@@ -1,0 +1,65 @@
+{
+  "source": "scan",
+  "fileName": "2025-09-15_25251.pdf",
+  "supplierName": "Milchhof Grünwald eG",
+  "supplierVatId": "DE149063278",
+  "number": "25251",
+  "date": "2025-09-15",
+  "currency": "EUR",
+  "netTotal": 21805,
+  "grossTotal": 23331,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 21805,
+      "tax": 1526
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Deutsche Markenbutter 250 g",
+      "sellerArticleId": "3001",
+      "quantity": 63000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1990000,
+      "priceBaseQty": 1000,
+      "lineNet": 12537,
+      "vat": 700,
+      "gtin": "4006040032137",
+      "expectedIngredientId": "ing.butter",
+      "expectedFactor": 250
+    },
+    {
+      "no": 2,
+      "name": "Schlagsahne 30 % 1 l",
+      "sellerArticleId": "3110",
+      "quantity": 34000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 2650000,
+      "priceBaseQty": 1000,
+      "lineNet": 9010,
+      "vat": 700,
+      "gtin": "4006040031109",
+      "expectedIngredientId": "ing.sahne",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Speisequark 20 % 500 g",
+      "sellerArticleId": "3400",
+      "quantity": 2000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1290000,
+      "priceBaseQty": 1000,
+      "lineNet": 258,
+      "vat": 700,
+      "gtin": "4006040034001",
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}

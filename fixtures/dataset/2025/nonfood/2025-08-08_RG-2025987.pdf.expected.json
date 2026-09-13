@@ -1,0 +1,95 @@
+{
+  "source": "scan",
+  "fileName": "2025-08-08_RG-2025987.pdf",
+  "supplierName": "HygienePlus Gastro-Bedarf GmbH",
+  "supplierVatId": "DE326540118",
+  "number": "RG-2025987",
+  "date": "2025-08-08",
+  "currency": "EUR",
+  "netTotal": 18670,
+  "grossTotal": 22217,
+  "vatBreakdown": [
+    {
+      "vat": 1900,
+      "net": 18670,
+      "tax": 3547
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Spülmaschinen-Reiniger flüssig 12 kg",
+      "sellerArticleId": "HP-2201",
+      "quantity": 1000,
+      "unitText": "Kanister",
+      "unitCode": "XCI",
+      "unitPrice": 38900000,
+      "priceBaseQty": 1000,
+      "lineNet": 3890,
+      "vat": 1900,
+      "gtin": "4260555201012",
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 2,
+      "name": "Klarspüler 10 l",
+      "sellerArticleId": "HP-2202",
+      "quantity": 1000,
+      "unitText": "Kanister",
+      "unitCode": "XCI",
+      "unitPrice": 32900000,
+      "priceBaseQty": 1000,
+      "lineNet": 3290,
+      "vat": 1900,
+      "gtin": "4260555202019",
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 3,
+      "name": "Nitrilhandschuhe blau Gr. M 100 St.",
+      "sellerArticleId": "HP-3105",
+      "quantity": 6000,
+      "unitText": "Box",
+      "unitCode": "XBX",
+      "unitPrice": 7900000,
+      "priceBaseQty": 1000,
+      "lineNet": 4740,
+      "vat": 1900,
+      "gtin": "4260555310516",
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 4,
+      "name": "Handtuchrollen 2-lagig 6 x 140 m",
+      "sellerArticleId": "HP-4010",
+      "quantity": 2000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 24900000,
+      "priceBaseQty": 1000,
+      "lineNet": 4980,
+      "vat": 1900,
+      "gtin": "4260555401016",
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 5,
+      "name": "Fettlöser Küche 1 l Sprühflasche",
+      "sellerArticleId": "HP-5001",
+      "quantity": 3000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 5900000,
+      "priceBaseQty": 1000,
+      "lineNet": 1770,
+      "vat": 1900,
+      "gtin": "4260555500015",
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}

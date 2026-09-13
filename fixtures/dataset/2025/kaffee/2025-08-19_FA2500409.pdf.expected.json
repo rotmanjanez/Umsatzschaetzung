@@ -1,0 +1,62 @@
+{
+  "source": "scan",
+  "fileName": "2025-08-19_FA2500409.pdf",
+  "supplierName": "Rösterei Marktkaffee GmbH",
+  "supplierVatId": "DE305118724",
+  "number": "FA2500409",
+  "date": "2025-08-19",
+  "currency": "EUR",
+  "netTotal": 25950,
+  "grossTotal": 27767,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 25950,
+      "tax": 1817
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Marktkaffee Gastro-Espresso, ganze Bohne, 1 kg",
+      "sellerArticleId": "MK-1000",
+      "quantity": 9000,
+      "unitText": "Pkg",
+      "unitCode": "XPK",
+      "unitPrice": 20900000,
+      "priceBaseQty": 1000,
+      "lineNet": 18810,
+      "vat": 700,
+      "expectedIngredientId": "ing.kaffee",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 2,
+      "name": "Marktkaffee Hausmischung Crema, ganze Bohne, 500 g",
+      "sellerArticleId": "MK-0500",
+      "quantity": 4000,
+      "unitText": "Pkg",
+      "unitCode": "XPK",
+      "unitPrice": 9900000,
+      "priceBaseQty": 1000,
+      "lineNet": 3960,
+      "vat": 700,
+      "expectedIngredientId": "ing.kaffee",
+      "expectedFactor": 500
+    },
+    {
+      "no": 3,
+      "name": "Zuckersticks 4 g, 1000 Stück",
+      "sellerArticleId": "ZS-1000",
+      "quantity": 2000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 15900000,
+      "priceBaseQty": 1000,
+      "lineNet": 3180,
+      "vat": 700,
+      "expectedIngredientId": "ing.zucker",
+      "expectedFactor": 4000
+    }
+  ]
+}

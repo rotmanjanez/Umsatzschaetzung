@@ -1,0 +1,76 @@
+{
+  "source": "scan",
+  "fileName": "2025-07-07_R-25-041.pdf",
+  "supplierName": "Gärtnerei Stadler",
+  "supplierVatId": "DE318905472",
+  "number": "R-25-041",
+  "date": "2025-07-07",
+  "currency": "EUR",
+  "netTotal": 9097,
+  "grossTotal": 9734,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 9097,
+      "tax": 637
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Speisezwiebeln gelb 10 kg Sack",
+      "sellerArticleId": "Z-10",
+      "quantity": 2000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 1780,
+      "vat": 700,
+      "expectedIngredientId": "ing.zwiebeln",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "Tomaten rund, Kl. I",
+      "sellerArticleId": "T-01",
+      "quantity": 14500,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 2100000,
+      "priceBaseQty": 1000,
+      "lineNet": 3045,
+      "vat": 700,
+      "expectedIngredientId": "ing.tomaten",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Eisbergsalat",
+      "sellerArticleId": "S-01",
+      "quantity": 30000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 950000,
+      "priceBaseQty": 1000,
+      "lineNet": 2850,
+      "vat": 700,
+      "expectedIngredientId": "ing.salat.eisberg",
+      "expectedFactor": 600
+    },
+    {
+      "no": 4,
+      "name": "Salatgurken",
+      "sellerArticleId": "G-01",
+      "quantity": 18000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 790000,
+      "priceBaseQty": 1000,
+      "lineNet": 1422,
+      "vat": 700,
+      "expectedIngredientId": "ing.gurken",
+      "expectedFactor": 400
+    }
+  ]
+}

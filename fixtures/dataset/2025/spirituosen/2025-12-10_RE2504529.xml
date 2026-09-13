@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ubl:Invoice xmlns:ubl="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+             xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+             xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>RE2504529</cbc:ID>
+  <cbc:IssueDate>2025-12-10</cbc:IssueDate>
+  <cbc:DueDate>2025-12-24</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>Rechnung zur Lieferung vom 10.12.2025. Alle Preise netto zzgl. gesetzlicher Umsatzsteuer.</cbc:Note>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>10-7741</cbc:BuyerReference>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="EM">faktura@brueckner-spirituosen.de</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Brückner Spirituosen &amp; Barbedarf GmbH</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Laubanger 21</cbc:StreetName>
+        <cbc:CityName>Bamberg</cbc:CityName>
+        <cbc:PostalZone>96052</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>DE277340196</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>207/114/20895</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>FC</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Brückner Spirituosen &amp; Barbedarf GmbH</cbc:RegistrationName>
+        <cbc:CompanyID>HRB 8203 Amtsgericht Bamberg</cbc:CompanyID>
+        <cbc:CompanyLegalForm>HRB 8203 Amtsgericht Bamberg, Geschäftsführer Andreas Brückner</cbc:CompanyLegalForm>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>Faktura Brückner Spirituosen &amp; Barbedarf GmbH</cbc:Name>
+        <cbc:Telephone>0951 30980-0</cbc:Telephone>
+        <cbc:ElectronicMail>faktura@brueckner-spirituosen.de</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="EM">buchhaltung@gasthaus-zur-linde.de</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID>10-7741</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Gasthaus Zur Linde</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Lindenstraße 12</cbc:StreetName>
+        <cbc:CityName>Ansbach</cbc:CityName>
+        <cbc:PostalZone>91522</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>DE297415836</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Gasthaus Zur Linde, Inh. Renate Vogel e.K.</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>Renate Vogel</cbc:Name>
+        <cbc:Telephone>0981 4820-0</cbc:Telephone>
+        <cbc:ElectronicMail>buchhaltung@gasthaus-zur-linde.de</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:Delivery>
+    <cbc:ActualDeliveryDate>2025-12-10</cbc:ActualDeliveryDate>
+    <cac:DeliveryLocation>
+      <cac:Address>
+        <cbc:StreetName>Lindenstraße 12</cbc:StreetName>
+        <cbc:CityName>Ansbach</cbc:CityName>
+        <cbc:PostalZone>91522</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:Address>
+    </cac:DeliveryLocation>
+    <cac:DeliveryParty>
+      <cac:PartyName>
+        <cbc:Name>Gasthaus Zur Linde</cbc:Name>
+      </cac:PartyName>
+    </cac:DeliveryParty>
+  </cac:Delivery>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode name="SEPA-Überweisung">58</cbc:PaymentMeansCode>
+    <cbc:PaymentID>RE2504529</cbc:PaymentID>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>DE81770500000300018255</cbc:ID>
+      <cbc:Name>Brückner Spirituosen &amp; Barbedarf GmbH</cbc:Name>
+      <cac:FinancialInstitutionBranch>
+        <cbc:ID>BYLADEM1SKB</cbc:ID>
+      </cac:FinancialInstitutionBranch>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PaymentTerms>
+    <cbc:Note>Zahlbar innerhalb 14 Tagen ohne Abzug. Fällig am 24.12.2025 auf das Konto DE81 7705 0000 0300 0182 55 (BYLADEM1SKB, Sparkasse Bamberg), Verwendungszweck RE2504529.</cbc:Note>
+  </cac:PaymentTerms>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">66.44</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">349.70</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">66.44</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID>S</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">349.70</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">349.70</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">416.14</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">416.14</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="XBO">10</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">79.90</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Fränkischer Doppelkorn 38 % vol 0,7 l</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>40070</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">4009862310035</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>S</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">7.99</cbc:PriceAmount>
+      <cbc:BaseQuantity unitCode="XBO">1</cbc:BaseQuantity>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="XBO">6</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">71.40</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Wodka Gorbatschow 37,5 % vol 1,0 l</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>41100</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">4003310011106</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>S</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">11.90</cbc:PriceAmount>
+      <cbc:BaseQuantity unitCode="XBO">1</cbc:BaseQuantity>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>3</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="XBO">16</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">198.40</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Jägermeister 35 % vol 0,7 l</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>43070</cbc:ID>
+      </cac:SellersItemIdentification>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0160">4067700010208</cbc:ID>
+      </cac:StandardItemIdentification>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>S</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">12.40</cbc:PriceAmount>
+      <cbc:BaseQuantity unitCode="XBO">1</cbc:BaseQuantity>
+    </cac:Price>
+  </cac:InvoiceLine>
+</ubl:Invoice>

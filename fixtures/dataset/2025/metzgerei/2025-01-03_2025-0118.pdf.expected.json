@@ -1,0 +1,62 @@
+{
+  "source": "scan",
+  "fileName": "2025-01-03_2025-0118.pdf",
+  "supplierName": "Metzgerei Hofmann",
+  "supplierVatId": "DE134578920",
+  "number": "2025/0118",
+  "date": "2025-01-03",
+  "currency": "EUR",
+  "netTotal": 24090,
+  "grossTotal": 25776,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 24090,
+      "tax": 1686
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Schweineschnitzel natur, ausgelöst",
+      "sellerArticleId": "1021",
+      "quantity": 13470,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 7850000,
+      "priceBaseQty": 1000,
+      "lineNet": 10574,
+      "vat": 700,
+      "expectedIngredientId": "ing.schwein.schnitzel",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 2,
+      "name": "Rinderhackfleisch, mager",
+      "sellerArticleId": "1140",
+      "quantity": 4390,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 8400000,
+      "priceBaseQty": 1000,
+      "lineNet": 3688,
+      "vat": 700,
+      "expectedIngredientId": "ing.rind.hack",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Bratwurst grob, fränkisch, 120 g",
+      "sellerArticleId": "2010",
+      "quantity": 126000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 780000,
+      "priceBaseQty": 1000,
+      "lineNet": 9828,
+      "vat": 700,
+      "expectedIngredientId": "ing.bratwurst",
+      "expectedFactor": 1
+    }
+  ]
+}

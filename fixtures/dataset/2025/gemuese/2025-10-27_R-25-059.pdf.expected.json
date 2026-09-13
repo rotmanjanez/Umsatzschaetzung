@@ -1,0 +1,104 @@
+{
+  "source": "scan",
+  "fileName": "2025-10-27_R-25-059.pdf",
+  "supplierName": "Gärtnerei Stadler",
+  "supplierVatId": "DE318905472",
+  "number": "R-25-059",
+  "date": "2025-10-27",
+  "currency": "EUR",
+  "netTotal": 16793,
+  "grossTotal": 17969,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 16793,
+      "tax": 1176
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Speisezwiebeln gelb 10 kg Sack",
+      "sellerArticleId": "Z-10",
+      "quantity": 1000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 890,
+      "vat": 700,
+      "expectedIngredientId": "ing.zwiebeln",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "Tomaten rund, Kl. I",
+      "sellerArticleId": "T-01",
+      "quantity": 21000,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 2450000,
+      "priceBaseQty": 1000,
+      "lineNet": 5145,
+      "vat": 700,
+      "expectedIngredientId": "ing.tomaten",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Eisbergsalat",
+      "sellerArticleId": "S-01",
+      "quantity": 30000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1350000,
+      "priceBaseQty": 1000,
+      "lineNet": 4050,
+      "vat": 700,
+      "expectedIngredientId": "ing.salat.eisberg",
+      "expectedFactor": 600
+    },
+    {
+      "no": 4,
+      "name": "Salatgurken",
+      "sellerArticleId": "G-01",
+      "quantity": 12000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 790000,
+      "priceBaseQty": 1000,
+      "lineNet": 948,
+      "vat": 700,
+      "expectedIngredientId": "ing.gurken",
+      "expectedFactor": 400
+    },
+    {
+      "no": 5,
+      "name": "Speisekartoffeln festkochend 25 kg",
+      "sellerArticleId": "K-25",
+      "quantity": 3000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 16500000,
+      "priceBaseQty": 1000,
+      "lineNet": 4950,
+      "vat": 700,
+      "expectedIngredientId": "ing.kartoffeln",
+      "expectedFactor": 25000
+    },
+    {
+      "no": 6,
+      "name": "Petersilie glatt, Bund",
+      "sellerArticleId": "P-01",
+      "quantity": 9000,
+      "unitText": "Bund",
+      "unitCode": "XBH",
+      "unitPrice": 900000,
+      "priceBaseQty": 1000,
+      "lineNet": 810,
+      "vat": 700,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}

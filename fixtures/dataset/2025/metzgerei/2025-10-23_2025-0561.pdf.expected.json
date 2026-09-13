@@ -1,0 +1,118 @@
+{
+  "source": "scan",
+  "fileName": "2025-10-23_2025-0561.pdf",
+  "supplierName": "Metzgerei Hofmann",
+  "supplierVatId": "DE134578920",
+  "number": "2025/0561",
+  "date": "2025-10-23",
+  "currency": "EUR",
+  "netTotal": 43343,
+  "grossTotal": 46377,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 43343,
+      "tax": 3034
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Schweineschnitzel natur, ausgelöst",
+      "sellerArticleId": "1021",
+      "quantity": 17250,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 8390000,
+      "priceBaseQty": 1000,
+      "lineNet": 14473,
+      "vat": 700,
+      "expectedIngredientId": "ing.schwein.schnitzel",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 2,
+      "name": "Rinderhackfleisch, mager",
+      "sellerArticleId": "1140",
+      "quantity": 5500,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 8750000,
+      "priceBaseQty": 1000,
+      "lineNet": 4813,
+      "vat": 700,
+      "expectedIngredientId": "ing.rind.hack",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Kochschinken am Stück",
+      "sellerArticleId": "1502",
+      "quantity": 4660,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 12600000,
+      "priceBaseQty": 1000,
+      "lineNet": 5872,
+      "vat": 700,
+      "expectedIngredientId": "ing.schinken",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 4,
+      "name": "Frühstücksspeck geräuchert, geschnitten",
+      "sellerArticleId": "1510",
+      "quantity": 1720,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 11800000,
+      "priceBaseQty": 1000,
+      "lineNet": 2030,
+      "vat": 700,
+      "expectedIngredientId": "ing.speck",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 5,
+      "name": "Putenbrustfilet frisch",
+      "sellerArticleId": "1310",
+      "quantity": 4920,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 9100000,
+      "priceBaseQty": 1000,
+      "lineNet": 4477,
+      "vat": 700,
+      "expectedIngredientId": "ing.pute.brust",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 6,
+      "name": "Hähnchenschenkel mit Rückenstück",
+      "sellerArticleId": "1320",
+      "quantity": 4220,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 4550000,
+      "priceBaseQty": 1000,
+      "lineNet": 1920,
+      "vat": 700,
+      "expectedIngredientId": "ing.haehnchen.schenkel",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 7,
+      "name": "Bratwurst grob, fränkisch, 120 g",
+      "sellerArticleId": "2010",
+      "quantity": 119000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 820000,
+      "priceBaseQty": 1000,
+      "lineNet": 9758,
+      "vat": 700,
+      "expectedIngredientId": "ing.bratwurst",
+      "expectedFactor": 1
+    }
+  ]
+}

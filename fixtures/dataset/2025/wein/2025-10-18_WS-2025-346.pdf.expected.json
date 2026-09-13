@@ -1,0 +1,76 @@
+{
+  "source": "scan",
+  "fileName": "2025-10-18_WS-2025-346.pdf",
+  "supplierName": "Weingut Sommer",
+  "supplierVatId": "DE229871034",
+  "number": "WS-2025-346",
+  "date": "2025-10-18",
+  "currency": "EUR",
+  "netTotal": 94530,
+  "grossTotal": 112491,
+  "vatBreakdown": [
+    {
+      "vat": 1900,
+      "net": 94530,
+      "tax": 17961
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "2024 Iphöfer Kronsberg Silvaner trocken 0,75 l",
+      "sellerArticleId": "2024-S-01",
+      "quantity": 68000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 7200000,
+      "priceBaseQty": 1000,
+      "lineNet": 48960,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.weiss",
+      "expectedFactor": 750
+    },
+    {
+      "no": 2,
+      "name": "2024 Müller-Thurgau halbtrocken 1,0 l Schoppen",
+      "sellerArticleId": "2024-MT-02",
+      "quantity": 20000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 4950000,
+      "priceBaseQty": 1000,
+      "lineNet": 9900,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.weiss",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "2022 Domina trocken 0,75 l",
+      "sellerArticleId": "2022-D-01",
+      "quantity": 26000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 7900000,
+      "priceBaseQty": 1000,
+      "lineNet": 20540,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.rot",
+      "expectedFactor": 750
+    },
+    {
+      "no": 4,
+      "name": "Sommer Sekt b.A. brut 0,75 l",
+      "sellerArticleId": "SEKT-01",
+      "quantity": 17000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 15130,
+      "vat": 1900,
+      "expectedIngredientId": "ing.sekt",
+      "expectedFactor": 750
+    }
+  ]
+}
