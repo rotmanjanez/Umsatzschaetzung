@@ -1,7 +1,5 @@
 using System.IO;
 using System.Security.Cryptography;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using Ausbeute.Model;
 using Ausbeute.Service;
 using Microsoft.Win32;
@@ -108,24 +106,37 @@ public sealed class Session : Observable
         });
     }
 
-    public Task<bool> Put<T>(Entity entity, string id, T data, JsonTypeInfo<T> info, CancellationToken ct) =>
-        ApplyChange(entity, id, Op.Put, JsonSerializer.SerializeToElement(data, info), ct);
+    public Task<bool> Put(IRuleEntity data, CancellationToken ct) =>
+        SaveRules(rs =>
+        {
+            data.Meta = new Meta { ChangedAt = Clock.Now() };
+            rs.Put(data);
+        }, ct);
 
     public Task<bool> Retire(Entity entity, string id, CancellationToken ct) =>
-        ApplyChange(entity, id, Op.Retire, JsonDocument.Parse("null").RootElement, ct);
+        SaveRules(rs =>
+        {
+            if (rs.Find(entity, id) is { } e) e.Meta.ValidTo = DateOnly.FromDateTime(DateTime.Now);
+        }, ct);
 
-    Task<bool> ApplyChange(Entity entity, string id, Op op, JsonElement data, CancellationToken ct)
+    Task<bool> SaveRules(Action<RuleSet> edit, CancellationToken ct)
     {
-        var change = new Change { Entity = entity, EntityId = id, Op = op, Data = data };
+        var rs = Rules?.RuleSet;
+        if (rs is null) return Task.FromResult(false);
+        edit(rs);
         return Run(async () =>
         {
-            var resp = await Service.ApplyChanges(Rules?.RuleSet.Version ?? 0, [change], ct);
-            if (resp.Overlaps.Count > 0)
-                Message = "Andere Benutzer haben gleichzeitig geändert: " + string.Join(", ", resp.Overlaps.Select(c => EntityLabel(c.Entity)).Distinct());
-            else if (resp.Queued)
-                Message = "Änderung wird bei Verbindung übertragen";
+            try
+            {
+                Rules = await Service.SaveRules(rs, ct);
+            }
+            catch (ServiceError)
+            {
+                await LoadRules(ct);
+                throw;
+            }
+            RulesChanged?.Invoke();
             await LoadStatus(ct);
-            await LoadRules(ct);
         });
     }
 
