@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Ausbeute.Model;
@@ -12,27 +11,15 @@ public enum Entity
     [JsonStringEnumMemberName("yield_rule")] YieldRule,
 }
 
-public enum Op
+public static class Clock
 {
-    [JsonStringEnumMemberName("put")] Put,
-    [JsonStringEnumMemberName("retire")] Retire,
-}
-
-public sealed class Change
-{
-    public long Id { get; set; }
-    public DateTimeOffset At { get; set; }
-    public Entity Entity { get; set; }
-    public string EntityId { get; set; } = "";
-    public Op Op { get; set; }
-    public JsonElement Data { get; set; }
+    public static DateTimeOffset Now() => DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 }
 
 public sealed class Meta
 {
     public DateOnly? ValidFrom { get; set; }
     public DateOnly? ValidTo { get; set; }
-    public long ChangeId { get; set; }
     public DateTimeOffset ChangedAt { get; set; }
 
     public bool ValidOn(DateOnly? d)
@@ -191,15 +178,28 @@ public sealed class YieldRule : IRuleEntity
 public sealed class RuleSet
 {
     public long Version { get; set; }
-    public string Hash { get; set; } = "";
     public Dictionary<string, Ingredient> Ingredients { get; set; } = [];
     public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
     public Dictionary<string, Product> Products { get; set; } = [];
     public Dictionary<string, YieldRule> YieldRules { get; set; } = [];
-}
 
-public sealed class RulesCache
-{
-    public RuleSet? RuleSet { get; set; }
-    public List<Change>? Pending { get; set; }
+    public IRuleEntity? Find(Entity entity, string id) => entity switch
+    {
+        Entity.Ingredient => Ingredients.GetValueOrDefault(id),
+        Entity.Mapping => Mappings.GetValueOrDefault(id),
+        Entity.Product => Products.GetValueOrDefault(id),
+        Entity.YieldRule => YieldRules.GetValueOrDefault(id),
+        _ => null,
+    };
+
+    public void Put(IRuleEntity e)
+    {
+        switch (e)
+        {
+            case Ingredient x: Ingredients[x.Id] = x; break;
+            case ArticleMapping x: Mappings[x.Id] = x; break;
+            case Product x: Products[x.Id] = x; break;
+            case YieldRule x: YieldRules[x.Id] = x; break;
+        }
+    }
 }
