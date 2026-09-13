@@ -2,17 +2,13 @@ using Ausbeute.Model;
 
 namespace Ausbeute.Service;
 
-public sealed record StatusResp(bool Online, long RulesVersion, string RulesDate, int PendingChanges, string AppVersion, string? Problem);
+public sealed record StatusResp(bool Online, long RulesVersion, string RulesDate, string AppVersion, string? Problem);
 
 public sealed record RuleSetResp(RuleSet RuleSet, RuleSetDisplay Display);
 
 public sealed record RuleSetDisplay(Dictionary<string, ProductDisplay> Products);
 
 public sealed record ProductDisplay(string Recipe);
-
-public sealed record ChangesResp(List<Change> Changes, long Version);
-
-public sealed record ApplyChangesResp(long Version, bool Queued, List<Change> Overlaps);
 
 public sealed record ListCasesResp(List<CaseRow> Cases);
 
