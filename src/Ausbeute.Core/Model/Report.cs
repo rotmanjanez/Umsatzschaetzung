@@ -20,8 +20,6 @@ public sealed class SourceRef
     public long LineNo { get; set; }
     public Entity? Entity { get; set; }
     public string? EntityId { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public long ChangeId { get; set; }
     public string? Reason { get; set; }
 }
 
