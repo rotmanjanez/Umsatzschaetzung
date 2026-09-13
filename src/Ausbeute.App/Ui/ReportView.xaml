@@ -1,0 +1,59 @@
+<ui:Screen x:Class="Ausbeute.App.Ui.ReportView"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Ausbeute.App.Ui"
+           xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+           Margin="24">
+    <ui:Screen.Resources>
+        <BooleanToVisibilityConverter x:Key="Vis"/>
+    </ui:Screen.Resources>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Content="CSV exportieren" Style="{StaticResource SecondaryButton}" Click="ExportCsv"/>
+                <Button Content="Als PDF speichern" Style="{StaticResource PrimaryButton}" Click="SavePdf" IsEnabled="{Binding Ready}"/>
+            </StackPanel>
+            <TextBlock Text="Bericht" Style="{StaticResource PageTitle}"/>
+        </DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="Nicht berücksichtigte Einkäufe" Style="{StaticResource SectionHeader}"/>
+        <Border DockPanel.Dock="Top" Style="{StaticResource Card}">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="220"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Erfasste Einkäufe (netto)" Style="{StaticResource KeyLabel}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Purchases}" Style="{StaticResource Number}" Margin="0,0,0,6"/>
+                    <TextBlock Grid.Row="1" Text="davon in der Kalkulation" Style="{StaticResource KeyLabel}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Included}" Style="{StaticResource Number}" Margin="0,0,0,6"/>
+                    <TextBlock Grid.Row="2" Text="Nicht berücksichtigt" Style="{StaticResource KeyLabel}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Excluded}" Style="{StaticResource Number}" Margin="0,0,0,6"/>
+                </Grid>
+                <TextBlock Text="Keine" Style="{StaticResource Muted}" Visibility="{Binding NoExcluded, Converter={StaticResource Vis}}"/>
+                <Expander Header="Positionen anzeigen" Visibility="{Binding HasExcluded, Converter={StaticResource Vis}}">
+                    <DataGrid Style="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" MaxHeight="240" Margin="0,8,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Rechnung" Binding="{Binding Invoice}" Width="160"/>
+                            <DataGridTextColumn Header="Pos." Binding="{Binding LineNo}" Width="60" ElementStyle="{StaticResource Number}"/>
+                            <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Grund" Binding="{Binding Reason}" Width="220" ElementStyle="{StaticResource Muted}"/>
+                            <DataGridTextColumn Header="Netto" Binding="{Binding LineNet}" Width="110" ElementStyle="{StaticResource Number}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+            </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Panel}">
+            <Grid>
+                <wv2:WebView2 x:Name="Web"/>
+                <TextBlock Text="{Binding Note}" Style="{StaticResource EmptyState}" Visibility="{Binding ShowNote, Converter={StaticResource Vis}}"/>
+            </Grid>
+        </Border>
+    </DockPanel>
+</ui:Screen>

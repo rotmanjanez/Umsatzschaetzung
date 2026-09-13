@@ -1,0 +1,99 @@
+using System.Windows;
+using System.Windows.Controls;
+using Ausbeute.Service;
+
+namespace Ausbeute.App.Ui;
+
+public partial class Shell : Window
+{
+    readonly Session session;
+    readonly CasesView cases;
+    readonly Screen[] screens;
+    readonly RadioButton[] buttons;
+    Screen? current;
+
+    public Shell(IService service)
+    {
+        InitializeComponent();
+        session = new Session(service);
+        cases = new CasesView(session);
+        screens =
+        [
+            new CaseView(session),
+            new InvoicesView(session),
+            new MappingView(session),
+            new RulesView(session),
+            new CalcView(session),
+            new ReportView(session),
+        ];
+        buttons = [NavCase, NavInvoices, NavMapping, NavRules, NavCalc, NavReport];
+        session.CaseOpened += OpenCase;
+        session.CaseChanged += RefreshContext;
+        session.StatusChanged += RefreshStatus;
+        session.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Session.Message)) RefreshStatus();
+        };
+        Loaded += async (_, _) =>
+        {
+            Show(cases);
+            await session.LoadStatus(CancellationToken.None);
+            await session.LoadRules(CancellationToken.None);
+        };
+        Closed += (_, _) => current?.Leave();
+    }
+
+    void Show(Screen screen)
+    {
+        if (current == screen) return;
+        current?.Leave();
+        current = screen;
+        Body.Content = screen;
+        screen.Enter();
+    }
+
+    void NavChecked(object sender, RoutedEventArgs e)
+    {
+        var i = Array.IndexOf(buttons, (RadioButton)sender);
+        if (i >= 0) Show(screens[i]);
+    }
+
+    void OpenCase(CaseResp resp)
+    {
+        RefreshContext();
+        Nav.Visibility = Visibility.Visible;
+        buttons[0].IsChecked = true;
+        Show(screens[0]);
+    }
+
+    void Back(object sender, RoutedEventArgs e)
+    {
+        current?.Leave();
+        current = null;
+        session.CloseCase();
+        Nav.Visibility = Visibility.Collapsed;
+        foreach (var b in buttons) b.IsChecked = false;
+        Title = "Ausbeutekalkulation";
+        Show(cases);
+    }
+
+    void RefreshContext()
+    {
+        if (session.Case is null) return;
+        CaseLabel.Text = session.Case.Label;
+        CasePeriod.Text = session.Display?.Period ?? "";
+        Title = "Ausbeutekalkulation: " + session.Case.Label;
+    }
+
+    void RefreshStatus()
+    {
+        var parts = new List<string>();
+        if (session.Status is { } s)
+        {
+            if (s.RulesDate != "") parts.Add("Regeln vom " + s.RulesDate);
+            if (!string.IsNullOrEmpty(s.Problem)) parts.Add(s.Problem);
+        }
+        if (session.Message != "") parts.Add(session.Message);
+        StatusText.Text = string.Join("  ·  ", parts);
+    }
+}
