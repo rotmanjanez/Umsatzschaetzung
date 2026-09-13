@@ -186,7 +186,7 @@ public partial class MappingView : Screen
             Factor = factor.Value,
             Confirmed = true,
         };
-        if (await Session.Put(Entity.Mapping, mapping.Id, mapping, ModelJsonContext.Default.ArticleMapping, Ct))
+        if (await Session.Put(mapping, Ct))
             await AssignId(g, mapping.Id);
     }
 

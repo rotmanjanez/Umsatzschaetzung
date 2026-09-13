@@ -193,7 +193,7 @@ public partial class RulesView : Screen
         var id = f.CurrentId ?? Session.NewId("ingredient");
         var data = new Ingredient { Id = id, Name = f.Name.Trim(), BaseUnit = Units[f.UnitIndex], Category = f.Category.Trim() };
         f.CurrentId = id;
-        await Session.Put(Entity.Ingredient, id, data, ModelJsonContext.Default.Ingredient, Ct);
+        await Session.Put(data, Ct);
     }
 
     async void RetireIngredient(object sender, RoutedEventArgs e)
@@ -259,7 +259,7 @@ public partial class RulesView : Screen
             return;
         }
         f.CurrentId = id;
-        await Session.Put(Entity.Product, id, data, ModelJsonContext.Default.Product, Ct);
+        await Session.Put(data, Ct);
     }
 
     async void RetireProduct(object sender, RoutedEventArgs e)
@@ -328,7 +328,7 @@ public partial class RulesView : Screen
             Source = f.Source.Trim(),
         };
         f.CurrentId = id;
-        await Session.Put(Entity.YieldRule, id, data, ModelJsonContext.Default.YieldRule, Ct);
+        await Session.Put(data, Ct);
     }
 
     async void RetireYield(object sender, RoutedEventArgs e)
