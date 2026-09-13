@@ -1,10 +1,9 @@
 using System.IO;
-using Ausbeute.Llm;
 using Microsoft.Win32;
 
 namespace Ausbeute.App.Platform;
 
-public sealed record Config(string Store, string CaseDir, string ModelDir, string Model);
+public sealed record Config(string Store, string CaseDir, string ModelDir);
 
 public static class RegistryConfig
 {
@@ -18,8 +17,7 @@ public static class RegistryConfig
     public static Config Load() => new(
         Value("Store") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Ausbeute", "store"),
         Value("CaseDir") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents", "Ausbeute"),
-        Value("ModelDir") ?? Path.Combine(AppContext.BaseDirectory, "models"),
-        Value("Model") ?? Presets.Gemma4E2B);
+        Value("ModelDir") ?? Path.Combine(AppContext.BaseDirectory, "models"));
 
     static string? Value(string name)
     {

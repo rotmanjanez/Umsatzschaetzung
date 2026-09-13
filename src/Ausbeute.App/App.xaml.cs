@@ -5,7 +5,7 @@ using Ausbeute.App.Platform;
 using Ausbeute.App.Ui;
 using Ausbeute.Casefile;
 using Ausbeute.Rulestore;
-using Ausbeute.Llm;
+using Ausbeute.Llama;
 using Ausbeute.Service;
 
 namespace Ausbeute.App;
@@ -45,8 +45,8 @@ public partial class App : Application
 
     ILlmEngine? OpenModel(Config config)
     {
-        if (!File.Exists(Path.Combine(config.ModelDir, Presets.All[config.Model].File))) return null;
-        var engine = new LlamaEngine(config.ModelDir, config.Model);
+        if (!File.Exists(Path.Combine(config.ModelDir, LlamaEngine.ModelFile))) return null;
+        var engine = new LlamaEngine(config.ModelDir);
         owned.Add(engine);
         return engine;
     }
