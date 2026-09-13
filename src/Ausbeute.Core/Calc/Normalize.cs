@@ -64,7 +64,7 @@ public static class Normalize
                     Sources =
                     [
                         new SourceRef { Kind = SourceKind.InvoiceLine, InvoiceId = inv.Id, LineNo = line.No },
-                        new SourceRef { Kind = SourceKind.Rule, Entity = Entity.Mapping, EntityId = m.Id, ChangeId = m.Meta.ChangeId },
+                        new SourceRef { Kind = SourceKind.Rule, Entity = Entity.Mapping, EntityId = m.Id },
                     ],
                 };
                 u.Node ??= new Node { Label = ing.Name + ": Einkauf", Unit = Units.Value(ing.BaseUnit) };
