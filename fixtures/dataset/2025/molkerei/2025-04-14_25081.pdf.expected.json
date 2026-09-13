@@ -1,0 +1,65 @@
+{
+  "source": "scan",
+  "fileName": "2025-04-14_25081.pdf",
+  "supplierName": "Milchhof Grünwald eG",
+  "supplierVatId": "DE149063278",
+  "number": "25081",
+  "date": "2025-04-14",
+  "currency": "EUR",
+  "netTotal": 21182,
+  "grossTotal": 22665,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 21182,
+      "tax": 1483
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Deutsche Markenbutter 250 g",
+      "sellerArticleId": "3001",
+      "quantity": 48000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 2190000,
+      "priceBaseQty": 1000,
+      "lineNet": 10512,
+      "vat": 700,
+      "gtin": "4006040032137",
+      "expectedIngredientId": "ing.butter",
+      "expectedFactor": 250
+    },
+    {
+      "no": 2,
+      "name": "Schlagsahne 30 % 1 l",
+      "sellerArticleId": "3110",
+      "quantity": 14000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 2650000,
+      "priceBaseQty": 1000,
+      "lineNet": 3710,
+      "vat": 700,
+      "gtin": "4006040031109",
+      "expectedIngredientId": "ing.sahne",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Gouda jung Scheiben 48 % 1 kg",
+      "sellerArticleId": "3210",
+      "quantity": 8000,
+      "unitText": "Pkg",
+      "unitCode": "XPK",
+      "unitPrice": 8700000,
+      "priceBaseQty": 1000,
+      "lineNet": 6960,
+      "vat": 700,
+      "gtin": "4006040032106",
+      "expectedIngredientId": "ing.kaese",
+      "expectedFactor": 1000
+    }
+  ]
+}

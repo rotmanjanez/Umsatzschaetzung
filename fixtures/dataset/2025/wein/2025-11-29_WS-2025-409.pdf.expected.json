@@ -1,0 +1,104 @@
+{
+  "source": "scan",
+  "fileName": "2025-11-29_WS-2025-409.pdf",
+  "supplierName": "Weingut Sommer",
+  "supplierVatId": "DE229871034",
+  "number": "WS-2025-409",
+  "date": "2025-11-29",
+  "currency": "EUR",
+  "netTotal": 80110,
+  "grossTotal": 95331,
+  "vatBreakdown": [
+    {
+      "vat": 1900,
+      "net": 80110,
+      "tax": 15221
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "2024 Iphöfer Kronsberg Silvaner trocken 0,75 l",
+      "sellerArticleId": "2024-S-01",
+      "quantity": 32000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 7200000,
+      "priceBaseQty": 1000,
+      "lineNet": 23040,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.weiss",
+      "expectedFactor": 750
+    },
+    {
+      "no": 2,
+      "name": "2024 Müller-Thurgau halbtrocken 1,0 l Schoppen",
+      "sellerArticleId": "2024-MT-02",
+      "quantity": 16000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 4950000,
+      "priceBaseQty": 1000,
+      "lineNet": 7920,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.weiss",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "2022 Domina trocken 0,75 l",
+      "sellerArticleId": "2022-D-01",
+      "quantity": 22000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 7900000,
+      "priceBaseQty": 1000,
+      "lineNet": 17380,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.rot",
+      "expectedFactor": 750
+    },
+    {
+      "no": 4,
+      "name": "2021 Spätburgunder trocken 0,75 l",
+      "sellerArticleId": "2021-SB-01",
+      "quantity": 20000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 9800000,
+      "priceBaseQty": 1000,
+      "lineNet": 19600,
+      "vat": 1900,
+      "expectedIngredientId": "ing.wein.rot",
+      "expectedFactor": 750
+    },
+    {
+      "no": 5,
+      "name": "Sommer Sekt b.A. brut 0,75 l",
+      "sellerArticleId": "SEKT-01",
+      "quantity": 12000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 10680,
+      "vat": 1900,
+      "expectedIngredientId": "ing.sekt",
+      "expectedFactor": 750
+    },
+    {
+      "no": 6,
+      "name": "Versandkostenpauschale",
+      "sellerArticleId": "VS",
+      "quantity": 1000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 14900000,
+      "priceBaseQty": 1000,
+      "lineNet": 1490,
+      "vat": 1900,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}

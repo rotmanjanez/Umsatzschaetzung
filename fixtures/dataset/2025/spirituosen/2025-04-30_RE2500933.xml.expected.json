@@ -1,0 +1,80 @@
+{
+  "source": "ubl",
+  "fileName": "2025-04-30_RE2500933.xml",
+  "supplierName": "Brückner Spirituosen & Barbedarf GmbH",
+  "supplierVatId": "DE277340196",
+  "number": "RE2500933",
+  "date": "2025-04-30",
+  "currency": "EUR",
+  "netTotal": 35802,
+  "grossTotal": 42604,
+  "vatBreakdown": [
+    {
+      "vat": 1900,
+      "net": 35802,
+      "tax": 6802
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Fränkischer Doppelkorn 38 % vol 0,7 l",
+      "sellerArticleId": "40070",
+      "quantity": 8000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 7990000,
+      "priceBaseQty": 1000,
+      "lineNet": 6392,
+      "vat": 1900,
+      "gtin": "4009862310035",
+      "expectedIngredientId": "ing.korn",
+      "expectedFactor": 700
+    },
+    {
+      "no": 2,
+      "name": "Wodka Gorbatschow 37,5 % vol 1,0 l",
+      "sellerArticleId": "41100",
+      "quantity": 10000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 11900000,
+      "priceBaseQty": 1000,
+      "lineNet": 11900,
+      "vat": 1900,
+      "gtin": "4003310011106",
+      "expectedIngredientId": "ing.wodka",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Havana Club Añejo 3 Años 40 % vol 0,7 l",
+      "sellerArticleId": "42070",
+      "quantity": 3000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 12900000,
+      "priceBaseQty": 1000,
+      "lineNet": 3870,
+      "vat": 1900,
+      "gtin": "8501110080231",
+      "expectedIngredientId": "ing.rum.braun",
+      "expectedFactor": 700
+    },
+    {
+      "no": 4,
+      "name": "Jägermeister 35 % vol 0,7 l",
+      "sellerArticleId": "43070",
+      "quantity": 11000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 12400000,
+      "priceBaseQty": 1000,
+      "lineNet": 13640,
+      "vat": 1900,
+      "gtin": "4067700010208",
+      "expectedIngredientId": "ing.kraeuterlikoer",
+      "expectedFactor": 700
+    }
+  ]
+}

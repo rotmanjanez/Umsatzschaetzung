@@ -1,0 +1,90 @@
+{
+  "source": "scan",
+  "fileName": "2025-12-22_R-25-069.pdf",
+  "supplierName": "Gärtnerei Stadler",
+  "supplierVatId": "DE318905472",
+  "number": "R-25-069",
+  "date": "2025-12-22",
+  "currency": "EUR",
+  "netTotal": 11676,
+  "grossTotal": 12493,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 11676,
+      "tax": 817
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Speisezwiebeln gelb 10 kg Sack",
+      "sellerArticleId": "Z-10",
+      "quantity": 1000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 890,
+      "vat": 700,
+      "expectedIngredientId": "ing.zwiebeln",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "Tomaten rund, Kl. I",
+      "sellerArticleId": "T-01",
+      "quantity": 9000,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 3200000,
+      "priceBaseQty": 1000,
+      "lineNet": 2880,
+      "vat": 700,
+      "expectedIngredientId": "ing.tomaten",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Eisbergsalat",
+      "sellerArticleId": "S-01",
+      "quantity": 23000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1350000,
+      "priceBaseQty": 1000,
+      "lineNet": 3105,
+      "vat": 700,
+      "expectedIngredientId": "ing.salat.eisberg",
+      "expectedFactor": 600
+    },
+    {
+      "no": 4,
+      "name": "Salatgurken",
+      "sellerArticleId": "G-01",
+      "quantity": 19000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 790000,
+      "priceBaseQty": 1000,
+      "lineNet": 1501,
+      "vat": 700,
+      "expectedIngredientId": "ing.gurken",
+      "expectedFactor": 400
+    },
+    {
+      "no": 5,
+      "name": "Speisekartoffeln festkochend 25 kg",
+      "sellerArticleId": "K-25",
+      "quantity": 2000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 16500000,
+      "priceBaseQty": 1000,
+      "lineNet": 3300,
+      "vat": 700,
+      "expectedIngredientId": "ing.kartoffeln",
+      "expectedFactor": 25000
+    }
+  ]
+}

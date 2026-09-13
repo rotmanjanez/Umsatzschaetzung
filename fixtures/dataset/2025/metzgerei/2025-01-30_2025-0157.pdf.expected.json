@@ -1,0 +1,118 @@
+{
+  "source": "scan",
+  "fileName": "2025-01-30_2025-0157.pdf",
+  "supplierName": "Metzgerei Hofmann",
+  "supplierVatId": "DE134578920",
+  "number": "2025/0157",
+  "date": "2025-01-30",
+  "currency": "EUR",
+  "netTotal": 40857,
+  "grossTotal": 43717,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 40857,
+      "tax": 2860
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Schweineschnitzel natur, ausgelöst",
+      "sellerArticleId": "1021",
+      "quantity": 14500,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 7850000,
+      "priceBaseQty": 1000,
+      "lineNet": 11383,
+      "vat": 700,
+      "expectedIngredientId": "ing.schwein.schnitzel",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 2,
+      "name": "Schweinenacken ohne Knochen",
+      "sellerArticleId": "1035",
+      "quantity": 7420,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 6200000,
+      "priceBaseQty": 1000,
+      "lineNet": 4600,
+      "vat": 700,
+      "expectedIngredientId": "ing.schwein.nacken",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Rinderhackfleisch, mager",
+      "sellerArticleId": "1140",
+      "quantity": 8000,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 8400000,
+      "priceBaseQty": 1000,
+      "lineNet": 6720,
+      "vat": 700,
+      "expectedIngredientId": "ing.rind.hack",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 4,
+      "name": "Rindergulasch, geschnitten",
+      "sellerArticleId": "1145",
+      "quantity": 6500,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 9900000,
+      "priceBaseQty": 1000,
+      "lineNet": 6435,
+      "vat": 700,
+      "expectedIngredientId": "ing.rind.gulasch",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 5,
+      "name": "Kochschinken am Stück",
+      "sellerArticleId": "1502",
+      "quantity": 4000,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 12600000,
+      "priceBaseQty": 1000,
+      "lineNet": 5040,
+      "vat": 700,
+      "expectedIngredientId": "ing.schinken",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 6,
+      "name": "Putenbrustfilet frisch",
+      "sellerArticleId": "1310",
+      "quantity": 2540,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 9100000,
+      "priceBaseQty": 1000,
+      "lineNet": 2311,
+      "vat": 700,
+      "expectedIngredientId": "ing.pute.brust",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 7,
+      "name": "Bratwurst grob, fränkisch, 120 g",
+      "sellerArticleId": "2010",
+      "quantity": 56000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 780000,
+      "priceBaseQty": 1000,
+      "lineNet": 4368,
+      "vat": 700,
+      "expectedIngredientId": "ing.bratwurst",
+      "expectedFactor": 1
+    }
+  ]
+}

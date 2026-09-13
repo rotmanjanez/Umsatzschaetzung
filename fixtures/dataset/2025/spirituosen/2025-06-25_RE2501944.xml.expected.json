@@ -1,0 +1,80 @@
+{
+  "source": "ubl",
+  "fileName": "2025-06-25_RE2501944.xml",
+  "supplierName": "Brückner Spirituosen & Barbedarf GmbH",
+  "supplierVatId": "DE277340196",
+  "number": "RE2501944",
+  "date": "2025-06-25",
+  "currency": "EUR",
+  "netTotal": 64637,
+  "grossTotal": 76918,
+  "vatBreakdown": [
+    {
+      "vat": 1900,
+      "net": 64637,
+      "tax": 12281
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Fränkischer Doppelkorn 38 % vol 0,7 l",
+      "sellerArticleId": "40070",
+      "quantity": 13000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 7990000,
+      "priceBaseQty": 1000,
+      "lineNet": 10387,
+      "vat": 1900,
+      "gtin": "4009862310035",
+      "expectedIngredientId": "ing.korn",
+      "expectedFactor": 700
+    },
+    {
+      "no": 2,
+      "name": "Wodka Gorbatschow 37,5 % vol 1,0 l",
+      "sellerArticleId": "41100",
+      "quantity": 16000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 11900000,
+      "priceBaseQty": 1000,
+      "lineNet": 19040,
+      "vat": 1900,
+      "gtin": "4003310011106",
+      "expectedIngredientId": "ing.wodka",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Moskovskaya Wodka 40 % vol 0,7 l",
+      "sellerArticleId": "41070",
+      "quantity": 5000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 10900000,
+      "priceBaseQty": 1000,
+      "lineNet": 5450,
+      "vat": 1900,
+      "gtin": "4003310000704",
+      "expectedIngredientId": "ing.wodka",
+      "expectedFactor": 700
+    },
+    {
+      "no": 4,
+      "name": "Jägermeister 35 % vol 0,7 l",
+      "sellerArticleId": "43070",
+      "quantity": 24000,
+      "unitText": "Fl",
+      "unitCode": "XBO",
+      "unitPrice": 12400000,
+      "priceBaseQty": 1000,
+      "lineNet": 29760,
+      "vat": 1900,
+      "gtin": "4067700010208",
+      "expectedIngredientId": "ing.kraeuterlikoer",
+      "expectedFactor": 700
+    }
+  ]
+}

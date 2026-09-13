@@ -1,0 +1,193 @@
+{
+  "source": "cii",
+  "fileName": "2025-03-05_9120065089.zugferd.xml",
+  "supplierName": "GastroMarkt C+C Großhandel GmbH & Co. KG",
+  "supplierVatId": "DE245880137",
+  "number": "9120065089",
+  "date": "2025-03-05",
+  "currency": "EUR",
+  "netTotal": 40655,
+  "grossTotal": 44080,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 35835,
+      "tax": 2509
+    },
+    {
+      "vat": 1900,
+      "net": 4820,
+      "tax": 916
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "447120",
+      "quantity": 6000,
+      "unitCode": "H87",
+      "unitPrice": 13960000,
+      "priceBaseQty": 1000,
+      "lineNet": 8376,
+      "vat": 700,
+      "expectedIngredientId": "ing.pommes",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "301250",
+      "quantity": 2000,
+      "unitCode": "H87",
+      "unitPrice": 11450000,
+      "priceBaseQty": 1000,
+      "lineNet": 2290,
+      "vat": 700,
+      "expectedIngredientId": "ing.reis",
+      "expectedFactor": 5000
+    },
+    {
+      "no": 3,
+      "name": "302410",
+      "quantity": 3000,
+      "unitCode": "H87",
+      "unitPrice": 12900000,
+      "priceBaseQty": 1000,
+      "lineNet": 3870,
+      "vat": 700,
+      "expectedIngredientId": "ing.nudeln",
+      "expectedFactor": 5000
+    },
+    {
+      "no": 4,
+      "name": "305110",
+      "quantity": 9000,
+      "unitCode": "H87",
+      "unitPrice": 1890000,
+      "priceBaseQty": 1000,
+      "lineNet": 1701,
+      "vat": 700,
+      "expectedIngredientId": "ing.panade",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 5,
+      "name": "410990",
+      "quantity": 4000,
+      "unitCode": "H87",
+      "unitPrice": 21900000,
+      "priceBaseQty": 1000,
+      "lineNet": 8760,
+      "vat": 700,
+      "expectedIngredientId": "ing.oel.fritteuse",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 6,
+      "name": "305010",
+      "quantity": 2000,
+      "unitCode": "H87",
+      "unitPrice": 10900000,
+      "priceBaseQty": 1000,
+      "lineNet": 2180,
+      "vat": 700,
+      "expectedIngredientId": "ing.mehl",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 7,
+      "name": "305020",
+      "quantity": 17000,
+      "unitCode": "H87",
+      "unitPrice": 1290000,
+      "priceBaseQty": 1000,
+      "lineNet": 2193,
+      "vat": 700,
+      "expectedIngredientId": "ing.zucker",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 8,
+      "name": "305030",
+      "quantity": 5000,
+      "unitCode": "H87",
+      "unitPrice": 490000,
+      "priceBaseQty": 1000,
+      "lineNet": 245,
+      "vat": 700,
+      "expectedIngredientId": "ing.salz",
+      "expectedFactor": 500
+    },
+    {
+      "no": 9,
+      "name": "520110",
+      "quantity": 5000,
+      "unitCode": "H87",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 4450,
+      "vat": 700,
+      "expectedIngredientId": "ing.kaese",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 10,
+      "name": "520220",
+      "quantity": 2000,
+      "unitCode": "H87",
+      "unitPrice": 7200000,
+      "priceBaseQty": 1000,
+      "lineNet": 1440,
+      "vat": 700,
+      "expectedIngredientId": "ing.mozzarella",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 11,
+      "name": "610330",
+      "quantity": 2000,
+      "unitCode": "H87",
+      "unitPrice": 1650000,
+      "priceBaseQty": 1000,
+      "lineNet": 330,
+      "vat": 700,
+      "expectedIngredientId": "ing.toastbrot",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 12,
+      "name": "810050",
+      "quantity": 1000,
+      "unitCode": "H87",
+      "unitPrice": 19900000,
+      "priceBaseQty": 1000,
+      "lineNet": 1990,
+      "vat": 1900,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 13,
+      "name": "810110",
+      "quantity": 1000,
+      "unitCode": "H87",
+      "unitPrice": 14500000,
+      "priceBaseQty": 1000,
+      "lineNet": 1450,
+      "vat": 1900,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 14,
+      "name": "810210",
+      "quantity": 2000,
+      "unitCode": "H87",
+      "unitPrice": 6900000,
+      "priceBaseQty": 1000,
+      "lineNet": 1380,
+      "vat": 1900,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}

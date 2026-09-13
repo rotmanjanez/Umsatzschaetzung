@@ -1,0 +1,104 @@
+{
+  "source": "scan",
+  "fileName": "2025-09-01_R-25-049.pdf",
+  "supplierName": "Gärtnerei Stadler",
+  "supplierVatId": "DE318905472",
+  "number": "R-25-049",
+  "date": "2025-09-01",
+  "currency": "EUR",
+  "netTotal": 21021,
+  "grossTotal": 22492,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 21021,
+      "tax": 1471
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Speisezwiebeln gelb 10 kg Sack",
+      "sellerArticleId": "Z-10",
+      "quantity": 2000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 8900000,
+      "priceBaseQty": 1000,
+      "lineNet": 1780,
+      "vat": 700,
+      "expectedIngredientId": "ing.zwiebeln",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "Tomaten rund, Kl. I",
+      "sellerArticleId": "T-01",
+      "quantity": 10000,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 2450000,
+      "priceBaseQty": 1000,
+      "lineNet": 2450,
+      "vat": 700,
+      "expectedIngredientId": "ing.tomaten",
+      "expectedFactor": 1000
+    },
+    {
+      "no": 3,
+      "name": "Eisbergsalat",
+      "sellerArticleId": "S-01",
+      "quantity": 38000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 950000,
+      "priceBaseQty": 1000,
+      "lineNet": 3610,
+      "vat": 700,
+      "expectedIngredientId": "ing.salat.eisberg",
+      "expectedFactor": 600
+    },
+    {
+      "no": 4,
+      "name": "Salatgurken",
+      "sellerArticleId": "G-01",
+      "quantity": 29000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 790000,
+      "priceBaseQty": 1000,
+      "lineNet": 2291,
+      "vat": 700,
+      "expectedIngredientId": "ing.gurken",
+      "expectedFactor": 400
+    },
+    {
+      "no": 5,
+      "name": "Speisekartoffeln festkochend 25 kg",
+      "sellerArticleId": "K-25",
+      "quantity": 5000,
+      "unitText": "Sack",
+      "unitCode": "XSA",
+      "unitPrice": 16500000,
+      "priceBaseQty": 1000,
+      "lineNet": 8250,
+      "vat": 700,
+      "expectedIngredientId": "ing.kartoffeln",
+      "expectedFactor": 25000
+    },
+    {
+      "no": 6,
+      "name": "Hokkaido-Kürbis",
+      "sellerArticleId": "KU-01",
+      "quantity": 12000,
+      "unitText": "kg",
+      "unitCode": "KGM",
+      "unitPrice": 2200000,
+      "priceBaseQty": 1000,
+      "lineNet": 2640,
+      "vat": 700,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}
