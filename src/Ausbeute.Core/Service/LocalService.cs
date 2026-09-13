@@ -1,33 +1,32 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using Ausbeute.Calc;
 using Ausbeute.Casefile;
-using Ausbeute.Changes;
 using Ausbeute.Extract;
 using Ausbeute.Invoices;
 using Ausbeute.Llm;
 using Ausbeute.Model;
 using Ausbeute.Reports;
 using Ausbeute.Rules;
+using Ausbeute.Rulestore;
 using Ausbeute.Suggest;
 
 namespace Ausbeute.Service;
 
-public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, IPdfPages? pdf, IPdfPrinter? printer, ILlmEngine? llm, string appVersion) : IService
+public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IPdfPages? pdf, IPdfPrinter? printer, ILlmEngine? llm, string appVersion) : IService
 {
     const int AutoMapMinConfidence = 60;
     const int ScanDpi = 300;
     const int PreviewDpi = 150;
-    const string ProblemOffline = "Änderungsspeicher nicht erreichbar, es gelten die zwischengespeicherten Regeln.";
+    const string ProblemOffline = "Regelspeicher nicht erreichbar, es gelten die zwischengespeicherten Regeln.";
     static readonly HashSet<string> BlockingFlags = ["line_total", "sum_net", "missing_field"];
 
     readonly Matcher matcher = new(llm);
 
-    public Task<StatusResp> Status(CancellationToken ct) => Guard(async () =>
+    public Task<StatusResp> Status(CancellationToken ct) => Guard(() =>
     {
-        var rs = await rules.Current(ct);
-        return new StatusResp(rules.Online, rs.Version, Format.Day(RulesDate(rs)), rules.Pending, appVersion, rules.Online ? null : ProblemOffline);
+        var rs = rules.Load();
+        return new StatusResp(rules.Online, rs.Version, Format.Day(RulesDate(rs)), appVersion, rules.Online ? null : ProblemOffline);
     });
 
     static DateTimeOffset RulesDate(RuleSet rs) =>
@@ -38,34 +37,26 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
             .DefaultIfEmpty(default)
             .Max();
 
-    public Task<RuleSetResp> Rules(CancellationToken ct) => Guard(async () =>
+    public Task<RuleSetResp> Rules(CancellationToken ct) => Guard(() => RulesResp(rules.Load()));
+
+    public Task<RuleSetResp> SaveRules(RuleSet rs, CancellationToken ct) => Guard(() =>
     {
-        var rs = await rules.Current(ct);
-        return new RuleSetResp(rs, Display.Rules(rs));
+        RuleCheck.Validate(rs);
+        rules.Save(rs);
+        return RulesResp(rs);
     });
 
-    public Task<ChangesResp> RulesChanges(long since, CancellationToken ct) => Guard(async () =>
-    {
-        var (changes, version) = await rules.Changes(since, ct);
-        return new ChangesResp(changes, version);
-    });
-
-    public Task<ApplyChangesResp> ApplyChanges(long baseVersion, List<Change> changes, CancellationToken ct) => Guard(async () =>
-    {
-        var (version, queued, overlaps) = await rules.Apply(baseVersion, changes, ct);
-        return new ApplyChangesResp(version, queued, overlaps);
-    });
+    static RuleSetResp RulesResp(RuleSet rs) => new(rs, Display.Rules(rs));
 
     public Task<ListCasesResp> ListCases(CancellationToken ct) => Guard(() => Task.FromResult(new ListCasesResp(
         cases.List().Select(c => new CaseRow(c, Display.Period(c.PeriodFrom, c.PeriodTo), Format.Day(c.UpdatedAt), c.Invoices.Count)).ToList())));
 
-    public Task<CaseResp> GetCase(string caseId, CancellationToken ct) => Guard(async () =>
-        Resp(LoadCase(caseId), await rules.Current(ct)));
+    public Task<CaseResp> GetCase(string caseId, CancellationToken ct) => Guard(() => Resp(LoadCase(caseId)));
 
-    public Task<CaseResp> PutCase(Case kase, CancellationToken ct) => Guard(async () =>
+    public Task<CaseResp> PutCase(Case kase, CancellationToken ct) => Guard(() =>
     {
         SaveCase(kase);
-        return Resp(kase, await rules.Current(ct));
+        return Resp(kase);
     });
 
     public Task DeleteCase(string caseId, CancellationToken ct) => Guard(() =>
@@ -75,14 +66,14 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
         return Task.FromResult(0);
     });
 
-    public Task<CaseResp> ImportCase(string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
+    public Task<CaseResp> ImportCase(string fileName, byte[] data, CancellationToken ct) => Guard(() =>
     {
         var c = CaseStore.Decode(data);
         SaveCase(c);
-        return Resp(c, await rules.Current(ct));
+        return Resp(c);
     });
 
-    public Task<ExportResp> ExportCase(string caseId, ExportFormat format, CancellationToken ct) => Guard(async () =>
+    public Task<ExportResp> ExportCase(string caseId, ExportFormat format, CancellationToken ct) => Guard(() =>
     {
         var c = LoadCase(caseId);
         switch (format)
@@ -90,7 +81,7 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
             case ExportFormat.Json:
                 return new ExportResp(CaseStore.Encode(c), FileName(c, "json"));
             case ExportFormat.Csv:
-                var (rep, rs) = await Compute(c, ct);
+                var (rep, rs) = Compute(c);
                 return new ExportResp(Csv.Render(c, rep, rs), FileName(c, "csv"));
             default:
                 throw new ServiceError(ErrorCode.Unsupported, $"Exportformat \"{format}\" nicht unterstützt");
@@ -104,14 +95,14 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
         {
             case Kind.PdfScan or Kind.PdfText or Kind.Image:
                 var empty = new Invoice();
-                return new ParseResp(empty, [], Display.Invoice(empty, await rules.Current(ct)), true, null);
+                return new ParseResp(empty, [], Display.Invoice(empty, rules.Load()), true, null);
             case Kind.Unknown:
                 throw new ServiceError(ErrorCode.Unsupported, $"Dateiformat von \"{fileName}\" nicht erkannt");
         }
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = NewId("re-");
         var (rs, unmapped) = await MapLines(inv, true, ct);
-        var c = caseId == "" ? null : Attach(caseId, inv, rs, fileName, data);
+        var c = caseId == "" ? null : Attach(caseId, inv, fileName, data);
         return new ParseResp(inv, unmapped, Display.Invoice(inv, rs), false, c);
     });
 
@@ -187,8 +178,8 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
         var (rs, _) = await MapLines(inv, confirm, ct);
         var resp = new VerifyResp(inv, flags, Display.Invoice(inv, rs), false, null);
         if (!confirm && !req.Draft) return resp;
-        if (confirm && inv.Source == Source.Scan) inv.Verification = new Verification { At = ChangeData.Now() };
-        var c = Attach(req.CaseId, inv, rs, req.FileName ?? inv.FileName, req.Data ?? []);
+        if (confirm && inv.Source == Source.Scan) inv.Verification = new Verification { At = Clock.Now() };
+        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? []);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
@@ -216,32 +207,32 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
 
     public Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplierVatId, CancellationToken ct) => Guard(async () =>
     {
-        var rs = await rules.Current(ct);
+        var rs = rules.Load();
         var sugs = await matcher.Suggest(rs, supplierVatId, line, ct);
         var candidates = sugs.Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind, Display.CandidateLabel(rs, sg.Mapping))).ToList();
         return new MappingSuggestResp(candidates, sugs.Any(sg => sg.Kind == OriginKind.Model) ? llm?.Model : null);
     });
 
-    public Task<ReportDisplay> Calculate(string caseId, CancellationToken ct) => Guard(async () =>
+    public Task<ReportDisplay> Calculate(string caseId, CancellationToken ct) => Guard(() =>
     {
         var c = LoadCase(caseId);
-        var (rep, rs) = await Compute(c, ct);
+        var (rep, rs) = Compute(c);
         return Display.Report(c, rep, rs);
     });
 
     public Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct) => Guard(async () =>
     {
         var c = LoadCase(caseId);
-        var (rep, rs) = await Compute(c, ct);
+        var (rep, rs) = Compute(c);
         var html = Html.Render(c, rs, rep);
         if (!pdf) return new ReportResp(html, null, FileName(c, "html"));
         if (printer is null) throw new ServiceError(ErrorCode.Unsupported, "PDF-Ausgabe nicht verfügbar");
         return new ReportResp(html, await printer.Print(html, ct), FileName(c, "pdf"));
     });
 
-    async Task<(Model.Report Report, RuleSet Rules)> Compute(Case c, CancellationToken ct)
+    (Model.Report Report, RuleSet Rules) Compute(Case c)
     {
-        var rs = await rules.Current(ct);
+        var rs = rules.Load();
         try
         {
             return (Calculation.Run(c, rs), rs);
@@ -260,16 +251,16 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
 
     void SaveCase(Case c)
     {
-        var t = ChangeData.Now();
+        var t = Clock.Now();
         if (c.Id == "") c.Id = NewId("fall-");
         if (c.CreatedAt == default) c.CreatedAt = t;
         c.UpdatedAt = t;
         cases.Save(c);
     }
 
-    static CaseResp Resp(Case c, RuleSet rs) => new(c, Display.Case(c, rs));
+    CaseResp Resp(Case c) => new(c, Display.Case(c, rules.Load()));
 
-    CaseResp Attach(string caseId, Invoice inv, RuleSet rs, string fileName, byte[] data)
+    CaseResp Attach(string caseId, Invoice inv, string fileName, byte[] data)
     {
         var c = LoadCase(caseId);
         if (data.Length > 0) cases.SaveFile(caseId, inv.Id, fileName, data);
@@ -277,12 +268,12 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
         SaveCase(c);
-        return Resp(c, rs);
+        return Resp(c);
     }
 
     async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, bool ask, CancellationToken ct)
     {
-        var rs = await rules.Current(ct);
+        var rs = rules.Load();
         var unmapped = new List<int>();
         foreach (var l in inv.Lines)
         {
@@ -319,24 +310,19 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
         if (sg.Confidence < AutoMapMinConfidence) return rs;
         var m = sg.Mapping;
         m.Id = NewId("map-");
-        m.Meta = new Meta { ValidFrom = Today() };
-        var change = new Change
-        {
-            Entity = Entity.Mapping,
-            EntityId = m.Id,
-            Op = Op.Put,
-            Data = JsonSerializer.SerializeToElement(m, ModelJsonContext.Default.ArticleMapping),
-        };
+        m.Meta = new Meta { ValidFrom = Today(), ChangedAt = Clock.Now() };
+        rs.Mappings[m.Id] = m;
         try
         {
-            await rules.Apply(rs.Version, [change], ct);
+            RuleCheck.Validate(rs);
+            rules.Save(rs);
         }
-        catch (Exception e) when (e is RulesException or StoreUnavailableException)
+        catch (Exception e) when (e is RulesException or StoreUnavailableException or RulesConflictException)
         {
-            return rs;
+            return rules.Load();
         }
         l.MappingId = m.Id;
-        return await rules.Current(ct);
+        return rs;
     }
 
     static string FileName(Case c, string ext)
@@ -366,6 +352,8 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
     static string NewId(string prefix) =>
         prefix + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(4));
 
+    static Task<T> Guard<T>(Func<T> body) => Guard(() => Task.FromResult(body()));
+
     static async Task<T> Guard<T>(Func<Task<T>> body)
     {
         try
@@ -378,6 +366,7 @@ public sealed class LocalService(Repository rules, CaseStore cases, IOcr? ocr, I
             {
                 CaseNotFoundException => ErrorCode.NotFound,
                 CaseInvalidException or RulesException or InvalidDataException => ErrorCode.Invalid,
+                RulesConflictException => ErrorCode.Conflict,
                 StoreUnavailableException => ErrorCode.Unavailable,
                 _ => ErrorCode.Internal,
             }, e.Message, inner: e);
