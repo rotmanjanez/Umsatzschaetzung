@@ -4,7 +4,6 @@ using Ausbeute.Calc;
 using Ausbeute.Casefile;
 using Ausbeute.Extract;
 using Ausbeute.Invoices;
-using Ausbeute.Llm;
 using Ausbeute.Model;
 using Ausbeute.Reports;
 using Ausbeute.Rules;
