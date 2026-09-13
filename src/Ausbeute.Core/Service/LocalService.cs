@@ -93,7 +93,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
         switch (InvoiceParser.Detect(data))
         {
-            case Kind.PdfScan or Kind.PdfText or Kind.Image:
+            case Kind.Pdf or Kind.Image:
                 var empty = new Invoice();
                 return new ParseResp(empty, [], Display.Invoice(empty, rules.Load()), true, null);
             case Kind.Unknown:
@@ -113,20 +113,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
         var pages = new List<ExtractPage>();
         switch (InvoiceParser.Detect(data))
         {
-            case Kind.PdfText:
-                var textPages = PdfText.Extract(data);
-                var rendered = await RenderPdf(data, PdfText.Dpi, ct);
-                for (var i = 0; i < textPages.Count; i++)
-                {
-                    var tp = textPages[i];
-                    var image = rendered is not null && i < rendered.Count ? rendered[i] : [];
-                    pages.Add(new ExtractPage(tp.Width, tp.Height, tp.Words, image));
-                }
-                break;
             case Kind.Image:
                 pages.Add(await Recognize(data, ct));
                 break;
-            case Kind.PdfScan:
+            case Kind.Pdf:
                 foreach (var image in await RenderPdf(data, ScanDpi, ct) ?? throw NoPdfPages())
                     pages.Add(await Recognize(image, ct));
                 break;
@@ -198,7 +188,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
         var pages = InvoiceParser.Detect(data) switch
         {
             Kind.Image => [new SourcePage(data, null)],
-            Kind.PdfScan or Kind.PdfText or Kind.Zugferd =>
+            Kind.Pdf or Kind.Zugferd =>
                 (await RenderPdf(data, PreviewDpi, ct) ?? throw NoPdfPages()).Select(p => new SourcePage(p, null)).ToList(),
             _ => [new SourcePage(null, Encoding.UTF8.GetString(data))],
         };
