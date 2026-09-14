@@ -32,6 +32,24 @@
                     </StackPanel>
                 </Grid>
                 <TextBlock Text="Datum als TT.MM.JJJJ" Style="{StaticResource FieldLabel}"/>
+                <TextBlock Text="Steuerpflichtiger" Style="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                <TextBlock Text="Name *" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="NewName" Width="520" HorizontalAlignment="Left"/>
+                <Grid Width="520" HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Steuernummer *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="NewTaxNumber"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="PaB-Nr. *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="NewPab"/>
+                    </StackPanel>
+                </Grid>
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                     <Button Content="Anlegen" Style="{StaticResource PrimaryButton}" Click="Create" Margin="0,0,8,0"/>
                     <Button Content="Abbrechen" Style="{StaticResource SecondaryButton}" Click="CancelNew"/>

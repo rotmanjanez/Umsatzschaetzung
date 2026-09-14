@@ -53,17 +53,29 @@ public partial class CasesView : Screen
         var label = NewLabel.Text.Trim();
         var from = Input.Date(NewFrom.Text);
         var to = Input.Date(NewTo.Text);
+        var taxpayer = new Taxpayer
+        {
+            Name = NewName.Text.Trim(),
+            TaxNumber = NewTaxNumber.Text.Trim(),
+            PabNumber = NewPab.Text.Trim(),
+        };
         if (label == "" || from is null || to is null)
         {
             Session.Fail("Bitte Bezeichnung und Zeitraum (TT.MM.JJJJ) angeben.");
             return;
         }
-        var kase = new Case { Label = label, PeriodFrom = from.Value, PeriodTo = to.Value };
+        if (taxpayer.Name == "" || taxpayer.TaxNumber == "" || taxpayer.PabNumber == "")
+        {
+            Session.Fail("Bitte Name, Steuernummer und PaB-Nr. des Steuerpflichtigen angeben.");
+            return;
+        }
+        var kase = new Case { Label = label, PeriodFrom = from.Value, PeriodTo = to.Value, Taxpayer = taxpayer };
         await Session.Run(async () =>
         {
             var resp = await Session.Service.PutCase(kase, Ct);
             NewPanel.Visibility = Visibility.Collapsed;
             NewLabel.Text = NewFrom.Text = NewTo.Text = "";
+            NewName.Text = NewTaxNumber.Text = NewPab.Text = "";
             Session.Open(resp);
         });
     }
