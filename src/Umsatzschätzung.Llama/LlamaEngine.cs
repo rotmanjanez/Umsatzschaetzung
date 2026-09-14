@@ -10,6 +10,7 @@ public sealed class LlamaEngine : ILlmEngine
     const int Context = 8192;
     const int DefaultMaxTokens = 512;
     const int Aborted = 1;
+    const int Crashed = -7;
 
     readonly SemaphoreSlim gate = new(1, 1);
     IntPtr handle;
@@ -43,6 +44,8 @@ public sealed class LlamaEngine : ILlmEngine
                 var err = Take(errPtr);
                 if (rc == Aborted || ct.IsCancellationRequested)
                     throw new OperationCanceledException(ct);
+                if (rc == Crashed)
+                    throw new InvalidOperationException(err);
                 if (rc != 0)
                     throw new InvalidOperationException($"Generierung fehlgeschlagen ({rc}): {err}");
                 return output;

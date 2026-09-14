@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ggml-backend.h"
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
+#include <vulkan/vulkan_core.h>
+
 #include "llama.h"
 
 #include "engine.h"
@@ -15,6 +20,7 @@
 #define AL_ERR_DECODE -4
 #define AL_ERR_PIECE -5
 #define AL_ERR_MEMORY -6
+#define AL_ERR_CRASHED -7
 
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -74,28 +80,44 @@ static int al_buf_append(struct al_buf *b, const char *s, size_t n) {
 }
 
 static int al_backend_ready = 0;
+static int al_gpu = 0;
 
-// No Vulkan ICD registered means zero GPU devices, and offloading to none of them
-// faults inside the backend. CPU is always present, so fall back to it.
-static int al_gpu_devices(void) {
-	int n = 0;
-	for (size_t i = 0; i < ggml_backend_dev_count(); i++) {
-		enum ggml_backend_dev_type t = ggml_backend_dev_type(ggml_backend_dev_get(i));
-		if (t == GGML_BACKEND_DEVICE_TYPE_GPU) n++;
-	}
-	return n;
+// With the loader present but no ICD registered, vkCreateInstance returns
+// VK_ERROR_INCOMPATIBLE_DRIVER and a null handle. ggml_vk_instance_init does not
+// check that result and dereferences the handle, so the backend has to stay out of
+// the registry: asking ggml for a device count is what builds the registry, and
+// building the registry is what crashes.
+static int al_vulkan_usable(void) {
+	VkInstanceCreateInfo ci = { .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
+	VkInstance inst = VK_NULL_HANDLE;
+	if (vkCreateInstance(&ci, NULL, &inst) != VK_SUCCESS || inst == VK_NULL_HANDLE) return 0;
+	uint32_t n = 0;
+	int ok = vkEnumeratePhysicalDevices(inst, &n, NULL) == VK_SUCCESS && n > 0;
+	vkDestroyInstance(inst, NULL);
+	return ok;
 }
 
-void *umsatzschaetzung_llm_open(const char *model_path, int n_ctx, int n_threads, char **err) {
+static void al_select_backend(void) {
+	al_gpu = al_vulkan_usable();
+	if (al_gpu) return;
+#if defined(_WIN32)
+	_putenv_s("GGML_DISABLE_VULKAN", "1");
+#else
+	setenv("GGML_DISABLE_VULKAN", "1", 1);
+#endif
+}
+
+static void *al_open(const char *model_path, int n_ctx, int n_threads, char **err) {
 	if (err) *err = NULL;
 	if (!al_backend_ready) {
+		al_select_backend();
 		llama_log_set(al_log_silent, NULL);
 		llama_backend_init();
 		al_backend_ready = 1;
 	}
 
 	struct llama_model_params mp = llama_model_default_params();
-	mp.n_gpu_layers = al_gpu_devices() > 0 ? -1 : 0;
+	mp.n_gpu_layers = al_gpu ? -1 : 0;
 
 	struct llama_model *model = llama_model_load_from_file(model_path, mp);
 	if (!model) {
@@ -145,7 +167,7 @@ static int al_decode(struct al_ctx *c, llama_token *toks, int n) {
 	return AL_DONE;
 }
 
-int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
+static int al_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
 	struct al_ctx *c = h;
 	*out = NULL;
 	if (err) *err = NULL;
@@ -235,6 +257,60 @@ int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *gramm
 	return AL_DONE;
 }
 
+// A fault in llama.cpp or a graphics driver would otherwise take the whole app with
+// it: the runtime treats an access violation in native code as corrupted state and
+// ends the process before any managed handler runs. Containing it here turns the
+// crash into an error the caller can report. What it cannot do is make the library
+// usable again — the backend registry is built once per process and a fault leaves
+// it half-initialized — so the engine stays poisoned until the app restarts.
+static int al_poisoned = 0;
+
+#if defined(_WIN32)
+// Stack overflow is deliberately not caught: the guard page is gone by then and
+// running a handler on the exhausted stack faults again.
+static int al_fatal(unsigned long code) {
+	return code == EXCEPTION_ACCESS_VIOLATION || code == EXCEPTION_ILLEGAL_INSTRUCTION
+		? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH;
+}
+#endif
+
+void *umsatzschaetzung_llm_open(const char *model_path, int n_ctx, int n_threads, char **err) {
+	if (al_poisoned) {
+		al_set_err(err, "Sprachmodell nach einem Absturz nicht verfügbar, bitte das Programm neu starten");
+		return NULL;
+	}
+#if defined(_WIN32)
+	__try {
+		return al_open(model_path, n_ctx, n_threads, err);
+	} __except (al_fatal(GetExceptionCode())) {
+		al_poisoned = 1;
+		al_set_err(err, "Sprachmodell abgestürzt, bitte das Programm neu starten");
+		return NULL;
+	}
+#else
+	return al_open(model_path, n_ctx, n_threads, err);
+#endif
+}
+
+int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
+	if (al_poisoned) {
+		al_set_err(err, "Sprachmodell nach einem Absturz nicht verfügbar, bitte das Programm neu starten");
+		return AL_ERR_CRASHED;
+	}
+#if defined(_WIN32)
+	__try {
+		return al_complete(h, prompt, grammar, max_tokens, out, err);
+	} __except (al_fatal(GetExceptionCode())) {
+		al_poisoned = 1;
+		*out = NULL;
+		al_set_err(err, "Sprachmodell abgestürzt, bitte das Programm neu starten");
+		return AL_ERR_CRASHED;
+	}
+#else
+	return al_complete(h, prompt, grammar, max_tokens, out, err);
+#endif
+}
+
 void umsatzschaetzung_llm_abort(void *h) {
 	if (h) al_store(&((struct al_ctx *) h)->aborted, 1);
 }
@@ -242,6 +318,9 @@ void umsatzschaetzung_llm_abort(void *h) {
 void umsatzschaetzung_llm_close(void *h) {
 	struct al_ctx *c = h;
 	if (!c) return;
+	// Freeing a context the backend faulted in would fault again. Leaking it is
+	// harmless: nothing may use the engine again before the process exits.
+	if (al_poisoned) return;
 	llama_free(c->lctx);
 	llama_model_free(c->model);
 	free(c);
