@@ -108,16 +108,24 @@ public sealed class RuleStore
 
     void Snapshot(SqliteConnection db)
     {
-        var path = Path.Combine(snapshotDir, "rules-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".db");
-        if (File.Exists(path)) return;
-        using (var cmd = db.CreateCommand())
+        var path = Path.Combine(snapshotDir, "rules-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".db");
+        var temp = Path.Combine(snapshotDir, "rules-" + Guid.NewGuid().ToString("N") + ".tmp");
+        try
         {
-            cmd.CommandText = "VACUUM INTO @path";
-            cmd.Parameters.AddWithValue("@path", path);
-            cmd.ExecuteNonQuery();
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = "VACUUM INTO @path";
+                cmd.Parameters.AddWithValue("@path", temp);
+                cmd.ExecuteNonQuery();
+            }
+            File.Move(temp, path, true);
+            foreach (var old in Directory.EnumerateFiles(snapshotDir, "rules-*.db").OrderDescending(StringComparer.Ordinal).Skip(KeptSnapshots))
+                File.Delete(old);
         }
-        foreach (var old in Directory.EnumerateFiles(snapshotDir, "rules-*.db").OrderDescending(StringComparer.Ordinal).Skip(KeptSnapshots))
-            File.Delete(old);
+        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
+        {
+            try { File.Delete(temp); } catch (IOException) { }
+        }
     }
 
     static RuleSet Read(SqliteConnection db, SqliteTransaction? tx)
