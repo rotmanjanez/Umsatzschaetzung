@@ -8,6 +8,7 @@ project(
 )
 
 find_package(llama REQUIRED)
+find_package(Vulkan REQUIRED)
 
 add_library(umsatzschaetzung_llm SHARED)
 target_sources(
@@ -16,7 +17,7 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" FILES engine.h
 )
 target_compile_features(umsatzschaetzung_llm PRIVATE c_std_11)
-target_link_libraries(umsatzschaetzung_llm PRIVATE llama)
+target_link_libraries(umsatzschaetzung_llm PRIVATE llama Vulkan::Vulkan)
 set_target_properties(
     umsatzschaetzung_llm
     PROPERTIES
