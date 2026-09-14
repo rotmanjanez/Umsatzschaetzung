@@ -16,6 +16,7 @@ public sealed class Session : Observable
     public const string CsvFilter = "CSV|*.csv";
 
     string message = "";
+    string error = "";
 
     public Session(IService service) => Service = service;
 
@@ -27,6 +28,7 @@ public sealed class Session : Observable
     public Dictionary<string, OcrResp> Drafts { get; } = [];
 
     public string Message { get => message; set => Set(ref message, value); }
+    public string Error { get => error; set => Set(ref error, value); }
 
     public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed;
     public event Action<CaseResp>? CaseOpened;
@@ -49,9 +51,11 @@ public sealed class Session : Observable
         }
     }
 
+    public void Fail(string text) => Error = text;
+
     public void Fail(ServiceError e)
     {
-        Message = e.Code switch
+        Error = e.Code switch
         {
             ErrorCode.Invalid => "Ungültige Eingabe: " + e.Message,
             ErrorCode.NotFound => "Nicht gefunden: " + e.Message,
@@ -172,7 +176,7 @@ public sealed class Session : Observable
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
-                Message = "Datei konnte nicht gelesen werden: " + Path.GetFileName(path);
+                Fail("Datei konnte nicht gelesen werden: " + Path.GetFileName(path));
             }
         }
         return files;
@@ -189,7 +193,7 @@ public sealed class Session : Observable
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            Message = "Datei konnte nicht gespeichert werden: " + Path.GetFileName(dialog.FileName);
+            Fail("Datei konnte nicht gespeichert werden: " + Path.GetFileName(dialog.FileName));
         }
     }
 }

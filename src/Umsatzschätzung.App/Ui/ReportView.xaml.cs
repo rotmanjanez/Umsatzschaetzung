@@ -89,7 +89,7 @@ public partial class ReportView : Screen
             var resp = await Session.Service.RenderReport(caseId, true, Ct);
             if (resp.Pdf is null)
             {
-                Session.Message = "PDF konnte nicht erstellt werden";
+                Session.Fail("PDF konnte nicht erstellt werden");
                 return;
             }
             Session.Message = "";

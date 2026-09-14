@@ -135,6 +135,39 @@
         <Setter Property="Margin" Value="0,0,0,8"/>
     </Style>
 
+    <Style x:Key="ErrorBanner" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DangerSoftBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Padding" Value="16,10"/>
+    </Style>
+
+    <Style x:Key="ErrorBannerText" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="ErrorBannerClose" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="8,0"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="StatusBar" TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="0,1,0,0"/>
