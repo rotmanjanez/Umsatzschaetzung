@@ -18,9 +18,14 @@ public sealed class Session : Observable
     string message = "";
     string error = "";
 
-    public Session(IService service) => Service = service;
+    public Session(IService service, ILlmProgress? llm)
+    {
+        Service = service;
+        Imports = new Imports(this, llm);
+    }
 
     public IService Service { get; }
+    public Imports Imports { get; }
     public Case? Case { get; private set; }
     public CaseDisplay? Display { get; private set; }
     public RuleSetResp? Rules { get; private set; }

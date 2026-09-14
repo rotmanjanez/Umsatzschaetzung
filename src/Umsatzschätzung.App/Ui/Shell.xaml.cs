@@ -13,10 +13,11 @@ public partial class Shell : Window
     Screen? current;
     RulesWindow? rules;
 
-    public Shell(IService service)
+    public Shell(IService service, ILlmProgress? llm)
     {
         InitializeComponent();
-        session = new Session(service);
+        session = new Session(service, llm);
+        ImportList.ItemsSource = session.Imports.Jobs;
         cases = new CasesView(session);
         screens =
         [
@@ -44,10 +45,13 @@ public partial class Shell : Window
         };
         Closed += (_, _) =>
         {
+            session.Imports.CancelAll();
             current?.Leave();
             rules?.Close();
         };
     }
+
+    void CancelImport(object sender, RoutedEventArgs e) => ((ImportJob)((Button)sender).DataContext).Cancel();
 
     void ShowRules(object sender, RoutedEventArgs e) => ShowRules();
 
