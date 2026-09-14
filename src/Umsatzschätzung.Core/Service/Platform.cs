@@ -2,7 +2,7 @@ using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.Service;
 
-public sealed record OcrPageWords(int Width, int Height, List<OcrWord> Words);
+public sealed record OcrPageWords(int Width, int Height, List<OcrWord> Words, byte[]? Image = null);
 
 public interface IOcr
 {
