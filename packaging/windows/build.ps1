@@ -72,7 +72,7 @@ $wixArch = if ($Arch -eq "win-arm64") { "arm64" } else { "x64" }
 wix build -arch $wixArch -culture de-DE `
     -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "CabArch=$wixArch" `
     -d "ModelShard1=$($shards[0].FullName)" -d "ModelShard2=$($shards[1].FullName)" -d "ModelShard3=$($shards[2].FullName)" `
-    -o (Join-Path $out "umsatzschätzung-$msiVersion-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
+    -o (Join-Path $out "umsatzschaetzung-$msiVersion-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
 if ($LASTEXITCODE -ne 0) { throw "wix failed" }
 Sign (Get-ChildItem $out -Filter *.msi).FullName
 

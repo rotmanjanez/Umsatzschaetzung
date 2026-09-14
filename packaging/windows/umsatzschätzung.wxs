@@ -9,7 +9,7 @@
            InstallerVersion="500">
 
     <MajorUpgrade DowngradeErrorMessage="Eine neuere Version der Umsatzschätzung ist bereits installiert." />
-    <MediaTemplate EmbedCab="no" CabinetTemplate="umsatzschätzung-$(var.CabArch){0}.cab" CompressionLevel="none" MaximumUncompressedMediaSize="1500" />
+    <MediaTemplate EmbedCab="no" CabinetTemplate="umsatzschaetzung-$(var.CabArch){0}.cab" CompressionLevel="none" MaximumUncompressedMediaSize="1500" />
 
     <Property Id="STORE" Secure="yes" />
     <Property Id="CASEDIR" Secure="yes" />
