@@ -264,13 +264,11 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
-        <Setter Property="Resources">
+        <Setter Property="CellStyle">
             <Setter.Value>
-                <ResourceDictionary>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="VerticalAlignment" Value="Center"/>
-                    </Style>
-                </ResourceDictionary>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
             </Setter.Value>
         </Setter>
     </Style>
