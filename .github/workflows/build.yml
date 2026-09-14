@@ -58,7 +58,9 @@ jobs:
           path: third_party/llama/models
           key: gguf-${{ hashFiles('tools/llm/fetch.ps1') }}
 
-      - run: dotnet tool install --global wix
+      # v7 gates builds behind the Open Source Maintenance Fee EULA; v6 does not
+      # and reads the same v4 schema the .wxs uses.
+      - run: dotnet tool install --global wix --version 6.0.2
       - name: install vulkan sdk
         run: |
           choco install vulkan-sdk --no-progress
