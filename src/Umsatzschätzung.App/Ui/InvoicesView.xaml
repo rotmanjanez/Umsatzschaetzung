@@ -18,7 +18,6 @@
                 <TextBlock Text="{Binding ImportText}" VerticalAlignment="Center"/>
             </DockPanel>
         </Border>
-        <TextBlock DockPanel.Dock="Top" Text="Dateien können auch per Drag &amp; Drop abgelegt werden (XML, PDF, PNG, JPG, TIFF)." Style="{StaticResource Muted}" Margin="0,0,0,12"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="9*" MinWidth="240"/>
