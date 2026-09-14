@@ -33,12 +33,14 @@
       <Component Id="Exe">
         <File Id="UmsatzschaetzungExe" Source="$(var.Dist)/umsatzschätzung.exe" KeyPath="yes">
           <Shortcut Id="StartMenu" Directory="ProgramMenuFolder" Name="Umsatzschätzung"
-                    Description="Umsatzschätzung für die Betriebsprüfung" Advertise="yes" />
+                    Description="Umsatzschätzung für die Betriebsprüfung" WorkingDirectory="INSTALLFOLDER" />
         </File>
       </Component>
       <Files Include="$(var.Dist)\**">
         <Exclude Files="$(var.Dist)\umsatzschätzung.exe" />
         <Exclude Files="$(var.Dist)\**.pdb" />
+        <Exclude Files="$(var.Dist)\Microsoft.Web.WebView2.*.xml" />
+        <Exclude Files="$(var.Dist)\runtimes\**\WebView2Loader.dll" />
       </Files>
       <Component Id="RegistryStore" Condition="STORE">
         <RegistryValue Root="HKLM" Key="SOFTWARE\Umsatzschätzung" Name="Store" Type="string" Value="[STORE]" KeyPath="yes" />
