@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Umsatzschätzung.App/Umsatzschätzung.App.csproj" />
+    <Project Path="src/Umsatzschätzung.Core/Umsatzschätzung.Core.csproj" />
+    <Project Path="src/Umsatzschätzung.E2e/Umsatzschätzung.E2e.csproj" />
+    <Project Path="src/Umsatzschätzung.Llama/Umsatzschätzung.Llama.csproj" />
+  </Folder>
+</Solution>

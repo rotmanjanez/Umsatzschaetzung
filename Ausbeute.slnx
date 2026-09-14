@@ -1,7 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Ausbeute.App/Ausbeute.App.csproj" />
-    <Project Path="src/Ausbeute.Core/Ausbeute.Core.csproj" />
-    <Project Path="src/Ausbeute.Llama/Ausbeute.Llama.csproj" />
-  </Folder>
-</Solution>

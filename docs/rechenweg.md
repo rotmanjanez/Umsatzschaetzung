@@ -1,4 +1,4 @@
-# Der Rechenweg der Ausbeutekalkulation
+# Der Rechenweg der Umsatzschätzung
 
 Diese Darstellung richtet sich an Prüferinnen und Prüfer sowie an den
 Steuerpflichtigen und seinen Berater. Sie beschreibt, wie das Programm aus den

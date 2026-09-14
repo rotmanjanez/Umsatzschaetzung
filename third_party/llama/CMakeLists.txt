@@ -1,24 +1,24 @@
 cmake_minimum_required(VERSION 3.25...4.4)
 
 project(
-    ausbeute_llm
-    DESCRIPTION "llama.cpp behind the three-function Ausbeute C ABI"
+    umsatzschaetzung_llm
+    DESCRIPTION "llama.cpp behind the three-function Umsatzschätzung C ABI"
     LANGUAGES C CXX
     VERSION 1.0.0
 )
 
 find_package(llama REQUIRED)
 
-add_library(ausbeute_llm SHARED)
+add_library(umsatzschaetzung_llm SHARED)
 target_sources(
-    ausbeute_llm
+    umsatzschaetzung_llm
     PRIVATE engine.c
     PUBLIC FILE_SET HEADERS BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" FILES engine.h
 )
-target_compile_features(ausbeute_llm PRIVATE c_std_11)
-target_link_libraries(ausbeute_llm PRIVATE llama)
+target_compile_features(umsatzschaetzung_llm PRIVATE c_std_11)
+target_link_libraries(umsatzschaetzung_llm PRIVATE llama)
 set_target_properties(
-    ausbeute_llm
+    umsatzschaetzung_llm
     PROPERTIES
         PREFIX ""
         C_VISIBILITY_PRESET hidden
@@ -28,5 +28,5 @@ set_target_properties(
 )
 
 include(GNUInstallDirs)
-install(TARGETS ausbeute_llm EXPORT ausbeute_llm FILE_SET HEADERS)
-install(EXPORT ausbeute_llm DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/ausbeute_llm" FILE ausbeute_llm-config.cmake)
+install(TARGETS umsatzschaetzung_llm EXPORT umsatzschaetzung_llm FILE_SET HEADERS)
+install(EXPORT umsatzschaetzung_llm DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/umsatzschaetzung_llm" FILE umsatzschaetzung_llm-config.cmake)

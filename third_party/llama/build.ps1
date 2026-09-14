@@ -105,7 +105,7 @@ Invoke-Cmake @Generator -S $Src -B (Join-Path $Work "llama") `
     @CrossFlags @CpuFlags
 Invoke-Cmake --build (Join-Path $Work "llama") --config Release --target install
 
-Invoke-Cmake @Generator -S $Root -B (Join-Path $Work "ausbeute_llm") `
+Invoke-Cmake @Generator -S $Root -B (Join-Path $Work "umsatzschaetzung_llm") `
     -DCMAKE_BUILD_TYPE=Release `
     -DCMAKE_C_COMPILER=clang-cl `
     -DCMAKE_CXX_COMPILER=clang-cl `
@@ -114,7 +114,7 @@ Invoke-Cmake @Generator -S $Root -B (Join-Path $Work "ausbeute_llm") `
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="$Out" `
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE="$Out" `
     @CrossFlags
-Invoke-Cmake --build (Join-Path $Work "ausbeute_llm") --config Release
+Invoke-Cmake --build (Join-Path $Work "umsatzschaetzung_llm") --config Release
 
 # gguf-split shards the weights below the 2 GB per-file limit of Windows Installer.
 # It is a build-time tool: CPU only, and only that target is built.
@@ -142,4 +142,4 @@ Invoke-Cmake @Generator -S $Src -B (Join-Path $Work "tools") `
     @CrossFlags @CpuFlags
 Invoke-Cmake --build (Join-Path $Work "tools") --config Release --target llama-gguf-split
 
-Get-Item (Join-Path $Out "ausbeute_llm.dll"), (Join-Path $Out "llama-gguf-split.exe")
+Get-Item (Join-Path $Out "umsatzschaetzung_llm.dll"), (Join-Path $Out "llama-gguf-split.exe")

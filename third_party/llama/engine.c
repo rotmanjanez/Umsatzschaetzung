@@ -74,7 +74,7 @@ static int al_buf_append(struct al_buf *b, const char *s, size_t n) {
 
 static int al_backend_ready = 0;
 
-void *ausbeute_llm_open(const char *model_path, int n_ctx, int n_threads, char **err) {
+void *umsatzschaetzung_llm_open(const char *model_path, int n_ctx, int n_threads, char **err) {
 	if (err) *err = NULL;
 	if (!al_backend_ready) {
 		llama_log_set(al_log_silent, NULL);
@@ -133,7 +133,7 @@ static int al_decode(struct al_ctx *c, llama_token *toks, int n) {
 	return AL_DONE;
 }
 
-int ausbeute_llm_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
+int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
 	struct al_ctx *c = h;
 	*out = NULL;
 	if (err) *err = NULL;
@@ -223,11 +223,11 @@ int ausbeute_llm_complete(void *h, const char *prompt, const char *grammar, int 
 	return AL_DONE;
 }
 
-void ausbeute_llm_abort(void *h) {
+void umsatzschaetzung_llm_abort(void *h) {
 	if (h) al_store(&((struct al_ctx *) h)->aborted, 1);
 }
 
-void ausbeute_llm_close(void *h) {
+void umsatzschaetzung_llm_close(void *h) {
 	struct al_ctx *c = h;
 	if (!c) return;
 	llama_free(c->lctx);
@@ -235,4 +235,4 @@ void ausbeute_llm_close(void *h) {
 	free(c);
 }
 
-void ausbeute_llm_free(char *p) { free(p); }
+void umsatzschaetzung_llm_free(char *p) { free(p); }
