@@ -12,6 +12,7 @@
 #include "engine.h"
 
 #define AL_BATCH 512
+#define AL_REPORT_US 200000
 #define AL_DONE 0
 #define AL_ABORTED 1
 #define AL_ERR_TOKENIZE -1
@@ -156,18 +157,48 @@ static void *al_open(const char *model_path, int n_ctx, int n_threads, char **er
 	return c;
 }
 
-static int al_decode(struct al_ctx *c, llama_token *toks, int n) {
+struct al_progress {
+	umsatzschaetzung_llm_progress fn;
+	void *user;
+	int prompt_tokens;
+	int prompt_done;
+	int64_t prompt_start_us;
+	int64_t prompt_us;
+	int64_t gen_start_us;
+	int64_t last_us;
+};
+
+// Reading a scan spends most of its time on the prompt, so the prompt batches report
+// too: without them the caller would see no rate at all until the first token lands.
+// Crossing into the caller costs far more than a token does, so a report is only worth
+// making a few times a second — the rate it carries is cumulative either way.
+static void al_report(struct al_progress *p, int gen_tokens, int force) {
+	if (!p || !p->fn) return;
+	int64_t now = ggml_time_us();
+	if (!force && now - p->last_us < AL_REPORT_US) return;
+	p->last_us = now;
+	int64_t gen_us = p->gen_start_us ? now - p->gen_start_us : 0;
+	p->fn(p->user, p->prompt_tokens, p->prompt_done, gen_tokens, (double) p->prompt_us / 1000.0, (double) gen_us / 1000.0);
+}
+
+static int al_decode(struct al_ctx *c, llama_token *toks, int n, struct al_progress *p) {
 	for (int i = 0; i < n; i += AL_BATCH) {
 		if (al_load(&c->aborted)) return AL_ABORTED;
 		int m = n - i < AL_BATCH ? n - i : AL_BATCH;
 		int rc = llama_decode(c->lctx, llama_batch_get_one(toks + i, m));
 		if (rc == 2) return AL_ABORTED;
 		if (rc != 0) return AL_ERR_DECODE;
+		if (p) {
+			p->prompt_done += m;
+			p->prompt_us = ggml_time_us() - p->prompt_start_us;
+			al_report(p, 0, 0);
+		}
 	}
 	return AL_DONE;
 }
 
-static int al_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
+static int al_complete(void *h, const char *prompt, const char *grammar, int max_tokens,
+		umsatzschaetzung_llm_progress on_progress, void *user, char **out, char **err) {
 	struct al_ctx *c = h;
 	*out = NULL;
 	if (err) *err = NULL;
@@ -209,7 +240,8 @@ static int al_complete(void *h, const char *prompt, const char *grammar, int max
 	}
 	llama_sampler_chain_add(smpl, llama_sampler_init_greedy());
 
-	int rc = al_decode(c, toks, n);
+	struct al_progress prog = { .fn = on_progress, .user = user, .prompt_tokens = n, .prompt_start_us = ggml_time_us() };
+	int rc = al_decode(c, toks, n, &prog);
 	free(toks);
 	if (rc != AL_DONE) {
 		llama_sampler_free(smpl);
@@ -217,6 +249,9 @@ static int al_complete(void *h, const char *prompt, const char *grammar, int max
 		return rc;
 	}
 	int n_used = n;
+	int gen_tokens = 0;
+	prog.gen_start_us = ggml_time_us();
+	al_report(&prog, 0, 1);
 
 	struct al_buf text = {0};
 	char piece[256];
@@ -240,15 +275,18 @@ static int al_complete(void *h, const char *prompt, const char *grammar, int max
 			break;
 		}
 
-		rc = al_decode(c, &id, 1);
+		rc = al_decode(c, &id, 1, NULL);
 		if (rc != AL_DONE) {
 			if (rc != AL_ABORTED) al_set_err(err, "llama_decode failed");
 			break;
 		}
 		n_used++;
+		al_report(&prog, i + 1, 0);
+		gen_tokens = i + 1;
 	}
 
 	llama_sampler_free(smpl);
+	al_report(&prog, gen_tokens, 1);
 	if (rc != AL_DONE) {
 		free(text.data);
 		return rc;
@@ -292,14 +330,15 @@ void *umsatzschaetzung_llm_open(const char *model_path, int n_ctx, int n_threads
 #endif
 }
 
-int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *grammar, int max_tokens, char **out, char **err) {
+int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *grammar, int max_tokens,
+		umsatzschaetzung_llm_progress on_progress, void *user, char **out, char **err) {
 	if (al_poisoned) {
 		al_set_err(err, "Sprachmodell nach einem Absturz nicht verfügbar, bitte das Programm neu starten");
 		return AL_ERR_CRASHED;
 	}
 #if defined(_WIN32)
 	__try {
-		return al_complete(h, prompt, grammar, max_tokens, out, err);
+		return al_complete(h, prompt, grammar, max_tokens, on_progress, user, out, err);
 	} __except (al_fatal(GetExceptionCode())) {
 		al_poisoned = 1;
 		*out = NULL;
@@ -307,7 +346,7 @@ int umsatzschaetzung_llm_complete(void *h, const char *prompt, const char *gramm
 		return AL_ERR_CRASHED;
 	}
 #else
-	return al_complete(h, prompt, grammar, max_tokens, out, err);
+	return al_complete(h, prompt, grammar, max_tokens, on_progress, user, out, err);
 #endif
 }
 

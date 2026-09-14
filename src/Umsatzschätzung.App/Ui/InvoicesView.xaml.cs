@@ -24,17 +24,10 @@ public sealed record InvoiceLineRow(string Name, string Quantity, string UnitPri
 
 public sealed class InvoicesModel : Observable
 {
-    bool empty = true, importing;
-    int importDone, importTotal;
-    string importFile = "";
+    bool empty = true;
 
     public ObservableCollection<InvoiceRow> Invoices { get; } = [];
     public bool Empty { get => empty; set => Set(ref empty, value); }
-    public bool Importing { get => importing; set => Set(ref importing, value); }
-    public int ImportDone { get => importDone; set { if (Set(ref importDone, value)) Raise(nameof(ImportText)); } }
-    public int ImportTotal { get => importTotal; set { if (Set(ref importTotal, value)) Raise(nameof(ImportText)); } }
-    public string ImportFile { get => importFile; set { if (Set(ref importFile, value)) Raise(nameof(ImportText)); } }
-    public string ImportText => (ImportDone + 1) + " von " + ImportTotal + " Dateien · " + ImportFile;
 }
 
 public partial class InvoicesView : Screen
@@ -42,8 +35,6 @@ public partial class InvoicesView : Screen
     readonly InvoicesModel model = new();
     readonly Dictionary<string, InvoiceSourceResp?> sources = [];
     readonly Dictionary<string, VerifyView> editors = [];
-    readonly Queue<PickedFile> queue = new();
-    CancellationTokenSource? importCts;
     VerifyView? verify;
     bool refreshing;
 
@@ -54,6 +45,7 @@ public partial class InvoicesView : Screen
         Search.Attach(model.Invoices, r => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal);
         Session.CaseChanged += Refresh;
         Session.CaseClosed += CaseClosed;
+        Session.Imports.Finished += ImportFinished;
     }
 
     protected override void OnEnter()
@@ -66,8 +58,6 @@ public partial class InvoicesView : Screen
 
     void CaseClosed()
     {
-        importCts?.Cancel();
-        queue.Clear();
         sources.Clear();
         foreach (var e in editors.Values) e.Leave();
         editors.Clear();
@@ -167,8 +157,7 @@ public partial class InvoicesView : Screen
 
     async void AddFiles(object sender, RoutedEventArgs e)
     {
-        var files = await Session.PickFiles(Session.InvoiceFilter, true);
-        StartImport(files);
+        StartImport(await Session.PickFiles(Session.InvoiceFilter, true));
     }
 
     void DragOverFiles(object sender, DragEventArgs e)
@@ -183,67 +172,14 @@ public partial class InvoicesView : Screen
         StartImport(await Session.ReadFiles(paths));
     }
 
-    void AbortImport(object sender, RoutedEventArgs e) => importCts?.Cancel();
-
     void StartImport(List<PickedFile> files)
     {
-        if (files.Count == 0 || Session.Case is null) return;
-        foreach (var f in files) queue.Enqueue(f);
-        model.ImportTotal += files.Count;
-        if (importCts is null) _ = RunImport(Session.Case.Id);
+        if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, files);
     }
 
-    async Task RunImport(string caseId)
+    void ImportFinished(ImportJob job)
     {
-        importCts = new CancellationTokenSource();
-        var ct = importCts.Token;
-        model.ImportDone = 0;
-        model.Importing = true;
-        var stored = 0;
-        var drafts = 0;
-        var failed = new List<string>();
-        string? firstDraft = null;
-        while (queue.Count > 0 && !ct.IsCancellationRequested)
-        {
-            var file = queue.Dequeue();
-            model.ImportFile = file.Name;
-            try
-            {
-                var parsed = await Session.Service.ParseInvoice(caseId, file.Name, file.Data, ct);
-                if (!parsed.NeedsOcr)
-                {
-                    if (parsed.Case is not null && Session.Case?.Id == caseId) Session.SetCase(parsed.Case);
-                    stored++;
-                }
-                else
-                {
-                    var ocr = await Session.Service.OcrInvoice(caseId, file.Name, file.Data, ct);
-                    var v = await Session.Service.VerifyInvoice(new VerifyReq(caseId, ocr.Draft, false, true, file.Name, file.Data), ct);
-                    Session.Drafts[v.Invoice.Id] = ocr;
-                    if (v.Case is not null && Session.Case?.Id == caseId) Session.SetCase(v.Case);
-                    drafts++;
-                    firstDraft ??= v.Invoice.Id;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (ServiceError ex)
-            {
-                failed.Add(file.Name + ": " + ex.Message);
-            }
-            model.ImportDone++;
-        }
-        queue.Clear();
-        importCts.Dispose();
-        importCts = null;
-        model.Importing = false;
-        model.ImportTotal = 0;
-        var summary = stored + " Rechnungen übernommen, " + drafts + " zur Prüfung";
-        Session.Message = summary;
-        if (failed.Count > 0) Session.Fail("Nicht importiert: " + string.Join("; ", failed));
-        if (firstDraft is not null && IsActive)
-            List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == firstDraft);
+        if (job.FirstDraft is not { } id || Session.Case?.Id != job.CaseId || !IsActive) return;
+        List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == id);
     }
 }

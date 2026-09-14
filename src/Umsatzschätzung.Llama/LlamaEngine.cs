@@ -4,7 +4,7 @@ using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.Llama;
 
-public sealed class LlamaEngine : ILlmEngine
+public sealed class LlamaEngine : ILlmEngine, ILlmProgress
 {
     public const string ModelFile = "gemma-4-E2B_q4_0-it-00001-of-00003.gguf";
     const int Context = 8192;
@@ -13,16 +13,32 @@ public sealed class LlamaEngine : ILlmEngine
     const int Crashed = -7;
 
     readonly SemaphoreSlim gate = new(1, 1);
+    readonly Native.Progress progress;
     IntPtr handle;
 
     public LlamaEngine(string modelDir)
     {
+        progress = OnProgress;
         handle = Native.Open(Path.Combine(modelDir, ModelFile), Context, Environment.ProcessorCount, out var err);
         if (handle == IntPtr.Zero)
             throw new InvalidOperationException($"Sprachmodell {ModelFile} konnte nicht geladen werden: {Take(err)}");
     }
 
     public string Model => "gemma-4-e2b";
+
+    public event Action<LlmStats>? Progress;
+
+    void OnProgress(IntPtr user, int promptTokens, int promptDone, int genTokens, double promptMs, double genMs)
+    {
+        try
+        {
+            Progress?.Invoke(new LlmStats(promptTokens, promptDone, genTokens, promptMs, genMs));
+        }
+        catch
+        {
+            // a throw here would unwind through native frames
+        }
+    }
 
     public async Task<string> Complete(LlmRequest request, CancellationToken ct)
     {
@@ -39,7 +55,7 @@ public sealed class LlamaEngine : ILlmEngine
             var text = await Task.Run(() =>
             {
                 using var abort = ct.Register(() => Native.Abort(h));
-                var rc = Native.Complete(h, prompt, grammar, maxTokens, out var outPtr, out var errPtr);
+                var rc = Native.Complete(h, prompt, grammar, maxTokens, progress, IntPtr.Zero, out var outPtr, out var errPtr);
                 var output = Take(outPtr);
                 var err = Take(errPtr);
                 if (rc == Aborted || ct.IsCancellationRequested)
@@ -50,6 +66,7 @@ public sealed class LlamaEngine : ILlmEngine
                     throw new InvalidOperationException($"Generierung fehlgeschlagen ({rc}): {err}");
                 return output;
             }, ct);
+            GC.KeepAlive(progress);
             var i = text.LastIndexOf("</think>", StringComparison.Ordinal);
             return (i >= 0 ? text[(i + "</think>".Length)..] : text).Trim();
         }
@@ -93,9 +110,13 @@ public sealed class LlamaEngine : ILlmEngine
         [DllImport(Lib, EntryPoint = "umsatzschaetzung_llm_open", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr Open([MarshalAs(UnmanagedType.LPUTF8Str)] string modelPath, int nCtx, int nThreads, out IntPtr err);
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void Progress(IntPtr user, int promptTokens, int promptDone, int genTokens, double promptMs, double genMs);
+
         [DllImport(Lib, EntryPoint = "umsatzschaetzung_llm_complete", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Complete(IntPtr h, [MarshalAs(UnmanagedType.LPUTF8Str)] string prompt,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string? grammar, int maxTokens, out IntPtr output, out IntPtr err);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string? grammar, int maxTokens, Progress? onProgress, IntPtr user,
+            out IntPtr output, out IntPtr err);
 
         [DllImport(Lib, EntryPoint = "umsatzschaetzung_llm_abort", CallingConvention = CallingConvention.Cdecl)]
         public static extern void Abort(IntPtr h);
