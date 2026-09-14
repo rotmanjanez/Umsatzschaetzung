@@ -55,7 +55,7 @@ public partial class CasesView : Screen
         var to = Input.Date(NewTo.Text);
         if (label == "" || from is null || to is null)
         {
-            Session.Message = "Bitte Bezeichnung und Zeitraum (TT.MM.JJJJ) angeben.";
+            Session.Fail("Bitte Bezeichnung und Zeitraum (TT.MM.JJJJ) angeben.");
             return;
         }
         var kase = new Case { Label = label, PeriodFrom = from.Value, PeriodTo = to.Value };

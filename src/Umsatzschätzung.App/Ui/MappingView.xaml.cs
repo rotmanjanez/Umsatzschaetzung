@@ -172,7 +172,7 @@ public partial class MappingView : Screen
         var factor = Input.Int(model.Factor);
         if (model.Ingredient is null || factor is null)
         {
-            Session.Message = "Bitte Zutat und Faktor angeben.";
+            Session.Fail("Bitte Zutat und Faktor angeben.");
             return;
         }
         var mapping = new ArticleMapping

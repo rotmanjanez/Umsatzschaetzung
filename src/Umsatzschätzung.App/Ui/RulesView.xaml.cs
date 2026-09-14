@@ -187,7 +187,7 @@ public partial class RulesView : Screen
         var f = model.Ingredients;
         if (f.Name.Trim() == "" || f.UnitIndex < 0)
         {
-            Session.Message = "Bitte alle Pflichtfelder ausfüllen.";
+            Session.Fail("Bitte alle Pflichtfelder ausfüllen.");
             return;
         }
         var id = f.CurrentId ?? Session.NewId("ingredient");
@@ -248,14 +248,14 @@ public partial class RulesView : Screen
             var amount = Input.Int(row.Amount);
             if (row.Ingredient is null || amount is null)
             {
-                Session.Message = "Bitte alle Pflichtfelder ausfüllen.";
+                Session.Fail("Bitte alle Pflichtfelder ausfüllen.");
                 return;
             }
             data.Recipe.Add(new RecipeLine { IngredientId = row.Ingredient.Id, Amount = amount.Value });
         }
         if (data.Name == "")
         {
-            Session.Message = "Bitte alle Pflichtfelder ausfüllen.";
+            Session.Fail("Bitte alle Pflichtfelder ausfüllen.");
             return;
         }
         f.CurrentId = id;
@@ -311,7 +311,7 @@ public partial class RulesView : Screen
         var category = f.Category.Trim() == "" ? null : f.Category.Trim();
         if (f.Name.Trim() == "" || rates.Any(r => r is null) || (ingredientId is null && category is null))
         {
-            Session.Message = "Bitte alle Pflichtfelder ausfüllen.";
+            Session.Fail("Bitte alle Pflichtfelder ausfüllen.");
             return;
         }
         var data = new YieldRule

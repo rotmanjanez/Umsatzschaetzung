@@ -217,7 +217,7 @@ public partial class CaseView : Screen
         var kase = Session.Case;
         if (kase is null || !model.Collect(kase)) return;
         if (!await Session.SaveCase(ct) && !ct.IsCancellationRequested)
-            Session.Message = "Änderungen an der Prüfung konnten nicht gespeichert werden";
+            Session.Fail("Änderungen an der Prüfung konnten nicht gespeichert werden");
     }
 
     void AddStock(object sender, RoutedEventArgs e) => model.Stock.Add(new StockRow(Session.Ingredients()));

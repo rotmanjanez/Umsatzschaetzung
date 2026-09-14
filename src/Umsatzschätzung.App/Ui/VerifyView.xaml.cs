@@ -280,7 +280,7 @@ public partial class VerifyView : Screen
             if (!v.Accepted || v.Case is null)
             {
                 Apply(v);
-                Session.Message = "Nicht übernommen, bitte die markierten Werte korrigieren.";
+                Session.Fail("Nicht übernommen, bitte die markierten Werte korrigieren.");
                 return;
             }
             Session.Message = "Rechnung übernommen";

@@ -239,7 +239,8 @@ public partial class InvoicesView : Screen
         model.Importing = false;
         model.ImportTotal = 0;
         var summary = stored + " Rechnungen übernommen, " + drafts + " zur Prüfung";
-        Session.Message = failed.Count == 0 ? summary : summary + " · Nicht importiert: " + string.Join("; ", failed);
+        Session.Message = summary;
+        if (failed.Count > 0) Session.Fail("Nicht importiert: " + string.Join("; ", failed));
         if (firstDraft is not null && IsActive)
             List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == firstDraft);
     }

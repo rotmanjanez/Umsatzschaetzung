@@ -30,9 +30,11 @@ public partial class Shell : Window
         session.CaseOpened += OpenCase;
         session.CaseChanged += RefreshContext;
         session.StatusChanged += RefreshStatus;
+        session.StatusChanged += RefreshError;
         session.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(Session.Message)) RefreshStatus();
+            if (e.PropertyName == nameof(Session.Error)) RefreshError();
         };
         Loaded += async (_, _) =>
         {
@@ -46,6 +48,7 @@ public partial class Shell : Window
     void Show(Screen screen)
     {
         if (current == screen) return;
+        session.Error = "";
         current?.Leave();
         current = screen;
         Body.Content = screen;
@@ -85,14 +88,20 @@ public partial class Shell : Window
         Title = "Umsatzschätzung: " + session.Case.Label;
     }
 
+    void DismissError(object sender, RoutedEventArgs e) => session.Error = "";
+
+    void RefreshError()
+    {
+        var text = session.Error != "" ? session.Error : session.Status?.Problem ?? "";
+        ErrorText.Text = text;
+        ErrorBanner.Visibility = text == "" ? Visibility.Collapsed : Visibility.Visible;
+        ErrorClose.Visibility = session.Error == "" ? Visibility.Collapsed : Visibility.Visible;
+    }
+
     void RefreshStatus()
     {
         var parts = new List<string>();
-        if (session.Status is { } s)
-        {
-            if (s.RulesDate != "") parts.Add("Regeln vom " + s.RulesDate);
-            if (!string.IsNullOrEmpty(s.Problem)) parts.Add(s.Problem);
-        }
+        if (session.Status?.RulesDate is { Length: > 0 } date) parts.Add("Regeln vom " + date);
         if (session.Message != "") parts.Add(session.Message);
         StatusText.Text = string.Join("  ·  ", parts);
     }
