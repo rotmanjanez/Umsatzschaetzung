@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ggml-backend.h"
 #include "llama.h"
 
 #include "engine.h"
@@ -74,6 +75,17 @@ static int al_buf_append(struct al_buf *b, const char *s, size_t n) {
 
 static int al_backend_ready = 0;
 
+// No Vulkan ICD registered means zero GPU devices, and offloading to none of them
+// faults inside the backend. CPU is always present, so fall back to it.
+static int al_gpu_devices(void) {
+	int n = 0;
+	for (size_t i = 0; i < ggml_backend_dev_count(); i++) {
+		enum ggml_backend_dev_type t = ggml_backend_dev_type(ggml_backend_dev_get(i));
+		if (t == GGML_BACKEND_DEVICE_TYPE_GPU) n++;
+	}
+	return n;
+}
+
 void *umsatzschaetzung_llm_open(const char *model_path, int n_ctx, int n_threads, char **err) {
 	if (err) *err = NULL;
 	if (!al_backend_ready) {
@@ -83,7 +95,7 @@ void *umsatzschaetzung_llm_open(const char *model_path, int n_ctx, int n_threads
 	}
 
 	struct llama_model_params mp = llama_model_default_params();
-	mp.n_gpu_layers = -1;
+	mp.n_gpu_layers = al_gpu_devices() > 0 ? -1 : 0;
 
 	struct llama_model *model = llama_model_load_from_file(model_path, mp);
 	if (!model) {

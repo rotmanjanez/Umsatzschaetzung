@@ -17,9 +17,10 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        CrashLog.Install();
         DispatcherUnhandledException += (_, args) =>
         {
-            MessageBox.Show(args.Exception.Message, "Unerwarteter Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            CrashLog.Report(args.Exception, "Unerwarteter Fehler");
             args.Handled = true;
         };
         IService service;
@@ -30,6 +31,12 @@ public partial class App : Application
         catch (StoreUnavailableException ex)
         {
             MessageBox.Show(ex.Message, "Regelspeicher nicht verfügbar", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+            return;
+        }
+        catch (Exception ex)
+        {
+            CrashLog.Report(ex, "Start fehlgeschlagen");
             Shutdown(1);
             return;
         }
@@ -57,8 +64,16 @@ public partial class App : Application
     ILlmEngine? OpenModel(Config config)
     {
         if (!File.Exists(Path.Combine(config.ModelDir, LlamaEngine.ModelFile))) return null;
-        var engine = new LlamaEngine(config.ModelDir);
-        owned.Add(engine);
-        return engine;
+        try
+        {
+            var engine = new LlamaEngine(config.ModelDir);
+            owned.Add(engine);
+            return engine;
+        }
+        catch (Exception ex)
+        {
+            CrashLog.Report(ex, "Sprachmodell nicht verfügbar");
+            return null;
+        }
     }
 }
