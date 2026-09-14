@@ -1,0 +1,118 @@
+<ui:Screen x:Class="Umsatzschätzung.App.Ui.MappingView"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
+           Margin="24">
+    <ui:Screen.Resources>
+        <BooleanToVisibilityConverter x:Key="Vis"/>
+    </ui:Screen.Resources>
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="Zuordnung" Style="{StaticResource PageTitle}"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="42*" MinWidth="280"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="58*" MinWidth="360"/>
+            </Grid.ColumnDefinitions>
+            <Border Style="{StaticResource Panel}">
+                <Grid>
+                    <DataGrid x:Name="Groups" Style="{StaticResource Grid}" ItemsSource="{Binding Groups}" IsReadOnly="True" SelectionChanged="GroupSelected">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Lieferant" Binding="{Binding Supplier}" Width="170"/>
+                            <DataGridTextColumn Header="Position" Binding="{Binding Name}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Positionen" Binding="{Binding Count}" Width="100" ElementStyle="{StaticResource Number}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Text="Alles zugeordnet" Style="{StaticResource EmptyState}" Visibility="{Binding Empty, Converter={StaticResource Vis}}"/>
+                </Grid>
+            </Border>
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+            <Border Grid.Column="2" Style="{StaticResource Panel}" Padding="16">
+                <Grid>
+                    <TextBlock Text="Keine Position gewählt" Style="{StaticResource EmptyState}" Visibility="{Binding NoSelection, Converter={StaticResource Vis}}"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding HasSelection, Converter={StaticResource Vis}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Lieferant" Style="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Supplier}" Style="{StaticResource KeyValue}"/>
+                                <TextBlock Grid.Row="1" Text="Artikelnummer" Style="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Article}" Style="{StaticResource KeyValue}"/>
+                                <TextBlock Grid.Row="2" Text="Einheit" Style="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Unit}" Style="{StaticResource KeyValue}"/>
+                                <TextBlock Grid.Row="3" Text="Positionen" Style="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Count}" Style="{StaticResource KeyValue}"/>
+                            </Grid>
+                            <StackPanel Visibility="{Binding ShowCandidates, Converter={StaticResource Vis}}">
+                                <TextBlock Text="Vorschläge werden ermittelt …" Style="{StaticResource Muted}" Visibility="{Binding Loading, Converter={StaticResource Vis}}"/>
+                                <TextBlock Text="Keine Vorschläge" Style="{StaticResource Muted}" Visibility="{Binding NoCandidates, Converter={StaticResource Vis}}"/>
+                                <ItemsControl ItemsSource="{Binding Candidates}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <RadioButton GroupName="Candidates" IsChecked="{Binding Selected}" Margin="0,0,0,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Display}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                        <Border Style="{StaticResource BadgeSuccess}" Visibility="{Binding IsExact, Converter={StaticResource Vis}}">
+                                                            <TextBlock Text="Exakter Treffer" Style="{StaticResource BadgeText}"/>
+                                                        </Border>
+                                                        <Border Style="{StaticResource BadgeInfo}" Visibility="{Binding IsModel, Converter={StaticResource Vis}}">
+                                                            <TextBlock Text="Modellvorschlag" Style="{StaticResource BadgeText}"/>
+                                                        </Border>
+                                                        <Border Style="{StaticResource Badge}" Visibility="{Binding IsManual, Converter={StaticResource Vis}}">
+                                                            <TextBlock Text="Manuell" Style="{StaticResource BadgeText}"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Confidence}" Style="{StaticResource Muted}" FontSize="12" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </RadioButton>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <Border Style="{StaticResource Card}" Visibility="{Binding Manual, Converter={StaticResource Vis}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="160"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Zutat *" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                        <ComboBox ItemsSource="{Binding Ingredients}" DisplayMemberPath="Name" SelectedItem="{Binding Ingredient}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Faktor *" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                        <TextBox Style="{StaticResource NumberBox}" Text="{Binding Factor, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Text="Basiseinheiten je Rechnungseinheit" Style="{StaticResource FieldLabel}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="Zuordnen" Style="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"/>
+                                <Button Content="{Binding ManualLabel}" Style="{StaticResource SecondaryButton}" Click="ToggleManual"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </DockPanel>
+</ui:Screen>

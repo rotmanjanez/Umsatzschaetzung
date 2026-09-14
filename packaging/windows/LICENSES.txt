@@ -1,4 +1,4 @@
-Ausbeutekalkulation - Hinweise zu Drittkomponenten
+Umsatzschätzung - Hinweise zu Drittkomponenten
 
 ==== Microsoft .NET Runtime und WPF (MIT) ====
 https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
