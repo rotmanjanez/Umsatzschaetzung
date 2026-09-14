@@ -10,6 +10,25 @@ project(
 find_package(llama REQUIRED)
 find_package(Vulkan REQUIRED)
 
+# FindVulkan picks vulkan-1.lib by path alone, and lld-link accepts an import
+# library of the wrong machine type by copying its thunks verbatim: an x64 SDK
+# on an ARM64 target yields a dll that dies on the first Vulkan call. The short
+# import members of the archive carry the machine word, so check it here.
+if(WIN32)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|aarch64)$")
+        set(expected_machine 64aa)
+    else()
+        set(expected_machine 6486)
+    endif()
+    file(READ "${Vulkan_LIBRARY}" vulkan_lib_hex HEX)
+    string(REGEX MATCH "600a0000ffff[0-9a-f]{4}([0-9a-f]{4})" _match "${vulkan_lib_hex}")
+    if(NOT _match)
+        message(FATAL_ERROR "cannot read machine type of ${Vulkan_LIBRARY}")
+    elseif(NOT CMAKE_MATCH_1 STREQUAL expected_machine)
+        message(FATAL_ERROR "${Vulkan_LIBRARY} is built for a different architecture than ${CMAKE_SYSTEM_PROCESSOR}: install the matching Vulkan SDK")
+    endif()
+endif()
+
 add_library(umsatzschaetzung_llm SHARED)
 target_sources(
     umsatzschaetzung_llm
