@@ -14,12 +14,14 @@
                     <TextBlock x:Name="CaseLabel" Style="{StaticResource NavContext}"/>
                     <TextBlock x:Name="CasePeriod" Style="{StaticResource NavContextSub}"/>
                 </StackPanel>
-                <Button DockPanel.Dock="Bottom" Content="← Prüfungen" Style="{StaticResource NavBack}" Margin="12" Click="Back"/>
+                <StackPanel DockPanel.Dock="Bottom" Margin="12">
+                    <Button Content="Regeln …" Style="{StaticResource NavBack}" Click="ShowRules"/>
+                    <Button Content="← Prüfungen" Style="{StaticResource NavBack}" Click="Back"/>
+                </StackPanel>
                 <StackPanel Margin="12,0">
                     <RadioButton x:Name="NavCase" Content="Prüfung" Style="{StaticResource NavButton}" Checked="NavChecked"/>
                     <RadioButton x:Name="NavInvoices" Content="Rechnungen" Style="{StaticResource NavButton}" Checked="NavChecked"/>
                     <RadioButton x:Name="NavMapping" Content="Zuordnung" Style="{StaticResource NavButton}" Checked="NavChecked"/>
-                    <RadioButton x:Name="NavRules" Content="Regeln" Style="{StaticResource NavButton}" Checked="NavChecked"/>
                     <RadioButton x:Name="NavCalc" Content="Kalkulation" Style="{StaticResource NavButton}" Checked="NavChecked"/>
                     <RadioButton x:Name="NavReport" Content="Bericht" Style="{StaticResource NavButton}" Checked="NavChecked"/>
                 </StackPanel>

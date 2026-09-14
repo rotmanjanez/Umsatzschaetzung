@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
@@ -30,7 +31,10 @@ public partial class CasesView : Screen
     {
         InitializeComponent();
         DataContext = model;
+        Search.Attach(model.Cases, r => r.Case.Label + " " + r.Period + " " + r.Case.Taxpayer.Name);
     }
+
+    void ShowRules(object sender, RoutedEventArgs e) => Session.ShowRules();
 
     protected override void OnEnter() => _ = Reload();
 
@@ -80,7 +84,7 @@ public partial class CasesView : Screen
         });
     }
 
-    void OpenSelected(object sender, MouseButtonEventArgs e) => Open(Grid.SelectedItem as CaseRow);
+    void RowClicked(object sender, MouseButtonEventArgs e) => Open(((DataGridRow)sender).Item as CaseRow);
 
     void GridKeyDown(object sender, KeyEventArgs e)
     {
@@ -88,8 +92,6 @@ public partial class CasesView : Screen
         e.Handled = true;
         Open(Grid.SelectedItem as CaseRow);
     }
-
-    void OpenRow(object sender, RoutedEventArgs e) => Open(((FrameworkElement)sender).DataContext as CaseRow);
 
     async void Open(CaseRow? row)
     {

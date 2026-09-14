@@ -3,9 +3,17 @@
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
            Margin="24">
+    <ui:Screen.Resources>
+        <Style x:Key="CaseRow" TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+            <Setter Property="Cursor" Value="Hand"/>
+            <EventSetter Event="MouseLeftButtonUp" Handler="RowClicked"/>
+        </Style>
+    </ui:Screen.Resources>
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                <ui:SearchBox x:Name="Search" Margin="0,0,16,0"/>
+                <Button Content="Regeln" Style="{StaticResource SecondaryButton}" Click="ShowRules"/>
                 <Button Content="Importieren" Style="{StaticResource SecondaryButton}" Click="Import"/>
                 <Button Content="Neue Prüfung" Style="{StaticResource PrimaryButton}" Click="StartNew"/>
             </StackPanel>
@@ -57,7 +65,7 @@
         </Border>
         <Grid>
             <DataGrid x:Name="Grid" Style="{StaticResource Grid}" ItemsSource="{Binding Cases}" IsReadOnly="True"
-                      MouseDoubleClick="OpenSelected" KeyDown="GridKeyDown">
+                      RowStyle="{StaticResource CaseRow}" KeyDown="GridKeyDown">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Case.Label}" Width="*">
                         <DataGridTextColumn.ElementStyle>
@@ -68,15 +76,11 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Zeitraum" Binding="{Binding Period}" Width="200"/>
-                    <DataGridTextColumn Header="Rechnungen" Binding="{Binding Invoices}" Width="110" ElementStyle="{StaticResource Number}"/>
                     <DataGridTextColumn Header="Zuletzt geändert" Binding="{Binding UpdatedAt}" Width="160" ElementStyle="{StaticResource Muted}"/>
                     <DataGridTemplateColumn Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="Öffnen" Style="{StaticResource LinkButton}" Click="OpenRow"/>
-                                    <Button Content="Löschen" Style="{StaticResource DangerLink}" Click="Delete"/>
-                                </StackPanel>
+                                <Button Content="&#xE74D;" Style="{StaticResource DangerIcon}" ToolTip="Löschen" Click="Delete"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

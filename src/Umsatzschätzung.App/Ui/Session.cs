@@ -30,7 +30,9 @@ public sealed class Session : Observable
     public string Message { get => message; set => Set(ref message, value); }
     public string Error { get => error; set => Set(ref error, value); }
 
-    public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed;
+    public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed, RulesRequested;
+
+    public void ShowRules() => RulesRequested?.Invoke();
     public event Action<CaseResp>? CaseOpened;
 
     public async Task<bool> Run(Func<Task> work)
