@@ -54,7 +54,8 @@ if ($LASTEXITCODE -ne 0) { throw "publish failed" }
 Copy-Item (Join-Path $root "third_party\llama\build\$Arch\umsatzschaetzung_llm.dll") $dist
 Copy-Item (Join-Path $PSScriptRoot "LICENSES.txt") $dist
 
-foreach ($required in "umsatzschätzung.exe", "WebView2Loader.dll", "umsatzschaetzung_llm.dll", "e_sqlite3.dll", "LICENSES.txt") {
+foreach ($required in "umsatzschätzung.exe", "WebView2Loader.dll", "umsatzschaetzung_llm.dll", "e_sqlite3.dll", "LICENSES.txt",
+                      "PresentationNative_cor3.dll", "wpfgfx_cor3.dll", "PenImc_cor3.dll", "vcruntime140_cor3.dll") {
     if (-not (Test-Path (Join-Path $dist $required))) { throw "$required missing from $dist" }
 }
 Sign (Get-ChildItem $dist -Include *.exe, *.dll -Recurse).FullName

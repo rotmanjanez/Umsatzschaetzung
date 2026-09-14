@@ -34,18 +34,7 @@
                     Description="Umsatzschätzung für die Betriebsprüfung" Advertise="yes" />
         </File>
       </Component>
-      <Component Id="WebView2Loader">
-        <File Source="$(var.Dist)/WebView2Loader.dll" />
-      </Component>
-      <Component Id="Llm">
-        <File Source="$(var.Dist)/umsatzschaetzung_llm.dll" />
-      </Component>
-      <Component Id="Sqlite">
-        <File Source="$(var.Dist)/e_sqlite3.dll" />
-      </Component>
-      <Component Id="Licenses">
-        <File Source="$(var.Dist)/LICENSES.txt" />
-      </Component>
+      <Files Include="$(var.Dist)\**" Exclude="$(var.Dist)\umsatzschätzung.exe;$(var.Dist)\*.pdb" />
       <Component Id="RegistryStore" Condition="STORE">
         <RegistryValue Root="HKLM" Key="SOFTWARE\Umsatzschätzung" Name="Store" Type="string" Value="[STORE]" KeyPath="yes" />
       </Component>
