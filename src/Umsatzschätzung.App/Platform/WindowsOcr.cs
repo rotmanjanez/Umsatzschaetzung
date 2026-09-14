@@ -31,12 +31,12 @@ public sealed class WindowsOcr : IOcr
         var max = (int)OcrEngine.MaxImageDimension;
         var scale = Math.Max(width, height) > max ? (double)max / Math.Max(width, height) : 1.0;
 
-        var best = await Pass(decoder, scale, BitmapRotation.None, ct);
+        var best = await Recognize(decoder, scale, BitmapRotation.None, ct);
         if (Orientation.Score(best.Words) < Orientation.Confident)
         {
             foreach (var rotation in Retries)
             {
-                var pass = await Pass(decoder, scale, rotation, ct);
+                var pass = await Recognize(decoder, scale, rotation, ct);
                 if (Orientation.Score(pass.Words) > Orientation.Score(best.Words)) best = pass;
             }
         }
@@ -47,7 +47,7 @@ public sealed class WindowsOcr : IOcr
 
     sealed record Pass(BitmapRotation Rotation, int Width, int Height, List<Model.OcrWord> Words);
 
-    async Task<Pass> Pass(BitmapDecoder decoder, double scale, BitmapRotation rotation, CancellationToken ct)
+    async Task<Pass> Recognize(BitmapDecoder decoder, double scale, BitmapRotation rotation, CancellationToken ct)
     {
         var transform = new BitmapTransform
         {
