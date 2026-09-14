@@ -13,8 +13,8 @@ jobs:
         os: [windows-latest, windows-11-arm]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - run: dotnet build
@@ -34,16 +34,30 @@ jobs:
     env:
       PFX_BASE64: ${{ secrets.PFX_BASE64 }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
-      - uses: actions/cache@v4
+
+      # The extracted source must be cached with the object files: without it the
+      # tarball is unpacked fresh every run and ninja rebuilds everything anyway.
+      # build.ps1 carries the llama.cpp version, so hashing it in the restore-keys
+      # prefix keeps a version bump from restoring a stale source tree.
+      - uses: actions/cache@v6
         with:
           path: |
             third_party/llama/build
-            third_party/llama/models
-          key: llama-${{ matrix.arch }}-${{ hashFiles('third_party/llama/build.ps1', 'third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt', 'tools/llm/fetch.ps1') }}
+            third_party/llama/llama.cpp
+          key: llama-${{ matrix.arch }}-${{ hashFiles('third_party/llama/build.ps1') }}-${{ hashFiles('third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt') }}
+          restore-keys: llama-${{ matrix.arch }}-${{ hashFiles('third_party/llama/build.ps1') }}-
+
+      # The weights are architecture independent; one shared entry instead of a
+      # copy per arch keeps the matrix inside the repository cache limit.
+      - uses: actions/cache@v6
+        with:
+          path: third_party/llama/models
+          key: gguf-${{ hashFiles('tools/llm/fetch.ps1') }}
+
       - run: dotnet tool install --global wix
       - name: install vulkan sdk
         run: |
@@ -68,7 +82,7 @@ jobs:
       - run: pwsh packaging/windows/build.ps1 -Version ${{ github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX"
         env:
           UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: umsatzschätzung-${{ matrix.arch }}-msi
           path: |
