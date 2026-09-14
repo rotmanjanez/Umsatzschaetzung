@@ -1,0 +1,56 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest, windows-11-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build
+      - run: dotnet run --project src/Umsatzschätzung.E2e
+
+  msi:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/cache@v4
+        with:
+          path: |
+            third_party/llama/build
+            third_party/llama/models
+          key: llama-${{ hashFiles('third_party/llama/build.ps1', 'third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt', 'tools/llm/fetch.ps1') }}
+      - run: dotnet tool install --global wix
+      - run: choco install vulkan-sdk --no-progress
+      - name: restore signing certificate
+        if: env.PFX_BASE64 != ''
+        env:
+          PFX_BASE64: ${{ secrets.PFX_BASE64 }}
+        run: |
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\publisher.pfx", [Convert]::FromBase64String($env:PFX_BASE64))
+          "PFX=$env:RUNNER_TEMP\publisher.pfx" >> $env:GITHUB_ENV
+        shell: pwsh
+      - run: pwsh packaging/windows/build.ps1 -Version ${{ github.ref_name }} -Arch win-x64 -Pfx "$env:PFX"
+        env:
+          UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: umsatzschätzung-win-x64-msi
+          path: |
+            dist/msi/*.msi
+            dist/msi/publisher.cer
+            dist/msi/SHA256SUMS.txt
