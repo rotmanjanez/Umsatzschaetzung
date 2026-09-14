@@ -16,9 +16,9 @@ $dist = Join-Path $root "dist\$Arch"
 if ($ModelDir -eq "") { $ModelDir = Join-Path $root "third_party\llama\models" }
 $modelBase = "gemma-4-E2B_q4_0-it"
 
-function SignTool {
+function Resolve-SignTool {
     if ($script:tool) { return $script:tool }
-    $onPath = Get-Command signtool -ErrorAction Ignore
+    $onPath = @(Get-Command signtool.exe -CommandType Application -ErrorAction Ignore)[0]
     if ($onPath) { $script:tool = $onPath.Source; return $script:tool }
     $hostArch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "x64" }
     $script:tool = Get-ChildItem (Join-Path ${env:ProgramFiles(x86)} "Windows Kits\10\bin") -Directory -ErrorAction Ignore |
@@ -33,7 +33,7 @@ function SignTool {
 
 function Sign([string[]]$files) {
     if ($SignArgs.Count -eq 0) { return }
-    & (SignTool) sign /fd SHA256 /td SHA256 /tr $Timestamp /d Umsatzschätzung @SignArgs @files
+    & (Resolve-SignTool) sign /fd SHA256 /td SHA256 /tr $Timestamp /d Umsatzschätzung @SignArgs @files
     if ($LASTEXITCODE -ne 0) { throw "signtool failed" }
 }
 
