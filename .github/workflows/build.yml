@@ -121,7 +121,7 @@ jobs:
         run: |
           mkdir release
           find artifacts -type f \( -name '*.msi' -o -name '*.cab' -o -name 'publisher.cer' \) \
-            -exec cp -n {} release/ \;
+            -exec cp {} release/ \;
           test -n "$(find release -name '*.msi' -print -quit)" || { echo "no msi in artifacts:"; find artifacts -type f; exit 1; }
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -l release
@@ -130,6 +130,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" release/* \
+          gh release create "$GITHUB_REF_NAME" release/* --repo "$GITHUB_REPOSITORY" \
             --title "$GITHUB_REF_NAME" --generate-notes \
             ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}
