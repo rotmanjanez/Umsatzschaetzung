@@ -77,6 +77,6 @@ Sign (Get-ChildItem $out -Filter *.msi).FullName
 
 if ($SignArgs.Count -gt 0) { Copy-Item (Join-Path $PSScriptRoot "publisher.cer") $out }
 
-@(Get-ChildItem $out -File) | ForEach-Object {
+@(Get-ChildItem $out -File -Exclude *.wixpdb) | ForEach-Object {
     "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash, $_.Name
 } | Tee-Object (Join-Path $out "SHA256SUMS.txt")

@@ -89,5 +89,6 @@ jobs:
           name: umsatzschätzung-${{ matrix.arch }}-msi
           path: |
             dist/msi/*.msi
+            dist/msi/*.cab
             dist/msi/publisher.cer
             dist/msi/SHA256SUMS.txt
