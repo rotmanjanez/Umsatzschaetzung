@@ -136,7 +136,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
         if (ocr is null) throw new ServiceError(ErrorCode.Unsupported, "Texterkennung nicht verfügbar");
         ct.ThrowIfCancellationRequested();
         var page = await ocr.Recognize(image, ct);
-        return new ExtractPage(page.Width, page.Height, page.Words, image);
+        return new ExtractPage(page.Width, page.Height, page.Words, page.Image ?? image);
     }
 
     async Task<List<byte[]>?> RenderPdf(byte[] data, int dpi, CancellationToken ct)
