@@ -109,13 +109,18 @@ public partial class RulesView : Screen
     {
         InitializeComponent();
         DataContext = model;
-        Session.RulesChanged += Rebuild;
+        IngredientSearch.Attach(model.Ingredients.Items, i => i.Name + " " + i.Category + " " + i.UnitLabel);
+        ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
+        YieldSearch.Attach(model.Yields.Items, y => y.Title + " " + y.Source);
     }
 
     protected override async void OnEnter()
     {
+        Session.RulesChanged += Rebuild;
         await Session.LoadRules(Ct);
     }
+
+    protected override void OnLeave() => Session.RulesChanged -= Rebuild;
 
     void Rebuild()
     {

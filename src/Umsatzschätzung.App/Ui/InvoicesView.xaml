@@ -25,7 +25,9 @@
                 <ColumnDefinition Width="16*" MinWidth="480"/>
             </Grid.ColumnDefinitions>
             <Border Style="{StaticResource Panel}">
-                <Grid>
+                <DockPanel>
+                    <ui:SearchBox x:Name="Search" DockPanel.Dock="Top" Width="Auto" Margin="8"/>
+                    <Grid>
                     <ListBox x:Name="List" ItemsSource="{Binding Invoices}" SelectionChanged="SelectionChanged" BorderThickness="0" Background="Transparent"
                              HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
@@ -38,7 +40,8 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <TextBlock Text="Noch keine Rechnungen" Style="{StaticResource EmptyState}" Visibility="{Binding Empty, Converter={StaticResource Vis}}"/>
-                </Grid>
+                    </Grid>
+                </DockPanel>
             </Border>
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
             <Grid Grid.Column="2">

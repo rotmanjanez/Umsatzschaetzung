@@ -174,7 +174,7 @@
                     <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Entfernen" Style="{StaticResource DangerLink}" Click="RemoveLine"/>
+                                <Button Content="&#xE74D;" Style="{StaticResource DangerIcon}" ToolTip="Entfernen" Click="RemoveLine"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

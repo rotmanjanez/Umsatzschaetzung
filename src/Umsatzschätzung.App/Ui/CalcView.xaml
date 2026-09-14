@@ -113,7 +113,7 @@
                                                     <ComboBox ItemsSource="{Binding Options}" DisplayMemberPath="Name" SelectedItem="{Binding Product}"/>
                                                     <TextBox Grid.Column="1" Style="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Portions, UpdateSourceTrigger=PropertyChanged}"/>
                                                     <TextBox Grid.Column="2" Margin="8,0,0,0" Text="{Binding Reason, UpdateSourceTrigger=PropertyChanged}"/>
-                                                    <Button Grid.Column="3" Content="Entfernen" Style="{StaticResource DangerLink}" HorizontalAlignment="Right" Click="RemovePinned"/>
+                                                    <Button Grid.Column="3" Content="&#xE74D;" Style="{StaticResource DangerIcon}" ToolTip="Entfernen" HorizontalAlignment="Right" Click="RemovePinned"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>

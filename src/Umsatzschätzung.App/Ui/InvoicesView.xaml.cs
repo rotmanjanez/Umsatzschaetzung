@@ -51,6 +51,7 @@ public partial class InvoicesView : Screen
     {
         InitializeComponent();
         DataContext = model;
+        Search.Attach(model.Invoices, r => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal);
         Session.CaseChanged += Refresh;
         Session.CaseClosed += CaseClosed;
     }

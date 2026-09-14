@@ -15,7 +15,9 @@
                 <ColumnDefinition Width="58*" MinWidth="360"/>
             </Grid.ColumnDefinitions>
             <Border Style="{StaticResource Panel}">
-                <Grid>
+                <DockPanel>
+                    <ui:SearchBox x:Name="Search" DockPanel.Dock="Top" Width="Auto" Margin="8"/>
+                    <Grid>
                     <DataGrid x:Name="Groups" Style="{StaticResource Grid}" ItemsSource="{Binding Groups}" IsReadOnly="True" SelectionChanged="GroupSelected">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Lieferant" Binding="{Binding Supplier}" Width="170"/>
@@ -31,7 +33,8 @@
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="Alles zugeordnet" Style="{StaticResource EmptyState}" Visibility="{Binding Empty, Converter={StaticResource Vis}}"/>
-                </Grid>
+                    </Grid>
+                </DockPanel>
             </Border>
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
             <Border Grid.Column="2" Style="{StaticResource Panel}" Padding="16">
