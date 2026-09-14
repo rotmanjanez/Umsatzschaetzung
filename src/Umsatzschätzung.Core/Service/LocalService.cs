@@ -17,7 +17,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
     const int AutoMapMinConfidence = 60;
     const int ScanDpi = 300;
     const int PreviewDpi = 150;
-    const string ProblemOffline = "Regelspeicher nicht erreichbar, es gelten die zwischengespeicherten Regeln.";
     static readonly HashSet<string> BlockingFlags = ["line_total", "sum_net", "missing_field"];
 
     readonly Matcher matcher = new(llm);
@@ -25,7 +24,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
     public Task<StatusResp> Status(CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
-        return new StatusResp(rules.Online, rs.Version, Format.Day(RulesDate(rs)), appVersion, rules.Online ? null : ProblemOffline);
+        return new StatusResp(rs.Version, Format.Day(RulesDate(rs)), appVersion, rules.Notice);
     });
 
     static DateTimeOffset RulesDate(RuleSet rs) =>
@@ -38,11 +37,12 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
 
     public Task<RuleSetResp> Rules(CancellationToken ct) => Guard(() => RulesResp(rules.Load()));
 
-    public Task<RuleSetResp> SaveRules(RuleSet rs, CancellationToken ct) => Guard(() =>
+    public Task<RuleSetResp> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(() =>
     {
+        var rs = rules.Load();
+        rs.Put(rule);
         RuleCheck.Validate(rs);
-        rules.Save(rs);
-        return RulesResp(rs);
+        return RulesResp(rules.Save(rule));
     });
 
     static RuleSetResp RulesResp(RuleSet rs) => new(rs, Display.Rules(rs));
@@ -304,9 +304,9 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
         try
         {
             RuleCheck.Validate(rs);
-            rules.Save(rs);
+            rs = rules.Save(m);
         }
-        catch (Exception e) when (e is RulesException or StoreUnavailableException or RulesConflictException)
+        catch (Exception e) when (e is RulesException or StoreUnavailableException)
         {
             return rules.Load();
         }
@@ -355,7 +355,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
             {
                 CaseNotFoundException => ErrorCode.NotFound,
                 CaseInvalidException or RulesException or InvalidDataException => ErrorCode.Invalid,
-                RulesConflictException => ErrorCode.Conflict,
                 StoreUnavailableException => ErrorCode.Unavailable,
                 _ => ErrorCode.Internal,
             }, e.Message, inner: e);

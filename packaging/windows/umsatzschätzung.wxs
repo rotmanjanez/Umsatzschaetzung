@@ -40,6 +40,9 @@
       <Component Id="Llm">
         <File Source="$(var.Dist)/umsatzschaetzung_llm.dll" />
       </Component>
+      <Component Id="Sqlite">
+        <File Source="$(var.Dist)/e_sqlite3.dll" />
+      </Component>
       <Component Id="Licenses">
         <File Source="$(var.Dist)/LICENSES.txt" />
       </Component>

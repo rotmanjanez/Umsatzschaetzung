@@ -12,6 +12,10 @@ namespace Umsatzschätzung.Model;
     WriteIndented = true)]
 [JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(RuleSet))]
+[JsonSerializable(typeof(Ingredient))]
+[JsonSerializable(typeof(ArticleMapping))]
+[JsonSerializable(typeof(Product))]
+[JsonSerializable(typeof(YieldRule))]
 [JsonSerializable(typeof(Invoice))]
 [JsonSerializable(typeof(OcrPage))]
 [JsonSerializable(typeof(List<OcrPage>))]
@@ -28,5 +32,9 @@ public static class Json
 
     public static T Deserialize<T>(ReadOnlySpan<byte> data) =>
         JsonSerializer.Deserialize(data, (JsonTypeInfo<T>)ModelJsonContext.Default.GetTypeInfo(typeof(T))!)
+        ?? throw new JsonException("leeres Dokument");
+
+    public static T Deserialize<T>(string json) =>
+        JsonSerializer.Deserialize(json, (JsonTypeInfo<T>)ModelJsonContext.Default.GetTypeInfo(typeof(T))!)
         ?? throw new JsonException("leeres Dokument");
 }
