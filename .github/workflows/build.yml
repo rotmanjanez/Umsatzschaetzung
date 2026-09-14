@@ -5,6 +5,11 @@ on:
     branches: [main]
     tags: ["v*"]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: version to stamp into the build, e.g. 0.1.0-alpha.1
+        default: 0.0.0-dev
 
 jobs:
   test:
@@ -28,11 +33,14 @@ jobs:
         include:
           - os: windows-latest
             arch: win-x64
+            vulkan_os: windows
           - os: windows-11-arm
             arch: win-arm64
+            vulkan_os: warm
     runs-on: ${{ matrix.os }}
     env:
       PFX_BASE64: ${{ secrets.PFX_BASE64 }}
+      VULKAN_SDK_VERSION: 1.4.357.0
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -48,8 +56,8 @@ jobs:
           path: |
             third_party/llama/build
             third_party/llama/llama.cpp
-          key: llama-${{ matrix.arch }}-${{ hashFiles('third_party/llama/build.ps1') }}-${{ hashFiles('third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt') }}
-          restore-keys: llama-${{ matrix.arch }}-${{ hashFiles('third_party/llama/build.ps1') }}-
+          key: llama-${{ matrix.arch }}-vk${{ env.VULKAN_SDK_VERSION }}-${{ hashFiles('third_party/llama/build.ps1') }}-${{ hashFiles('third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt') }}
+          restore-keys: llama-${{ matrix.arch }}-vk${{ env.VULKAN_SDK_VERSION }}-${{ hashFiles('third_party/llama/build.ps1') }}-
 
       # The weights are architecture independent; one shared entry instead of a
       # copy per arch keeps the matrix inside the repository cache limit.
@@ -61,17 +69,19 @@ jobs:
       # v7 gates builds behind the Open Source Maintenance Fee EULA; v6 does not
       # and reads the same v4 schema the .wxs uses.
       - run: dotnet tool install --global wix --version 6.0.2
+      # The chocolatey vulkan-sdk package is the x64 SDK on every runner. Linking
+      # its x64 vulkan-1.lib into the ARM64 dll produced x86 import thunks that
+      # crash on the first Vulkan call, so the SDK is fetched per architecture
+      # ("warm" is LunarG's key for Windows on ARM64).
       - name: install vulkan sdk
         run: |
-          choco install vulkan-sdk --no-progress
-          $sdk = [Environment]::GetEnvironmentVariable("VULKAN_SDK", "Machine")
-          if (-not $sdk) {
-              $sdk = (Get-ChildItem C:\VulkanSDK -Directory -ErrorAction Ignore |
-                  Where-Object { $_.Name -as [version] } |
-                  Sort-Object { [version]$_.Name } -Descending |
-                  Select-Object -First 1).FullName
-          }
-          if (-not $sdk) { throw "Vulkan SDK not found after install" }
+          $ver = "${{ env.VULKAN_SDK_VERSION }}"
+          $sdk = "$env:RUNNER_TEMP\VulkanSDK\$ver"
+          $exe = "$env:RUNNER_TEMP\vulkan-sdk.exe"
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/$ver/${{ matrix.vulkan_os }}/vulkan_sdk.exe" -OutFile $exe
+          & $exe --root $sdk --accept-licenses --default-answer --confirm-command install | Out-Host
+          if ($LASTEXITCODE -ne 0) { throw "Vulkan SDK install failed with $LASTEXITCODE" }
+          if (-not (Test-Path "$sdk\Lib\vulkan-1.lib")) { throw "Vulkan SDK not found at $sdk after install" }
           "VULKAN_SDK=$sdk" >> $env:GITHUB_ENV
           "$sdk\Bin" >> $env:GITHUB_PATH
         shell: pwsh
@@ -81,7 +91,7 @@ jobs:
           [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\publisher.pfx", [Convert]::FromBase64String($env:PFX_BASE64))
           "PFX=$env:RUNNER_TEMP\publisher.pfx" >> $env:GITHUB_ENV
         shell: pwsh
-      - run: pwsh packaging/windows/build.ps1 -Version ${{ github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX"
+      - run: pwsh packaging/windows/build.ps1 -Version ${{ inputs.version || github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX"
         env:
           UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
       - uses: actions/upload-artifact@v7
@@ -92,3 +102,36 @@ jobs:
             dist/msi/*.cab
             dist/msi/publisher.cer
             dist/msi/SHA256SUMS.txt
+
+  release:
+    needs: msi
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: umsatzschätzung-*-msi
+          path: artifacts
+
+      # Both arch artifacts carry a SHA256SUMS.txt and the same publisher.cer,
+      # so the sums files are renamed per arch instead of overwriting each other.
+      - name: collect assets
+        run: |
+          mkdir release
+          for dir in artifacts/*/; do
+            arch=$(basename "$dir" | sed 's/.*-\(win-[a-z0-9]*\)-msi$/\1/')
+            cp "$dir"*.msi "$dir"*.cab release/ 2>/dev/null || true
+            cp "$dir"SHA256SUMS.txt "release/SHA256SUMS-$arch.txt"
+            cp "$dir"publisher.cer release/ 2>/dev/null || true
+          done
+          ls -l release
+
+      - name: publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/* \
+            --title "$GITHUB_REF_NAME" --generate-notes \
+            ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}
