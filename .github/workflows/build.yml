@@ -22,7 +22,15 @@ jobs:
 
   msi:
     needs: test
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: win-x64
+          - os: windows-11-arm
+            arch: win-arm64
+    runs-on: ${{ matrix.os }}
     env:
       PFX_BASE64: ${{ secrets.PFX_BASE64 }}
     steps:
@@ -35,21 +43,34 @@ jobs:
           path: |
             third_party/llama/build
             third_party/llama/models
-          key: llama-${{ hashFiles('third_party/llama/build.ps1', 'third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt', 'tools/llm/fetch.ps1') }}
+          key: llama-${{ matrix.arch }}-${{ hashFiles('third_party/llama/build.ps1', 'third_party/llama/engine.c', 'third_party/llama/CMakeLists.txt', 'tools/llm/fetch.ps1') }}
       - run: dotnet tool install --global wix
-      - run: choco install vulkan-sdk --no-progress
+      - name: install vulkan sdk
+        run: |
+          choco install vulkan-sdk --no-progress
+          $sdk = [Environment]::GetEnvironmentVariable("VULKAN_SDK", "Machine")
+          if (-not $sdk) {
+              $sdk = (Get-ChildItem C:\VulkanSDK -Directory -ErrorAction Ignore |
+                  Where-Object { $_.Name -as [version] } |
+                  Sort-Object { [version]$_.Name } -Descending |
+                  Select-Object -First 1).FullName
+          }
+          if (-not $sdk) { throw "Vulkan SDK not found after install" }
+          "VULKAN_SDK=$sdk" >> $env:GITHUB_ENV
+          "$sdk\Bin" >> $env:GITHUB_PATH
+        shell: pwsh
       - name: restore signing certificate
         if: env.PFX_BASE64 != ''
         run: |
           [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\publisher.pfx", [Convert]::FromBase64String($env:PFX_BASE64))
           "PFX=$env:RUNNER_TEMP\publisher.pfx" >> $env:GITHUB_ENV
         shell: pwsh
-      - run: pwsh packaging/windows/build.ps1 -Version ${{ github.ref_name }} -Arch win-x64 -Pfx "$env:PFX"
+      - run: pwsh packaging/windows/build.ps1 -Version ${{ github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX"
         env:
           UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
       - uses: actions/upload-artifact@v4
         with:
-          name: umsatzschätzung-win-x64-msi
+          name: umsatzschätzung-${{ matrix.arch }}-msi
           path: |
             dist/msi/*.msi
             dist/msi/publisher.cer
