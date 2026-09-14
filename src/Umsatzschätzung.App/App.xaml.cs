@@ -66,16 +66,8 @@ public partial class App : Application
     ILlmEngine? OpenModel(Config config)
     {
         if (!File.Exists(Path.Combine(config.ModelDir, LlamaEngine.ModelFile))) return null;
-        try
-        {
-            var engine = new LlamaEngine(config.ModelDir);
-            owned.Add(engine);
-            return engine;
-        }
-        catch (Exception ex)
-        {
-            CrashLog.Report(ex, "Sprachmodell nicht verfügbar");
-            return null;
-        }
+        var engine = new LazyLlmEngine(config.ModelDir);
+        owned.Add(engine);
+        return engine;
     }
 }

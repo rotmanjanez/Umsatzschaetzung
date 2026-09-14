@@ -7,6 +7,7 @@ namespace Umsatzschätzung.Llama;
 public sealed class LlamaEngine : ILlmEngine, ILlmProgress
 {
     public const string ModelFile = "gemma-4-E2B_q4_0-it-00001-of-00003.gguf";
+    public const string ModelId = "gemma-4-e2b";
     const int Context = 8192;
     const int DefaultMaxTokens = 512;
     const int Aborted = 1;
@@ -21,10 +22,10 @@ public sealed class LlamaEngine : ILlmEngine, ILlmProgress
         progress = OnProgress;
         handle = Native.Open(Path.Combine(modelDir, ModelFile), Context, Environment.ProcessorCount, out var err);
         if (handle == IntPtr.Zero)
-            throw new InvalidOperationException($"Sprachmodell {ModelFile} konnte nicht geladen werden: {Take(err)}");
+            throw new ServiceError(ErrorCode.Unavailable, $"Sprachmodell {ModelFile} konnte nicht geladen werden: {Take(err)}");
     }
 
-    public string Model => "gemma-4-e2b";
+    public string Model => ModelId;
 
     public event Action<LlmStats>? Progress;
 
