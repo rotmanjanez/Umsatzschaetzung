@@ -31,7 +31,6 @@
                         <TextBox x:Name="NewTo"/>
                     </StackPanel>
                 </Grid>
-                <TextBlock Text="Datum als TT.MM.JJJJ" Style="{StaticResource FieldLabel}"/>
                 <TextBlock Text="Steuerpflichtiger" Style="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
                 <TextBlock Text="Name *" Style="{StaticResource FieldLabel}"/>
                 <TextBox x:Name="NewName" Width="520" HorizontalAlignment="Left"/>

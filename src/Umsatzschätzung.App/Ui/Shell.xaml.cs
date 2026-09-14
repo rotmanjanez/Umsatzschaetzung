@@ -29,7 +29,6 @@ public partial class Shell : Window
         buttons = [NavCase, NavInvoices, NavMapping, NavRules, NavCalc, NavReport];
         session.CaseOpened += OpenCase;
         session.CaseChanged += RefreshContext;
-        session.StatusChanged += RefreshStatus;
         session.StatusChanged += RefreshError;
         session.PropertyChanged += (_, e) =>
         {
@@ -98,11 +97,5 @@ public partial class Shell : Window
         ErrorClose.Visibility = session.Error == "" ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    void RefreshStatus()
-    {
-        var parts = new List<string>();
-        if (session.Status?.RulesDate is { Length: > 0 } date) parts.Add("Regeln vom " + date);
-        if (session.Message != "") parts.Add(session.Message);
-        StatusText.Text = string.Join("  ·  ", parts);
-    }
+    void RefreshStatus() => StatusText.Text = session.Message;
 }

@@ -87,7 +87,6 @@ public static class Html
         }
         else
         {
-            b.Append("<p>Aufgeführt sind die Rechnungspositionen, die in die Kalkulation eingehen.</p>\n");
             b.Append("<table>\n<thead><tr><th>Rechnungsnr.</th><th>Datum</th><th class=\"wide\">Position</th><th class=\"num\">Menge</th><th class=\"num\">Einzelpreis</th><th class=\"num\">Netto</th></tr></thead>\n<tbody>\n");
             foreach (var l in f.Lines)
                 Row(b, Esc(l.Invoice), Esc(l.Date), Esc(l.Name), Num(l.Quantity), Num(l.UnitPrice), Num(l.LineNet));

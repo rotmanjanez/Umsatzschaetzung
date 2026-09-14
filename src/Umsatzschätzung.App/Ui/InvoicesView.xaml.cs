@@ -26,14 +26,15 @@ public sealed class InvoicesModel : Observable
 {
     bool empty = true, importing;
     int importDone, importTotal;
-    string importText = "";
+    string importFile = "";
 
     public ObservableCollection<InvoiceRow> Invoices { get; } = [];
     public bool Empty { get => empty; set => Set(ref empty, value); }
     public bool Importing { get => importing; set => Set(ref importing, value); }
-    public int ImportDone { get => importDone; set => Set(ref importDone, value); }
-    public int ImportTotal { get => importTotal; set => Set(ref importTotal, value); }
-    public string ImportText { get => importText; set => Set(ref importText, value); }
+    public int ImportDone { get => importDone; set { if (Set(ref importDone, value)) Raise(nameof(ImportText)); } }
+    public int ImportTotal { get => importTotal; set { if (Set(ref importTotal, value)) Raise(nameof(ImportText)); } }
+    public string ImportFile { get => importFile; set { if (Set(ref importFile, value)) Raise(nameof(ImportText)); } }
+    public string ImportText => (ImportDone + 1) + " von " + ImportTotal + " Dateien · " + ImportFile;
 }
 
 public partial class InvoicesView : Screen
@@ -204,7 +205,7 @@ public partial class InvoicesView : Screen
         while (queue.Count > 0 && !ct.IsCancellationRequested)
         {
             var file = queue.Dequeue();
-            model.ImportText = "Import: " + (model.ImportDone + 1) + " von " + model.ImportTotal + " Dateien · " + file.Name;
+            model.ImportFile = file.Name;
             try
             {
                 var parsed = await Session.Service.ParseInvoice(caseId, file.Name, file.Data, ct);

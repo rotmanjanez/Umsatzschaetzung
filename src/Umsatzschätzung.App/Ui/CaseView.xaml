@@ -54,7 +54,7 @@
                     </StackPanel>
                 </Border>
 
-                <TextBlock Text="Erklärte Umsätze" Style="{StaticResource SectionHeader}"/>
+                <TextBlock Text="Erklärte Umsätze, netto in €" Style="{StaticResource SectionHeader}"/>
                 <Border Style="{StaticResource Card}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -67,17 +67,14 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Umsatz zu 19 %" Style="{StaticResource FieldLabel}"/>
                             <TextBox Style="{StaticResource NumberBox}" Text="{Binding Declared19, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="netto, in €" Style="{StaticResource FieldLabel}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Umsatz zu 7 %" Style="{StaticResource FieldLabel}"/>
                             <TextBox Style="{StaticResource NumberBox}" Text="{Binding Declared7, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="netto, in €" Style="{StaticResource FieldLabel}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="4">
                             <TextBlock Text="Umsatz zu 0 %" Style="{StaticResource FieldLabel}"/>
                             <TextBox Style="{StaticResource NumberBox}" Text="{Binding Declared0, UpdateSourceTrigger=PropertyChanged}"/>
-                            <TextBlock Text="netto, in €" Style="{StaticResource FieldLabel}"/>
                         </StackPanel>
                     </Grid>
                 </Border>

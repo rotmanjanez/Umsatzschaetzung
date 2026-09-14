@@ -28,8 +28,7 @@
         <DockPanel>
             <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Style="{StaticResource ErrorBanner}" Visibility="Collapsed">
                 <DockPanel>
-                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Style="{StaticResource ErrorBannerClose}"
-                            ToolTip="Meldung schließen" Click="DismissError"/>
+                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Style="{StaticResource ErrorBannerClose}" Click="DismissError"/>
                     <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorBannerText}"/>
                 </DockPanel>
             </Border>
