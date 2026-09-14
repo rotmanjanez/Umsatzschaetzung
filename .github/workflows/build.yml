@@ -115,17 +115,15 @@ jobs:
           pattern: umsatzschätzung-*-msi
           path: artifacts
 
-      # Both arch artifacts carry a SHA256SUMS.txt and the same publisher.cer,
-      # so the sums files are renamed per arch instead of overwriting each other.
+      # The per-arch SHA256SUMS.txt files would collide on merge, so the sums
+      # are recomputed here over the combined asset set instead.
       - name: collect assets
         run: |
           mkdir release
-          for dir in artifacts/*/; do
-            arch=$(basename "$dir" | sed 's/.*-\(win-[a-z0-9]*\)-msi$/\1/')
-            cp "$dir"*.msi "$dir"*.cab release/ 2>/dev/null || true
-            cp "$dir"SHA256SUMS.txt "release/SHA256SUMS-$arch.txt"
-            cp "$dir"publisher.cer release/ 2>/dev/null || true
-          done
+          find artifacts -type f \( -name '*.msi' -o -name '*.cab' -o -name 'publisher.cer' \) \
+            -exec cp -n {} release/ \;
+          test -n "$(find release -name '*.msi' -print -quit)" || { echo "no msi in artifacts:"; find artifacts -type f; exit 1; }
+          (cd release && sha256sum * > SHA256SUMS.txt)
           ls -l release
 
       - name: publish release
