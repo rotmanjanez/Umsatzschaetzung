@@ -1,0 +1,210 @@
+{
+  "version": 1041,
+  "hash": "sha256:3f1c6a2d9b74e08c5a11d4f2c7e93b6081aa25de4c0f7b83915e6d2af4c81b07",
+  "ingredients": {
+    "ing.bier.fass": {
+      "id": "ing.bier.fass",
+      "name": "Fassbier Pils",
+      "baseUnit": "ml",
+      "category": "Bier vom Fass",
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1001,
+        "changedAt": "2024-01-08T09:12:00Z"
+      }
+    },
+    "ing.bier.flasche": {
+      "id": "ing.bier.flasche",
+      "name": "Flaschenbier Pils 0,33 l",
+      "baseUnit": "ml",
+      "category": "Bier Flasche",
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1002,
+        "changedAt": "2024-01-08T09:12:00Z"
+      }
+    },
+    "ing.korn": {
+      "id": "ing.korn",
+      "name": "Doppelkorn 38 % vol",
+      "baseUnit": "ml",
+      "category": "Spirituosen",
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1003,
+        "changedAt": "2024-01-08T09:12:00Z"
+      }
+    }
+  },
+  "mappings": {
+    "map.fass50": {
+      "id": "map.fass50",
+      "supplierVatId": "DE811947233",
+      "supplierArticleId": "31090",
+      "unitCode": "XKG",
+      "ingredientId": "ing.bier.fass",
+      "factor": 50000,
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1010,
+        "changedAt": "2024-01-08T09:20:00Z"
+      },
+      "confirmed": true
+    },
+    "map.kiste24x033": {
+      "id": "map.kiste24x033",
+      "supplierVatId": "DE811947233",
+      "supplierArticleId": "31210",
+      "unitCode": "XCS",
+      "ingredientId": "ing.bier.flasche",
+      "factor": 7920,
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1011,
+        "changedAt": "2024-01-08T09:20:00Z"
+      },
+      "confirmed": true
+    },
+    "map.korn07": {
+      "id": "map.korn07",
+      "supplierVatId": "DE811947233",
+      "supplierArticleId": "55120",
+      "unitCode": "XBO",
+      "ingredientId": "ing.korn",
+      "factor": 700,
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1012,
+        "changedAt": "2024-01-08T09:20:00Z"
+      },
+      "confirmed": true
+    }
+  },
+  "products": {
+    "prod.pils.03": {
+      "id": "prod.pils.03",
+      "name": "Pils 0,3 l vom Fass",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.fass",
+          "amount": 300
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1020,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.pils.05": {
+      "id": "prod.pils.05",
+      "name": "Pils 0,5 l vom Fass",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.fass",
+          "amount": 500
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1021,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.pils.flasche": {
+      "id": "prod.pils.flasche",
+      "name": "Pils 0,33 l Flasche",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.flasche",
+          "amount": 330
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1022,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.korn.2cl": {
+      "id": "prod.korn.2cl",
+      "name": "Doppelkorn 2 cl",
+      "recipe": [
+        {
+          "ingredientId": "ing.korn",
+          "amount": 20
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1023,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.korn.4cl": {
+      "id": "prod.korn.4cl",
+      "name": "Doppelkorn 4 cl",
+      "recipe": [
+        {
+          "ingredientId": "ing.korn",
+          "amount": 40
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1024,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    }
+  },
+  "yieldRules": {
+    "yr.bier.fass": {
+      "id": "yr.bier.fass",
+      "name": "Fassbier Standard",
+      "category": "Bier vom Fass",
+      "shrinkage": 300,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 100,
+      "source": "Richtsatzsammlung des BMF, Gewerbeklasse Schankwirtschaft; Schankverlust, Personalverbrauch und Freirunden",
+      "default": true,
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1030,
+        "changedAt": "2024-01-08T09:44:00Z"
+      }
+    },
+    "yr.bier.flasche": {
+      "id": "yr.bier.flasche",
+      "name": "Flaschenbier Standard",
+      "category": "Bier Flasche",
+      "shrinkage": 0,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 0,
+      "source": "Richtsatzsammlung des BMF, Gewerbeklasse Schankwirtschaft; kein Schankverlust bei Flaschenware",
+      "default": true,
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1031,
+        "changedAt": "2024-01-08T09:44:00Z"
+      }
+    },
+    "yr.spirituosen": {
+      "id": "yr.spirituosen",
+      "name": "Spirituosen Standard",
+      "category": "Spirituosen",
+      "shrinkage": 200,
+      "ownUse": 100,
+      "staff": 0,
+      "free": 0,
+      "source": "Richtsatzsammlung des BMF, Gewerbeklasse Schankwirtschaft; Ausschankverlust und Eigenverbrauch",
+      "default": true,
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1032,
+        "changedAt": "2024-01-08T09:44:00Z"
+      }
+    }
+  }
+}
