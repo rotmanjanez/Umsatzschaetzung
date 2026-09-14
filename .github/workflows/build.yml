@@ -23,6 +23,8 @@ jobs:
   msi:
     needs: test
     runs-on: windows-latest
+    env:
+      PFX_BASE64: ${{ secrets.PFX_BASE64 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -38,8 +40,6 @@ jobs:
       - run: choco install vulkan-sdk --no-progress
       - name: restore signing certificate
         if: env.PFX_BASE64 != ''
-        env:
-          PFX_BASE64: ${{ secrets.PFX_BASE64 }}
         run: |
           [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\publisher.pfx", [Convert]::FromBase64String($env:PFX_BASE64))
           "PFX=$env:RUNNER_TEMP\publisher.pfx" >> $env:GITHUB_ENV
