@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions" revision="1.0" schemaVersion="1.0">
+  <policyNamespaces>
+    <target prefix="umsatzschaetzung" namespace="Umsatzschätzung.Policies" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+  <categories>
+    <category name="Umsatzschätzung" displayName="$(string.Umsatzschätzung)" />
+  </categories>
+  <policies>
+    <policy name="Store" class="Machine" displayName="$(string.Store)" explainText="$(string.StoreExplain)" presentation="$(presentation.Store)" key="SOFTWARE\Policies\Umsatzschätzung">
+      <parentCategory ref="Umsatzschätzung" />
+      <supportedOn ref="windows:SUPPORTED_Windows_10_0" />
+      <elements>
+        <text id="Store" valueName="Store" required="true" />
+      </elements>
+    </policy>
+    <policy name="CaseDir" class="Machine" displayName="$(string.CaseDir)" explainText="$(string.CaseDirExplain)" presentation="$(presentation.CaseDir)" key="SOFTWARE\Policies\Umsatzschätzung">
+      <parentCategory ref="Umsatzschätzung" />
+      <supportedOn ref="windows:SUPPORTED_Windows_10_0" />
+      <elements>
+        <text id="CaseDir" valueName="CaseDir" required="true" expandable="true" />
+      </elements>
+    </policy>
+    <policy name="ModelDir" class="Machine" displayName="$(string.ModelDir)" explainText="$(string.ModelDirExplain)" presentation="$(presentation.ModelDir)" key="SOFTWARE\Policies\Umsatzschätzung">
+      <parentCategory ref="Umsatzschätzung" />
+      <supportedOn ref="windows:SUPPORTED_Windows_10_0" />
+      <elements>
+        <text id="ModelDir" valueName="ModelDir" required="true" />
+      </elements>
+    </policy>
+  </policies>
+</policyDefinitions>

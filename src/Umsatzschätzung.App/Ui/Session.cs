@@ -106,29 +106,25 @@ public sealed class Session : Observable
         });
     }
 
-    public Task<bool> Put(IRuleEntity data, CancellationToken ct) =>
-        SaveRules(rs =>
-        {
-            data.Meta = new Meta { ChangedAt = Clock.Now() };
-            rs.Put(data);
-        }, ct);
-
-    public Task<bool> Retire(Entity entity, string id, CancellationToken ct) =>
-        SaveRules(rs =>
-        {
-            if (rs.Find(entity, id) is { } e) e.Meta.ValidTo = DateOnly.FromDateTime(DateTime.Now);
-        }, ct);
-
-    Task<bool> SaveRules(Action<RuleSet> edit, CancellationToken ct)
+    public Task<bool> Put(IRuleEntity data, CancellationToken ct)
     {
-        var rs = Rules?.RuleSet;
-        if (rs is null) return Task.FromResult(false);
-        edit(rs);
-        return Run(async () =>
+        data.Meta = new Meta { ChangedAt = Clock.Now() };
+        return SaveRule(data, ct);
+    }
+
+    public Task<bool> Retire(Entity entity, string id, CancellationToken ct)
+    {
+        if (Rules?.RuleSet.Find(entity, id) is not { } e) return Task.FromResult(false);
+        e.Meta.ValidTo = DateOnly.FromDateTime(DateTime.Now);
+        return SaveRule(e, ct);
+    }
+
+    Task<bool> SaveRule(IRuleEntity rule, CancellationToken ct) =>
+        Run(async () =>
         {
             try
             {
-                Rules = await Service.SaveRules(rs, ct);
+                Rules = await Service.SaveRule(rule, ct);
             }
             catch (ServiceError)
             {
@@ -138,7 +134,6 @@ public sealed class Session : Observable
             RulesChanged?.Invoke();
             await LoadStatus(ct);
         });
-    }
 
     public static string EntityLabel(Entity e) => e switch
     {

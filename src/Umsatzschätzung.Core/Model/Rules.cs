@@ -21,6 +21,8 @@ public sealed class Meta
     public DateOnly? ValidFrom { get; set; }
     public DateOnly? ValidTo { get; set; }
     public DateTimeOffset ChangedAt { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public long Rev { get; set; }
 
     public bool ValidOn(DateOnly? d)
     {

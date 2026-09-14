@@ -2,7 +2,7 @@ using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.Service;
 
-public sealed record StatusResp(bool Online, long RulesVersion, string RulesDate, string AppVersion, string? Problem);
+public sealed record StatusResp(long RulesVersion, string RulesDate, string AppVersion, string? Problem);
 
 public sealed record RuleSetResp(RuleSet RuleSet, RuleSetDisplay Display);
 

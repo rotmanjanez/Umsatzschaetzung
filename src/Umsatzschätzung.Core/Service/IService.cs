@@ -6,7 +6,7 @@ public interface IService
 {
     Task<StatusResp> Status(CancellationToken ct);                                                          // GET  /status
     Task<RuleSetResp> Rules(CancellationToken ct);                                                          // GET  /rules
-    Task<RuleSetResp> SaveRules(RuleSet rules, CancellationToken ct);                                       // PUT  /rules   rules.Version must equal the stored version, else Conflict
+    Task<RuleSetResp> SaveRule(IRuleEntity rule, CancellationToken ct);                                     // PUT  /rules/{kind}/{id}   last write wins, resp holds the whole set
 
     Task<ListCasesResp> ListCases(CancellationToken ct);                                                    // GET    /cases
     Task<CaseResp> GetCase(string caseId, CancellationToken ct);                                            // GET    /cases/{id}

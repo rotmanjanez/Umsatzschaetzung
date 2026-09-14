@@ -1,0 +1,508 @@
+{
+  "version": 0,
+  "ingredients": {
+    "ing.bier.fass": {
+      "id": "ing.bier.fass",
+      "name": "Fassbier",
+      "baseUnit": "ml",
+      "category": "Bier vom Fass",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.bier.flasche": {
+      "id": "ing.bier.flasche",
+      "name": "Flaschenbier",
+      "baseUnit": "ml",
+      "category": "Bier Flasche",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.wein.weiss": {
+      "id": "ing.wein.weiss",
+      "name": "Weißwein",
+      "baseUnit": "ml",
+      "category": "Wein",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.wein.rot": {
+      "id": "ing.wein.rot",
+      "name": "Rotwein",
+      "baseUnit": "ml",
+      "category": "Wein",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.sekt": {
+      "id": "ing.sekt",
+      "name": "Sekt",
+      "baseUnit": "ml",
+      "category": "Wein",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.spirituose": {
+      "id": "ing.spirituose",
+      "name": "Spirituose",
+      "baseUnit": "ml",
+      "category": "Spirituosen",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.softdrink": {
+      "id": "ing.softdrink",
+      "name": "Erfrischungsgetränk",
+      "baseUnit": "ml",
+      "category": "Alkoholfreie Getränke",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.wasser": {
+      "id": "ing.wasser",
+      "name": "Mineralwasser",
+      "baseUnit": "ml",
+      "category": "Alkoholfreie Getränke",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.saft": {
+      "id": "ing.saft",
+      "name": "Fruchtsaft",
+      "baseUnit": "ml",
+      "category": "Alkoholfreie Getränke",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.kaffee": {
+      "id": "ing.kaffee",
+      "name": "Kaffee, geröstet",
+      "baseUnit": "g",
+      "category": "Heißgetränke",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.schwein": {
+      "id": "ing.schwein",
+      "name": "Schweinefleisch",
+      "baseUnit": "g",
+      "category": "Fleisch",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.rind": {
+      "id": "ing.rind",
+      "name": "Rindfleisch",
+      "baseUnit": "g",
+      "category": "Fleisch",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.geflügel": {
+      "id": "ing.geflügel",
+      "name": "Geflügel",
+      "baseUnit": "g",
+      "category": "Fleisch",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.pommes": {
+      "id": "ing.pommes",
+      "name": "Pommes frites, tiefgekühlt",
+      "baseUnit": "g",
+      "category": "Beilagen",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "ing.brötchen": {
+      "id": "ing.brötchen",
+      "name": "Brötchen",
+      "baseUnit": "piece",
+      "category": "Backwaren",
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    }
+  },
+  "mappings": {},
+  "products": {
+    "prod.bier.03": {
+      "id": "prod.bier.03",
+      "name": "Bier 0,3 l vom Fass",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.fass",
+          "amount": 300
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.bier.05": {
+      "id": "prod.bier.05",
+      "name": "Bier 0,5 l vom Fass",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.fass",
+          "amount": 500
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.bier.flasche.033": {
+      "id": "prod.bier.flasche.033",
+      "name": "Bier 0,33 l Flasche",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.flasche",
+          "amount": 330
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.bier.flasche.05": {
+      "id": "prod.bier.flasche.05",
+      "name": "Bier 0,5 l Flasche",
+      "recipe": [
+        {
+          "ingredientId": "ing.bier.flasche",
+          "amount": 500
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.wein.weiss.02": {
+      "id": "prod.wein.weiss.02",
+      "name": "Weißwein 0,2 l",
+      "recipe": [
+        {
+          "ingredientId": "ing.wein.weiss",
+          "amount": 200
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.wein.rot.02": {
+      "id": "prod.wein.rot.02",
+      "name": "Rotwein 0,2 l",
+      "recipe": [
+        {
+          "ingredientId": "ing.wein.rot",
+          "amount": 200
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.sekt.01": {
+      "id": "prod.sekt.01",
+      "name": "Sekt 0,1 l",
+      "recipe": [
+        {
+          "ingredientId": "ing.sekt",
+          "amount": 100
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.spirituose.2cl": {
+      "id": "prod.spirituose.2cl",
+      "name": "Spirituose 2 cl",
+      "recipe": [
+        {
+          "ingredientId": "ing.spirituose",
+          "amount": 20
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.spirituose.4cl": {
+      "id": "prod.spirituose.4cl",
+      "name": "Spirituose 4 cl",
+      "recipe": [
+        {
+          "ingredientId": "ing.spirituose",
+          "amount": 40
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.softdrink.03": {
+      "id": "prod.softdrink.03",
+      "name": "Erfrischungsgetränk 0,3 l",
+      "recipe": [
+        {
+          "ingredientId": "ing.softdrink",
+          "amount": 300
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.wasser.025": {
+      "id": "prod.wasser.025",
+      "name": "Mineralwasser 0,25 l",
+      "recipe": [
+        {
+          "ingredientId": "ing.wasser",
+          "amount": 250
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.saft.02": {
+      "id": "prod.saft.02",
+      "name": "Fruchtsaft 0,2 l",
+      "recipe": [
+        {
+          "ingredientId": "ing.saft",
+          "amount": 200
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.kaffee": {
+      "id": "prod.kaffee",
+      "name": "Tasse Kaffee",
+      "recipe": [
+        {
+          "ingredientId": "ing.kaffee",
+          "amount": 7
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.schnitzel": {
+      "id": "prod.schnitzel",
+      "name": "Schnitzel mit Pommes",
+      "recipe": [
+        {
+          "ingredientId": "ing.schwein",
+          "amount": 180
+        },
+        {
+          "ingredientId": "ing.pommes",
+          "amount": 200
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.steak": {
+      "id": "prod.steak",
+      "name": "Rindersteak mit Pommes",
+      "recipe": [
+        {
+          "ingredientId": "ing.rind",
+          "amount": 200
+        },
+        {
+          "ingredientId": "ing.pommes",
+          "amount": 200
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.hähnchen": {
+      "id": "prod.hähnchen",
+      "name": "Hähnchenbrust mit Pommes",
+      "recipe": [
+        {
+          "ingredientId": "ing.geflügel",
+          "amount": 180
+        },
+        {
+          "ingredientId": "ing.pommes",
+          "amount": 200
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "prod.bratwurst": {
+      "id": "prod.bratwurst",
+      "name": "Bratwurst im Brötchen",
+      "recipe": [
+        {
+          "ingredientId": "ing.schwein",
+          "amount": 120
+        },
+        {
+          "ingredientId": "ing.brötchen",
+          "amount": 1
+        }
+      ],
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    }
+  },
+  "yieldRules": {
+    "yr.bier.fass": {
+      "id": "yr.bier.fass",
+      "name": "Fassbier Standard",
+      "category": "Bier vom Fass",
+      "shrinkage": 300,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 100,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.bier.flasche": {
+      "id": "yr.bier.flasche",
+      "name": "Flaschenbier Standard",
+      "category": "Bier Flasche",
+      "shrinkage": 0,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.wein": {
+      "id": "yr.wein",
+      "name": "Wein Standard",
+      "category": "Wein",
+      "shrinkage": 100,
+      "ownUse": 0,
+      "staff": 50,
+      "free": 50,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.spirituosen": {
+      "id": "yr.spirituosen",
+      "name": "Spirituosen Standard",
+      "category": "Spirituosen",
+      "shrinkage": 200,
+      "ownUse": 100,
+      "staff": 0,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.alkoholfrei": {
+      "id": "yr.alkoholfrei",
+      "name": "Alkoholfreie Getränke Standard",
+      "category": "Alkoholfreie Getränke",
+      "shrinkage": 0,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.heiss": {
+      "id": "yr.heiss",
+      "name": "Heißgetränke Standard",
+      "category": "Heißgetränke",
+      "shrinkage": 0,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.fleisch": {
+      "id": "yr.fleisch",
+      "name": "Fleisch Standard",
+      "category": "Fleisch",
+      "shrinkage": 500,
+      "ownUse": 100,
+      "staff": 100,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.beilagen": {
+      "id": "yr.beilagen",
+      "name": "Beilagen Standard",
+      "category": "Beilagen",
+      "shrinkage": 200,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    },
+    "yr.backwaren": {
+      "id": "yr.backwaren",
+      "name": "Backwaren Standard",
+      "category": "Backwaren",
+      "shrinkage": 100,
+      "ownUse": 0,
+      "staff": 100,
+      "free": 0,
+      "source": "Ausgangswert der Installation; vor Verwendung anhand der Richtsatzsammlung des BMF für das Prüfungsjahr und die Gewerbeklasse prüfen",
+      "default": true,
+      "meta": {
+        "changedAt": "2026-01-01T00:00:00Z"
+      }
+    }
+  }
+}

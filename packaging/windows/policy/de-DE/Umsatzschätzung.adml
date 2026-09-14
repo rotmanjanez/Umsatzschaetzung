@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions" revision="1.0" schemaVersion="1.0">
+  <displayName>Umsatzschätzung</displayName>
+  <description>Einstellungen der Umsatzschätzung</description>
+  <resources>
+    <stringTable>
+      <string id="Umsatzschätzung">Umsatzschätzung</string>
+      <string id="Store">Gemeinsamer Regelspeicher</string>
+      <string id="StoreExplain">Ordner (lokal oder UNC-Pfad einer Freigabe) mit der Datenbank rules.db, in der alle Installationen die gemeinsamen Regeln, Rezepturen und Artikelzuordnungen ablegen. Die Gruppe der Anwender benötigt Lese-, Schreib-, Erstell- und Löschrechte in diesem Ordner. Jede Installation sichert beim Start eine Kopie unter %LOCALAPPDATA%\Umsatzschätzung\snapshots und stellt eine beschädigte Datenbank daraus wieder her.</string>
+      <string id="CaseDir">Ordner für Prüfungsakten</string>
+      <string id="CaseDirExplain">Ordner, in dem die Prüfungsakten der angemeldeten Person liegen. Umgebungsvariablen wie %USERPROFILE% werden aufgelöst. Standard: Dokumente\Umsatzschätzung.</string>
+      <string id="ModelDir">Ordner des Sprachmodells</string>
+      <string id="ModelDirExplain">Ordner mit den Gewichten des Sprachmodells für die Artikelzuordnung. Standard: der vom Installationspaket angelegte Unterordner models.</string>
+    </stringTable>
+    <presentationTable>
+      <presentation id="Store"><textBox refId="Store"><label>Pfad:</label></textBox></presentation>
+      <presentation id="CaseDir"><textBox refId="CaseDir"><label>Pfad:</label></textBox></presentation>
+      <presentation id="ModelDir"><textBox refId="ModelDir"><label>Pfad:</label></textBox></presentation>
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>

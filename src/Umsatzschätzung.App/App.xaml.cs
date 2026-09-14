@@ -22,7 +22,18 @@ public partial class App : Application
             MessageBox.Show(args.Exception.Message, "Unerwarteter Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
         };
-        new Shell(CreateService()).Show();
+        IService service;
+        try
+        {
+            service = CreateService();
+        }
+        catch (StoreUnavailableException ex)
+        {
+            MessageBox.Show(ex.Message, "Regelspeicher nicht verfügbar", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+            return;
+        }
+        new Shell(service).Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -36,7 +47,7 @@ public partial class App : Application
         var config = RegistryConfig.Load();
         var local = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Umsatzschätzung");
         Directory.CreateDirectory(local);
-        var rules = new RuleStore(config.Store, Path.Combine(local, "rules.json"));
+        var rules = new RuleStore(config.Store, Path.Combine(local, "snapshots"), RuleStore.Seed());
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
         var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
