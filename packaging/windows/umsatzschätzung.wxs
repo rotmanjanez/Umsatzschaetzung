@@ -36,7 +36,10 @@
                     Description="Umsatzschätzung für die Betriebsprüfung" Advertise="yes" />
         </File>
       </Component>
-      <Files Include="$(var.Dist)\**" Exclude="$(var.Dist)\umsatzschätzung.exe;$(var.Dist)\*.pdb" />
+      <Files Include="$(var.Dist)\**">
+        <Exclude Files="$(var.Dist)\umsatzschätzung.exe" />
+        <Exclude Files="$(var.Dist)\**.pdb" />
+      </Files>
       <Component Id="RegistryStore" Condition="STORE">
         <RegistryValue Root="HKLM" Key="SOFTWARE\Umsatzschätzung" Name="Store" Type="string" Value="[STORE]" KeyPath="yes" />
       </Component>
