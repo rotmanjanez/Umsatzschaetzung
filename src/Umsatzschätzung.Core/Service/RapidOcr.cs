@@ -39,14 +39,18 @@ public sealed class RapidOcr : IOcr, IDisposable
 
     readonly RapidOcrModelSet models;
     readonly RapidOcrOptions options;
+    readonly int threads;
     Engine? engine;
 
-    public RapidOcr() : this(Models, Options) { }
+    // Threads is per instance, not per machine: one page at a time wants every core,
+    // but a corpus run with a page per core wants one core each.
+    public RapidOcr(int threads = 0) : this(Models, Options, threads) { }
 
-    internal RapidOcr(RapidOcrModelSet models, RapidOcrOptions options)
+    internal RapidOcr(RapidOcrModelSet models, RapidOcrOptions options, int threads = 0)
     {
         this.models = models;
         this.options = options;
+        this.threads = threads;
     }
 
     public void Dispose() => engine?.Dispose();
@@ -76,7 +80,7 @@ public sealed class RapidOcr : IOcr, IDisposable
         foreach (var block in result.TextBlocks)
             foreach (var word in block.WordResults ?? [])
                 if (!string.IsNullOrWhiteSpace(word.Text))
-                    words.Add(new OcrWord { Text = word.Text, Box = Bounds(word.BoxPoints) });
+                    words.Add(new OcrWord { Text = word.Text, Box = Bounds(word.BoxPoints), Confidence = word.Score });
         return words;
     }
 
@@ -110,7 +114,7 @@ public sealed class RapidOcr : IOcr, IDisposable
     Engine Open()
     {
         var engine = new Engine();
-        try { engine.InitModels(models); }
+        try { if (threads > 0) engine.InitModels(models, threads); else engine.InitModels(models); }
         catch (Exception e)
         {
             engine.Dispose();
