@@ -24,9 +24,9 @@ public sealed class CandidateRow(MappingCandidate candidate) : Observable
     public MappingCandidate Candidate { get; } = candidate;
     public string Display => Candidate.Display;
     public bool IsExact => Candidate.Kind == OriginKind.Exact;
-    public bool IsModel => Candidate.Kind == OriginKind.Model;
+    public bool IsLexical => Candidate.Kind == OriginKind.Lexical;
     public bool IsManual => Candidate.Kind == OriginKind.Manual;
-    public string Confidence => IsModel ? "Sicherheit " + Candidate.Confidence + " %" : "";
+    public string Confidence => IsLexical ? "Sicherheit " + Candidate.Confidence + " %" : "";
     public bool Selected { get => selected; set => Set(ref selected, value); }
 }
 
@@ -181,6 +181,7 @@ public partial class MappingView : Screen
             SupplierVatId = g.VatId,
             SupplierArticleId = g.Article,
             Name = g.Name,
+            Observed = g.Name,
             UnitCode = g.Unit,
             IngredientId = model.Ingredient.Id,
             Factor = factor.Value,

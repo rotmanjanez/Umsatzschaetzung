@@ -13,7 +13,6 @@
                     <Border Style="{StaticResource Banner}" Background="{StaticResource InfoSoftBrush}" Margin="12,0,12,6">
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Content="Abbrechen" Style="{StaticResource LinkButton}" Click="CancelImport"/>
-                            <TextBlock DockPanel.Dock="Right" Text="{Binding Tps}" Style="{StaticResource Muted}" FontSize="11" Margin="12,0" VerticalAlignment="Center" MinWidth="128"/>
                             <ProgressBar DockPanel.Dock="Right" Width="160" Height="6" Margin="12,0" VerticalAlignment="Center" Maximum="{Binding Total}" Value="{Binding Done, Mode=OneWay}"/>
                             <TextBlock Text="{Binding Label}" FontWeight="SemiBold" Margin="0,0,10,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="220"/>
                             <TextBlock Text="{Binding Text}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
