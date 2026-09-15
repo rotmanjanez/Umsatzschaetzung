@@ -1,0 +1,135 @@
+CATEGORIES = {
+    "baeckerei": {
+        "bases": ["Brötchen", "Semmel", "Laugenbrezel", "Kaiserbrötchen", "Bauernbrot", "Roggenmischbrot",
+                  "Ciabatta", "Baguette", "Croissant", "Nussschnecke", "Apfeltasche", "Kornspitz",
+                  "Vollkornbrot", "Dinkelweckerl", "Butterhörnchen", "Mohnflesserl", "Toastbrot"],
+        "variants": ["Weizen", "Roggen", "Dinkel", "Vollkorn", "Mehrkorn", "hell", "dunkel", "rustikal",
+                     "vorgebacken", "TK", "Mini", ""],
+        "sizes": ["40 g", "55 g", "70 g", "90 g", "250 g", "500 g", "750 g", "1 kg", "Btl. 20 Stk"],
+        "units": [("Stk", "H87", 1), ("Btl", "XBG", 20), ("Kt", "CT", 60)],
+        "price": (18, 420),
+        "rates": ['reduced'],
+    },
+    "metzgerei": {
+        "bases": ["Schweinerücken", "Schweineschnitzel", "Rinderhüfte", "Rindergulasch", "Hähnchenbrust",
+                  "Putenschnitzel", "Bratwurst", "Leberkäse", "Schinkenspeck", "Kalbsrücken", "Faschiertes",
+                  "Schweinebauch", "Rinderbeiried", "Hüftsteak", "Grillwürstel"],
+        "variants": ["frisch", "TK", "ausgelöst", "pariert", "geschnitten", "mariniert", "grob", "fein", ""],
+        "sizes": ["ca. 2 kg", "ca. 5 kg", "1 kg", "2,5 kg", "Vak.", "im Netz", "180 g", "200 g"],
+        "units": [("kg", "KGM", 1), ("Stk", "H87", 1), ("Kt", "CT", 10)],
+        "price": (420, 3800),
+        "rates": ['reduced'],
+    },
+    "molkerei": {
+        "bases": ["Vollmilch", "Schlagobers", "Sauerrahm", "Naturjoghurt", "Butter", "Gouda", "Emmentaler",
+                  "Bergkäse", "Frischkäse", "Mozzarella", "Parmesan", "Creme fraiche", "Topfen", "Feta"],
+        "variants": ["3,5 %", "1,5 %", "36 %", "20 %", "gerieben", "in Scheiben", "am Stück", "laktosefrei", ""],
+        "sizes": ["1 l", "250 ml", "500 g", "1 kg", "5 kg", "Becher 180 g", "Block 3 kg"],
+        "units": [("l", "LTR", 1), ("kg", "KGM", 1), ("Stk", "H87", 1), ("Kt", "CT", 12)],
+        "price": (65, 1900),
+        "rates": ['reduced'],
+    },
+    "gemuese": {
+        "bases": ["Speisekartoffel", "Zwiebel", "Karotte", "Eisbergsalat", "Tomate", "Gurke", "Paprika",
+                  "Champignon", "Brokkoli", "Zucchini", "Petersilie", "Knoblauch", "Rucola", "Feldsalat", "Apfel"],
+        "variants": ["festkochend", "rot", "gelb", "grün", "braun", "Klasse I", "Bio", "gewaschen",
+                     "geschnitten", "Rispe", ""],
+        "sizes": ["Kiste 10 kg", "Netz 5 kg", "Steige", "Sack 25 kg", "Beutel 1 kg", "500 g", "Kt 6 kg"],
+        "units": [("kg", "KGM", 1), ("Kiste", "BX", 1), ("Stk", "H87", 1), ("Btl", "XBG", 1)],
+        "price": (55, 890),
+        "rates": ['reduced'],
+    },
+    "getraenke": {
+        "bases": ["Mineralwasser", "Apfelsaft", "Orangensaft", "Cola", "Zitronenlimonade", "Almdudler",
+                  "Tonic Water", "Eistee", "Holunderblütensirup", "Cola Postmix Sirup", "Bier vom Fass",
+                  "Radler", "Weizenbier", "Energy Drink"],
+        "variants": ["prickelnd", "still", "zuckerfrei", "naturtrüb", "Mehrweg", "Einweg", "Glas", "PET", ""],
+        "sizes": ["0,33 l", "0,5 l", "0,75 l", "1,0 l", "1,5 l", "10 l", "20 l", "30 l", "Kiste 24 x 0,33 l"],
+        "units": [("Kiste", "BX", 24), ("Fass", "BA", 1), ("Kt", "CT", 12), ("Stk", "H87", 1), ("l", "LTR", 1)],
+        "price": (45, 12500),
+        "rates": ['standard', 'reduced'],
+    },
+    "wein": {
+        "bases": ["Grüner Veltliner", "Riesling", "Zweigelt", "Blaufränkisch", "Welschriesling", "Sauvignon Blanc",
+                  "Chardonnay", "Weißburgunder", "Merlot", "Prosecco Frizzante", "Sekt brut", "Rosé"],
+        "variants": ["Kabinett", "trocken", "halbtrocken", "Reserve", "Klassik", "Ried Hochrain", "DAC", "2022",
+                     "2023", "2024", ""],
+        "sizes": ["0,75 l", "1,0 l", "Bag in Box 10 l", "Kt 6 Fl.", "Kt 12 Fl."],
+        "units": [("Fl", "BO", 1), ("Kt", "CT", 6), ("Stk", "H87", 1)],
+        "price": (280, 4800),
+        "rates": ['standard'],
+    },
+    "spirituosen": {
+        "bases": ["Wodka", "Gin", "Weißer Rum", "Brauner Rum", "Blended Whisky", "Kräuterlikör", "Aperitivo Bitter",
+                  "Obstbrand Marille", "Williamsbirne", "Tequila Silver", "Cognac VS", "Eierlikör"],
+        "variants": ["40 % vol", "37,5 % vol", "38 % vol", "Premium", "Standard", "Barflasche", ""],
+        "sizes": ["0,5 l", "0,7 l", "1,0 l", "3,0 l", "Kt 6 x 0,7 l"],
+        "units": [("Fl", "BO", 1), ("Kt", "CT", 6), ("Stk", "H87", 1)],
+        "price": (680, 9800),
+        "rates": ['standard'],
+    },
+    "kaffee": {
+        "bases": ["Espresso Bohnen", "Caffè Crema", "Röstkaffee gemahlen", "Kaffeebohnen Hausmischung",
+                  "Schwarztee", "Früchtetee", "Trinkschokolade", "Cappuccino Topping"],
+        "variants": ["100 % Arabica", "Bar-Mischung", "Bio", "entkoffeiniert", "Beutel", ""],
+        "sizes": ["1 kg", "500 g", "250 g", "Kt 6 x 1 kg", "Dose 2 kg"],
+        "units": [("kg", "KGM", 1), ("Kt", "CT", 6), ("Stk", "H87", 1)],
+        "price": (780, 3400),
+        "rates": ['standard', 'reduced'],
+    },
+    "nonfood": {
+        "bases": ["Serviette", "Geschirrspültabs", "Handtuchrolle", "Müllsack", "Alufolie", "Frischhaltefolie",
+                  "Reinigungsmittel", "Glasreiniger", "Einweghandschuh", "Kerzenteelicht", "Kassenrolle",
+                  "Pizzakarton", "Trinkhalm Papier"],
+        "variants": ["weiß", "schwarz", "bordeaux", "2-lagig", "3-lagig", "unparfümiert", "Größe M",
+                     "Größe L", "24 cm", "33 cm", ""],
+        "sizes": ["Pack 250 Stk", "Kt 1000 Stk", "Rolle 300 m", "5 l Kanister", "Karton 6 x 1 l"],
+        "units": [("Pack", "PK", 1), ("Kt", "CT", 1), ("Stk", "H87", 1), ("Rolle", "RO", 1)],
+        "price": (120, 8900),
+        "rates": ['standard'],
+    },
+    "cc": {
+        "bases": ["Pommes frites", "Kroketten", "Backerbsen", "Semmelbrösel", "Sonnenblumenöl", "Rapsöl",
+                  "Tomatenpaprika", "Essiggurken", "Mayonnaise", "Ketchup", "Senf mittelscharf", "Reis langkorn",
+                  "Spaghetti", "Basmatireis", "Zucker", "Salz"],
+        "variants": ["TK", "7 mm", "10 mm", "fein", "grob", "Eimer", "Kanister", "Beutel", ""],
+        "sizes": ["2,5 kg", "5 kg", "10 kg", "10 l", "Kt 4 x 2,5 kg", "Eimer 5 kg"],
+        "units": [("Kt", "CT", 4), ("Stk", "H87", 1), ("kg", "KGM", 1), ("Eimer", "BJ", 1)],
+        "price": (95, 4200),
+        "rates": ['reduced', 'standard'],
+    },
+}
+
+SUPPLIER_HEADS = ["Gebr.", "Gasthaus-Service", "Delikatessen", "Feinkost", "Landhof", "Alpen", "Donau", "Wiener",
+                  "Steirische", "Tiroler", "Nordwest", "Süd", "Rhein", "Elbe", "Hanse", "Zentral", "Erste",
+                  "Regional", "Terra", "Vital", "Prima", "Optima", "Panorama", "Kreis"]
+SUPPLIER_NAMES = ["Ahrweiler", "Birnbacher", "Calmeyer", "Dohrmann", "Eckenstein", "Frühwirth", "Gassner",
+                  "Hollerbach", "Innerhofer", "Jaklitsch", "Kirchmayr", "Lindtner", "Moosbrugger", "Nussbaumer",
+                  "Oberleitner", "Pucher", "Quehenberger", "Rauscher", "Steinbichler", "Trautmann", "Ulrichs",
+                  "Vogelsang", "Wallnöfer", "Zehentner"]
+SUPPLIER_TAILS = ["GmbH", "GmbH & Co. KG", "KG", "OG", "GesmbH", "e.K.", "AG", "Handels GmbH", "Vertriebs GmbH"]
+TRADES = {"baeckerei": "Backwaren", "metzgerei": "Fleischwaren", "molkerei": "Molkereiprodukte",
+          "gemuese": "Obst & Gemüse", "getraenke": "Getränkefachhandel", "wein": "Weinhandel",
+          "spirituosen": "Spirituosen", "kaffee": "Kaffeerösterei", "nonfood": "Hygiene & Bedarf",
+          "cc": "Großhandel"}
+
+STREETS = ["Bahnhofstraße", "Industriestraße", "Gewerbepark", "Hauptstraße", "Lindenweg", "Am Mühlbach",
+           "Feldgasse", "Kirchenplatz", "Ringstraße", "Obere Donaulände", "Handelskai", "Sonnenallee",
+           "Im Gewerbegebiet", "Schmiedgasse", "Rosenweg"]
+CITIES = [("1100", "Wien"), ("4020", "Linz"), ("5020", "Salzburg"), ("8010", "Graz"), ("6020", "Innsbruck"),
+          ("9020", "Klagenfurt"), ("80331", "München"), ("70173", "Stuttgart"), ("90402", "Nürnberg"),
+          ("60311", "Frankfurt am Main"), ("20095", "Hamburg"), ("50667", "Köln"), ("04109", "Leipzig"),
+          ("01067", "Dresden"), ("3100", "St. Pölten"), ("4600", "Wels")]
+BANKS = ["Raiffeisenbank", "Sparkasse", "Volksbank", "Hypo Landesbank", "Commerzbank", "Oberbank",
+         "Erste Bank", "Kreissparkasse"]
+CUSTOMERS = ["Gasthaus Zur Alten Post", "Restaurant Seeblick", "Café Central", "Bistro Eck", "Hotel Waldhof",
+             "Pizzeria Da Vinci", "Wirtshaus Am Anger", "Bar Kontrast", "Braustüberl Riedl"]
+PAYMENT = ["Zahlbar innerhalb von 14 Tagen netto.", "Zahlung binnen 30 Tagen ohne Abzug.",
+           "Bei Zahlung innerhalb 8 Tagen 2 % Skonto, 30 Tage netto.",
+           "Zahlbar sofort nach Erhalt der Rechnung.", "Lastschrifteinzug erfolgt am 15. des Folgemonats.",
+           "Es gelten unsere allgemeinen Geschäftsbedingungen."]
+
+RATES = {
+    "AT": {"standard": 2000, "reduced": 1000, "special": 1300},
+    "DE": {"standard": 1900, "reduced": 700, "special": 700},
+}
