@@ -20,10 +20,11 @@ public sealed class WindowsPdfPages : IPdfPages
         {
             ct.ThrowIfCancellationRequested();
             using var page = document.GetPage(i);
+            var (width, height) = Target(page.Size.Width, page.Size.Height, dpi);
             var options = new PdfPageRenderOptions
             {
-                DestinationWidth = (uint)Math.Max(1, Math.Round(page.Size.Width * dpi / 96.0)),
-                DestinationHeight = (uint)Math.Max(1, Math.Round(page.Size.Height * dpi / 96.0)),
+                DestinationWidth = width,
+                DestinationHeight = height,
                 BitmapEncoderId = BitmapEncoder.PngEncoderId,
             };
             using var png = new InMemoryRandomAccessStream();
@@ -31,6 +32,18 @@ public sealed class WindowsPdfPages : IPdfPages
             pages.Add(await ReadAll(png, ct));
         }
         return pages;
+    }
+
+    // A scan wrapped one point per pixel reports an A4 page as 3307 x 4677 device
+    // units instead of 794 x 1123, so scaling it to 300 dpi renders it at 10333 px
+    // wide: a 600 MB bitmap holding no more detail than the 2480 px scan inside it.
+    // The recogniser reads nothing above MaxImageDimension anyway, so stop there.
+    static (uint Width, uint Height) Target(double w, double h, int dpi)
+    {
+        var scale = dpi / 96.0;
+        var longest = Math.Max(w, h) * scale;
+        if (longest > RapidOcr.MaxImageDimension) scale *= RapidOcr.MaxImageDimension / longest;
+        return ((uint)Math.Max(1, Math.Round(w * scale)), (uint)Math.Max(1, Math.Round(h * scale)));
     }
 
     static async Task<byte[]> ReadAll(IRandomAccessStream stream, CancellationToken ct)
