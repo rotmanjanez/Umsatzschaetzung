@@ -5,3 +5,26 @@ https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
 
 ==== Microsoft Edge WebView2 SDK ====
 https://www.nuget.org/packages/Microsoft.Web.WebView2 (Microsoft Software License Terms)
+
+==== RapidOcrNet (Apache-2.0) ====
+https://github.com/BobLd/RapidOcrNet/blob/master/LICENSE
+
+==== Clipper2 (Boost Software License 1.0) ====
+Von RapidOcrNet zur Polygonberechnung der Textrahmen verwendet.
+https://github.com/AngusJohnson/Clipper2/blob/main/LICENSE
+
+==== ONNX Runtime (MIT) ====
+https://github.com/microsoft/onnxruntime/blob/main/LICENSE
+
+==== PP-OCRv5, lateinische Modelle (Apache-2.0) ====
+Die mitgelieferten Gewichte unter models/v5 stammen aus PaddleOCR.
+https://github.com/PaddlePaddle/PaddleOCR/blob/main/LICENSE
+
+==== SkiaSharp (MIT), Skia (BSD-3-Clause) ====
+https://github.com/mono/SkiaSharp/blob/main/LICENSE.md
+https://github.com/google/skia/blob/main/LICENSE
+
+==== Microsoft.Data.Sqlite (MIT), SQLitePCLRaw (Apache-2.0) ====
+https://github.com/dotnet/efcore/blob/main/LICENSE.txt
+https://github.com/ericsink/SQLitePCL.raw/blob/master/LICENSE.TXT
+SQLite selbst ist gemeinfrei: https://www.sqlite.org/copyright.html
