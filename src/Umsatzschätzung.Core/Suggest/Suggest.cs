@@ -59,7 +59,6 @@ public sealed class Matcher(ILlmEngine? engine)
         var raw = await engine.Complete(new LlmRequest(
             Prompt.CategoryPrompt,
             Prompt.LineText(line) + "\nWarengruppen:\n" + string.Join("\n", cats) + "\n",
-            Prompt.CategoryGrammar(cats),
             48), ct);
         return raw.Trim();
     }
@@ -69,7 +68,6 @@ public sealed class Matcher(ILlmEngine? engine)
         var raw = await engine.Complete(new LlmRequest(
             Prompt.SystemPrompt,
             Prompt.IngredientUser(line, ingredients),
-            Prompt.IngredientGrammar(ingredients),
             96), ct);
         return Prompt.ParseAnswer(raw);
     }
