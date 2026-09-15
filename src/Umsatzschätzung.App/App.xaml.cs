@@ -59,7 +59,9 @@ public partial class App : Application
         owned.Add(printer);
         var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
         llm = OpenModel(config);
-        return new LocalService(rules, new CaseStore(config.CaseDir), new WindowsOcr(), new WindowsPdfPages(), printer, llm, version);
+        var ocr = new RapidOcr();
+        owned.Add(ocr);
+        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, new WindowsPdfPages(), printer, llm, version);
     }
 
     ILlmEngine? OpenModel(Config config) => null;
