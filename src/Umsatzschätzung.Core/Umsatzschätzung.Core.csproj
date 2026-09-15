@@ -11,11 +11,14 @@
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="ocr-check" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="../../docs/rechenweg.md" LogicalName="rechenweg.md" />
     <EmbeddedResource Include="Rulestore/seed.json" LogicalName="seed.json" />
   </ItemGroup>
-  <!-- The tagger ships the same way: the 132 MB int8 ONNX and the four tokenizer
-       artefacts are dropped into models/b at the repo root, not checked in. -->
+  <!-- The tagger ships the same way, out of models/b at the repo root. Those files
+       are in the repo, but through Git LFS: see .gitattributes. -->
   <ItemGroup>
     <ContentWithTargetPath Include="../../models/b/*" TargetPath="models/b/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

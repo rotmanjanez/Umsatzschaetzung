@@ -78,25 +78,41 @@ public static class Parse
         return parts.Skip(1).All(p => p.Length == 3);
     }
 
-    static long Rescale(long v, int from, int to)
-    {
-        for (; from < to; from++) v *= 10;
-        if (from == to) return v;
-        long div = 1;
-        for (; from > to; from--) div *= 10;
-        var half = div / 2;
-        return v < 0 ? (v - half) / div : (v + half) / div;
-    }
+    // German OCR cells, not clean tokens: a rate or an amount arrives wrapped in whatever
+    // the scan put next to it ("*12,51", ".0,68", "1.234,50 EUR"), so the number is searched
+    // for rather than required to be the whole string.
+    static readonly Regex NumberRx = new(@"-?\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?");
 
     public static long Number(string s, int scale)
     {
-        foreach (var field in s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+        var t = s.Trim().Replace('\u00a0', ' ');
+        t = Currency.Replace(t, "").Trim();
+        var neg = t.StartsWith('-') || t.EndsWith('-');
+        t = t.Trim('-').Trim();
+        var hit = NumberRx.Match(t);
+        if (!hit.Success) return 0;
+        var text = hit.Value;
+
+        if (text.Contains(','))
+            text = text.Replace(".", "").Replace(" ", "").Replace(',', '.');
+        else if (text.Count(c => c == '.') != 1 || text[(text.IndexOf('.') + 1)..].Length == 3)
+            text = text.Replace(".", "").Replace(" ", "");
+
+        if (!decimal.TryParse(text, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture, out var v))
+            return 0;
+        try
         {
-            var tok = field.Split('/', 2)[0];
-            if (TryParseNumber(tok, out var v, out var sc)) return Rescale(v, sc, scale);
+            for (var i = 0; i < scale; i++) v *= 10m;
+            return (long)Math.Round(neg ? -v : v, MidpointRounding.AwayFromZero);
         }
-        return 0;
+        catch (OverflowException)
+        {
+            return 0;
+        }
     }
+
+    static readonly Regex Currency = new(@"[€$%]|EUR|Eur");
 
     // Searches rather than matches: the date cell carries its label often enough
     // ("Rechnungsdatum: 08.11.2025") that anchoring loses it.
