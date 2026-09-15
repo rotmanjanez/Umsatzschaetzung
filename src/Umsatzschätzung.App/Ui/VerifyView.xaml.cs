@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
 
@@ -132,7 +134,11 @@ public partial class VerifyView : Screen
     static readonly HashSet<string> Blocking = ["line_total", "sum_net", "missing_field"];
     static readonly Field[] LineFields = [Field.Quantity, Field.Unit, Field.Name, Field.UnitPrice, Field.LineNet, Field.Vat];
 
+    static readonly string[] HeaderFields =
+        [nameof(VerifyModel.Supplier), nameof(VerifyModel.VatId), nameof(VerifyModel.Number), nameof(VerifyModel.Date)];
+
     readonly VerifyModel model = new();
+    readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
     readonly Action<CaseResp> onStored;
     readonly List<OcrPage> pages;
     Invoice draft;
@@ -150,7 +156,12 @@ public partial class VerifyView : Screen
         display = invoiceDisplay;
         pages = ocr?.Pages ?? [];
         DataContext = model;
-        model.Changed += HeaderEdited;
+        model.PropertyChanged += HeaderEdited;
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            _ = Preview();
+        };
         LoadDraft();
         if (pages.Count > 0)
         {
@@ -207,18 +218,25 @@ public partial class VerifyView : Screen
         applying = false;
     }
 
-    void HeaderEdited()
+    void HeaderEdited(object? sender, PropertyChangedEventArgs e)
     {
-        if (applying) return;
+        if (applying || Array.IndexOf(HeaderFields, e.PropertyName) < 0) return;
         draft.SupplierName = model.Supplier;
         draft.SupplierVatId = model.VatId == "" ? null : model.VatId;
         draft.Number = model.Number;
         if (Input.Date(model.Date) is { } d) draft.Date = d;
+        Schedule();
     }
 
     void LineEdited()
     {
-        if (!applying) _ = Preview();
+        if (!applying) Schedule();
+    }
+
+    void Schedule()
+    {
+        timer.Stop();
+        timer.Start();
     }
 
     Invoice Current()
@@ -271,6 +289,7 @@ public partial class VerifyView : Screen
     async void Confirm(object sender, RoutedEventArgs e)
     {
         if (Session.Case is null) return;
+        timer.Stop();
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
         var req = new VerifyReq(Session.Case.Id, Current(), true, false, null, null);
         Session.Message = "Rechnung wird übernommen …";
@@ -295,7 +314,7 @@ public partial class VerifyView : Screen
         var row = new LineRow(new InvoiceLine { No = no + 1, PriceBaseQty = 1000 }, new LineDisplay("", "", "", "", ""), Math.Max(currentPage, 0), []);
         row.Changed += LineEdited;
         model.Lines.Add(row);
-        _ = Preview();
+        Schedule();
     }
 
     void RemoveLine(object sender, RoutedEventArgs e)
@@ -303,7 +322,7 @@ public partial class VerifyView : Screen
         if (((FrameworkElement)sender).DataContext is not LineRow row) return;
         row.Changed -= LineEdited;
         model.Lines.Remove(row);
-        _ = Preview();
+        Schedule();
     }
 
     void CellChanged(object? sender, EventArgs e)
