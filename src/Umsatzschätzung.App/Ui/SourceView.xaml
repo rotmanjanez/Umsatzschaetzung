@@ -1,18 +1,21 @@
 <UserControl x:Class="Umsatzschätzung.App.Ui.SourceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui">
     <DockPanel>
         <DockPanel DockPanel.Dock="Top" Margin="12,8">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Content="−" Style="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"/>
-                <TextBlock x:Name="ZoomText" Text="100 %" VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
+                <TextBlock Text="{Binding Path=(ui:ZoomPan.Zoom), ElementName=Viewer, StringFormat={}{0:P0}}"
+                           VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
                 <Button Content="+" Style="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"/>
                 <Button Content="Anpassen" Style="{StaticResource LinkButton}" Click="ZoomReset"/>
             </StackPanel>
             <TextBlock x:Name="Note" Style="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
         </DockPanel>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <StackPanel x:Name="Pages" Margin="12"/>
+        <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <StackPanel x:Name="Pages" HorizontalAlignment="Left"/>
         </ScrollViewer>
     </DockPanel>
 </UserControl>
