@@ -13,7 +13,6 @@ namespace Umsatzschätzung.App;
 public partial class App : Application
 {
     readonly List<IDisposable> owned = [];
-    ILlmEngine? llm;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -41,7 +40,7 @@ public partial class App : Application
             Shutdown(1);
             return;
         }
-        new Shell(service, llm as ILlmProgress).Show();
+        new Shell(service).Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -59,13 +58,10 @@ public partial class App : Application
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
         var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
-        llm = OpenModel(config);
         var ocr = new RapidOcr();
         owned.Add(ocr);
         var tagger = new Tagger();
         owned.Add(tagger);
-        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, new WindowsPdfPages(), printer, llm, version);
+        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, new WindowsPdfPages(), printer, version);
     }
-
-    ILlmEngine? OpenModel(Config config) => null;
 }

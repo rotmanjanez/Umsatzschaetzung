@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App.Ui;
@@ -10,7 +8,7 @@ public sealed class ImportJob(string caseId, string label) : Observable
     readonly CancellationTokenSource cts = new();
 
     int total, done;
-    string file = "", tps = "";
+    string file = "";
     bool running;
 
     public string CaseId { get; } = caseId;
@@ -26,7 +24,6 @@ public sealed class ImportJob(string caseId, string label) : Observable
     public int Total { get => total; set { if (Set(ref total, value)) Raise(nameof(Text)); } }
     public int Done { get => done; set { if (Set(ref done, value)) Raise(nameof(Text)); } }
     public string File { get => file; set { if (Set(ref file, value)) Raise(nameof(Text)); } }
-    public string Tps { get => tps; set => Set(ref tps, value); }
     public bool Running { get => running; set { if (Set(ref running, value)) Raise(nameof(Text)); } }
 
     public string Text => Running
@@ -39,20 +36,10 @@ public sealed class ImportJob(string caseId, string label) : Observable
 public sealed class Imports
 {
     readonly Session session;
-    readonly Dispatcher dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
 
-    ImportJob? current;
     bool pumping;
-    int lastGen;
-    double lastGenMs;
-    long tokens;
-    double millis;
 
-    public Imports(Session session, ILlmProgress? llm)
-    {
-        this.session = session;
-        if (llm is not null) llm.Progress += OnProgress;
-    }
+    public Imports(Session session) => this.session = session;
 
     public ObservableCollection<ImportJob> Jobs { get; } = [];
 
@@ -89,7 +76,6 @@ public sealed class Imports
         finally
         {
             pumping = false;
-            current = null;
         }
     }
 
@@ -97,9 +83,7 @@ public sealed class Imports
 
     async Task Run(ImportJob job)
     {
-        current = job;
         job.Running = true;
-        ResetStats(job);
         while (job.Queue.Count > 0 && !job.Ct.IsCancellationRequested)
         {
             var file = job.Queue.Dequeue();
@@ -152,35 +136,4 @@ public sealed class Imports
         Finished?.Invoke(job);
         Jobs.Remove(job);
     }
-
-    void ResetStats(ImportJob job)
-    {
-        lastGen = 0;
-        lastGenMs = 0;
-        tokens = 0;
-        millis = 0;
-        job.Tps = "";
-    }
-
-    // The engine reports a few times a second from the worker thread, and imports run one
-    // at a time, so the sample belongs to whichever job is current. A falling token count
-    // means the next completion started, so the finished one folds into the job total.
-    void OnProgress(LlmStats stats)
-    {
-        if (current is not { } job) return;
-        if (stats.GenTokens < lastGen)
-        {
-            tokens += lastGen;
-            millis += lastGenMs;
-        }
-        lastGen = stats.GenTokens;
-        lastGenMs = stats.GenMs;
-        var text = stats.GenTokens == 0 && stats.PromptDone < stats.PromptTokens
-            ? Rate(stats.PromptDone, stats.PromptMs) + " · Beleg wird gelesen"
-            : Rate(tokens + stats.GenTokens, millis + stats.GenMs);
-        dispatcher.BeginInvoke(() => job.Tps = text);
-    }
-
-    static string Rate(long tokens, double ms) =>
-        tokens + " Token · " + (ms > 0 ? tokens * 1000.0 / ms : 0).ToString("0.0") + " T/s";
 }

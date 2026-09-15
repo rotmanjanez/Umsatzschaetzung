@@ -34,7 +34,7 @@ public sealed record SourcePage(byte[]? Image, string? Text);
 
 public sealed record InvoiceSourceResp(string FileName, List<SourcePage> Pages);
 
-public sealed record MappingSuggestResp(List<MappingCandidate> Candidates, string? Model);
+public sealed record MappingSuggestResp(List<MappingCandidate> Candidates);
 
 public sealed record MappingCandidate(ArticleMapping Mapping, int Confidence, OriginKind Kind, string Display);
 

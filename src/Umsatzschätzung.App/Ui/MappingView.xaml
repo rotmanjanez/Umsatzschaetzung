@@ -76,8 +76,8 @@
                                                         <Border Style="{StaticResource BadgeSuccess}" Visibility="{Binding IsExact, Converter={StaticResource Vis}}">
                                                             <TextBlock Text="Exakter Treffer" Style="{StaticResource BadgeText}"/>
                                                         </Border>
-                                                        <Border Style="{StaticResource BadgeInfo}" Visibility="{Binding IsModel, Converter={StaticResource Vis}}">
-                                                            <TextBlock Text="Modellvorschlag" Style="{StaticResource BadgeText}"/>
+                                                        <Border Style="{StaticResource BadgeInfo}" Visibility="{Binding IsLexical, Converter={StaticResource Vis}}">
+                                                            <TextBlock Text="Namensvorschlag" Style="{StaticResource BadgeText}"/>
                                                         </Border>
                                                         <Border Style="{StaticResource Badge}" Visibility="{Binding IsManual, Converter={StaticResource Vis}}">
                                                             <TextBlock Text="Manuell" Style="{StaticResource BadgeText}"/>
