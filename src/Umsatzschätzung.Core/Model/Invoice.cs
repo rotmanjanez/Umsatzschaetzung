@@ -68,6 +68,8 @@ public sealed class OcrWord
 {
     public string Text { get; set; } = "";
     public Box Box { get; set; } = new(0, 0, 0, 0);
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public float Confidence { get; set; }
 }
 
 public sealed class Flag
