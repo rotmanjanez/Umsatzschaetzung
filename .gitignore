@@ -7,3 +7,5 @@ obj
 dist
 *.pfx
 *.pfx.base64
+
+__pycache__

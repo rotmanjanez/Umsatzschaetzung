@@ -3,6 +3,12 @@ using Umsatzschätzung.Casefile;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Rulestore;
 using Umsatzschätzung.Service;
+using Umsatzschätzung.E2e;
+using Umsatzschätzung.Suggest;
+using Umsatzschätzung.Tagging;
+
+if (args is ["tokenizer", var tokenizerDir, ..])
+    return TokenizerParity.Run(tokenizerDir, args.Length > 2 ? args[2] : null);
 
 var data = Path.Combine(AppContext.BaseDirectory, "data");
 var work = Directory.CreateTempSubdirectory("umsatzschätzung-e2e-");
@@ -12,7 +18,7 @@ var seed = Json.Deserialize<RuleSet>(File.ReadAllBytes(Path.Combine(data, "rules
 IService svc = new LocalService(
     new RuleStore(store, snapshots, seed),
     new CaseStore(Path.Combine(work.FullName, "cases")),
-    null, null, null, null, "e2e");
+    null, new Tagger(), null, null, "e2e");
 var ct = CancellationToken.None;
 var checks = 0;
 
@@ -43,6 +49,34 @@ Check(report.Html.Contains("7.335,95 €") && report.Html.Contains("Anhang E"), 
 
 var csv = Encoding.UTF8.GetString((await svc.ExportCase(kase.Case.Id, ExportFormat.Csv, ct)).Data);
 Check(csv.Contains("Kalkulierter Umsatz (netto);7.335,95 €"), "csv export");
+
+Pack? Size(string text) => PackSize.Read(text);
+Check(Size("Kiste Pils 20 x 0,5 l") == new Pack(20, 500, Unit.Ml), "pack: count times litres");
+Check(Size("Mehl Type 550 25 kg Sack") == new Pack(1, 25000, Unit.G), "pack: kilograms, article number is not a size");
+Check(Size("Weisswein trocken 0,75 l 12% vol") == new Pack(1, 750, Unit.Ml), "pack: alcohol strength is not a size");
+Check(Size("Cola PET 24x0,33") == new Pack(24, 330, null), "pack: unitless count times value reads as litres");
+Check(Size("Servietten 3-lagig 250 Stk") == new Pack(250, 1000, Unit.Piece), "pack: piece count");
+Check(Size("Trg 6er Limo 0,33 l") == new Pack(6, 330, Unit.Ml), "pack: multipack prefix ahead of the size");
+Check(Size("Rinderhuefte, Abrechnung je kg") is null, "pack: nothing to read");
+Check(PackSize.Strip("Kiste Pils 20 x 0,5 l") == "Pils", "strip: packaging goes, the ware stays");
+Check(PackSize.Strip("Mehl Type 550 25 kg Sack") == "Mehl Type 550", "strip: a number outside a pack size is not packaging");
+Check(Matcher.Factor(null, "KGM", Unit.G) == 1000, "factor falls back to the billed unit");
+Check(Matcher.Factor(new Pack(1, 750, Unit.Ml), "XBO", Unit.G) is null, "factor rejects a size in the wrong base unit");
+
+async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
+    (await svc.SuggestMapping(new InvoiceLine { Name = name, UnitCode = unitCode }, "ATU00000000", ct)).Candidates;
+
+var keg = await Suggest("Fassbier Pils, Keg 50 l", "XKG");
+Check(keg.Count > 0 && keg[0].Mapping.IngredientId == "ing.bier.fass" && keg[0].Mapping.Factor == 50000,
+    "suggest: keg maps to the draught beer");
+Check(keg[0].Kind == OriginKind.Lexical && keg[0].Confidence is > 0 and < 100, "suggest: candidate is lexical and not certain");
+
+var schnaps = await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO");
+Check(schnaps.Count > 0 && schnaps[0].Mapping.IngredientId == "ing.korn" && schnaps[0].Mapping.Factor == 700,
+    "suggest: bottle size beats the alcohol strength");
+
+Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: deposit has no ingredient");
+Check((await Suggest("Fassbier Pils, Keg 50 l", "XKG"))[0].Mapping.Factor == 50000, "suggest: index is reused");
 
 var parsed = await svc.ParseInvoice(kase.Case.Id, "zugferd.pdf", File.ReadAllBytes(Path.Combine(data, "zugferd.pdf")), ct);
 Check(!parsed.NeedsOcr && parsed.Invoice.Number == "RE-20201121/508" && parsed.Invoice.Lines.Count == 3, "zugferd parse");
@@ -84,5 +118,25 @@ var restored = Reopen();
 Check(restored.Notice is not null && restored.Load().Version == 2, "corrupt store restored from snapshot");
 Check(Directory.GetFiles(store, "rules.db.defekt-*").Length == 1, "corrupt file kept aside");
 
+// Dynamic ranking: a confirmed mapping teaches the wording, and the wording carries
+// to a line nobody has seen, with its own pack size.
+Check((await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG")).Count == 0, "suggest: unknown wording maps to nothing");
+await svc.SaveRule(new ArticleMapping
+{
+    Id = "map.zwickl",
+    SupplierVatId = "ATU00000000",
+    SupplierArticleId = "Z-1",
+    Observed = "Zwickl naturtrueb, Keg 30 l",
+    IngredientId = "ing.bier.fass",
+    Factor = 30000,
+    Confirmed = true,
+}, ct);
+var learned = await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG");
+Check(learned.Count > 0 && learned[0].Mapping.IngredientId == "ing.bier.fass" && learned[0].Mapping.Factor == 50000,
+    "suggest: one confirmation teaches the wording and the new pack size still decides the factor");
+Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: what was learnt does not drag the deposit line along");
+
 work.Delete(true);
 Console.WriteLine($"ok, {checks} checks");
+
+return 0;
