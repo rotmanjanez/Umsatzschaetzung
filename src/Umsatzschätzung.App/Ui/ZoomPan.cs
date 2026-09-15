@@ -21,6 +21,9 @@ public static class ZoomPan
     public static readonly DependencyProperty ZoomProperty = DependencyProperty.RegisterAttached(
         "Zoom", typeof(double), typeof(ZoomPan), new PropertyMetadata(1.0, ZoomChanged, CoerceZoom));
 
+    static readonly DependencyProperty FitProperty = DependencyProperty.RegisterAttached(
+        "Fit", typeof(double), typeof(ZoomPan), new PropertyMetadata(1.0, FitChanged));
+
     static readonly DependencyProperty StateProperty = DependencyProperty.RegisterAttached(
         "State", typeof(State), typeof(ZoomPan));
 
@@ -32,21 +35,28 @@ public static class ZoomPan
 
     public static double GetZoom(ScrollViewer viewer) => (double)viewer.GetValue(ZoomProperty);
 
+    static double GetFit(ScrollViewer viewer) => (double)viewer.GetValue(FitProperty);
+
     public static void ZoomBy(ScrollViewer viewer, double factor) =>
         ZoomAt(viewer, GetZoom(viewer) * factor, new Point(viewer.ViewportWidth / 2, viewer.ViewportHeight / 2));
 
     public static void FitWidth(ScrollViewer viewer)
     {
-        if (Content(viewer) is not { ActualWidth: > 0 } content) return;
-        var room = viewer.ViewportWidth > 0 ? viewer.ViewportWidth : viewer.ActualWidth - viewer.Padding.Left - viewer.Padding.Right;
-        if (room <= 0) return;
-        SetZoom(viewer, room / content.ActualWidth);
+        if (WidthRatio(viewer) is not { } ratio) return;
+        SetZoom(viewer, ratio / GetFit(viewer));
         viewer.ScrollToHome();
+    }
+
+    static double? WidthRatio(ScrollViewer viewer)
+    {
+        if (Content(viewer) is not { ActualWidth: > 0 } content) return null;
+        var room = viewer.ActualWidth - viewer.Padding.Left - viewer.Padding.Right - SystemParameters.VerticalScrollBarWidth;
+        return room > 0 ? room / content.ActualWidth : null;
     }
 
     public static void Reveal(ScrollViewer viewer, Rect box)
     {
-        var zoom = GetZoom(viewer);
+        var zoom = Scale(viewer);
         var scaled = new Rect(box.X * zoom, box.Y * zoom, box.Width * zoom, box.Height * zoom);
         viewer.ScrollToHorizontalOffset(Clamp(viewer.HorizontalOffset, scaled.Left, scaled.Right, viewer.ViewportWidth));
         viewer.ScrollToVerticalOffset(Clamp(viewer.VerticalOffset, scaled.Top, scaled.Bottom, viewer.ViewportHeight));
@@ -57,6 +67,8 @@ public static class ZoomPan
         if (far - near >= viewport || near < offset) return near - viewport / 4;
         return far > offset + viewport ? far - viewport * 3 / 4 : offset;
     }
+
+    static double Scale(ScrollViewer viewer) => GetZoom(viewer) * GetFit(viewer);
 
     static object CoerceZoom(DependencyObject o, object value) => Math.Clamp((double)value, Min, Max);
 
@@ -69,9 +81,13 @@ public static class ZoomPan
         viewer.SetValue(StateProperty, (bool)e.NewValue ? new State(viewer) : null);
     }
 
-    static void ZoomChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+    static void ZoomChanged(DependencyObject o, DependencyPropertyChangedEventArgs e) => Reapply(o);
+
+    static void FitChanged(DependencyObject o, DependencyPropertyChangedEventArgs e) => Reapply(o);
+
+    static void Reapply(DependencyObject o)
     {
-        if (o is ScrollViewer viewer && viewer.GetValue(StateProperty) is State state) state.Apply((double)e.NewValue);
+        if (o is ScrollViewer viewer && viewer.GetValue(StateProperty) is State state) state.Apply();
     }
 
     static void ZoomAt(ScrollViewer viewer, double zoom, Point pivot)
@@ -101,6 +117,8 @@ public static class ZoomPan
             viewer.PreviewMouseDown += Down;
             viewer.PreviewMouseMove += Move;
             viewer.PreviewMouseUp += Up;
+            viewer.SizeChanged += Refit;
+            viewer.ScrollChanged += Scrolled;
             viewer.Loaded += Loaded;
             viewer.Unloaded += Unloaded;
             if (viewer.IsLoaded) Loaded(viewer, new RoutedEventArgs());
@@ -112,6 +130,8 @@ public static class ZoomPan
             viewer.PreviewMouseDown -= Down;
             viewer.PreviewMouseMove -= Move;
             viewer.PreviewMouseUp -= Up;
+            viewer.SizeChanged -= Refit;
+            viewer.ScrollChanged -= Scrolled;
             viewer.Loaded -= Loaded;
             viewer.Unloaded -= Unloaded;
             Unloaded(viewer, new RoutedEventArgs());
@@ -119,16 +139,27 @@ public static class ZoomPan
                 content.LayoutTransform = Transform.Identity;
         }
 
-        public void Apply(double zoom)
+        public void Apply()
         {
             if (Content(viewer) is not { } content) return;
             content.LayoutTransform = scale;
-            scale.ScaleX = scale.ScaleY = zoom;
+            scale.ScaleX = scale.ScaleY = Scale(viewer);
+        }
+
+        void Scrolled(object? sender, ScrollChangedEventArgs e)
+        {
+            if (e.ExtentWidthChange != 0) Refit(sender, e);
+        }
+
+        void Refit(object? sender, EventArgs e)
+        {
+            if (WidthRatio(viewer) is { } ratio) viewer.SetValue(FitProperty, Math.Min(1, ratio));
         }
 
         void Loaded(object? sender, RoutedEventArgs e)
         {
-            Apply(GetZoom(viewer));
+            Refit(viewer, EventArgs.Empty);
+            Apply();
             if (hwnd is null && PresentationSource.FromVisual(viewer) is HwndSource source)
             {
                 hwnd = source;
