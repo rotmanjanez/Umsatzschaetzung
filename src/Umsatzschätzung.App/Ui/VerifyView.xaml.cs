@@ -345,6 +345,19 @@ public partial class VerifyView : Screen
         FocusBox.Width = box.W + 8;
         FocusBox.Height = box.H + 8;
         FocusBox.Visibility = Visibility.Visible;
+        ZoomPan.Reveal(Viewer, new Rect(box.X - 4, box.Y - 4, box.W + 8, box.H + 8));
+    }
+
+    void ZoomIn(object sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, ZoomPan.Step);
+
+    void ZoomOut(object sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, 1 / ZoomPan.Step);
+
+    void ZoomFit(object sender, RoutedEventArgs e) => FitPage();
+
+    void FitPage()
+    {
+        Viewer.UpdateLayout();
+        ZoomPan.FitWidth(Viewer);
     }
 
     void ShowPage(int index)
@@ -362,6 +375,7 @@ public partial class VerifyView : Screen
         PageImage.Height = h;
         FocusBox.Visibility = Visibility.Collapsed;
         RenderFlagged();
+        FitPage();
     }
 
     void RenderFlagged()

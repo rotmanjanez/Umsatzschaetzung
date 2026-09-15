@@ -74,17 +74,23 @@
             <Grid>
                 <DockPanel x:Name="OcrPane">
                     <DockPanel DockPanel.Dock="Top" Margin="12,8">
-                        <ComboBox x:Name="PageSelect" DockPanel.Dock="Right" MinWidth="120" SelectionChanged="PageChanged"/>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="−" Style="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"/>
+                            <TextBlock Text="{Binding Path=(ui:ZoomPan.Zoom), ElementName=Viewer, StringFormat={}{0:P0}}"
+                                       VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
+                            <Button Content="+" Style="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"/>
+                            <Button Content="Anpassen" Style="{StaticResource LinkButton}" Click="ZoomFit"/>
+                            <ComboBox x:Name="PageSelect" MinWidth="120" Margin="8,0,0,0" SelectionChanged="PageChanged"/>
+                        </StackPanel>
                         <TextBlock Text="Beleg" Style="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
                     </DockPanel>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <Viewbox Stretch="Uniform" StretchDirection="Both" Margin="12" HorizontalAlignment="Left" VerticalAlignment="Top">
-                            <Canvas x:Name="PageCanvas">
-                                <Image x:Name="PageImage" Stretch="Fill"/>
-                                <Canvas x:Name="Flagged"/>
-                                <Rectangle x:Name="FocusBox" Stroke="{StaticResource FocusBoxBrush}" StrokeThickness="3" RadiusX="3" RadiusY="3" Visibility="Collapsed"/>
-                            </Canvas>
-                        </Viewbox>
+                    <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <Canvas x:Name="PageCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <Image x:Name="PageImage" Stretch="Fill"/>
+                            <Canvas x:Name="Flagged"/>
+                            <Rectangle x:Name="FocusBox" Stroke="{StaticResource FocusBoxBrush}" StrokeThickness="3" RadiusX="3" RadiusY="3" Visibility="Collapsed"/>
+                        </Canvas>
                     </ScrollViewer>
                 </DockPanel>
                 <ui:SourceView x:Name="Source" Visibility="Collapsed"/>
