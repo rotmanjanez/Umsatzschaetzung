@@ -54,6 +54,9 @@ public sealed class ArticleMapping : IRuleEntity
     public string? SupplierArticleId { get; set; }
     public string? Gtin { get; set; }
     public string? Name { get; set; }
+    // The invoice wording this mapping was made from. Never matched against — it is
+    // what the suggester learns a supplier's vocabulary from.
+    public string? Observed { get; set; }
     public string? UnitCode { get; set; }
     public string IngredientId { get; set; } = "";
     public long Factor { get; set; }
@@ -81,7 +84,7 @@ public static class ArticleName
     }
 }
 
-public enum OriginKind { Exact, Model, Manual }
+public enum OriginKind { Exact, Lexical, Manual }
 
 public static class Match
 {

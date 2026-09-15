@@ -13,14 +13,14 @@ using Umsatzschätzung.Tagging;
 
 namespace Umsatzschätzung.Service;
 
-public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, ILlmEngine? llm, string appVersion) : IService
+public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion) : IService
 {
     const int AutoMapMinConfidence = 60;
     const int ScanDpi = 300;
     const int PreviewDpi = 150;
     static readonly HashSet<string> BlockingFlags = ["line_total", "sum_net", "missing_field"];
 
-    readonly Matcher matcher = new(llm);
+    readonly Matcher matcher = new();
 
     public Task<StatusResp> Status(CancellationToken ct) => Guard(() =>
     {
@@ -194,12 +194,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceSourceResp(name, pages);
     });
 
-    public Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplierVatId, CancellationToken ct) => Guard(async () =>
+    public Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplierVatId, CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
-        var sugs = await matcher.Suggest(rs, supplierVatId, line, ct);
-        var candidates = sugs.Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind, Display.CandidateLabel(rs, sg.Mapping))).ToList();
-        return new MappingSuggestResp(candidates, sugs.Any(sg => sg.Kind == OriginKind.Model) ? llm?.Model : null);
+        var sugs = matcher.Suggest(rs, supplierVatId, line);
+        return new MappingSuggestResp(sugs
+            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind, Display.CandidateLabel(rs, sg.Mapping)))
+            .ToList());
     });
 
     public Task<ReportDisplay> Calculate(string caseId, CancellationToken ct) => Guard(() =>
@@ -280,15 +281,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             return rs;
         }
         if (!ask) return rs;
-        List<Suggestion> sugs;
-        try
-        {
-            sugs = await matcher.Suggest(rs, inv.SupplierVatId, l, ct);
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            return rs;
-        }
+        var sugs = matcher.Suggest(rs, inv.SupplierVatId, l);
         if (sugs.Count == 0) return rs;
         var sg = sugs[0];
         if (sg.Kind == OriginKind.Exact)

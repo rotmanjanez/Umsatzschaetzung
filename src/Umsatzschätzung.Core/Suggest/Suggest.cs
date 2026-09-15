@@ -1,74 +1,108 @@
-using Umsatzschätzung.Service;
 using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.Suggest;
 
 public sealed record Suggestion(ArticleMapping Mapping, int Confidence, OriginKind Kind);
 
-public sealed class Matcher(ILlmEngine? engine)
+public sealed class Matcher
 {
-    public async Task<List<Suggestion>> Suggest(RuleSet rs, string? supplierVatId, InvoiceLine line, CancellationToken ct)
+    const int Candidates = 5;
+    const double MinScore = 0.5;
+
+    // Load() hands out a fresh RuleSet every call, so the version is the key: one
+    // Matcher belongs to one rule store and reindexes only once a save bumps it.
+    long indexed = -1;
+    Lexicon? lexicon;
+    Evidence? evidence;
+
+    public List<Suggestion> Suggest(RuleSet rs, string? supplierVatId, InvoiceLine line)
     {
         if (Match.Mapping(rs, supplierVatId, DateOnly.FromDateTime(DateTime.Now), line) is { } hit)
             return [new Suggestion(hit, 100, OriginKind.Exact)];
-        if (engine is null) return [];
-        var ingredients = ActiveIngredients(rs);
-        if (ingredients.Count == 0) return [];
-        if (ingredients.Count > Prompt.CategoryThreshold)
-        {
-            var category = await AskCategory(engine, line, ingredients, ct);
-            var narrowed = ingredients.Where(i => i.Category == category).ToList();
-            if (narrowed.Count > 0) ingredients = narrowed;
-        }
-        var ans = await AskIngredient(engine, line, ingredients, ct);
-        if (!rs.Ingredients.TryGetValue(ans.IngredientId, out var ing)) return [];
-        if (FactorOf(ans.Count, ans.SizeMilli, ing.BaseUnit) is not { } factor) return [];
-        var mapping = new ArticleMapping
-        {
-            SupplierVatId = supplierVatId,
-            Gtin = line.Gtin,
-            IngredientId = ing.Id,
-            Factor = factor,
-        };
-        if (!string.IsNullOrEmpty(supplierVatId)) mapping.SupplierArticleId = line.SellerArticleId;
-        if (string.IsNullOrEmpty(mapping.SupplierArticleId) && string.IsNullOrEmpty(mapping.Gtin)) mapping.Name = line.Name;
-        return [new Suggestion(mapping, ans.Confidence, OriginKind.Model)];
-    }
 
-    static List<Ingredient> ActiveIngredients(RuleSet rs)
-    {
-        var today = DateOnly.FromDateTime(DateTime.Now);
-        return rs.Ingredients.Values
-            .Where(i => i.Meta.ValidOn(today))
-            .OrderBy(i => i.Id, StringComparer.Ordinal)
+        Index(rs);
+        var scores = lexicon!.Score(line.Name);
+        foreach (var (id, learned) in evidence!.Score(line.Name, supplierVatId))
+            scores[id] = Fuse(scores.GetValueOrDefault(id), learned);
+
+        var pack = PackSize.Read(line.Name);
+        return scores
+            .Where(s => s.Value >= MinScore && rs.Ingredients.ContainsKey(s.Key))
+            .OrderByDescending(s => s.Value)
+            .ThenBy(s => s.Key, StringComparer.Ordinal)
+            .Select(s => (Score: s.Value, Ingredient: rs.Ingredients[s.Key]))
+            .Select(c => (c.Score, c.Ingredient, Factor: Factor(pack, line.UnitCode, c.Ingredient.BaseUnit)))
+            .Where(c => c.Factor is not null)
+            .Take(Candidates)
+            .Select(c => new Suggestion(
+                Mapping(supplierVatId, line, c.Ingredient.Id, c.Factor!.Value),
+                Confidence(c.Score),
+                OriginKind.Lexical))
             .ToList();
     }
 
-    public static long? FactorOf(long count, long sizeMilli, Unit baseUnit)
+    // Either signal on its own can carry a candidate, and two weak ones that agree
+    // beat one. Nothing to weight by hand: with no history the evidence term is 0
+    // and the name match decides, as it did before there was anything to learn from.
+    static double Fuse(double name, double learned) => 1 - (1 - name) * (1 - learned);
+
+    void Index(RuleSet rs)
     {
-        if (count <= 0 || sizeMilli <= 0) return null;
-        var factor = count * sizeMilli;
-        if (baseUnit == Unit.Piece) factor /= 1000;
-        return factor <= 0 ? null : factor;
+        if (indexed == rs.Version && lexicon is not null && evidence is not null) return;
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var active = rs.Ingredients.Values.Where(i => i.Meta.ValidOn(today))
+            .OrderBy(i => i.Id, StringComparer.Ordinal).ToList();
+        var ids = active.Select(i => i.Id).ToHashSet(StringComparer.Ordinal);
+        var log = rs.Mappings.Keys.Order(StringComparer.Ordinal)
+            .Select(id => rs.Mappings[id])
+            .Where(m => m.Meta.ValidOn(today))
+            .ToList();
+        lexicon = new Lexicon(Names(active, ids, log));
+        evidence = new Evidence(log, ids);
+        indexed = rs.Version;
     }
 
-    static async Task<string> AskCategory(ILlmEngine engine, InvoiceLine line, List<Ingredient> ingredients, CancellationToken ct)
+    // Character matching sees the ingredient's own name and the wording of mappings
+    // somebody checked. Unreviewed wording is left to Evidence, which discounts it.
+    static IEnumerable<(Ingredient, string)> Names(List<Ingredient> active, HashSet<string> ids, List<ArticleMapping> log)
     {
-        var cats = Prompt.Categories(ingredients);
-        if (cats.Count == 0) return "";
-        var raw = await engine.Complete(new LlmRequest(
-            Prompt.CategoryPrompt,
-            Prompt.LineText(line) + "\nWarengruppen:\n" + string.Join("\n", cats) + "\n",
-            48), ct);
-        return raw.Trim();
+        var byId = active.ToDictionary(i => i.Id, StringComparer.Ordinal);
+        foreach (var ing in active) yield return (ing, ing.Name);
+        foreach (var m in log)
+            if (m.Confirmed && Wording(m) is { } text && ids.Contains(m.IngredientId))
+                yield return (byId[m.IngredientId], text);
     }
 
-    async Task<Answer> AskIngredient(ILlmEngine engine, InvoiceLine line, List<Ingredient> ingredients, CancellationToken ct)
+    public static string? Wording(ArticleMapping m) =>
+        !string.IsNullOrEmpty(m.Observed) ? m.Observed : !string.IsNullOrEmpty(m.Name) ? m.Name : null;
+
+    static int Confidence(double score) => Math.Clamp((int)Math.Round(score * 100), 1, 99);
+
+    static ArticleMapping Mapping(string? supplierVatId, InvoiceLine line, string ingredientId, long factor)
     {
-        var raw = await engine.Complete(new LlmRequest(
-            Prompt.SystemPrompt,
-            Prompt.IngredientUser(line, ingredients),
-            96), ct);
-        return Prompt.ParseAnswer(raw);
+        var m = new ArticleMapping
+        {
+            SupplierVatId = supplierVatId,
+            Gtin = line.Gtin,
+            Observed = line.Name,
+            IngredientId = ingredientId,
+            Factor = factor,
+        };
+        if (!string.IsNullOrEmpty(supplierVatId)) m.SupplierArticleId = line.SellerArticleId;
+        if (string.IsNullOrEmpty(m.SupplierArticleId) && string.IsNullOrEmpty(m.Gtin)) m.Name = line.Name;
+        return m;
+    }
+
+    // One invoice unit in base units. From the pack size in the description, or
+    // else from the billed unit when that alone already fixes the amount.
+    public static long? Factor(Pack? pack, string unitCode, Unit baseUnit)
+    {
+        if (pack is { } p)
+        {
+            if (baseUnit == Unit.Piece) return p.Base == Unit.Piece ? p.Count : null;
+            return p.Base == baseUnit || p.Base is null ? p.Count * p.Size : null;
+        }
+        if (Units.Lookup(unitCode) is not { } u || u.Base != baseUnit) return null;
+        return u.Factor;
     }
 }

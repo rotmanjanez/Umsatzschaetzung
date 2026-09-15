@@ -13,10 +13,10 @@ public partial class Shell : Window
     Screen? current;
     RulesWindow? rules;
 
-    public Shell(IService service, ILlmProgress? llm)
+    public Shell(IService service)
     {
         InitializeComponent();
-        session = new Session(service, llm);
+        session = new Session(service);
         ImportList.ItemsSource = session.Imports.Jobs;
         cases = new CasesView(session);
         screens =
