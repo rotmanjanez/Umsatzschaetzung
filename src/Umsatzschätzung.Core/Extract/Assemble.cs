@@ -3,8 +3,8 @@ using Umsatzschätzung.Tagging;
 
 namespace Umsatzschätzung.Extract;
 
-// Labelled words to an Invoice. Port of tools/eval/assemble.py, which is the reference the
-// eval scores both models against; keep the two in step.
+// Labelled words to an Invoice. Shared by the app and by tools/eval, so both models are
+// scored through the same assembly the app ships.
 public static class Assemble
 {
     static readonly Field[] Header =
