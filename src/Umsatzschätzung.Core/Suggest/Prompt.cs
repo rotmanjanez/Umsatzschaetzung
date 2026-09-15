@@ -36,18 +36,6 @@ internal static class Prompt
         Wähle die Warengruppe, in die die Rechnungsposition am ehesten gehört.
         """;
 
-    const string IngredientGrammarHead = """
-        root ::= "{" ws "\"ingredientId\":" ws id "," ws "\"count\":" ws int "," ws "\"size\":" ws num "," ws "\"confidence\":" ws conf ws "}"
-        """ + "\nid ::= ";
-
-    const string IngredientGrammarTail = """
-
-        int ::= [1-9] [0-9]? [0-9]? [0-9]? [0-9]?
-        num ::= [0-9] [0-9]? [0-9]? [0-9]? [0-9]? ("." [0-9] [0-9]? [0-9]?)?
-        conf ::= "100" | [1-9] [0-9]? | "0"
-        ws ::= [ \t\n]*
-        """ + "\n";
-
     public static string LineText(InvoiceLine line)
     {
         var b = new StringBuilder();
@@ -69,15 +57,6 @@ internal static class Prompt
 
     public static List<string> Categories(IReadOnlyList<Ingredient> ingredients) =>
         ingredients.Select(i => i.Category).Where(c => c != "").Distinct().Order(StringComparer.Ordinal).ToList();
-
-    static string Literal(string s) => "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
-
-    static string JsonString(string s) => Literal("\"" + s + "\"");
-
-    public static string IngredientGrammar(IReadOnlyList<Ingredient> ingredients) =>
-        IngredientGrammarHead + string.Join(" | ", ingredients.Select(i => i.Id).Append("none").Select(JsonString)) + IngredientGrammarTail;
-
-    public static string CategoryGrammar(IReadOnlyList<string> cats) => "root ::= " + string.Join(" | ", cats.Select(Literal)) + "\n";
 
     public static Answer ParseAnswer(string raw)
     {

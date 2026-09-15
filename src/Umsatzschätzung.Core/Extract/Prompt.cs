@@ -52,18 +52,9 @@ internal static class Prompt
         wird bei einem Summenblock mit "MwSt 19 %" die Position {"row": 14, "quantity": "6", "unit": "Kiste", "name": "Mineralwasser 12 x 0,7 l", "unitPrice": "9,60", "lineNet": "57,60", "vat": "19"}.
         """;
 
-    public const string Grammar = """
-        root ::= "{" ws "\"number\":" ws str "," ws "\"date\":" ws str "," ws "\"supplier\":" ws str "," ws "\"netTotal\":" ws str "," ws "\"grossTotal\":" ws str "," ws "\"lines\":" ws "[" ws (line (ws "," ws line)*)? ws "]" ws "}"
-        line ::= "{" ws "\"row\":" ws int "," ws "\"quantity\":" ws str "," ws "\"unit\":" ws str "," ws "\"name\":" ws str "," ws "\"unitPrice\":" ws str "," ws "\"lineNet\":" ws str "," ws "\"vat\":" ws str ws "}"
-        str ::= "\"" char* "\""
-        char ::= [^"\\\x00-\x1F\x7F] | "\\" ["\\/bfnrt]
-        int ::= "-1" | [0-9] [0-9]? [0-9]? [0-9]?
-        ws ::= [ \t\n]*
-        """ + "\n";
-
     public static async Task<Answer> Ask(ILlmEngine engine, IReadOnlyList<Row> rows, CancellationToken ct)
     {
-        var request = new LlmRequest(SystemPrompt, Rows.Render(rows), Grammar, BaseTokens + TokensPerRow * Math.Min(rows.Count, MaxRowsPerCall));
+        var request = new LlmRequest(SystemPrompt, Rows.Render(rows), BaseTokens + TokensPerRow * Math.Min(rows.Count, MaxRowsPerCall));
         var raw = await engine.Complete(request, ct);
         try
         {

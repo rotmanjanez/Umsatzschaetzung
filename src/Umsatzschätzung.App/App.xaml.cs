@@ -5,7 +5,6 @@ using Umsatzschätzung.App.Platform;
 using Umsatzschätzung.App.Ui;
 using Umsatzschätzung.Casefile;
 using Umsatzschätzung.Rulestore;
-using Umsatzschätzung.Llama;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App;
@@ -63,11 +62,5 @@ public partial class App : Application
         return new LocalService(rules, new CaseStore(config.CaseDir), new WindowsOcr(), new WindowsPdfPages(), printer, llm, version);
     }
 
-    ILlmEngine? OpenModel(Config config)
-    {
-        if (!File.Exists(Path.Combine(config.ModelDir, LlamaEngine.ModelFile))) return null;
-        var engine = new LazyLlmEngine(config.ModelDir);
-        owned.Add(engine);
-        return engine;
-    }
+    ILlmEngine? OpenModel(Config config) => null;
 }

@@ -51,15 +51,6 @@
     </ComponentGroup>
 
     <ComponentGroup Id="Model" Directory="ModelFolder">
-      <Component Id="WeightsShard1">
-        <File Source="$(var.ModelShard1)" KeyPath="yes" />
-      </Component>
-      <Component Id="WeightsShard2">
-        <File Source="$(var.ModelShard2)" KeyPath="yes" />
-      </Component>
-      <Component Id="WeightsShard3">
-        <File Source="$(var.ModelShard3)" KeyPath="yes" />
-      </Component>
       <Component Id="RegistryModel">
         <RegistryKey Root="HKLM" Key="SOFTWARE\Umsatzschätzung">
           <RegistryValue Name="ModelDir" Type="string" Value="[ModelFolder]" KeyPath="yes" />
