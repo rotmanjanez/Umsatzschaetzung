@@ -18,19 +18,3 @@ public interface IPdfPrinter
 {
     Task<byte[]> Print(string html, CancellationToken ct);
 }
-
-public sealed record LlmRequest(string System, string User, int MaxTokens);
-
-public interface ILlmEngine : IDisposable
-{
-    string Model { get; }
-    Task<string> Complete(LlmRequest request, CancellationToken ct);
-}
-
-public sealed record LlmStats(int PromptTokens, int PromptDone, int GenTokens, double PromptMs, double GenMs);
-
-// Raised a few times a second while a completion runs, from the thread running it.
-public interface ILlmProgress
-{
-    event Action<LlmStats>? Progress;
-}

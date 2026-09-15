@@ -18,10 +18,10 @@ public sealed class Session : Observable
     string message = "";
     string error = "";
 
-    public Session(IService service, ILlmProgress? llm)
+    public Session(IService service)
     {
         Service = service;
-        Imports = new Imports(this, llm);
+        Imports = new Imports(this);
     }
 
     public IService Service { get; }
