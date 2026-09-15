@@ -1,4 +1,3 @@
-using System.Text;
 using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.Extract;
@@ -12,8 +11,6 @@ internal sealed class Row(OcrWord first)
 
 internal static class Rows
 {
-    const int MaxGapSpaces = 8;
-
     public static List<Row> GroupRows(IEnumerable<OcrWord> words)
     {
         var rows = new List<Row>();
@@ -50,32 +47,5 @@ internal static class Rows
         var x = Math.Min(a.X, b.X);
         var y = Math.Min(a.Y, b.Y);
         return new Box(x, y, Math.Max(a.X + a.W, b.X + b.W) - x, Math.Max(a.Y + a.H, b.Y + b.H) - y);
-    }
-
-    public static string Render(IReadOnlyList<Row> rows)
-    {
-        var b = new StringBuilder();
-        for (var i = 0; i < rows.Count; i++)
-        {
-            var r = rows[i];
-            b.Append(i).Append('|');
-            var em = Math.Max(1, MedianHeight(r.Words));
-            var right = r.Words[0].Box.X;
-            foreach (var w in r.Words)
-            {
-                var gap = w.Box.X - right;
-                b.Append(' ', Math.Min(MaxGapSpaces, Math.Max(1, (2 * gap + em / 2) / em)));
-                b.Append(w.Text);
-                right = w.Box.X + w.Box.W;
-            }
-            b.Append('\n');
-        }
-        return b.ToString();
-    }
-
-    static int MedianHeight(List<OcrWord> words)
-    {
-        var hs = words.Select(w => w.Box.H).Order().ToList();
-        return hs[hs.Count / 2];
     }
 }

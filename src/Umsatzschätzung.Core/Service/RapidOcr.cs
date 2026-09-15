@@ -8,20 +8,28 @@ namespace Umsatzschätzung.Service;
 
 public sealed class RapidOcr : IOcr, IDisposable
 {
-    public const string Name = "RapidOcrNet/PP-OCRv5-latin";
+    public const string Name = "RapidOcrNet/PP-OCRv6-det-small+PP-OCRv5-latin-rec";
 
     // The detector caps the long side at this before it runs. Boxes come back in
     // source pixels regardless, but the cap is what limits how small a glyph may be
     // on the page and still be read, so the corpus dumps record it.
-    public const int MaxImageDimension = 1024;
+    public const int MaxImageDimension = 4000;
 
-    static readonly RapidOcrOptions Options = RapidOcrOptions.Default with { ReturnWordBox = true };
+    static readonly RapidOcrOptions Options =
+        RapidOcrOptions.PPOCRv6 with { ReturnWordBox = true, MaxSideLen = MaxImageDimension };
 
+    // The v6 detector is paired with the v5 latin recogniser: v6 recognises far more
+    // scripts than these invoices need and is slower for it. The two halves normalise
+    // differently — v6 wants [-1, 1], v5 wants ImageNet statistics — so the detector's
+    // own mean and deviation have to travel with its path.
+    //
     // The model paths in the package presets are relative, and the corpus tool is run
     // from wherever the corpus lives.
     static readonly RapidOcrModelSet Models = RapidOcrModelSet.PPOCRv5Latin with
     {
-        DetModelPath = Beside(RapidOcrModelSet.PPOCRv5Latin.DetModelPath),
+        DetModelPath = Beside("models/v6/PP-OCRv6_det_small.onnx"),
+        DetMean = RapidOcrModelSet.PPOCRv6Small.DetMean,
+        DetStd = RapidOcrModelSet.PPOCRv6Small.DetStd,
         ClsModelPath = Beside(RapidOcrModelSet.PPOCRv5Latin.ClsModelPath),
         RecModelPath = Beside(RapidOcrModelSet.PPOCRv5Latin.RecModelPath),
         KeysPath = Beside(RapidOcrModelSet.PPOCRv5Latin.KeysPath),
@@ -29,7 +37,17 @@ public sealed class RapidOcr : IOcr, IDisposable
 
     static string Beside(string path) => Path.Combine(AppContext.BaseDirectory, path);
 
+    readonly RapidOcrModelSet models;
+    readonly RapidOcrOptions options;
     Engine? engine;
+
+    public RapidOcr() : this(Models, Options) { }
+
+    internal RapidOcr(RapidOcrModelSet models, RapidOcrOptions options)
+    {
+        this.models = models;
+        this.options = options;
+    }
 
     public void Dispose() => engine?.Dispose();
 
@@ -49,7 +67,7 @@ public sealed class RapidOcr : IOcr, IDisposable
     OcrResult Read(SKBitmap page)
     {
         engine ??= Open();
-        return engine.Detect(page, Options);
+        return engine.Detect(page, options);
     }
 
     static List<OcrWord> Words(OcrResult result)
@@ -89,16 +107,16 @@ public sealed class RapidOcr : IOcr, IDisposable
         };
     }
 
-    static Engine Open()
+    Engine Open()
     {
         var engine = new Engine();
-        try { engine.InitModels(Models); }
+        try { engine.InitModels(models); }
         catch (Exception e)
         {
             engine.Dispose();
             throw new InvalidOperationException(
                 "Die Texterkennungsmodelle konnten nicht geladen werden. Erwartet unter " +
-                Path.Combine(AppContext.BaseDirectory, "models", "v5") + ".", e);
+                Path.Combine(AppContext.BaseDirectory, "models") + ".", e);
         }
         return engine;
     }

@@ -14,6 +14,16 @@
     <EmbeddedResource Include="../../docs/rechenweg.md" LogicalName="rechenweg.md" />
     <EmbeddedResource Include="Rulestore/seed.json" LogicalName="seed.json" />
   </ItemGroup>
+  <!-- The tagger ships the same way: the 132 MB int8 ONNX and the four tokenizer
+       artefacts are dropped into models/b at the repo root, not checked in. -->
+  <ItemGroup>
+    <ContentWithTargetPath Include="../../models/b/*" TargetPath="models/b/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <!-- The v6 detector is not in the RapidOcrNet package; it sits beside the tagger
+       models under models/v6 and ships the same way. -->
+  <ItemGroup>
+    <ContentWithTargetPath Include="models/v6/*" TargetPath="models/v6/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <!-- RapidOcrNet copies its ONNX models next to its own build output, and build
        targets do not travel across a project reference, so anything referencing Core
        would come up without models. Declare them as content instead: that does travel. -->

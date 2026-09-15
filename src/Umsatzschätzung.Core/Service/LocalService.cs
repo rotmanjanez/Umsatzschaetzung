@@ -9,10 +9,11 @@ using Umsatzschätzung.Reports;
 using Umsatzschätzung.Rules;
 using Umsatzschätzung.Rulestore;
 using Umsatzschätzung.Suggest;
+using Umsatzschätzung.Tagging;
 
 namespace Umsatzschätzung.Service;
 
-public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IPdfPages? pdf, IPdfPrinter? printer, ILlmEngine? llm, string appVersion) : IService
+public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, ILlmEngine? llm, string appVersion) : IService
 {
     const int AutoMapMinConfidence = 60;
     const int ScanDpi = 300;
@@ -108,7 +109,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
     public Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
     {
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
-        if (llm is null) throw new ServiceError(ErrorCode.Unsupported, "Belegerkennung nicht verfügbar: kein Sprachmodell konfiguriert");
         var pages = new List<ExtractPage>();
         switch (InvoiceParser.Detect(data))
         {
@@ -123,7 +123,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, IP
                 throw new ServiceError(ErrorCode.Unsupported, $"\"{fileName}\" ist kein Scan");
         }
         if (pages.Count == 0) throw new ServiceError(ErrorCode.Unsupported, $"keine Seiten in \"{fileName}\" gefunden");
-        var (draft, output) = await Extractor.InvoiceAsync(llm, pages, ct);
+        var (draft, output) = await Extractor.InvoiceAsync(tagger, pages, ct);
         draft.Id = NewId("re-");
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);

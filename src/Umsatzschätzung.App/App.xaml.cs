@@ -6,6 +6,7 @@ using Umsatzschätzung.App.Ui;
 using Umsatzschätzung.Casefile;
 using Umsatzschätzung.Rulestore;
 using Umsatzschätzung.Service;
+using Umsatzschätzung.Tagging;
 
 namespace Umsatzschätzung.App;
 
@@ -61,7 +62,9 @@ public partial class App : Application
         llm = OpenModel(config);
         var ocr = new RapidOcr();
         owned.Add(ocr);
-        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, new WindowsPdfPages(), printer, llm, version);
+        var tagger = new Tagger();
+        owned.Add(tagger);
+        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, new WindowsPdfPages(), printer, llm, version);
     }
 
     ILlmEngine? OpenModel(Config config) => null;

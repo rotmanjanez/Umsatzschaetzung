@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.Extract;
@@ -11,8 +12,6 @@ public static class Parse
     public const int ScaleMicro = 6;
     public const int ScaleCents = 2;
     public const int ScaleBp = 2;
-
-    static readonly string[] DateLayouts = ["dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy", "yyyy-MM-dd"];
 
     public static bool TryParseNumber(string input, out long value, out int scale)
     {
@@ -99,8 +98,47 @@ public static class Parse
         return 0;
     }
 
-    public static DateOnly? Date(string s) =>
-        DateOnly.TryParseExact(s.Trim(), DateLayouts, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+    // Searches rather than matches: the date cell carries its label often enough
+    // ("Rechnungsdatum: 08.11.2025") that anchoring loses it.
+    static readonly (Regex Rx, int Y, int M, int D)[] DatePatterns =
+    [
+        (new(@"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)"), 1, 2, 3),
+        (new(@"(?<!\d)(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})(?!\d)"), 3, 2, 1),
+        (new(@"(?<!\d)(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2})(?!\d)"), 3, 2, 1),
+    ];
+
+    static readonly Regex NamedDate = new(@"(\d{1,2})\.?\s+(\p{L}+)\s+(\d{4})");
+
+    static readonly string[] Months =
+    [
+        "januar", "februar", "märz", "april", "mai", "juni",
+        "juli", "august", "september", "oktober", "november", "dezember",
+    ];
+
+    public static DateOnly? Date(string s)
+    {
+        s = s.Trim();
+        foreach (var (rx, y, m, d) in DatePatterns)
+        {
+            var hit = rx.Match(s);
+            if (!hit.Success) continue;
+            var year = int.Parse(hit.Groups[y].Value, CultureInfo.InvariantCulture);
+            return Make(year < 100 ? year + 2000 : year,
+                int.Parse(hit.Groups[m].Value, CultureInfo.InvariantCulture),
+                int.Parse(hit.Groups[d].Value, CultureInfo.InvariantCulture));
+        }
+        var named = NamedDate.Match(s);
+        if (!named.Success) return null;
+        var month = Array.IndexOf(Months, named.Groups[2].Value.ToLowerInvariant()) + 1;
+        return month == 0 ? null
+            : Make(int.Parse(named.Groups[3].Value, CultureInfo.InvariantCulture), month,
+                int.Parse(named.Groups[1].Value, CultureInfo.InvariantCulture));
+    }
+
+    static DateOnly? Make(int year, int month, int day) =>
+        month is >= 1 and <= 12 && day >= 1 && year is >= 1 and <= 9999 && day <= DateTime.DaysInMonth(year, month)
+            ? new DateOnly(year, month, day)
+            : null;
 
     public static string UnitCode(string text)
     {
