@@ -7,7 +7,7 @@ public sealed record Suggestion(ArticleMapping Mapping, int Confidence, OriginKi
 public sealed class Matcher
 {
     const int Candidates = 5;
-    const double MinScore = 0.5;
+    const double MinScore = 0.4;
 
     // Load() hands out a fresh RuleSet every call, so the version is the key: one
     // Matcher belongs to one rule store and reindexes only once a save bumps it.
@@ -97,12 +97,19 @@ public sealed class Matcher
     // else from the billed unit when that alone already fixes the amount.
     public static long? Factor(Pack? pack, string unitCode, Unit baseUnit)
     {
-        if (pack is { } p)
-        {
-            if (baseUnit == Unit.Piece) return p.Base == Unit.Piece ? p.Count : null;
-            return p.Base == baseUnit || p.Base is null ? p.Count * p.Size : null;
-        }
+        if (Packed(pack, baseUnit) is { } packed) return packed;
         if (Units.Lookup(unitCode) is not { } u || u.Base != baseUnit) return null;
         return u.Factor;
+    }
+
+    // A pack size that does not fit the base unit says nothing about the amount —
+    // "Brötchen Weizen 55 g" billed per piece is a weight per piece, not a pack.
+    // The billed unit still answers it, so a mismatch here falls through rather
+    // than dropping the candidate.
+    static long? Packed(Pack? pack, Unit baseUnit)
+    {
+        if (pack is not { } p) return null;
+        if (baseUnit == Unit.Piece) return p.Base == Unit.Piece ? p.Count : null;
+        return p.Base == baseUnit || p.Base is null ? p.Count * p.Size : null;
     }
 }
