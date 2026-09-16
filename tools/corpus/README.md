@@ -144,3 +144,11 @@ exits and lists what is installed. The same tool dumps the real scans in
 Transferring the labels from `truth.json` onto the OCR words by IoU plus text
 similarity. That is the step that turns the two files above into training rows, and
 it is where the genuine OCR errors become part of the supervision.
+
+## Einheiten
+
+Die Codes stehen nur in `data/units.json`. `vocab.py` führt je Warengruppe den
+gedruckten Einheitentext und die Stückzahl je Gebinde; den Code holt `content.py`
+über `tools/units.py` aus derselben Datei, die `Umsatzschätzung.Core/Model/Units.cs`
+einbettet. UN/ECE Rec 20: Packmittel aus Rec 21 tragen dort das Präfix X — `XCT`,
+nicht `CT`.

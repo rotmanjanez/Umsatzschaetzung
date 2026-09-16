@@ -7,7 +7,7 @@ namespace Umsatzschätzung.Eval;
 
 public sealed record Variation(string Invoice, string Template, List<List<TaggedWord>> Pages, bool PerLineVat);
 
-// page.jsonl and expected.json, as tools/corpus and tools/trainb --dump write them.
+// page.jsonl and expected.json, as tools/corpus and tools/train --dump write them.
 public static class Corpus
 {
     public static IEnumerable<Variation> Read(string rows, string split, bool repair)
@@ -108,23 +108,6 @@ public static class Corpus
     }
 
     static bool Number(string t) => ReadsAsNumber.IsMatch(t.Trim());
-
-    // tools/corpus/vocab.py, which is what expected.json carries. Deliberately NOT
-    // Model/Units.cs: the app answers Kt with XCT and Kiste with XCS, the corpus with CT
-    // and BX. Unifying them would rewrite the ground truth to make the app look right.
-    static readonly Dictionary<string, string> Units = new(StringComparer.Ordinal)
-    {
-        ["stk"] = "H87", ["st"] = "H87", ["stück"] = "H87", ["stueck"] = "H87", ["ea"] = "H87",
-        ["kg"] = "KGM", ["g"] = "GRM", ["gr"] = "GRM", ["l"] = "LTR", ["ltr"] = "LTR", ["ml"] = "MLT",
-        ["kt"] = "CT", ["karton"] = "CT", ["kar"] = "CT", ["pk"] = "PK", ["pack"] = "PK",
-        ["fl"] = "BO", ["flasche"] = "BO", ["ds"] = "CA", ["dose"] = "CA", ["ki"] = "BX",
-        ["kiste"] = "BX", ["bd"] = "BE", ["bund"] = "BE", ["pal"] = "PF", ["sack"] = "BG",
-        ["btl"] = "XBG", ["beutel"] = "XBG", ["fass"] = "BA", ["rolle"] = "RO", ["ro"] = "RO",
-        ["eimer"] = "BJ", ["ei"] = "BJ",
-    };
-
-    public static string UnitCode(string text) =>
-        text.Length == 0 ? "" : Units.GetValueOrDefault(text.Trim().Trim('.').ToLowerInvariant(), "");
 
     public static Doc Expected(string path)
     {

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Umsatzschätzung.Model;
@@ -24,83 +25,32 @@ public static class Bp
     public const long Full = 10000;
 }
 
-public sealed record UnitInfo(string Code, string Name, Unit Base, long Factor);
+public sealed record UnitInfo(string Code, string Name, Unit Base, long Factor, string[] Aliases);
 
 public static class Units
 {
-    static readonly Dictionary<string, UnitInfo> Table = new UnitInfo[]
-    {
-        new("KGM", "Kilogramm", Unit.G, 1000),
-        new("GRM", "Gramm", Unit.G, 1),
-        new("LTR", "Liter", Unit.Ml, 1000),
-        new("MLT", "Milliliter", Unit.Ml, 1),
-        new("CLT", "Zentiliter", Unit.Ml, 10),
-        new("H87", "Stück", Unit.Piece, 1),
-        new("C62", "Einheit", Unit.Piece, 1),
-        new("PCE", "Stück", Unit.Piece, 1),
-        new("EA", "Stück", Unit.Piece, 1),
-        new("XBO", "Flasche", Unit.Piece, 1),
-        new("XCT", "Karton", Unit.Piece, 1),
-        new("XCS", "Kiste", Unit.Piece, 1),
-        new("XBX", "Box", Unit.Piece, 1),
-        new("XPK", "Packung", Unit.Piece, 1),
-        new("XCR", "Kasten", Unit.Piece, 1),
-        new("XBA", "Fass", Unit.Piece, 1),
-        new("XKG", "Keg", Unit.Piece, 1),
-        new("XBG", "Beutel", Unit.Piece, 1),
-        new("XCI", "Kanister", Unit.Piece, 1),
-        new("XSA", "Sack", Unit.Piece, 1),
-        new("XCA", "Dose", Unit.Piece, 1),
-        new("XRO", "Rolle", Unit.Piece, 1),
-        new("XBH", "Bund", Unit.Piece, 1),
-    }.ToDictionary(u => u.Code, StringComparer.OrdinalIgnoreCase);
+    // data/units.json ist die einzige Kopie; tools/units.py liest dieselbe Datei.
+    static readonly UnitInfo[] All = Load();
 
-    static readonly Dictionary<string, string> Alias = new(StringComparer.OrdinalIgnoreCase)
+    static readonly Dictionary<string, UnitInfo> Table =
+        All.ToDictionary(u => u.Code, StringComparer.OrdinalIgnoreCase);
+
+    static readonly Dictionary<string, string> Alias =
+        (from u in All from a in u.Aliases select (a, u.Code))
+        .ToDictionary(x => x.a, x => x.Code, StringComparer.OrdinalIgnoreCase);
+
+    static UnitInfo[] Load()
     {
-        ["stk"] = "H87",
-        ["st"] = "H87",
-        ["stck"] = "H87",
-        ["stück"] = "H87",
-        ["stueck"] = "H87",
-        ["pc"] = "H87",
-        ["fl"] = "XBO",
-        ["fla"] = "XBO",
-        ["flasche"] = "XBO",
-        ["flaschen"] = "XBO",
-        ["kt"] = "XCT",
-        ["karton"] = "XCT",
-        ["kartons"] = "XCT",
-        ["ki"] = "XCS",
-        ["kiste"] = "XCS",
-        ["kisten"] = "XCS",
-        ["kasten"] = "XCR",
-        ["fass"] = "XKG",
-        ["fässer"] = "XKG",
-        ["beutel"] = "XBG",
-        ["btl"] = "XBG",
-        ["kanister"] = "XCI",
-        ["kan"] = "XCI",
-        ["sack"] = "XSA",
-        ["säcke"] = "XSA",
-        ["sa"] = "XSA",
-        ["pk"] = "XPK",
-        ["pkg"] = "XPK",
-        ["packung"] = "XPK",
-        ["pack"] = "XPK",
-        ["dose"] = "XCA",
-        ["box"] = "XBX",
-        ["rolle"] = "XRO",
-        ["rollen"] = "XRO",
-        ["bund"] = "XBH",
-        ["ds"] = "XCA",
-        ["kg"] = "KGM",
-        ["g"] = "GRM",
-        ["l"] = "LTR",
-        ["lt"] = "LTR",
-        ["ltr"] = "LTR",
-        ["ml"] = "MLT",
-        ["cl"] = "CLT",
-    };
+        using var stream = typeof(Units).Assembly.GetManifestResourceStream("units.json")
+            ?? throw new InvalidOperationException("units.json fehlt in der Assembly.");
+        using var json = JsonDocument.Parse(stream);
+        return [.. json.RootElement.GetProperty("units").EnumerateArray().Select(u => new UnitInfo(
+            u.GetProperty("code").GetString()!,
+            u.GetProperty("name").GetString()!,
+            u.GetProperty("base").GetString() switch { "ml" => Unit.Ml, "g" => Unit.G, _ => Unit.Piece },
+            u.GetProperty("factor").GetInt64(),
+            [.. u.GetProperty("aliases").EnumerateArray().Select(a => a.GetString()!)]))];
+    }
 
     public static ValueUnit Value(Unit u) => u switch
     {

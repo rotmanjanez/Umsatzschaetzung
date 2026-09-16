@@ -1,8 +1,13 @@
 import datetime as dt
 import random
+import sys
+from pathlib import Path
 
 import money
 import vocab
+
+sys.path[:0] = [str(Path(__file__).resolve().parent.parent)]
+import units  # noqa: E402
 
 
 CONSONANTS = "bcdfghjklmnpqrstvwxyz"
@@ -152,7 +157,8 @@ def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share):
     cat = vocab.CATEGORIES[category]
     lines = []
     for no in range(1, count + 1):
-        unit_text, unit_code, pack = rng.choice(cat["units"])
+        unit_text, pack = rng.choice(cat["units"])
+        unit_code = units.code(unit_text)
         quantity = rng.choice([1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 48, 60, 100, 120])
         if unit_code in ("KGM", "LTR") and rng.random() < 0.5:
             quantity = quantity * money.QTY + rng.choice([0, 250, 500, 750, 100, 400]) * (money.QTY // 1000)
