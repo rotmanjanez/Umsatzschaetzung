@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Avalonia.Platform.Storage;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
@@ -28,13 +30,14 @@ public sealed class InvoicesModel : Observable
 {
     bool empty = true;
     bool dragging;
+    bool selected;
 
     public ObservableCollection<InvoiceRow> Invoices { get; } = [];
 
     public bool Empty
     {
         get => empty;
-        set { if (Set(ref empty, value)) Raise(nameof(DropHint)); }
+        set => Set(ref empty, value);
     }
 
     public bool Dragging
@@ -43,7 +46,15 @@ public sealed class InvoicesModel : Observable
         set { if (Set(ref dragging, value)) Raise(nameof(DropHint)); }
     }
 
-    public bool DropHint => dragging && !empty;
+    public bool Selected
+    {
+        get => selected;
+        set { if (Set(ref selected, value)) { Raise(nameof(Idle)); Raise(nameof(DropHint)); } }
+    }
+
+    public bool Idle => !selected;
+
+    public bool DropHint => dragging && selected;
 }
 
 public partial class InvoicesView : Screen
@@ -104,16 +115,20 @@ public partial class InvoicesView : Screen
         if (!refreshing) ShowDetail(List.SelectedItem as InvoiceRow);
     }
 
+    void ListPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if ((e.Source as Visual)?.FindAncestorOfType<ListBoxItem>(true) is null) List.SelectedItem = null;
+    }
+
     void ShowDetail(InvoiceRow? row)
     {
+        model.Selected = row is not null;
         if (row is null)
         {
             SwapVerify(null);
             Detail.IsVisible = false;
-            EmptyDetail.IsVisible = !model.Empty;
             return;
         }
-        EmptyDetail.IsVisible = false;
         if (row.IsDraft)
         {
             Detail.IsVisible = false;
