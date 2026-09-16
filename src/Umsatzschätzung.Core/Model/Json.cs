@@ -12,6 +12,7 @@ namespace Umsatzschätzung.Model;
     WriteIndented = true)]
 [JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(RuleSet))]
+[JsonSerializable(typeof(Category))]
 [JsonSerializable(typeof(Ingredient))]
 [JsonSerializable(typeof(ArticleMapping))]
 [JsonSerializable(typeof(Product))]

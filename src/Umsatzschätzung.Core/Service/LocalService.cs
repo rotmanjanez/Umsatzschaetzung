@@ -46,6 +46,15 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return RulesResp(rules.Save(rule));
     });
 
+    public Task<RuleSetResp> DeleteRule(Entity kind, string id, CancellationToken ct) => Guard(() =>
+    {
+        var rs = rules.Load();
+        if (rs.Find(kind, id) is null) throw new ServiceError(ErrorCode.NotFound, $"{Format.EntityName(kind)} \u201e{id}\u201c");
+        if (RuleCheck.Users(rs, kind, id) is { Count: > 0 } users)
+            throw new ServiceError(ErrorCode.Conflict, $"{Format.EntityName(kind)} wird noch verwendet von: {string.Join(", ", users)}");
+        return RulesResp(rules.Delete(kind, id));
+    });
+
     static RuleSetResp RulesResp(RuleSet rs) => new(rs, Display.Rules(rs));
 
     public Task<ListCasesResp> ListCases(CancellationToken ct) => Guard(() => Task.FromResult(new ListCasesResp(

@@ -1,39 +1,62 @@
 {
   "version": 1041,
+  "categories": {
+    "cat.bier.flasche": {
+      "id": "cat.bier.flasche",
+      "name": "Bier Flasche",
+      "meta": {
+        "changedAt": "2026-09-16T00:00:00+00:00"
+      }
+    },
+    "cat.bier.vom.fass": {
+      "id": "cat.bier.vom.fass",
+      "name": "Bier vom Fass",
+      "meta": {
+        "changedAt": "2026-09-16T00:00:00+00:00"
+      }
+    },
+    "cat.spirituosen": {
+      "id": "cat.spirituosen",
+      "name": "Spirituosen",
+      "meta": {
+        "changedAt": "2026-09-16T00:00:00+00:00"
+      }
+    }
+  },
   "hash": "sha256:3f1c6a2d9b74e08c5a11d4f2c7e93b6081aa25de4c0f7b83915e6d2af4c81b07",
   "ingredients": {
     "ing.bier.fass": {
       "id": "ing.bier.fass",
       "name": "Fassbier Pils",
       "baseUnit": "ml",
-      "category": "Bier vom Fass",
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1001,
         "changedAt": "2024-01-08T09:12:00Z"
-      }
+      },
+      "categoryId": "cat.bier.vom.fass"
     },
     "ing.bier.flasche": {
       "id": "ing.bier.flasche",
       "name": "Flaschenbier Pils 0,33 l",
       "baseUnit": "ml",
-      "category": "Bier Flasche",
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1002,
         "changedAt": "2024-01-08T09:12:00Z"
-      }
+      },
+      "categoryId": "cat.bier.flasche"
     },
     "ing.korn": {
       "id": "ing.korn",
       "name": "Doppelkorn 38 % vol",
       "baseUnit": "ml",
-      "category": "Spirituosen",
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1003,
         "changedAt": "2024-01-08T09:12:00Z"
-      }
+      },
+      "categoryId": "cat.spirituosen"
     }
   },
   "mappings": {
@@ -161,7 +184,6 @@
     "yr.bier.fass": {
       "id": "yr.bier.fass",
       "name": "Fassbier Standard",
-      "category": "Bier vom Fass",
       "shrinkage": 300,
       "ownUse": 0,
       "staff": 100,
@@ -172,12 +194,12 @@
         "validFrom": "2024-01-01",
         "changeId": 1030,
         "changedAt": "2024-01-08T09:44:00Z"
-      }
+      },
+      "categoryId": "cat.bier.vom.fass"
     },
     "yr.bier.flasche": {
       "id": "yr.bier.flasche",
       "name": "Flaschenbier Standard",
-      "category": "Bier Flasche",
       "shrinkage": 0,
       "ownUse": 0,
       "staff": 100,
@@ -188,12 +210,12 @@
         "validFrom": "2024-01-01",
         "changeId": 1031,
         "changedAt": "2024-01-08T09:44:00Z"
-      }
+      },
+      "categoryId": "cat.bier.flasche"
     },
     "yr.spirituosen": {
       "id": "yr.spirituosen",
       "name": "Spirituosen Standard",
-      "category": "Spirituosen",
       "shrinkage": 200,
       "ownUse": 100,
       "staff": 0,
@@ -204,7 +226,8 @@
         "validFrom": "2024-01-01",
         "changeId": 1032,
         "changedAt": "2024-01-08T09:44:00Z"
-      }
+      },
+      "categoryId": "cat.spirituosen"
     }
   }
 }

@@ -14,6 +14,15 @@ public static class Format
 
     public static string Date(DateOnly? d) => d is { } x ? $"{x.Day:D2}.{x.Month:D2}.{x.Year:D4}" : "";
 
+    public static string EntityName(Entity e) => e switch
+    {
+        Entity.Category => "Kategorie",
+        Entity.Ingredient => "Zutat",
+        Entity.Mapping => "Zuordnung",
+        Entity.Product => "Produkt",
+        _ => "Ausbeuteregel",
+    };
+
     public static string UnitName(Unit u) => u switch
     {
         Unit.Ml => "ml",

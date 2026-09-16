@@ -22,6 +22,8 @@ public sealed class Session : Observable
     public static readonly FilePickerFileType[] PdfFilter = [new("PDF") { Patterns = ["*.pdf"] }];
     public static readonly FilePickerFileType[] CsvFilter = [new("CSV") { Patterns = ["*.csv"] }];
 
+    static readonly Dictionary<string, string> NoCategories = [];
+
     string error = "";
 
     public Session(IService service)
@@ -134,12 +136,13 @@ public sealed class Session : Observable
         return SaveRule(data, ct);
     }
 
-    public Task<bool> Retire(Entity entity, string id, CancellationToken ct)
-    {
-        if (Rules?.RuleSet.Find(entity, id) is not { } e) return Task.FromResult(false);
-        e.Meta.ValidTo = DateOnly.FromDateTime(DateTime.Now);
-        return SaveRule(e, ct);
-    }
+    public Task<bool> Delete(Entity entity, string id, CancellationToken ct) =>
+        Run(async () =>
+        {
+            Rules = await Service.DeleteRule(entity, id, ct);
+            RulesChanged?.Invoke();
+            await LoadStatus(ct);
+        });
 
     Task<bool> SaveRule(IRuleEntity rule, CancellationToken ct) =>
         Run(async () =>
@@ -157,15 +160,15 @@ public sealed class Session : Observable
             await LoadStatus(ct);
         });
 
-    public static string EntityLabel(Entity e) => e switch
-    {
-        Entity.Ingredient => "Zutat",
-        Entity.Mapping => "Zuordnung",
-        Entity.Product => "Produkt",
-        _ => "Ertragsregel",
-    };
-
     public static string NewId(string prefix) => prefix + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(6));
+
+    public List<Category> Categories() =>
+        Rules is null ? [] : Rules.RuleSet.Categories.Values.OrderBy(c => c.Name, StringComparer.Ordinal).ToList();
+
+    public IReadOnlyDictionary<string, string> CategoryNames => Rules?.Display.Categories ?? NoCategories;
+
+    public string CategoryName(string? id) =>
+        string.IsNullOrEmpty(id) ? "" : CategoryNames.GetValueOrDefault(id, "");
 
     public List<Ingredient> Ingredients() =>
         Rules is null ? [] : Rules.RuleSet.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();

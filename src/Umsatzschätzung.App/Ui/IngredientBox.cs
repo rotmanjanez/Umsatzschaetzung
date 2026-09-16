@@ -12,6 +12,18 @@ namespace Umsatzschätzung.App.Ui;
 // Picker for the long ingredient list: tippen filtert nach Name oder Kategorie.
 public sealed class IngredientBox : AutoCompleteBox
 {
+    // Kategorienamen liegen beim Verweisziel, nicht bei der Zutat. Die Ansicht setzt sie
+    // einmal je Regelstand; über den Logikbaum erreichen sie auch Boxen in Vorlagen.
+    public static readonly AttachedProperty<IReadOnlyDictionary<string, string>?> CategoryNamesProperty =
+        AvaloniaProperty.RegisterAttached<IngredientBox, Control, IReadOnlyDictionary<string, string>?>(
+            "CategoryNames", inherits: true);
+
+    public static void SetCategoryNames(Control target, IReadOnlyDictionary<string, string>? value) =>
+        target.SetValue(CategoryNamesProperty, value);
+
+    public static IReadOnlyDictionary<string, string>? GetCategoryNames(Control target) =>
+        target.GetValue(CategoryNamesProperty);
+
     public IngredientBox()
     {
         FilterMode = AutoCompleteFilterMode.Custom;
@@ -20,7 +32,7 @@ public sealed class IngredientBox : AutoCompleteBox
         IsTextCompletionEnabled = false;
         PlaceholderText = "Zutat suchen …";
         ValueMemberBinding = new Binding(nameof(Ingredient.Name));
-        ItemTemplate = new FuncDataTemplate<Ingredient>((_, _) => Row(), true);
+        ItemTemplate = new FuncDataTemplate<Ingredient>((i, _) => Row(Category(i)), false);
     }
 
     protected override void OnGotFocus(FocusChangedEventArgs e)
@@ -39,26 +51,29 @@ public sealed class IngredientBox : AutoCompleteBox
         else SetCurrentValue(TextProperty, "");
     }
 
-    static Control Row()
+    string Category(Ingredient? i) =>
+        i is null ? "" : GetCategoryNames(this)?.GetValueOrDefault(i.CategoryId) ?? "";
+
+    static Control Row(string category)
     {
         var name = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
         name[!TextBlock.TextProperty] = new Binding(nameof(Ingredient.Name));
-        var category = new TextBlock
+        var label = new TextBlock
         {
+            Text = category,
             FontSize = 12,
             Margin = new Thickness(16, 0, 0, 0),
             VerticalAlignment = VerticalAlignment.Center,
         };
-        category[!TextBlock.TextProperty] = new Binding(nameof(Ingredient.Category));
-        category[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
-        DockPanel.SetDock(category, Dock.Right);
-        return new DockPanel { Children = { category, name } };
+        label[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
+        DockPanel.SetDock(label, Dock.Right);
+        return new DockPanel { Children = { label, name } };
     }
 
-    static bool Matches(string? text, Ingredient i)
+    bool Matches(string? text, Ingredient i)
     {
         var terms = (text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var s = i.Name + " " + i.Category;
+        var s = i.Name + " " + Category(i);
         return terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -19,23 +19,38 @@ public sealed class StockRow : Observable
     public string Closing { get => closing; set => Set(ref closing, value); }
 }
 
+public sealed class RuleOption(YieldRule rule, string text)
+{
+    public YieldRule Rule { get; } = rule;
+    public string Text { get; } = text;
+    public string Source => Rule.Source;
+}
+
+public sealed class YieldKindGroup(string kind, List<YieldGroupRow> rows) : Observable
+{
+    YieldGroupRow? selectedRow;
+
+    public string Kind { get; } = kind;
+    public List<YieldGroupRow> Rows { get; } = rows;
+    public YieldGroupRow? SelectedRow { get => selectedRow; set => Set(ref selectedRow, value); }
+}
+
 public sealed class YieldGroupRow : Observable
 {
-    YieldRule? selected;
+    RuleOption? selected;
 
-    public YieldGroupRow(YieldChoice choice, string label, string kind, List<YieldRule> rules)
+    public YieldGroupRow(YieldChoice choice, string label, List<YieldRule> rules)
     {
         Choice = choice;
         Label = label;
-        Kind = kind;
-        Rules = rules;
+        Options = rules.Select(r => new RuleOption(r, r.Name)).ToList();
     }
 
     public YieldChoice Choice { get; }
     public string Label { get; }
-    public string Kind { get; }
-    public List<YieldRule> Rules { get; }
-    public YieldRule? Selected { get => selected; set => Set(ref selected, value); }
+    public List<RuleOption> Options { get; }
+    // The detail list nulls its selection while it rebinds; a row always has a rule, so ignore that.
+    public RuleOption? Selected { get => selected; set { if (value is not null) Set(ref selected, value); } }
 }
 
 public sealed class CaseModel : Observable
@@ -44,7 +59,8 @@ public sealed class CaseModel : Observable
 
     string label = "", from = "", to = "", name = "", taxNumber = "", pab = "";
     readonly string[] declared = ["", "", ""];
-    bool noYields = true, noInvoices;
+    YieldGroupRow? detail;
+    bool noYields = true, noInvoices, syncing;
 
     public string Label { get => label; set => Set(ref label, value); }
     public string From { get => from; set => Set(ref from, value); }
@@ -58,7 +74,23 @@ public sealed class CaseModel : Observable
     public bool NoYields { get => noYields; private set => Set(ref noYields, value); }
     public bool NoInvoices { get => noInvoices; private set => Set(ref noInvoices, value); }
     public ObservableCollection<StockRow> Stock { get; } = [];
-    public ObservableCollection<YieldGroupRow> Yields { get; } = [];
+    public ObservableCollection<YieldKindGroup> Yields { get; } = [];
+
+    // Which scope the right-hand column shows. View state, not case data — it deliberately
+    // raises without Changed so browsing the list never marks the Prüfung dirty.
+    public YieldGroupRow? Detail
+    {
+        get => detail;
+        private set
+        {
+            if (ReferenceEquals(detail, value)) return;
+            detail = value;
+            Raise();
+            Raise(nameof(NoDetail));
+        }
+    }
+
+    public bool NoDetail => detail is null;
 
     public void Load(Session session)
     {
@@ -84,12 +116,26 @@ public sealed class CaseModel : Observable
                 Closing = e.Closing.ToString(),
             });
         Yields.Clear();
-        foreach (var g in YieldGroups(session, ingredients))
+        Detail = null;
+        foreach (var group in YieldGroups(session, ingredients))
         {
-            g.Selected = Chosen(k, g);
-            Yields.Add(g);
+            foreach (var row in group.Rows) row.Selected = Chosen(k, row);
+            group.Changed += () => Show(group);
+            Yields.Add(group);
         }
         NoYields = Yields.Count == 0;
+        if (Yields.Count > 0) Yields[0].SelectedRow = Yields[0].Rows[0];
+    }
+
+    // One selection across both lists: picking in one clears the other.
+    void Show(YieldKindGroup active)
+    {
+        if (syncing) return;
+        syncing = true;
+        foreach (var g in Yields)
+            if (!ReferenceEquals(g, active)) g.SelectedRow = null;
+        syncing = false;
+        Detail = active.SelectedRow;
     }
 
     public bool Collect(Case k)
@@ -124,42 +170,67 @@ public sealed class CaseModel : Observable
             k.Inventory.Add(new InventoryEntry { IngredientId = row.Ingredient.Id, Opening = opening.Value, Closing = closing.Value });
         }
         k.Yields = Yields
-            .Where(g => g.Selected is not null)
-            .Select(g => new YieldChoice { IngredientId = g.Choice.IngredientId, Category = g.Choice.Category, YieldRuleId = g.Selected!.Id })
+            .SelectMany(g => g.Rows)
+            .Where(r => r.Selected is not null)
+            .Select(r => new YieldChoice { IngredientId = r.Choice.IngredientId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule.Id })
             .ToList();
         return valid;
     }
 
-    static List<YieldGroupRow> YieldGroups(Session session, List<Ingredient> ingredients)
+    // Only what this Prüfung actually touches: an empty café has no business being offered fuel or funerals.
+    static List<YieldKindGroup> YieldGroups(Session session, List<Ingredient> ingredients)
     {
-        var groups = new List<YieldGroupRow>();
-        if (session.Rules is null) return groups;
-        var rules = session.Rules.RuleSet.YieldRules.Values.OrderBy(r => r.Name, StringComparer.Ordinal).ToList();
+        if (session.Rules is null || session.Case is null) return [];
+        var rs = session.Rules.RuleSet;
+        var used = InCase(session.Case, rs);
+        var rules = rs.YieldRules.Values.OrderBy(r => r.Name, StringComparer.Ordinal).ToList();
+        List<YieldGroupRow> byCategory = [], byIngredient = [];
         var seen = new HashSet<string>();
         foreach (var ing in ingredients)
         {
-            if (ing.Category != "" && seen.Add(ing.Category))
+            if (!used.Contains(ing.Id)) continue;
+            if (ing.CategoryId != "" && seen.Add(ing.CategoryId))
             {
-                var byCategory = rules.Where(r => string.IsNullOrEmpty(r.IngredientId) && r.Category == ing.Category).ToList();
-                if (byCategory.Count > 1)
-                    groups.Add(new YieldGroupRow(new YieldChoice { Category = ing.Category }, ing.Category, "Kategorie", byCategory));
+                var forCategory = rules.Where(r => string.IsNullOrEmpty(r.IngredientId) && r.CategoryId == ing.CategoryId).ToList();
+                if (forCategory.Count > 1)
+                    byCategory.Add(new YieldGroupRow(
+                        new YieldChoice { CategoryId = ing.CategoryId }, session.CategoryName(ing.CategoryId), forCategory));
             }
-            var byIngredient = rules.Where(r => r.IngredientId == ing.Id).ToList();
-            if (byIngredient.Count > 1)
-                groups.Add(new YieldGroupRow(new YieldChoice { IngredientId = ing.Id }, ing.Name, "Zutat", byIngredient));
+            var forIngredient = rules.Where(r => r.IngredientId == ing.Id).ToList();
+            if (forIngredient.Count > 1)
+                byIngredient.Add(new YieldGroupRow(new YieldChoice { IngredientId = ing.Id }, ing.Name, forIngredient));
         }
-        return groups.OrderBy(g => g.Kind, StringComparer.Ordinal).ToList();
+        List<YieldKindGroup> groups = [];
+        if (byCategory.Count > 0) groups.Add(new YieldKindGroup("Nach Kategorie", Sorted(byCategory)));
+        if (byIngredient.Count > 0) groups.Add(new YieldKindGroup("Nach Zutat", Sorted(byIngredient)));
+        return groups;
     }
 
-    static YieldRule Chosen(Case k, YieldGroupRow g)
+    static List<YieldGroupRow> Sorted(List<YieldGroupRow> rows) =>
+        rows.OrderBy(r => r.Label, StringComparer.Ordinal).ToList();
+
+    static HashSet<string> InCase(Case k, RuleSet rs)
+    {
+        var ids = new HashSet<string>();
+        foreach (var e in k.Inventory) ids.Add(e.IngredientId);
+        foreach (var p in k.Products)
+            if (rs.Products.TryGetValue(p.ProductId, out var product))
+                foreach (var line in product.Recipe) ids.Add(line.IngredientId);
+        foreach (var invoice in k.Invoices)
+            foreach (var line in invoice.Lines)
+                if (Match.Mapping(rs, invoice.SupplierVatId, invoice.Date, line) is { } m) ids.Add(m.IngredientId);
+        return ids;
+    }
+
+    static RuleOption Chosen(Case k, YieldGroupRow row)
     {
         foreach (var y in k.Yields)
         {
-            if (y.IngredientId != g.Choice.IngredientId || y.Category != g.Choice.Category) continue;
-            var rule = g.Rules.Find(r => r.Id == y.YieldRuleId);
-            if (rule is not null) return rule;
+            if (y.IngredientId != row.Choice.IngredientId || y.CategoryId != row.Choice.CategoryId) continue;
+            var option = row.Options.Find(o => o.Rule.Id == y.YieldRuleId);
+            if (option is not null) return option;
         }
-        return g.Rules.Find(r => r.Default) ?? g.Rules[0];
+        return row.Options.Find(o => o.Rule.Default) ?? row.Options[0];
     }
 }
 
@@ -182,8 +253,9 @@ public partial class CaseView : Screen
         };
         model.Yields.CollectionChanged += (_, e) =>
         {
-            if (e.NewItems is not null)
-                foreach (YieldGroupRow row in e.NewItems) row.Changed += Edited;
+            if (e.NewItems is null) return;
+            foreach (YieldKindGroup group in e.NewItems)
+                foreach (var row in group.Rows) row.Changed += Edited;
         };
         timer.Tick += (_, _) =>
         {

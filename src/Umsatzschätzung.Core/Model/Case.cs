@@ -12,7 +12,7 @@ public sealed class InventoryEntry
 public sealed class YieldChoice
 {
     public string? IngredientId { get; set; }
-    public string? Category { get; set; }
+    public string? CategoryId { get; set; }
     public string YieldRuleId { get; set; } = "";
 }
 

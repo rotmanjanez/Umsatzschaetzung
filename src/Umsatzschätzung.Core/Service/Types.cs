@@ -6,7 +6,7 @@ public sealed record StatusResp(long RulesVersion, string RulesDate, string AppV
 
 public sealed record RuleSetResp(RuleSet RuleSet, RuleSetDisplay Display);
 
-public sealed record RuleSetDisplay(Dictionary<string, ProductDisplay> Products);
+public sealed record RuleSetDisplay(Dictionary<string, ProductDisplay> Products, Dictionary<string, string> Categories);
 
 public sealed record ProductDisplay(string Recipe);
 

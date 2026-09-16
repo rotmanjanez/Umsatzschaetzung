@@ -309,7 +309,8 @@ public static class Display
     public static string ProductNote(ProductRowDisplay p) => p.Disabled ? "deaktiviert" : p.PriceMissing ? "Preis fehlt" : "";
 
     public static RuleSetDisplay Rules(RuleSet rs) =>
-        new(rs.Products.ToDictionary(kv => kv.Key, kv => new ProductDisplay(Recipe(rs, kv.Value))));
+        new(rs.Products.ToDictionary(kv => kv.Key, kv => new ProductDisplay(Recipe(rs, kv.Value))),
+            rs.Categories.ToDictionary(kv => kv.Key, kv => kv.Value.Name));
 
     public static CaseDisplay Case(Case c, RuleSet rs)
     {

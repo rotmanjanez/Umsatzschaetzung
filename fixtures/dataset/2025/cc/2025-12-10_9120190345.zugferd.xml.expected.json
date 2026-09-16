@@ -30,7 +30,7 @@
       "priceBaseQty": 1000,
       "lineNet": 7250,
       "vat": 700,
-      "expectedIngredientId": "ing.pommes",
+      "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
       "expectedFactor": 10000
     },
     {
@@ -102,7 +102,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1440,
       "vat": 700,
-      "expectedIngredientId": "ing.mozzarella",
+      "expectedIngredientId": "ing.mozzarella.abgetropft",
       "expectedFactor": 1000
     },
     {

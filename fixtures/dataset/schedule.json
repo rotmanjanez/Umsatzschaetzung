@@ -312,7 +312,7 @@
      "priceBaseQty": 1000,
      "lineNet": 25800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -327,7 +327,7 @@
      "lineNet": 8940,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -497,7 +497,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9828,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -543,7 +543,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -633,7 +633,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -719,7 +719,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3162,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-03",
      "deliveryNoteNo": "LS-250103-21"
@@ -783,7 +783,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3224,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-06",
      "deliveryNoteNo": "LS-250106-11"
@@ -847,7 +847,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4092,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-08",
      "deliveryNoteNo": "LS-250108-43"
@@ -911,7 +911,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3596,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-10",
      "deliveryNoteNo": "LS-250110-28"
@@ -969,7 +969,7 @@
      "priceBaseQty": 1000,
      "lineNet": 64500,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -983,7 +983,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -998,7 +998,7 @@
      "lineNet": 2980,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -1251,7 +1251,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9906,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -1387,7 +1387,7 @@
      "priceBaseQty": 1000,
      "lineNet": 43470,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 750
     },
     {
@@ -1401,7 +1401,7 @@
      "priceBaseQty": 1000,
      "lineNet": 15840,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 1000
     },
     {
@@ -1415,7 +1415,7 @@
      "priceBaseQty": 1000,
      "lineNet": 15800,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -1429,7 +1429,7 @@
      "priceBaseQty": 1000,
      "lineNet": 21560,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     }
    ]
@@ -1469,7 +1469,7 @@
      "priceBaseQty": 1000,
      "lineNet": 51600,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -1483,7 +1483,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -1498,7 +1498,7 @@
      "lineNet": 7450,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -1751,7 +1751,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4368,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -1797,7 +1797,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -1902,7 +1902,7 @@
      "lineNet": 294,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -1932,7 +1932,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -2032,7 +2032,7 @@
      "lineNet": 17010,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 1000
     },
     {
@@ -2047,7 +2047,7 @@
      "lineNet": 7920,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 500
     }
    ]
@@ -2087,7 +2087,7 @@
      "priceBaseQty": 1000,
      "lineNet": 64500,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -2101,7 +2101,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -2116,7 +2116,7 @@
      "lineNet": 4470,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -2442,7 +2442,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8580,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -2456,7 +2456,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2622,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -2470,7 +2470,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1415,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -2638,7 +2638,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-10",
      "deliveryNoteNo": "LS-250210-38"
@@ -2718,7 +2718,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4650,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-12",
      "deliveryNoteNo": "LS-250212-13"
@@ -2782,7 +2782,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3596,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-14",
      "deliveryNoteNo": "LS-250214-20"
@@ -2814,7 +2814,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2480,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-17",
      "deliveryNoteNo": "LS-250217-53"
@@ -2894,7 +2894,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2914,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-19",
      "deliveryNoteNo": "LS-250219-48"
@@ -2942,7 +2942,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3100,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-21",
      "deliveryNoteNo": "LS-250221-49"
@@ -3000,7 +3000,7 @@
      "priceBaseQty": 1000,
      "lineNet": 25800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -3014,7 +3014,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -3029,7 +3029,7 @@
      "lineNet": 4470,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -3184,7 +3184,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8112,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -3230,7 +3230,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -3335,7 +3335,7 @@
      "lineNet": 245,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -3365,7 +3365,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -3566,7 +3566,7 @@
      "priceBaseQty": 1000,
      "lineNet": 25800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -3580,7 +3580,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8150,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -3595,7 +3595,7 @@
      "lineNet": 10430,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -3863,7 +3863,7 @@
      "priceBaseQty": 1000,
      "lineNet": 13416,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -3999,7 +3999,7 @@
      "priceBaseQty": 1000,
      "lineNet": 40710,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 750
     },
     {
@@ -4013,7 +4013,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6435,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 1000
     },
     {
@@ -4027,7 +4027,7 @@
      "priceBaseQty": 1000,
      "lineNet": 22120,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -4041,7 +4041,7 @@
      "priceBaseQty": 1000,
      "lineNet": 23520,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -4109,7 +4109,7 @@
      "priceBaseQty": 1000,
      "lineNet": 77400,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -4124,7 +4124,7 @@
      "lineNet": 4470,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -4363,7 +4363,7 @@
      "priceBaseQty": 1000,
      "lineNet": 12636,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -4377,7 +4377,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3312,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -4423,7 +4423,7 @@
      "lineNet": 5584,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -4543,7 +4543,7 @@
      "lineNet": 392,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -4573,7 +4573,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -4674,7 +4674,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2170,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-24",
      "deliveryNoteNo": "LS-250324-50"
@@ -4754,7 +4754,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2294,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-26",
      "deliveryNoteNo": "LS-250326-78"
@@ -4802,7 +4802,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5022,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-28",
      "deliveryNoteNo": "LS-250328-74"
@@ -4834,7 +4834,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1984,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-31",
      "deliveryNoteNo": "LS-250331-81"
@@ -4898,7 +4898,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4712,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-04-02",
      "deliveryNoteNo": "LS-250402-11"
@@ -4962,7 +4962,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5270,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-04-04",
      "deliveryNoteNo": "LS-250404-34"
@@ -5020,7 +5020,7 @@
      "priceBaseQty": 1000,
      "lineNet": 53600,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -5034,7 +5034,7 @@
      "priceBaseQty": 1000,
      "lineNet": 24450,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -5063,7 +5063,7 @@
      "lineNet": 6160,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -5389,7 +5389,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6864,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -5403,7 +5403,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8280,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -5417,7 +5417,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2588,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -5624,7 +5624,7 @@
      "priceBaseQty": 1000,
      "lineNet": 40200,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -5639,7 +5639,7 @@
      "lineNet": 10780,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -5824,7 +5824,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5382,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -5865,7 +5865,7 @@
      "lineNet": 4188,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -5940,7 +5940,7 @@
      "lineNet": 4320,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -6081,7 +6081,7 @@
      "priceBaseQty": 1000,
      "lineNet": 53600,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -6095,7 +6095,7 @@
      "priceBaseQty": 1000,
      "lineNet": 24450,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -6110,7 +6110,7 @@
      "lineNet": 6160,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -6364,7 +6364,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10660,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -6378,7 +6378,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3623,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -6528,7 +6528,7 @@
      "priceBaseQty": 1000,
      "lineNet": 42090,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 750
     },
     {
@@ -6542,7 +6542,7 @@
      "priceBaseQty": 1000,
      "lineNet": 13430,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -6596,7 +6596,7 @@
      "priceBaseQty": 1000,
      "lineNet": 40200,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -6611,7 +6611,7 @@
      "lineNet": 3080,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -6880,7 +6880,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4264,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -6894,7 +6894,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2318,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -6940,7 +6940,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -7060,7 +7060,7 @@
      "lineNet": 245,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -7090,7 +7090,7 @@
      "lineNet": 2160,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -7236,7 +7236,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1922,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-19",
      "deliveryNoteNo": "LS-250519-63"
@@ -7284,7 +7284,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3968,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-21",
      "deliveryNoteNo": "LS-250521-53"
@@ -7316,7 +7316,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-23",
      "deliveryNoteNo": "LS-250523-26"
@@ -7380,7 +7380,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2790,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-26",
      "deliveryNoteNo": "LS-250526-27"
@@ -7444,7 +7444,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3844,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-28",
      "deliveryNoteNo": "LS-250528-51"
@@ -7508,7 +7508,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3100,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-30",
      "deliveryNoteNo": "LS-250530-87"
@@ -7566,7 +7566,7 @@
      "priceBaseQty": 1000,
      "lineNet": 93800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -7580,7 +7580,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8150,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -7609,7 +7609,7 @@
      "lineNet": 13860,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -7935,7 +7935,7 @@
      "priceBaseQty": 1000,
      "lineNet": 22058,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -7949,7 +7949,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5796,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -7963,7 +7963,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4361,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -8105,7 +8105,7 @@
      "lineNet": 35530,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 1000
     },
     {
@@ -8120,7 +8120,7 @@
      "lineNet": 4950,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 500
     },
     {
@@ -8190,7 +8190,7 @@
      "priceBaseQty": 1000,
      "lineNet": 40200,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -8204,7 +8204,7 @@
      "priceBaseQty": 1000,
      "lineNet": 32600,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -8219,7 +8219,7 @@
      "lineNet": 10780,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -8389,7 +8389,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9594,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -8435,7 +8435,7 @@
      "lineNet": 4188,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -8540,7 +8540,7 @@
      "lineNet": 147,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -8570,7 +8570,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -8755,7 +8755,7 @@
      "priceBaseQty": 1000,
      "lineNet": 93800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -8769,7 +8769,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8150,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -8798,7 +8798,7 @@
      "lineNet": 7700,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -9038,7 +9038,7 @@
      "priceBaseQty": 1000,
      "lineNet": 18040,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -9052,7 +9052,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7935,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -9066,7 +9066,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1953,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -9188,7 +9188,7 @@
      "priceBaseQty": 1000,
      "lineNet": 20010,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 750
     },
     {
@@ -9202,7 +9202,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6930,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 1000
     },
     {
@@ -9216,7 +9216,7 @@
      "priceBaseQty": 1000,
      "lineNet": 35550,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -9230,7 +9230,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5880,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -9298,7 +9298,7 @@
      "priceBaseQty": 1000,
      "lineNet": 93800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -9312,7 +9312,7 @@
      "priceBaseQty": 1000,
      "lineNet": 32600,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -9327,7 +9327,7 @@
      "lineNet": 13860,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -9567,7 +9567,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6396,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -9581,7 +9581,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6624,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -9595,7 +9595,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3222,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -9641,7 +9641,7 @@
      "lineNet": 7250,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -9761,7 +9761,7 @@
      "lineNet": 245,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -9791,7 +9791,7 @@
      "lineNet": 3600,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -9936,7 +9936,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-14",
      "deliveryNoteNo": "LS-250714-49"
@@ -10016,7 +10016,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7688,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-16",
      "deliveryNoteNo": "LS-250716-75"
@@ -10048,7 +10048,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-18",
      "deliveryNoteNo": "LS-250718-44"
@@ -10128,7 +10128,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5704,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-21",
      "deliveryNoteNo": "LS-250721-29"
@@ -10192,7 +10192,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5518,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-23",
      "deliveryNoteNo": "LS-250723-27"
@@ -10272,7 +10272,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3038,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-25",
      "deliveryNoteNo": "LS-250725-57"
@@ -10330,7 +10330,7 @@
      "priceBaseQty": 1000,
      "lineNet": 93800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -10344,7 +10344,7 @@
      "priceBaseQty": 1000,
      "lineNet": 24450,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -10373,7 +10373,7 @@
      "lineNet": 10780,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -10699,7 +10699,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7216,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -10713,7 +10713,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3243,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -10727,7 +10727,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4706,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -10964,7 +10964,7 @@
      "priceBaseQty": 1000,
      "lineNet": 67000,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -10978,7 +10978,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8150,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -11007,7 +11007,7 @@
      "lineNet": 6160,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -11162,7 +11162,7 @@
      "priceBaseQty": 1000,
      "lineNet": 19680,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -11208,7 +11208,7 @@
      "lineNet": 2900,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -11283,7 +11283,7 @@
      "lineNet": 343,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -11368,7 +11368,7 @@
      "lineNet": 18810,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 1000
     },
     {
@@ -11383,7 +11383,7 @@
      "lineNet": 3960,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 500
     },
     {
@@ -11438,7 +11438,7 @@
      "priceBaseQty": 1000,
      "lineNet": 93800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -11453,7 +11453,7 @@
      "lineNet": 13860,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -11736,7 +11736,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8528,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -11918,7 +11918,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3100,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-08-25",
      "deliveryNoteNo": "LS-250825-36"
@@ -11998,7 +11998,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6200,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-08-27",
      "deliveryNoteNo": "LS-250827-32"
@@ -12046,7 +12046,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4774,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-08-29",
      "deliveryNoteNo": "LS-250829-73"
@@ -12094,7 +12094,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2108,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-09-01",
      "deliveryNoteNo": "LS-250901-34"
@@ -12158,7 +12158,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4712,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-09-03",
      "deliveryNoteNo": "LS-250903-25"
@@ -12206,7 +12206,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2170,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-09-05",
      "deliveryNoteNo": "LS-250905-73"
@@ -12280,7 +12280,7 @@
      "priceBaseQty": 1000,
      "lineNet": 26800,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -12294,7 +12294,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -12309,7 +12309,7 @@
      "lineNet": 6160,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -12564,7 +12564,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10086,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -12578,7 +12578,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2898,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -12592,7 +12592,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1753,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -12638,7 +12638,7 @@
      "lineNet": 8700,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -12758,7 +12758,7 @@
      "lineNet": 196,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -12788,7 +12788,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -12944,7 +12944,7 @@
      "priceBaseQty": 1000,
      "lineNet": 53600,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -12958,7 +12958,7 @@
      "priceBaseQty": 1000,
      "lineNet": 24450,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -12987,7 +12987,7 @@
      "lineNet": 7700,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -13327,7 +13327,7 @@
      "priceBaseQty": 1000,
      "lineNet": 15252,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -13341,7 +13341,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1725,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese",
+     "expectedIngredientId": "ing.leberkaese.gebacken",
      "expectedFactor": 1000
     }
    ]
@@ -13622,7 +13622,7 @@
      "priceBaseQty": 1000,
      "lineNet": 68750,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -13636,7 +13636,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -13651,7 +13651,7 @@
      "lineNet": 4620,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -13806,7 +13806,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4346,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -13852,7 +13852,7 @@
      "lineNet": 4350,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -13987,7 +13987,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -14087,7 +14087,7 @@
      "priceBaseQty": 1000,
      "lineNet": 48960,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 750
     },
     {
@@ -14101,7 +14101,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9900,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 1000
     },
     {
@@ -14115,7 +14115,7 @@
      "priceBaseQty": 1000,
      "lineNet": 20540,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -14169,7 +14169,7 @@
      "priceBaseQty": 1000,
      "lineNet": 82500,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -14184,7 +14184,7 @@
      "lineNet": 4620,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -14467,7 +14467,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9758,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -14649,7 +14649,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2356,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-20",
      "deliveryNoteNo": "LS-251020-76"
@@ -14713,7 +14713,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5332,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-22",
      "deliveryNoteNo": "LS-251022-20"
@@ -14777,7 +14777,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3348,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-24",
      "deliveryNoteNo": "LS-251024-70"
@@ -14841,7 +14841,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6200,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-27",
      "deliveryNoteNo": "LS-251027-13"
@@ -14889,7 +14889,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5952,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-29",
      "deliveryNoteNo": "LS-251029-42"
@@ -14953,7 +14953,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4588,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-31",
      "deliveryNoteNo": "LS-251031-71"
@@ -14995,7 +14995,7 @@
      "priceBaseQty": 1000,
      "lineNet": 68750,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -15010,7 +15010,7 @@
      "lineNet": 3080,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -15263,7 +15263,7 @@
      "priceBaseQty": 1000,
      "lineNet": 11562,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -15309,7 +15309,7 @@
      "lineNet": 4350,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -15429,7 +15429,7 @@
      "lineNet": 343,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.salz",
+     "expectedIngredientId": "ing.speisesalz",
      "expectedFactor": 500
     },
     {
@@ -15459,7 +15459,7 @@
      "lineNet": 3600,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -15564,7 +15564,7 @@
      "lineNet": 41800,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 1000
     },
     {
@@ -15579,7 +15579,7 @@
      "lineNet": 7920,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee",
+     "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 500
     },
     {
@@ -15649,7 +15649,7 @@
      "priceBaseQty": 1000,
      "lineNet": 82500,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -15663,7 +15663,7 @@
      "priceBaseQty": 1000,
      "lineNet": 24450,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -15678,7 +15678,7 @@
      "lineNet": 6160,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -16018,7 +16018,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4674,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -16032,7 +16032,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4692,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -16182,7 +16182,7 @@
      "priceBaseQty": 1000,
      "lineNet": 23040,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 750
     },
     {
@@ -16196,7 +16196,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7920,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.weiss",
+     "expectedIngredientId": "ing.weisswein",
      "expectedFactor": 1000
     },
     {
@@ -16210,7 +16210,7 @@
      "priceBaseQty": 1000,
      "lineNet": 17380,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -16224,7 +16224,7 @@
      "priceBaseQty": 1000,
      "lineNet": 19600,
      "vat": 1900,
-     "expectedIngredientId": "ing.wein.rot",
+     "expectedIngredientId": "ing.rotwein",
      "expectedFactor": 750
     },
     {
@@ -16292,7 +16292,7 @@
      "priceBaseQty": 1000,
      "lineNet": 55000,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -16306,7 +16306,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8150,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -16321,7 +16321,7 @@
      "lineNet": 9240,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -16491,7 +16491,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10414,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -16537,7 +16537,7 @@
      "lineNet": 7250,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes",
+     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
      "expectedFactor": 10000
     },
     {
@@ -16627,7 +16627,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella",
+     "expectedIngredientId": "ing.mozzarella.abgetropft",
      "expectedFactor": 1000
     },
     {
@@ -16768,7 +16768,7 @@
      "priceBaseQty": 1000,
      "lineNet": 68750,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 50000
     },
     {
@@ -16782,7 +16782,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -16797,7 +16797,7 @@
      "lineNet": 3080,
      "vat": 1900,
      "gtin": "4001234000203",
-     "expectedIngredientId": "ing.bier.flasche",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -17051,7 +17051,7 @@
      "priceBaseQty": 1000,
      "lineNet": 14432,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst",
+     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
      "expectedFactor": 1
     },
     {
@@ -17065,7 +17065,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6555,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst",
+     "expectedIngredientId": "ing.currywurst.kuechenfertig",
      "expectedFactor": 1
     }
    ]
@@ -17233,7 +17233,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7316,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-15",
      "deliveryNoteNo": "LS-251215-60"
@@ -17281,7 +17281,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4464,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-17",
      "deliveryNoteNo": "LS-251217-58"
@@ -17329,7 +17329,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6262,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-19",
      "deliveryNoteNo": "LS-251219-85"
@@ -17377,7 +17377,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3286,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-22",
      "deliveryNoteNo": "LS-251222-45"
@@ -17457,7 +17457,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5890,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-24",
      "deliveryNoteNo": "LS-251224-50"
@@ -17537,7 +17537,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7006,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel",
+     "expectedIngredientId": "ing.brezel.zugekauft",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-26",
      "deliveryNoteNo": "LS-251226-16"

@@ -5,36 +5,84 @@ using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.App.Ui;
 
-public static class RuleLabel
-{
-    public static string Mark(string name, Meta meta) => meta.ValidTo is null ? name : name + " (zurückgezogen)";
-}
-
-public sealed class IngredientItem(Ingredient ingredient)
+public sealed class IngredientItem(Ingredient ingredient, string category)
 {
     public Ingredient Ingredient { get; } = ingredient;
-    public string Name => RuleLabel.Mark(Ingredient.Name, Ingredient.Meta);
+    public string Name => Ingredient.Name;
     public string UnitLabel => Format.UnitName(Ingredient.BaseUnit);
-    public string Category => Ingredient.Category;
+    public string Category { get; } = category;
     public string Tip => Category == "" ? Name + " · " + UnitLabel : Name + " · " + Category + " · " + UnitLabel;
+}
+
+public sealed class CategoryOption(string? id, string name)
+{
+    // Id null marks the entry that creates a category instead of choosing one.
+    public string? Id { get; } = id;
+    public string Name { get; } = name;
+}
+
+public sealed class CategoryPicker : Observable
+{
+    public static readonly CategoryOption Create = new(null, "+ neue Kategorie …");
+    public static readonly CategoryOption None = new("", "keine");
+
+    CategoryOption? selected = None;
+    List<CategoryOption> options = [None, Create];
+    string newName = "";
+    bool invalid;
+
+    public List<CategoryOption> Options { get => options; private set => Set(ref options, value); }
+    public string NewName { get => newName; set { if (Set(ref newName, value)) Invalid = false; } }
+    public bool Invalid { get => invalid; set => Set(ref invalid, value); }
+    public bool Creating => ReferenceEquals(selected, Create);
+
+    public CategoryOption? Selected
+    {
+        get => selected;
+        set
+        {
+            if (!Set(ref selected, value)) return;
+            Invalid = false;
+            Raise(nameof(Creating));
+        }
+    }
+
+    public void Load(List<Category> categories, string? id)
+    {
+        Options = [None, .. categories.Select(c => new CategoryOption(c.Id, c.Name)), Create];
+        NewName = "";
+        Selected = Options.Find(o => o.Id == (id ?? "")) ?? None;
+    }
 }
 
 public sealed class ProductItem(Product product, string recipe)
 {
     public Product Product { get; } = product;
-    public string Name => RuleLabel.Mark(Product.Name, Product.Meta);
+    public string Name => Product.Name;
     public string Recipe { get; } = recipe;
     public string Tip => Recipe == "" ? Name : Name + "\n" + Recipe;
 }
 
-public sealed class YieldItem(YieldRule rule, string title)
+public sealed class YieldItem(YieldRule rule)
 {
     public YieldRule Rule { get; } = rule;
-    public string Title { get; } = title;
-    public bool ForIngredient => !string.IsNullOrEmpty(Rule.IngredientId);
-    public bool ForCategory => !ForIngredient;
+    public string Title => Rule.Name;
+    public string Standard => Rule.Default ? "Standard" : "";
     public string Source => Rule.Source;
     public string Tip => Source == "" ? Title : Title + "\n" + Source;
+}
+
+// A row of the left column: the category (or ingredient) whose rules are alternatives,
+// only one of which is in force at a time.
+public sealed class ScopeItem(string id, bool ingredient, string label, string search, List<YieldItem> rules)
+{
+    public string Id { get; } = id;
+    public bool Ingredient { get; } = ingredient;
+    public string Label { get; } = label;
+    public string Search { get; } = search;
+    public List<YieldItem> Rules { get; } = rules;
+    public string Kind => Ingredient ? "Zutat" : "Kategorie";
+    public string Tip => Kind + " · " + Rules.Count + (Rules.Count == 1 ? " Regel" : " Regeln");
 }
 
 public sealed class RecipeRow(List<Ingredient> options) : Observable
@@ -60,45 +108,30 @@ public sealed class RecipeRow(List<Ingredient> options) : Observable
     public bool AmountInvalid { get => amountInvalid; set => Set(ref amountInvalid, value); }
 }
 
-public abstract class EntityForm<T> : Observable
+public abstract class EntityForm : Observable
 {
-    const string WillRetire = "„Zurückziehen“ setzt den Eintrag zum heutigen Tag außer Kraft: Prüfungszeiträume ab diesem Tag "
-        + "verwenden ihn nicht mehr, frühere Prüfungen rechnen unverändert damit weiter. Gelöscht wird nichts.";
-    const string WasRetired = "Prüfungszeiträume ab diesem Tag verwenden den Eintrag nicht mehr, frühere Prüfungen rechnen "
-        + "unverändert damit weiter. Erneutes Speichern macht ihn wieder gültig.";
-
     string title = "";
     bool existing, active;
-    DateOnly? retiredOn;
 
-    public ObservableCollection<T> Items { get; } = [];
     public string? CurrentId { get; set; }
     public string Title { get => title; set => Set(ref title, value); }
-    public bool Existing { get => existing; set { if (Set(ref existing, value)) RaiseRetirement(); } }
+    public bool Existing { get => existing; set => Set(ref existing, value); }
     public bool Active { get => active; set => Set(ref active, value); }
-    public DateOnly? RetiredOn { get => retiredOn; set { if (Set(ref retiredOn, value)) RaiseRetirement(); } }
-    public bool Retired => retiredOn is not null;
-    public bool Retirable => existing && retiredOn is null;
-    public string RetiredLabel => "Zurückgezogen am " + retiredOn?.ToString("dd.MM.yyyy");
-    public string RetireHint => retiredOn is null ? WillRetire : WasRetired;
+}
 
-    void RaiseRetirement()
-    {
-        Raise(nameof(Retired));
-        Raise(nameof(Retirable));
-        Raise(nameof(RetiredLabel));
-        Raise(nameof(RetireHint));
-    }
+public abstract class EntityForm<T> : EntityForm
+{
+    public ObservableCollection<T> Items { get; } = [];
 }
 
 public sealed class IngredientForm : EntityForm<IngredientItem>
 {
-    string name = "", category = "";
+    string name = "";
     int unitIndex = -1;
     bool nameInvalid, unitInvalid;
 
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
-    public string Category { get => category; set => Set(ref category, value); }
+    public CategoryPicker Category { get; } = new();
     public int UnitIndex { get => unitIndex; set { if (Set(ref unitIndex, value)) UnitInvalid = false; } }
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
     public bool UnitInvalid { get => unitInvalid; set => Set(ref unitInvalid, value); }
@@ -114,18 +147,20 @@ public sealed class ProductForm : EntityForm<ProductItem>
     public ObservableCollection<RecipeRow> Recipe { get; } = [];
 }
 
-public sealed class YieldForm : EntityForm<YieldItem>
+public sealed class YieldForm : EntityForm<ScopeItem>
 {
     public static readonly Ingredient None = new() { Id = "", Name = "keine" };
 
-    string name = "", category = "", shrinkage = "", ownUse = "", staff = "", free = "", source = "";
+    string scopeTitle = "", name = "", shrinkage = "", ownUse = "", staff = "", free = "", source = "";
     bool isDefault, nameInvalid, scopeInvalid, sourceInvalid;
     readonly bool[] rateInvalid = new bool[4];
     Ingredient? ingredient = None;
     List<Ingredient> ingredientOptions = [None];
 
+    public ObservableCollection<YieldItem> Rules { get; } = [];
+    public string ScopeTitle { get => scopeTitle; set => Set(ref scopeTitle, value); }
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
-    public string Category { get => category; set { if (Set(ref category, value)) ScopeInvalid = false; } }
+    public CategoryPicker Category { get; } = new();
     public string Shrinkage { get => shrinkage; set { if (Set(ref shrinkage, value)) ShrinkageInvalid = false; } }
     public string OwnUse { get => ownUse; set { if (Set(ref ownUse, value)) OwnUseInvalid = false; } }
     public string Staff { get => staff; set { if (Set(ref staff, value)) StaffInvalid = false; } }
@@ -160,7 +195,7 @@ public partial class RulesView : Screen
     static readonly Unit[] Units = [Unit.Ml, Unit.G, Unit.Piece];
 
     readonly RulesModel model = new();
-    bool loading;
+    bool loading, saving;
 
     public RulesView(Session session) : base(session)
     {
@@ -168,10 +203,10 @@ public partial class RulesView : Screen
         DataContext = model;
         IngredientSearch.Attach(model.Ingredients.Items, i => i.Name + " " + i.Category + " " + i.UnitLabel);
         ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
-        YieldSearch.Attach(model.Yields.Items, y => y.Title + " " + y.Source);
+        YieldSearch.Attach(model.Yields.Items, s => s.Search);
         IngredientGrid.ItemsSource = IngredientSearch.View;
         ProductGrid.ItemsSource = ProductSearch.View;
-        YieldGrid.ItemsSource = YieldSearch.View;
+        ScopeGrid.ItemsSource = YieldSearch.View;
     }
 
     protected override async void OnEnter()
@@ -184,13 +219,15 @@ public partial class RulesView : Screen
 
     void Rebuild()
     {
-        if (!IsActive || Session.Rules is null) return;
+        if (saving || !IsActive || Session.Rules is null) return;
         var rs = Session.Rules.RuleSet;
         loading = true;
         var ingredients = Session.Ingredients();
 
+        IngredientBox.SetCategoryNames(this, Session.CategoryNames);
+
         model.Ingredients.Items.Clear();
-        foreach (var i in ingredients) model.Ingredients.Items.Add(new IngredientItem(i));
+        foreach (var i in ingredients) model.Ingredients.Items.Add(new IngredientItem(i, Session.CategoryName(i.CategoryId)));
         IngredientGrid.SelectedItem = model.Ingredients.Items.FirstOrDefault(i => i.Ingredient.Id == model.Ingredients.CurrentId);
 
         model.Products.Items.Clear();
@@ -199,31 +236,29 @@ public partial class RulesView : Screen
         ProductGrid.SelectedItem = model.Products.Items.FirstOrDefault(p => p.Product.Id == model.Products.CurrentId);
 
         model.Yields.IngredientOptions = [YieldForm.None, .. ingredients];
+        var scopes = YieldScopes(rs);
         model.Yields.Items.Clear();
-        foreach (var y in rs.YieldRules.Values.OrderBy(y => y.Name, StringComparer.Ordinal))
-            model.Yields.Items.Add(new YieldItem(y, RuleLabel.Mark(
-                y.Name + " (" + (string.IsNullOrEmpty(y.IngredientId) ? y.Category : Session.IngredientName(y.IngredientId)) + ")", y.Meta)));
-        YieldGrid.SelectedItem = model.Yields.Items.FirstOrDefault(y => y.Rule.Id == model.Yields.CurrentId);
+        foreach (var scope in scopes) model.Yields.Items.Add(scope);
+        ScopeGrid.SelectedItem = scopes.Find(s => s.Rules.Exists(r => r.Rule.Id == model.Yields.CurrentId)) ?? scopes.FirstOrDefault();
 
         loading = false;
         if (IngredientGrid.SelectedItem is IngredientItem ii) LoadIngredient(ii.Ingredient); else model.Ingredients.Active = false;
         if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product); else model.Products.Active = false;
-        if (YieldGrid.SelectedItem is YieldItem yi) LoadYield(yi.Rule); else model.Yields.Active = false;
+        if (ScopeGrid.SelectedItem is ScopeItem si) ShowScope(si, model.Yields.CurrentId); else model.Yields.Active = false;
     }
 
     static string Missing(params string?[] fields) =>
         "Bitte prüfen: " + string.Join(", ", fields.OfType<string>()) + ".";
 
-    async Task Retire(Entity entity, string? id, string noun, string name)
+    async Task Delete(EntityForm form, Entity entity)
     {
-        if (id is null) return;
+        if (form.CurrentId is not { } id) return;
+        var noun = Format.EntityName(entity);
         var confirmed = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
-            "„" + name + "“ wird zum heutigen Tag außer Kraft gesetzt: Prüfungszeiträume ab heute ziehen den Eintrag "
-            + "nicht mehr heran, frühere Prüfungen rechnen unverändert damit weiter. Gelöscht wird nichts – der Eintrag "
-            + "bleibt in der Liste und wird dort als zurückgezogen geführt.",
-            noun + " zurückziehen");
+            "„" + form.Title + "“ wird dauerhaft aus den Regeln entfernt. Bereits erstellte Berichte bleiben unverändert.",
+            noun + " löschen");
         if (!confirmed) return;
-        await Session.Retire(entity, id, Ct);
+        if (await Session.Delete(entity, id, Ct)) form.CurrentId = null;
     }
 
     void IngredientSelected(object? sender, SelectionChangedEventArgs e)
@@ -236,11 +271,10 @@ public partial class RulesView : Screen
         var f = model.Ingredients;
         f.CurrentId = i.Id;
         f.Existing = f.Active = true;
-        f.RetiredOn = i.Meta.ValidTo;
         f.Title = i.Name;
         f.Name = i.Name;
         f.UnitIndex = Array.IndexOf(Units, i.BaseUnit);
-        f.Category = i.Category;
+        f.Category.Load(Session.Categories(), i.CategoryId);
     }
 
     void NewIngredient(object? sender, RoutedEventArgs e)
@@ -250,11 +284,10 @@ public partial class RulesView : Screen
         f.CurrentId = null;
         f.Existing = false;
         f.Active = true;
-        f.RetiredOn = null;
         f.Title = "Neue Zutat";
         f.Name = "";
         f.UnitIndex = -1;
-        f.Category = "";
+        f.Category.Load(Session.Categories(), null);
     }
 
     async void SaveIngredient(object? sender, RoutedEventArgs e)
@@ -268,15 +301,17 @@ public partial class RulesView : Screen
             return;
         }
         var id = f.CurrentId ?? Session.NewId("ingredient");
-        var data = new Ingredient { Id = id, Name = f.Name.Trim(), BaseUnit = Units[f.UnitIndex], Category = f.Category.Trim() };
-        f.CurrentId = id;
-        await Session.Put(data, Ct);
+        var data = new Ingredient { Id = id, Name = f.Name.Trim(), BaseUnit = Units[f.UnitIndex] };
+        await Compose(async () =>
+        {
+            if (await CategoryId(f.Category) is not { } categoryId) return;
+            data.CategoryId = categoryId;
+            f.CurrentId = id;
+            await Session.Put(data, Ct);
+        });
     }
 
-    async void RetireIngredient(object? sender, RoutedEventArgs e)
-    {
-        await Retire(Entity.Ingredient, model.Ingredients.CurrentId, "Zutat", model.Ingredients.Title);
-    }
+    async void DeleteIngredient(object? sender, RoutedEventArgs e) => await Delete(model.Ingredients, Entity.Ingredient);
 
     void ProductSelected(object? sender, SelectionChangedEventArgs e)
     {
@@ -289,7 +324,6 @@ public partial class RulesView : Screen
         var options = Session.Ingredients();
         f.CurrentId = p.Id;
         f.Existing = f.Active = true;
-        f.RetiredOn = p.Meta.ValidTo;
         f.Title = p.Name;
         f.Name = p.Name;
         f.Recipe.Clear();
@@ -304,7 +338,6 @@ public partial class RulesView : Screen
         f.CurrentId = null;
         f.Existing = false;
         f.Active = true;
-        f.RetiredOn = null;
         f.Title = "Neues Produkt";
         f.Name = "";
         f.Recipe.Clear();
@@ -344,14 +377,84 @@ public partial class RulesView : Screen
         await Session.Put(data, Ct);
     }
 
-    async void RetireProduct(object? sender, RoutedEventArgs e)
+    async void DeleteProduct(object? sender, RoutedEventArgs e) => await Delete(model.Products, Entity.Product);
+
+    // A new category is a second entity: hold the rebuild so the half-filled form survives both saves.
+    async Task Compose(Func<Task> save)
     {
-        await Retire(Entity.Product, model.Products.CurrentId, "Produkt", model.Products.Title);
+        saving = true;
+        try
+        {
+            await save();
+        }
+        finally
+        {
+            saving = false;
+        }
+        Rebuild();
+    }
+
+    // "" when no category is wanted, the id otherwise, null when the picker is not usable.
+    async Task<string?> CategoryId(CategoryPicker picker)
+    {
+        if (!picker.Creating) return picker.Selected?.Id ?? "";
+        var name = picker.NewName.Trim();
+        picker.Invalid = name == "";
+        if (picker.Invalid)
+        {
+            Session.Fail(Missing("Name der neuen Kategorie"));
+            return null;
+        }
+        if (Session.Categories().Find(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) is { } existing)
+            return existing.Id;
+        var id = Session.NewId("category");
+        return await Session.Put(new Category { Id = id, Name = name }, Ct) ? id : null;
+    }
+
+    List<ScopeItem> YieldScopes(RuleSet rs)
+    {
+        var grouped = new Dictionary<string, List<YieldRule>>(StringComparer.Ordinal);
+        foreach (var y in rs.YieldRules.Values)
+        {
+            var key = string.IsNullOrEmpty(y.IngredientId) ? "c:" + (y.CategoryId ?? "") : "i:" + y.IngredientId;
+            if (!grouped.TryGetValue(key, out var list)) grouped[key] = list = [];
+            list.Add(y);
+        }
+        var scopes = new List<ScopeItem>(grouped.Count);
+        foreach (var (key, rules) in grouped)
+        {
+            var ingredient = key[0] == 'i';
+            var id = key[2..];
+            var label = ingredient ? Session.IngredientName(id) : Session.CategoryName(id);
+            if (label == "") label = "(ohne Zuordnung)";
+            var items = rules.OrderBy(r => r.Name, StringComparer.Ordinal).Select(r => new YieldItem(r)).ToList();
+            var search = label + " " + string.Join(" ", rules.Select(r => r.Name + " " + r.Source));
+            scopes.Add(new ScopeItem(id, ingredient, label, search, items));
+        }
+        return scopes.OrderBy(s => s.Ingredient).ThenBy(s => s.Label, StringComparer.Ordinal).ToList();
+    }
+
+    void ScopeSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!loading && ScopeGrid.SelectedItem is ScopeItem item) ShowScope(item, null);
+    }
+
+    void ShowScope(ScopeItem scope, string? preferId)
+    {
+        var f = model.Yields;
+        f.ScopeTitle = scope.Label;
+        f.Rules.Clear();
+        foreach (var r in scope.Rules) f.Rules.Add(r);
+        var pick = f.Rules.FirstOrDefault(r => r.Rule.Id == preferId) ?? f.Rules.FirstOrDefault();
+        loading = true;
+        RuleGrid.SelectedItem = pick;
+        loading = false;
+        if (pick is not null) LoadYield(pick.Rule); else f.Active = false;
     }
 
     void YieldSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (!loading && YieldGrid.SelectedItem is YieldItem item) LoadYield(item.Rule);
+        if (!loading && RuleGrid.SelectedItem is YieldItem item) LoadYield(item.Rule);
     }
 
     void LoadYield(YieldRule y)
@@ -359,11 +462,10 @@ public partial class RulesView : Screen
         var f = model.Yields;
         f.CurrentId = y.Id;
         f.Existing = f.Active = true;
-        f.RetiredOn = y.Meta.ValidTo;
         f.Title = y.Name;
         f.Name = y.Name;
         f.IsDefault = y.Default;
-        f.Category = y.Category ?? "";
+        f.Category.Load(Session.Categories(), y.CategoryId);
         f.Ingredient = f.IngredientOptions.Find(i => i.Id == (y.IngredientId ?? "")) ?? YieldForm.None;
         f.Shrinkage = Input.BpText(y.Shrinkage);
         f.OwnUse = Input.BpText(y.OwnUse);
@@ -375,15 +477,21 @@ public partial class RulesView : Screen
     void NewYield(object? sender, RoutedEventArgs e)
     {
         var f = model.Yields;
-        YieldGrid.SelectedItem = null;
+        var scope = ScopeGrid.SelectedItem as ScopeItem;
+        loading = true;
+        RuleGrid.SelectedItem = null;
+        loading = false;
         f.CurrentId = null;
         f.Existing = false;
         f.Active = true;
-        f.RetiredOn = null;
         f.Title = "Neue Ertragsregel";
-        f.Name = f.Category = f.Shrinkage = f.OwnUse = f.Staff = f.Free = f.Source = "";
+        f.Name = f.Shrinkage = f.OwnUse = f.Staff = f.Free = f.Source = "";
         f.IsDefault = false;
-        f.Ingredient = YieldForm.None;
+        // A new rule starts in the scope that is open — almost always the one meant.
+        f.Category.Load(Session.Categories(), scope is { Ingredient: false } ? scope.Id : null);
+        f.Ingredient = scope is { Ingredient: true }
+            ? f.IngredientOptions.Find(i => i.Id == scope.Id) ?? YieldForm.None
+            : YieldForm.None;
     }
 
     async void SaveYield(object? sender, RoutedEventArgs e)
@@ -392,9 +500,8 @@ public partial class RulesView : Screen
         var id = f.CurrentId ?? Session.NewId("yield_rule");
         var rates = new[] { Input.Bp(f.Shrinkage), Input.Bp(f.OwnUse), Input.Bp(f.Staff), Input.Bp(f.Free) };
         var ingredientId = f.Ingredient is { Id: not "" } ing ? ing.Id : null;
-        var category = f.Category.Trim() == "" ? null : f.Category.Trim();
         f.NameInvalid = f.Name.Trim() == "";
-        f.ScopeInvalid = ingredientId is null && category is null;
+        f.ScopeInvalid = ingredientId is null && !f.Category.Creating && f.Category.Selected?.Id is null or "";
         f.SourceInvalid = f.Source.Trim() == "";
         f.ShrinkageInvalid = rates[0] is not >= 0;
         f.OwnUseInvalid = rates[1] is not >= 0;
@@ -418,7 +525,6 @@ public partial class RulesView : Screen
             Id = id,
             Name = f.Name.Trim(),
             Default = f.IsDefault,
-            Category = category,
             IngredientId = ingredientId,
             Shrinkage = rates[0]!.Value,
             OwnUse = rates[1]!.Value,
@@ -426,12 +532,14 @@ public partial class RulesView : Screen
             Free = rates[3]!.Value,
             Source = f.Source.Trim(),
         };
-        f.CurrentId = id;
-        await Session.Put(data, Ct);
+        await Compose(async () =>
+        {
+            if (await CategoryId(f.Category) is not { } categoryId) return;
+            data.CategoryId = categoryId == "" ? null : categoryId;
+            f.CurrentId = id;
+            await Session.Put(data, Ct);
+        });
     }
 
-    async void RetireYield(object? sender, RoutedEventArgs e)
-    {
-        await Retire(Entity.YieldRule, model.Yields.CurrentId, "Ertragsregel", model.Yields.Title);
-    }
+    async void DeleteYield(object? sender, RoutedEventArgs e) => await Delete(model.Yields, Entity.YieldRule);
 }

@@ -28,7 +28,7 @@
       "lineNet": 4188,
       "vat": 700,
       "gtin": "4056489011231",
-      "expectedIngredientId": "ing.pommes",
+      "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
       "expectedFactor": 10000
     },
     {
@@ -103,7 +103,7 @@
       "lineNet": 4320,
       "vat": 700,
       "gtin": "4062300052029",
-      "expectedIngredientId": "ing.mozzarella",
+      "expectedIngredientId": "ing.mozzarella.abgetropft",
       "expectedFactor": 1000
     },
     {

@@ -9,7 +9,7 @@ public sealed class RuleStore
 {
     const int KeptSnapshots = 10;
     const string Schema = """
-        CREATE TABLE IF NOT EXISTS rule(kind TEXT NOT NULL, id TEXT NOT NULL, json TEXT NOT NULL, PRIMARY KEY(kind, id)) WITHOUT ROWID;
+        CREATE TABLE IF NOT EXISTS rule(kind TEXT NOT NULL, id TEXT NOT NULL, json TEXT NOT NULL, deleted_at TEXT, PRIMARY KEY(kind, id)) WITHOUT ROWID;
         CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value INTEGER NOT NULL) WITHOUT ROWID;
         INSERT OR IGNORE INTO meta VALUES('version', 0);
         """;
@@ -35,7 +35,7 @@ public sealed class RuleStore
             if (existed) Snapshot(db);
             Exec(db, Schema);
             using var tx = db.BeginTransaction(deferred: false);
-            foreach (var e in Entities(seed)) Upsert(db, tx, Kind(e), e, "INSERT OR IGNORE INTO rule VALUES(@kind, @id, @json)");
+            foreach (var e in Entities(seed)) Upsert(db, tx, Kind(e), e, "INSERT OR IGNORE INTO rule(kind, id, json) VALUES(@kind, @id, @json)");
             tx.Commit();
             return 0;
         });
@@ -63,7 +63,27 @@ public sealed class RuleStore
         cmd.Transaction = tx;
         cmd.CommandText = "UPDATE meta SET value = value + 1 WHERE key = 'version' RETURNING value";
         e.Meta.Rev = (long)cmd.ExecuteScalar()!;
-        Upsert(db, tx, Kind(e), e, "INSERT INTO rule VALUES(@kind, @id, @json) ON CONFLICT(kind, id) DO UPDATE SET json = excluded.json");
+        Upsert(db, tx, Kind(e), e, "INSERT INTO rule(kind, id, json) VALUES(@kind, @id, @json) "
+            + "ON CONFLICT(kind, id) DO UPDATE SET json = excluded.json, deleted_at = NULL");
+        var rs = Read(db, tx);
+        tx.Commit();
+        return rs;
+    });
+
+    public RuleSet Delete(Entity kind, string id) => Guarded(() =>
+    {
+        using var db = Open();
+        using var tx = db.BeginTransaction(deferred: false);
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.Transaction = tx;
+            cmd.CommandText = "UPDATE meta SET value = value + 1 WHERE key = 'version';"
+                + "UPDATE rule SET deleted_at = @now WHERE kind = @kind AND id = @id";
+            cmd.Parameters.AddWithValue("@kind", kind.ToString());
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Parameters.AddWithValue("@now", Clock.Now().ToString("O"));
+            cmd.ExecuteNonQuery();
+        }
         var rs = Read(db, tx);
         tx.Commit();
         return rs;
@@ -135,7 +155,7 @@ public sealed class RuleStore
         cmd.Transaction = tx;
         cmd.CommandText = "SELECT value FROM meta WHERE key = 'version'";
         rs.Version = (long)cmd.ExecuteScalar()!;
-        cmd.CommandText = "SELECT kind, id, json FROM rule";
+        cmd.CommandText = "SELECT kind, id, json FROM rule WHERE deleted_at IS NULL";
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
@@ -143,6 +163,7 @@ public sealed class RuleStore
             var json = r.GetString(2);
             rs.Put(kind switch
             {
+                Entity.Category => Json.Deserialize<Category>(json),
                 Entity.Ingredient => Json.Deserialize<Ingredient>(json),
                 Entity.Mapping => Json.Deserialize<ArticleMapping>(json),
                 Entity.Product => Json.Deserialize<Product>(json),
@@ -171,10 +192,11 @@ public sealed class RuleStore
     }
 
     static IEnumerable<IRuleEntity> Entities(RuleSet rs) =>
-        rs.Ingredients.Values.Concat<IRuleEntity>(rs.Mappings.Values).Concat(rs.Products.Values).Concat(rs.YieldRules.Values);
+        rs.Categories.Values.Concat<IRuleEntity>(rs.Ingredients.Values).Concat(rs.Mappings.Values).Concat(rs.Products.Values).Concat(rs.YieldRules.Values);
 
     static Entity Kind(IRuleEntity e) => e switch
     {
+        Category => Entity.Category,
         Ingredient => Entity.Ingredient,
         ArticleMapping => Entity.Mapping,
         Product => Entity.Product,
@@ -184,6 +206,7 @@ public sealed class RuleStore
 
     static string Encode(IRuleEntity e) => e switch
     {
+        Category x => Json.Serialize(x),
         Ingredient x => Json.Serialize(x),
         ArticleMapping x => Json.Serialize(x),
         Product x => Json.Serialize(x),

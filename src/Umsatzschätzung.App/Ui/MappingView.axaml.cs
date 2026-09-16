@@ -104,6 +104,7 @@ public partial class MappingView : Screen
 
     protected override void OnEnter()
     {
+        IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         model.Ingredients = Session.Ingredients();
         model.Groups.Clear();
         foreach (var g in UnmappedGroups()) model.Groups.Add(g);
