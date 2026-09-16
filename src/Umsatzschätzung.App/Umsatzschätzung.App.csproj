@@ -20,6 +20,9 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <RuntimeIdentifiers>osx-arm64</RuntimeIdentifiers>
+    <!-- codesign findet Dateien mit Umlaut im Namen nicht wieder: im Info.plist
+         stehen sie normalisiert, auf der Platte nicht. Auf macOS also ohne. -->
+    <AssemblyName>umsatzschaetzung</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

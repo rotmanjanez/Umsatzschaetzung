@@ -41,7 +41,7 @@ public sealed class Tagger : IDisposable
     // extra work on efficiency cores. The default is not good enough here.
     const int Threads = 4;
 
-    static string Dir => Path.Combine(AppContext.BaseDirectory, "models", "b");
+    static string Dir => AppFiles.Beside(Path.Combine("models", "b"));
     static string ModelPath => Path.Combine(Dir, "tagger.int8.onnx");
 
     readonly Lock gate = new();

@@ -15,7 +15,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [windows-latest, windows-11-arm]
+        os: [windows-latest, windows-11-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -68,8 +68,52 @@ jobs:
             dist/msi/publisher.cer
             dist/msi/SHA256SUMS.txt
 
+  dmg:
+    needs: test
+    runs-on: macos-latest
+    env:
+      CERT_BASE64: ${{ secrets.MACOS_CERT_BASE64 }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Ein eigener Schlüsselbund, damit der Lauf nichts am Runner-Standardbund
+      # ändert; ohne Zertifikat wird ad-hoc signiert und nicht notarisiert.
+      - name: restore signing certificate
+        if: env.CERT_BASE64 != ''
+        env:
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          keychain=$RUNNER_TEMP/build.keychain
+          password=$(uuidgen)
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          echo "$CERT_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          echo "IDENTITY=${{ secrets.MACOS_IDENTITY }}" >> "$GITHUB_ENV"
+
+      - run: sh packaging/macos/build.sh -v "${{ inputs.version || github.ref_name }}" ${IDENTITY:+-i "$IDENTITY"}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: umsatzschätzung-osx-arm64-dmg
+          path: |
+            dist/dmg/*.dmg
+            dist/dmg/SHA256SUMS.txt
+
   release:
-    needs: msi
+    needs: [msi, dmg]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -77,7 +121,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v7
         with:
-          pattern: umsatzschätzung-*-msi
+          pattern: umsatzschätzung-*
           path: artifacts
 
       # The per-arch SHA256SUMS.txt files would collide on merge, so the sums
@@ -85,9 +129,10 @@ jobs:
       - name: collect assets
         run: |
           mkdir release
-          find artifacts -type f \( -name '*.msi' -o -name 'publisher.cer' \) \
+          find artifacts -type f \( -name '*.msi' -o -name '*.dmg' -o -name 'publisher.cer' \) \
             -exec cp {} release/ \;
           test -n "$(find release -name '*.msi' -print -quit)" || { echo "no msi in artifacts:"; find artifacts -type f; exit 1; }
+          test -n "$(find release -name '*.dmg' -print -quit)" || { echo "no dmg in artifacts:"; find artifacts -type f; exit 1; }
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -l release
 
