@@ -10,7 +10,8 @@ public sealed record ExcludedLineRow(string Invoice, long LineNo, string Name, s
 public sealed class ReportModel : Observable
 {
     string purchases = "", included = "", excluded = "", note = "";
-    bool hasExcluded, ready;
+    bool hasExcluded, ready, busy;
+    string saved = "";
 
     public ObservableCollection<ExcludedLineRow> Rows { get; } = [];
     public string Purchases { get => purchases; set => Set(ref purchases, value); }
@@ -18,7 +19,14 @@ public sealed class ReportModel : Observable
     public string Excluded { get => excluded; set => Set(ref excluded, value); }
     public bool HasExcluded { get => hasExcluded; set { if (Set(ref hasExcluded, value)) Raise(nameof(NoExcluded)); } }
     public bool NoExcluded => !hasExcluded;
-    public bool Ready { get => ready; set => Set(ref ready, value); }
+    public bool Ready { get => ready; set { if (Set(ref ready, value)) Raise(nameof(CanSave)); } }
+    public bool Busy { get => busy; set { if (Set(ref busy, value)) { Raise(nameof(CanSave)); Raise(nameof(CanExport)); Raise(nameof(PdfLabel)); Raise(nameof(CsvLabel)); } } }
+    public bool CanSave => ready && !busy;
+    public bool CanExport => !busy;
+    public string PdfLabel => busy ? "Wird erstellt …" : "Als PDF speichern";
+    public string CsvLabel => busy ? "Wird exportiert …" : "CSV exportieren";
+    public string Saved { get => saved; set { if (Set(ref saved, value)) Raise(nameof(ShowSaved)); } }
+    public bool ShowSaved => saved != "";
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }
     public bool ShowNote => note != "";
 
@@ -87,7 +95,8 @@ public partial class ReportView : Screen
     {
         if (Session.Case is null) return;
         var caseId = Session.Case.Id;
-        Session.Message = "Bericht wird erstellt …";
+        model.Saved = "";
+        model.Busy = true;
         await Session.Run(async () =>
         {
             var resp = await Session.Service.RenderReport(caseId, true, Ct);
@@ -96,19 +105,26 @@ public partial class ReportView : Screen
                 Session.Fail("PDF konnte nicht erstellt werden");
                 return;
             }
-            Session.Message = "";
-            await Session.SaveFile(resp.FileName, resp.Pdf, Session.PdfFilter);
+            model.Busy = false;
+            if (await Session.SaveFile(resp.FileName, resp.Pdf, Session.PdfFilter) is { } name)
+                model.Saved = "Gespeichert: " + name;
         });
+        model.Busy = false;
     }
 
     async void ExportCsv(object? sender, RoutedEventArgs e)
     {
         if (Session.Case is null) return;
         var caseId = Session.Case.Id;
+        model.Saved = "";
+        model.Busy = true;
         await Session.Run(async () =>
         {
             var resp = await Session.Service.ExportCase(caseId, ExportFormat.Csv, Ct);
-            await Session.SaveFile(resp.FileName, resp.Data, Session.CsvFilter);
+            model.Busy = false;
+            if (await Session.SaveFile(resp.FileName, resp.Data, Session.CsvFilter) is { } name)
+                model.Saved = "Gespeichert: " + name;
         });
+        model.Busy = false;
     }
 }

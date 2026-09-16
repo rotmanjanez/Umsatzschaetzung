@@ -206,9 +206,6 @@ public partial class MappingView : Screen
         if (Session.Case is null) return;
         foreach (var (inv, line) in g.Lines) Session.Case.Invoices[inv].Lines[line].MappingId = mappingId;
         if (await Session.SaveCase(Ct))
-        {
-            Session.Message = "Zugeordnet";
             OnEnter();
-        }
     }
 }

@@ -22,7 +22,6 @@ public sealed class Session : Observable
     public static readonly FilePickerFileType[] PdfFilter = [new("PDF") { Patterns = ["*.pdf"] }];
     public static readonly FilePickerFileType[] CsvFilter = [new("CSV") { Patterns = ["*.csv"] }];
 
-    string message = "";
     string error = "";
 
     public Session(IService service)
@@ -42,7 +41,6 @@ public sealed class Session : Observable
     public StatusResp? Status { get; private set; }
     public Dictionary<string, OcrResp> Drafts { get; } = [];
 
-    public string Message { get => message; set => Set(ref message, value); }
     public string Error { get => error; set => Set(ref error, value); }
 
     public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed, RulesRequested;
@@ -202,20 +200,21 @@ public sealed class Session : Observable
         return files;
     }
 
-    public async Task SaveFile(string name, byte[] data, IReadOnlyList<FilePickerFileType> filter)
+    public async Task<string?> SaveFile(string name, byte[] data, IReadOnlyList<FilePickerFileType> filter)
     {
-        if (Owner?.StorageProvider is not { } storage) return;
+        if (Owner?.StorageProvider is not { } storage) return null;
         var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions { SuggestedFileName = name, FileTypeChoices = filter });
-        if (file is null) return;
+        if (file is null) return null;
         try
         {
             await using var stream = await file.OpenWriteAsync();
             await stream.WriteAsync(data);
-            Message = "Gespeichert: " + file.Name;
+            return file.Name;
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             Fail("Datei konnte nicht gespeichert werden: " + file.Name);
+            return null;
         }
     }
 }

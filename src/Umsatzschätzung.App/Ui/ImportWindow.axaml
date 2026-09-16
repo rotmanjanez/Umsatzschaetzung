@@ -7,11 +7,13 @@
         WindowStartupLocation="CenterOwner">
     <StackPanel Margin="20,16">
         <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-        <ProgressBar Height="6" Margin="0,12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}"/>
-        <DockPanel>
+        <ProgressBar Height="6" Margin="0,12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}" IsVisible="{Binding Pending}"/>
+        <DockPanel IsVisible="{Binding Pending}">
             <TextBlock DockPanel.Dock="Right" Text="{Binding Eta}" Theme="{StaticResource Muted}" Margin="12,0,0,0"/>
             <TextBlock Text="{Binding Text}" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
         </DockPanel>
-        <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick"/>
+        <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" IsVisible="{Binding Complete}" TextWrapping="Wrap" Margin="0,12,0,0"/>
+        <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Pending}"/>
+        <Button Content="Schließen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Complete}"/>
     </StackPanel>
 </Window>

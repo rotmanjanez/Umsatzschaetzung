@@ -8,7 +8,7 @@ public sealed class ImportJob(string caseId, string label) : Observable
     readonly CancellationTokenSource cts = new();
 
     int total, done;
-    string file = "";
+    string file = "", summary = "";
     bool running;
 
     public string CaseId { get; } = caseId;
@@ -31,6 +31,10 @@ public sealed class ImportJob(string caseId, string label) : Observable
     public string Text => Running
         ? Math.Min(Done + 1, Total) + " von " + Total + " · " + File
         : "Wartet · " + Total + (Total == 1 ? " Datei" : " Dateien");
+
+    public string Summary { get => summary; set { if (Set(ref summary, value)) { Raise(nameof(Complete)); Raise(nameof(Pending)); } } }
+    public bool Complete => summary != "";
+    public bool Pending => summary == "";
 
     public double Fraction => Progress.Fraction;
 
@@ -160,7 +164,7 @@ public sealed class Imports
     void Finish(ImportJob job)
     {
         var where = session.Case?.Id == job.CaseId ? "" : job.Label + ": ";
-        session.Message = where + job.Stored + " Rechnungen übernommen, " + job.Drafts + " zur Prüfung";
+        job.Summary = job.Stored + " Rechnungen übernommen, " + job.Drafts + " zur Prüfung";
         if (job.Failed.Count > 0) session.Fail(where + "Nicht importiert: " + string.Join("; ", job.Failed));
         Finished?.Invoke(job);
         Jobs.Remove(job);

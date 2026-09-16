@@ -206,12 +206,6 @@
         </Setter>
     </ControlTheme>
 
-    <ControlTheme x:Key="StatusBar" TargetType="Border">
-        <Setter Property="BorderBrush" Value="{DynamicResource SoftBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="0,1,0,0"/>
-        <Setter Property="Padding" Value="16,6"/>
-    </ControlTheme>
-
     <ControlTheme x:Key="Grid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
