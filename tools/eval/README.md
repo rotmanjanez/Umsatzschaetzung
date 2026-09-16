@@ -21,7 +21,7 @@ out near perfect. Whatever it loses is assembly loss, not model error, and it is
 the ceiling for every model scored afterwards. A model can never beat it.
 
 Model B is scored by dumping its predictions in this shape and pointing `--rows`
-at the dump — see `tools/trainb/README.md`.
+at the dump — see `tools/train/README.md`.
 
 ## Scales, from Extract/Parse.cs
 

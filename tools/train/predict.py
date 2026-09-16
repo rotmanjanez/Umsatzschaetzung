@@ -1,0 +1,166 @@
+"""Tag the val pages with a trained model and write them as a page.jsonl.
+
+Scoring is C#: assembly and metrics both live in tools/eval, so the number comes
+out of the same Assemble the app ships rather than a second implementation.
+
+    python3 predict.py --rows page.jsonl --run runs/b --dump pred.jsonl
+    dotnet run --project tools/eval -- --rows pred.jsonl --split val
+"""
+import argparse
+import json
+from collections import defaultdict
+from pathlib import Path
+
+import numpy as np
+import torch
+
+from data import MAX_LEN, MAX_ROWS, OVERLAP, stitch, windows
+from model import Tagger, quantise_box, tokenizer
+from schema import LABELS, ROLES, read_jsonl
+
+
+@torch.no_grad()
+def tag_page(model, tk, page, device):
+    ws = list(windows(page, tk))
+    word_logits, role_logits = [], []
+    for w in ws:
+        out = model(torch.tensor(w["input_ids"])[None].to(device),
+                    torch.tensor(w["bbox"])[None].to(device),
+                    torch.ones(1, len(w["input_ids"]), dtype=torch.long, device=device),
+                    torch.tensor(w["row_pool"])[None].to(device))
+        word_logits.append(out[0][0].float().cpu().numpy())
+        role_logits.append((w["row_pool"], out[1][0].float().cpu().numpy()))
+
+    n = sum(len(w["input_ids"]) - 2 for w in ws) - sum(
+        max(0, ws[i - 1]["offset"] + len(ws[i - 1]["input_ids"]) - 2 - ws[i]["offset"])
+        for i in range(1, len(ws)))
+    seq = stitch(ws, word_logits, max(n, 1))
+
+    roles = defaultdict(list)
+    for w, (pool, rl) in zip(ws, role_logits):
+        present = [int(np.flatnonzero(pool[i])[0]) for i in range(pool.shape[0])]
+        for i, at in enumerate(present):
+            roles[w["offset"] + at - 1].append(rl[i])
+
+    out, at = [], 0
+    for word in page["words"]:
+        sub = tk.encode(" " + word["t"], add_special_tokens=False)
+        if not sub or at >= len(seq):
+            continue
+        role = roles.get(at)
+        out.append({"t": word["t"], "box": word["box"], "row": word["row"],
+                    "pred": LABELS[int(seq[at].argmax())],
+                    "role": ROLES[int(np.mean(role, 0).argmax())] if role else word.get("role", "line-item")})
+        at += len(sub)
+    return out
+
+
+# The ONNX path mirrors Tagging/Tagger.cs rather than tag_page: same windowing,
+# summed word logits, and a per-token role head averaged over a row's first
+# subwords. Tagging through it measures quantisation end to end.
+def onnx_page(sess, tk, page, bos, eos):
+    ids, boxes, row_of, starts, kept = [], [], [], [], []
+    for w in page["words"]:
+        sub = tk.encode(" " + w["t"], add_special_tokens=False)
+        if not sub:
+            continue
+        box = quantise_box(w["box"], page["w"], page["h"])
+        starts.append(len(ids))
+        kept.append(w)
+        for k, s in enumerate(sub):
+            ids.append(s)
+            boxes.append(box)
+            row_of.append(w["row"] if k == 0 else -1)
+    if not kept:
+        return []
+
+    word_acc = np.zeros((len(ids), len(LABELS)), dtype=np.float64)
+    role_acc = defaultdict(lambda: np.zeros(len(ROLES)))
+
+    body = MAX_LEN - 2
+    step = max(1, body - OVERLAP)
+    for s in range(0, len(ids), step):
+        e = min(s + body, len(ids))
+        n = e - s + 2
+        inp = np.zeros((1, n), dtype=np.int64)
+        bb = np.zeros((1, n, 4), dtype=np.int64)
+        inp[0, 0], inp[0, n - 1] = bos, eos
+        inp[0, 1:n - 1] = ids[s:e]
+        bb[0, 1:n - 1] = boxes[s:e]
+        wl, rl = sess.run(["word_logits", "role_logits"],
+                          {"input_ids": inp, "bbox": bb,
+                           "attention_mask": np.ones((1, n), dtype=np.int64)})
+        word_acc[s:e] += wl[0, 1:n - 1]
+
+        members = {}
+        for i in range(s, e):
+            r = row_of[i]
+            if r < 0:
+                continue
+            if r not in members:
+                if len(members) == MAX_ROWS:
+                    continue
+                members[r] = []
+            members[r].append(i - s + 1)
+        for r, at in members.items():
+            role_acc[r] += rl[0, at].mean(0)
+        if e == len(ids):
+            break
+
+    return [{"t": w["t"], "box": w["box"], "row": w["row"],
+             "pred": LABELS[int(word_acc[st].argmax())],
+             "role": ROLES[int(role_acc[w["row"]].argmax())] if w["row"] in role_acc
+             else "line-item"}
+            for w, st in zip(kept, starts)]
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rows", type=Path, required=True)
+    ap.add_argument("--run", type=Path, required=True)
+    ap.add_argument("--split", default="val")
+    ap.add_argument("--dump", type=Path, required=True,
+                    help="where to write the tagged pages, for tools/eval to score")
+    ap.add_argument("--truth-only", action="store_true", help="the assembly ceiling, no model")
+    ap.add_argument("--onnx", type=Path,
+                    help="tag with the int8 ONNX through the C# inference path instead "
+                         "of PyTorch, so quantisation is measured end to end")
+    a = ap.parse_args()
+
+    pages = [p for p in read_jsonl(a.rows) if p.get("split") == a.split]
+    model = tk = device = sess = None
+    if a.onnx:
+        import onnxruntime as ort
+        tk = tokenizer()
+        o = ort.SessionOptions()
+        o.intra_op_num_threads, o.inter_op_num_threads = 4, 1
+        sess = ort.InferenceSession(str(a.onnx), o, providers=["CPUExecutionProvider"])
+    elif not a.truth_only:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        tk = tokenizer()
+        model = Tagger().to(device).eval()
+        model.load_state_dict(torch.load(a.run / "model.pt", map_location=device, weights_only=True))
+
+    rows, got = defaultdict(list), defaultdict(list)
+    for p in pages:
+        key = p["template"]  # one variation, not one invoice: variations of the
+                             # same invoice are separate documents
+        rows[key].append(p)
+        if a.truth_only:
+            got[key].append(p["words"])
+        elif sess is not None:
+            got[key].append(onnx_page(sess, tk, p, tk.bos_token_id, tk.eos_token_id))
+        else:
+            got[key].append(tag_page(model, tk, p, device))
+
+    with a.dump.open("w") as f:
+        for k in rows:
+            for p, words in zip(rows[k], got[k]):
+                f.write(json.dumps({**{n: p[n] for n in
+                                       ("split", "invoice", "template", "page", "w", "h")},
+                                    "words": words}, ensure_ascii=False) + "\n")
+    print(f"{len(pages)} Seiten -> {a.dump}")
+
+
+if __name__ == "__main__":
+    main()

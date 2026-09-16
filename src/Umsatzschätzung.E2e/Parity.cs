@@ -3,7 +3,7 @@ using Umsatzschätzung.Tagging;
 
 namespace Umsatzschätzung.E2e;
 
-// Runs the C# byte-level BPE over every case tools/trainb/tokenizer_parity.py dumped and
+// Runs the C# byte-level BPE over every case tools/train/tokenizer_parity.py dumped and
 // asserts the ids are identical. A tokenizer that diverges from the one the model was
 // trained with does not crash and does not error; it quietly costs accuracy.
 static class TokenizerParity
