@@ -20,7 +20,7 @@
             </StackPanel>
             <TextBlock Text="Prüfungen" Theme="{StaticResource PageTitle}"/>
         </DockPanel>
-        <Border x:Name="NewPanel" DockPanel.Dock="Top" Theme="{StaticResource Card}" IsVisible="False">
+        <Border DockPanel.Dock="Top" Theme="{StaticResource Card}" IsVisible="{Binding Creating}">
             <StackPanel MaxWidth="560" HorizontalAlignment="Left">
                 <TextBlock Text="Neue Prüfung" Theme="{StaticResource SectionHeader}"/>
                 <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
@@ -28,11 +28,11 @@
                 <Grid Width="520" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Zeitraum von *" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="NewFrom"/>
+                        <ui:DateBox x:Name="NewFrom"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Zeitraum bis *" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="NewTo"/>
+                        <ui:DateBox x:Name="NewTo"/>
                     </StackPanel>
                 </Grid>
                 <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
@@ -83,7 +83,15 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <TextBlock Text="Noch keine Prüfungen" Theme="{StaticResource EmptyState}" IsVisible="{Binding Empty}"/>
+            <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding ShowEmpty}">
+                <TextBlock Text="Noch keine Prüfungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center"
+                           Text="Eine Prüfung hält Zeitraum, Steuerpflichtigen, Rechnungen und Kalkulation zusammen. Legen Sie eine neue Prüfung an oder importieren Sie eine gespeicherte Prüfungsdatei."/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <Button Content="Importieren" Theme="{StaticResource SecondaryButton}" Click="Import"/>
+                    <Button Content="Neue Prüfung" Theme="{StaticResource PrimaryButton}" Click="StartNew"/>
+                </StackPanel>
+            </StackPanel>
         </Grid>
     </DockPanel>
 </ui:Screen>
