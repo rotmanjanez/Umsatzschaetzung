@@ -57,11 +57,11 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelection}">
                         <StackPanel>
                             <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="*,*,*,*">
+                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
                                 <TextBlock Text="Lieferant" Theme="{StaticResource KeyLabel}"/>
                                 <TextBlock Grid.Column="1" Text="{Binding Supplier}" Theme="{StaticResource KeyValue}"/>
-                                <TextBlock Grid.Row="1" Text="Artikelnummer" Theme="{StaticResource KeyLabel}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}"/>
+                                <TextBlock Grid.Row="1" Text="Artikelnummer" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasArticle}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasArticle}"/>
                                 <TextBlock Grid.Row="2" Text="Einheit" Theme="{StaticResource KeyLabel}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Unit}" Theme="{StaticResource KeyValue}"/>
                                 <TextBlock Grid.Row="3" Text="Positionen" Theme="{StaticResource KeyLabel}"/>

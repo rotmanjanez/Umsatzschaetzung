@@ -124,6 +124,8 @@ public partial class InvoicesView : Screen
         Supplier.Text = row.Supplier;
         Number.Text = row.Invoice.Number;
         Date.Text = row.Display.Date;
+        DateWarning.IsVisible = OutsidePeriod(row.Invoice);
+        ToolTip.SetTip(DateWarning, "Prüfungszeitraum " + (Session.Display?.Period ?? ""));
         Net.Text = row.Display.NetTotal;
         Gross.Text = row.Display.GrossTotal;
         LinesGrid.ItemsSource = row.Invoice.Lines.Select((l, i) =>
@@ -134,6 +136,9 @@ public partial class InvoicesView : Screen
         Detail.IsVisible = true;
         _ = LoadSource(row.Id);
     }
+
+    bool OutsidePeriod(Invoice inv) =>
+        Session.Case is { } k && inv.Date is { } d && (d < k.PeriodFrom || d > k.PeriodTo);
 
     void SwapVerify(VerifyView? next)
     {

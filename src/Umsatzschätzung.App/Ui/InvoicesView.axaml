@@ -66,6 +66,9 @@
                                     <TextBlock x:Name="Number" FontWeight="SemiBold" Margin="0,0,24,0"/>
                                     <TextBlock Text="Datum" Theme="{StaticResource KeyLabel}" Margin="0,0,8,0"/>
                                     <TextBlock x:Name="Date" FontWeight="SemiBold"/>
+                                    <Border x:Name="DateWarning" Theme="{StaticResource BadgeWarning}" Margin="8,0,0,0" IsVisible="False">
+                                        <TextBlock Text="Außerhalb des Zeitraums" Theme="{StaticResource BadgeText}"/>
+                                    </Border>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                     <TextBlock Text="Netto" Theme="{StaticResource KeyLabel}" Margin="0,0,8,0"/>
