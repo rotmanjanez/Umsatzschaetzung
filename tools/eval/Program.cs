@@ -35,7 +35,7 @@ foreach (var variation in Corpus.Read(rows, split, repair))
 {
     var want = Corpus.Expected(Path.Combine(corpus, variation.Invoice, "expected.json"));
     var pages = variation.Pages.Select(_ => new OcrPage()).ToList();
-    var got = Assemble.Invoice(variation.Pages, pages, Corpus.UnitCode);
+    var got = Assemble.Invoice(variation.Pages, pages);
     var r = Score.One(Doc(got), want, VatExempt(variation, want));
     results.Add(r);
     rowsOut.Add($"{variation.Invoice}\t{variation.Template}\t{r.CellsWrong}\t{r.CellsTotal}\t{r.LinesMatched}\t{r.LinesGot}\t{r.LinesWant}\t" +

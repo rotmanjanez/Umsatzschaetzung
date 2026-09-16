@@ -16,6 +16,7 @@
   <ItemGroup>
     <EmbeddedResource Include="../../docs/rechenweg.md" LogicalName="rechenweg.md" />
     <EmbeddedResource Include="Rulestore/seed.json" LogicalName="seed.json" />
+    <EmbeddedResource Include="../../data/units.json" LogicalName="units.json" />
   </ItemGroup>
   <!-- The tagger ships the same way, out of models/b at the repo root. Those files
        are in the repo, but through Git LFS: see .gitattributes. -->

@@ -1,0 +1,30 @@
+{
+  "_": "Die einzige Kopie der Einheitentabelle. Umsatzschätzung.Core/Model/Units.cs und tools/units.py lesen diese Datei; sonst niemand. Codes sind UN/ECE Rec 20 -- Packmittel aus Rec 21 tragen dort das Präfix X (XCT, nicht CT).",
+  "units": [
+    { "code": "KGM", "name": "Kilogramm", "base": "g",     "factor": 1000, "aliases": ["kg"] },
+    { "code": "GRM", "name": "Gramm",     "base": "g",     "factor": 1,    "aliases": ["g", "gr"] },
+    { "code": "LTR", "name": "Liter",     "base": "ml",    "factor": 1000, "aliases": ["l", "lt", "ltr"] },
+    { "code": "MLT", "name": "Milliliter","base": "ml",    "factor": 1,    "aliases": ["ml"] },
+    { "code": "CLT", "name": "Zentiliter","base": "ml",    "factor": 10,   "aliases": ["cl"] },
+    { "code": "H87", "name": "Stück",     "base": "piece", "factor": 1,    "aliases": ["stk", "st", "stck", "stück", "stueck", "pc", "ea"] },
+    { "code": "C62", "name": "Einheit",   "base": "piece", "factor": 1,    "aliases": [] },
+    { "code": "PCE", "name": "Stück",     "base": "piece", "factor": 1,    "aliases": [] },
+    { "code": "EA",  "name": "Stück",     "base": "piece", "factor": 1,    "aliases": [] },
+    { "code": "XBO", "name": "Flasche",   "base": "piece", "factor": 1,    "aliases": ["fl", "fla", "flasche", "flaschen"] },
+    { "code": "XCT", "name": "Karton",    "base": "piece", "factor": 1,    "aliases": ["kt", "kar", "karton", "kartons"] },
+    { "code": "XCS", "name": "Kiste",     "base": "piece", "factor": 1,    "aliases": ["ki", "kiste", "kisten"] },
+    { "code": "XBX", "name": "Box",       "base": "piece", "factor": 1,    "aliases": ["box"] },
+    { "code": "XPK", "name": "Packung",   "base": "piece", "factor": 1,    "aliases": ["pk", "pkg", "packung", "pack"] },
+    { "code": "XCR", "name": "Kasten",    "base": "piece", "factor": 1,    "aliases": ["kasten"] },
+    { "code": "XBA", "name": "Fass",      "base": "piece", "factor": 1,    "aliases": [] },
+    { "code": "XKG", "name": "Keg",       "base": "piece", "factor": 1,    "aliases": ["fass", "fässer"] },
+    { "code": "XBG", "name": "Beutel",    "base": "piece", "factor": 1,    "aliases": ["beutel", "btl"] },
+    { "code": "XCI", "name": "Kanister",  "base": "piece", "factor": 1,    "aliases": ["kanister", "kan"] },
+    { "code": "XSA", "name": "Sack",      "base": "piece", "factor": 1,    "aliases": ["sack", "säcke", "sa"] },
+    { "code": "XCA", "name": "Dose",      "base": "piece", "factor": 1,    "aliases": ["dose", "ds"] },
+    { "code": "XRO", "name": "Rolle",     "base": "piece", "factor": 1,    "aliases": ["rolle", "rollen", "ro"] },
+    { "code": "XBH", "name": "Bund",      "base": "piece", "factor": 1,    "aliases": ["bund", "bd"] },
+    { "code": "XBJ", "name": "Eimer",     "base": "piece", "factor": 1,    "aliases": ["eimer", "ei"] },
+    { "code": "XPF", "name": "Palette",   "base": "piece", "factor": 1,    "aliases": ["palette", "pal"] }
+  ]
+}
