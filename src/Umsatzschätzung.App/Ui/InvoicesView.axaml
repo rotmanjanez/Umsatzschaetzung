@@ -20,10 +20,15 @@
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="ui:InvoiceRow">
-                                    <StackPanel Margin="4,6">
-                                        <TextBlock Text="{Binding Supplier}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding Sub}" Theme="{StaticResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
-                                    </StackPanel>
+                                    <Grid ColumnDefinitions="*,Auto" Margin="4,6">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Supplier}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Sub}" Theme="{StaticResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" VerticalAlignment="Center" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
+                                            <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                        </Button>
+                                    </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

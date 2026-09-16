@@ -85,6 +85,12 @@ public sealed partial class CaseStore(string dir)
         WriteAtomic(Path.Combine(target, name), data);
     }
 
+    public void DeleteFile(string caseId, string invoiceId)
+    {
+        var target = FileDir(caseId, invoiceId);
+        if (Directory.Exists(target)) Directory.Delete(target, true);
+    }
+
     public (string Name, byte[] Data) LoadFile(string caseId, string invoiceId)
     {
         var target = FileDir(caseId, invoiceId);
