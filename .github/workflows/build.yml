@@ -65,7 +65,6 @@ jobs:
           name: umsatzschätzung-${{ matrix.arch }}-msi
           path: |
             dist/msi/*.msi
-            dist/msi/*.cab
             dist/msi/publisher.cer
             dist/msi/SHA256SUMS.txt
 
@@ -86,7 +85,7 @@ jobs:
       - name: collect assets
         run: |
           mkdir release
-          find artifacts -type f \( -name '*.msi' -o -name '*.cab' -o -name 'publisher.cer' \) \
+          find artifacts -type f \( -name '*.msi' -o -name 'publisher.cer' \) \
             -exec cp {} release/ \;
           test -n "$(find release -name '*.msi' -print -quit)" || { echo "no msi in artifacts:"; find artifacts -type f; exit 1; }
           (cd release && sha256sum * > SHA256SUMS.txt)

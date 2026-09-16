@@ -11,6 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $dist = Join-Path $root "dist\$Arch"
+$models = Join-Path $root "models"
 
 function Resolve-SignTool {
     if ($script:tool) { return $script:tool }
@@ -51,6 +52,13 @@ foreach ($required in "umsatzschätzung.exe", "WebView2Loader.dll", "e_sqlite3.d
                       "PresentationNative_cor3.dll", "wpfgfx_cor3.dll", "PenImc_cor3.dll", "vcruntime140_cor3.dll") {
     if (-not (Test-Path (Join-Path $dist $required))) { throw "$required missing from $dist" }
 }
+foreach ($required in "tagger.int8.onnx", "vocab.json", "merges.txt", "byte_to_unicode.json", "spec.json") {
+    $file = Get-Item (Join-Path $models "b\$required") -ErrorAction Ignore
+    if (-not $file) { throw "models\b\$required missing; run git lfs pull" }
+    if ($file.Length -lt 1kb -and (Get-Content $file -First 1) -like "version https://git-lfs*") {
+        throw "models\b\$required is an LFS pointer; run git lfs pull"
+    }
+}
 Sign (Get-ChildItem $dist -Include *.exe, *.dll -Recurse).FullName
 if ($NoInstaller) { Get-ChildItem $dist; exit 0 }
 
@@ -59,7 +67,7 @@ Remove-Item -Recurse -Force $out -ErrorAction Ignore
 New-Item -ItemType Directory $out | Out-Null
 $wixArch = if ($Arch -eq "win-arm64") { "arm64" } else { "x64" }
 wix build -arch $wixArch -culture de-DE `
-    -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "CabArch=$wixArch" `
+    -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "Models=$models" `
     -o (Join-Path $out "umsatzschaetzung-$msiVersion-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
 if ($LASTEXITCODE -ne 0) { throw "wix failed" }
 Sign (Get-ChildItem $out -Filter *.msi).FullName
