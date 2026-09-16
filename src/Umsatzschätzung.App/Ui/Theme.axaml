@@ -1,17 +1,41 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <SolidColorBrush x:Key="WarningBrush" Color="#C47A0E"/>
-    <SolidColorBrush x:Key="WarningSoftBrush" Color="#38E0912B"/>
-    <SolidColorBrush x:Key="SuccessBrush" Color="#1F8A4C"/>
-    <SolidColorBrush x:Key="SuccessSoftBrush" Color="#333DB86B"/>
-    <SolidColorBrush x:Key="InfoBrush" Color="#2F63D8"/>
-    <SolidColorBrush x:Key="InfoSoftBrush" Color="#334F80F0"/>
-    <SolidColorBrush x:Key="NeutralSoftBrush" Color="#22808080"/>
-    <SolidColorBrush x:Key="DangerBrush" Color="#D03030"/>
-    <SolidColorBrush x:Key="DangerSoftBrush" Color="#33E5484D"/>
-    <SolidColorBrush x:Key="FocusBoxBrush" Color="#2F63D8"/>
-    <SolidColorBrush x:Key="SoftBorderBrush" Color="#33808080"/>
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="WarningBrush" Color="#B06E0A"/>
+            <SolidColorBrush x:Key="WarningSoftBrush" Color="#2EE0912B"/>
+            <SolidColorBrush x:Key="SuccessBrush" Color="#1F8A4C"/>
+            <SolidColorBrush x:Key="SuccessSoftBrush" Color="#2B3DB86B"/>
+            <SolidColorBrush x:Key="InfoBrush" Color="#2F63D8"/>
+            <SolidColorBrush x:Key="InfoSoftBrush" Color="#2B4F80F0"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#C62B2B"/>
+            <SolidColorBrush x:Key="DangerSoftBrush" Color="#2BE5484D"/>
+            <SolidColorBrush x:Key="NeutralSoftBrush" Color="#14808080"/>
+            <SolidColorBrush x:Key="FocusBoxBrush" Color="#2F63D8"/>
+            <SolidColorBrush x:Key="SoftBorderBrush" Color="#25202030"/>
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFF4F4F6"/>
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFFFF"/>
+            <SolidColorBrush x:Key="GridLineBrush" Color="#16202030"/>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="WarningBrush" Color="#E3A83C"/>
+            <SolidColorBrush x:Key="WarningSoftBrush" Color="#2EE0912B"/>
+            <SolidColorBrush x:Key="SuccessBrush" Color="#4FC97E"/>
+            <SolidColorBrush x:Key="SuccessSoftBrush" Color="#2B3DB86B"/>
+            <SolidColorBrush x:Key="InfoBrush" Color="#7AA2F7"/>
+            <SolidColorBrush x:Key="InfoSoftBrush" Color="#2B4F80F0"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#F2706F"/>
+            <SolidColorBrush x:Key="DangerSoftBrush" Color="#2BE5484D"/>
+            <SolidColorBrush x:Key="NeutralSoftBrush" Color="#1EB0B4C0"/>
+            <SolidColorBrush x:Key="FocusBoxBrush" Color="#7AA2F7"/>
+            <SolidColorBrush x:Key="SoftBorderBrush" Color="#26E6E8F0"/>
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FF2B2B2E"/>
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FF35353A"/>
+            <SolidColorBrush x:Key="GridLineBrush" Color="#18E6E8F0"/>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
     <FontFamily x:Key="MonoFont">Cascadia Mono, Menlo, Consolas, Courier New</FontFamily>
 
     <StreamGeometry x:Key="DeleteIcon">M6,2 H10 V3 H14 V4.5 H2 V3 H6 Z M3.4,6 H12.6 L11.9,14.6 H4.1 Z</StreamGeometry>
@@ -83,7 +107,7 @@
     </ControlTheme>
 
     <ControlTheme x:Key="DangerLink" TargetType="Button" BasedOn="{StaticResource LinkButton}">
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
     </ControlTheme>
 
     <ControlTheme x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource LinkButton}">
@@ -93,12 +117,12 @@
     </ControlTheme>
 
     <ControlTheme x:Key="DangerIcon" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
     </ControlTheme>
 
     <ControlTheme x:Key="Card" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="16"/>
@@ -106,13 +130,13 @@
     </ControlTheme>
 
     <ControlTheme x:Key="Panel" TargetType="Border">
-        <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
     </ControlTheme>
 
     <ControlTheme x:Key="Badge" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource NeutralSoftBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource NeutralSoftBrush}"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="6,1"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -120,15 +144,15 @@
     </ControlTheme>
 
     <ControlTheme x:Key="BadgeWarning" TargetType="Border" BasedOn="{StaticResource Badge}">
-        <Setter Property="Background" Value="{StaticResource WarningSoftBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
     </ControlTheme>
 
     <ControlTheme x:Key="BadgeSuccess" TargetType="Border" BasedOn="{StaticResource Badge}">
-        <Setter Property="Background" Value="{StaticResource SuccessSoftBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}"/>
     </ControlTheme>
 
     <ControlTheme x:Key="BadgeInfo" TargetType="Border" BasedOn="{StaticResource Badge}">
-        <Setter Property="Background" Value="{StaticResource InfoSoftBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource InfoSoftBrush}"/>
     </ControlTheme>
 
     <ControlTheme x:Key="BadgeText" TargetType="TextBlock">
@@ -137,28 +161,28 @@
     </ControlTheme>
 
     <ControlTheme x:Key="Banner" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource WarningSoftBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
         <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="Padding" Value="12,8"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
     </ControlTheme>
 
     <ControlTheme x:Key="ErrorBanner" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource DangerSoftBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource DangerSoftBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
         <Setter Property="Padding" Value="16,10"/>
     </ControlTheme>
 
     <ControlTheme x:Key="ErrorBannerText" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </ControlTheme>
 
     <ControlTheme x:Key="ErrorBannerClose" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="8,0"/>
@@ -177,7 +201,7 @@
     </ControlTheme>
 
     <ControlTheme x:Key="StatusBar" TargetType="Border">
-        <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="0,1,0,0"/>
         <Setter Property="Padding" Value="16,6"/>
     </ControlTheme>
@@ -188,7 +212,7 @@
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="GridLinesVisibility" Value="Horizontal"/>
-        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource SoftBorderBrush}"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource GridLineBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
