@@ -27,9 +27,23 @@ public sealed record InvoiceLineRow(string Name, string Quantity, string UnitPri
 public sealed class InvoicesModel : Observable
 {
     bool empty = true;
+    bool dragging;
 
     public ObservableCollection<InvoiceRow> Invoices { get; } = [];
-    public bool Empty { get => empty; set => Set(ref empty, value); }
+
+    public bool Empty
+    {
+        get => empty;
+        set { if (Set(ref empty, value)) Raise(nameof(DropHint)); }
+    }
+
+    public bool Dragging
+    {
+        get => dragging;
+        set { if (Set(ref dragging, value)) Raise(nameof(DropHint)); }
+    }
+
+    public bool DropHint => dragging && !empty;
 }
 
 public partial class InvoicesView : Screen
@@ -47,6 +61,7 @@ public partial class InvoicesView : Screen
         Search.Attach(model.Invoices, r => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal);
         List.ItemsSource = Search.View;
         AddHandler(DragDrop.DragOverEvent, DragOverFiles);
+        AddHandler(DragDrop.DragLeaveEvent, DragLeft);
         AddHandler(DragDrop.DropEvent, Dropped);
         Session.CaseChanged += Refresh;
         Session.CaseClosed += CaseClosed;
@@ -167,12 +182,17 @@ public partial class InvoicesView : Screen
 
     void DragOverFiles(object? sender, DragEventArgs e)
     {
-        e.DragEffects = e.DataTransfer.Contains(DataFormat.File) ? DragDropEffects.Copy : DragDropEffects.None;
+        var files = e.DataTransfer.Contains(DataFormat.File);
+        e.DragEffects = files ? DragDropEffects.Copy : DragDropEffects.None;
+        model.Dragging = files;
         e.Handled = true;
     }
 
+    void DragLeft(object? sender, RoutedEventArgs e) => model.Dragging = false;
+
     async void Dropped(object? sender, DragEventArgs e)
     {
+        model.Dragging = false;
         if (e.DataTransfer.TryGetFiles() is not { } items) return;
         StartImport(await Session.ReadFiles(items.Select(f => f.TryGetLocalPath()).OfType<string>()));
     }
