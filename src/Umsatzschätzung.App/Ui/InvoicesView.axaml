@@ -16,7 +16,7 @@
                 <DockPanel>
                     <ui:SearchBox x:Name="Search" DockPanel.Dock="Top" Width="NaN" Margin="8"/>
                     <Grid>
-                        <ListBox x:Name="List" SelectionChanged="SelectionChanged" BorderThickness="0" Background="Transparent"
+                        <ListBox x:Name="List" SelectionChanged="SelectionChanged" PointerPressed="ListPressed" BorderThickness="0" Background="Transparent"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="ui:InvoiceRow">
@@ -39,8 +39,7 @@
             </Border>
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
             <Grid Grid.Column="2">
-                <TextBlock x:Name="EmptyDetail" Text="Keine Rechnung gewählt" Theme="{StaticResource EmptyState}"/>
-                <Grid x:Name="Intro" Margin="8" IsVisible="{Binding Empty}">
+                <Grid x:Name="Intro" Margin="8" IsVisible="{Binding Idle}">
                     <Rectangle Theme="{StaticResource DropZone}" Classes.over="{Binding Dragging}"/>
                     <StackPanel MaxWidth="460" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="32">
                         <PathIcon Theme="{StaticResource DropIcon}"/>
