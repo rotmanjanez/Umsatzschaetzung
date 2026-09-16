@@ -9,7 +9,7 @@
            InstallerVersion="500">
 
     <MajorUpgrade DowngradeErrorMessage="Eine neuere Version der Umsatzschätzung ist bereits installiert." />
-    <MediaTemplate EmbedCab="no" CabinetTemplate="umsatzschaetzung-$(var.CabArch){0}.cab" CompressionLevel="none" MaximumUncompressedMediaSize="1500" />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Property Id="STORE" Secure="yes" />
     <Property Id="CASEDIR" Secure="yes" />
@@ -24,7 +24,9 @@
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="Umsatzschätzung">
-        <Directory Id="ModelFolder" Name="models" />
+        <Directory Id="ModelFolder" Name="models">
+          <Directory Id="ModelBFolder" Name="b" />
+        </Directory>
       </Directory>
     </StandardDirectory>
     <StandardDirectory Id="ProgramMenuFolder" />
@@ -56,6 +58,7 @@
           <RegistryValue Name="ModelDir" Type="string" Value="[ModelFolder]" KeyPath="yes" />
         </RegistryKey>
       </Component>
+      <Files Include="$(var.Models)\b\**" Directory="ModelBFolder" />
     </ComponentGroup>
 
     <Feature Id="Main" Title="Umsatzschätzung" Level="1">
