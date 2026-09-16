@@ -11,11 +11,13 @@ namespace Umsatzschätzung.App.Ui;
 
 public sealed class CasesModel : Observable
 {
-    bool empty = true;
+    bool empty = true, creating;
 
     public ObservableCollection<CaseRow> Cases { get; } = [];
 
-    public bool Empty { get => empty; private set => Set(ref empty, value); }
+    public bool Empty { get => empty; private set { if (Set(ref empty, value)) Raise(nameof(ShowEmpty)); } }
+    public bool Creating { get => creating; set { if (Set(ref creating, value)) Raise(nameof(ShowEmpty)); } }
+    public bool ShowEmpty => empty && !creating;
 
     public void Set(List<CaseRow> rows)
     {
@@ -28,6 +30,7 @@ public sealed class CasesModel : Observable
 public partial class CasesView : Screen
 {
     readonly CasesModel model = new();
+    readonly TextBox[] fields;
 
     public CasesView(Session session) : base(session)
     {
@@ -36,6 +39,8 @@ public partial class CasesView : Screen
         Search.Attach(model.Cases, r => r.Case.Label + " " + r.Period + " " + r.Case.Taxpayer.Name);
         Grid.ItemsSource = Search.View;
         Grid.AddHandler(PointerReleasedEvent, RowClicked, RoutingStrategies.Bubble);
+        fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab];
+        foreach (var field in fields) field.TextChanged += (s, _) => ((TextBox)s!).Classes.Set("invalid", false);
     }
 
     void ShowRules(object? sender, RoutedEventArgs e) => Session.ShowRules();
@@ -50,43 +55,62 @@ public partial class CasesView : Screen
 
     void StartNew(object? sender, RoutedEventArgs e)
     {
-        NewPanel.IsVisible = true;
+        foreach (var field in fields) field.Classes.Set("invalid", false);
+        model.Creating = true;
         NewLabel.Focus();
     }
 
-    void CancelNew(object? sender, RoutedEventArgs e) => NewPanel.IsVisible = false;
+    void CancelNew(object? sender, RoutedEventArgs e) => model.Creating = false;
 
     async void Create(object? sender, RoutedEventArgs e)
     {
         var label = (NewLabel.Text ?? "").Trim();
-        var from = Input.Date(NewFrom.Text ?? "");
-        var to = Input.Date(NewTo.Text ?? "");
+        var from = Input.Date(NewFrom.Text);
+        var to = Input.Date(NewTo.Text);
         var taxpayer = new Taxpayer
         {
             Name = (NewName.Text ?? "").Trim(),
             TaxNumber = (NewTaxNumber.Text ?? "").Trim(),
             PabNumber = (NewPab.Text ?? "").Trim(),
         };
-        if (label == "" || from is null || to is null)
+
+        var problems = new List<string>();
+        TextBox? first = null;
+        void Check(TextBox field, bool ok, string name)
         {
-            Session.Fail("Bitte Bezeichnung und Zeitraum (TT.MM.JJJJ) angeben.");
+            field.Classes.Set("invalid", !ok);
+            if (ok) return;
+            problems.Add(name);
+            first ??= field;
+        }
+
+        Check(NewLabel, label != "", "Bezeichnung");
+        Check(NewFrom.Box, from is not null, Period("von", NewFrom.Text));
+        Check(NewTo.Box, to is not null, Period("bis", NewTo.Text));
+        if (from is { } f && to is { } t && t < f) Check(NewTo.Box, false, "Zeitraum bis (liegt vor dem Beginn)");
+        Check(NewName, taxpayer.Name != "", "Name");
+        Check(NewTaxNumber, taxpayer.TaxNumber != "", "Steuernummer");
+        Check(NewPab, taxpayer.PabNumber != "", "PaB-Nr.");
+        if (problems.Count > 0)
+        {
+            Session.Fail("Bitte prüfen: " + string.Join(", ", problems) + ".");
+            first?.Focus();
             return;
         }
-        if (taxpayer.Name == "" || taxpayer.TaxNumber == "" || taxpayer.PabNumber == "")
-        {
-            Session.Fail("Bitte Name, Steuernummer und PaB-Nr. des Steuerpflichtigen angeben.");
-            return;
-        }
-        var kase = new Case { Label = label, PeriodFrom = from.Value, PeriodTo = to.Value, Taxpayer = taxpayer };
+
+        var kase = new Case { Label = label, PeriodFrom = from!.Value, PeriodTo = to!.Value, Taxpayer = taxpayer };
         await Session.Run(async () =>
         {
             var resp = await Session.Service.PutCase(kase, Ct);
-            NewPanel.IsVisible = false;
+            model.Creating = false;
             NewLabel.Text = NewFrom.Text = NewTo.Text = "";
             NewName.Text = NewTaxNumber.Text = NewPab.Text = "";
             Session.Open(resp);
         });
     }
+
+    static string Period(string end, string text) =>
+        text.Trim() == "" ? "Zeitraum " + end : "Zeitraum " + end + " (Datum als TT.MM.JJJJ)";
 
     void RowClicked(object? sender, PointerReleasedEventArgs e)
     {

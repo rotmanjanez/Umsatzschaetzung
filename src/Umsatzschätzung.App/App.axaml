@@ -13,6 +13,12 @@
         <Style Selector="Window">
             <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
         </Style>
+        <Style Selector="TextBox.invalid, ComboBox.invalid">
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+        </Style>
+        <Style Selector=":is(Control).invalid /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+        </Style>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>

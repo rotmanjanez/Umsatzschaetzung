@@ -29,38 +29,47 @@
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-                        <Border Theme="{StaticResource Card}" DataContext="{Binding Ingredients}" x:DataType="ui:IngredientForm">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
-                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox Text="{Binding Name, Mode=TwoWay}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Basiseinheit *" Theme="{StaticResource FieldLabel}"/>
-                                        <ComboBox SelectedIndex="{Binding UnitIndex}">
-                                            <ComboBoxItem Content="Milliliter (ml)"/>
-                                            <ComboBoxItem Content="Gramm (g)"/>
-                                            <ComboBoxItem Content="Stück"/>
-                                        </ComboBox>
+                    <Grid Grid.Column="2" DataContext="{Binding Ingredients}" x:DataType="ui:IngredientForm">
+                        <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
+                                   Text="Links eine Zutat auswählen, um sie zu bearbeiten – oder mit „Neu“ eine neue anlegen."/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
+                            <Border Theme="{StaticResource Card}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Basiseinheit *" Theme="{StaticResource FieldLabel}"/>
+                                            <ComboBox SelectedIndex="{Binding UnitIndex}" Classes.invalid="{Binding UnitInvalid}">
+                                                <ComboBoxItem Content="Milliliter (ml)"/>
+                                                <ComboBoxItem Content="Gramm (g)"/>
+                                                <ComboBoxItem Content="Stück"/>
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Category, Mode=TwoWay}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                        <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveIngredient" Margin="0,0,8,0"/>
+                                        <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireIngredient" IsVisible="{Binding Retirable}"/>
+                                        <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Retired}">
+                                            <TextBlock Text="{Binding RetiredLabel}" Theme="{StaticResource BadgeText}"/>
+                                        </Border>
                                     </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding Category, Mode=TwoWay}"/>
-                                    </StackPanel>
-                                </Grid>
-                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveIngredient" Margin="0,0,8,0"/>
-                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireIngredient" IsVisible="{Binding Existing}"/>
+                                    <TextBlock Text="{Binding RetireHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,8,0,0"
+                                               MaxWidth="560" HorizontalAlignment="Left" IsVisible="{Binding Existing}"/>
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </ScrollViewer>
+                            </Border>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </TabItem>
 
@@ -85,48 +94,59 @@
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-                        <Border Theme="{StaticResource Card}" DataContext="{Binding Products}" x:DataType="ui:ProductForm">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
-                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox Text="{Binding Name, Mode=TwoWay}"/>
-                                <TextBlock Text="Rezept" Theme="{StaticResource SectionHeader}" Margin="0,20,0,4"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="180"/>
-                                        <ColumnDefinition Width="90"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
-                                </Grid>
-                                <ItemsControl ItemsSource="{Binding Recipe}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="ui:RecipeRow">
-                                            <Grid Margin="0,0,0,6">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="180"/>
-                                                    <ColumnDefinition Width="90"/>
-                                                </Grid.ColumnDefinitions>
-                                                <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"/>
-                                                <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Amount, Mode=TwoWay}"/>
-                                                <Button Grid.Column="2" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" HorizontalAlignment="Right" Click="RemoveRecipeLine">
-                                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
-                                                </Button>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveProduct" Margin="0,0,8,0"/>
-                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireProduct" IsVisible="{Binding Existing}"/>
+                    <Grid Grid.Column="2" DataContext="{Binding Products}" x:DataType="ui:ProductForm">
+                        <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
+                                   Text="Links ein Produkt auswählen, um es zu bearbeiten – oder mit „Neu“ ein neues anlegen."/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
+                            <Border Theme="{StaticResource Card}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
+                                    <TextBlock Text="Rezept *" Theme="{StaticResource SectionHeader}" Margin="0,20,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="180"/>
+                                            <ColumnDefinition Width="90"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                        <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Recipe}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="ui:RecipeRow">
+                                                <Grid Margin="0,0,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="180"/>
+                                                        <ColumnDefinition Width="90"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"
+                                                              Classes.invalid="{Binding IngredientInvalid}"/>
+                                                    <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Amount, Mode=TwoWay}"
+                                                             Classes.invalid="{Binding AmountInvalid}"/>
+                                                    <Button Grid.Column="2" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" HorizontalAlignment="Right" Click="RemoveRecipeLine">
+                                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                        <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveProduct" Margin="0,0,8,0"/>
+                                        <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireProduct" IsVisible="{Binding Retirable}"/>
+                                        <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Retired}">
+                                            <TextBlock Text="{Binding RetiredLabel}" Theme="{StaticResource BadgeText}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding RetireHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,8,0,0"
+                                               MaxWidth="560" HorizontalAlignment="Left" IsVisible="{Binding Existing}"/>
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </ScrollViewer>
+                            </Border>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </TabItem>
 
@@ -151,74 +171,84 @@
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-                        <Border Theme="{StaticResource Card}" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                    <Grid Grid.Column="2" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
+                        <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
+                                   Text="Links eine Ertragsregel auswählen, um sie zu bearbeiten – oder mit „Neu“ eine neue anlegen."/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
+                            <Border Theme="{StaticResource Card}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
+                                        </StackPanel>
+                                        <CheckBox Grid.Column="2" Content="Standardregel" IsChecked="{Binding IsDefault}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                                    </Grid>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding Category, Mode=TwoWay}" Classes.invalid="{Binding ScopeInvalid}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
+                                            <ComboBox ItemsSource="{Binding IngredientOptions}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"
+                                                      Classes.invalid="{Binding ScopeInvalid}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="Kategorie oder Zutat angeben" Theme="{StaticResource FieldLabel}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Schwund * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Shrinkage, Mode=TwoWay}" Classes.invalid="{Binding ShrinkageInvalid}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Eigenverbrauch * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Theme="{StaticResource NumberBox}" Text="{Binding OwnUse, Mode=TwoWay}" Classes.invalid="{Binding OwnUseInvalid}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="Personal * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Staff, Mode=TwoWay}" Classes.invalid="{Binding StaffInvalid}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="6">
+                                            <TextBlock Text="Freigetränke * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Free, Mode=TwoWay}" Classes.invalid="{Binding FreeInvalid}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="Quelle *" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding Source, Mode=TwoWay}" Classes.invalid="{Binding SourceInvalid}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                        <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveYield" Margin="0,0,8,0"/>
+                                        <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireYield" IsVisible="{Binding Retirable}"/>
+                                        <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Retired}">
+                                            <TextBlock Text="{Binding RetiredLabel}" Theme="{StaticResource BadgeText}"/>
+                                        </Border>
                                     </StackPanel>
-                                    <CheckBox Grid.Column="2" Content="Standardregel" IsChecked="{Binding IsDefault}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
-                                </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding Category, Mode=TwoWay}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
-                                        <ComboBox ItemsSource="{Binding IngredientOptions}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"/>
-                                    </StackPanel>
-                                </Grid>
-                                <TextBlock Text="Kategorie oder Zutat angeben" Theme="{StaticResource FieldLabel}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Schwund * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Shrinkage, Mode=TwoWay}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Eigenverbrauch * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding OwnUse, Mode=TwoWay}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="4">
-                                        <TextBlock Text="Personal * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Staff, Mode=TwoWay}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="6">
-                                        <TextBlock Text="Freigetränke * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Free, Mode=TwoWay}"/>
-                                    </StackPanel>
-                                </Grid>
-                                <TextBlock Text="Quelle" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox Text="{Binding Source, Mode=TwoWay}"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveYield" Margin="0,0,8,0"/>
-                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireYield" IsVisible="{Binding Existing}"/>
+                                    <TextBlock Text="{Binding RetireHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,8,0,0"
+                                               MaxWidth="560" HorizontalAlignment="Left" IsVisible="{Binding Existing}"/>
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </ScrollViewer>
+                            </Border>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>
