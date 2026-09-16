@@ -77,7 +77,6 @@ public static class Html
         b.Append("<dt>Rechnungen</dt><dd>").Append(usedInvoices.Count).Append("</dd>\n");
         b.Append("</dl>\n</header>\n");
 
-        b.Append("<p><strong>Umsatzschätzung ").Append(Esc(c.Label)).Append(", Zeitraum ").Append(Esc(f.Period)).Append("</strong></p>\n");
         b.Append("<p>Aus dem Wareneinkauf des Zeitraums ergibt sich der nachfolgend kalkulierte Umsatz. Abschnitt 1 führt die Eingangspositionen auf, Abschnitt 2 stellt die erklärten Umsätze dem kalkulierten Ergebnis gegenüber. Rezepturen, Warenfluss, Rechenweg und die Herleitung jedes Werts stehen im Anhang.</p>\n");
 
         b.Append("<section class=\"first\">\n<h1>1 Eingangspositionen</h1>\n");
