@@ -28,7 +28,7 @@ public sealed class Tagger : IDisposable
 {
     public const string Name = "lilt-gottbert-b/int8";
 
-    // tools/trainb/data.py: 512 subwords per window, 128 of overlap, at most 96 rows
+    // tools/train/data.py: 512 subwords per window, 128 of overlap, at most 96 rows
     // pooled per window. model.py quantises boxes into 1024 bins, not 1000.
     const int MaxLen = 512;
     const int Overlap = 128;
@@ -163,7 +163,7 @@ public sealed class Tagger : IDisposable
 
         // The exported role head runs per token; it is affine, so averaging its logits over
         // a row's first subwords is exactly the row_pool mean-pool the model was trained
-        // with. tools/trainb/data.py caps a window at 96 pooled rows.
+        // with. tools/train/data.py caps a window at 96 pooled rows.
         var seen = new List<int>();
         var members = new Dictionary<int, List<int>>();
         for (var i = from; i < to; i++)
@@ -194,7 +194,7 @@ public sealed class Tagger : IDisposable
         throw new InvalidOperationException($"Das Belegerkennungsmodell liefert keinen Ausgang \"{name}\".");
     }
 
-    // tools/trainb/model.py quantise_box: pixels to LiLT bin space, clamped inside the page,
+    // tools/train/model.py quantise_box: pixels to LiLT bin space, clamped inside the page,
     // so the same invoice scanned at 200 and at 400 dpi produces identical position inputs.
     static int[] Quantise(Box box, int width, int height)
     {

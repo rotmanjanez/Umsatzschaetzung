@@ -6,9 +6,10 @@ using System.Text.RegularExpressions;
 namespace Umsatzschätzung.Tagging;
 
 // GPT-2 style byte-level BPE, the inference half of the GottBERT tokenizer. Ported from
-// tools/trainb/reference_bpe.py, which is the spec: it rebuilds the tokenizer from the
-// four dumped artefacts alone and matches every case in cases.jsonl. A silent mismatch
-// between training and inference does not crash, it just quietly costs accuracy.
+// the Bpe class in tools/train/tokenizer_parity.py, which is the spec: it rebuilds the
+// tokenizer from the four dumped artefacts alone and matches every case in cases.jsonl.
+// A silent mismatch between training and inference does not crash, it just quietly
+// costs accuracy.
 public sealed class Bpe
 {
     public const string FileName = "vocab.json";
