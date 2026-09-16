@@ -8,7 +8,8 @@ from PIL import Image, ImageFilter
 def profile(**kw):
     base = dict(rotate=0.0, skew=0.0, blur=0.0, noise=0.0, jpeg=0, gamma=1.0, contrast=1.0,
                 speckle=0.0, vignette=0.0, texture=0.0, shadow=0.0, edge=0.0, gray=0.0, bilevel=0.0,
-                black=0.0, white=255.0)
+                black=0.0, white=255.0,
+                ink_erode=0.0, ink_bands=0.0, ink_blotch=0.0, ink_dropout=0.0)
     base.update(kw)
     return base
 
@@ -31,6 +32,9 @@ PROFILES = {
     "dark": profile(rotate=1.3, skew=0.4, blur=1.4, noise=9.0, jpeg=60, gamma=1.1,
                     speckle=0.0005, vignette=0.32, texture=0.04, shadow=0.35, gray=0.7,
                     black=4.0, white=143.0),
+    "low_ink": profile(rotate=1.1, skew=0.35, blur=1.1, noise=7.0, jpeg=70, gamma=1.08, contrast=0.95,
+                       speckle=0.0004, vignette=0.1, texture=0.03, gray=0.75,
+                       ink_erode=0.55, ink_bands=0.45, ink_blotch=0.38, ink_dropout=0.018),
     "washed": profile(rotate=1.5, skew=0.5, blur=1.6, noise=11.0, jpeg=56, gamma=1.05,
                       speckle=0.0007, vignette=0.14, texture=0.05, edge=0.3, gray=0.9,
                       black=92.0, white=186.0),
@@ -43,6 +47,8 @@ def jitter(rng, profile, amount=1.0):
         p[key] = rng.uniform(-p[key], p[key]) * amount
     for key in ("blur", "noise", "speckle", "vignette", "texture", "shadow", "edge"):
         p[key] *= rng.uniform(0.6, 1.25)
+    for key in ("ink_erode", "ink_bands", "ink_blotch", "ink_dropout"):
+        p[key] *= rng.uniform(0.55, 1.4)
     if p["gray"] < 0.95:
         p["gray"] = min(0.94, p["gray"] * rng.uniform(0.6, 1.25)) * amount
     if p["jpeg"]:
@@ -117,6 +123,57 @@ def edge_gain(shape, strength, rng):
     return gain
 
 
+def ink_coverage(rng, shape, blotch, bands):
+    """Wie viel Farbe je Pixel ankommt, 0 = gar keine, 1 = voll.
+
+    Zwei Ursachen: eine grobfleckige Komponente (leere Kartusche, trockene Walze)
+    und waagrechte Streifen (Druckkopf, Walzenumfang).
+    """
+    h, w = shape
+    cov = np.ones(shape, dtype=np.float32)
+    if blotch > 0.001:
+        # Zwei Oktaven: grob für leere Stellen auf der Seite, fein damit einzelne
+        # Striche aufbrechen statt nur gleichmäßig blass zu werden.
+        for divisor, share in ((70, 0.62), (340, 0.38)):
+            small = (max(3, w // divisor), max(3, h // divisor))
+            low = rng.standard_normal((small[1], small[0]), dtype=np.float32)
+            low = np.asarray(Image.fromarray((low * 70 + 128).clip(0, 255).astype(np.uint8), "L")
+                             .resize((w, h), Image.BICUBIC), dtype=np.float32)
+            cov -= blotch * share * ((128.0 - low) / 128.0).clip(0.0, 1.0)
+    if bands > 0.001:
+        ys = np.arange(h, dtype=np.float32)
+        streak = np.zeros(h, dtype=np.float32)
+        for _ in range(int(rng.integers(2, 6))):
+            period = float(rng.uniform(h / 26.0, h / 5.0))
+            streak += np.sin(ys * (2.0 * math.pi / period) + float(rng.uniform(0.0, 6.28)))
+        streak = (streak / 3.0 + rng.standard_normal(h, dtype=np.float32) * 0.22).clip(0.0, 1.0)
+        cov -= bands * streak[:, None]
+    return cov.clip(0.04, 1.0)
+
+
+def starve(image, p, rng):
+    """Schlechter Druck, bevor überhaupt gescannt wird: dünne, aufgebrochene Striche.
+
+    Greift nur die Farbe an, nicht das Papier — `(255 - arr)` ist auf Weiß null,
+    also bleibt der Untergrund stehen und nur die Schrift wird blass. Das
+    unterscheidet den Modus von `faded`, das den ganzen Tonwertumfang staucht.
+    """
+    arr = np.asarray(image, dtype=np.float32)
+    if p["ink_erode"] > 0.01:
+        # Ein Maximumfilter hellt auf; auf dünnen Strichen frisst er sie an.
+        thin = np.asarray(image.filter(ImageFilter.MaxFilter(3)), dtype=np.float32)
+        arr = arr + (thin - arr) * min(1.0, p["ink_erode"])
+    cov = ink_coverage(rng, arr.shape[:2], p["ink_blotch"], p["ink_bands"])
+    arr = arr + (255.0 - arr) * (1.0 - (cov if arr.ndim == 2 else cov[:, :, None]))
+    if p["ink_dropout"] > 1e-6:
+        holes = rng.random(arr.shape[:2], dtype=np.float32) < p["ink_dropout"]
+        if arr.ndim == 3:
+            holes = holes[:, :, None]
+        arr = np.where(holes, 255.0 - (255.0 - arr) * 0.12, arr)
+    np.clip(arr, 0, 255, out=arr)
+    return Image.fromarray(arr.astype(np.uint8), image.mode)
+
+
 def apply(image, p, rng):
     w, h = image.size
     m = matrix(p, w, h)
@@ -129,6 +186,9 @@ def apply(image, p, rng):
         image = image.convert("L")
     elif p["gray"] > 0.05:
         image = Image.blend(image, image.convert("L").convert("RGB"), min(1.0, p["gray"]))
+    if p["ink_erode"] > 0.01 or p["ink_bands"] > 0.001 or p["ink_blotch"] > 0.001:
+        # Vor dem Weichzeichnen: der Druck war schon schlecht, bevor der Scanner ihn sah.
+        image = starve(image, p, rng)
     if p["blur"] > 0.02:
         image = image.filter(ImageFilter.GaussianBlur(p["blur"]))
 

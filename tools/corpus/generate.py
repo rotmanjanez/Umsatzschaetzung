@@ -19,7 +19,7 @@ import layout
 import render
 
 PROFILE_MIX = ["scan_clean", "scan_worn", "photocopy", "washed", "scan_clean", "photo",
-               "faded", "scan_worn", "dark", "crisp", "fax"]
+               "faded", "scan_worn", "dark", "crisp", "fax", "low_ink"]
 FORMATS = ["jpg", "jpg", "jpg", "pdf"]
 
 
@@ -113,7 +113,7 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
             "scale": scale,
             "degradation": {k: (round(v, 3) if isinstance(v, float) else v)
                             for k, v in params.items()},
-            "layout": {k: used[k] for k in ("columns", "glue_unit", "no_header_row", "header_style",
+            "layout": {k: used[k] for k in ("page_format", "columns", "glue_unit", "no_header_row", "header_style",
                                             "table_style", "align", "font", "size", "narrow_name",
                                             "logo", "address_corner", "meta_style", "totals_style",
                                             "footer", "uppercase_headers", "group_headings",
@@ -130,7 +130,9 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
 
 
 def one(args):
-    index, seed, root, variations, scale, val_share, formats = args
+    index, seed, root, variations, scale, val_share, formats, page_mix = args
+    if page_mix:
+        layout.PAGE_MIX = page_mix
     invoice, meta = content.make(digest(seed, "inv", index), index)
     name = f"inv-{index:06d}"
     out_dir = os.path.join(root, name)
@@ -155,6 +157,22 @@ def one(args):
     return {"invoice": name, "category": meta["category"], "kind": meta["kind"],
             "lines": len(invoice["lines"]), "variations": made,
             "expected_variations": variations}
+
+
+def parse_page_mix(text):
+    """'letter=38,a5=14' -> the (names, weights) pair layout.PAGE_MIX expects."""
+    if not text.strip():
+        return None
+    names, weights = [], []
+    for part in text.split(","):
+        name, _, weight = part.partition("=")
+        name = name.strip()
+        if name not in layout.PAGE_FORMATS:
+            raise SystemExit(f"unknown page format {name!r}; "
+                             f"known: {', '.join(sorted(layout.PAGE_FORMATS))}")
+        names.append(name)
+        weights.append(float(weight) if weight.strip() else 1.0)
+    return (names, weights)
 
 
 def human(size):
@@ -225,11 +243,17 @@ def main():
     ap.add_argument("--verbose", action="store_true", help="one line per invoice")
     ap.add_argument("--formats", default="png,jpg,pdf",
                     help="comma-separated subset of png,jpg,pdf")
+    ap.add_argument("--page-mix", default="",
+                    help="override the page-format weights, e.g. "
+                         "'letter=38,a5=14,b5=12,legal=14,folio=12,a4_land=10'. "
+                         "Names come from layout.PAGE_FORMATS. Used to extend an "
+                         "existing A4-only corpus with the other formats.")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
     formats = tuple(f.strip() for f in args.formats.split(",") if f.strip())
-    jobs = [(i, args.seed, args.out, args.variations, args.scale, args.val_share, formats)
+    page_mix = parse_page_mix(args.page_mix)
+    jobs = [(i, args.seed, args.out, args.variations, args.scale, args.val_share, formats, page_mix)
             for i in range(args.start, args.start + args.count)]
     done = []
     bar = Progress(len(jobs))
@@ -251,6 +275,7 @@ def main():
         "dpi": 96 * args.scale,
         "val_share": args.val_share,
         "formats": list(formats),
+        "page_mix": args.page_mix or "default",
         "invoices": done,
     }
     with open(os.path.join(args.out, "manifest.json"), "w", encoding="utf-8") as f:

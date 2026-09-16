@@ -135,14 +135,23 @@ def totals_block(spec, invoice, meta):
     rows = []
     net = (spec["total_net"], money.cents(invoice["netTotal"]) + " €", "netTotal")
     gross = (spec["total_gross"], money.cents(invoice["grossTotal"]) + " €", "grossTotal")
-    vat_rows = [(f'{spec["total_vat"]} {money.pct(b["vat"])} % von {money.cents(b["net"])}',
+    # Nur der Satz selbst ist `vat`, nicht die Beschriftung, nicht das "%", nicht
+    # der Nettobetrag, auf den er sich bezieht. `assemble` greift auf den
+    # Summenblock zurück, sobald die Positionstabelle keine MwSt-Spalte hat — und
+    # das ist die Mehrheit der Rechnungen. Bleibt der Satz hier unbeschriftet,
+    # kann kein Modell diesen Weg lernen, und der Fehler fällt erst am
+    # vat-Wert der fertigen Rechnung auf.
+    vat_rows = [([(spec["total_vat"], "O", 0),
+                  (money.pct(b["vat"]), "vat", 0),
+                  ("% von " + money.cents(b["net"]), "O", 0)],
                  money.cents(b["tax"]) + " €", "O") for b in invoice["vatBreakdown"]]
     if spec["gross_first"]:
         rows = [gross] + vat_rows + [net]
     else:
         rows = [net] + vat_rows + [gross]
     body = "".join(f'<tr class="{"grand" if f == "grossTotal" else ""}">'
-                   f'<td class=k>{words(k)}</td><td class=v>{words(v, f)}</td></tr>'
+                   f'<td class=k>{cell(k) if isinstance(k, list) else words(k)}</td>'
+                   f'<td class=v>{words(v, f)}</td></tr>'
                    for k, v, f in rows)
     return (f'<table class="totals {spec["totals_style"]} side-{spec["totals_side"]}" '
             f'data-role="total">{body}</table>')

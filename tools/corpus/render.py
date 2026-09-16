@@ -10,8 +10,15 @@ import money
 
 CHROME = os.environ.get("CORPUS_CHROME") or shutil.which("chromium") or shutil.which("chrome") \
     or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-PAGE_W = 794
+PAGE_W = 794          # A4 at 96 dpi, the default when a spec carries no format
 PAGE_H = 1123
+MM_PX = 96.0 / 25.4
+
+
+def page_px(spec):
+    """The spec's page box in CSS pixels. A4 reproduces the old constants exactly."""
+    w_mm, h_mm = layout.PAGE_FORMATS[spec.get("page_format", "a4")]
+    return round(w_mm * MM_PX), round(h_mm * MM_PX)
 
 MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September",
           "Oktober", "November", "Dezember"]
@@ -27,14 +34,18 @@ PROBE = """(() => document.querySelectorAll('.page').length && [...document.quer
   const r=e.getBoundingClientRect();
   return {role:e.dataset.role,l:+(e.dataset.l||0),box:[r.x-b.x,r.y-b.y,r.width,r.height]};
  });
- let overflow=0;
- for(const w of words) overflow=Math.max(overflow,w.box[1]+w.box[3]-b.height);
- return {width:b.width,height:b.height,words,regions,overflow};
+ let overflow=0,hoverflow=0;
+ for(const w of words){
+  overflow=Math.max(overflow,w.box[1]+w.box[3]-b.height);
+  hoverflow=Math.max(hoverflow,w.box[0]+w.box[2]-b.width,-w.box[0]);
+ }
+ return {width:b.width,height:b.height,words,regions,overflow,hoverflow};
 }))()"""
 
 
 def css(spec):
     mx, my = spec["page_margin"]
+    pw, ph = page_px(spec)
     style = spec["table_style"]
     rule = f'{spec["rule_weight"]}px solid #333'
     light = f'{spec["rule_weight"]}px solid #999'
@@ -52,10 +63,10 @@ def css(spec):
         "boxed": f'.items th{{border:{rule};font-weight:700;background:#f0f0f0}}',
     }[spec["header_style"]]
     return f"""
-@page{{size:A4;margin:0}}
+@page{{size:{pw}px {ph}px;margin:0}}
 *{{box-sizing:border-box}}
 body{{margin:0;font-family:{spec["font"]};font-size:{spec["size"]}pt;line-height:{spec["leading"]};color:#111}}
-.page{{width:{PAGE_W}px;height:{PAGE_H}px;position:relative;overflow:hidden;padding:{my}mm {mx}mm;
+.page{{width:{pw}px;height:{ph}px;position:relative;overflow:hidden;padding:{my}mm {mx}mm;
  page-break-after:always;background:#fff}}
 .page:last-child{{page-break-after:auto}}
 .head{{display:flex;justify-content:space-between;align-items:flex-start;gap:8mm}}
@@ -128,7 +139,8 @@ def rows_per_page(spec):
         row_mm *= 1.25
     if spec["group_headings"]:
         row_mm *= 1.12
-    usable = 297 - 2 * spec["page_margin"][1] - 118
+    h_mm = layout.PAGE_FORMATS[spec.get("page_format", "a4")][1]
+    usable = h_mm - 2 * spec["page_margin"][1] - 118 * min(1.0, h_mm / 297.0)
     return max(2, int(usable / max(row_mm, 2.0)))
 
 
@@ -202,11 +214,11 @@ FLAGS = ["--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", "--
 _page = None
 
 
-def browser_page(count):
+def browser_page(count, pw=PAGE_W, ph=PAGE_H):
     global _page
     if _page is None:
         _page = cdp.Browser(CHROME, FLAGS).page()
-    _page.metrics(PAGE_W, PAGE_H * count, 1)
+    _page.metrics(pw, ph * count, 1)
     return _page
 
 
@@ -220,10 +232,10 @@ def reset():
         _page = None
 
 
-def run(path, count=1):
+def run(path, count=1, pw=PAGE_W, ph=PAGE_H):
     for attempt in (0, 1):
         try:
-            page = browser_page(count)
+            page = browser_page(count, pw, ph)
             page.navigate(f"file://{path}")
             probes = page.evaluate(PROBE)
             if not probes:
@@ -244,10 +256,25 @@ def build(spec, invoice, meta, seed, workdir):
         sheet, bodies, used = document(spec, invoice, meta, seed, per_page)
         with open(path, "w", encoding="utf-8") as f:
             f.write(page_document(sheet, "".join(bodies)))
-        _, pages = run(path, len(bodies))
+        _, pages = run(path, len(bodies), *page_px(spec))
         overflow = max(p["overflow"] for p in pages)
-        if overflow <= 1.0:
+        hoverflow = max(p.get("hoverflow", 0.0) for p in pages)
+        if overflow <= 1.0 and hoverflow <= 1.0:
             return path, pages, used
+        if hoverflow > 1.0:
+            # Ein Wort läuft seitlich aus der Seite — rechts hinaus, oder links, weil
+            # ein zu breiter Block mit `justify-content:flex-end` nach links überläuft:
+            # die Tabelle ist zu breit für das
+            # Blatt. Nur kleinerer Satz und engere Zellen helfen — weniger Zeilen pro
+            # Seite ändert an der Breite nichts. Ungefangen verschwindet das Wort beim
+            # `overflow:hidden` der Seite und fehlt still in der Wahrheit, was auf A5
+            # reihenweise `lineNet` gekostet hat.
+            spec = dict(spec)
+            spec["size"] = max(5.6, spec["size"] * 0.9)
+            spec["cell_pad_x"] = max(0.3, spec["cell_pad_x"] * 0.7)
+            per_page = rows_per_page(spec)
+            previous = None
+            continue
         stalled = previous is not None and overflow > previous * 0.8
         previous = overflow
         if per_page > 3 and not stalled:
@@ -263,10 +290,12 @@ def build(spec, invoice, meta, seed, workdir):
 
 
 def shoot(path, probes, workdir, scale):
-    page = browser_page(len(probes))
+    pw = round(probes[0]["width"])
+    ph = round(probes[0]["height"])
+    page = browser_page(len(probes), pw, ph)
     shots = []
     for i, probe in enumerate(probes):
-        clip = {"x": 0, "y": i * PAGE_H, "width": PAGE_W, "height": PAGE_H, "scale": scale}
+        clip = {"x": 0, "y": i * ph, "width": pw, "height": ph, "scale": scale}
         part = os.path.join(workdir, f"page-{i + 1}.raw.png")
         with open(part, "wb") as f:
             f.write(page.screenshot(clip))

@@ -83,18 +83,49 @@ NUMERIC = {"menge", "preis", "rabatt", "mwst", "betrag"}
 PRICE_COLUMNS = {"preis", "betrag", "rabatt", "mwst", "basis"}
 
 
+# Seitenformate in mm. Die echten Scans sind ~88 % A4 und ~12 % US Letter; der
+# Rest steht für alles, was ein Lieferant sonst noch durch den Drucker schickt.
+# `quantise_box` normiert x an der Breite und y an der Höhe *getrennt*, also fällt
+# das Seitenverhältnis gerade nicht heraus — es muss im Korpus vorkommen.
+PAGE_FORMATS = {
+    "a4":      (210.0, 297.0),
+    "letter":  (215.9, 279.4),
+    "legal":   (215.9, 355.6),
+    "folio":   (210.0, 330.0),
+    "b5":      (176.0, 250.0),
+    "a5":      (148.0, 210.0),
+    "a4_land": (297.0, 210.0),
+}
+# A4 bleibt dominant wie in echt (~88 %), die selteneren Formate sind bewusst
+# übergewichtet: das Modell braucht genug Beispiele, um sie zu lernen.
+PAGE_MIX = (["a4", "letter", "legal", "folio", "b5", "a5", "a4_land"],
+            [70, 12, 4, 4, 3, 4, 3])
+
+# Was auf ein schmales Blatt (< 180 mm) noch passt: A5 (148) und B5 (176).
+NARROW_COLUMNS = {"pos", "name", "menge", "einheit", "preis", "betrag", "rabatt"}
+
+
 def template(seed):
     rng = random.Random(seed)
+    page_format = rng.choices(PAGE_MIX[0], weights=PAGE_MIX[1], k=1)[0]
     order = list(rng.choice(ORDERS))
     present = {"pos": rng.random() < 0.65, "artikel": rng.random() < 0.7, "gtin": rng.random() < 0.15,
                "name": True, "menge": True, "einheit": rng.random() < 0.6, "preis": True,
                "basis": rng.random() < 0.12, "rabatt": False, "mwst": rng.random() < 0.45,
                "betrag": True}
     columns = [c for c in order if present.get(c)]
+    # Ein schmales Blatt trägt keine zehn Spalten: auf A5 wird die Betragsspalte
+    # so weit gequetscht, dass ihre Wörter aus der Seite laufen und beim Clippen
+    # verloren gehen. Die Überlauf-Schleife in `render.build` fängt das nicht, sie
+    # misst nur die Höhe. Also hier die optionalen Spalten streichen.
+    narrow_page = PAGE_FORMATS[page_format][0] < 180.0
+    if narrow_page:
+        columns = [c for c in columns if c in NARROW_COLUMNS]
     font, tweak = rng.choice(FONTS)
     narrow = rng.random() < 0.3
     return {
         "id": str(seed),
+        "page_format": page_format,
         "columns": columns,
         "glue_unit": not present["einheit"],
         "headers": {c: rng.choice(LABELS[c]) for c in LABELS},
@@ -113,7 +144,12 @@ def template(seed):
         "logo": rng.choice(["none", "mark", "wordmark", "band", "mark", "wordmark"]),
         "logo_side": rng.choice(["left", "right"]),
         "address_corner": rng.choice(["left", "right"]),
-        "meta_style": rng.choice(["pairs", "stack", "boxed", "row"]),
+        # "row" legt die Kopfdaten als eine Zeile nicht umbrechender Zellen an. Das
+        # ist die breiteste Variante und passt auf A5 bei keiner Schriftgröße mehr;
+        # `render.build` schrumpft dann bis an den Font-Boden und die Rechnungsnummer
+        # wird trotzdem abgeschnitten.
+        "meta_style": rng.choice(["pairs", "stack", "boxed"] if narrow_page
+                                 else ["pairs", "stack", "boxed", "row"]),
         "meta_side": rng.choice(["left", "right", "right"]),
         "totals_style": rng.choice(["block", "boxed", "table", "block", "table"]),
         "totals_side": rng.choice(["right", "right", "right", "full"]),

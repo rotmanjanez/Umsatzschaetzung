@@ -74,6 +74,26 @@ before or after the name; unit as its own column or glued to the quantity ("12 K
 VAT per line or only in the totals block; discount column only when the invoice
 actually carries discounts.
 
+**Seitenformat.** Sieben Formate, gewichtet in `layout.PAGE_MIX`: A4, US Letter, Legal,
+Folio, B5, A5 und A4 quer. Das ist keine Kosmetik. `quantise_box` normiert x an der
+Seitenbreite und y an der Seitenhöhe *getrennt*, also fällt das Seitenverhältnis gerade
+nicht heraus — dieselbe Rechnung auf Letter (1,294) landet in anderen Bins als auf A4
+(1,414). Die echten Scans in `fixtures/dataset/2025` sind ~88 % A4 und ~12 % Letter, und
+die Letter-Seiten hängen alle an einem Lieferanten, also fällt der Fehler dort geballt an
+und nicht als gleichmäßiges Rauschen. Die Auflösung dagegen ist egal: das Modell sieht
+nie ein Pixel, und `tools/rapidocr/run.py --max-side` deckelt sie ohnehin vor der OCR.
+
+`--page-mix "letter=38,a5=14,..."` überschreibt die Gewichte, um einen bestehenden,
+reinen A4-Korpus mit `--start` um die anderen Formate zu ergänzen, statt ihn neu zu bauen.
+
+Unter 180 mm Breite streicht `template()` die optionalen Spalten (`NARROW_COLUMNS`): auf
+A5 quetscht eine neunspaltige Tabelle die Betragsspalte so weit, dass ihre Wörter aus der
+Seite laufen und beim Clippen verloren gehen. Die Überlauf-Schleife in `render.build`
+fängt das nicht — sie misst nur die Höhe, nie die Breite. Das Streichen entschärft es,
+behebt es aber nicht ganz: A5 liegt bei ~7 % fehlerhafter Variationen gegen ~1,2 % sonst,
+alles fehlende `lineNet`-Wörter auf zeilenreichen Rechnungen. Wer A5 ernsthaft braucht,
+muss `build()` die Breite messen lassen.
+
 **Alignment and spacing.** Per-column right/left/centre alignment, varying cell padding
 and leading, and a narrow-table mode that wraps the article name onto a second row.
 Numeric columns never wrap; the name column absorbs the slack.
@@ -88,6 +108,27 @@ either corner, four metadata block styles, three totals styles, footers with ban
 details in one to three columns, multi-page invoices with `Übertrag` carried totals and
 page numbers, and delivery notes that carry no prices at all.
 
+**Gebindegrößen.** `sizes.py` builds the size that goes *into the article name* —
+"0,7 l", "Kt 6 x 0,7 l", "Btl. 20 Stk" — instead of drawing from the short hand-written
+list per category (which it still uses for about one size in eight). It varies the
+measure (l, ml, cl, kg, g, Stk, cm, m, %), the spelling (`l` / `L` / `ltr` / `Ltr.` /
+`Liter`), whether a space separates number from unit, the container, and the multiplier
+form. Containers are split into liquid and dry pools so no "Sack 0,33 l" comes out.
+
+This exists because of a specific confusion: OCR reads the litre `l` after a decimal as
+a `1`, and the tagger then calls that stray token `quantity` instead of `name`. About
+18 % of sizes (`ADVERSARIAL_SHARE`) are therefore printed with an OCR-shaped misspelling
+already baked in — "0,71", "0,7 I", "0,7l", "400 9". That is safe supervision, not a
+poisoned label: the mutated string is what gets printed *and* what lands in
+`expected.json`, so ground truth stays self-consistent and `validate.py` passes. Only
+the size inside the name is ever mutated; quantity, price and total cells are never
+touched, because there the printed text has to keep matching the number.
+
+No U+00A0 between number and unit, tempting as it looks: `blocks.words` splits on
+`str.split()`, which treats U+00A0 as whitespace, so the spans would be identical to the
+plain-space case while the non-breaking space stayed behind in the expected name and
+tripped `validate.py`.
+
 **Content.** Ten trade categories, Austrian and German suppliers with matching VAT
 rates (20/13/10 vs 19/7), one or two rates per invoice, 1–60 lines, per-100-g price
 bases, group subheadings and per-line detail rows. Article names are mostly real German
@@ -100,12 +141,24 @@ injected defect — rounding drift, a cent of slack, an extra charge outside the
 sum, a line missing from the total — so the model never learns that the numbers always
 add up.
 
-**Degradation.** Six profiles (`crisp`, `scan_clean`, `scan_worn`, `photocopy`, `photo`,
-`fax`) combining rotation up to ~2°, shear, gaussian blur, sensor noise, JPEG
-requantisation, gamma and contrast shifts, paper grain, vignetting, desk shadows,
-speckle, dark photocopier edges and bilevel thresholding, plus occasional rubber stamps
-and handwritten scribbles. Output is PNG, JPEG or an image-only PDF, which is what a
-real scan is.
+**Degradation.** Ten profiles — `crisp`, `scan_clean`, `scan_worn`, `photocopy`, `photo`,
+`fax`, `faded`, `dark`, `washed`, `low_ink` — combining rotation up to ~2°, shear,
+gaussian blur, sensor noise, JPEG requantisation, gamma and contrast shifts, paper grain,
+vignetting, desk shadows, speckle, dark photocopier edges and bilevel thresholding, plus
+occasional rubber stamps and handwritten scribbles. Output is PNG, JPEG or an image-only
+PDF, which is what a real scan is.
+
+`low_ink` is the odd one out: every other profile models the *acquisition*, this one
+models a page that was already badly printed before anyone scanned it — an empty
+cartridge, a dry roller. `degrade.starve()` runs before the scan blur and only touches
+the ink, never the paper: `arr + (255 - arr) * (1 - coverage)` is a no-op on white, so
+the background stays put and only the glyphs go pale. That is what separates it from
+`faded`, which squeezes the whole tonal range with `black`/`white`. Three knobs:
+`ink_erode` thins strokes with a maximum filter, `ink_bands` lays in the horizontal
+streaks a tired roller leaves, and `ink_blotch` varies coverage over two octaves — coarse
+for empty patches, fine so individual strokes break up instead of merely greying out.
+`ink_dropout` punches the last few holes. It is photometric only, so word boxes are
+untouched.
 
 ## Checking the labels
 
