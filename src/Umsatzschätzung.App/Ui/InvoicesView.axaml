@@ -31,6 +31,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                         <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource EmptyState}" IsVisible="{Binding Empty}"/>
+                        <ui:NoResults Search="{Binding #Search}"/>
                     </Grid>
                 </DockPanel>
             </Border>

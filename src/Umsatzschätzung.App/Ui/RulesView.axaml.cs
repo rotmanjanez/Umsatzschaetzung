@@ -12,12 +12,11 @@ public static class RuleLabel
 
 public sealed class IngredientItem(Ingredient ingredient)
 {
-    static readonly Dictionary<Unit, string> Labels = new() { [Unit.Ml] = "ml", [Unit.G] = "g", [Unit.Piece] = "Stück" };
-
     public Ingredient Ingredient { get; } = ingredient;
     public string Name => RuleLabel.Mark(Ingredient.Name, Ingredient.Meta);
-    public string UnitLabel => Labels[Ingredient.BaseUnit];
+    public string UnitLabel => Format.UnitName(Ingredient.BaseUnit);
     public string Category => Ingredient.Category;
+    public string Tip => Category == "" ? Name + " · " + UnitLabel : Name + " · " + Category + " · " + UnitLabel;
 }
 
 public sealed class ProductItem(Product product, string recipe)
@@ -25,6 +24,7 @@ public sealed class ProductItem(Product product, string recipe)
     public Product Product { get; } = product;
     public string Name => RuleLabel.Mark(Product.Name, Product.Meta);
     public string Recipe { get; } = recipe;
+    public string Tip => Recipe == "" ? Name : Name + "\n" + Recipe;
 }
 
 public sealed class YieldItem(YieldRule rule, string title)
@@ -34,6 +34,7 @@ public sealed class YieldItem(YieldRule rule, string title)
     public bool ForIngredient => !string.IsNullOrEmpty(Rule.IngredientId);
     public bool ForCategory => !ForIngredient;
     public string Source => Rule.Source;
+    public string Tip => Source == "" ? Title : Title + "\n" + Source;
 }
 
 public sealed class RecipeRow(List<Ingredient> options) : Observable
@@ -43,7 +44,17 @@ public sealed class RecipeRow(List<Ingredient> options) : Observable
     bool ingredientInvalid, amountInvalid;
 
     public List<Ingredient> Options { get; } = options;
-    public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) IngredientInvalid = false; } }
+    public Ingredient? Ingredient
+    {
+        get => ingredient;
+        set
+        {
+            if (!Set(ref ingredient, value)) return;
+            IngredientInvalid = false;
+            Raise(nameof(UnitLabel));
+        }
+    }
+    public string UnitLabel => ingredient is null ? "–" : Format.UnitName(ingredient.BaseUnit);
     public string Amount { get => amount; set { if (Set(ref amount, value)) AmountInvalid = false; } }
     public bool IngredientInvalid { get => ingredientInvalid; set => Set(ref ingredientInvalid, value); }
     public bool AmountInvalid { get => amountInvalid; set => Set(ref amountInvalid, value); }
