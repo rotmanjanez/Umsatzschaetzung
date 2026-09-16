@@ -5,10 +5,10 @@
            x:DataType="ui:VerifyModel">
     <ui:Screen.Styles>
         <Style Selector="TextBox.flagged /template/ Border#PART_BorderElement">
-            <Setter Property="Background" Value="{StaticResource WarningSoftBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
         </Style>
         <Style Selector="Border.flagged">
-            <Setter Property="Background" Value="{StaticResource WarningSoftBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
         </Style>
     </ui:Screen.Styles>
     <Grid>
@@ -44,7 +44,7 @@
                             <Canvas x:Name="PageCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
                                 <Image x:Name="PageImage" Stretch="Fill"/>
                                 <Canvas x:Name="Flagged"/>
-                                <Rectangle x:Name="FocusBox" Stroke="{StaticResource FocusBoxBrush}" StrokeThickness="3" RadiusX="3" RadiusY="3" IsVisible="False"/>
+                                <Rectangle x:Name="FocusBox" Stroke="{DynamicResource FocusBoxBrush}" StrokeThickness="3" RadiusX="3" RadiusY="3" IsVisible="False"/>
                             </Canvas>
                         </LayoutTransformControl>
                     </ScrollViewer>
