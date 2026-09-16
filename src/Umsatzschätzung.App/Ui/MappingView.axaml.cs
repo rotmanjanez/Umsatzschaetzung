@@ -32,14 +32,16 @@ public sealed class CandidateRow(MappingCandidate candidate) : Observable
 
 public sealed class MappingModel : Observable
 {
-    bool empty = true, hasSelection, loading, manual;
+    bool empty = true, noInvoices, hasSelection, loading, manual;
     string title = "", supplier = "", article = "", unit = "", count = "", factor = "";
     Ingredient? ingredient;
     List<Ingredient> ingredients = [];
 
     public ObservableCollection<LineGroup> Groups { get; } = [];
     public ObservableCollection<CandidateRow> Candidates { get; } = [];
-    public bool Empty { get => empty; set => Set(ref empty, value); }
+    public bool Empty { get => empty; set { if (Set(ref empty, value)) Raise(nameof(AllMapped)); } }
+    public bool NoInvoices { get => noInvoices; set { if (Set(ref noInvoices, value)) Raise(nameof(AllMapped)); } }
+    public bool AllMapped => empty && !noInvoices;
     public bool HasSelection { get => hasSelection; set { if (Set(ref hasSelection, value)) Raise(nameof(NoSelection)); } }
     public bool NoSelection => !hasSelection;
     public bool Loading { get => loading; set { if (Set(ref loading, value)) Raise(nameof(NoCandidates)); } }
@@ -105,6 +107,7 @@ public partial class MappingView : Screen
         model.Ingredients = Session.Ingredients();
         model.Groups.Clear();
         foreach (var g in UnmappedGroups()) model.Groups.Add(g);
+        model.NoInvoices = Session.Case?.Invoices.Count == 0;
         model.Empty = model.Groups.Count == 0;
         model.SetCandidates([]);
         model.HasSelection = false;
@@ -193,6 +196,10 @@ public partial class MappingView : Screen
         if (await Session.Put(mapping, Ct))
             await AssignId(g, mapping.Id);
     }
+
+    void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);
+
+    void GoCalc(object? sender, RoutedEventArgs e) => Session.Go(Tab.Calc);
 
     async Task AssignId(LineGroup g, string mappingId)
     {

@@ -95,7 +95,7 @@ public partial class InvoicesView : Screen
         {
             SwapVerify(null);
             Detail.IsVisible = false;
-            EmptyDetail.IsVisible = true;
+            EmptyDetail.IsVisible = !model.Empty;
             return;
         }
         EmptyDetail.IsVisible = false;

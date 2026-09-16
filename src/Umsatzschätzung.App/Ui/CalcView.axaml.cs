@@ -43,7 +43,7 @@ public sealed class PinnedRow(List<Product> options) : Observable
 
 public sealed class CalcModel : Observable
 {
-    bool busy, hasResult;
+    bool busy, hasResult, noInvoices;
     NodeDisplay? node;
 
     public ObservableCollection<ProductRowModel> Products { get; } = [];
@@ -52,8 +52,9 @@ public sealed class CalcModel : Observable
     public ObservableCollection<NodeDisplay> Roots { get; } = [];
     public ObservableCollection<KV> Summary { get; } = [];
     public bool Busy { get => busy; set => Set(ref busy, value); }
-    public bool HasResult { get => hasResult; set { if (Set(ref hasResult, value)) Raise(nameof(NoResult)); } }
-    public bool NoResult => !hasResult;
+    public bool HasResult { get => hasResult; set { if (Set(ref hasResult, value)) Raise(nameof(Calculating)); } }
+    public bool NoInvoices { get => noInvoices; set { if (Set(ref noInvoices, value)) Raise(nameof(Calculating)); } }
+    public bool Calculating => !hasResult && !noInvoices;
     public NodeDisplay? Node
     {
         get => node;
@@ -97,6 +98,12 @@ public partial class CalcView : Screen
         if (Session.Case is null) return;
         await Session.LoadRules(Ct);
         if (Session.Case is null || !IsActive) return;
+        model.NoInvoices = Session.Case.Invoices.Count == 0;
+        if (model.NoInvoices)
+        {
+            model.HasResult = false;
+            return;
+        }
         loading = true;
         var products = Session.Products();
         model.Pinned.Clear();
@@ -229,6 +236,8 @@ public partial class CalcView : Screen
         }
         return cp;
     }
+
+    void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);
 
     void AddPinned(object? sender, RoutedEventArgs e) => model.Pinned.Add(new PinnedRow(Session.Products()));
 

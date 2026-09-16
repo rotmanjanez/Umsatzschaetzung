@@ -9,6 +9,8 @@ namespace Umsatzschätzung.App.Ui;
 
 public sealed record PickedFile(string Name, byte[] Data);
 
+public enum Tab { Case, Invoices, Mapping, Calc, Report }
+
 public sealed class Session : Observable
 {
     public static readonly FilePickerFileType[] InvoiceFilter =
@@ -47,6 +49,9 @@ public sealed class Session : Observable
 
     public void ShowRules() => RulesRequested?.Invoke();
     public event Action<CaseResp>? CaseOpened;
+    public event Action<Tab>? TabRequested;
+
+    public void Go(Tab tab) => TabRequested?.Invoke(tab);
 
     public async Task<bool> Run(Func<Task> work)
     {

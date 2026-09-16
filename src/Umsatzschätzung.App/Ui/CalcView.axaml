@@ -23,12 +23,15 @@
         </Style>
     </ui:Screen.Styles>
     <DockPanel>
-        <DockPanel DockPanel.Dock="Top">
-            <TextBlock DockPanel.Dock="Right" Text="Wird neu berechnet …" Theme="{StaticResource Muted}" VerticalAlignment="Top" Margin="0,6,0,0" IsVisible="{Binding Busy}"/>
-            <TextBlock Text="Kalkulation" Theme="{StaticResource PageTitle}"/>
-        </DockPanel>
+        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Right" Text="Wird neu berechnet …" Theme="{StaticResource Muted}" Margin="0,0,0,16" IsVisible="{Binding Busy}"/>
         <Grid>
-            <TextBlock Text="Wird berechnet …" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoResult}"/>
+            <TextBlock Text="Wird berechnet …" Theme="{StaticResource EmptyState}" IsVisible="{Binding Calculating}"/>
+            <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding NoInvoices}">
+                <TextBlock Text="Noch keine Datengrundlage" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
+                           Text="Die Kalkulation leitet Portionen und Umsätze aus den zugeordneten Rechnungspositionen ab. Ohne Rechnungen gibt es nichts zu rechnen."/>
+                <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
+            </StackPanel>
             <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasResult}">
                 <StackPanel Margin="0,0,16,0">
                     <TextBlock Text="Produkte" Theme="{StaticResource SectionHeader}"/>

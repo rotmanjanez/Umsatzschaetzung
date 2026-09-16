@@ -44,7 +44,7 @@ public sealed class CaseModel : Observable
 
     string label = "", from = "", to = "", name = "", taxNumber = "", pab = "";
     readonly string[] declared = ["", "", ""];
-    bool noYields = true;
+    bool noYields = true, noInvoices;
 
     public string Label { get => label; set => Set(ref label, value); }
     public string From { get => from; set => Set(ref from, value); }
@@ -56,6 +56,7 @@ public sealed class CaseModel : Observable
     public string Declared7 { get => declared[1]; set => Set(ref declared[1], value); }
     public string Declared0 { get => declared[2]; set => Set(ref declared[2], value); }
     public bool NoYields { get => noYields; private set => Set(ref noYields, value); }
+    public bool NoInvoices { get => noInvoices; private set => Set(ref noInvoices, value); }
     public ObservableCollection<StockRow> Stock { get; } = [];
     public ObservableCollection<YieldGroupRow> Yields { get; } = [];
 
@@ -69,6 +70,7 @@ public sealed class CaseModel : Observable
         Name = k.Taxpayer.Name;
         TaxNumber = k.Taxpayer.TaxNumber;
         Pab = k.Taxpayer.PabNumber;
+        NoInvoices = k.Invoices.Count == 0;
         Declared19 = Input.Edit(d.Declared.GetValueOrDefault(1900, ""));
         Declared7 = Input.Edit(d.Declared.GetValueOrDefault(700, ""));
         Declared0 = Input.Edit(d.Declared.GetValueOrDefault(0, ""));
@@ -220,6 +222,8 @@ public partial class CaseView : Screen
         if (!await Session.SaveCase(ct) && !ct.IsCancellationRequested)
             Session.Fail("Änderungen an der Prüfung konnten nicht gespeichert werden");
     }
+
+    void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);
 
     void AddStock(object? sender, RoutedEventArgs e) => model.Stock.Add(new StockRow(Session.Ingredients()));
 

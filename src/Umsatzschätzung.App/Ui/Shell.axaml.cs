@@ -34,6 +34,7 @@ public partial class Shell : Window
         session.CaseChanged += RefreshContext;
         session.StatusChanged += RefreshError;
         session.RulesRequested += ShowRules;
+        session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
         session.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(Session.Message)) RefreshStatus();

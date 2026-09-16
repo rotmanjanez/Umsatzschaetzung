@@ -5,10 +5,7 @@
            x:DataType="ui:InvoicesModel"
            Margin="0,12,0,0" DragDrop.AllowDrop="True">
     <DockPanel>
-        <DockPanel DockPanel.Dock="Top">
-            <Button DockPanel.Dock="Right" Content="Rechnungen hinzufügen" Theme="{StaticResource PrimaryButton}" Click="AddFiles" VerticalAlignment="Top"/>
-            <TextBlock Text="Rechnungen" Theme="{StaticResource PageTitle}"/>
-        </DockPanel>
+        <Button DockPanel.Dock="Top" HorizontalAlignment="Right" Content="Rechnungen hinzufügen" Theme="{StaticResource PrimaryButton}" Margin="0,0,0,16" Click="AddFiles"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="9*" MinWidth="240"/>
@@ -38,6 +35,14 @@
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
             <Grid Grid.Column="2">
                 <TextBlock x:Name="EmptyDetail" Text="Keine Rechnung gewählt" Theme="{StaticResource EmptyState}"/>
+                <StackPanel x:Name="Intro" MaxWidth="460" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding Empty}">
+                    <TextBlock Text="Rechnungen hinzufügen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
+                               Text="PDF, Bilder (PNG, JPG, TIFF) und XML-Rechnungen. Dateien können auch hierher gezogen werden."/>
+                    <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0"
+                               Text="Gescannte Belege werden gelesen und danach zur Prüfung vorgelegt; XML-Rechnungen werden direkt übernommen."/>
+                    <Button Content="Rechnungen hinzufügen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="AddFiles"/>
+                </StackPanel>
                 <Grid x:Name="Detail" IsVisible="False">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="9*" MinHeight="160"/>

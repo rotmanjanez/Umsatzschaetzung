@@ -5,7 +5,6 @@
            x:DataType="ui:MappingModel"
            Margin="0,12,0,0">
     <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="Zuordnung" Theme="{StaticResource PageTitle}"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="42*" MinWidth="280"/>
@@ -35,7 +34,18 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="Alles zugeordnet" Theme="{StaticResource EmptyState}" IsVisible="{Binding Empty}"/>
+                    <StackPanel MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16" IsVisible="{Binding NoInvoices}">
+                        <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
+                                   Text="Zugeordnet werden Rechnungspositionen zu Zutaten. Fügen Sie zuerst Rechnungen hinzu."/>
+                        <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
+                    </StackPanel>
+                    <StackPanel MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16" IsVisible="{Binding AllMapped}">
+                        <TextBlock Text="Alles zugeordnet" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
+                                   Text="Jede Rechnungsposition ist einer Zutat zugeordnet."/>
+                        <Button Content="Zur Kalkulation" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoCalc"/>
+                    </StackPanel>
                     <ui:NoResults Search="{Binding #Search}"/>
                     </Grid>
                 </DockPanel>
