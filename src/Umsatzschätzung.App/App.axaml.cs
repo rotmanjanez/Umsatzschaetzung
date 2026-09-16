@@ -82,6 +82,8 @@ public partial class App : Application
         IPdfPages? pdf = null;
 #if WINDOWS
         if (OperatingSystem.IsWindows()) pdf = new WindowsPdfPages();
+#else
+        if (OperatingSystem.IsMacOS()) pdf = new MacPdfPages();
 #endif
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
