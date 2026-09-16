@@ -42,6 +42,10 @@
 
     <StreamGeometry x:Key="CalendarIcon">M2,3 H14 V6 H2 Z M2,6 H3.2 V14 H2 Z M12.8,6 H14 V14 H12.8 Z M3.2,12.8 H12.8 V14 H3.2 Z</StreamGeometry>
 
+    <StreamGeometry x:Key="ImportIcon">M7,1 H9 V8.2 H11.6 L8,12.2 L4.4,8.2 H7 Z M2,10.5 H4 V13.5 H12 V10.5 H14 V15.5 H2 Z</StreamGeometry>
+
+    <StreamGeometry x:Key="DocumentIcon">M3,1 H9.5 L13,4.5 V15 H3 Z</StreamGeometry>
+
     <ControlTheme x:Key="PageTitle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="22"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
@@ -218,6 +222,29 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
+    </ControlTheme>
+
+    <ControlTheme x:Key="DropZone" TargetType="Rectangle">
+        <Setter Property="Stroke" Value="{DynamicResource SoftBorderBrush}"/>
+        <Setter Property="StrokeThickness" Value="2"/>
+        <Setter Property="StrokeDashArray" Value="5,4"/>
+        <Setter Property="StrokeLineCap" Value="Round"/>
+        <Setter Property="RadiusX" Value="12"/>
+        <Setter Property="RadiusY" Value="12"/>
+        <Setter Property="Fill" Value="Transparent"/>
+        <Style Selector="^.over">
+            <Setter Property="Stroke" Value="{DynamicResource InfoBrush}"/>
+            <Setter Property="Fill" Value="{DynamicResource InfoSoftBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="DropIcon" TargetType="PathIcon">
+        <Setter Property="Data" Value="{StaticResource ImportIcon}"/>
+        <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="0,0,0,14"/>
     </ControlTheme>
 
     <ControlTheme x:Key="EmptyState" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
