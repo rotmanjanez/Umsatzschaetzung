@@ -102,7 +102,11 @@ PAGE_MIX = (["a4", "letter", "legal", "folio", "b5", "a5", "a4_land"],
             [70, 12, 4, 4, 3, 4, 3])
 
 # Was auf ein schmales Blatt (< 180 mm) noch passt: A5 (148) und B5 (176).
-NARROW_COLUMNS = {"pos", "name", "menge", "einheit", "preis", "betrag", "rabatt"}
+# Artikelnummer und MwSt sind hier drin, seit `render.build` den Breitenüberlauf
+# selbst wegskaliert; ohne sie sah der Tagger auf 10.9 % der Seiten nie eine
+# articleId und hätte "schmale Seite heißt keine Artikelnummer" gelernt.
+NARROW_COLUMNS = {"pos", "name", "menge", "einheit", "preis", "betrag", "rabatt",
+                  "artikel", "mwst"}
 
 
 def template(seed):
@@ -114,10 +118,12 @@ def template(seed):
                "basis": rng.random() < 0.12, "rabatt": False, "mwst": rng.random() < 0.45,
                "betrag": True}
     columns = [c for c in order if present.get(c)]
-    # Ein schmales Blatt trägt keine zehn Spalten: auf A5 wird die Betragsspalte
-    # so weit gequetscht, dass ihre Wörter aus der Seite laufen und beim Clippen
-    # verloren gehen. Die Überlauf-Schleife in `render.build` fängt das nicht, sie
-    # misst nur die Höhe. Also hier die optionalen Spalten streichen.
+    # Ein schmales Blatt trägt nicht beliebig viele Spalten. Den Überlauf fängt
+    # inzwischen `render.build` ab — es misst neben der Höhe auch die Breite und
+    # verkleinert Schrift und Zellenabstand, bis die Zeile passt. Gestrichen wird
+    # hier nur noch, was auf 148 mm auch gedruckt keinen Sinn ergibt (GTIN neben
+    # Artikelnummer, Bemessungsgrundlage). Artikelnummer und MwSt-Spalte bleiben:
+    # sie vorschnell zu streichen kostete A5/B5 jede articleId-Supervision.
     narrow_page = PAGE_FORMATS[page_format][0] < 180.0
     if narrow_page:
         columns = [c for c in columns if c in NARROW_COLUMNS]
