@@ -62,7 +62,8 @@ public sealed class MappingModel : Observable
     public bool CanAssign => manual || Candidates.Any(c => c.Selected);
     public string Title { get => title; set => Set(ref title, value); }
     public string Supplier { get => supplier; set => Set(ref supplier, value); }
-    public string Article { get => article; set => Set(ref article, value); }
+    public string Article { get => article; set { if (Set(ref article, value)) Raise(nameof(HasArticle)); } }
+    public bool HasArticle => article != "";
     public string Unit { get => unit; set => Set(ref unit, value); }
     public string Count { get => count; set => Set(ref count, value); }
     public string Factor { get => factor; set => Set(ref factor, value); }
@@ -149,7 +150,7 @@ public partial class MappingView : Screen
         model.Title = g.Name;
         model.Supplier = g.Supplier;
         model.Article = g.Article ?? "";
-        model.Unit = g.Unit;
+        model.Unit = Units.Label(g.Unit);
         model.Count = g.Count.ToString();
         model.HasSelection = true;
         model.Loading = true;
