@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
 
@@ -43,6 +45,9 @@ public partial class InvoicesView : Screen
         InitializeComponent();
         DataContext = model;
         Search.Attach(model.Invoices, r => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal);
+        List.ItemsSource = Search.View;
+        AddHandler(DragDrop.DragOverEvent, DragOverFiles);
+        AddHandler(DragDrop.DropEvent, Dropped);
         Session.CaseChanged += Refresh;
         Session.CaseClosed += CaseClosed;
         Session.Imports.Finished += ImportFinished;
@@ -79,7 +84,7 @@ public partial class InvoicesView : Screen
         ShowDetail(List.SelectedItem as InvoiceRow);
     }
 
-    void SelectionChanged(object sender, SelectionChangedEventArgs e)
+    void SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (!refreshing) ShowDetail(List.SelectedItem as InvoiceRow);
     }
@@ -89,14 +94,14 @@ public partial class InvoicesView : Screen
         if (row is null)
         {
             SwapVerify(null);
-            Detail.Visibility = Visibility.Collapsed;
-            EmptyDetail.Visibility = Visibility.Visible;
+            Detail.IsVisible = false;
+            EmptyDetail.IsVisible = true;
             return;
         }
-        EmptyDetail.Visibility = Visibility.Collapsed;
+        EmptyDetail.IsVisible = false;
         if (row.IsDraft)
         {
-            Detail.Visibility = Visibility.Collapsed;
+            Detail.IsVisible = false;
             SwapVerify(EditorFor(row));
             return;
         }
@@ -111,7 +116,7 @@ public partial class InvoicesView : Screen
             var d = i < row.Display.Lines.Count ? row.Display.Lines[i] : new LineDisplay("", "", "", "", "");
             return new InvoiceLineRow(l.Name, d.Quantity, d.UnitPrice, d.LineNet, d.Vat, d.Mapping);
         }).ToList();
-        Detail.Visibility = Visibility.Visible;
+        Detail.IsVisible = true;
         _ = LoadSource(row.Id);
     }
 
@@ -121,7 +126,7 @@ public partial class InvoicesView : Screen
         verify?.Leave();
         verify = next;
         VerifyHost.Content = next;
-        VerifyHost.Visibility = next is null ? Visibility.Collapsed : Visibility.Visible;
+        VerifyHost.IsVisible = next is not null;
         if (next is not null && IsActive) next.Enter();
     }
 
@@ -155,21 +160,21 @@ public partial class InvoicesView : Screen
         if ((List.SelectedItem as InvoiceRow)?.Id == id) Source.Show(resp, resp?.FileName ?? "Kein Beleg gespeichert.");
     }
 
-    async void AddFiles(object sender, RoutedEventArgs e)
+    async void AddFiles(object? sender, RoutedEventArgs e)
     {
         StartImport(await Session.PickFiles(Session.InvoiceFilter, true));
     }
 
-    void DragOverFiles(object sender, DragEventArgs e)
+    void DragOverFiles(object? sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.DragEffects = e.DataTransfer.Contains(DataFormat.File) ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
-    async void Dropped(object sender, DragEventArgs e)
+    async void Dropped(object? sender, DragEventArgs e)
     {
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
-        StartImport(await Session.ReadFiles(paths));
+        if (e.DataTransfer.TryGetFiles() is not { } items) return;
+        StartImport(await Session.ReadFiles(items.Select(f => f.TryGetLocalPath()).OfType<string>()));
     }
 
     void StartImport(List<PickedFile> files)

@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <SolidColorBrush x:Key="WarningBrush" Color="#C47A0E"/>
@@ -12,151 +12,152 @@
     <SolidColorBrush x:Key="DangerSoftBrush" Color="#33E5484D"/>
     <SolidColorBrush x:Key="FocusBoxBrush" Color="#2F63D8"/>
     <SolidColorBrush x:Key="SoftBorderBrush" Color="#33808080"/>
-    <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas, Courier New</FontFamily>
+    <FontFamily x:Key="MonoFont">Cascadia Mono, Menlo, Consolas, Courier New</FontFamily>
 
-    <Style x:Key="PageTitle" TargetType="TextBlock">
+    <StreamGeometry x:Key="DeleteIcon">M6,2 H10 V3 H14 V4.5 H2 V3 H6 Z M3.4,6 H12.6 L11.9,14.6 H4.1 Z</StreamGeometry>
+
+    <ControlTheme x:Key="PageTitle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="22"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Margin" Value="0,0,0,16"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="SectionHeader" TargetType="TextBlock">
+    <ControlTheme x:Key="SectionHeader" TargetType="TextBlock">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Muted" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+    <ControlTheme x:Key="Muted" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+    <ControlTheme x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Margin" Value="0,10,0,4"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="KeyLabel" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+    <ControlTheme x:Key="KeyLabel" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
         <Setter Property="Margin" Value="0,0,16,6"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="KeyValue" TargetType="TextBlock">
+    <ControlTheme x:Key="KeyValue" TargetType="TextBlock">
         <Setter Property="Margin" Value="0,0,0,6"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Number" TargetType="TextBlock">
+    <ControlTheme x:Key="Number" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
         <Setter Property="TextAlignment" Value="Right"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="NumberBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+    <ControlTheme x:Key="NumberBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
         <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
         <Setter Property="TextAlignment" Value="Right"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-        <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
+    <ControlTheme x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForeground}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Padding" Value="14,6"/>
         <Setter Property="MinWidth" Value="110"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <ControlTheme x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Padding" Value="12,6"/>
         <Setter Property="Margin" Value="0,0,8,0"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="LinkButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <ControlTheme x:Key="LinkButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="8,2"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="DangerLink" TargetType="Button" BasedOn="{StaticResource LinkButton}">
+    <ControlTheme x:Key="DangerLink" TargetType="Button" BasedOn="{StaticResource LinkButton}">
         <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource LinkButton}">
-        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
+    <ControlTheme x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource LinkButton}">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Padding" Value="8,5"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="DangerIcon" TargetType="Button" BasedOn="{StaticResource IconButton}">
+    <ControlTheme x:Key="DangerIcon" TargetType="Button" BasedOn="{StaticResource IconButton}">
         <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Card" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
+    <ControlTheme x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="16"/>
         <Setter Property="Margin" Value="0,0,0,16"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Panel" TargetType="Border">
+    <ControlTheme x:Key="Panel" TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Badge" TargetType="Border">
+    <ControlTheme x:Key="Badge" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource NeutralSoftBrush}"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="6,1"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="BadgeWarning" TargetType="Border" BasedOn="{StaticResource Badge}">
+    <ControlTheme x:Key="BadgeWarning" TargetType="Border" BasedOn="{StaticResource Badge}">
         <Setter Property="Background" Value="{StaticResource WarningSoftBrush}"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="BadgeSuccess" TargetType="Border" BasedOn="{StaticResource Badge}">
+    <ControlTheme x:Key="BadgeSuccess" TargetType="Border" BasedOn="{StaticResource Badge}">
         <Setter Property="Background" Value="{StaticResource SuccessSoftBrush}"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="BadgeInfo" TargetType="Border" BasedOn="{StaticResource Badge}">
+    <ControlTheme x:Key="BadgeInfo" TargetType="Border" BasedOn="{StaticResource Badge}">
         <Setter Property="Background" Value="{StaticResource InfoSoftBrush}"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="BadgeText" TargetType="TextBlock">
+    <ControlTheme x:Key="BadgeText" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Banner" TargetType="Border">
+    <ControlTheme x:Key="Banner" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource WarningSoftBrush}"/>
         <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="Padding" Value="12,8"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="ErrorBanner" TargetType="Border">
+    <ControlTheme x:Key="ErrorBanner" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource DangerSoftBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}"/>
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
         <Setter Property="Padding" Value="16,10"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="ErrorBannerText" TargetType="TextBlock">
+    <ControlTheme x:Key="ErrorBannerText" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="ErrorBannerClose" TargetType="Button">
+    <ControlTheme x:Key="ErrorBannerClose" TargetType="Button">
         <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -165,26 +166,24 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
+            <ControlTemplate TargetType="Button">
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+            </ControlTemplate>
         </Setter>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="StatusBar" TargetType="Border">
+    <ControlTheme x:Key="StatusBar" TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource SoftBorderBrush}"/>
         <Setter Property="BorderThickness" Value="0,1,0,0"/>
         <Setter Property="Padding" Value="16,6"/>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="Grid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+    <ControlTheme x:Key="Grid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="AutoGenerateColumns" Value="False"/>
-        <Setter Property="CanUserAddRows" Value="False"/>
-        <Setter Property="CanUserDeleteRows" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="SelectionMode" Value="Single"/>
@@ -193,20 +192,13 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
-        <Setter Property="CellStyle">
-            <Setter.Value>
-                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-                    <Setter Property="VerticalContentAlignment" Value="Center"/>
-                </Style>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    </ControlTheme>
 
-    <Style x:Key="EmptyState" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+    <ControlTheme x:Key="EmptyState" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="Margin" Value="24"/>
-    </Style>
+    </ControlTheme>
 
 </ResourceDictionary>

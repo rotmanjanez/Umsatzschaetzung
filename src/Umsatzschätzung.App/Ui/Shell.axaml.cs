@@ -1,8 +1,6 @@
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Shell;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App.Ui;
@@ -19,7 +17,7 @@ public partial class Shell : Window
     public Shell(IService service)
     {
         InitializeComponent();
-        session = new Session(service);
+        session = new Session(service) { Owner = this };
         session.Imports.Jobs.CollectionChanged += ImportsChanged;
         cases = new CasesView(session);
         CasesHost.Content = cases;
@@ -31,7 +29,7 @@ public partial class Shell : Window
             new CalcView(session),
             new ReportView(session),
         ];
-        for (var i = 0; i < screens.Length; i++) ((TabItem)Tabs.Items[i]).Content = screens[i];
+        for (var i = 0; i < screens.Length; i++) ((TabItem)Tabs.Items[i]!).Content = screens[i];
         session.CaseOpened += OpenCase;
         session.CaseChanged += RefreshContext;
         session.StatusChanged += RefreshError;
@@ -58,33 +56,16 @@ public partial class Shell : Window
     void ImportsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         foreach (ImportJob job in e.OldItems ?? Array.Empty<ImportJob>())
-        {
-            job.PropertyChanged -= ImportProgressed;
             if (imports.Remove(job, out var window)) window.Close();
-        }
         foreach (ImportJob job in e.NewItems ?? Array.Empty<ImportJob>())
         {
-            var window = new ImportWindow(job) { Owner = this };
+            var window = new ImportWindow(job);
             imports[job] = window;
-            job.PropertyChanged += ImportProgressed;
-            window.Show();
+            window.Show(this);
         }
-        RefreshTaskbar();
     }
 
-    void ImportProgressed(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(ImportJob.Fraction)) RefreshTaskbar();
-    }
-
-    void RefreshTaskbar()
-    {
-        var jobs = session.Imports.Jobs;
-        Taskbar.ProgressState = jobs.Count == 0 ? TaskbarItemProgressState.None : TaskbarItemProgressState.Normal;
-        Taskbar.ProgressValue = jobs.Count == 0 ? 0 : jobs.Average(j => j.Fraction);
-    }
-
-    void ShowRules(object sender, RoutedEventArgs e) => ShowRules();
+    void ShowRules(object? sender, RoutedEventArgs e) => ShowRules();
 
     void ShowRules()
     {
@@ -106,27 +87,27 @@ public partial class Shell : Window
         screen.Enter();
     }
 
-    void TabChanged(object sender, SelectionChangedEventArgs e)
+    void TabChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.OriginalSource == Tabs && Tabs.SelectedIndex >= 0 && CaseUi.IsVisible) Show(screens[Tabs.SelectedIndex]);
+        if (e.Source == Tabs && Tabs.SelectedIndex >= 0 && CaseUi.IsVisible) Show(screens[Tabs.SelectedIndex]);
     }
 
     void OpenCase(CaseResp resp)
     {
         RefreshContext();
-        CasesHost.Visibility = Visibility.Collapsed;
-        CaseUi.Visibility = Visibility.Visible;
+        CasesHost.IsVisible = false;
+        CaseUi.IsVisible = true;
         Tabs.SelectedIndex = 0;
         Show(screens[0]);
     }
 
-    void Back(object sender, RoutedEventArgs e)
+    void Back(object? sender, RoutedEventArgs e)
     {
         current?.Leave();
         current = null;
         session.CloseCase();
-        CaseUi.Visibility = Visibility.Collapsed;
-        CasesHost.Visibility = Visibility.Visible;
+        CaseUi.IsVisible = false;
+        CasesHost.IsVisible = true;
         Title = "Umsatzschätzung";
         Show(cases);
     }
@@ -139,14 +120,14 @@ public partial class Shell : Window
         Title = "Umsatzschätzung: " + session.Case.Label;
     }
 
-    void DismissError(object sender, RoutedEventArgs e) => session.Error = "";
+    void DismissError(object? sender, RoutedEventArgs e) => session.Error = "";
 
     void RefreshError()
     {
         var text = session.Error != "" ? session.Error : session.Status?.Problem ?? "";
         ErrorText.Text = text;
-        ErrorBanner.Visibility = text == "" ? Visibility.Collapsed : Visibility.Visible;
-        ErrorClose.Visibility = session.Error == "" ? Visibility.Collapsed : Visibility.Visible;
+        ErrorBanner.IsVisible = text != "";
+        ErrorClose.IsVisible = session.Error != "";
     }
 
     void RefreshStatus() => StatusText.Text = session.Message;

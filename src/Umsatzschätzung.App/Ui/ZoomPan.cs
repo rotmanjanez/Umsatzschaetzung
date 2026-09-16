@@ -1,9 +1,9 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Interop;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace Umsatzschätzung.App.Ui;
 
@@ -13,32 +13,48 @@ public static class ZoomPan
     public const double Max = 8;
     public const double Step = 1.25;
 
-    const int WmMouseHWheel = 0x020E;
+    // Avalonia reports wheel notches, not WPF's 120ths.
+    const double Notch = 40;
 
-    public static readonly DependencyProperty EnabledProperty = DependencyProperty.RegisterAttached(
-        "Enabled", typeof(bool), typeof(ZoomPan), new PropertyMetadata(false, EnabledChanged));
+    // Avalonia exposes no system scrollbar metric; the Fluent bar is 16px wide.
+    const double ScrollBarWidth = 16;
 
-    public static readonly DependencyProperty ZoomProperty = DependencyProperty.RegisterAttached(
-        "Zoom", typeof(double), typeof(ZoomPan), new PropertyMetadata(1.0, ZoomChanged, CoerceZoom));
+    public static readonly AttachedProperty<bool> EnabledProperty =
+        AvaloniaProperty.RegisterAttached<ScrollViewer, bool>("Enabled", typeof(ZoomPan));
 
-    static readonly DependencyProperty FitProperty = DependencyProperty.RegisterAttached(
-        "Fit", typeof(double), typeof(ZoomPan), new PropertyMetadata(1.0, FitChanged));
+    public static readonly AttachedProperty<double> ZoomProperty =
+        AvaloniaProperty.RegisterAttached<ScrollViewer, double>("Zoom", typeof(ZoomPan), 1.0);
 
-    static readonly DependencyProperty StateProperty = DependencyProperty.RegisterAttached(
-        "State", typeof(State), typeof(ZoomPan));
+    static readonly AttachedProperty<double> FitProperty =
+        AvaloniaProperty.RegisterAttached<ScrollViewer, double>("Fit", typeof(ZoomPan), 1.0);
+
+    static readonly AttachedProperty<State?> StateProperty =
+        AvaloniaProperty.RegisterAttached<ScrollViewer, State?>("State", typeof(ZoomPan));
+
+    static ZoomPan()
+    {
+        EnabledProperty.Changed.AddClassHandler<ScrollViewer>((viewer, e) =>
+        {
+            if (viewer.GetValue(StateProperty) is { } old) old.Detach();
+            viewer.SetValue(StateProperty, e.GetNewValue<bool>() ? new State(viewer) : null);
+        });
+        ZoomProperty.Changed.AddClassHandler<ScrollViewer>((viewer, _) => Reapply(viewer));
+        FitProperty.Changed.AddClassHandler<ScrollViewer>((viewer, _) => Reapply(viewer));
+    }
 
     public static void SetEnabled(ScrollViewer viewer, bool value) => viewer.SetValue(EnabledProperty, value);
 
-    public static bool GetEnabled(ScrollViewer viewer) => (bool)viewer.GetValue(EnabledProperty);
+    public static bool GetEnabled(ScrollViewer viewer) => viewer.GetValue(EnabledProperty);
 
-    public static void SetZoom(ScrollViewer viewer, double value) => viewer.SetValue(ZoomProperty, value);
+    // Avalonia has no coercion callback, so the range lives here.
+    public static void SetZoom(ScrollViewer viewer, double value) => viewer.SetValue(ZoomProperty, Math.Clamp(value, Min, Max));
 
-    public static double GetZoom(ScrollViewer viewer) => (double)viewer.GetValue(ZoomProperty);
+    public static double GetZoom(ScrollViewer viewer) => viewer.GetValue(ZoomProperty);
 
-    static double GetFit(ScrollViewer viewer) => (double)viewer.GetValue(FitProperty);
+    static double GetFit(ScrollViewer viewer) => viewer.GetValue(FitProperty);
 
     public static void ZoomBy(ScrollViewer viewer, double factor) =>
-        ZoomAt(viewer, GetZoom(viewer) * factor, new Point(viewer.ViewportWidth / 2, viewer.ViewportHeight / 2));
+        ZoomAt(viewer, GetZoom(viewer) * factor, new Point(viewer.Viewport.Width / 2, viewer.Viewport.Height / 2));
 
     public static void FitWidth(ScrollViewer viewer)
     {
@@ -49,17 +65,18 @@ public static class ZoomPan
 
     static double? WidthRatio(ScrollViewer viewer)
     {
-        if (Content(viewer) is not { ActualWidth: > 0 } content) return null;
-        var room = viewer.ActualWidth - viewer.Padding.Left - viewer.Padding.Right - SystemParameters.VerticalScrollBarWidth;
-        return room > 0 ? room / content.ActualWidth : null;
+        if (Content(viewer) is not { Bounds.Width: > 0 } content) return null;
+        var room = viewer.Bounds.Width - viewer.Padding.Left - viewer.Padding.Right - ScrollBarWidth;
+        return room > 0 ? room / content.Bounds.Width : null;
     }
 
     public static void Reveal(ScrollViewer viewer, Rect box)
     {
         var zoom = Scale(viewer);
         var scaled = new Rect(box.X * zoom, box.Y * zoom, box.Width * zoom, box.Height * zoom);
-        viewer.ScrollToHorizontalOffset(Clamp(viewer.HorizontalOffset, scaled.Left, scaled.Right, viewer.ViewportWidth));
-        viewer.ScrollToVerticalOffset(Clamp(viewer.VerticalOffset, scaled.Top, scaled.Bottom, viewer.ViewportHeight));
+        viewer.Offset = new Vector(
+            Clamp(viewer.Offset.X, scaled.Left, scaled.Right, viewer.Viewport.Width),
+            Clamp(viewer.Offset.Y, scaled.Top, scaled.Bottom, viewer.Viewport.Height));
     }
 
     static double Clamp(double offset, double near, double far, double viewport)
@@ -70,24 +87,14 @@ public static class ZoomPan
 
     static double Scale(ScrollViewer viewer) => GetZoom(viewer) * GetFit(viewer);
 
-    static object CoerceZoom(DependencyObject o, object value) => Math.Clamp((double)value, Min, Max);
+    // WPF scaled the content itself; Avalonia needs a LayoutTransformControl between viewer and content.
+    static LayoutTransformControl? Host(ScrollViewer viewer) => viewer.Content as LayoutTransformControl;
 
-    static FrameworkElement? Content(ScrollViewer viewer) => viewer.Content as FrameworkElement;
+    static Control? Content(ScrollViewer viewer) => Host(viewer)?.Child;
 
-    static void EnabledChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+    static void Reapply(ScrollViewer viewer)
     {
-        if (o is not ScrollViewer viewer) return;
-        if (viewer.GetValue(StateProperty) is State old) old.Detach();
-        viewer.SetValue(StateProperty, (bool)e.NewValue ? new State(viewer) : null);
-    }
-
-    static void ZoomChanged(DependencyObject o, DependencyPropertyChangedEventArgs e) => Reapply(o);
-
-    static void FitChanged(DependencyObject o, DependencyPropertyChangedEventArgs e) => Reapply(o);
-
-    static void Reapply(DependencyObject o)
-    {
-        if (o is ScrollViewer viewer && viewer.GetValue(StateProperty) is State state) state.Apply();
+        if (viewer.GetValue(StateProperty) is { } state) state.Apply();
     }
 
     static void ZoomAt(ScrollViewer viewer, double zoom, Point pivot)
@@ -97,15 +104,12 @@ public static class ZoomPan
         var factor = GetZoom(viewer) / before;
         if (factor == 1) return;
         viewer.UpdateLayout();
-        viewer.ScrollToHorizontalOffset((viewer.HorizontalOffset + pivot.X) * factor - pivot.X);
-        viewer.ScrollToVerticalOffset((viewer.VerticalOffset + pivot.Y) * factor - pivot.Y);
+        viewer.Offset = new Vector((viewer.Offset.X + pivot.X) * factor - pivot.X, (viewer.Offset.Y + pivot.Y) * factor - pivot.Y);
     }
 
     sealed class State
     {
         readonly ScrollViewer viewer;
-        readonly ScaleTransform scale = new(1, 1);
-        HwndSource? hwnd;
         Point grab;
         Vector origin;
         bool panning;
@@ -113,42 +117,39 @@ public static class ZoomPan
         public State(ScrollViewer viewer)
         {
             this.viewer = viewer;
-            viewer.PreviewMouseWheel += Wheel;
-            viewer.PreviewMouseDown += Down;
-            viewer.PreviewMouseMove += Move;
-            viewer.PreviewMouseUp += Up;
+            viewer.AddHandler(InputElement.PointerWheelChangedEvent, Wheel, RoutingStrategies.Tunnel);
+            viewer.AddHandler(InputElement.PointerPressedEvent, Down, RoutingStrategies.Tunnel);
+            viewer.AddHandler(InputElement.PointerMovedEvent, Move, RoutingStrategies.Tunnel);
+            viewer.AddHandler(InputElement.PointerReleasedEvent, Up, RoutingStrategies.Tunnel);
             viewer.SizeChanged += Refit;
             viewer.ScrollChanged += Scrolled;
             viewer.Loaded += Loaded;
-            viewer.Unloaded += Unloaded;
             if (viewer.IsLoaded) Loaded(viewer, new RoutedEventArgs());
         }
 
         public void Detach()
         {
-            viewer.PreviewMouseWheel -= Wheel;
-            viewer.PreviewMouseDown -= Down;
-            viewer.PreviewMouseMove -= Move;
-            viewer.PreviewMouseUp -= Up;
+            viewer.RemoveHandler(InputElement.PointerWheelChangedEvent, Wheel);
+            viewer.RemoveHandler(InputElement.PointerPressedEvent, Down);
+            viewer.RemoveHandler(InputElement.PointerMovedEvent, Move);
+            viewer.RemoveHandler(InputElement.PointerReleasedEvent, Up);
             viewer.SizeChanged -= Refit;
             viewer.ScrollChanged -= Scrolled;
             viewer.Loaded -= Loaded;
-            viewer.Unloaded -= Unloaded;
-            Unloaded(viewer, new RoutedEventArgs());
-            if (Content(viewer) is { } content && ReferenceEquals(content.LayoutTransform, scale))
-                content.LayoutTransform = Transform.Identity;
+            if (Host(viewer) is { } host) host.LayoutTransform = null;
         }
 
+        // A fresh transform each time: LayoutTransformControl re-measures on the property change, not on mutation.
         public void Apply()
         {
-            if (Content(viewer) is not { } content) return;
-            content.LayoutTransform = scale;
-            scale.ScaleX = scale.ScaleY = Scale(viewer);
+            if (Host(viewer) is not { } host) return;
+            var scale = Scale(viewer);
+            host.LayoutTransform = new ScaleTransform(scale, scale);
         }
 
         void Scrolled(object? sender, ScrollChangedEventArgs e)
         {
-            if (e.ExtentWidthChange != 0) Refit(sender, e);
+            if (e.ExtentDelta.X != 0) Refit(sender, e);
         }
 
         void Refit(object? sender, EventArgs e)
@@ -160,73 +161,49 @@ public static class ZoomPan
         {
             Refit(viewer, EventArgs.Empty);
             Apply();
-            if (hwnd is null && PresentationSource.FromVisual(viewer) is HwndSource source)
+        }
+
+        void Wheel(object? sender, PointerWheelEventArgs e)
+        {
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
             {
-                hwnd = source;
-                hwnd.AddHook(Hook);
-            }
-        }
-
-        void Unloaded(object? sender, RoutedEventArgs e)
-        {
-            hwnd?.RemoveHook(Hook);
-            hwnd = null;
-        }
-
-        nint Hook(nint window, int message, nint wParam, nint lParam, ref bool handled)
-        {
-            if (message != WmMouseHWheel || !viewer.IsMouseOver) return 0;
-            viewer.ScrollToHorizontalOffset(viewer.HorizontalOffset + (short)((ulong)wParam >> 16) / 3.0);
-            handled = true;
-            return 0;
-        }
-
-        void Wheel(object sender, MouseWheelEventArgs e)
-        {
-            var keys = Keyboard.Modifiers;
-            if ((keys & ModifierKeys.Control) != 0)
-            {
-                ZoomAt(viewer, GetZoom(viewer) * Math.Pow(Step, e.Delta / 120.0), e.GetPosition(viewer));
+                ZoomAt(viewer, GetZoom(viewer) * Math.Pow(Step, e.Delta.Y), e.GetPosition(viewer));
                 e.Handled = true;
                 return;
             }
-            if ((keys & ModifierKeys.Shift) == 0) return;
-            viewer.ScrollToHorizontalOffset(viewer.HorizontalOffset - e.Delta / 3.0);
+            var sideways = e.Delta.X != 0 ? e.Delta.X : e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? e.Delta.Y : 0;
+            if (sideways == 0) return;
+            viewer.Offset = new Vector(viewer.Offset.X - sideways * Notch, viewer.Offset.Y);
             e.Handled = true;
         }
 
-        void Down(object sender, MouseButtonEventArgs e)
+        void Down(object? sender, PointerPressedEventArgs e)
         {
-            var text = e.ChangedButton == MouseButton.Left && e.OriginalSource is DependencyObject source && InText(source);
-            if (e.ChangedButton == MouseButton.Right || text) return;
+            var buttons = e.GetCurrentPoint(viewer).Properties;
+            if (buttons.IsRightButtonPressed) return;
+            if (buttons.IsLeftButtonPressed && e.Source is Visual source && InText(source)) return;
             grab = e.GetPosition(viewer);
-            origin = new Vector(viewer.HorizontalOffset, viewer.VerticalOffset);
+            origin = viewer.Offset;
             panning = true;
-            viewer.Cursor = Cursors.ScrollAll;
-            viewer.CaptureMouse();
+            viewer.Cursor = new Cursor(StandardCursorType.SizeAll);
+            e.Pointer.Capture(viewer);
         }
 
-        void Move(object sender, MouseEventArgs e)
+        void Move(object? sender, PointerEventArgs e)
         {
             if (!panning) return;
             var delta = e.GetPosition(viewer) - grab;
-            viewer.ScrollToHorizontalOffset(origin.X - delta.X);
-            viewer.ScrollToVerticalOffset(origin.Y - delta.Y);
+            viewer.Offset = new Vector(origin.X - delta.X, origin.Y - delta.Y);
         }
 
-        void Up(object sender, MouseButtonEventArgs e)
+        void Up(object? sender, PointerReleasedEventArgs e)
         {
             if (!panning) return;
             panning = false;
             viewer.Cursor = null;
-            viewer.ReleaseMouseCapture();
+            e.Pointer.Capture(null);
         }
 
-        static bool InText(DependencyObject source)
-        {
-            for (var node = source; node is not null; node = VisualTreeHelper.GetParent(node))
-                if (node is TextBoxBase) return true;
-            return false;
-        }
+        static bool InText(Visual source) => source is TextBox || source.GetVisualAncestors().Any(v => v is TextBox);
     }
 }

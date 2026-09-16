@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
 using System.ComponentModel;
-using System.Windows.Input;
-using System.Windows.Shapes;
-using System.Windows.Threading;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Threading;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
 
@@ -172,12 +174,12 @@ public partial class VerifyView : Screen
             }
             for (var i = 0; i < pages.Count; i++) PageSelect.Items.Add("Seite " + (i + 1));
             PageSelect.SelectedIndex = 0;
-            PageSelect.Visibility = pages.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
+            PageSelect.IsVisible = pages.Count > 1;
         }
         else
         {
-            OcrPane.Visibility = Visibility.Collapsed;
-            Source.Visibility = Visibility.Visible;
+            OcrPane.IsVisible = false;
+            Source.IsVisible = true;
         }
         ApplyFlags(flags);
     }
@@ -286,7 +288,7 @@ public partial class VerifyView : Screen
         RenderFlagged();
     }
 
-    async void Confirm(object sender, RoutedEventArgs e)
+    async void Confirm(object? sender, RoutedEventArgs e)
     {
         if (Session.Case is null) return;
         timer.Stop();
@@ -308,7 +310,7 @@ public partial class VerifyView : Screen
         });
     }
 
-    void AddLine(object sender, RoutedEventArgs e)
+    void AddLine(object? sender, RoutedEventArgs e)
     {
         var no = model.Lines.Count == 0 ? 0 : model.Lines.Max(r => r.Line.No);
         var row = new LineRow(new InvoiceLine { No = no + 1, PriceBaseQty = 1000 }, new LineDisplay("", "", "", "", ""), Math.Max(currentPage, 0), []);
@@ -317,9 +319,9 @@ public partial class VerifyView : Screen
         Schedule();
     }
 
-    void RemoveLine(object sender, RoutedEventArgs e)
+    void RemoveLine(object? sender, RoutedEventArgs e)
     {
-        if (((FrameworkElement)sender).DataContext is not LineRow row) return;
+        if ((sender as Control)?.DataContext is not LineRow row) return;
         row.Changed -= LineEdited;
         model.Lines.Remove(row);
         Schedule();
@@ -327,16 +329,15 @@ public partial class VerifyView : Screen
 
     void CellChanged(object? sender, EventArgs e)
     {
-        var cell = Lines.CurrentCell;
-        if (cell.Item is not LineRow row || cell.Column is null || cell.Column.DisplayIndex >= LineFields.Length)
+        if (Lines.SelectedItem is not LineRow row || Lines.CurrentColumn is not { } column || column.DisplayIndex >= LineFields.Length)
         {
             FocusCell(currentPage, null);
             return;
         }
-        FocusCell(row.Page, row.Cells.GetValueOrDefault(LineFields[cell.Column.DisplayIndex])?.Box);
+        FocusCell(row.Page, row.Cells.GetValueOrDefault(LineFields[column.DisplayIndex])?.Box);
     }
 
-    void HeaderFocus(object sender, KeyboardFocusChangedEventArgs e)
+    void HeaderFocus(object? sender, FocusChangedEventArgs e)
     {
         if (pages.Count == 0) return;
         var field = ReferenceEquals(sender, SupplierBox) || ReferenceEquals(sender, VatIdBox) ? Field.Supplier
@@ -345,7 +346,7 @@ public partial class VerifyView : Screen
         FocusCell(0, pages[0].Header.GetValueOrDefault(field)?.Box);
     }
 
-    void PageChanged(object sender, SelectionChangedEventArgs e)
+    void PageChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (PageSelect.SelectedIndex >= 0) ShowPage(PageSelect.SelectedIndex);
     }
@@ -356,22 +357,22 @@ public partial class VerifyView : Screen
         if (page != currentPage && page >= 0 && page < pages.Count) PageSelect.SelectedIndex = page;
         if (box is null)
         {
-            FocusBox.Visibility = Visibility.Collapsed;
+            FocusBox.IsVisible = false;
             return;
         }
         Canvas.SetLeft(FocusBox, box.X - 4);
         Canvas.SetTop(FocusBox, box.Y - 4);
         FocusBox.Width = box.W + 8;
         FocusBox.Height = box.H + 8;
-        FocusBox.Visibility = Visibility.Visible;
+        FocusBox.IsVisible = true;
         ZoomPan.Reveal(Viewer, new Rect(box.X - 4, box.Y - 4, box.W + 8, box.H + 8));
     }
 
-    void ZoomIn(object sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, ZoomPan.Step);
+    void ZoomIn(object? sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, ZoomPan.Step);
 
-    void ZoomOut(object sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, 1 / ZoomPan.Step);
+    void ZoomOut(object? sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, 1 / ZoomPan.Step);
 
-    void ZoomFit(object sender, RoutedEventArgs e) => FitPage();
+    void ZoomFit(object? sender, RoutedEventArgs e) => FitPage();
 
     void FitPage()
     {
@@ -385,14 +386,14 @@ public partial class VerifyView : Screen
         currentPage = index;
         var page = pages[index];
         var image = Images.Decode(page.Image);
-        var w = page.Width > 0 ? page.Width : image.PixelWidth;
-        var h = page.Height > 0 ? page.Height : image.PixelHeight;
+        var w = page.Width > 0 ? page.Width : image.PixelSize.Width;
+        var h = page.Height > 0 ? page.Height : image.PixelSize.Height;
         PageCanvas.Width = w;
         PageCanvas.Height = h;
         PageImage.Source = image;
         PageImage.Width = w;
         PageImage.Height = h;
-        FocusBox.Visibility = Visibility.Collapsed;
+        FocusBox.IsVisible = false;
         RenderFlagged();
         FitPage();
     }
@@ -414,8 +415,8 @@ public partial class VerifyView : Screen
             {
                 Width = b.W + 6,
                 Height = b.H + 6,
-                Stroke = (System.Windows.Media.Brush)FindResource("WarningBrush"),
-                Fill = (System.Windows.Media.Brush)FindResource("WarningSoftBrush"),
+                Stroke = (IBrush)Application.Current!.FindResource("WarningBrush")!,
+                Fill = (IBrush)Application.Current!.FindResource("WarningSoftBrush")!,
                 StrokeThickness = 2,
                 RadiusX = 3,
                 RadiusY = 3,

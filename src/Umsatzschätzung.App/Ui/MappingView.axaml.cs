@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
 
@@ -95,6 +95,9 @@ public partial class MappingView : Screen
     {
         InitializeComponent();
         DataContext = model;
+        Search.Width = double.NaN;
+        Search.Attach(model.Groups, g => g.Supplier + " " + g.Name + " " + g.Article);
+        Groups.ItemsSource = Search.View;
     }
 
     protected override void OnEnter()
@@ -130,7 +133,7 @@ public partial class MappingView : Screen
         return groups.Values.OrderBy(g => g.Supplier + g.Name, StringComparer.Ordinal).ToList();
     }
 
-    async void GroupSelected(object sender, SelectionChangedEventArgs e)
+    async void GroupSelected(object? sender, SelectionChangedEventArgs e)
     {
         var seq = ++suggestSeq;
         model.SetCandidates([]);
@@ -158,9 +161,9 @@ public partial class MappingView : Screen
         if (seq == suggestSeq) model.Loading = false;
     }
 
-    void ToggleManual(object sender, RoutedEventArgs e) => model.Manual = !model.Manual;
+    void ToggleManual(object? sender, RoutedEventArgs e) => model.Manual = !model.Manual;
 
-    async void Assign(object sender, RoutedEventArgs e)
+    async void Assign(object? sender, RoutedEventArgs e)
     {
         if (Groups.SelectedItem is not LineGroup g || Session.Case is null) return;
         if (!model.Manual)

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
-using System.Windows;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App.Ui;
@@ -35,8 +36,9 @@ public sealed class ReportModel : Observable
 
 public partial class ReportView : Screen
 {
+    const string Unavailable = "Berichtsvorschau nicht verfügbar, Web-Komponente konnte nicht geladen werden";
+
     readonly ReportModel model = new();
-    bool webReady;
 
     public ReportView(Session session) : base(session)
     {
@@ -63,23 +65,25 @@ public partial class ReportView : Screen
 
     async Task ShowHtml(string html)
     {
+        var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void Completed(object? sender, WebViewNavigationCompletedEventArgs e) => done.TrySetResult(e.IsSuccess);
+        Web.NavigationCompleted += Completed;
         try
         {
-            if (!webReady)
-            {
-                await Web.EnsureCoreWebView2Async();
-                webReady = true;
-            }
-            Web.NavigateToString(html);
-            model.Note = "";
+            Web.NavigateToString(html, null!);
+            model.Note = await done.Task.WaitAsync(TimeSpan.FromSeconds(20), Ct) ? "" : Unavailable;
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            model.Note = "Berichtsvorschau nicht verfügbar, WebView2-Laufzeit fehlt";
+            model.Note = Unavailable;
+        }
+        finally
+        {
+            Web.NavigationCompleted -= Completed;
         }
     }
 
-    async void SavePdf(object sender, RoutedEventArgs e)
+    async void SavePdf(object? sender, RoutedEventArgs e)
     {
         if (Session.Case is null) return;
         var caseId = Session.Case.Id;
@@ -97,7 +101,7 @@ public partial class ReportView : Screen
         });
     }
 
-    async void ExportCsv(object sender, RoutedEventArgs e)
+    async void ExportCsv(object? sender, RoutedEventArgs e)
     {
         if (Session.Case is null) return;
         var caseId = Session.Case.Id;

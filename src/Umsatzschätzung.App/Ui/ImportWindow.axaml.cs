@@ -1,5 +1,6 @@
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 
 namespace Umsatzschätzung.App.Ui;
 
@@ -24,7 +25,7 @@ public partial class ImportWindow : Window
         Title = "Import · " + job.Percent + " · " + job.Label;
     }
 
-    void CancelClick(object sender, RoutedEventArgs e) => Close();
+    void CancelClick(object? sender, RoutedEventArgs e) => Close();
 
     protected override void OnClosed(EventArgs e)
     {

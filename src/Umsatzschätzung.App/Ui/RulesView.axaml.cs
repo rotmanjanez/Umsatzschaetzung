@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.App.Ui;
@@ -112,6 +112,9 @@ public partial class RulesView : Screen
         IngredientSearch.Attach(model.Ingredients.Items, i => i.Name + " " + i.Category + " " + i.UnitLabel);
         ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
         YieldSearch.Attach(model.Yields.Items, y => y.Title + " " + y.Source);
+        IngredientGrid.ItemsSource = IngredientSearch.View;
+        ProductGrid.ItemsSource = ProductSearch.View;
+        YieldGrid.ItemsSource = YieldSearch.View;
     }
 
     protected override async void OnEnter()
@@ -153,13 +156,13 @@ public partial class RulesView : Screen
     async Task Retire(Entity entity, string? id, string noun, string name)
     {
         if (id is null) return;
-        var answer = MessageBox.Show("„" + name + "“ gilt danach nicht mehr für neue Berechnungen.", noun + " zurückziehen",
-            MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
-        if (answer != MessageBoxResult.Yes) return;
+        var confirmed = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+            "„" + name + "“ gilt danach nicht mehr für neue Berechnungen.", noun + " zurückziehen");
+        if (!confirmed) return;
         await Session.Retire(entity, id, Ct);
     }
 
-    void IngredientSelected(object sender, SelectionChangedEventArgs e)
+    void IngredientSelected(object? sender, SelectionChangedEventArgs e)
     {
         if (!loading && IngredientGrid.SelectedItem is IngredientItem item) LoadIngredient(item.Ingredient);
     }
@@ -175,7 +178,7 @@ public partial class RulesView : Screen
         f.Category = i.Category;
     }
 
-    void NewIngredient(object sender, RoutedEventArgs e)
+    void NewIngredient(object? sender, RoutedEventArgs e)
     {
         var f = model.Ingredients;
         IngredientGrid.SelectedItem = null;
@@ -187,7 +190,7 @@ public partial class RulesView : Screen
         f.Category = "";
     }
 
-    async void SaveIngredient(object sender, RoutedEventArgs e)
+    async void SaveIngredient(object? sender, RoutedEventArgs e)
     {
         var f = model.Ingredients;
         if (f.Name.Trim() == "" || f.UnitIndex < 0)
@@ -201,13 +204,13 @@ public partial class RulesView : Screen
         await Session.Put(data, Ct);
     }
 
-    async void RetireIngredient(object sender, RoutedEventArgs e)
+    async void RetireIngredient(object? sender, RoutedEventArgs e)
     {
         await Retire(Entity.Ingredient, model.Ingredients.CurrentId, "Zutat", model.Ingredients.Title);
         model.Ingredients.CurrentId = null;
     }
 
-    void ProductSelected(object sender, SelectionChangedEventArgs e)
+    void ProductSelected(object? sender, SelectionChangedEventArgs e)
     {
         if (!loading && ProductGrid.SelectedItem is ProductItem item) LoadProduct(item.Product);
     }
@@ -225,7 +228,7 @@ public partial class RulesView : Screen
             f.Recipe.Add(new RecipeRow(options) { Ingredient = options.Find(i => i.Id == l.IngredientId), Amount = l.Amount.ToString() });
     }
 
-    void NewProduct(object sender, RoutedEventArgs e)
+    void NewProduct(object? sender, RoutedEventArgs e)
     {
         var f = model.Products;
         ProductGrid.SelectedItem = null;
@@ -236,14 +239,14 @@ public partial class RulesView : Screen
         f.Recipe.Clear();
     }
 
-    void AddRecipeLine(object sender, RoutedEventArgs e) => model.Products.Recipe.Add(new RecipeRow(Session.Ingredients()));
+    void AddRecipeLine(object? sender, RoutedEventArgs e) => model.Products.Recipe.Add(new RecipeRow(Session.Ingredients()));
 
-    void RemoveRecipeLine(object sender, RoutedEventArgs e)
+    void RemoveRecipeLine(object? sender, RoutedEventArgs e)
     {
-        if (((FrameworkElement)sender).DataContext is RecipeRow row) model.Products.Recipe.Remove(row);
+        if ((sender as Control)?.DataContext is RecipeRow row) model.Products.Recipe.Remove(row);
     }
 
-    async void SaveProduct(object sender, RoutedEventArgs e)
+    async void SaveProduct(object? sender, RoutedEventArgs e)
     {
         var f = model.Products;
         var id = f.CurrentId ?? Session.NewId("product");
@@ -267,13 +270,13 @@ public partial class RulesView : Screen
         await Session.Put(data, Ct);
     }
 
-    async void RetireProduct(object sender, RoutedEventArgs e)
+    async void RetireProduct(object? sender, RoutedEventArgs e)
     {
         await Retire(Entity.Product, model.Products.CurrentId, "Produkt", model.Products.Title);
         model.Products.CurrentId = null;
     }
 
-    void YieldSelected(object sender, SelectionChangedEventArgs e)
+    void YieldSelected(object? sender, SelectionChangedEventArgs e)
     {
         if (!loading && YieldGrid.SelectedItem is YieldItem item) LoadYield(item.Rule);
     }
@@ -295,7 +298,7 @@ public partial class RulesView : Screen
         f.Source = y.Source;
     }
 
-    void NewYield(object sender, RoutedEventArgs e)
+    void NewYield(object? sender, RoutedEventArgs e)
     {
         var f = model.Yields;
         YieldGrid.SelectedItem = null;
@@ -307,7 +310,7 @@ public partial class RulesView : Screen
         f.Ingredient = YieldForm.None;
     }
 
-    async void SaveYield(object sender, RoutedEventArgs e)
+    async void SaveYield(object? sender, RoutedEventArgs e)
     {
         var f = model.Yields;
         var id = f.CurrentId ?? Session.NewId("yield_rule");
@@ -336,7 +339,7 @@ public partial class RulesView : Screen
         await Session.Put(data, Ct);
     }
 
-    async void RetireYield(object sender, RoutedEventArgs e)
+    async void RetireYield(object? sender, RoutedEventArgs e)
     {
         await Retire(Entity.YieldRule, model.Yields.CurrentId, "Ertragsregel", model.Yields.Title);
         model.Yields.CurrentId = null;

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
 
@@ -25,7 +26,8 @@ public sealed class ProductRowModel : Observable
     public string Revenue { get => revenue; set => Set(ref revenue, value); }
     public bool Active { get => active; set => Set(ref active, value); }
     public bool PriceMissing { get => priceMissing; set => Set(ref priceMissing, value); }
-    public bool Disabled { get => disabled; set => Set(ref disabled, value); }
+    public bool Disabled { get => disabled; set { if (Set(ref disabled, value)) Raise(nameof(Fade)); } }
+    public double Fade => disabled ? 0.55 : 1;
 }
 
 public sealed class PinnedRow(List<Product> options) : Observable
@@ -228,12 +230,12 @@ public partial class CalcView : Screen
         return cp;
     }
 
-    void AddPinned(object sender, RoutedEventArgs e) => model.Pinned.Add(new PinnedRow(Session.Products()));
+    void AddPinned(object? sender, RoutedEventArgs e) => model.Pinned.Add(new PinnedRow(Session.Products()));
 
-    void RemovePinned(object sender, RoutedEventArgs e)
+    void RemovePinned(object? sender, RoutedEventArgs e)
     {
-        if (((FrameworkElement)sender).DataContext is PinnedRow row) model.Pinned.Remove(row);
+        if ((sender as Control)?.DataContext is PinnedRow row) model.Pinned.Remove(row);
     }
 
-    void NodeSelected(object sender, RoutedPropertyChangedEventArgs<object> e) => model.Node = e.NewValue as NodeDisplay;
+    void NodeSelected(object? sender, SelectionChangedEventArgs e) => model.Node = Tree.SelectedItem as NodeDisplay;
 }
