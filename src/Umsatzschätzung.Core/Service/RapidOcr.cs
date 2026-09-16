@@ -35,7 +35,7 @@ public sealed class RapidOcr : IOcr, IDisposable
         KeysPath = Beside(RapidOcrModelSet.PPOCRv5Latin.KeysPath),
     };
 
-    static string Beside(string path) => Path.Combine(AppContext.BaseDirectory, path);
+    static string Beside(string path) => AppFiles.Beside(path);
 
     readonly RapidOcrModelSet models;
     readonly RapidOcrOptions options;
@@ -120,7 +120,7 @@ public sealed class RapidOcr : IOcr, IDisposable
             engine.Dispose();
             throw new InvalidOperationException(
                 "Die Texterkennungsmodelle konnten nicht geladen werden. Erwartet unter " +
-                Path.Combine(AppContext.BaseDirectory, "models") + ".", e);
+                AppFiles.Beside("models") + ".", e);
         }
         return engine;
     }
