@@ -19,35 +19,36 @@
                     </DockPanel>
                 </Border>
 
-                <TextBlock Text="Eckdaten" Theme="{StaticResource SectionHeader}"/>
-                <StackPanel Margin="0,0,0,24">
-                    <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
-                    <TextBox Text="{Binding Label, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Zeitraum" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
-                    <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Von *" Theme="{StaticResource FieldLabel}"/>
-                            <ui:DateBox Text="{Binding From, Mode=TwoWay}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Bis *" Theme="{StaticResource FieldLabel}"/>
-                            <ui:DateBox Text="{Binding To, Mode=TwoWay}"/>
-                        </StackPanel>
-                    </Grid>
-                    <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
-                    <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox Text="{Binding Name, Mode=TwoWay}"/>
-                            <TextBlock Text="PaB-Nr." Theme="{StaticResource FieldLabel}"/>
-                            <TextBox Text="{Binding Pab, Mode=TwoWay}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Steuernummer" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox Text="{Binding TaxNumber, Mode=TwoWay}"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
+                <Expander Header="Eckdaten bearbeiten" Margin="0,0,0,24">
+                    <StackPanel Margin="0,12,0,0">
+                        <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding Label, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Zeitraum" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                        <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Von *" Theme="{StaticResource FieldLabel}"/>
+                                <ui:DateBox Text="{Binding From, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Bis *" Theme="{StaticResource FieldLabel}"/>
+                                <ui:DateBox Text="{Binding To, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                        <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                                <TextBlock Text="PaB-Nr." Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding Pab, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Steuernummer" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding TaxNumber, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Expander>
 
                 <TextBlock Text="Erklärte Umsätze, netto in €" Theme="{StaticResource SectionHeader}"/>
                 <Grid Margin="0,0,0,24" ColumnDefinitions="*,16,*,16,*">
