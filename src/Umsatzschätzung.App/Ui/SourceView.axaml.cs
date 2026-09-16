@@ -1,6 +1,9 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App.Ui;
@@ -21,7 +24,7 @@ public partial class SourceView : UserControl
             {
                 Pages.Children.Add(new Border
                 {
-                    Style = (Style)FindResource("Panel"),
+                    Theme = (ControlTheme)Application.Current!.FindResource("Panel")!,
                     Margin = new Thickness(0, 0, 0, 12),
                     HorizontalAlignment = HorizontalAlignment.Left,
                     Child = new Image { Source = Images.Decode(image), Width = BaseWidth, Stretch = Stretch.Uniform },
@@ -33,7 +36,7 @@ public partial class SourceView : UserControl
                 Text = page.Text ?? "",
                 IsReadOnly = true,
                 TextWrapping = TextWrapping.Wrap,
-                FontFamily = (FontFamily)FindResource("MonoFont"),
+                FontFamily = (FontFamily)Application.Current!.FindResource("MonoFont")!,
                 Width = BaseWidth,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Margin = new Thickness(0, 0, 0, 12),
@@ -43,9 +46,9 @@ public partial class SourceView : UserControl
         Viewer.ScrollToHome();
     }
 
-    void ZoomIn(object sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, ZoomPan.Step);
+    void ZoomIn(object? sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, ZoomPan.Step);
 
-    void ZoomOut(object sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, 1 / ZoomPan.Step);
+    void ZoomOut(object? sender, RoutedEventArgs e) => ZoomPan.ZoomBy(Viewer, 1 / ZoomPan.Step);
 
-    void ZoomReset(object sender, RoutedEventArgs e) => ZoomPan.FitWidth(Viewer);
+    void ZoomReset(object? sender, RoutedEventArgs e) => ZoomPan.FitWidth(Viewer);
 }

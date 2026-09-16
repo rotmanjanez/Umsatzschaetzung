@@ -3,8 +3,6 @@ using Microsoft.Win32;
 
 namespace Umsatzschätzung.App.Platform;
 
-public sealed record Config(string Store, string CaseDir);
-
 public static class RegistryConfig
 {
     static readonly (RegistryKey Hive, string Path)[] Sources =
@@ -15,7 +13,7 @@ public static class RegistryConfig
     ];
 
     public static Config Load() => new(
-        Value("Store") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Umsatzschätzung", "store"),
+        Value("Store") ?? Path.Combine(AppData.Dir, "store"),
         Value("CaseDir") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents", "Umsatzschätzung"));
 
     static string? Value(string name)

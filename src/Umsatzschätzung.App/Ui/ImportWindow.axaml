@@ -1,0 +1,17 @@
+<Window x:Class="Umsatzschätzung.App.Ui.ImportWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
+        x:DataType="ui:ImportJob"
+        Width="440" SizeToContent="Height" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="20,16">
+        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+        <ProgressBar Height="6" Margin="0,12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}"/>
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Eta}" Theme="{StaticResource Muted}" Margin="12,0,0,0"/>
+            <TextBlock Text="{Binding Text}" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+        </DockPanel>
+        <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick"/>
+    </StackPanel>
+</Window>

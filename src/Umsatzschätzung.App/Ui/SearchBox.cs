@@ -1,8 +1,9 @@
 using System.Collections;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
+using Avalonia;
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Collections;
+using Avalonia.Controls;
+using Avalonia.Layout;
 
 namespace Umsatzschätzung.App.Ui;
 
@@ -11,38 +12,39 @@ public sealed class SearchBox : Grid
     readonly TextBox box = new();
     readonly TextBlock hint = new()
     {
-        Text = "  Filtern",
-        FontFamily = new("Segoe Fluent Icons, Segoe MDL2 Assets, Segoe UI"),
+        Text = "  Filtern",
         IsHitTestVisible = false,
         Margin = new Thickness(12, 0, 0, 0),
         VerticalAlignment = VerticalAlignment.Center,
     };
-    ICollectionView? view;
     Func<object, string> text = _ => "";
 
     public SearchBox()
     {
         Width = 220;
-        hint.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
+        hint[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
         Children.Add(box);
         Children.Add(hint);
         box.TextChanged += (_, _) =>
         {
-            hint.Visibility = box.Text == "" ? Visibility.Visible : Visibility.Collapsed;
-            view?.Refresh();
+            hint.IsVisible = box.Text is null or "";
+            View?.Refresh();
         };
     }
+
+    // Avalonia has no ICollectionView: the filtered view is a separate object, so
+    // consumers bind their ItemsSource to View rather than to the source collection.
+    public DataGridCollectionView? View { get; private set; }
 
     public void Attach<T>(IEnumerable<T> items, Func<T, string> text)
     {
         this.text = o => text((T)o);
-        view = CollectionViewSource.GetDefaultView((IEnumerable)items);
-        view.Filter = Match;
+        View = new DataGridCollectionView((IEnumerable)items) { Filter = Match };
     }
 
     bool Match(object item)
     {
-        var terms = box.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var terms = (box.Text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (terms.Length == 0) return true;
         var s = text(item);
         return terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));

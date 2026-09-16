@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
 
@@ -32,9 +34,11 @@ public partial class CasesView : Screen
         InitializeComponent();
         DataContext = model;
         Search.Attach(model.Cases, r => r.Case.Label + " " + r.Period + " " + r.Case.Taxpayer.Name);
+        Grid.ItemsSource = Search.View;
+        Grid.AddHandler(PointerReleasedEvent, RowClicked, RoutingStrategies.Bubble);
     }
 
-    void ShowRules(object sender, RoutedEventArgs e) => Session.ShowRules();
+    void ShowRules(object? sender, RoutedEventArgs e) => Session.ShowRules();
 
     protected override void OnEnter() => _ = Reload();
 
@@ -44,24 +48,24 @@ public partial class CasesView : Screen
         model.Set(resp.Cases);
     });
 
-    void StartNew(object sender, RoutedEventArgs e)
+    void StartNew(object? sender, RoutedEventArgs e)
     {
-        NewPanel.Visibility = Visibility.Visible;
+        NewPanel.IsVisible = true;
         NewLabel.Focus();
     }
 
-    void CancelNew(object sender, RoutedEventArgs e) => NewPanel.Visibility = Visibility.Collapsed;
+    void CancelNew(object? sender, RoutedEventArgs e) => NewPanel.IsVisible = false;
 
-    async void Create(object sender, RoutedEventArgs e)
+    async void Create(object? sender, RoutedEventArgs e)
     {
-        var label = NewLabel.Text.Trim();
-        var from = Input.Date(NewFrom.Text);
-        var to = Input.Date(NewTo.Text);
+        var label = (NewLabel.Text ?? "").Trim();
+        var from = Input.Date(NewFrom.Text ?? "");
+        var to = Input.Date(NewTo.Text ?? "");
         var taxpayer = new Taxpayer
         {
-            Name = NewName.Text.Trim(),
-            TaxNumber = NewTaxNumber.Text.Trim(),
-            PabNumber = NewPab.Text.Trim(),
+            Name = (NewName.Text ?? "").Trim(),
+            TaxNumber = (NewTaxNumber.Text ?? "").Trim(),
+            PabNumber = (NewPab.Text ?? "").Trim(),
         };
         if (label == "" || from is null || to is null)
         {
@@ -77,16 +81,22 @@ public partial class CasesView : Screen
         await Session.Run(async () =>
         {
             var resp = await Session.Service.PutCase(kase, Ct);
-            NewPanel.Visibility = Visibility.Collapsed;
+            NewPanel.IsVisible = false;
             NewLabel.Text = NewFrom.Text = NewTo.Text = "";
             NewName.Text = NewTaxNumber.Text = NewPab.Text = "";
             Session.Open(resp);
         });
     }
 
-    void RowClicked(object sender, MouseButtonEventArgs e) => Open(((DataGridRow)sender).Item as CaseRow);
+    void RowClicked(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton != MouseButton.Left) return;
+        if (e.Source is not Visual source) return;
+        var row = source.GetSelfAndVisualAncestors().OfType<DataGridRow>().FirstOrDefault();
+        if (row is not null) Open(row.DataContext as CaseRow);
+    }
 
-    void GridKeyDown(object sender, KeyEventArgs e)
+    void GridKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter) return;
         e.Handled = true;
@@ -103,13 +113,13 @@ public partial class CasesView : Screen
         });
     }
 
-    async void Delete(object sender, RoutedEventArgs e)
+    async void Delete(object? sender, RoutedEventArgs e)
     {
-        if (((FrameworkElement)sender).DataContext is not CaseRow row) return;
-        var answer = MessageBox.Show(
+        if ((sender as Control)?.DataContext is not CaseRow row) return;
+        var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
             "„" + row.Case.Label + "“ wird mit allen Rechnungen unwiderruflich gelöscht.",
-            "Prüfung löschen", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
-        if (answer != MessageBoxResult.Yes) return;
+            "Prüfung löschen");
+        if (!answer) return;
         await Session.Run(async () =>
         {
             await Session.Service.DeleteCase(row.Case.Id, Ct);
@@ -117,7 +127,7 @@ public partial class CasesView : Screen
         });
     }
 
-    async void Import(object sender, RoutedEventArgs e)
+    async void Import(object? sender, RoutedEventArgs e)
     {
         var files = await Session.PickFiles(Session.CaseFilter, false);
         if (files.Count == 0) return;

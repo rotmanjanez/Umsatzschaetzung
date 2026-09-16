@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.App.Ui;
@@ -220,10 +221,10 @@ public partial class CaseView : Screen
             Session.Fail("Änderungen an der Prüfung konnten nicht gespeichert werden");
     }
 
-    void AddStock(object sender, RoutedEventArgs e) => model.Stock.Add(new StockRow(Session.Ingredients()));
+    void AddStock(object? sender, RoutedEventArgs e) => model.Stock.Add(new StockRow(Session.Ingredients()));
 
-    void RemoveStock(object sender, RoutedEventArgs e)
+    void RemoveStock(object? sender, RoutedEventArgs e)
     {
-        if (((FrameworkElement)sender).DataContext is StockRow row) model.Stock.Remove(row);
+        if ((sender as Control)?.DataContext is StockRow row) model.Stock.Remove(row);
     }
 }

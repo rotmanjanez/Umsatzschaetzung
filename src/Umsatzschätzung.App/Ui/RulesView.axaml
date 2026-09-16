@@ -1,0 +1,268 @@
+<ui:Screen x:Class="Umsatzschätzung.App.Ui.RulesView"
+           xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
+           xmlns:m="clr-namespace:Umsatzschätzung.Model;assembly=Umsatzschätzung.Core"
+           x:DataType="ui:RulesModel"
+           Margin="24">
+    <DockPanel>
+        <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0">
+
+            <TabItem Header="Zutaten">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" MinWidth="260"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="62*" MinWidth="260"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Theme="{StaticResource Panel}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8">
+                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewIngredient"/>
+                                <ui:SearchBox x:Name="IngredientSearch" Width="NaN"/>
+                            </DockPanel>
+                            <DataGrid x:Name="IngredientGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="IngredientSelected">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=ui:IngredientItem}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Einheit" Width="90">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:IngredientItem">
+                                                <TextBlock Text="{Binding UnitLabel}" Theme="{StaticResource Muted}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Kategorie" Width="130">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:IngredientItem">
+                                                <TextBlock Text="{Binding Category}" Theme="{StaticResource Muted}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <Border Theme="{StaticResource Card}" DataContext="{Binding Ingredients}" x:DataType="ui:IngredientForm">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Basiseinheit *" Theme="{StaticResource FieldLabel}"/>
+                                        <ComboBox SelectedIndex="{Binding UnitIndex}">
+                                            <ComboBoxItem Content="Milliliter (ml)"/>
+                                            <ComboBoxItem Content="Gramm (g)"/>
+                                            <ComboBoxItem Content="Stück"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Category, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveIngredient" Margin="0,0,8,0"/>
+                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireIngredient" IsVisible="{Binding Existing}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Produkte">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" MinWidth="260"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="62*" MinWidth="260"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Theme="{StaticResource Panel}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8">
+                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewProduct"/>
+                                <ui:SearchBox x:Name="ProductSearch" Width="NaN"/>
+                            </DockPanel>
+                            <DataGrid x:Name="ProductGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="ProductSelected">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=ui:ProductItem}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Rezept" Width="240">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:ProductItem">
+                                                <TextBlock Text="{Binding Recipe}" Theme="{StaticResource Muted}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <Border Theme="{StaticResource Card}" DataContext="{Binding Products}" x:DataType="ui:ProductForm">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                                <TextBlock Text="Rezept" Theme="{StaticResource SectionHeader}" Margin="0,20,0,4"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="90"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                    <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Recipe}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="ui:RecipeRow">
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"/>
+                                                <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Amount, Mode=TwoWay}"/>
+                                                <Button Grid.Column="2" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" HorizontalAlignment="Right" Click="RemoveRecipeLine">
+                                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveProduct" Margin="0,0,8,0"/>
+                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireProduct" IsVisible="{Binding Existing}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Ertragsregeln">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" MinWidth="260"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="62*" MinWidth="260"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Theme="{StaticResource Panel}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8">
+                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewYield"/>
+                                <ui:SearchBox x:Name="YieldSearch" Width="NaN"/>
+                            </DockPanel>
+                            <DataGrid x:Name="YieldGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="YieldSelected">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Gilt für" Binding="{Binding Title, DataType=ui:YieldItem}" Width="*"/>
+                                    <DataGridTemplateColumn Header="Art" Width="110">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:YieldItem">
+                                                <Grid>
+                                                    <Border Theme="{StaticResource BadgeInfo}" IsVisible="{Binding ForIngredient}">
+                                                        <TextBlock Text="Zutat" Theme="{StaticResource BadgeText}"/>
+                                                    </Border>
+                                                    <Border Theme="{StaticResource Badge}" IsVisible="{Binding ForCategory}">
+                                                        <TextBlock Text="Kategorie" Theme="{StaticResource BadgeText}"/>
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Quelle" Width="160">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:YieldItem">
+                                                <TextBlock Text="{Binding Source}" Theme="{StaticResource Muted}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <Border Theme="{StaticResource Card}" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="2" Content="Standardregel" IsChecked="{Binding IsDefault}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding Category, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
+                                        <ComboBox ItemsSource="{Binding IngredientOptions}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="Kategorie oder Zutat angeben" Theme="{StaticResource FieldLabel}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Schwund * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Shrinkage, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Eigenverbrauch * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding OwnUse, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="4">
+                                        <TextBlock Text="Personal * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Staff, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="6">
+                                        <TextBlock Text="Freigetränke * (in %)" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Free, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="Quelle" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding Source, Mode=TwoWay}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveYield" Margin="0,0,8,0"/>
+                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireYield" IsVisible="{Binding Existing}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</ui:Screen>

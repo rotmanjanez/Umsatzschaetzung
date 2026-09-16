@@ -1,0 +1,37 @@
+<Window x:Class="Umsatzschätzung.App.Ui.Shell"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Umsatzschätzung" Width="1320" Height="860" MinWidth="960" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Theme="{StaticResource StatusBar}">
+            <TextBlock x:Name="StatusText" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+        </Border>
+        <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
+            <DockPanel>
+                <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Theme="{StaticResource ErrorBannerClose}" Click="DismissError"/>
+                <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}"/>
+            </DockPanel>
+        </Border>
+        <Grid>
+            <ContentControl x:Name="CasesHost"/>
+            <DockPanel x:Name="CaseUi" Margin="24,16,24,0" IsVisible="False">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                    <Button DockPanel.Dock="Left" Content="← Prüfungen" Theme="{StaticResource LinkButton}" VerticalAlignment="Center" Margin="0,0,20,0" Click="Back"/>
+                    <Button DockPanel.Dock="Right" Content="Regeln …" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" Click="ShowRules"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="CaseLabel" Theme="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="CasePeriod" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </DockPanel>
+                <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged">
+                    <TabItem Header="Prüfung"/>
+                    <TabItem Header="Rechnungen"/>
+                    <TabItem Header="Zuordnung"/>
+                    <TabItem Header="Kalkulation"/>
+                    <TabItem Header="Bericht"/>
+                </TabControl>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -1,23 +1,43 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <TargetFrameworks>net10.0;net10.0-windows10.0.19041.0</TargetFrameworks>
     <RootNamespace>Umsatzschätzung.App</RootNamespace>
     <AssemblyName>umsatzschätzung</AssemblyName>
-    <UseWPF>true</UseWPF>
     <InvariantGlobalization>false</InvariantGlobalization>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationIcon>Ui/Assets/app.ico</ApplicationIcon>
+    <!-- Views take a Session and are only ever constructed in code, never fetched
+         from the runtime XAML loader by URI, which is all AVLN3001 warns about. -->
+    <NoWarn>AVLN3001</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041.0'">
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Ui/Assets/app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <RuntimeIdentifiers>osx-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Resource Include="Ui/Assets/logo.svg" />
-    <Resource Include="Ui/Assets/logo-256.png" />
+    <AvaloniaResource Include="Ui/Assets/logo.svg" />
+    <AvaloniaResource Include="Ui/Assets/logo-256.png" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../Umsatzschätzung.Core/Umsatzschätzung.Core.csproj" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3485.44" />
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Controls.WebView" Version="12.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net10.0-windows10.0.19041.0'">
+    <Compile Remove="Platform/Windows/**" />
   </ItemGroup>
 </Project>

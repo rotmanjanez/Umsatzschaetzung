@@ -2,7 +2,8 @@ using System.IO;
 using System.Security.Cryptography;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;
-using Microsoft.Win32;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 
 namespace Umsatzschätzung.App.Ui;
 
@@ -10,10 +11,14 @@ public sealed record PickedFile(string Name, byte[] Data);
 
 public sealed class Session : Observable
 {
-    public const string InvoiceFilter = "Rechnungen|*.xml;*.pdf;*.png;*.jpg;*.jpeg;*.tif;*.tiff|Alle Dateien|*.*";
-    public const string CaseFilter = "Prüfung|*.json";
-    public const string PdfFilter = "PDF|*.pdf";
-    public const string CsvFilter = "CSV|*.csv";
+    public static readonly FilePickerFileType[] InvoiceFilter =
+    [
+        new("Rechnungen") { Patterns = ["*.xml", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff"] },
+        new("Alle Dateien") { Patterns = ["*"] },
+    ];
+    public static readonly FilePickerFileType[] CaseFilter = [new("Prüfung") { Patterns = ["*.json"] }];
+    public static readonly FilePickerFileType[] PdfFilter = [new("PDF") { Patterns = ["*.pdf"] }];
+    public static readonly FilePickerFileType[] CsvFilter = [new("CSV") { Patterns = ["*.csv"] }];
 
     string message = "";
     string error = "";
@@ -23,6 +28,9 @@ public sealed class Session : Observable
         Service = service;
         Imports = new Imports(this);
     }
+
+    // Session has no visual of its own; Shell assigns itself so the file pickers have a parent.
+    public TopLevel? Owner { get; set; }
 
     public IService Service { get; }
     public Imports Imports { get; }
@@ -165,11 +173,11 @@ public sealed class Session : Observable
     public string IngredientName(string id) =>
         Rules is not null && Rules.RuleSet.Ingredients.TryGetValue(id, out var i) ? i.Name : "";
 
-    public async Task<List<PickedFile>> PickFiles(string filter, bool multi)
+    public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi)
     {
-        var dialog = new OpenFileDialog { Filter = filter, Multiselect = multi };
-        if (dialog.ShowDialog() != true) return [];
-        return await ReadFiles(dialog.FileNames);
+        if (Owner?.StorageProvider is not { } storage) return [];
+        var picked = await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter });
+        return await ReadFiles(picked.Select(f => f.TryGetLocalPath()).OfType<string>());
     }
 
     public async Task<List<PickedFile>> ReadFiles(IEnumerable<string> paths)
@@ -189,18 +197,20 @@ public sealed class Session : Observable
         return files;
     }
 
-    public async Task SaveFile(string name, byte[] data, string filter)
+    public async Task SaveFile(string name, byte[] data, IReadOnlyList<FilePickerFileType> filter)
     {
-        var dialog = new SaveFileDialog { FileName = name, Filter = filter };
-        if (dialog.ShowDialog() != true) return;
+        if (Owner?.StorageProvider is not { } storage) return;
+        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions { SuggestedFileName = name, FileTypeChoices = filter });
+        if (file is null) return;
         try
         {
-            await File.WriteAllBytesAsync(dialog.FileName, data);
-            Message = "Gespeichert: " + Path.GetFileName(dialog.FileName);
+            await using var stream = await file.OpenWriteAsync();
+            await stream.WriteAsync(data);
+            Message = "Gespeichert: " + file.Name;
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            Fail("Datei konnte nicht gespeichert werden: " + Path.GetFileName(dialog.FileName));
+            Fail("Datei konnte nicht gespeichert werden: " + file.Name);
         }
     }
 }
