@@ -172,6 +172,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
+    public Task<CaseResp> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(() =>
+    {
+        var c = LoadCase(caseId);
+        var i = c.Invoices.FindIndex(x => x.Id == invoiceId);
+        if (i < 0) throw new ServiceError(ErrorCode.NotFound, $"Rechnung \"{invoiceId}\" nicht im Fall \"{caseId}\"");
+        c.Invoices.RemoveAt(i);
+        cases.DeleteFile(caseId, invoiceId);
+        SaveCase(c);
+        return Resp(c);
+    });
+
     public Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct) => Guard(async () =>
     {
         string name;

@@ -175,6 +175,30 @@ public partial class InvoicesView : Screen
         if ((List.SelectedItem as InvoiceRow)?.Id == id) Source.Show(resp, resp?.FileName ?? "Kein Beleg gespeichert.");
     }
 
+    async void Delete(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is not InvoiceRow row || Session.Case is not { } k) return;
+        var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+            "Die Rechnung „" + row.Supplier + " · " + row.Invoice.Number + "“ wird mit dem Beleg unwiderruflich gelöscht.",
+            "Rechnung löschen");
+        if (!answer) return;
+        await Session.Run(async () =>
+        {
+            var resp = await Session.Service.DeleteInvoice(k.Id, row.Id, Ct);
+            Forget(row.Id);
+            Session.SetCase(resp);
+        });
+    }
+
+    void Forget(string id)
+    {
+        sources.Remove(id);
+        Session.Drafts.Remove(id);
+        if (!editors.Remove(id, out var editor)) return;
+        if (verify == editor) SwapVerify(null);
+        else editor.Leave();
+    }
+
     async void AddFiles(object? sender, RoutedEventArgs e)
     {
         StartImport(await Session.PickFiles(Session.InvoiceFilter, true));
