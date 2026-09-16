@@ -83,6 +83,7 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+            <ui:NoResults Search="{Binding #Search}"/>
             <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding ShowEmpty}">
                 <TextBlock Text="Noch keine Prüfungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
                 <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center"

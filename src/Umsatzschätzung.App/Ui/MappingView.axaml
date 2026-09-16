@@ -2,7 +2,6 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
-           xmlns:m="clr-namespace:Umsatzschätzung.Model;assembly=Umsatzschätzung.Core"
            x:DataType="ui:MappingModel"
            Margin="0,12,0,0">
     <DockPanel>
@@ -37,6 +36,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="Alles zugeordnet" Theme="{StaticResource EmptyState}" IsVisible="{Binding Empty}"/>
+                    <ui:NoResults Search="{Binding #Search}"/>
                     </Grid>
                 </DockPanel>
             </Border>
@@ -88,7 +88,7 @@
                                 <Grid ColumnDefinitions="*,16,160">
                                     <StackPanel>
                                         <TextBlock Text="Zutat *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                        <ComboBox ItemsSource="{Binding Ingredients}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+                                        <ui:IngredientBox ItemsSource="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Faktor *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>

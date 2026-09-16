@@ -14,11 +14,18 @@ public static class Format
 
     public static string Date(DateOnly? d) => d is { } x ? $"{x.Day:D2}.{x.Month:D2}.{x.Year:D4}" : "";
 
+    public static string UnitName(Unit u) => u switch
+    {
+        Unit.Ml => "ml",
+        Unit.G => "g",
+        _ => "Stück",
+    };
+
     public static string Qty(long n, Unit u) => u switch
     {
-        Unit.Ml => Math.Abs(n) >= 1000 ? Fixed(n, 3, 0) + " l" : Group(n) + " ml",
-        Unit.G => Math.Abs(n) >= 1000 ? Fixed(n, 3, 0) + " kg" : Group(n) + " g",
-        _ => Group(n) + " Stück",
+        Unit.Ml when Math.Abs(n) >= 1000 => Fixed(n, 3, 0) + " l",
+        Unit.G when Math.Abs(n) >= 1000 => Fixed(n, 3, 0) + " kg",
+        _ => Group(n) + " " + UnitName(u),
     };
 
     public static string Portions(long v) => Group(v) + (Math.Abs(v) == 1 ? " Portion" : " Portionen");

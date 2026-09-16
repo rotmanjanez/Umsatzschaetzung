@@ -19,6 +19,10 @@
         <Style Selector=":is(Control).invalid /template/ Border#PART_BorderElement">
             <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
         </Style>
+        <!-- AutoCompleteBox draws its border in the inner TextBox, out of reach of the selector above. -->
+        <Style Selector="AutoCompleteBox.invalid /template/ TextBox#PART_TextBox">
+            <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+        </Style>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>

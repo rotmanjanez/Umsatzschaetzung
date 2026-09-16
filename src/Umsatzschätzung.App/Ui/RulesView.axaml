@@ -2,7 +2,6 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
-           xmlns:m="clr-namespace:Umsatzschätzung.Model;assembly=Umsatzschätzung.Core"
            x:DataType="ui:RulesModel"
            Margin="24">
     <DockPanel>
@@ -21,11 +20,20 @@
                                 <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewIngredient"/>
                                 <ui:SearchBox x:Name="IngredientSearch" Width="NaN"/>
                             </DockPanel>
-                            <DataGrid x:Name="IngredientGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="IngredientSelected">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=ui:IngredientItem}" Width="*"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                            <Grid>
+                                <DataGrid x:Name="IngredientGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="IngredientSelected">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Name" Width="*" SortMemberPath="Name">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate x:DataType="ui:IngredientItem">
+                                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <ui:NoResults Search="{Binding #IngredientSearch}"/>
+                            </Grid>
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
@@ -35,7 +43,7 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <Border Theme="{StaticResource Card}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
                                     <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
                                     <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
                                     <Grid>
@@ -86,11 +94,20 @@
                                 <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewProduct"/>
                                 <ui:SearchBox x:Name="ProductSearch" Width="NaN"/>
                             </DockPanel>
-                            <DataGrid x:Name="ProductGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="ProductSelected">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=ui:ProductItem}" Width="*"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                            <Grid>
+                                <DataGrid x:Name="ProductGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="ProductSelected">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Name" Width="*" SortMemberPath="Name">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate x:DataType="ui:ProductItem">
+                                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <ui:NoResults Search="{Binding #ProductSearch}"/>
+                            </Grid>
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
@@ -100,7 +117,7 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <Border Theme="{StaticResource Card}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
                                     <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
                                     <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
                                     <TextBlock Text="Rezept *" Theme="{StaticResource SectionHeader}" Margin="0,20,0,4"/>
@@ -111,7 +128,7 @@
                                             <ColumnDefinition Width="90"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                        <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
+                                        <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,48,4"/>
                                     </Grid>
                                     <ItemsControl ItemsSource="{Binding Recipe}">
                                         <ItemsControl.ItemTemplate>
@@ -122,10 +139,14 @@
                                                         <ColumnDefinition Width="180"/>
                                                         <ColumnDefinition Width="90"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"
-                                                              Classes.invalid="{Binding IngredientInvalid}"/>
-                                                    <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Amount, Mode=TwoWay}"
-                                                             Classes.invalid="{Binding AmountInvalid}"/>
+                                                    <ui:IngredientBox ItemsSource="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
+                                                                      Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"/>
+                                                    <DockPanel Grid.Column="1" Margin="8,0,0,0">
+                                                        <TextBlock DockPanel.Dock="Right" Text="{Binding UnitLabel}" Theme="{StaticResource Muted}"
+                                                                   FontSize="12" Width="42" Margin="6,0,0,0"/>
+                                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}"
+                                                                 Classes.invalid="{Binding AmountInvalid}"/>
+                                                    </DockPanel>
                                                     <Button Grid.Column="2" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" HorizontalAlignment="Right" Click="RemoveRecipeLine">
                                                         <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                                     </Button>
@@ -163,11 +184,20 @@
                                 <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewYield"/>
                                 <ui:SearchBox x:Name="YieldSearch" Width="NaN"/>
                             </DockPanel>
-                            <DataGrid x:Name="YieldGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="YieldSelected">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Gilt für" Binding="{Binding Title, DataType=ui:YieldItem}" Width="*"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                            <Grid>
+                                <DataGrid x:Name="YieldGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="YieldSelected">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Gilt für" Width="*" SortMemberPath="Title">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate x:DataType="ui:YieldItem">
+                                                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <ui:NoResults Search="{Binding #YieldSearch}"/>
+                            </Grid>
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
@@ -177,7 +207,7 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <Border Theme="{StaticResource Card}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition/>
@@ -202,8 +232,8 @@
                                         </StackPanel>
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
-                                            <ComboBox ItemsSource="{Binding IngredientOptions}" DisplayMemberBinding="{Binding Name, DataType=m:Ingredient}" SelectedItem="{Binding Ingredient}"
-                                                      Classes.invalid="{Binding ScopeInvalid}"/>
+                                            <ui:IngredientBox ItemsSource="{Binding IngredientOptions}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
+                                                              Classes.invalid="{Binding ScopeInvalid}" HorizontalAlignment="Stretch"/>
                                         </StackPanel>
                                     </Grid>
                                     <TextBlock Text="Kategorie oder Zutat angeben" Theme="{StaticResource FieldLabel}"/>
