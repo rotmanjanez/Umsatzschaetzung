@@ -21,6 +21,12 @@ public partial class ImportWindow : Window
 
     void Tick()
     {
+        if (job.Complete)
+        {
+            timer.Stop();
+            Title = "Import · " + job.Label;
+            return;
+        }
         job.Sample();
         Title = "Import · " + job.Percent + " · " + job.Label;
     }
@@ -31,6 +37,6 @@ public partial class ImportWindow : Window
     {
         base.OnClosed(e);
         timer.Stop();
-        job.Cancel();
+        if (!job.Complete) job.Cancel();
     }
 }

@@ -86,7 +86,7 @@ public sealed class VerifyModel : Observable
 {
     string supplier = "", vatId = "", number = "", date = "", netTotal = "", grossTotal = "";
     string? supplierFlag, numberFlag, dateFlag, netFlag, grossFlag;
-    bool canConfirm;
+    bool canConfirm, confirming;
 
     public string Supplier { get => supplier; set => Set(ref supplier, value); }
     public string VatId { get => vatId; set => Set(ref vatId, value); }
@@ -94,7 +94,10 @@ public sealed class VerifyModel : Observable
     public string Date { get => date; set => Set(ref date, value); }
     public string NetTotal { get => netTotal; set => Set(ref netTotal, value); }
     public string GrossTotal { get => grossTotal; set => Set(ref grossTotal, value); }
-    public bool CanConfirm { get => canConfirm; set => Set(ref canConfirm, value); }
+    public bool CanConfirm { get => canConfirm; set { if (Set(ref canConfirm, value)) Raise(nameof(ConfirmReady)); } }
+    public bool Confirming { get => confirming; set { if (Set(ref confirming, value)) { Raise(nameof(ConfirmReady)); Raise(nameof(ConfirmLabel)); } } }
+    public bool ConfirmReady => canConfirm && !confirming;
+    public string ConfirmLabel => confirming ? "Wird übernommen …" : "Bestätigen";
     public string? SupplierFlag => supplierFlag;
     public bool SupplierFlagged => supplierFlag is not null;
     public string? NumberFlag => numberFlag;
@@ -294,7 +297,7 @@ public partial class VerifyView : Screen
         timer.Stop();
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
         var req = new VerifyReq(Session.Case.Id, Current(), true, false, null, null);
-        Session.Message = "Rechnung wird übernommen …";
+        model.Confirming = true;
         await Session.Run(async () =>
         {
             var v = await Session.Service.VerifyInvoice(req, Ct);
@@ -304,10 +307,10 @@ public partial class VerifyView : Screen
                 Session.Fail("Nicht übernommen, bitte die markierten Werte korrigieren.");
                 return;
             }
-            Session.Message = "Rechnung übernommen";
             Session.Drafts.Remove(v.Invoice.Id);
             onStored(v.Case);
         });
+        model.Confirming = false;
     }
 
     void AddLine(object? sender, RoutedEventArgs e)

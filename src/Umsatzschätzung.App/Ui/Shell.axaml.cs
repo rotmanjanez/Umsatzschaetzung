@@ -35,11 +35,7 @@ public partial class Shell : Window
         session.StatusChanged += RefreshError;
         session.RulesRequested += ShowRules;
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
-        session.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(Session.Message)) RefreshStatus();
-            if (e.PropertyName == nameof(Session.Error)) RefreshError();
-        };
+        session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
         Loaded += async (_, _) =>
         {
             Show(cases);
@@ -57,7 +53,7 @@ public partial class Shell : Window
     void ImportsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         foreach (ImportJob job in e.OldItems ?? Array.Empty<ImportJob>())
-            if (imports.Remove(job, out var window)) window.Close();
+            if (imports.Remove(job, out var window) && job.Summary == "") window.Close();
         foreach (ImportJob job in e.NewItems ?? Array.Empty<ImportJob>())
         {
             var window = new ImportWindow(job);
@@ -130,6 +126,4 @@ public partial class Shell : Window
         ErrorBanner.IsVisible = text != "";
         ErrorClose.IsVisible = session.Error != "";
     }
-
-    void RefreshStatus() => StatusText.Text = session.Message;
 }
