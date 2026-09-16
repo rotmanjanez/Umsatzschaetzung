@@ -24,20 +24,6 @@
                             <DataGrid x:Name="IngredientGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="IngredientSelected">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=ui:IngredientItem}" Width="*"/>
-                                    <DataGridTemplateColumn Header="Einheit" Width="90">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:IngredientItem">
-                                                <TextBlock Text="{Binding UnitLabel}" Theme="{StaticResource Muted}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Kategorie" Width="130">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:IngredientItem">
-                                                <TextBlock Text="{Binding Category}" Theme="{StaticResource Muted}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
@@ -94,13 +80,6 @@
                             <DataGrid x:Name="ProductGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="ProductSelected">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Name" Binding="{Binding Name, DataType=ui:ProductItem}" Width="*"/>
-                                    <DataGridTemplateColumn Header="Rezept" Width="240">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:ProductItem">
-                                                <TextBlock Text="{Binding Recipe}" Theme="{StaticResource Muted}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
@@ -167,27 +146,6 @@
                             <DataGrid x:Name="YieldGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="YieldSelected">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Gilt für" Binding="{Binding Title, DataType=ui:YieldItem}" Width="*"/>
-                                    <DataGridTemplateColumn Header="Art" Width="110">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:YieldItem">
-                                                <Grid>
-                                                    <Border Theme="{StaticResource BadgeInfo}" IsVisible="{Binding ForIngredient}">
-                                                        <TextBlock Text="Zutat" Theme="{StaticResource BadgeText}"/>
-                                                    </Border>
-                                                    <Border Theme="{StaticResource Badge}" IsVisible="{Binding ForCategory}">
-                                                        <TextBlock Text="Kategorie" Theme="{StaticResource BadgeText}"/>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Quelle" Width="160">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:YieldItem">
-                                                <TextBlock Text="{Binding Source}" Theme="{StaticResource Muted}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
