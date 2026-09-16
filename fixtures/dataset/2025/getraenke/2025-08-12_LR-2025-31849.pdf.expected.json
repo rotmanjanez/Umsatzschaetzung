@@ -27,7 +27,7 @@
       "priceBaseQty": 1000,
       "lineNet": 67000,
       "vat": 1900,
-      "expectedIngredientId": "ing.bier.fass",
+      "expectedIngredientId": "ing.fassbier",
       "expectedFactor": 50000
     },
     {
@@ -41,7 +41,7 @@
       "priceBaseQty": 1000,
       "lineNet": 8150,
       "vat": 1900,
-      "expectedIngredientId": "ing.bier.fass",
+      "expectedIngredientId": "ing.fassbier",
       "expectedFactor": 30000
     },
     {
@@ -70,7 +70,7 @@
       "lineNet": 6160,
       "vat": 1900,
       "gtin": "4001234000203",
-      "expectedIngredientId": "ing.bier.flasche",
+      "expectedIngredientId": "ing.flaschenbier",
       "expectedFactor": 10000
     },
     {

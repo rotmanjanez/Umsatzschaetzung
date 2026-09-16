@@ -61,6 +61,7 @@ public sealed class DateBox : Grid
     void ShowCurrent()
     {
         picking = true;
+        calendar.DisplayMode = CalendarMode.Year;
         if (Input.Date(Text) is { } d)
         {
             calendar.DisplayDate = d.ToDateTime(TimeOnly.MinValue);

@@ -95,9 +95,20 @@ var korn = (await svc.Rules(ct)).RuleSet.Products["prod.korn.4cl"];
 korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
 var saved = await svc.SaveRule(korn, ct);
 Check(saved.RuleSet.Version == 1 && saved.RuleSet.Products["prod.korn.4cl"].Meta.Rev == 1, "save bumps version and stamps the entity");
-var water = new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", BaseUnit = Unit.Ml, Category = "Alkoholfrei" };
+var alkoholfrei = new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" };
+Check((await svc.SaveRule(alkoholfrei, ct)).RuleSet.Categories.ContainsKey("cat.alkoholfrei"), "a category is a rule entity of its own");
+var water = new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", BaseUnit = Unit.Ml, CategoryId = "cat.alkoholfrei" };
 var merged = (await svc.SaveRule(water, ct)).RuleSet;
-Check(merged.Version == 2 && merged.Ingredients.ContainsKey("ing.wasser") && merged.Products["prod.korn.4cl"].Meta.ValidTo is not null, "saves accumulate per entity");
+Check(merged.Version == 3 && merged.Ingredients.ContainsKey("ing.wasser") && merged.Products["prod.korn.4cl"].Meta.ValidTo is not null, "saves accumulate per entity");
+try
+{
+    await svc.SaveRule(new Ingredient { Id = "ing.kaputt", Name = "Kaputt", BaseUnit = Unit.G, CategoryId = "cat.fehlt" }, ct);
+    Check(false, "ingredient with a dangling category must be rejected");
+}
+catch (ServiceError e)
+{
+    Check(e.Code == ErrorCode.Invalid, "dangling category rejected with Invalid, got " + e.Code);
+}
 try
 {
     await svc.SaveRule(new Product { Id = "prod.kaputt", Name = "Kaputt", Recipe = [new RecipeLine { IngredientId = "ing.fehlt", Amount = 1 }] }, ct);
@@ -115,7 +126,7 @@ Reopen();
 Check(Directory.GetFiles(snapshots).Length == 1, "second start snapshots the store");
 File.WriteAllText(Path.Combine(store, "rules.db"), "kaputt");
 var restored = Reopen();
-Check(restored.Notice is not null && restored.Load().Version == 2, "corrupt store restored from snapshot");
+Check(restored.Notice is not null && restored.Load().Version == 3, "corrupt store restored from snapshot");
 Check(Directory.GetFiles(store, "rules.db.defekt-*").Length == 1, "corrupt file kept aside");
 
 // Dynamic ranking: a confirmed mapping teaches the wording, and the wording carries

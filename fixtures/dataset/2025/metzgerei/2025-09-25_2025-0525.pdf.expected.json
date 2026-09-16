@@ -139,7 +139,7 @@
       "priceBaseQty": 1000,
       "lineNet": 15252,
       "vat": 700,
-      "expectedIngredientId": "ing.bratwurst",
+      "expectedIngredientId": "ing.bratwurst.kuechenfertig",
       "expectedFactor": 1
     },
     {
@@ -153,7 +153,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1725,
       "vat": 700,
-      "expectedIngredientId": "ing.leberkaese",
+      "expectedIngredientId": "ing.leberkaese.gebacken",
       "expectedFactor": 1000
     }
   ]

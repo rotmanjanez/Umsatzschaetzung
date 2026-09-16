@@ -61,18 +61,16 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding Category, Mode=TwoWay}"/>
+                                        <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
+                                                  DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"/>
+                                        <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
+                                                 IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
                                     </StackPanel>
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveIngredient" Margin="0,0,8,0"/>
-                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireIngredient" IsVisible="{Binding Retirable}"/>
-                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Retired}">
-                                        <TextBlock Text="{Binding RetiredLabel}" Theme="{StaticResource BadgeText}"/>
-                                    </Border>
+                                    <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteIngredient" IsVisible="{Binding Existing}"/>
                                 </StackPanel>
-                                <TextBlock Text="{Binding RetireHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,8,0,0"
-                                           MaxWidth="560" HorizontalAlignment="Left" IsVisible="{Binding Existing}"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
@@ -154,13 +152,8 @@
                                 <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveProduct" Margin="0,0,8,0"/>
-                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireProduct" IsVisible="{Binding Retirable}"/>
-                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Retired}">
-                                        <TextBlock Text="{Binding RetiredLabel}" Theme="{StaticResource BadgeText}"/>
-                                    </Border>
+                                    <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteProduct" IsVisible="{Binding Existing}"/>
                                 </StackPanel>
-                                <TextBlock Text="{Binding RetireHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,8,0,0"
-                                           MaxWidth="560" HorizontalAlignment="Left" IsVisible="{Binding Existing}"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
@@ -170,23 +163,24 @@
             <TabItem Header="Ertragsregeln">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="38*" MinWidth="260"/>
+                        <ColumnDefinition Width="28*" MinWidth="200"/>
                         <ColumnDefinition Width="6"/>
-                        <ColumnDefinition Width="62*" MinWidth="260"/>
+                        <ColumnDefinition Width="30*" MinWidth="200"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="42*" MinWidth="260"/>
                     </Grid.ColumnDefinitions>
                     <Border Theme="{StaticResource Panel}">
                         <DockPanel>
                             <DockPanel DockPanel.Dock="Top" Margin="8">
-                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewYield"/>
                                 <ui:SearchBox x:Name="YieldSearch" Width="NaN"/>
                             </DockPanel>
                             <Grid>
-                                <DataGrid x:Name="YieldGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="YieldSelected">
+                                <DataGrid x:Name="ScopeGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="ScopeSelected">
                                     <DataGrid.Columns>
-                                        <DataGridTemplateColumn Header="Gilt für" Width="*" SortMemberPath="Title">
+                                        <DataGridTemplateColumn Header="Gilt für" Width="*" SortMemberPath="Label">
                                             <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="ui:YieldItem">
-                                                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}"/>
+                                                <DataTemplate x:DataType="ui:ScopeItem">
+                                                    <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}"/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -197,7 +191,36 @@
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <Grid Grid.Column="2" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
+                    <Border Grid.Column="2" Theme="{StaticResource Panel}" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8">
+                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewYield"/>
+                                <TextBlock Text="{Binding ScopeTitle}" Theme="{StaticResource FieldLabel}" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" Margin="2,0,0,0"/>
+                            </DockPanel>
+                            <DataGrid x:Name="RuleGrid" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="YieldSelected"
+                                      ItemsSource="{Binding Rules}">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Regel" Width="*" SortMemberPath="Title">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:YieldItem">
+                                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="" Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:YieldItem">
+                                                <TextBlock Text="{Binding Standard}" Theme="{StaticResource Muted}" FontSize="12"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+                    <GridSplitter Grid.Column="3" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                    <Grid Grid.Column="4" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
                         <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
                                    Text="Links eine Ertragsregel auswählen, um sie zu bearbeiten – oder mit „Neu“ eine neue anlegen."/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
@@ -223,7 +246,10 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding Category, Mode=TwoWay}" Classes.invalid="{Binding ScopeInvalid}"/>
+                                        <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
+                                                  DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch" Classes.invalid="{Binding ScopeInvalid}"/>
+                                        <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
+                                                 IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
@@ -263,13 +289,8 @@
                                 <TextBox Text="{Binding Source, Mode=TwoWay}" Classes.invalid="{Binding SourceInvalid}"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveYield" Margin="0,0,8,0"/>
-                                    <Button Content="Zurückziehen" Theme="{StaticResource DangerLink}" Click="RetireYield" IsVisible="{Binding Retirable}"/>
-                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Retired}">
-                                        <TextBlock Text="{Binding RetiredLabel}" Theme="{StaticResource BadgeText}"/>
-                                    </Border>
+                                    <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteYield" IsVisible="{Binding Existing}"/>
                                 </StackPanel>
-                                <TextBlock Text="{Binding RetireHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,8,0,0"
-                                           MaxWidth="560" HorizontalAlignment="Left" IsVisible="{Binding Existing}"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>

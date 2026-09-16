@@ -5,6 +5,36 @@
            xmlns:model="clr-namespace:Umsatzschätzung.Model;assembly=Umsatzschätzung.Core"
            x:DataType="ui:CaseModel"
            Margin="0,12,0,0">
+    <ui:Screen.Resources>
+        <DataTemplate x:Key="YieldGroupTemplate" x:DataType="ui:YieldKindGroup">
+            <StackPanel Margin="0,0,0,12">
+                <TextBlock Text="{Binding Kind}" Theme="{StaticResource FieldLabel}"/>
+                <ListBox ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                         Background="Transparent" BorderThickness="0" Padding="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="ui:YieldGroupRow">
+                            <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="YieldDetailTemplate" x:DataType="ui:YieldGroupRow">
+            <StackPanel>
+                <TextBlock Text="{Binding Label}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                <ListBox ItemsSource="{Binding Options}" SelectedItem="{Binding Selected, Mode=TwoWay}"
+                         Background="Transparent" BorderThickness="0" Padding="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="ui:RuleOption">
+                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" ToolTip.Tip="{Binding Source}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </DataTemplate>
+    </ui:Screen.Resources>
+
     <DockPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel MaxWidth="960" HorizontalAlignment="Left" Margin="0,0,16,0">
@@ -90,21 +120,18 @@
                     <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddStock" Margin="0,4,0,0"/>
                 </StackPanel>
 
-                <Expander x:Name="More" Header="Weitere Angaben" Margin="0,8,0,16">
+                <Expander x:Name="YieldRules" Header="Ertragsregeln" Margin="0,8,0,16">
                     <StackPanel Margin="0,12,0,0">
-                        <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
-                        <TextBlock Text="Keine Ertragsregeln zur Auswahl" Theme="{StaticResource Muted}" IsVisible="{Binding NoYields}"/>
-                        <ItemsControl ItemsSource="{Binding Yields}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="ui:YieldGroupRow">
-                                    <Grid ColumnDefinitions="260,100,*" Margin="0,0,0,8">
-                                        <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Kind}" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
-                                        <ComboBox Grid.Column="2" ItemsSource="{Binding Rules}" DisplayMemberBinding="{Binding Name, DataType=model:YieldRule}" SelectedItem="{Binding Selected, Mode=TwoWay}" MaxWidth="360" HorizontalAlignment="Left"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding NoYields}"
+                                   Text="Sobald Rechnungen zugeordnet sind, erscheinen hier die Ertragsregeln der betroffenen Kategorien und Zutaten."/>
+                        <Grid ColumnDefinitions="260,24,*" IsVisible="{Binding !NoYields}">
+                            <ItemsControl ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}"/>
+                            <Grid Grid.Column="2">
+                                <TextBlock Theme="{StaticResource EmptyState}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                           IsVisible="{Binding NoDetail}" Text="Links eine Kategorie auswählen."/>
+                                <ContentControl Content="{Binding Detail}" ContentTemplate="{StaticResource YieldDetailTemplate}"/>
+                            </Grid>
+                        </Grid>
                     </StackPanel>
                 </Expander>
             </StackPanel>

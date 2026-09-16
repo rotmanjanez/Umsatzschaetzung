@@ -5,6 +5,7 @@ namespace Umsatzschätzung.Model;
 
 public enum Entity
 {
+    [JsonStringEnumMemberName("category")] Category,
     [JsonStringEnumMemberName("ingredient")] Ingredient,
     [JsonStringEnumMemberName("mapping")] Mapping,
     [JsonStringEnumMemberName("product")] Product,
@@ -38,12 +39,19 @@ public interface IRuleEntity
     Meta Meta { get; set; }
 }
 
+public sealed class Category : IRuleEntity
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public Meta Meta { get; set; } = new();
+}
+
 public sealed class Ingredient : IRuleEntity
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public Unit BaseUnit { get; set; }
-    public string Category { get; set; } = "";
+    public string CategoryId { get; set; } = "";
     public Meta Meta { get; set; } = new();
 }
 
@@ -127,7 +135,7 @@ public static class Match
         foreach (var y in c.Yields)
         {
             if (y.IngredientId == ing.Id && rs.YieldRules.TryGetValue(y.YieldRuleId, out var r)) return (r, true);
-            if (string.IsNullOrEmpty(y.IngredientId) && !string.IsNullOrEmpty(y.Category) && y.Category == ing.Category)
+            if (string.IsNullOrEmpty(y.IngredientId) && !string.IsNullOrEmpty(y.CategoryId) && y.CategoryId == ing.CategoryId)
                 byCategory = y.YieldRuleId;
         }
         if (rs.YieldRules.TryGetValue(byCategory, out var rc)) return (rc, true);
@@ -138,7 +146,7 @@ public static class Match
             var r = rs.YieldRules[id];
             if (!r.Meta.ValidOn(c.PeriodTo)) continue;
             if (r.IngredientId == ing.Id) forIngredient.Add(r);
-            else if (string.IsNullOrEmpty(r.IngredientId) && !string.IsNullOrEmpty(r.Category) && r.Category == ing.Category)
+            else if (string.IsNullOrEmpty(r.IngredientId) && !string.IsNullOrEmpty(r.CategoryId) && r.CategoryId == ing.CategoryId)
                 forCategory.Add(r);
         }
         foreach (var set in new[] { forIngredient, forCategory })
@@ -168,7 +176,7 @@ public sealed class YieldRule : IRuleEntity
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public string? Category { get; set; }
+    public string? CategoryId { get; set; }
     public string? IngredientId { get; set; }
     public long Shrinkage { get; set; }
     public long OwnUse { get; set; }
@@ -183,6 +191,7 @@ public sealed class YieldRule : IRuleEntity
 public sealed class RuleSet
 {
     public long Version { get; set; }
+    public Dictionary<string, Category> Categories { get; set; } = [];
     public Dictionary<string, Ingredient> Ingredients { get; set; } = [];
     public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
     public Dictionary<string, Product> Products { get; set; } = [];
@@ -190,6 +199,7 @@ public sealed class RuleSet
 
     public IRuleEntity? Find(Entity entity, string id) => entity switch
     {
+        Entity.Category => Categories.GetValueOrDefault(id),
         Entity.Ingredient => Ingredients.GetValueOrDefault(id),
         Entity.Mapping => Mappings.GetValueOrDefault(id),
         Entity.Product => Products.GetValueOrDefault(id),
@@ -201,6 +211,7 @@ public sealed class RuleSet
     {
         switch (e)
         {
+            case Category x: Categories[x.Id] = x; break;
             case Ingredient x: Ingredients[x.Id] = x; break;
             case ArticleMapping x: Mappings[x.Id] = x; break;
             case Product x: Products[x.Id] = x; break;
