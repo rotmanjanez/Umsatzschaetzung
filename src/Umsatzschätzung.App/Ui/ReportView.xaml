@@ -3,7 +3,7 @@
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
            xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-           Margin="24">
+           Margin="0,12,0,0">
     <ui:Screen.Resources>
         <BooleanToVisibilityConverter x:Key="Vis"/>
     </ui:Screen.Resources>
