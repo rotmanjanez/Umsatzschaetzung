@@ -86,13 +86,38 @@ nie ein Pixel, und `tools/rapidocr/run.py --max-side` deckelt sie ohnehin vor de
 `--page-mix "letter=38,a5=14,..."` überschreibt die Gewichte, um einen bestehenden,
 reinen A4-Korpus mit `--start` um die anderen Formate zu ergänzen, statt ihn neu zu bauen.
 
-Unter 180 mm Breite streicht `template()` die optionalen Spalten (`NARROW_COLUMNS`): auf
-A5 quetscht eine neunspaltige Tabelle die Betragsspalte so weit, dass ihre Wörter aus der
-Seite laufen und beim Clippen verloren gehen. Die Überlauf-Schleife in `render.build`
-fängt das nicht — sie misst nur die Höhe, nie die Breite. Das Streichen entschärft es,
-behebt es aber nicht ganz: A5 liegt bei ~7 % fehlerhafter Variationen gegen ~1,2 % sonst,
-alles fehlende `lineNet`-Wörter auf zeilenreichen Rechnungen. Wer A5 ernsthaft braucht,
-muss `build()` die Breite messen lassen.
+Schmale Blätter (unter 180 mm: A5 mit 148, B5 mit 176) brauchten drei Anläufe, und die
+Reihenfolge lohnt sich zu kennen, weil die ersten beiden je für erledigt gehalten wurden.
+
+Zuerst fiel auf, dass A5 bei ~7 % fehlerhafter Variationen lag gegen ~1,2 % sonst, immer
+fehlende `lineNet`-Wörter. Ursache: eine neunspaltige Tabelle quetscht auf 148 mm die
+Betragsspalte so weit, dass ihre Wörter seitlich aus der Seite laufen. `overflow:hidden`
+schneidet sie ab, die DOM-Sonde meldet sie trotzdem — sie stehen dann in der Wahrheit,
+aber nicht im Bild. Die Überlauf-Schleife in `render.build` fing das nicht, weil sie nur
+die Höhe maß. Jetzt meldet die Sonde auch `hoverflow`, und `build()` verkleinert Schrift
+und Zellenabstand, bis die Zeile passt.
+
+Danach blieben Restfälle, in denen die Meta-Tabelle über den *linken* Rand lief: sie sitzt
+auf `justify-content:flex-end`, läuft also nach links aus und hat negative x-Werte, die
+eine Prüfung nur gegen die rechte Kante nicht sieht. `hoverflow` misst seither beides.
+
+Die letzten 3,5 % waren `meta_style:"row"` auf A5 — bei 5,6 pt, dem Schriftboden, immer
+noch zu breit. Die Überlauflogik arbeitete korrekt und verkleinerte bis zum Anschlag; das
+Layout ist auf 148 mm schlicht nicht darstellbar. `template()` schließt `"row"` auf
+schmalen Seiten deshalb aus.
+
+`NARROW_COLUMNS` streicht heute nur noch, was auch gedruckt keinen Sinn ergibt (GTIN neben
+der Artikelnummer, Bemessungsgrundlage). Artikelnummer und MwSt-Spalte bleiben. Sie waren
+anfangs mitgestrichen — als grober erster Fix, bevor `build()` die Breite messen konnte —
+und das kostete A5/B5 *jede* `articleId`-Supervision: 0,00 statt 2,06 Wörter je Seite auf
+10,9 % des Korpus. Das ist kein Fehler in der Wahrheit, die Seiten sind in sich stimmig;
+es bringt dem Tagger aber bei, dass eine schmale Seite keine Artikelnummer trägt, und eine
+echte A5-Rechnung mit Artikelspalte fällt ihm dann um. Gestrichene Spalten sind billig zu
+übersehen, weil nichts auffällt: `validate.py` ist zufrieden, erst eine Feldabdeckung je
+Format zeigt die Null.
+
+Mit allen drei Korrekturen: 1400 Rechnungen, 14 000 Variationen über alle sieben Formate,
+0 Beanstandungen.
 
 **Alignment and spacing.** Per-column right/left/centre alignment, varying cell padding
 and leading, and a narrow-table mode that wraps the article name onto a second row.
