@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import money
+import sizes
 import vocab
 
 sys.path[:0] = [str(Path(__file__).resolve().parent.parent)]
@@ -45,7 +46,7 @@ def abbreviate(rng, name):
     return text.upper() if rng.random() < 0.6 else text
 
 
-def article_name(rng, cat, opaque_share=0.0):
+def article_name(rng, cat, opaque_share=0.0, category=None):
     if rng.random() < opaque_share:
         return opaque_name(rng)
     base = rng.choice(cat["bases"])
@@ -54,8 +55,8 @@ def article_name(rng, cat, opaque_share=0.0):
         v = rng.choice(cat["variants"])
         if v:
             parts.append(v)
-    if rng.random() < 0.6:
-        parts.append(rng.choice(cat["sizes"]))
+    if rng.random() < 0.7:
+        parts.append(sizes.phrase(rng, cat, category))
     name = " ".join(parts)
     return abbreviate(rng, name) if rng.random() < 0.18 else name
 
@@ -173,7 +174,7 @@ def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share):
         net = money.line_net(quantity, unit_price, base_qty)
         lines.append({
             "no": no,
-            "name": article_name(rng, cat, opaque_share),
+            "name": article_name(rng, cat, opaque_share, category),
             "sellerArticleId": article_id(rng) if rng.random() < 0.85 else None,
             "gtin": gtin(rng) if rng.random() < 0.2 else None,
             "quantity": quantity,
