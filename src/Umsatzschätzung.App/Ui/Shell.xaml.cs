@@ -1,5 +1,8 @@
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Shell;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App.Ui;
@@ -9,7 +12,7 @@ public partial class Shell : Window
     readonly Session session;
     readonly CasesView cases;
     readonly Screen[] screens;
-    readonly RadioButton[] buttons;
+    readonly Dictionary<ImportJob, ImportWindow> imports = [];
     Screen? current;
     RulesWindow? rules;
 
@@ -17,8 +20,9 @@ public partial class Shell : Window
     {
         InitializeComponent();
         session = new Session(service);
-        ImportList.ItemsSource = session.Imports.Jobs;
+        session.Imports.Jobs.CollectionChanged += ImportsChanged;
         cases = new CasesView(session);
+        CasesHost.Content = cases;
         screens =
         [
             new CaseView(session),
@@ -27,7 +31,7 @@ public partial class Shell : Window
             new CalcView(session),
             new ReportView(session),
         ];
-        buttons = [NavCase, NavInvoices, NavMapping, NavCalc, NavReport];
+        for (var i = 0; i < screens.Length; i++) ((TabItem)Tabs.Items[i]).Content = screens[i];
         session.CaseOpened += OpenCase;
         session.CaseChanged += RefreshContext;
         session.StatusChanged += RefreshError;
@@ -51,7 +55,34 @@ public partial class Shell : Window
         };
     }
 
-    void CancelImport(object sender, RoutedEventArgs e) => ((ImportJob)((Button)sender).DataContext).Cancel();
+    void ImportsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        foreach (ImportJob job in e.OldItems ?? Array.Empty<ImportJob>())
+        {
+            job.PropertyChanged -= ImportProgressed;
+            if (imports.Remove(job, out var window)) window.Close();
+        }
+        foreach (ImportJob job in e.NewItems ?? Array.Empty<ImportJob>())
+        {
+            var window = new ImportWindow(job) { Owner = this };
+            imports[job] = window;
+            job.PropertyChanged += ImportProgressed;
+            window.Show();
+        }
+        RefreshTaskbar();
+    }
+
+    void ImportProgressed(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ImportJob.Fraction)) RefreshTaskbar();
+    }
+
+    void RefreshTaskbar()
+    {
+        var jobs = session.Imports.Jobs;
+        Taskbar.ProgressState = jobs.Count == 0 ? TaskbarItemProgressState.None : TaskbarItemProgressState.Normal;
+        Taskbar.ProgressValue = jobs.Count == 0 ? 0 : jobs.Average(j => j.Fraction);
+    }
 
     void ShowRules(object sender, RoutedEventArgs e) => ShowRules();
 
@@ -72,21 +103,20 @@ public partial class Shell : Window
         session.Error = "";
         current?.Leave();
         current = screen;
-        Body.Content = screen;
         screen.Enter();
     }
 
-    void NavChecked(object sender, RoutedEventArgs e)
+    void TabChanged(object sender, SelectionChangedEventArgs e)
     {
-        var i = Array.IndexOf(buttons, (RadioButton)sender);
-        if (i >= 0) Show(screens[i]);
+        if (e.OriginalSource == Tabs && Tabs.SelectedIndex >= 0 && CaseUi.IsVisible) Show(screens[Tabs.SelectedIndex]);
     }
 
     void OpenCase(CaseResp resp)
     {
         RefreshContext();
-        Nav.Visibility = Visibility.Visible;
-        buttons[0].IsChecked = true;
+        CasesHost.Visibility = Visibility.Collapsed;
+        CaseUi.Visibility = Visibility.Visible;
+        Tabs.SelectedIndex = 0;
         Show(screens[0]);
     }
 
@@ -95,8 +125,8 @@ public partial class Shell : Window
         current?.Leave();
         current = null;
         session.CloseCase();
-        Nav.Visibility = Visibility.Collapsed;
-        foreach (var b in buttons) b.IsChecked = false;
+        CaseUi.Visibility = Visibility.Collapsed;
+        CasesHost.Visibility = Visibility.Visible;
         Title = "Umsatzschätzung";
         Show(cases);
     }

@@ -16,6 +16,8 @@ public sealed class ImportJob(string caseId, string label) : Observable
     public Queue<PickedFile> Queue { get; } = new();
     public CancellationToken Ct => cts.Token;
 
+    public ImportProgress Progress { get; } = new();
+
     public int Stored { get; set; }
     public int Drafts { get; set; }
     public List<string> Failed { get; } = [];
@@ -30,7 +32,29 @@ public sealed class ImportJob(string caseId, string label) : Observable
         ? Math.Min(Done + 1, Total) + " von " + Total + " · " + File
         : "Wartet · " + Total + (Total == 1 ? " Datei" : " Dateien");
 
+    public double Fraction => Progress.Fraction;
+
+    public string Percent => Math.Floor(Progress.Fraction * 100) + " %";
+
+    public string Eta => Running ? Left(Progress.Remaining) : "";
+
+    public void Sample()
+    {
+        Progress.Sample();
+        Raise(nameof(Fraction));
+        Raise(nameof(Percent));
+        Raise(nameof(Eta));
+    }
+
     public void Cancel() => cts.Cancel();
+
+    static string Left(TimeSpan span) => span.TotalSeconds switch
+    {
+        < 12 => "noch wenige Sekunden",
+        < 60 => "noch etwa " + (int)Math.Round(span.TotalSeconds / 5) * 5 + " Sekunden",
+        < 120 => "noch etwa eine Minute",
+        _ => "noch etwa " + (int)Math.Round(span.TotalMinutes) + " Minuten",
+    };
 }
 
 public sealed class Imports
@@ -56,6 +80,7 @@ public sealed class Imports
         }
         foreach (var f in files) job.Queue.Enqueue(f);
         job.Total += files.Count;
+        job.Progress.Plan(files.Count);
         if (!pumping) _ = Pump();
     }
 
@@ -100,6 +125,7 @@ public sealed class Imports
             {
                 job.Failed.Add(file.Name + ": " + ex.Message);
             }
+            job.Progress.EndFile();
             job.Done++;
         }
         job.Running = false;
@@ -108,6 +134,7 @@ public sealed class Imports
 
     async Task Import(ImportJob job, PickedFile file)
     {
+        job.Progress.Begin(ImportStage.Parse);
         var parsed = await session.Service.ParseInvoice(job.CaseId, file.Name, file.Data, job.Ct);
         if (!parsed.NeedsOcr)
         {
@@ -115,7 +142,9 @@ public sealed class Imports
             job.Stored++;
             return;
         }
+        job.Progress.Begin(ImportStage.Ocr);
         var ocr = await session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct);
+        job.Progress.Begin(ImportStage.Verify);
         var v = await session.Service.VerifyInvoice(new VerifyReq(job.CaseId, ocr.Draft, false, true, file.Name, file.Data), job.Ct);
         session.Drafts[v.Invoice.Id] = ocr;
         Adopt(job, v.Case);

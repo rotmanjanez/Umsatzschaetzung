@@ -3,52 +3,38 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Umsatzschätzung" Width="1320" Height="860" MinWidth="960" MinHeight="600"
         WindowStartupLocation="CenterScreen">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="Taskbar"/>
+    </Window.TaskbarItemInfo>
     <DockPanel>
         <Border DockPanel.Dock="Bottom" Style="{StaticResource StatusBar}">
             <TextBlock x:Name="StatusText" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
         </Border>
-        <ItemsControl x:Name="ImportList" DockPanel.Dock="Bottom">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Style="{StaticResource Banner}" Background="{StaticResource InfoSoftBrush}" Margin="12,0,12,6">
-                        <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="Abbrechen" Style="{StaticResource LinkButton}" Click="CancelImport"/>
-                            <ProgressBar DockPanel.Dock="Right" Width="160" Height="6" Margin="12,0" VerticalAlignment="Center" Maximum="{Binding Total}" Value="{Binding Done, Mode=OneWay}"/>
-                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" Margin="0,0,10,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="220"/>
-                            <TextBlock Text="{Binding Text}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                        </DockPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <Border x:Name="Nav" DockPanel.Dock="Left" Width="220" Background="{StaticResource NavBrush}" Visibility="Collapsed">
+        <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Style="{StaticResource ErrorBanner}" Visibility="Collapsed">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Top" Margin="20,20,20,16">
-                    <TextBlock Text="Umsatzschätzung" Style="{StaticResource NavBrand}"/>
-                    <TextBlock x:Name="CaseLabel" Style="{StaticResource NavContext}"/>
-                    <TextBlock x:Name="CasePeriod" Style="{StaticResource NavContextSub}"/>
-                </StackPanel>
-                <StackPanel DockPanel.Dock="Bottom" Margin="12">
-                    <Button Content="Regeln …" Style="{StaticResource NavBack}" Click="ShowRules"/>
-                    <Button Content="← Prüfungen" Style="{StaticResource NavBack}" Click="Back"/>
-                </StackPanel>
-                <StackPanel Margin="12,0">
-                    <RadioButton x:Name="NavCase" Content="Prüfung" Style="{StaticResource NavButton}" Checked="NavChecked"/>
-                    <RadioButton x:Name="NavInvoices" Content="Rechnungen" Style="{StaticResource NavButton}" Checked="NavChecked"/>
-                    <RadioButton x:Name="NavMapping" Content="Zuordnung" Style="{StaticResource NavButton}" Checked="NavChecked"/>
-                    <RadioButton x:Name="NavCalc" Content="Kalkulation" Style="{StaticResource NavButton}" Checked="NavChecked"/>
-                    <RadioButton x:Name="NavReport" Content="Bericht" Style="{StaticResource NavButton}" Checked="NavChecked"/>
-                </StackPanel>
+                <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Style="{StaticResource ErrorBannerClose}" Click="DismissError"/>
+                <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorBannerText}"/>
             </DockPanel>
         </Border>
-        <DockPanel>
-            <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Style="{StaticResource ErrorBanner}" Visibility="Collapsed">
-                <DockPanel>
-                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Style="{StaticResource ErrorBannerClose}" Click="DismissError"/>
-                    <TextBlock x:Name="ErrorText" Style="{StaticResource ErrorBannerText}"/>
+        <Grid>
+            <ContentControl x:Name="CasesHost"/>
+            <DockPanel x:Name="CaseUi" Margin="24,16,24,0" Visibility="Collapsed">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                    <Button DockPanel.Dock="Left" Content="← Prüfungen" Style="{StaticResource LinkButton}" VerticalAlignment="Center" Margin="0,0,20,0" Click="Back"/>
+                    <Button DockPanel.Dock="Right" Content="Regeln …" Style="{StaticResource SecondaryButton}" VerticalAlignment="Center" Click="ShowRules"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="CaseLabel" Style="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="CasePeriod" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
                 </DockPanel>
-            </Border>
-            <ContentControl x:Name="Body"/>
-        </DockPanel>
+                <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged">
+                    <TabItem Header="Prüfung"/>
+                    <TabItem Header="Rechnungen"/>
+                    <TabItem Header="Zuordnung"/>
+                    <TabItem Header="Kalkulation"/>
+                    <TabItem Header="Bericht"/>
+                </TabControl>
+            </DockPanel>
+        </Grid>
     </DockPanel>
 </Window>
