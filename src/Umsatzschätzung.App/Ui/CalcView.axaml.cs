@@ -194,7 +194,8 @@ public partial class CalcView : Screen
         model.Revenue.Clear();
         foreach (var r in d.Revenue) model.Revenue.Add(r);
         model.Summary.Clear();
-        foreach (var kv in d.Summary) model.Summary.Add(kv);
+        foreach (var kv in d.Summary)
+            if (kv.Key != "calculatedRevenueNet") model.Summary.Add(kv);
         model.Roots.Clear();
         model.Roots.Add(d.Root);
         model.Node = null;

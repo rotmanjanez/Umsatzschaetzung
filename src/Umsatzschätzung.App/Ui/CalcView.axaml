@@ -73,7 +73,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="aktiv" Width="60">
+                                <DataGridTemplateColumn Header="Aktiv" Width="90">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ProductRowModel">
                                             <CheckBox IsChecked="{Binding Active, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -151,35 +151,6 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <TextBlock Text="Rechenweg" Theme="{StaticResource SectionHeader}"/>
-                    <Grid Height="440" Margin="0,0,0,16" ColumnDefinitions="3*,6,2*">
-                        <Border Theme="{StaticResource Panel}">
-                            <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectionChanged="NodeSelected" BorderThickness="0" Background="Transparent"/>
-                        </Border>
-                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                        <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
-                            <Grid>
-                                <TextBlock Text="Kein Rechenschritt gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoNode}"/>
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasNode}">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Node.Label}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Node.Value}" Theme="{StaticResource Number}" HorizontalAlignment="Left" FontSize="20" Margin="0,0,0,12"/>
-                                        <TextBlock Text="Formel" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBlock Text="{Binding Node.Formula}" FontFamily="{StaticResource MonoFont}" TextWrapping="Wrap"/>
-                                        <TextBlock Text="Quellen" Theme="{StaticResource FieldLabel}"/>
-                                        <ItemsControl ItemsSource="{Binding Node.Sources}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate x:DataType="x:String">
-                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-                                </ScrollViewer>
-                            </Grid>
-                        </Border>
-                    </Grid>
-
                     <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
                     <ItemsControl Margin="0,0,0,16" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
                         <ItemsControl.ItemTemplate>
@@ -195,6 +166,36 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <Expander Header="Rechenweg" Margin="0,0,0,16">
+                        <Grid Height="440" Margin="0,8,0,0" ColumnDefinitions="3*,6,2*">
+                            <Border Theme="{StaticResource Panel}">
+                                <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectionChanged="NodeSelected" BorderThickness="0" Background="Transparent"/>
+                            </Border>
+                            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                            <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
+                                <Grid>
+                                    <TextBlock Text="Kein Rechenschritt gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoNode}"/>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasNode}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Node.Label}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Node.Value}" Theme="{StaticResource Number}" HorizontalAlignment="Left" FontSize="20" Margin="0,0,0,12"/>
+                                            <TextBlock Text="Formel" Theme="{StaticResource FieldLabel}"/>
+                                            <TextBlock Text="{Binding Node.Formula}" FontFamily="{StaticResource MonoFont}" TextWrapping="Wrap"/>
+                                            <TextBlock Text="Quellen" Theme="{StaticResource FieldLabel}"/>
+                                            <ItemsControl ItemsSource="{Binding Node.Sources}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="x:String">
+                                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Expander>
                 </StackPanel>
             </ScrollViewer>
         </Grid>
