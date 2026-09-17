@@ -24,6 +24,8 @@ public sealed class IngredientBox : AutoCompleteBox
     public static IReadOnlyDictionary<string, string>? GetCategoryNames(Control target) =>
         target.GetValue(CategoryNamesProperty);
 
+    protected override Type StyleKeyOverride => typeof(AutoCompleteBox);
+
     public IngredientBox()
     {
         FilterMode = AutoCompleteFilterMode.Custom;
