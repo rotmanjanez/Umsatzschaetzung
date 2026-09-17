@@ -20,7 +20,9 @@ public enum Role
     Carry,
 }
 
-public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row);
+// Conf is the winning class's softmax probability, as tools/train/predict.py dumps it; a word
+// that carries none counts as 1.
+public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row, float Conf = 1f);
 
 // Model B: the LiLT layout stream with GottBERT as its text side, exported to int8 ONNX.
 // One page of OCR words in, one label and one row role per word out. docs/models.md §2.
@@ -34,7 +36,6 @@ public sealed class Tagger : IDisposable
     const int Overlap = 128;
     const int MaxRows = 96;
     const int BoxBins = 1024;
-    const int Labels = 13;
     const int Roles = 9;
 
     // Eight threads measured 2.3x slower than four on an M1 Pro: the scheduler puts the
@@ -75,8 +76,18 @@ public sealed class Tagger : IDisposable
         }
     }
 
+    // 13 for a checkpoint predating the header label classes, 19 with them.
+    static int LabelCount(InferenceSession session)
+    {
+        var dims = session.OutputMetadata["word_logits"].Dimensions;
+        var n = dims[^1];
+        if (n <= 0) throw new InvalidOperationException("Das Belegerkennungsmodell gibt die Klassenzahl nicht an.");
+        return n;
+    }
+
     static List<TaggedWord> Run(InferenceSession session, Bpe bpe, IReadOnlyList<OcrWord> words, int width, int height)
     {
+        var labels = LabelCount(session);
         var rows = Rows.GroupRows(words);
         var ordered = new List<(OcrWord Word, int Row)>();
         for (var r = 0; r < rows.Count; r++)
@@ -105,7 +116,7 @@ public sealed class Tagger : IDisposable
 
         // Overlapping windows are summed rather than averaged: every class at one
         // position shares the same window count, so argmax is unaffected.
-        var wordAcc = new float[ids.Count * Labels];
+        var wordAcc = new float[ids.Count * labels];
         var role = new Dictionary<int, float[]>();
 
         var body = MaxLen - 2;
@@ -113,25 +124,26 @@ public sealed class Tagger : IDisposable
         for (var s = 0; s < ids.Count; s += step)
         {
             var e = Math.Min(s + body, ids.Count);
-            Window(session, bpe, ids, boxes, rowOf, s, e, wordAcc, role);
+            Window(session, bpe, ids, boxes, rowOf, s, e, wordAcc, role, labels);
             if (e == ids.Count) break;
         }
 
         var tagged = new List<TaggedWord>(kept.Count);
         for (var i = 0; i < kept.Count; i++)
         {
-            var label = ArgMax(wordAcc, starts[i] * Labels, Labels);
+            var label = ArgMax(wordAcc, starts[i] * labels, labels);
             tagged.Add(new TaggedWord(
                 kept[i].Word,
                 label == 0 ? null : (Field)(label - 1),
                 role.TryGetValue(kept[i].Row, out var acc) ? (Role)ArgMax(acc, 0, Roles) : Role.LineItem,
-                kept[i].Row));
+                kept[i].Row,
+                Softmax(wordAcc, starts[i] * labels, labels, label)));
         }
         return tagged;
     }
 
     static void Window(InferenceSession session, Bpe bpe, List<int> ids, List<int[]> boxes, List<int> rowOf,
-                       int from, int to, float[] wordAcc, Dictionary<int, float[]> role)
+                       int from, int to, float[] wordAcc, Dictionary<int, float[]> role, int labels)
     {
         var n = to - from + 2;
         var input = new DenseTensor<long>([1, n]);
@@ -157,8 +169,8 @@ public sealed class Tagger : IDisposable
 
         for (var i = from; i < to; i++)
         {
-            var at = (i - from + 1) * Labels;
-            for (var c = 0; c < Labels; c++) wordAcc[i * Labels + c] += wordLogits[at + c];
+            var at = (i - from + 1) * labels;
+            for (var c = 0; c < labels; c++) wordAcc[i * labels + c] += wordLogits[at + c];
         }
 
         // The exported role head runs per token; it is affine, so averaging its logits over
@@ -212,5 +224,13 @@ public sealed class Tagger : IDisposable
         for (var i = 1; i < count; i++)
             if (values[offset + i] > values[offset + best]) best = i;
         return best;
+    }
+
+    static float Softmax(float[] values, int offset, int count, int index)
+    {
+        var max = values[offset + ArgMax(values, offset, count)];
+        double sum = 0;
+        for (var i = 0; i < count; i++) sum += Math.Exp(values[offset + i] - max);
+        return (float)(Math.Exp(values[offset + index] - max) / sum);
     }
 }

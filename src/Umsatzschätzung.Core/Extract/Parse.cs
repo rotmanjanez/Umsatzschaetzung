@@ -78,10 +78,25 @@ public static class Parse
         return parts.Skip(1).All(p => p.Length == 3);
     }
 
-    // German OCR cells, not clean tokens: a rate or an amount arrives wrapped in whatever
-    // the scan put next to it ("*12,51", ".0,68", "1.234,50 EUR"), so the number is searched
-    // for rather than required to be the whole string.
-    static readonly Regex NumberRx = new(@"-?\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?");
+    // The grouped-thousands branch must require a separator group: alternation is leftmost-
+    // first, so with `*` it matched the "78" of "78.49" and read 78,00. `;` and `:` are
+    // separators because that is what the heavier scan profiles turn a comma into.
+    static readonly Regex NumberRx =
+        new(@"-?\d{1,3}(?:[.\s;:]\d{3})+(?:[.,;:]\d+)?|-?\d+(?:[.,;:]\d+)?");
+
+    static readonly Regex Separator = new(@"[.,;:\s]");
+
+    // German grouping is always three digits, so a final group of exactly two is the cents
+    // whatever precedes it: `24.332.16` is 24 332,16, not 24 332.
+    static bool IsDecimal(string[] groups, string matched)
+    {
+        if (groups.Length < 2) return false;
+        var seps = Separator.Matches(matched);
+        var last = seps[^1].Value[0];
+        return last is ',' or ';' or ':'
+            || groups[^1].Length == 2
+            || (groups.Length == 2 && groups[^1].Length != 3);
+    }
 
     public static long Number(string s, int scale)
     {
@@ -91,15 +106,14 @@ public static class Parse
         t = t.Trim('-').Trim();
         var hit = NumberRx.Match(t);
         if (!hit.Success) return 0;
-        var text = hit.Value;
 
-        if (text.Contains(','))
-            text = text.Replace(".", "").Replace(" ", "").Replace(',', '.');
-        else if (text.Count(c => c == '.') != 1 || text[(text.IndexOf('.') + 1)..].Length == 3)
-            text = text.Replace(".", "").Replace(" ", "");
+        var matched = hit.Value;
+        var groups = Separator.Split(matched.TrimStart('-'));
+        var text = IsDecimal(groups, matched)
+            ? string.Concat(groups[..^1]) + "." + groups[^1]
+            : string.Concat(groups);
 
-        if (!decimal.TryParse(text, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
-                CultureInfo.InvariantCulture, out var v))
+        if (!decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var v))
             return 0;
         try
         {
@@ -131,9 +145,40 @@ public static class Parse
         "juli", "august", "september", "oktober", "november", "dezember",
     ];
 
-    public static DateOnly? Date(string s)
+    static readonly Dictionary<char, char> DateDigits = new()
     {
-        s = s.Trim();
+        ['O'] = '0', ['o'] = '0', ['I'] = '1', ['l'] = '1', ['|'] = '1',
+    };
+
+    static readonly Regex DateShape = new(@"^[\dOoIl|]{1,2}[.\-/][\dOoIl|]{1,2}[.\-/][\dOoIl|]{2,4}$");
+
+    // Second attempt only, so a date that already reads is never touched. A month is repaired
+    // only where exactly one of the twelve is one character away: `0ktober` comes back, `Ju1i`
+    // — one from both juli and juni — does not.
+    static string Unconfuse(string s)
+    {
+        var tokens = s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i < tokens.Length; i++)
+        {
+            var tok = tokens[i];
+            if (DateShape.IsMatch(tok))
+            {
+                tokens[i] = string.Concat(tok.Select(c => DateDigits.GetValueOrDefault(c, c)));
+                continue;
+            }
+            var bare = tok.Trim('.', ',', ';', ':').ToLowerInvariant();
+            if (bare.Length <= 2) continue;
+            var near = Months.Where(m => m.Length == bare.Length
+                && m.Zip(bare).Count(p => p.First != p.Second) == 1).ToList();
+            if (near.Count == 1) tokens[i] = near[0];
+        }
+        return string.Join(" ", tokens);
+    }
+
+    public static DateOnly? Date(string s) => Read(s.Trim()) ?? Read(Unconfuse(s.Trim()));
+
+    static DateOnly? Read(string s)
+    {
         foreach (var (rx, y, m, d) in DatePatterns)
         {
             var hit = rx.Match(s);

@@ -60,6 +60,15 @@ public enum Field
     [JsonStringEnumMemberName("supplier")] Supplier,
     [JsonStringEnumMemberName("netTotal")] NetTotal,
     [JsonStringEnumMemberName("grossTotal")] GrossTotal,
+
+    // In the order of FIELDS in tools/train/schema.py; the value ids are unchanged so a 13-way
+    // checkpoint still decodes.
+    [JsonStringEnumMemberName("numberLabel")] NumberLabel,
+    [JsonStringEnumMemberName("dateLabel")] DateLabel,
+    [JsonStringEnumMemberName("netLabel")] NetLabel,
+    [JsonStringEnumMemberName("grossLabel")] GrossLabel,
+    [JsonStringEnumMemberName("vatLabel")] VatLabel,
+    [JsonStringEnumMemberName("otherLabel")] OtherLabel,
 }
 
 public sealed record Box(int X, int Y, int W, int H);
