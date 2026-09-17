@@ -10,6 +10,13 @@
         <Style Selector="Border.flagged">
             <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
         </Style>
+        <Style Selector="Rectangle.flagged">
+            <Setter Property="Stroke" Value="{DynamicResource WarningBrush}"/>
+            <Setter Property="Fill" Value="{DynamicResource WarningSoftBrush}"/>
+            <Setter Property="StrokeThickness" Value="2"/>
+            <Setter Property="RadiusX" Value="3"/>
+            <Setter Property="RadiusY" Value="3"/>
+        </Style>
     </ui:Screen.Styles>
     <Grid>
         <Grid.ColumnDefinitions>
