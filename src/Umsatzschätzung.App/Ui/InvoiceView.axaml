@@ -1,0 +1,231 @@
+<ui:Screen x:Class="Umsatzschätzung.App.Ui.InvoiceView"
+           xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
+           x:DataType="ui:InvoiceModel">
+    <ui:Screen.Styles>
+        <Style Selector="TextBox.flagged /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
+        </Style>
+        <Style Selector="Border.flagged">
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
+        </Style>
+        <Style Selector="Rectangle.flagged">
+            <Setter Property="Stroke" Value="{DynamicResource WarningBrush}"/>
+            <Setter Property="Fill" Value="{DynamicResource WarningSoftBrush}"/>
+            <Setter Property="StrokeThickness" Value="2"/>
+            <Setter Property="RadiusX" Value="3"/>
+            <Setter Property="RadiusY" Value="3"/>
+        </Style>
+        <Style Selector="Border#State.auto">
+            <Setter Property="Background" Value="{DynamicResource InfoSoftBrush}"/>
+        </Style>
+        <Style Selector="Border#State.manual">
+            <Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}"/>
+        </Style>
+        <Style Selector="Border#State.pending">
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
+        </Style>
+        <Style Selector="Border.cell">
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+    </ui:Screen.Styles>
+    <Grid RowDefinitions="11*,6,9*">
+        <Border Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
+                    <Border x:Name="State" Theme="{StaticResource Badge}" Margin="12,0,0,0"
+                            Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">
+                        <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}"/>
+                    </Border>
+                    <TextBlock Text="Rechnung" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
+                </DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <Grid ColumnDefinitions="*,12,*,12,*">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Lieferant" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="SupplierBox" Text="{Binding Supplier, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Rechnungsnummer" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="NumberBox" Text="{Binding Number, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <DockPanel>
+                                <Border Theme="{StaticResource BadgeWarning}" DockPanel.Dock="Right" IsVisible="{Binding OutsidePeriod}" ToolTip.Tip="{Binding PeriodHint}">
+                                    <TextBlock Text="Außerhalb des Zeitraums" Theme="{StaticResource BadgeText}"/>
+                                </Border>
+                                <TextBlock Text="Datum" Theme="{StaticResource FieldLabel}"/>
+                            </DockPanel>
+                            <TextBox x:Name="DateBox" Text="{Binding Date, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,12,*,12,*">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Netto" Theme="{StaticResource FieldLabel}"/>
+                            <TextBlock Text="{Binding NetTotal}" Theme="{StaticResource Number}" HorizontalAlignment="Left" ToolTip.Tip="{Binding NetFlag}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Brutto" Theme="{StaticResource FieldLabel}"/>
+                            <TextBlock Text="{Binding GrossTotal}" Theme="{StaticResource Number}" HorizontalAlignment="Left" ToolTip.Tip="{Binding GrossFlag}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="Beleg" Theme="{StaticResource FieldLabel}"/>
+                            <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding FileName}"/>
+                        </StackPanel>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding HeaderFlags}" Margin="0,12,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Border Theme="{StaticResource Banner}">
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8"/>
+                </StackPanel>
+                <Button DockPanel.Dock="Bottom" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Margin="0,8,0,0" Click="AddLine"/>
+                <DataGrid x:Name="Lines" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Menge" Width="90" SortMemberPath="Quantity">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding QuantityFlagged}" ToolTip.Tip="{Binding QuantityFlag}">
+                                        <TextBlock Text="{Binding Quantity}" Theme="{StaticResource Number}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <TextBox Text="{Binding Quantity, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Einheit" Width="70" SortMemberPath="Unit">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding UnitFlagged}" ToolTip.Tip="{Binding UnitFlag}">
+                                        <TextBlock Text="{Binding Unit}" VerticalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <TextBox Text="{Binding Unit, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Position" Width="*" SortMemberPath="Name">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding NameFlagged}" ToolTip.Tip="{Binding NameFlag}">
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Einzelpreis" Width="110" SortMemberPath="UnitPrice">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding UnitPriceFlagged}" ToolTip.Tip="{Binding UnitPriceFlag}">
+                                        <TextBlock Text="{Binding UnitPrice}" Theme="{StaticResource Number}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <TextBox Text="{Binding UnitPrice, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Netto" Width="110" SortMemberPath="LineNet">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding LineNetFlagged}" ToolTip.Tip="{Binding LineNetFlag}">
+                                        <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Number}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <TextBox Text="{Binding LineNet, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="USt" Width="70" SortMemberPath="Vat">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding VatFlagged}" ToolTip.Tip="{Binding VatFlag}">
+                                        <TextBlock Text="{Binding Vat}" Theme="{StaticResource Number}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <TextBox Text="{Binding Vat, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Hinweis" Width="200" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Flagged}" ToolTip.Tip="{Binding Flag}">
+                                        <TextBlock Text="{Binding Flag}" Theme="{StaticResource BadgeText}" TextTrimming="CharacterEllipsis" MaxWidth="180"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:LineRow">
+                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveLine">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+
+        <Border Grid.Row="2" Theme="{StaticResource Panel}">
+            <Grid>
+                <DockPanel x:Name="OcrPane">
+                    <DockPanel DockPanel.Dock="Top" Margin="12,8">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="−" Theme="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"/>
+                            <TextBlock Text="{Binding #Viewer.(ui:ZoomPan.Zoom), StringFormat='{}{0:P0}'}"
+                                       VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
+                            <Button Content="+" Theme="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"/>
+                            <Button Content="Anpassen" Theme="{StaticResource LinkButton}" Click="ZoomFit"/>
+                            <ComboBox x:Name="PageSelect" MinWidth="120" Margin="8,0,0,0" SelectionChanged="PageChanged"/>
+                        </StackPanel>
+                        <TextBlock Text="Beleg" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <LayoutTransformControl HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <Canvas x:Name="PageCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <Image x:Name="PageImage" Stretch="Fill"/>
+                                <Canvas x:Name="Flagged"/>
+                                <Rectangle x:Name="FocusBox" Stroke="{DynamicResource FocusBoxBrush}" StrokeThickness="3" RadiusX="3" RadiusY="3" IsVisible="False"/>
+                            </Canvas>
+                        </LayoutTransformControl>
+                    </ScrollViewer>
+                </DockPanel>
+                <ui:SourceView x:Name="Source" IsVisible="False"/>
+            </Grid>
+        </Border>
+    </Grid>
+</ui:Screen>

@@ -167,7 +167,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     {
         var inv = req.Invoice;
         if (inv.Id == "") inv.Id = NewId("re-");
-        if (inv.Source == Source.Scan && inv.Verification is null)
+        if (inv.Source == Source.Scan)
             (inv.NetTotal, inv.GrossTotal) = InvoiceMath.LineTotals(inv.Lines);
         var flags = Check.Invoice(inv);
         var blocked = flags.Any(f => BlockingFlags.Contains(f.Code));
@@ -176,7 +176,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var (rs, _) = await MapLines(inv, confirm, ct);
         var resp = new VerifyResp(inv, flags, Display.Invoice(inv, rs), false, null);
         if (!confirm && !req.Draft) return resp;
-        if (confirm && inv.Source == Source.Scan) inv.Verification = new Verification { At = Clock.Now() };
+        if (confirm) inv.Verification = new Verification { At = Clock.Now() };
         var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? []);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });

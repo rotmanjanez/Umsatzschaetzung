@@ -16,11 +16,9 @@ public sealed class InvoiceRow(Invoice invoice, InvoiceDisplay display)
     public InvoiceDisplay Display { get; } = display;
     public string Id => Invoice.Id;
     public string Supplier => Invoice.SupplierName;
-    public bool IsDraft => Invoice.Source == Source.Scan && Invoice.Verification is null;
-    public string Sub => (IsDraft ? "Zu prüfen · " : "") + Invoice.Number + " · " + Display.Date + " · " + Display.NetTotal;
+    public Checked State => Checks.Of(Invoice);
+    public string Sub => Invoice.Number + " · " + Display.Date + " · " + Display.NetTotal;
 }
-
-public sealed record InvoiceLineRow(string Name, string Quantity, string UnitPrice, string LineNet, string Vat);
 
 public sealed class InvoicesModel : Observable
 {
@@ -28,7 +26,13 @@ public sealed class InvoicesModel : Observable
     bool dragging;
     bool selected;
 
-    public ObservableCollection<InvoiceRow> Invoices { get; } = [];
+    public ObservableCollection<InvoiceRow> Automatic { get; } = [];
+    public ObservableCollection<InvoiceRow> Manual { get; } = [];
+    public ObservableCollection<InvoiceRow> Pending { get; } = [];
+
+    public bool HasAutomatic => Automatic.Count > 0;
+    public bool HasManual => Manual.Count > 0;
+    public bool HasPending => Pending.Count > 0;
 
     public bool Empty
     {
@@ -51,22 +55,30 @@ public sealed class InvoicesModel : Observable
     public bool Idle => !selected;
 
     public bool DropHint => dragging && selected;
+
+    public void Sections()
+    {
+        Empty = Automatic.Count + Manual.Count + Pending.Count == 0;
+        foreach (var p in new[] { nameof(HasAutomatic), nameof(HasManual), nameof(HasPending) }) Raise(p);
+    }
 }
 
 public partial class InvoicesView : Screen
 {
     readonly InvoicesModel model = new();
-    readonly Dictionary<string, InvoiceSourceResp?> sources = [];
-    readonly Dictionary<string, VerifyView> editors = [];
-    VerifyView? verify;
+    readonly Dictionary<string, InvoiceView> editors = [];
+    readonly ListBox[] lists;
+    InvoiceView? editor;
     bool refreshing;
 
     public InvoicesView(Session session) : base(session)
     {
         InitializeComponent();
         DataContext = model;
-        Search.Attach(model.Invoices, r => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal);
-        List.ItemsSource = Search.View;
+        lists = [PendingList, AutomaticList, ManualList];
+        AutomaticList.ItemsSource = Search.Attach(model.Automatic, Text);
+        ManualList.ItemsSource = Search.Attach(model.Manual, Text);
+        PendingList.ItemsSource = Search.Attach(model.Pending, Text);
         AddHandler(DragDrop.DragOverEvent, DragOverFiles);
         AddHandler(DragDrop.DragLeaveEvent, DragLeft);
         AddHandler(DragDrop.DropEvent, Dropped);
@@ -75,120 +87,100 @@ public partial class InvoicesView : Screen
         Session.Imports.Finished += ImportFinished;
     }
 
+    static string Text(InvoiceRow r) => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal;
+
     protected override void OnEnter()
     {
         Refresh();
-        verify?.Enter();
+        editor?.Enter();
     }
 
-    protected override void OnLeave() => verify?.Leave();
+    protected override void OnLeave() => editor?.Leave();
 
     void CaseClosed()
     {
-        sources.Clear();
+        Session.Sources.Clear();
         foreach (var e in editors.Values) e.Leave();
         editors.Clear();
-        SwapVerify(null);
+        Swap(null);
     }
 
     void Refresh()
     {
         if (!IsActive || refreshing) return;
         refreshing = true;
-        var selected = (List.SelectedItem as InvoiceRow)?.Id;
-        model.Invoices.Clear();
+        var selected = Selected()?.Id;
+        foreach (var c in new[] { model.Automatic, model.Manual, model.Pending }) c.Clear();
         if (Session.Case is { } k && Session.Display is { } d)
             foreach (var inv in k.Invoices)
-                model.Invoices.Add(new InvoiceRow(inv, d.Invoices.GetValueOrDefault(inv.Id) ?? new InvoiceDisplay("", "", "", [])));
-        model.Empty = model.Invoices.Count == 0;
-        List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == selected);
+            {
+                var row = new InvoiceRow(inv, d.Invoices.GetValueOrDefault(inv.Id) ?? new InvoiceDisplay("", "", "", []));
+                Section(row.State).Add(row);
+            }
+        model.Sections();
+        foreach (var l in lists) l.SelectedItem = null;
+        var current = Rows().FirstOrDefault(r => r.Id == selected);
+        if (current is not null) List(current.State).SelectedItem = current;
         refreshing = false;
-        ShowDetail(List.SelectedItem as InvoiceRow);
+        ShowEditor(current);
     }
+
+    IEnumerable<InvoiceRow> Rows() => model.Automatic.Concat(model.Manual).Concat(model.Pending);
+
+    ObservableCollection<InvoiceRow> Section(Checked state) => state switch
+    {
+        Checked.Automatic => model.Automatic,
+        Checked.Manual => model.Manual,
+        _ => model.Pending,
+    };
+
+    ListBox List(Checked state) => state switch
+    {
+        Checked.Automatic => AutomaticList,
+        Checked.Manual => ManualList,
+        _ => PendingList,
+    };
+
+    InvoiceRow? Selected() => lists.Select(l => l.SelectedItem).OfType<InvoiceRow>().FirstOrDefault();
 
     void SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (!refreshing) ShowDetail(List.SelectedItem as InvoiceRow);
+        if (refreshing || sender is not ListBox list || list.SelectedItem is not InvoiceRow row) return;
+        foreach (var other in lists.Where(l => l != list)) other.SelectedItem = null;
+        ShowEditor(row);
     }
 
     void ListPressed(object? sender, PointerPressedEventArgs e)
     {
-        if ((e.Source as Visual)?.FindAncestorOfType<ListBoxItem>(true) is null) List.SelectedItem = null;
+        if ((e.Source as Visual)?.FindAncestorOfType<ListBoxItem>(true) is not null) return;
+        foreach (var l in lists) l.SelectedItem = null;
+        ShowEditor(null);
     }
 
-    void ShowDetail(InvoiceRow? row)
+    void ShowEditor(InvoiceRow? row)
     {
         model.Selected = row is not null;
-        if (row is null)
-        {
-            SwapVerify(null);
-            Detail.IsVisible = false;
-            return;
-        }
-        if (row.IsDraft)
-        {
-            Detail.IsVisible = false;
-            SwapVerify(EditorFor(row));
-            return;
-        }
-        SwapVerify(null);
-        Supplier.Text = row.Supplier;
-        Number.Text = row.Invoice.Number;
-        Date.Text = row.Display.Date;
-        DateWarning.IsVisible = OutsidePeriod(row.Invoice);
-        ToolTip.SetTip(DateWarning, "Prüfungszeitraum " + (Session.Display?.Period ?? ""));
-        Net.Text = row.Display.NetTotal;
-        Gross.Text = row.Display.GrossTotal;
-        LinesGrid.ItemsSource = row.Invoice.Lines.Select((l, i) =>
-        {
-            var d = i < row.Display.Lines.Count ? row.Display.Lines[i] : new LineDisplay("", "", "", "", "");
-            return new InvoiceLineRow(l.Name, d.Quantity, d.UnitPrice, d.LineNet, d.Vat);
-        }).ToList();
-        Detail.IsVisible = true;
-        _ = LoadSource(row.Id);
+        Swap(row is null ? null : EditorFor(row));
     }
 
-    bool OutsidePeriod(Invoice inv) =>
-        Session.Case is { } k && inv.Date is { } d && (d < k.PeriodFrom || d > k.PeriodTo);
-
-    void SwapVerify(VerifyView? next)
+    void Swap(InvoiceView? next)
     {
-        if (verify == next) return;
-        verify?.Leave();
-        verify = next;
-        VerifyHost.Content = next;
-        VerifyHost.IsVisible = next is not null;
+        if (editor == next) return;
+        editor?.Leave();
+        // Only reviews in progress stay cached; a read invoice would just hold on to its page images.
+        if (editor is { Keep: false }) editors.Remove(editor.Id);
+        editor = next;
+        EditorHost.Content = next;
+        EditorHost.IsVisible = next is not null;
         if (next is not null && IsActive) next.Enter();
     }
 
-    VerifyView EditorFor(InvoiceRow row)
+    InvoiceView EditorFor(InvoiceRow row)
     {
         if (editors.TryGetValue(row.Id, out var existing)) return existing;
-        var editor = new VerifyView(Session, row.Invoice, row.Display, Session.Drafts.GetValueOrDefault(row.Id), stored =>
-        {
-            editors.Remove(row.Id);
-            SwapVerify(null);
-            Session.SetCase(stored);
-        });
-        editors[row.Id] = editor;
-        return editor;
-    }
-
-    async Task LoadSource(string id)
-    {
-        if (Session.Case is null) return;
-        if (sources.TryGetValue(id, out var cached))
-        {
-            Source.Show(cached, cached?.FileName ?? "Kein Beleg gespeichert.");
-            return;
-        }
-        var caseId = Session.Case.Id;
-        Source.Show(null, "Beleg wird geladen …");
-        InvoiceSourceResp? resp = null;
-        await Session.Run(async () => resp = await Session.Service.InvoiceSource(caseId, id, Ct));
-        if (Ct.IsCancellationRequested) return;
-        sources[id] = resp;
-        if ((List.SelectedItem as InvoiceRow)?.Id == id) Source.Show(resp, resp?.FileName ?? "Kein Beleg gespeichert.");
+        var view = new InvoiceView(Session, row.Invoice, row.Display, Session.Drafts.GetValueOrDefault(row.Id), Session.SetCase);
+        editors[row.Id] = view;
+        return view;
     }
 
     async void Delete(object? sender, RoutedEventArgs e)
@@ -208,11 +200,11 @@ public partial class InvoicesView : Screen
 
     void Forget(string id)
     {
-        sources.Remove(id);
         Session.Drafts.Remove(id);
-        if (!editors.Remove(id, out var editor)) return;
-        if (verify == editor) SwapVerify(null);
-        else editor.Leave();
+        Session.Sources.Remove(id);
+        if (!editors.Remove(id, out var gone)) return;
+        if (editor == gone) Swap(null);
+        else gone.Leave();
     }
 
     async void AddFiles(object? sender, RoutedEventArgs e)
@@ -245,6 +237,6 @@ public partial class InvoicesView : Screen
     void ImportFinished(ImportJob job)
     {
         if (job.FirstDraft is not { } id || Session.Case?.Id != job.CaseId || !IsActive) return;
-        List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == id);
+        if (Rows().FirstOrDefault(r => r.Id == id) is { } row) List(row.State).SelectedItem = row;
     }
 }
