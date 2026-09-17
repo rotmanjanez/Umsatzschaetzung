@@ -117,7 +117,10 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
                                             "table_style", "align", "font", "size", "narrow_name",
                                             "logo", "address_corner", "meta_style", "totals_style",
                                             "footer", "uppercase_headers", "group_headings",
-                                            "second_row_details")},
+                                            "second_row_details", "meta_table", "meta_place",
+                                            "sender_place", "wordmark_caps", "title_style",
+                                            "logo_side", "pos_format", "cell_currency",
+                                            "totals_side", "pageno_place", "decor_qr")},
             "headers": {c: used["headers"][c] for c in used["columns"]},
             "pages": pages,
         }

@@ -46,39 +46,79 @@ PROBE = """(() => document.querySelectorAll('.page').length && [...document.quer
 def css(spec):
     mx, my = spec["page_margin"]
     pw, ph = page_px(spec)
-    style = spec["table_style"]
-    rule = f'{spec["rule_weight"]}px solid #333'
-    light = f'{spec["rule_weight"]}px solid #999'
+    rule = f'{spec["rule_weight"]}px solid {spec["rule_ink"]}'
+    light = f'{spec["rule_weight"]}px solid {spec["rule_light"]}'
+    accent = spec["accent"]
     table_css = {
         "grid": f'.items td,.items th{{border:{light}}}',
         "rules": f'.items tr{{border-bottom:{light}}}.items thead tr{{border-bottom:{rule}}}',
-        "zebra": f'.items tbody tr.item:nth-child(even){{background:#eee}}',
+        "zebra": '.items tbody tr.item:nth-child(even){background:#eee}',
         "borderless": '',
-    }[style]
+        # Doppelte Linie unter dem Kopf, nur eine dicke Kopflinie, nur senkrechte
+        # Striche, gepunktet, abwechselnd getönte Spalten: alles Tabellenbilder,
+        # die auf echten Rechnungen vorkommen und die der Korpus bisher nicht kannte.
+        "double": f'.items thead tr{{border-bottom:3px double {spec["rule_ink"]}}}'
+                  f'.items tbody tr{{border-bottom:{light}}}',
+        "headrule": f'.items thead tr{{border-bottom:{spec["rule_weight"] * 2.4}px solid {accent}}}',
+        "vrules": f'.items td,.items th{{border-left:{light};border-right:{light}}}',
+        "dotted": f'.items tr{{border-bottom:{spec["rule_weight"]}px dotted {spec["rule_light"]}}}',
+        "colshade": '.items td:nth-child(even),.items th:nth-child(even){background:#f2f2f2}',
+    }[spec["table_style"]]
     header_css = {
         "bold": '.items th{font-weight:700}',
-        "inverted": f'.items th{{background:{spec["accent"]};color:#fff;font-weight:700}}',
+        "inverted": f'.items th{{background:{accent};color:#fff;font-weight:700}}',
         "underline": f'.items th{{border-bottom:{rule};font-weight:700}}',
         "plain": '.items th{font-weight:400}',
         "boxed": f'.items th{{border:{rule};font-weight:700;background:#f0f0f0}}',
+        "smallcaps": '.items th{font-variant:small-caps;font-weight:600}',
+        "accent": f'.items th{{color:{accent};font-weight:700}}',
+        "letterspaced": '.items th{letter-spacing:0.12em;font-weight:600;font-size:0.9em}',
     }[spec["header_style"]]
+    title_css = {
+        "plain": '',
+        "letter": '.title{letter-spacing:0.28em}',
+        "smallcaps": '.title{font-variant:small-caps;letter-spacing:0.06em}',
+        "underline": f'.title{{border-bottom:{spec["rule_weight"] * 2}px solid {accent};'
+                     'padding-bottom:1.5mm}',
+        "boxed": f'.title{{border:{rule};padding:1.8mm 3mm}}',
+        "band": f'.title{{background:{accent};color:#fff;padding:1.8mm 3mm}}',
+        "none": '',
+    }[spec["title_style"]]
     return f"""
 @page{{size:{pw}px {ph}px;margin:0}}
 *{{box-sizing:border-box}}
-body{{margin:0;font-family:{spec["font"]};font-size:{spec["size"]}pt;line-height:{spec["leading"]};color:#111}}
+body{{margin:0;font-family:{spec["font"]};font-size:{spec["size"]}pt;line-height:{spec["leading"]};
+ color:{spec["ink"]}}}
 .page{{width:{pw}px;height:{ph}px;position:relative;overflow:hidden;padding:{my}mm {mx}mm;
  page-break-after:always;background:#fff}}
 .page:last-child{{page-break-after:auto}}
-.head{{display:flex;justify-content:space-between;align-items:flex-start;gap:8mm}}
+.head{{display:flex;justify-content:space-between;align-items:flex-start;gap:8mm;
+ font-family:{spec["head_font"]}}}
 .head.rev{{flex-direction:row-reverse}}
+.head.mid{{flex-direction:column;align-items:center;text-align:center}}
+.beside{{display:flex;align-items:flex-start;gap:5mm}}
+.hmeta{{font-size:0.78em;line-height:1.45;text-align:right;white-space:nowrap}}
+.head.rev .hmeta,.head.mid .hmeta{{text-align:left}}
+.head.mid .hmeta{{text-align:center;margin-top:2mm}}
 .sender{{font-size:0.85em;line-height:1.35}}
+.sender.right{{text-align:right}}
+.tagline{{font-size:0.62em;letter-spacing:0.16em;color:#444;margin-top:0.6mm}}
 .addr{{margin-top:6mm}}
+.addrwrap.right{{display:flex;justify-content:flex-end}}
+.addrwrap.center{{display:flex;justify-content:center}}
+.addrow{{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;margin-top:6mm}}
+.addrow.right{{flex-direction:row-reverse}}
+.addrow .addr{{margin-top:0}}
 .retline{{font-size:0.62em;border-bottom:0.5px solid #999;padding-bottom:1mm;margin-bottom:2mm;color:#444}}
+.aheading{{font-size:0.72em;color:#555;margin-bottom:0.8mm}}
 .to{{line-height:1.4}}
-.wordmark{{font-size:1.9em;font-weight:700;letter-spacing:0.03em}}
+.wordmark{{font-size:1.9em;font-weight:700;letter-spacing:0.03em;line-height:1.15}}
+.wordmark.caps{{text-transform:uppercase}}
 .bar{{display:block;height:3px;margin-top:2px}}
 .band{{height:3.5mm;width:34mm;opacity:0.85;margin-bottom:1.5mm}}
-.title{{font-size:1.65em;font-weight:700;margin:7mm 0 3mm;color:{spec["accent"]}}}
+.dateline{{text-align:right;margin-top:5mm;font-size:0.95em}}
+.title{{font-size:1.65em;font-weight:700;margin:7mm 0 3mm;color:{accent};
+ font-family:{spec["head_font"]}}}
 table.meta{{border-collapse:collapse;font-size:0.9em}}
 table.meta td{{padding:0.3mm 2.5mm 0.3mm 0;vertical-align:top}}
 table.meta td.k{{color:#333}}
@@ -86,7 +126,13 @@ table.meta.boxed{{border:{light}}}
 table.meta.boxed td{{border:{light};padding:0.8mm 2mm}}
 table.meta.stack td.k{{font-size:0.82em;color:#555}}
 table.meta.row td{{padding-right:4mm;white-space:nowrap}}
+table.meta.stacked td.k{{font-size:0.8em;color:#555;padding-top:1.2mm}}
+table.meta.grid td{{padding:0.7mm 3mm 0.7mm 0;white-space:nowrap}}
+table.meta.grid tr.gk td{{font-size:0.82em;color:#555;font-weight:600}}
+table.meta.grid.boxed td{{border:{light};padding:0.9mm 2.5mm}}
 .metawrap{{display:flex;justify-content:{'flex-start' if spec["meta_side"] == 'left' else 'flex-end'};margin:2mm 0}}
+.panel{{border:{rule};padding:1.5mm 3mm;margin:3mm 0}}
+.panel table.meta{{width:100%}}
 .items{{width:100%;border-collapse:collapse;margin-top:3mm;table-layout:auto}}
 .items td.c-name,.items th.c-name{{width:{spec["name_pct"]}%}}
 .items td.nowrap,.items th.nowrap{{white-space:nowrap}}
@@ -101,6 +147,7 @@ tr.group td{{font-weight:700;background:#f4f4f4;padding-top:1.4mm}}
 .carry{{text-align:right;font-weight:600;margin-top:2mm;font-size:0.95em}}
 .totalswrap{{display:flex;justify-content:flex-end;margin-top:5mm}}
 .totalswrap.full{{display:block}}
+.totalswrap.left{{justify-content:flex-start}}
 table.totals{{border-collapse:collapse;min-width:70mm}}
 table.totals.full{{width:100%}}
 table.totals td{{padding:0.7mm 3mm}}
@@ -108,15 +155,29 @@ table.totals td.v{{text-align:right;white-space:nowrap}}
 table.totals.boxed{{border:{rule}}}
 table.totals.boxed td{{border-bottom:{light}}}
 table.totals.table td{{border-bottom:{light}}}
+table.totals.panel{{border-top:{spec["rule_weight"] * 2.6}px solid {accent};background:#f6f6f6}}
+table.totals.panel td{{padding:1mm 3.5mm}}
+table.totals.inline{{min-width:0}}
+table.totals.inline td{{white-space:nowrap;padding:0.7mm 4mm 0.7mm 0;font-weight:600}}
 table.totals tr.grand td{{font-weight:700;border-top:{rule};font-size:1.08em}}
 .pay{{margin-top:5mm;font-size:0.9em}}
 .foot{{position:absolute;left:{mx}mm;right:{mx}mm;bottom:{max(5, my - 4)}mm;font-size:0.72em;
  color:#333;border-top:{light};padding-top:1.5mm}}
 .foot.cols{{display:flex;gap:6mm;justify-content:space-between}}
 .fcol{{flex:1}}
-.pageno{{position:absolute;right:{mx}mm;top:{my - 4 if my > 8 else 4}mm;font-size:0.75em;color:#555}}
+.pageno{{position:absolute;font-size:0.75em;color:#555}}
+.pageno.p-tr{{right:{mx}mm;top:{my - 4 if my > 8 else 4}mm}}
+.pageno.p-bc{{left:0;right:0;text-align:center;bottom:{max(2, my - 9)}mm}}
+.pageno.p-bl{{left:{mx}mm;bottom:{max(2, my - 9)}mm}}
+.decor{{position:absolute;opacity:0.62}}
+.qr{{width:20mm;height:20mm}}
+.qr.q-bl{{left:{mx}mm;bottom:{my + 14}mm}}
+.qr.q-tr{{right:{mx}mm;top:{my + 2}mm}}
+.stampbox{{left:{mx + 18}mm;bottom:{my + 26}mm;width:34mm;height:15mm;border:2px solid;
+ transform:rotate(-11deg);opacity:0.45;border-radius:2mm}}
 {table_css}
 {header_css}
+{title_css}
 """
 
 
@@ -145,17 +206,32 @@ def rows_per_page(spec):
 
 
 def page_html(spec, invoice, meta, rng, page_lines, index, total, carry):
-    sup, cus = meta["supplier"], meta["customer"]
-    head_class = "head rev" if spec["logo_side"] == "right" else "head"
-    left = blocks.logo(spec, rng, sup["name"]) + blocks.sender(spec, sup)
-    parts = [f'<div class="{head_class}"><div>{left}</div><div class=hmeta></div></div>']
-    if spec["address_corner"] == "right":
-        parts.append(f'<div style="display:flex;justify-content:flex-end">{blocks.address(sup, cus)}</div>')
+    place = spec["meta_place"]
+    parts = [blocks.letterhead(spec, rng, meta)]
+    addr = blocks.address(spec, meta)
+    if place in ("top_right", "split"):
+        # Kopfdaten neben der Anschrift, nicht unter der Überschrift — auf echten
+        # Rechnungen die Normalform. "split" zieht Nummer und Datum hierher und
+        # lässt den Rest unten stehen.
+        side = blocks.meta_block(spec, invoice, meta, "ours" if place == "split" else "all")
+        parts.append(f'<div class="addrow {spec["address_corner"]}">'
+                     f'<div class=acol>{addr}</div><div class=mcol>{side}</div></div>')
     else:
-        parts.append(blocks.address(sup, cus))
-    parts.append(f'<div class=title>{blocks.words(spec["title"])}'
-                 f'{"" if not index else " " + blocks.words(f"Seite {index + 1}")}</div>')
-    parts.append(f'<div class=metawrap>{blocks.meta_block(spec, invoice, meta)}</div>')
+        parts.append(f'<div class="addrwrap {spec["address_corner"]}">{addr}</div>')
+    parts.append(blocks.dateline(spec, invoice, meta))
+    parts.append(blocks.title_line(spec, invoice, meta, index))
+    if place in ("under_title", "split"):
+        table = blocks.meta_block(spec, invoice, meta, "rest" if place == "split" else "all")
+        if table:
+            parts.append(f'<div class=metawrap>{table}</div>')
+    elif place == "panel":
+        table = blocks.meta_block(spec, invoice, meta, "all")
+        if table:
+            parts.append(f'<div class=panel>{table}</div>')
+    elif place == "bottom":
+        table = blocks.meta_block(spec, invoice, meta, "all")
+        if table:
+            parts.append(f'<div class=metawrap>{table}</div>')
     header = blocks.item_header(spec)
     body = blocks.item_rows(spec, page_lines)
     parts.append(f'<table class=items>{header}<tbody>{body}</tbody></table>')
@@ -168,9 +244,9 @@ def page_html(spec, invoice, meta, rng, page_lines, index, total, carry):
             parts.append(f'<div class="totalswrap {spec["totals_side"]}">{totals}</div>')
         if meta["kind"] == "invoice":
             parts.append(f'<div class=pay>{blocks.words(meta["payment"])}</div>')
-    if total > 1:
-        parts.append(f'<div class=pageno>{blocks.words(f"Seite {index + 1} von {total}")}</div>')
+    parts.append(blocks.pageno(spec, index, total))
     parts.append(blocks.footer(spec, meta))
+    parts.append(blocks.decor(spec, rng))
     return f'<div class=page data-role="page">{"".join(parts)}</div>'
 
 
@@ -184,12 +260,14 @@ def document(spec, invoice, meta, seed, per_page=None):
     rng = random.Random(seed)
     spec = dict(spec)
     spec["title"] = rng.choice(layout.TITLES[meta["kind"]])
+    spec["title_key"] = rng.choice(layout.TITLE_KEYS[meta["kind"]])
     spec["name_pct"] = name_pct(spec, meta)
     invoice = dict(invoice)
     invoice["date_text"] = date_text(spec, invoice["date"])
     meta = dict(meta)
     meta["delivery_text"] = date_text(spec, meta["delivery"])
     meta["due_text"] = date_text(spec, meta["due"])
+    meta["skonto_text"] = date_text(spec, meta["skonto_date"])
     lines = meta["render_lines"]
     pages_html = []
     groups = chunk(lines, per_page or rows_per_page(spec))

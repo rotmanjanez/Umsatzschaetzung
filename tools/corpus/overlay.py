@@ -13,6 +13,10 @@ COLOURS = {
     "vat": (150, 60, 200), "articleId": (110, 110, 0), "invoiceNumber": (220, 0, 140),
     "invoiceDate": (0, 90, 200), "supplier": (0, 60, 120), "netTotal": (200, 0, 60),
     "grossTotal": (140, 0, 0),
+    # Beschriftungsklassen in einem hellen Ton neben ihrer Wertklasse, damit im
+    # Overlay sofort sichtbar ist, ob Schlüssel und Wert zusammenpassen.
+    "numberLabel": (255, 120, 200), "dateLabel": (110, 170, 255), "netLabel": (255, 130, 160),
+    "grossLabel": (220, 110, 110), "vatLabel": (200, 150, 240), "otherLabel": (120, 200, 120),
 }
 
 

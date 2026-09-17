@@ -122,6 +122,9 @@ CITIES = [("1100", "Wien"), ("4020", "Linz"), ("5020", "Salzburg"), ("8010", "Gr
           ("01067", "Dresden"), ("3100", "St. Pölten"), ("4600", "Wels")]
 BANKS = ["Raiffeisenbank", "Sparkasse", "Volksbank", "Hypo Landesbank", "Commerzbank", "Oberbank",
          "Erste Bank", "Kreissparkasse"]
+FIRST_NAMES = ["Maria", "Andreas", "Sabine", "Thomas", "Petra", "Michael", "Christine", "Stefan",
+               "Barbara", "Johannes", "Elisabeth", "Markus", "Claudia", "Gerhard", "Ursula",
+               "Franz", "Birgit", "Wolfgang", "Katharina", "Hannes", "Doris", "Reinhard"]
 CUSTOMERS = ["Gasthaus Zur Alten Post", "Restaurant Seeblick", "Café Central", "Bistro Eck", "Hotel Waldhof",
              "Pizzeria Da Vinci", "Wirtshaus Am Anger", "Bar Kontrast", "Braustüberl Riedl"]
 PAYMENT = ["Zahlbar innerhalb von 14 Tagen netto.", "Zahlung binnen 30 Tagen ohne Abzug.",

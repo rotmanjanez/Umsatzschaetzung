@@ -6,8 +6,11 @@ from collections import Counter
 
 import money
 
+# Die zwölf Wertklassen und die sechs Beschriftungsklassen aus tools/train/schema.py.
+# Ein data-f, das hier fehlt, ist ein Tippfehler im Renderer und kein neues Feld.
 FIELDS = {"quantity", "unit", "name", "articleId", "unitPrice", "lineNet", "vat",
-          "invoiceNumber", "invoiceDate", "supplier", "netTotal", "grossTotal"}
+          "invoiceNumber", "invoiceDate", "supplier", "netTotal", "grossTotal",
+          "numberLabel", "dateLabel", "netLabel", "grossLabel", "vatLabel", "otherLabel"}
 
 
 def join(words, field, line):
@@ -64,6 +67,13 @@ def check(directory):
             shown = join(first, "invoiceNumber", 0)
             if shown != expected["number"]:
                 problems.append(f"{entry}: number {shown!r} != {expected['number']!r}")
+            if not join(first, "invoiceDate", 0):
+                problems.append(f"{entry}: no invoiceDate word on the first page")
+        # Der Lieferantenname steht je nach Briefkopf im Absender, in der Wortmarke
+        # oder — wenn es beides nicht gibt — in der Fußzeile. Genau eine dieser
+        # Stellen muss ihn beschriftet tragen, sonst hat die Seite keinen Lieferanten.
+        if not any(w["f"] == "supplier" for w in words):
+            problems.append(f"{entry}: no supplier word anywhere")
     return problems, counts
 
 
