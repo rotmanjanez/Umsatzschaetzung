@@ -240,24 +240,29 @@
                                 </Grid>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="140"/>
                                         <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                        <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
-                                                  DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch" Classes.invalid="{Binding ScopeInvalid}"/>
-                                        <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
-                                                 IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
+                                        <TextBlock Text="Gilt für *" Theme="{StaticResource FieldLabel}"/>
+                                        <ComboBox SelectedIndex="{Binding ScopeIndex}" HorizontalAlignment="Stretch">
+                                            <ComboBoxItem Content="Kategorie"/>
+                                            <ComboBoxItem Content="Zutat"/>
+                                        </ComboBox>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBlock Text="{Binding ScopeKind}" Theme="{StaticResource FieldLabel}"/>
+                                        <StackPanel IsVisible="{Binding !ScopeIsIngredient}">
+                                            <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
+                                                      DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch" Classes.invalid="{Binding ScopeInvalid}"/>
+                                            <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
+                                                     IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
+                                        </StackPanel>
                                         <ui:IngredientBox ItemsSource="{Binding IngredientOptions}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
-                                                          Classes.invalid="{Binding ScopeInvalid}" HorizontalAlignment="Stretch"/>
+                                                          IsVisible="{Binding ScopeIsIngredient}" Classes.invalid="{Binding ScopeInvalid}" HorizontalAlignment="Stretch"/>
                                     </StackPanel>
                                 </Grid>
-                                <TextBlock Text="Kategorie oder Zutat angeben" Theme="{StaticResource FieldLabel}"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
@@ -269,24 +274,37 @@
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="Schwund * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Shrinkage, Mode=TwoWay}" Classes.invalid="{Binding ShrinkageInvalid}"/>
+                                        <TextBlock Text="Schwund *" Theme="{StaticResource FieldLabel}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding Shrinkage, Mode=TwoWay}" Classes.invalid="{Binding ShrinkageInvalid}"/>
+                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Eigenverbrauch * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding OwnUse, Mode=TwoWay}" Classes.invalid="{Binding OwnUseInvalid}"/>
+                                        <TextBlock Text="Eigenverbrauch *" Theme="{StaticResource FieldLabel}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding OwnUse, Mode=TwoWay}" Classes.invalid="{Binding OwnUseInvalid}"/>
+                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </StackPanel>
                                     <StackPanel Grid.Column="4">
-                                        <TextBlock Text="Personal * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Staff, Mode=TwoWay}" Classes.invalid="{Binding StaffInvalid}"/>
+                                        <TextBlock Text="Personal *" Theme="{StaticResource FieldLabel}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding Staff, Mode=TwoWay}" Classes.invalid="{Binding StaffInvalid}"/>
+                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </StackPanel>
                                     <StackPanel Grid.Column="6">
-                                        <TextBlock Text="Freigetränke * (in %)" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Free, Mode=TwoWay}" Classes.invalid="{Binding FreeInvalid}"/>
+                                        <TextBlock Text="Freigetränke *" Theme="{StaticResource FieldLabel}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding Free, Mode=TwoWay}" Classes.invalid="{Binding FreeInvalid}"/>
+                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </Grid>
                                 <TextBlock Text="Quelle *" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox Text="{Binding Source, Mode=TwoWay}" Classes.invalid="{Binding SourceInvalid}"/>
+                                <TextBox Text="{Binding Source, Mode=TwoWay}" Classes.invalid="{Binding SourceInvalid}"
+                                         AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="140" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveYield" Margin="0,0,8,0"/>
                                     <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteYield" IsVisible="{Binding Existing}"/>

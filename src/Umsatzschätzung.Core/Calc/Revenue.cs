@@ -8,13 +8,6 @@ internal static class Revenue
 {
     static bool PriceMissing(CaseProduct cp) => cp.GrossPrice <= 0;
 
-    static bool Purchased(Product p, SortedDictionary<string, IngredientUse> uses)
-    {
-        foreach (var r in p.Recipe)
-            if (uses.ContainsKey(r.IngredientId)) return true;
-        return false;
-    }
-
     static (long Net, string Formula) ProductNet(CaseProduct cp, long portions)
     {
         if (PriceMissing(cp))
@@ -91,10 +84,11 @@ internal static class Revenue
             var p = rs.Products[pid];
             if (!p.Meta.ValidOn(c.PeriodTo)) continue;
             var known = settings.TryGetValue(pid, out var s);
-            if (!known && !pinReasons.ContainsKey(pid) && !Purchased(p, uses)) continue;
+            var allocated = byProduct.TryGetValue(pid, out var pa);
+            if (!allocated && !known && !pinReasons.ContainsKey(pid)) continue;
             var cp = known ? s! : new CaseProduct();
             var row = new ProductRow { ProductId = pid, GrossPrice = cp.GrossPrice, Vat = cp.Vat, Disabled = cp.Disabled, PriceMissing = PriceMissing(cp) };
-            if (byProduct.TryGetValue(pid, out var pa))
+            if (allocated)
             {
                 var n = ProductNode(c, rs, p, cp, pa, uses, pinReasons.GetValueOrDefault(pid, ""));
                 root.Inputs.Add(n);

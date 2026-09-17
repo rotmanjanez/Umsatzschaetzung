@@ -224,6 +224,8 @@ sealed partial class Problem(KnapsackInput input)
             res.Leftover[i] = left;
             if (minAmount.TryGetValue(i, out var m) && left < m) res.Binding.Add(i);
         }
+        foreach (var p in Products)
+            if (Portions[p] == 0 && !In.Pinned.ContainsKey(p)) Portions.Remove(p);
         return res;
     }
 }

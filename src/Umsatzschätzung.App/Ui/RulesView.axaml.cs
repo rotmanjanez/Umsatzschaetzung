@@ -152,6 +152,7 @@ public sealed class YieldForm : EntityForm<ScopeItem>
     public static readonly Ingredient None = new() { Id = "", Name = "keine" };
 
     string scopeTitle = "", name = "", shrinkage = "", ownUse = "", staff = "", free = "", source = "";
+    int scopeIndex;
     bool isDefault, nameInvalid, scopeInvalid, sourceInvalid;
     readonly bool[] rateInvalid = new bool[4];
     Ingredient? ingredient = None;
@@ -161,6 +162,21 @@ public sealed class YieldForm : EntityForm<ScopeItem>
     public string ScopeTitle { get => scopeTitle; set => Set(ref scopeTitle, value); }
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
     public CategoryPicker Category { get; } = new();
+
+    public int ScopeIndex
+    {
+        get => scopeIndex;
+        set
+        {
+            if (!Set(ref scopeIndex, value)) return;
+            ScopeInvalid = false;
+            Raise(nameof(ScopeIsIngredient));
+            Raise(nameof(ScopeKind));
+        }
+    }
+    public bool ScopeIsIngredient => scopeIndex == 1;
+    public string ScopeKind => ScopeIsIngredient ? "Zutat" : "Kategorie";
+
     public string Shrinkage { get => shrinkage; set { if (Set(ref shrinkage, value)) ShrinkageInvalid = false; } }
     public string OwnUse { get => ownUse; set { if (Set(ref ownUse, value)) OwnUseInvalid = false; } }
     public string Staff { get => staff; set { if (Set(ref staff, value)) StaffInvalid = false; } }
@@ -445,7 +461,9 @@ public partial class RulesView : Screen
         f.ScopeTitle = scope.Label;
         f.Rules.Clear();
         foreach (var r in scope.Rules) f.Rules.Add(r);
-        var pick = f.Rules.FirstOrDefault(r => r.Rule.Id == preferId) ?? f.Rules.FirstOrDefault();
+        var pick = f.Rules.FirstOrDefault(r => r.Rule.Id == preferId)
+                   ?? f.Rules.FirstOrDefault(r => r.Rule.Default)
+                   ?? f.Rules.FirstOrDefault();
         loading = true;
         RuleGrid.SelectedItem = pick;
         loading = false;
@@ -465,6 +483,7 @@ public partial class RulesView : Screen
         f.Title = y.Name;
         f.Name = y.Name;
         f.IsDefault = y.Default;
+        f.ScopeIndex = string.IsNullOrEmpty(y.IngredientId) ? 0 : 1;
         f.Category.Load(Session.Categories(), y.CategoryId);
         f.Ingredient = f.IngredientOptions.Find(i => i.Id == (y.IngredientId ?? "")) ?? YieldForm.None;
         f.Shrinkage = Input.BpText(y.Shrinkage);
@@ -488,6 +507,7 @@ public partial class RulesView : Screen
         f.Name = f.Shrinkage = f.OwnUse = f.Staff = f.Free = f.Source = "";
         f.IsDefault = false;
         // A new rule starts in the scope that is open — almost always the one meant.
+        f.ScopeIndex = scope is { Ingredient: true } ? 1 : 0;
         f.Category.Load(Session.Categories(), scope is { Ingredient: false } ? scope.Id : null);
         f.Ingredient = scope is { Ingredient: true }
             ? f.IngredientOptions.Find(i => i.Id == scope.Id) ?? YieldForm.None
@@ -499,9 +519,11 @@ public partial class RulesView : Screen
         var f = model.Yields;
         var id = f.CurrentId ?? Session.NewId("yield_rule");
         var rates = new[] { Input.Bp(f.Shrinkage), Input.Bp(f.OwnUse), Input.Bp(f.Staff), Input.Bp(f.Free) };
-        var ingredientId = f.Ingredient is { Id: not "" } ing ? ing.Id : null;
+        var ingredientId = f.ScopeIsIngredient && f.Ingredient is { Id: not "" } ing ? ing.Id : null;
         f.NameInvalid = f.Name.Trim() == "";
-        f.ScopeInvalid = ingredientId is null && !f.Category.Creating && f.Category.Selected?.Id is null or "";
+        f.ScopeInvalid = f.ScopeIsIngredient
+            ? ingredientId is null
+            : !f.Category.Creating && f.Category.Selected?.Id is null or "";
         f.SourceInvalid = f.Source.Trim() == "";
         f.ShrinkageInvalid = rates[0] is not >= 0;
         f.OwnUseInvalid = rates[1] is not >= 0;
@@ -514,7 +536,7 @@ public partial class RulesView : Screen
         {
             Session.Fail(Missing(
                 f.NameInvalid ? "Name" : null,
-                f.ScopeInvalid ? "Kategorie oder Zutat" : null,
+                f.ScopeInvalid ? f.ScopeKind : null,
                 rated ? null : "Anteile (Prozentwerte, nicht negativ)",
                 over ? "Anteile (zusammen höchstens 100 %)" : null,
                 f.SourceInvalid ? "Quelle" : null));
@@ -534,8 +556,11 @@ public partial class RulesView : Screen
         };
         await Compose(async () =>
         {
-            if (await CategoryId(f.Category) is not { } categoryId) return;
-            data.CategoryId = categoryId == "" ? null : categoryId;
+            if (!f.ScopeIsIngredient)
+            {
+                if (await CategoryId(f.Category) is not { } categoryId) return;
+                data.CategoryId = categoryId == "" ? null : categoryId;
+            }
             f.CurrentId = id;
             await Session.Put(data, Ct);
         });

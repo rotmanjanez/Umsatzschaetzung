@@ -20,11 +20,7 @@ public sealed class InvoiceRow(Invoice invoice, InvoiceDisplay display)
     public string Sub => (IsDraft ? "Zu prüfen · " : "") + Invoice.Number + " · " + Display.Date + " · " + Display.NetTotal;
 }
 
-public sealed record InvoiceLineRow(string Name, string Quantity, string UnitPrice, string LineNet, string Vat, string Mapping)
-{
-    public bool Mapped => Mapping != "";
-    public bool Unmapped => Mapping == "";
-}
+public sealed record InvoiceLineRow(string Name, string Quantity, string UnitPrice, string LineNet, string Vat);
 
 public sealed class InvoicesModel : Observable
 {
@@ -146,7 +142,7 @@ public partial class InvoicesView : Screen
         LinesGrid.ItemsSource = row.Invoice.Lines.Select((l, i) =>
         {
             var d = i < row.Display.Lines.Count ? row.Display.Lines[i] : new LineDisplay("", "", "", "", "");
-            return new InvoiceLineRow(l.Name, d.Quantity, d.UnitPrice, d.LineNet, d.Vat, d.Mapping);
+            return new InvoiceLineRow(l.Name, d.Quantity, d.UnitPrice, d.LineNet, d.Vat);
         }).ToList();
         Detail.IsVisible = true;
         _ = LoadSource(row.Id);
