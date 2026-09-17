@@ -53,7 +53,7 @@ sh "$here/icon.sh" "$contents/Resources"
 
 for required in \
     MacOS/umsatzschaetzung MacOS/libAvaloniaNative.dylib MacOS/libSkiaSharp.dylib \
-    MacOS/libe_sqlite3.dylib MacOS/libonnxruntime.dylib \
+    MacOS/libe_sqlite3.dylib MacOS/libonnxruntime.dylib MacOS/libpdfium.dylib \
     Resources/AppIcon.icns Resources/LICENSES.txt Info.plist
 do
     [ -e "$contents/$required" ] || { echo "$required fehlt in $app" >&2; exit 1; }

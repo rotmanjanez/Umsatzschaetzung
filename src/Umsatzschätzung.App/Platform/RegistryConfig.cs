@@ -1,8 +1,10 @@
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace Umsatzschätzung.App.Platform;
 
+[SupportedOSPlatform("windows")]
 public static class RegistryConfig
 {
     static readonly (RegistryKey Hive, string Path)[] Sources =

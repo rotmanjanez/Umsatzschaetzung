@@ -28,3 +28,7 @@ https://github.com/google/skia/blob/main/LICENSE
 https://github.com/dotnet/efcore/blob/main/LICENSE.txt
 https://github.com/ericsink/SQLitePCL.raw/blob/master/LICENSE.TXT
 SQLite selbst ist gemeinfrei: https://www.sqlite.org/copyright.html
+
+==== PDFium (BSD-3-Clause, Apache-2.0) ====
+https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE
+Die mitgelieferten Binärdateien stammen aus https://github.com/bblanchon/pdfium-binaries

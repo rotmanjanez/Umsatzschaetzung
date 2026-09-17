@@ -22,9 +22,7 @@ public static class AppConfig
 
     public static Config Load()
     {
-#if WINDOWS
         if (OperatingSystem.IsWindows()) return RegistryConfig.Load();
-#endif
         return File();
     }
 
