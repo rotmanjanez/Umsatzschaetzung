@@ -164,7 +164,7 @@ public sealed class Imports
     void Finish(ImportJob job)
     {
         var where = session.Case?.Id == job.CaseId ? "" : job.Label + ": ";
-        job.Summary = job.Stored + " Rechnungen übernommen, " + job.Drafts + " zur Prüfung";
+        job.Summary = job.Stored + " Rechnungen übernommen, " + job.Drafts + " zur Durchsicht";
         if (job.Failed.Count > 0) session.Fail(where + "Nicht importiert: " + string.Join("; ", job.Failed));
         Finished?.Invoke(job);
         Jobs.Remove(job);

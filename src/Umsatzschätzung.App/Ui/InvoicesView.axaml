@@ -47,7 +47,7 @@
                         <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
                                    Text="PDF, Bilder (PNG, JPG, TIFF) und XML-Rechnungen."/>
                         <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0"
-                                   Text="Gescannte Belege werden gelesen und danach zur Prüfung vorgelegt; XML-Rechnungen werden direkt übernommen."/>
+                                   Text="Gescannte Belege werden gelesen und danach zur Durchsicht vorgelegt; XML-Rechnungen werden direkt übernommen."/>
                     </StackPanel>
                 </Grid>
                 <Grid x:Name="Detail" IsVisible="False">

@@ -17,18 +17,10 @@
                     <Grid>
                     <DataGrid x:Name="Groups" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="GroupSelected">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Lieferant" Binding="{Binding Supplier, DataType=ui:LineGroup}" Width="170"/>
                             <DataGridTemplateColumn Header="Position" Width="*" SortMemberPath="Name">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:LineGroup">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Positionen" Width="100" SortMemberPath="Count">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:LineGroup">
-                                        <TextBlock Text="{Binding Count}" Theme="{StaticResource Number}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -52,20 +44,23 @@
             </Border>
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
             <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
-                <Grid>
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Theme="{StaticResource BadgeSuccess}" HorizontalAlignment="Left"
+                            Margin="0,0,0,12" IsVisible="{Binding HasAssigned}">
+                        <TextBlock Text="{Binding Assigned}" Theme="{StaticResource BadgeText}" TextWrapping="Wrap"/>
+                    </Border>
+                    <Grid>
                     <TextBlock Text="Keine Position gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoSelection}"/>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelection}">
                         <StackPanel>
                             <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-                                <TextBlock Text="Lieferant" Theme="{StaticResource KeyLabel}"/>
-                                <TextBlock Grid.Column="1" Text="{Binding Supplier}" Theme="{StaticResource KeyValue}"/>
-                                <TextBlock Grid.Row="1" Text="Artikelnummer" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasArticle}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasArticle}"/>
-                                <TextBlock Grid.Row="2" Text="Einheit" Theme="{StaticResource KeyLabel}"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Unit}" Theme="{StaticResource KeyValue}"/>
-                                <TextBlock Grid.Row="3" Text="Positionen" Theme="{StaticResource KeyLabel}"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Count}" Theme="{StaticResource KeyValue}"/>
+                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
+                                <TextBlock Text="Artikelnummer" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasArticle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasArticle}"/>
+                                <TextBlock Grid.Row="1" Text="Einheit" Theme="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Unit}" Theme="{StaticResource KeyValue}"/>
+                                <TextBlock Grid.Row="2" Text="Menge" Theme="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Quantity}" Theme="{StaticResource KeyValue}"/>
                             </Grid>
                             <StackPanel IsVisible="{Binding ShowCandidates}">
                                 <TextBlock Text="Vorschläge werden ermittelt …" Theme="{StaticResource Muted}" IsVisible="{Binding Loading}"/>
@@ -111,7 +106,8 @@
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
-                </Grid>
+                    </Grid>
+                </DockPanel>
             </Border>
         </Grid>
     </DockPanel>

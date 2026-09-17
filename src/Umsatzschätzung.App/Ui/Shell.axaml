@@ -23,10 +23,10 @@
                 </DockPanel>
                 <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged">
                     <TabItem Header="Prüfung"/>
-                    <TabItem Header="Rechnungen"/>
-                    <TabItem Header="Zuordnung"/>
-                    <TabItem Header="Kalkulation"/>
-                    <TabItem Header="Bericht"/>
+                    <TabItem Header="1. Rechnungen"/>
+                    <TabItem Header="2. Zuordnung"/>
+                    <TabItem Header="3. Kalkulation"/>
+                    <TabItem Header="4. Bericht"/>
                 </TabControl>
             </DockPanel>
         </Grid>

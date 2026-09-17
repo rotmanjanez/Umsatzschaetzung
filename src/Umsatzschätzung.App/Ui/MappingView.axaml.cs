@@ -14,6 +14,7 @@ public sealed class LineGroup
     public required string Name { get; init; }
     public required string Unit { get; init; }
     public List<(int Invoice, int Line)> Lines { get; } = [];
+    public long Quantity { get; set; }
     public int Count => Lines.Count;
 }
 
@@ -33,7 +34,8 @@ public sealed class CandidateRow(MappingCandidate candidate) : Observable
 public sealed class MappingModel : Observable
 {
     bool empty = true, noInvoices, hasSelection, loading, manual;
-    string title = "", supplier = "", article = "", unit = "", count = "", factor = "";
+    string title = "", article = "", unit = "", quantity = "", factor = "";
+    string assigned = "";
     Ingredient? ingredient;
     List<Ingredient> ingredients = [];
 
@@ -61,11 +63,12 @@ public sealed class MappingModel : Observable
     public string ManualLabel => manual ? "Vorschlag verwenden" : "Manuell zuordnen";
     public bool CanAssign => manual || Candidates.Any(c => c.Selected);
     public string Title { get => title; set => Set(ref title, value); }
-    public string Supplier { get => supplier; set => Set(ref supplier, value); }
     public string Article { get => article; set { if (Set(ref article, value)) Raise(nameof(HasArticle)); } }
     public bool HasArticle => article != "";
     public string Unit { get => unit; set => Set(ref unit, value); }
-    public string Count { get => count; set => Set(ref count, value); }
+    public string Quantity { get => quantity; set => Set(ref quantity, value); }
+    public string Assigned { get => assigned; set { if (Set(ref assigned, value)) Raise(nameof(HasAssigned)); } }
+    public bool HasAssigned => assigned != "";
     public string Factor { get => factor; set => Set(ref factor, value); }
     public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
     public List<Ingredient> Ingredients { get => ingredients; set => Set(ref ingredients, value); }
@@ -106,6 +109,7 @@ public partial class MappingView : Screen
     protected override void OnEnter()
     {
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
+        model.Assigned = "";
         model.Ingredients = Session.Ingredients();
         model.Groups.Clear();
         foreach (var g in UnmappedGroups()) model.Groups.Add(g);
@@ -133,6 +137,7 @@ public partial class MappingView : Screen
                     groups[key] = g;
                 }
                 g.Lines.Add((i, j));
+                g.Quantity += l.Quantity;
             }
         }
         return groups.Values.OrderBy(g => g.Supplier + g.Name, StringComparer.Ordinal).ToList();
@@ -147,11 +152,11 @@ public partial class MappingView : Screen
             model.HasSelection = false;
             return;
         }
+        model.Assigned = "";
         model.Title = g.Name;
-        model.Supplier = g.Supplier;
         model.Article = g.Article ?? "";
         model.Unit = Units.Label(g.Unit);
-        model.Count = g.Count.ToString();
+        model.Quantity = (Format.Milli(g.Quantity) + " " + Units.Label(g.Unit)).Trim();
         model.HasSelection = true;
         model.Loading = true;
         var (inv, line) = g.Lines[0];
@@ -173,8 +178,17 @@ public partial class MappingView : Screen
         if (Groups.SelectedItem is not LineGroup g || Session.Case is null) return;
         if (!model.Manual)
         {
-            var chosen = model.Candidates.FirstOrDefault(c => c.Selected);
-            if (chosen is not null) await AssignId(g, chosen.Candidate.Mapping.Id);
+            if (model.Candidates.FirstOrDefault(c => c.Selected) is not { } chosen) return;
+            // A suggested mapping is not stored yet: accepting it is what creates the rule.
+            var suggested = chosen.Candidate.Mapping;
+            if (suggested.Id == "")
+            {
+                suggested.Id = Session.NewId("map");
+                suggested.UnitCode = g.Unit;
+                suggested.Confirmed = true;
+                if (!await Session.Put(suggested, Ct)) return;
+            }
+            await AssignId(g, suggested.Id, chosen.Candidate.Display);
             return;
         }
         var factor = Input.Int(model.Factor);
@@ -196,18 +210,20 @@ public partial class MappingView : Screen
             Confirmed = true,
         };
         if (await Session.Put(mapping, Ct))
-            await AssignId(g, mapping.Id);
+            await AssignId(g, mapping.Id, model.Ingredient.Name + " × " + Format.Qty(factor.Value, model.Ingredient.BaseUnit));
     }
 
     void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);
 
     void GoCalc(object? sender, RoutedEventArgs e) => Session.Go(Tab.Calc);
 
-    async Task AssignId(LineGroup g, string mappingId)
+    async Task AssignId(LineGroup g, string mappingId, string label)
     {
-        if (Session.Case is null) return;
+        if (Session.Case is null || mappingId == "") return;
         foreach (var (inv, line) in g.Lines) Session.Case.Invoices[inv].Lines[line].MappingId = mappingId;
-        if (await Session.SaveCase(Ct))
-            OnEnter();
+        if (!await Session.SaveCase(Ct)) return;
+        var note = "„" + g.Name + "“ ist jetzt " + label + " zugeordnet.";
+        OnEnter();
+        model.Assigned = note;
     }
 }
