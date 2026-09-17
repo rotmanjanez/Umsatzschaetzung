@@ -79,12 +79,7 @@ public partial class App : Application
         owned.Add(ocr);
         var tagger = new Tagger();
         owned.Add(tagger);
-        IPdfPages? pdf = null;
-#if WINDOWS
-        if (OperatingSystem.IsWindows()) pdf = new WindowsPdfPages();
-#else
-        if (OperatingSystem.IsMacOS()) pdf = new MacPdfPages();
-#endif
+        var pdf = new PdfiumPages();
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
         return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, version);
