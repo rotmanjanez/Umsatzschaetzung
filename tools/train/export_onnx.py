@@ -29,9 +29,10 @@ class WordOnly(torch.nn.Module):
 
 def export(out, seq=512, run=None):
     out.mkdir(parents=True, exist_ok=True)
-    tagger = Tagger()
-    if run is not None:
-        tagger.load_state_dict(torch.load(run / "model.pt", map_location="cpu", weights_only=True))
+    state = None if run is None else torch.load(run / "model.pt", map_location="cpu", weights_only=True)
+    tagger = Tagger(n_labels=None if state is None else state["word_head.weight"].shape[0])
+    if state is not None:
+        tagger.load_state_dict(state)
     tagger = tagger.eval()
     params = sum(p.numel() for p in tagger.parameters())
     embed = tagger.body.embeddings.word_embeddings.weight.numel()
