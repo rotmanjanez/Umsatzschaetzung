@@ -418,11 +418,7 @@ public partial class VerifyView : Screen
             {
                 Width = b.W + 6,
                 Height = b.H + 6,
-                Stroke = (IBrush)Application.Current!.FindResource("WarningBrush")!,
-                Fill = (IBrush)Application.Current!.FindResource("WarningSoftBrush")!,
-                StrokeThickness = 2,
-                RadiusX = 3,
-                RadiusY = 3,
+                Classes = { "flagged" },
             };
             Canvas.SetLeft(rect, b.X - 3);
             Canvas.SetTop(rect, b.Y - 3);
