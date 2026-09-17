@@ -27,11 +27,10 @@ public static class Cii
         {
             Source = Source.Cii,
             SupplierName = seller is null ? "" : Xml.Text(seller, "Name").Trim(),
-            SupplierVatId = Numbers.Optional(VatId(seller)),
             Number = Xml.Text(root, "ExchangedDocument>ID").Trim(),
             Currency = Xml.Text(root, Settlement + ">InvoiceCurrencyCode").Trim(),
         };
-        inv.Date = Numbers.Wrap("cii", () => Date(Xml.Last(root, "ExchangedDocument>IssueDateTime>DateTimeString")));
+        inv.Date = Date(Xml.Last(root, "ExchangedDocument>IssueDateTime>DateTimeString"));
         inv.NetTotal = Numbers.Wrap("cii: net total", () => Numbers.OptionalCents(totals is null ? "" : Xml.Text(totals, "TaxBasisTotalAmount")));
         inv.GrossTotal = Numbers.Wrap("cii: gross total", () => Numbers.OptionalCents(totals is null ? "" : Xml.Text(totals, "GrandTotalAmount")));
         var i = 0;
@@ -43,26 +42,12 @@ public static class Cii
         return inv;
     }
 
-    static DateOnly Date(XElement? dt)
+    static DateOnly? Date(XElement? dt) => Xml.Attr(dt, "format").Trim() switch
     {
-        var format = Xml.Attr(dt, "format").Trim();
-        return format switch
-        {
-            "102" => Numbers.Date(Xml.Text(dt), "yyyyMMdd"),
-            "" => Numbers.Date(Xml.Text(dt), "yyyyMMdd", "yyyy-MM-dd"),
-            _ => throw new InvalidDataException($"unsupported date format \"{format}\""),
-        };
-    }
-
-    static string VatId(XElement? seller)
-    {
-        if (seller is null)
-            return "";
-        foreach (var id in Xml.Path(seller, "SpecifiedTaxRegistration>ID"))
-            if (string.Equals(Xml.Attr(id, "schemeID").Trim(), "VA", StringComparison.OrdinalIgnoreCase))
-                return Xml.Text(id).Trim();
-        return "";
-    }
+        "102" => Numbers.OptionalDate(Xml.Text(dt), "yyyyMMdd"),
+        "" => Numbers.OptionalDate(Xml.Text(dt), "yyyyMMdd", "yyyy-MM-dd"),
+        _ => null,
+    };
 
     static InvoiceLine Line(XElement l, int index)
     {

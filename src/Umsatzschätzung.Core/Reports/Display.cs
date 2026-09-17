@@ -15,7 +15,7 @@ public sealed record LineRow(string Invoice, string Date, long LineNo, string Na
 
 public sealed record IngredientDisplay(string Name, string Opening, string Bought, string Closing, string Cost, string Used, string UsedCost, string Yield, string Sellable, string Leftover, bool Binding);
 
-public sealed record YieldRateRow(string Ingredient, string Shrinkage, string OwnUse, string Staff, string Free, string Yield, string Source, bool Chosen);
+public sealed record YieldRateRow(string Ingredient, string Shrinkage, string OwnUse, string Staff, string Free, string Yield, bool Chosen);
 
 public sealed record PinnedRow(string Product, string Portions, string Reason);
 
@@ -223,7 +223,7 @@ public static class Display
         {
             if (!rs.Ingredients.TryGetValue(i.IngredientId, out var ing) || Match.YieldRule(c, rs, ing) is not var (rule, chosen)) continue;
             rows.Add(new YieldRateRow(ing.Name, Format.Bp(rule.Shrinkage), Format.Bp(rule.OwnUse), Format.Bp(rule.Staff), Format.Bp(rule.Free),
-                Format.Bp(Yield(rule)), rule.Source, chosen));
+                Format.Bp(Yield(rule)), chosen));
         }
         return rows;
     }

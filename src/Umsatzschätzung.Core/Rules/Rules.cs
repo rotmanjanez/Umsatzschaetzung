@@ -62,8 +62,6 @@ public static class RuleCheck
     {
         if (string.IsNullOrEmpty(e.SupplierArticleId) && string.IsNullOrEmpty(e.Gtin) && string.IsNullOrEmpty(e.Name))
             throw new RulesException("Zuordnung: Artikelnummer, GTIN oder Namensmuster erforderlich");
-        if (!string.IsNullOrEmpty(e.SupplierArticleId) && string.IsNullOrEmpty(e.SupplierVatId))
-            throw new RulesException("Zuordnung: Artikelnummer erfordert die USt-IdNr. des Lieferanten");
         if (e.Factor <= 0) throw new RulesException("Zuordnung: Faktor muss größer als 0 sein");
         if (!rs.Ingredients.ContainsKey(e.IngredientId))
             throw new RulesException($"Zuordnung: Zutat \"{e.IngredientId}\" existiert nicht");
@@ -109,6 +107,5 @@ public static class RuleCheck
             throw new RulesException("Ausbeuteregel: Anteile dürfen nicht negativ sein");
         if (e.Shrinkage + e.OwnUse + e.Staff + e.Free > Bp.Full)
             throw new RulesException("Ausbeuteregel: Summe der Anteile darf 100 % nicht überschreiten");
-        if (e.Source == "") throw new RulesException("Ausbeuteregel: Quelle darf nicht leer sein");
     }
 }

@@ -9,7 +9,6 @@ namespace Umsatzschätzung.App.Ui;
 public sealed class LineGroup
 {
     public required string Supplier { get; init; }
-    public required string? VatId { get; init; }
     public required string? Article { get; init; }
     public required string Name { get; init; }
     public required string Unit { get; init; }
@@ -130,10 +129,10 @@ public partial class MappingView : Screen
             {
                 var l = inv.Lines[j];
                 if (!string.IsNullOrEmpty(l.MappingId)) continue;
-                var key = inv.SupplierVatId + "|" + inv.SupplierName + "|" + (string.IsNullOrEmpty(l.SellerArticleId) ? l.Name : l.SellerArticleId);
+                var key = inv.SupplierName + "|" + (string.IsNullOrEmpty(l.SellerArticleId) ? l.Name : l.SellerArticleId);
                 if (!groups.TryGetValue(key, out var g))
                 {
-                    g = new LineGroup { Supplier = inv.SupplierName, VatId = inv.SupplierVatId, Article = l.SellerArticleId, Name = l.Name, Unit = l.UnitCode };
+                    g = new LineGroup { Supplier = inv.SupplierName, Article = l.SellerArticleId, Name = l.Name, Unit = l.UnitCode };
                     groups[key] = g;
                 }
                 g.Lines.Add((i, j));
@@ -163,7 +162,7 @@ public partial class MappingView : Screen
         var lineItem = Session.Case.Invoices[inv].Lines[line];
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.SuggestMapping(lineItem, g.VatId, Ct);
+            var resp = await Session.Service.SuggestMapping(lineItem, g.Supplier, Ct);
             if (seq != suggestSeq) return;
             model.Loading = false;
             model.SetCandidates(resp.Candidates);
@@ -200,7 +199,7 @@ public partial class MappingView : Screen
         var mapping = new ArticleMapping
         {
             Id = Session.NewId("map"),
-            SupplierVatId = g.VatId,
+            SupplierName = g.Supplier,
             SupplierArticleId = g.Article,
             Name = g.Name,
             Observed = g.Name,

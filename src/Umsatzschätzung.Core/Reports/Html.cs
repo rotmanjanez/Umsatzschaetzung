@@ -158,11 +158,11 @@ public static class Html
         }
         else
         {
-            b.Append("<table>\n<thead><tr><th class=\"wide\">Zutat und Grundlage</th><th class=\"num\">Schwund</th><th class=\"num\">Eigenverbrauch</th><th class=\"num\">Personal</th><th class=\"num\">Freiabgabe</th><th class=\"num\">Ausbeute</th></tr></thead>\n<tbody>\n");
+            b.Append("<table>\n<thead><tr><th class=\"wide\">Zutat</th><th class=\"num\">Schwund</th><th class=\"num\">Eigenverbrauch</th><th class=\"num\">Personal</th><th class=\"num\">Freiabgabe</th><th class=\"num\">Ausbeute</th></tr></thead>\n<tbody>\n");
             foreach (var y in f.YieldRates)
             {
-                var basis = (y.Chosen ? "In der Prüfung gewählt. " : "") + y.Source;
-                Row(b, Esc(y.Ingredient) + "<br><span class=\"note\">" + Esc(basis) + "</span>", Num(y.Shrinkage), Num(y.OwnUse), Num(y.Staff), Num(y.Free), Num(y.Yield));
+                var name = Esc(y.Ingredient) + (y.Chosen ? "<br><span class=\"note\">In der Prüfung gewählt.</span>" : "");
+                Row(b, name, Num(y.Shrinkage), Num(y.OwnUse), Num(y.Staff), Num(y.Free), Num(y.Yield));
             }
             b.Append("</tbody>\n</table>\n");
             b.Append("<p class=\"note\">Schwund umfasst bei Getränken den Schankverlust. Ohne Wahl in der Prüfung gilt der hinterlegte Standardsatz.</p>\n");

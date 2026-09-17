@@ -15,14 +15,14 @@ public sealed class Matcher
     Lexicon? lexicon;
     Evidence? evidence;
 
-    public List<Suggestion> Suggest(RuleSet rs, string? supplierVatId, InvoiceLine line)
+    public List<Suggestion> Suggest(RuleSet rs, string? supplier, InvoiceLine line)
     {
-        if (Match.Mapping(rs, supplierVatId, DateOnly.FromDateTime(DateTime.Now), line) is { } hit)
+        if (Match.Mapping(rs, supplier, DateOnly.FromDateTime(DateTime.Now), line) is { } hit)
             return [new Suggestion(hit, 100, OriginKind.Exact)];
 
         Index(rs);
         var scores = lexicon!.Score(line.Name);
-        foreach (var (id, learned) in evidence!.Score(line.Name, supplierVatId))
+        foreach (var (id, learned) in evidence!.Score(line.Name, supplier))
             scores[id] = Fuse(scores.GetValueOrDefault(id), learned);
 
         var pack = PackSize.Read(line.Name);
@@ -35,7 +35,7 @@ public sealed class Matcher
             .Where(c => c.Factor is not null)
             .Take(Candidates)
             .Select(c => new Suggestion(
-                Mapping(supplierVatId, line, c.Ingredient.Id, c.Factor!.Value),
+                Mapping(supplier, line, c.Ingredient.Id, c.Factor!.Value),
                 Confidence(c.Score),
                 OriginKind.Lexical))
             .ToList();
@@ -78,17 +78,17 @@ public sealed class Matcher
 
     static int Confidence(double score) => Math.Clamp((int)Math.Round(score * 100), 1, 99);
 
-    static ArticleMapping Mapping(string? supplierVatId, InvoiceLine line, string ingredientId, long factor)
+    static ArticleMapping Mapping(string? supplier, InvoiceLine line, string ingredientId, long factor)
     {
         var m = new ArticleMapping
         {
-            SupplierVatId = supplierVatId,
+            SupplierName = supplier,
             Gtin = line.Gtin,
             Observed = line.Name,
             IngredientId = ingredientId,
             Factor = factor,
         };
-        if (!string.IsNullOrEmpty(supplierVatId)) m.SupplierArticleId = line.SellerArticleId;
+        if (!string.IsNullOrEmpty(supplier)) m.SupplierArticleId = line.SellerArticleId;
         if (string.IsNullOrEmpty(m.SupplierArticleId) && string.IsNullOrEmpty(m.Gtin)) m.Name = line.Name;
         return m;
     }

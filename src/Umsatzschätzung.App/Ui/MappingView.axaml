@@ -15,17 +15,14 @@
                 <DockPanel>
                     <ui:SearchBox x:Name="Search" DockPanel.Dock="Top" Margin="8"/>
                     <Grid>
-                    <DataGrid x:Name="Groups" Theme="{StaticResource Grid}" IsReadOnly="True" SelectionChanged="GroupSelected">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Position" Width="*" SortMemberPath="Name">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:LineGroup">
-                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <ListBox x:Name="Groups" SelectionChanged="GroupSelected" BorderThickness="0" Background="Transparent"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="ui:LineGroup">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="4,6"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                     <StackPanel MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16" IsVisible="{Binding NoInvoices}">
                         <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
                         <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"

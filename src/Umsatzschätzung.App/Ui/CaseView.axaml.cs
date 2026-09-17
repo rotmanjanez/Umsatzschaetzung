@@ -23,7 +23,6 @@ public sealed class RuleOption(YieldRule rule, string text)
 {
     public YieldRule Rule { get; } = rule;
     public string Text { get; } = text;
-    public string Source => Rule.Source;
 }
 
 public sealed class YieldKindGroup(string kind, List<YieldGroupRow> rows) : Observable
@@ -218,7 +217,7 @@ public sealed class CaseModel : Observable
                 foreach (var line in product.Recipe) ids.Add(line.IngredientId);
         foreach (var invoice in k.Invoices)
             foreach (var line in invoice.Lines)
-                if (Match.Mapping(rs, invoice.SupplierVatId, invoice.Date, line) is { } m) ids.Add(m.IngredientId);
+                if (Match.Mapping(rs, invoice.SupplierName, invoice.Date, line) is { } m) ids.Add(m.IngredientId);
         return ids;
     }
 

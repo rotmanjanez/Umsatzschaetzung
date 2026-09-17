@@ -13,7 +13,7 @@ public sealed class Evidence
     const double UnconfirmedWeight = 0.25;
     const double UnseenPrior = 1.0;
 
-    readonly record struct Posting(string IngredientId, string? SupplierVatId, double Weight);
+    readonly record struct Posting(string IngredientId, string? SupplierName, double Weight);
 
     readonly Dictionary<string, List<Posting>> postings = new(StringComparer.Ordinal);
     readonly Dictionary<string, double> idf = new(StringComparer.Ordinal);
@@ -27,7 +27,7 @@ public sealed class Evidence
             foreach (var t in Terms(text))
             {
                 if (!postings.TryGetValue(t, out var list)) postings[t] = list = [];
-                list.Add(new Posting(m.IngredientId, m.SupplierVatId, weight));
+                list.Add(new Posting(m.IngredientId, m.SupplierName, weight));
             }
         }
         var total = postings.Values.SelectMany(p => p).Select(p => p.IngredientId).ToHashSet(StringComparer.Ordinal).Count;
@@ -35,7 +35,7 @@ public sealed class Evidence
             idf[t] = Math.Log(1.0 + (double)total / p.Select(x => x.IngredientId).ToHashSet(StringComparer.Ordinal).Count);
     }
 
-    public Dictionary<string, double> Score(string text, string? supplierVatId)
+    public Dictionary<string, double> Score(string text, string? supplier)
     {
         var terms = Terms(text).Where(postings.ContainsKey).ToList();
         var scores = new Dictionary<string, double>(StringComparer.Ordinal);
@@ -47,7 +47,7 @@ public sealed class Evidence
             var seen = UnseenPrior;
             foreach (var p in postings[t])
             {
-                var w = p.Weight * (p.SupplierVatId is not null && p.SupplierVatId == supplierVatId ? SupplierWeight : 1.0);
+                var w = p.Weight * (p.SupplierName is not null && p.SupplierName == supplier ? SupplierWeight : 1.0);
                 weights[p.IngredientId] = weights.GetValueOrDefault(p.IngredientId) + w;
                 seen += w;
             }

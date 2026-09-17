@@ -31,7 +31,7 @@ internal static class Yield
             if (Match.YieldRule(c, rs, ing) is var (r, chosen))
             {
                 parts = new(r.Shrinkage, r.OwnUse, r.Staff, r.Free);
-                sources.Add(new SourceRef { Kind = SourceKind.Rule, Entity = Entity.YieldRule, EntityId = r.Id, Reason = r.Source });
+                sources.Add(new SourceRef { Kind = SourceKind.Rule, Entity = Entity.YieldRule, EntityId = r.Id });
                 if (chosen)
                     sources.Add(new SourceRef { Kind = SourceKind.Case, EntityId = c.Id, Reason = "gewählte Ertragsregel „" + r.Name + "“" });
             }

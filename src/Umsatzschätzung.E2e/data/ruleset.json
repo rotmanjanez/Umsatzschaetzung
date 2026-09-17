@@ -62,7 +62,7 @@
   "mappings": {
     "map.fass50": {
       "id": "map.fass50",
-      "supplierVatId": "DE811947233",
+      "supplierName": "Rheinland Getränke Fachgroßhandel GmbH",
       "supplierArticleId": "31090",
       "unitCode": "XKG",
       "ingredientId": "ing.bier.fass",
@@ -76,7 +76,7 @@
     },
     "map.kiste24x033": {
       "id": "map.kiste24x033",
-      "supplierVatId": "DE811947233",
+      "supplierName": "Rheinland Getränke Fachgroßhandel GmbH",
       "supplierArticleId": "31210",
       "unitCode": "XCS",
       "ingredientId": "ing.bier.flasche",
@@ -90,7 +90,7 @@
     },
     "map.korn07": {
       "id": "map.korn07",
-      "supplierVatId": "DE811947233",
+      "supplierName": "Rheinland Getränke Fachgroßhandel GmbH",
       "supplierArticleId": "55120",
       "unitCode": "XBO",
       "ingredientId": "ing.korn",
@@ -188,7 +188,6 @@
       "ownUse": 0,
       "staff": 100,
       "free": 100,
-      "source": "Richtsatzsammlung des BMF, Gewerbeklasse Schankwirtschaft; Schankverlust, Personalverbrauch und Freirunden",
       "default": true,
       "meta": {
         "validFrom": "2024-01-01",
@@ -204,7 +203,6 @@
       "ownUse": 0,
       "staff": 100,
       "free": 0,
-      "source": "Richtsatzsammlung des BMF, Gewerbeklasse Schankwirtschaft; kein Schankverlust bei Flaschenware",
       "default": true,
       "meta": {
         "validFrom": "2024-01-01",
@@ -220,7 +218,6 @@
       "ownUse": 100,
       "staff": 0,
       "free": 0,
-      "source": "Richtsatzsammlung des BMF, Gewerbeklasse Schankwirtschaft; Ausschankverlust und Eigenverbrauch",
       "default": true,
       "meta": {
         "validFrom": "2024-01-01",

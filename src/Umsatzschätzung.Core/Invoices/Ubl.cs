@@ -24,18 +24,10 @@ public static class Ubl
         {
             Source = Source.Ubl,
             SupplierName = SupplierName(supplier),
-            SupplierVatId = Numbers.Optional(VatId(supplier)),
             Number = Xml.Text(root, "ID").Trim(),
             Currency = Xml.Text(root, "DocumentCurrencyCode").Trim(),
         };
-        try
-        {
-            inv.Date = Numbers.Date(Xml.Text(root, "IssueDate"), "yyyy-MM-dd");
-        }
-        catch (InvalidDataException e)
-        {
-            throw new InvalidDataException($"ubl: {e.Message}", e);
-        }
+        inv.Date = Numbers.OptionalDate(Xml.Text(root, "IssueDate"), "yyyy-MM-dd");
         inv.NetTotal = Numbers.Wrap("ubl: net total", () => Numbers.OptionalCents(totals is null ? "" : Xml.Text(totals, "TaxExclusiveAmount")));
         inv.GrossTotal = Numbers.Wrap("ubl: gross total", () => Numbers.OptionalCents(totals is null ? "" : Xml.Text(totals, "TaxInclusiveAmount")));
         var i = 0;
@@ -55,20 +47,6 @@ public static class Ubl
             if (n.Trim() is { Length: > 0 } t)
                 return t;
         return Xml.Text(supplier, "Party>PartyLegalEntity>RegistrationName").Trim();
-    }
-
-    static string VatId(XElement? supplier)
-    {
-        if (supplier is null)
-            return "";
-        var schemes = Xml.Path(supplier, "Party>PartyTaxScheme").ToList();
-        foreach (var s in schemes)
-            if (string.Equals(Xml.Text(s, "TaxScheme>ID").Trim(), "VAT", StringComparison.OrdinalIgnoreCase))
-                return Xml.Text(s, "CompanyID").Trim();
-        foreach (var s in schemes)
-            if (Xml.Text(s, "CompanyID").Trim() is { Length: > 0 } id)
-                return id;
-        return "";
     }
 
     static InvoiceLine Line(XElement l, int index)

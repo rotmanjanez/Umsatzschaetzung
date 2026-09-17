@@ -71,27 +71,23 @@
                 <Grid ColumnDefinitions="*,12,*,12,*">
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Lieferant" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="SupplierBox" Classes.flagged="{Binding SupplierFlagged}" ToolTip.Tip="{Binding SupplierFlag}" Text="{Binding Supplier, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                        <TextBox x:Name="SupplierBox" Text="{Binding Supplier, Mode=TwoWay}" GotFocus="HeaderFocus"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="USt-ID" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="VatIdBox" Text="{Binding VatId, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                        <TextBlock Text="Rechnungsnummer" Theme="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="NumberBox" Text="{Binding Number, Mode=TwoWay}" GotFocus="HeaderFocus"/>
                     </StackPanel>
                     <StackPanel Grid.Column="4">
-                        <TextBlock Text="Rechnungsnummer" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="NumberBox" Classes.flagged="{Binding NumberFlagged}" ToolTip.Tip="{Binding NumberFlag}" Text="{Binding Number, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                        <TextBlock Text="Datum" Theme="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="DateBox" Text="{Binding Date, Mode=TwoWay}" GotFocus="HeaderFocus"/>
                     </StackPanel>
                 </Grid>
                 <Grid ColumnDefinitions="*,12,*,12,*">
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Datum" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="DateBox" Classes.flagged="{Binding DateFlagged}" ToolTip.Tip="{Binding DateFlag}" Text="{Binding Date, Mode=TwoWay}" GotFocus="HeaderFocus"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
                         <TextBlock Text="Netto" Theme="{StaticResource FieldLabel}"/>
                         <TextBlock Text="{Binding NetTotal}" Theme="{StaticResource Number}" HorizontalAlignment="Left" ToolTip.Tip="{Binding NetFlag}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="4">
+                    <StackPanel Grid.Column="2">
                         <TextBlock Text="Brutto" Theme="{StaticResource FieldLabel}"/>
                         <TextBlock Text="{Binding GrossTotal}" Theme="{StaticResource Number}" HorizontalAlignment="Left" ToolTip.Tip="{Binding GrossFlag}"/>
                     </StackPanel>

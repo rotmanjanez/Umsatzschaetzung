@@ -33,7 +33,7 @@ public static class Normalize
         foreach (var inv in c.Invoices)
             foreach (var line in inv.Lines)
             {
-                var m = Match.Mapping(rs, inv.SupplierVatId, inv.Date, line);
+                var m = Match.Mapping(rs, inv.SupplierName, inv.Date, line);
                 if (m is null || !rs.Ingredients.TryGetValue(m.IngredientId, out var ing))
                 {
                     ex.Unmapped.Add(new UnmappedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet });

@@ -218,13 +218,15 @@ internal static class Numbers
     public static long OptionalBp(string s) => s.Trim().Length == 0 ? 0 : Bp(s);
     public static long BaseQty(string s) => s.Trim().Length == 0 ? 1000 : Milli(s);
 
-    public static DateOnly Date(string s, params string[] formats)
+    // The invoice date is optional: an absent or unreadable one leaves the field empty
+    // instead of rejecting the document.
+    public static DateOnly? OptionalDate(string s, params string[] formats)
     {
         s = s.Trim();
         foreach (var f in formats)
             if (DateOnly.TryParseExact(s, f, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
                 return d;
-        throw new InvalidDataException($"invalid date \"{s}\"");
+        return null;
     }
 
     public static long LineNo(string id, int index) =>

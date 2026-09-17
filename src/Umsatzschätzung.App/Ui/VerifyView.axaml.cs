@@ -84,12 +84,11 @@ public sealed class LineRow : Observable
 
 public sealed class VerifyModel : Observable
 {
-    string supplier = "", vatId = "", number = "", date = "", netTotal = "", grossTotal = "";
-    string? supplierFlag, numberFlag, dateFlag, netFlag, grossFlag;
+    string supplier = "", number = "", date = "", netTotal = "", grossTotal = "";
+    string? netFlag, grossFlag;
     bool canConfirm, confirming;
 
     public string Supplier { get => supplier; set => Set(ref supplier, value); }
-    public string VatId { get => vatId; set => Set(ref vatId, value); }
     public string Number { get => number; set => Set(ref number, value); }
     public string Date { get => date; set => Set(ref date, value); }
     public string NetTotal { get => netTotal; set => Set(ref netTotal, value); }
@@ -98,12 +97,6 @@ public sealed class VerifyModel : Observable
     public bool Confirming { get => confirming; set { if (Set(ref confirming, value)) { Raise(nameof(ConfirmReady)); Raise(nameof(ConfirmLabel)); } } }
     public bool ConfirmReady => canConfirm && !confirming;
     public string ConfirmLabel => confirming ? "Wird übernommen …" : "Bestätigen";
-    public string? SupplierFlag => supplierFlag;
-    public bool SupplierFlagged => supplierFlag is not null;
-    public string? NumberFlag => numberFlag;
-    public bool NumberFlagged => numberFlag is not null;
-    public string? DateFlag => dateFlag;
-    public bool DateFlagged => dateFlag is not null;
     public string? NetFlag => netFlag;
     public string? GrossFlag => grossFlag;
     public ObservableCollection<string> HeaderFlags { get; } = [];
@@ -111,36 +104,29 @@ public sealed class VerifyModel : Observable
 
     public void SetHeaderFlags(IEnumerable<Flag> flags)
     {
-        supplierFlag = numberFlag = dateFlag = netFlag = grossFlag = null;
+        netFlag = grossFlag = null;
         HeaderFlags.Clear();
         foreach (var f in flags)
         {
             HeaderFlags.Add(f.Message);
             switch (f.Field)
             {
-                case Field.Supplier: supplierFlag ??= f.Message; break;
-                case Field.InvoiceNumber: numberFlag ??= f.Message; break;
-                case Field.InvoiceDate: dateFlag ??= f.Message; break;
                 case Field.NetTotal: netFlag ??= f.Message; break;
                 case Field.GrossTotal: grossFlag ??= f.Message; break;
             }
         }
-        foreach (var p in new[]
-                 {
-                     nameof(SupplierFlag), nameof(SupplierFlagged), nameof(NumberFlag), nameof(NumberFlagged), nameof(DateFlag),
-                     nameof(DateFlagged), nameof(NetFlag), nameof(GrossFlag),
-                 })
-            Raise(p);
+        Raise(nameof(NetFlag));
+        Raise(nameof(GrossFlag));
     }
 }
 
 public partial class VerifyView : Screen
 {
-    static readonly HashSet<string> Blocking = ["line_total", "sum_net", "missing_field"];
+    static readonly HashSet<string> Blocking = ["line_total", "sum_net"];
     static readonly Field[] LineFields = [Field.Quantity, Field.Unit, Field.Name, Field.UnitPrice, Field.LineNet, Field.Vat];
 
     static readonly string[] HeaderFields =
-        [nameof(VerifyModel.Supplier), nameof(VerifyModel.VatId), nameof(VerifyModel.Number), nameof(VerifyModel.Date)];
+        [nameof(VerifyModel.Supplier), nameof(VerifyModel.Number), nameof(VerifyModel.Date)];
 
     readonly VerifyModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
@@ -204,7 +190,6 @@ public partial class VerifyView : Screen
     {
         applying = true;
         model.Supplier = draft.SupplierName;
-        model.VatId = draft.SupplierVatId ?? "";
         model.Number = draft.Number;
         model.Date = display.Date;
         model.NetTotal = display.NetTotal;
@@ -227,7 +212,6 @@ public partial class VerifyView : Screen
     {
         if (applying || Array.IndexOf(HeaderFields, e.PropertyName) < 0) return;
         draft.SupplierName = model.Supplier;
-        draft.SupplierVatId = model.VatId == "" ? null : model.VatId;
         draft.Number = model.Number;
         if (Input.Date(model.Date) is { } d) draft.Date = d;
         Schedule();
@@ -343,7 +327,7 @@ public partial class VerifyView : Screen
     void HeaderFocus(object? sender, FocusChangedEventArgs e)
     {
         if (pages.Count == 0) return;
-        var field = ReferenceEquals(sender, SupplierBox) || ReferenceEquals(sender, VatIdBox) ? Field.Supplier
+        var field = ReferenceEquals(sender, SupplierBox) ? Field.Supplier
             : ReferenceEquals(sender, NumberBox) ? Field.InvoiceNumber
             : Field.InvoiceDate;
         FocusCell(0, pages[0].Header.GetValueOrDefault(field)?.Box);
