@@ -108,20 +108,6 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Zuordnung" Width="220">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:InvoiceLineRow">
-                                                <Grid>
-                                                    <Border Theme="{StaticResource BadgeSuccess}" IsVisible="{Binding Mapped}" ToolTip.Tip="{Binding Mapping}">
-                                                        <TextBlock Text="{Binding Mapping}" Theme="{StaticResource BadgeText}" TextTrimming="CharacterEllipsis" MaxWidth="200"/>
-                                                    </Border>
-                                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Unmapped}">
-                                                        <TextBlock Text="Nicht zugeordnet" Theme="{StaticResource BadgeText}"/>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
