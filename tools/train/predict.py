@@ -19,6 +19,17 @@ from model import Tagger, quantise_box, tokenizer
 from schema import LABELS, ROLES, read_jsonl
 
 
+# LABELS grew from 13 to 19 when the label classes were appended; the value classes
+# kept their ids, so LABELS[:n] decodes an older, narrower head exactly.
+def head_size(state):
+    return state["word_head.weight"].shape[0]
+
+
+def softmax(x):
+    e = np.exp(x - x.max(-1, keepdims=True))
+    return e / e.sum(-1, keepdims=True)
+
+
 @torch.no_grad()
 def tag_page(model, tk, page, device):
     ws = list(windows(page, tk))
@@ -42,14 +53,16 @@ def tag_page(model, tk, page, device):
         for i, at in enumerate(present):
             roles[w["offset"] + at - 1].append(rl[i])
 
+    names = LABELS[:seq.shape[-1]]
     out, at = [], 0
     for word in page["words"]:
         sub = tk.encode(" " + word["t"], add_special_tokens=False)
         if not sub or at >= len(seq):
             continue
         role = roles.get(at)
+        k = int(seq[at].argmax())
         out.append({"t": word["t"], "box": word["box"], "row": word["row"],
-                    "pred": LABELS[int(seq[at].argmax())],
+                    "pred": names[k], "conf": round(float(softmax(seq[at])[k]), 3),
                     "role": ROLES[int(np.mean(role, 0).argmax())] if role else word.get("role", "line-item")})
         at += len(sub)
     return out
@@ -74,7 +87,7 @@ def onnx_page(sess, tk, page, bos, eos):
     if not kept:
         return []
 
-    word_acc = np.zeros((len(ids), len(LABELS)), dtype=np.float64)
+    word_acc = None
     role_acc = defaultdict(lambda: np.zeros(len(ROLES)))
 
     body = MAX_LEN - 2
@@ -90,6 +103,8 @@ def onnx_page(sess, tk, page, bos, eos):
         wl, rl = sess.run(["word_logits", "role_logits"],
                           {"input_ids": inp, "bbox": bb,
                            "attention_mask": np.ones((1, n), dtype=np.int64)})
+        if word_acc is None:
+            word_acc = np.zeros((len(ids), wl.shape[-1]), dtype=np.float64)
         word_acc[s:e] += wl[0, 1:n - 1]
 
         members = {}
@@ -107,8 +122,10 @@ def onnx_page(sess, tk, page, bos, eos):
         if e == len(ids):
             break
 
+    names = LABELS[:word_acc.shape[-1]]
     return [{"t": w["t"], "box": w["box"], "row": w["row"],
-             "pred": LABELS[int(word_acc[st].argmax())],
+             "pred": names[int(word_acc[st].argmax())],
+             "conf": round(float(softmax(word_acc[st]).max()), 3),
              "role": ROLES[int(role_acc[w["row"]].argmax())] if w["row"] in role_acc
              else "line-item"}
             for w, st in zip(kept, starts)]
@@ -138,8 +155,9 @@ def main():
     elif not a.truth_only:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tk = tokenizer()
-        model = Tagger().to(device).eval()
-        model.load_state_dict(torch.load(a.run / "model.pt", map_location=device, weights_only=True))
+        state = torch.load(a.run / "model.pt", map_location=device, weights_only=True)
+        model = Tagger(n_labels=head_size(state)).to(device).eval()
+        model.load_state_dict(state)
 
     rows, got = defaultdict(list), defaultdict(list)
     for p in pages:

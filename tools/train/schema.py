@@ -2,8 +2,18 @@
 import json
 from pathlib import Path
 
+# The value classes come first and keep their ids; the label classes are appended
+# so a checkpoint with the old 13-way head still maps onto LABELS[:13].
 FIELDS = ["quantity", "unit", "name", "articleId", "unitPrice", "lineNet", "vat",
-          "invoiceNumber", "invoiceDate", "supplier", "netTotal", "grossTotal"]
+          "invoiceNumber", "invoiceDate", "supplier", "netTotal", "grossTotal",
+          # Header and totals keys as classes of their own: assembly keys the value
+          # off its label instead of taking the first tagged run on the page.
+          # `otherLabel` is every key that is not ours (Kundennummer, Bestellnummer,
+          # Lieferdatum, UID, Tel ...), which is what separates "Rechnungsnummer"
+          # from "Kundennummer" for the model.
+          "numberLabel", "dateLabel", "netLabel", "grossLabel", "vatLabel", "otherLabel"]
+LABEL_OF = {"numberLabel": "invoiceNumber", "dateLabel": "invoiceDate",
+            "netLabel": "netTotal", "grossLabel": "grossTotal", "vatLabel": "vat"}
 LABELS = ["O"] + FIELDS
 LABEL_ID = {n: i for i, n in enumerate(LABELS)}
 

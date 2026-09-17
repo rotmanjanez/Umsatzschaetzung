@@ -36,12 +36,12 @@ def tokenizer(text=GOTTBERT):
 class Tagger(nn.Module):
     """Word classes on the first subword of each word, row roles on a mean pool."""
 
-    def __init__(self, body=None, dropout=0.1):
+    def __init__(self, body=None, dropout=0.1, n_labels=None):
         super().__init__()
         self.body = body if body is not None else backbone()
         h = self.body.config.hidden_size
         self.dropout = nn.Dropout(dropout)
-        self.word_head = nn.Linear(h, len(LABELS))
+        self.word_head = nn.Linear(h, n_labels or len(LABELS))
         self.role_head = nn.Linear(h, len(ROLES))
 
     def forward(self, input_ids, bbox, attention_mask, row_pool=None):
