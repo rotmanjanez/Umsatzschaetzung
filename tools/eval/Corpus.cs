@@ -48,7 +48,9 @@ public static class Corpus
                 Text = repair ? Repair(label, text) : text,
                 Box = new Box(Round(x), Round(box[1].GetDouble()), Round(box[2].GetDouble()), Round(box[3].GetDouble())),
             };
-            tagged.Add((w.GetProperty("row").GetInt32(), x, new TaggedWord(word, field, role, w.GetProperty("row").GetInt32())));
+            var conf = w.TryGetProperty("conf", out var c) ? c.GetSingle() : 1f;
+            var row = w.GetProperty("row").GetInt32();
+            tagged.Add((row, x, new TaggedWord(word, field, role, row, conf)));
         }
         return ([.. tagged.OrderBy(t => t.Row).ThenBy(t => t.X).Select(t => t.Word)], perLineVat);
     }
@@ -69,6 +71,12 @@ public static class Corpus
         "supplier" => Model.Field.Supplier,
         "netTotal" => Model.Field.NetTotal,
         "grossTotal" => Model.Field.GrossTotal,
+        "numberLabel" => Model.Field.NumberLabel,
+        "dateLabel" => Model.Field.DateLabel,
+        "netLabel" => Model.Field.NetLabel,
+        "grossLabel" => Model.Field.GrossLabel,
+        "vatLabel" => Model.Field.VatLabel,
+        "otherLabel" => Model.Field.OtherLabel,
         _ => null,
     };
 
