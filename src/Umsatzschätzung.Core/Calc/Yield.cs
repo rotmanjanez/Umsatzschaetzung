@@ -26,6 +26,7 @@ internal static class Yield
             var u = uses[id];
             if (!rs.Ingredients.TryGetValue(id, out var ing))
                 throw new InvalidOperationException($"yield: unknown ingredient \"{id}\"");
+            var unit = Scale.Of(rs, id) ?? Unit.Piece;
             var parts = default(Parts);
             List<SourceRef> sources = [];
             if (Match.YieldRule(c, rs, ing) is var (r, chosen))
@@ -40,8 +41,8 @@ internal static class Yield
             {
                 Label = ing.Name + ": verkaufsfähige Menge",
                 Value = u.Sellable,
-                Unit = Units.Value(ing.BaseUnit),
-                Formula = $"{Format.Qty(u.Used, ing.BaseUnit)} × ({parts.Formula(ing.BaseUnit)}) = {Format.Qty(u.Sellable, ing.BaseUnit)}",
+                Unit = Units.Value(unit),
+                Formula = $"{Format.Qty(u.Used, unit)} × ({parts.Formula(unit)}) = {Format.Qty(u.Sellable, unit)}",
                 Inputs = [u.Node!],
                 Sources = sources,
             };

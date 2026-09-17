@@ -7,6 +7,7 @@ public sealed class InventoryEntry
     public string IngredientId { get; set; } = "";
     public long Opening { get; set; }
     public long Closing { get; set; }
+    public string Unit { get; set; } = "";
 }
 
 public sealed class YieldChoice

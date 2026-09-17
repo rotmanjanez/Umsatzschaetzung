@@ -294,8 +294,7 @@ public static class Display
     public static string IngredientName(RuleSet rs, string id) =>
         rs.Ingredients.TryGetValue(id, out var e) ? e.Name : id;
 
-    public static Unit IngredientUnit(RuleSet rs, string id) =>
-        rs.Ingredients.TryGetValue(id, out var e) ? e.BaseUnit : Unit.Piece;
+    public static Unit IngredientUnit(RuleSet rs, string id) => Scale.Of(rs, id) ?? Unit.Piece;
 
     public static string ProductName(RuleSet rs, string id) =>
         rs.Products.TryGetValue(id, out var e) ? e.Name : id;
@@ -304,7 +303,10 @@ public static class Display
         rs.Products.TryGetValue(id, out var p) ? Recipe(rs, p) : "";
 
     public static string Recipe(RuleSet rs, Product p) =>
-        string.Join(", ", p.Recipe.Select(l => Format.Qty(l.Amount, IngredientUnit(rs, l.IngredientId)) + " " + IngredientName(rs, l.IngredientId)));
+        string.Join(", ", p.Recipe.Select(l => RecipeAmount(l) + " " + IngredientName(rs, l.IngredientId)));
+
+    public static string RecipeAmount(RecipeLine l) =>
+        Units.Lookup(l.Unit) is { } u ? Format.Group(l.Amount) + " " + u.Name : Format.Group(l.Amount);
 
     public static string ProductNote(ProductRowDisplay p) => p.Disabled ? "deaktiviert" : p.PriceMissing ? "Preis fehlt" : "";
 
@@ -337,5 +339,7 @@ public static class Display
     }
 
     public static string CandidateLabel(RuleSet rs, ArticleMapping m) =>
-        IngredientName(rs, m.IngredientId) + " × " + Format.Qty(m.Factor, IngredientUnit(rs, m.IngredientId));
+        m.Factor is { } f
+            ? IngredientName(rs, m.IngredientId) + " × " + Format.Qty(f, IngredientUnit(rs, m.IngredientId))
+            : IngredientName(rs, m.IngredientId);
 }

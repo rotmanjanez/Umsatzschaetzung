@@ -28,7 +28,6 @@
     "ing.bier.fass": {
       "id": "ing.bier.fass",
       "name": "Fassbier Pils",
-      "baseUnit": "ml",
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1001,
@@ -39,7 +38,6 @@
     "ing.bier.flasche": {
       "id": "ing.bier.flasche",
       "name": "Flaschenbier Pils 0,33 l",
-      "baseUnit": "ml",
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1002,
@@ -50,7 +48,6 @@
     "ing.korn": {
       "id": "ing.korn",
       "name": "Doppelkorn 38 % vol",
-      "baseUnit": "ml",
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1003,
@@ -110,7 +107,8 @@
       "recipe": [
         {
           "ingredientId": "ing.bier.fass",
-          "amount": 300
+          "amount": 300,
+          "unit": "MLT"
         }
       ],
       "meta": {
@@ -125,7 +123,8 @@
       "recipe": [
         {
           "ingredientId": "ing.bier.fass",
-          "amount": 500
+          "amount": 500,
+          "unit": "MLT"
         }
       ],
       "meta": {
@@ -140,7 +139,8 @@
       "recipe": [
         {
           "ingredientId": "ing.bier.flasche",
-          "amount": 330
+          "amount": 330,
+          "unit": "MLT"
         }
       ],
       "meta": {
@@ -155,7 +155,8 @@
       "recipe": [
         {
           "ingredientId": "ing.korn",
-          "amount": 20
+          "amount": 20,
+          "unit": "MLT"
         }
       ],
       "meta": {
@@ -170,7 +171,8 @@
       "recipe": [
         {
           "ingredientId": "ing.korn",
-          "amount": 40
+          "amount": 40,
+          "unit": "MLT"
         }
       ],
       "meta": {

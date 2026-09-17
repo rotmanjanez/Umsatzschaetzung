@@ -24,6 +24,7 @@ public static class Calculation
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Warnings.AddRange(flags);
+        rep.Warnings.AddRange(Scale.Conflicts(rs, ex.Unused.Select(l => l.IngredientId)));
         rep.Ingredients = IngredientRows(uses, allocs);
         var s = rep.Totals;
         s.Purchases = c.Invoices.Sum(inv => inv.Lines.Sum(l => l.LineNet));
@@ -84,7 +85,7 @@ public static class Calculation
         foreach (var p in c.Pinned)
             if (rs.Products.TryGetValue(p.ProductId, out var prod))
                 foreach (var r in prod.Recipe)
-                    demand[r.IngredientId] = demand.GetValueOrDefault(r.IngredientId) + r.Amount * p.Portions;
+                    demand[r.IngredientId] = demand.GetValueOrDefault(r.IngredientId) + Scale.ToBase(r.Amount, r.Unit) * p.Portions;
         HashSet<string> output = [];
         foreach (var p in c.Pinned)
         {

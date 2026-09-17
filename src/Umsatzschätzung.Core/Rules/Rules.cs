@@ -12,6 +12,7 @@ public static class RuleCheck
         foreach (var (id, e) in rs.Ingredients) ValidateIngredient(rs, Keyed(id, e));
         foreach (var (id, e) in rs.Mappings) ValidateMapping(rs, Keyed(id, e));
         foreach (var (id, e) in rs.Products) ValidateProduct(rs, Keyed(id, e));
+        ValidateScales(rs);
         foreach (var (id, e) in rs.YieldRules) ValidateYieldRule(rs, Keyed(id, e));
     }
 
@@ -52,8 +53,6 @@ public static class RuleCheck
     static void ValidateIngredient(RuleSet rs, Ingredient e)
     {
         if (e.Name == "") throw new RulesException("Zutat: Name darf nicht leer sein");
-        if (!Enum.IsDefined(e.BaseUnit))
-            throw new RulesException($"Zutat \"{e.Name}\": Basiseinheit muss ml, g oder piece sein");
         if (e.CategoryId != "" && !rs.Categories.ContainsKey(e.CategoryId))
             throw new RulesException($"Zutat \"{e.Name}\": Kategorie \"{e.CategoryId}\" existiert nicht");
     }
@@ -62,7 +61,7 @@ public static class RuleCheck
     {
         if (string.IsNullOrEmpty(e.SupplierArticleId) && string.IsNullOrEmpty(e.Gtin) && string.IsNullOrEmpty(e.Name))
             throw new RulesException("Zuordnung: Artikelnummer, GTIN oder Namensmuster erforderlich");
-        if (e.Factor <= 0) throw new RulesException("Zuordnung: Faktor muss größer als 0 sein");
+        if (e.Factor is <= 0) throw new RulesException("Zuordnung: Faktor muss größer als 0 sein");
         if (!rs.Ingredients.ContainsKey(e.IngredientId))
             throw new RulesException($"Zuordnung: Zutat \"{e.IngredientId}\" existiert nicht");
     }
@@ -78,8 +77,33 @@ public static class RuleCheck
                 throw new RulesException($"Produkt \"{e.Name}\": Zutat \"{l.IngredientId}\" existiert nicht");
             if (l.Amount <= 0)
                 throw new RulesException($"Produkt \"{e.Name}\": Menge der Zutat \"{l.IngredientId}\" muss größer als 0 sein");
+            if (Units.Lookup(l.Unit) is null)
+                throw new RulesException($"Produkt \"{e.Name}\": Zutat \"{l.IngredientId}\" hat die unbekannte Einheit \"{l.Unit}\"");
         }
     }
+
+    // Die Rezeptur ist die einzige Stelle, an der eine Zutat eine Einheit bekommt. Zwei
+    // Rezepte dürfen sie deshalb nicht verschieden messen: Pommes in Stück und Pommes in
+    // Gramm sind zwei Zutaten, keine.
+    static void ValidateScales(RuleSet rs)
+    {
+        var seen = new Dictionary<string, (Unit Base, string Product)>(StringComparer.Ordinal);
+        foreach (var id in rs.Products.Keys.OrderBy(k => k, StringComparer.Ordinal))
+        {
+            var p = rs.Products[id];
+            foreach (var l in p.Recipe)
+            {
+                if (Units.Lookup(l.Unit) is not { } u) continue;
+                if (!seen.TryGetValue(l.IngredientId, out var first)) seen[l.IngredientId] = (u.Base, p.Name);
+                else if (first.Base != u.Base)
+                    throw new RulesException(
+                        $"Zutat \"{Name(rs, l.IngredientId)}\": \"{first.Product}\" rechnet in {Format.UnitName(first.Base)}, "
+                        + $"\"{p.Name}\" in {Format.UnitName(u.Base)}");
+            }
+        }
+    }
+
+    static string Name(RuleSet rs, string id) => rs.Ingredients.TryGetValue(id, out var i) ? i.Name : id;
 
     static void ValidateYieldRule(RuleSet rs, YieldRule e)
     {

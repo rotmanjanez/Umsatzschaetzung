@@ -73,7 +73,10 @@ internal static class Knapsack
         {
             var lines = new Dictionary<string, long>();
             foreach (var l in input.Recipe[p])
-                if (l.Amount > 0) lines[l.IngredientId] = lines.GetValueOrDefault(l.IngredientId) + l.Amount;
+            {
+                var amount = Scale.ToBase(l.Amount, l.Unit);
+                if (amount > 0) lines[l.IngredientId] = lines.GetValueOrDefault(l.IngredientId) + amount;
+            }
             pr.Amount[p] = lines;
         }
 

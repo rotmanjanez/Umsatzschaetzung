@@ -34,6 +34,16 @@ Check(status.RulesVersion == 0 && status.Problem is null, "status reads the seed
 var kase = await svc.ImportCase("case.json", File.ReadAllBytes(Path.Combine(data, "case.json")), ct);
 Check(kase.Case.Id == "case.bar.2024" && kase.Case.Invoices.Count == 1, "case import");
 
+var neu = await svc.PutCase(new Case
+{
+    Label = "Neue Prüfung",
+    PeriodFrom = new DateOnly(2024, 1, 1),
+    PeriodTo = new DateOnly(2024, 12, 31),
+    Taxpayer = new Taxpayer { Name = "Muster", TaxNumber = "123/4567", PabNumber = "89" },
+}, ct);
+Check(neu.Case.Id.StartsWith("fall-") && (await svc.ListCases(ct)).Cases.Any(c => c.Case.Id == neu.Case.Id),
+    "a case without an id gets one and is stored");
+
 var calc = await svc.Calculate(kase.Case.Id, ct);
 var summary = calc.Summary.ToDictionary(kv => kv.Key, kv => kv.Value);
 Check(summary["purchases"] == "1.690,00 €", "purchases " + summary["purchases"]);
@@ -60,16 +70,18 @@ Check(Size("Trg 6er Limo 0,33 l") == new Pack(6, 330, Unit.Ml), "pack: multipack
 Check(Size("Rinderhuefte, Abrechnung je kg") is null, "pack: nothing to read");
 Check(PackSize.Strip("Kiste Pils 20 x 0,5 l") == "Pils", "strip: packaging goes, the ware stays");
 Check(PackSize.Strip("Mehl Type 550 25 kg Sack") == "Mehl Type 550", "strip: a number outside a pack size is not packaging");
-Check(Matcher.Factor(null, "KGM", Unit.G) == 1000, "factor falls back to the billed unit");
+Check(Matcher.Factor(null, "KGM", Unit.G) is null, "factor: kg needs none, the unit table converts");
+Check(Matcher.Factor(new Pack(20, 500, Unit.Ml), "XCS", Unit.Ml) == 10000, "factor: a crate is only known from its pack size");
 Check(Matcher.Factor(new Pack(1, 750, Unit.Ml), "XBO", Unit.G) is null, "factor rejects a size in the wrong base unit");
 
 async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
-    (await svc.SuggestMapping(new InvoiceLine { Name = name, UnitCode = unitCode }, "ATU00000000", ct)).Candidates;
+    (await svc.SuggestMapping(new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct)).Candidates;
 
 var keg = await Suggest("Fassbier Pils, Keg 50 l", "XKG");
 Check(keg.Count > 0 && keg[0].Mapping.IngredientId == "ing.bier.fass" && keg[0].Mapping.Factor == 50000,
     "suggest: keg maps to the draught beer");
 Check(keg[0].Kind == OriginKind.Lexical && keg[0].Confidence is > 0 and < 100, "suggest: candidate is lexical and not certain");
+Check(keg[0].Mapping.Id == "", "suggest: a lexical candidate is a proposal, not a stored mapping");
 
 var schnaps = await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO");
 Check(schnaps.Count > 0 && schnaps[0].Mapping.IngredientId == "ing.korn" && schnaps[0].Mapping.Factor == 700,
@@ -97,12 +109,12 @@ var saved = await svc.SaveRule(korn, ct);
 Check(saved.RuleSet.Version == 1 && saved.RuleSet.Products["prod.korn.4cl"].Meta.Rev == 1, "save bumps version and stamps the entity");
 var alkoholfrei = new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" };
 Check((await svc.SaveRule(alkoholfrei, ct)).RuleSet.Categories.ContainsKey("cat.alkoholfrei"), "a category is a rule entity of its own");
-var water = new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", BaseUnit = Unit.Ml, CategoryId = "cat.alkoholfrei" };
+var water = new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", CategoryId = "cat.alkoholfrei" };
 var merged = (await svc.SaveRule(water, ct)).RuleSet;
 Check(merged.Version == 3 && merged.Ingredients.ContainsKey("ing.wasser") && merged.Products["prod.korn.4cl"].Meta.ValidTo is not null, "saves accumulate per entity");
 try
 {
-    await svc.SaveRule(new Ingredient { Id = "ing.kaputt", Name = "Kaputt", BaseUnit = Unit.G, CategoryId = "cat.fehlt" }, ct);
+    await svc.SaveRule(new Ingredient { Id = "ing.kaputt", Name = "Kaputt", CategoryId = "cat.fehlt" }, ct);
     Check(false, "ingredient with a dangling category must be rejected");
 }
 catch (ServiceError e)
@@ -118,15 +130,27 @@ catch (ServiceError e)
 {
     Check(e.Code == ErrorCode.Invalid, "invalid rule rejected with Invalid, got " + e.Code);
 }
+try
+{
+    await svc.DeleteRule(Entity.Ingredient, "ing.korn", ct);
+    Check(false, "an ingredient other entries reference must not be deletable");
+}
+catch (ServiceError e)
+{
+    Check(e.Code == ErrorCode.Conflict, "referenced ingredient rejected with Conflict, got " + e.Code);
+}
+var pruned = (await svc.DeleteRule(Entity.Product, "prod.korn.2cl", ct)).RuleSet;
+Check(pruned.Version == 4 && !pruned.Products.ContainsKey("prod.korn.2cl"), "delete drops the entity and bumps the version");
+
 var recalced = await svc.Calculate(kase.Case.Id, ct);
 Check(recalced.Products.All(p => p.ProductId != "prod.korn.4cl"), "retired product leaves the calculation");
 
 RuleStore Reopen() => new(store, snapshots, seed);
-Reopen();
+Check(!Reopen().Load().Products.ContainsKey("prod.korn.2cl"), "the seed does not resurrect a deleted entity");
 Check(Directory.GetFiles(snapshots).Length == 1, "second start snapshots the store");
 File.WriteAllText(Path.Combine(store, "rules.db"), "kaputt");
 var restored = Reopen();
-Check(restored.Notice is not null && restored.Load().Version == 3, "corrupt store restored from snapshot");
+Check(restored.Notice is not null && restored.Load().Version == 4, "corrupt store restored from snapshot");
 Check(Directory.GetFiles(store, "rules.db.defekt-*").Length == 1, "corrupt file kept aside");
 
 // Dynamic ranking: a confirmed mapping teaches the wording, and the wording carries
@@ -135,7 +159,7 @@ Check((await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG")).Count == 0, "suggest
 await svc.SaveRule(new ArticleMapping
 {
     Id = "map.zwickl",
-    SupplierVatId = "ATU00000000",
+    SupplierName = "Rheinland Getränke Fachgroßhandel GmbH",
     SupplierArticleId = "Z-1",
     Observed = "Zwickl naturtrueb, Keg 30 l",
     IngredientId = "ing.bier.fass",

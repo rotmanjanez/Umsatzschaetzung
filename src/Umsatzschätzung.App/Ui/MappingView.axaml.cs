@@ -190,10 +190,17 @@ public partial class MappingView : Screen
             await AssignId(g, suggested.Id, chosen.Candidate.Display);
             return;
         }
-        var factor = Input.Int(model.Factor);
-        if (model.Ingredient is null || factor is null)
+        if (model.Ingredient is null)
         {
-            Session.Fail("Bitte Zutat und Faktor angeben.");
+            Session.Fail("Bitte eine Zutat wählen.");
+            return;
+        }
+        var unit = Scale.Of(Session.Rules!.RuleSet, model.Ingredient.Id);
+        var needsFactor = Units.Lookup(g.Unit) is not { Container: false } u || u.Base != unit;
+        var factor = model.Factor.Trim() == "" ? null : Input.Int(model.Factor);
+        if (needsFactor && factor is null)
+        {
+            Session.Fail($"{Units.Label(g.Unit)} lässt sich nicht umrechnen — bitte den Inhalt je {Units.Label(g.Unit)} angeben.");
             return;
         }
         var mapping = new ArticleMapping
@@ -205,11 +212,13 @@ public partial class MappingView : Screen
             Observed = g.Name,
             UnitCode = g.Unit,
             IngredientId = model.Ingredient.Id,
-            Factor = factor.Value,
+            Factor = needsFactor ? factor : null,
             Confirmed = true,
         };
         if (await Session.Put(mapping, Ct))
-            await AssignId(g, mapping.Id, model.Ingredient.Name + " × " + Format.Qty(factor.Value, model.Ingredient.BaseUnit));
+            await AssignId(g, mapping.Id, mapping.Factor is { } f && unit is { } bu
+                ? model.Ingredient.Name + " × " + Format.Qty(f, bu)
+                : model.Ingredient.Name);
     }
 
     void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);
