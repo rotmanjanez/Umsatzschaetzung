@@ -4,6 +4,29 @@
            xmlns:ui="clr-namespace:Umsatzschätzung.App.Ui"
            x:DataType="ui:InvoicesModel"
            Margin="0,12,0,0" DragDrop.AllowDrop="True">
+    <ui:Screen.Resources>
+        <DataTemplate x:Key="InvoiceRowTemplate" x:DataType="ui:InvoiceRow">
+            <Grid ColumnDefinitions="*,Auto" Margin="4,6">
+                <StackPanel>
+                    <TextBlock Text="{Binding Supplier}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Sub}" Theme="{StaticResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                </StackPanel>
+                <Button Grid.Column="1" VerticalAlignment="Center" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
+                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </ui:Screen.Resources>
+    <ui:Screen.Styles>
+        <Style Selector="StackPanel.section > DockPanel">
+            <Setter Property="Margin" Value="10,10,10,2"/>
+        </Style>
+        <Style Selector="StackPanel.section > ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+    </ui:Screen.Styles>
     <DockPanel>
         <Button DockPanel.Dock="Top" HorizontalAlignment="Right" Content="Rechnungen hinzufügen" Theme="{StaticResource PrimaryButton}" Margin="0,0,0,16" Click="AddFiles"/>
         <Grid>
@@ -16,22 +39,31 @@
                 <DockPanel>
                     <ui:SearchBox x:Name="Search" DockPanel.Dock="Top" Width="NaN" Margin="8"/>
                     <Grid>
-                        <ListBox x:Name="List" SelectionChanged="SelectionChanged" PointerPressed="ListPressed" BorderThickness="0" Background="Transparent"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="ui:InvoiceRow">
-                                    <Grid ColumnDefinitions="*,Auto" Margin="4,6">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Supplier}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding Sub}" Theme="{StaticResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
-                                        </StackPanel>
-                                        <Button Grid.Column="1" VerticalAlignment="Center" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
-                                            <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
-                                        </Button>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PointerPressed="ListPressed">
+                            <StackPanel>
+                                <StackPanel Classes="section" IsVisible="{Binding HasPending}">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Pending.Count}" Theme="{StaticResource Muted}" FontSize="12"/>
+                                        <TextBlock Text="Prüfung offen" Theme="{StaticResource FieldLabel}" Margin="0"/>
+                                    </DockPanel>
+                                    <ListBox x:Name="PendingList" ItemTemplate="{StaticResource InvoiceRowTemplate}" SelectionChanged="SelectionChanged"/>
+                                </StackPanel>
+                                <StackPanel Classes="section" IsVisible="{Binding HasAutomatic}">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Automatic.Count}" Theme="{StaticResource Muted}" FontSize="12"/>
+                                        <TextBlock Text="Automatisch geprüft" Theme="{StaticResource FieldLabel}" Margin="0"/>
+                                    </DockPanel>
+                                    <ListBox x:Name="AutomaticList" ItemTemplate="{StaticResource InvoiceRowTemplate}" SelectionChanged="SelectionChanged"/>
+                                </StackPanel>
+                                <StackPanel Classes="section" IsVisible="{Binding HasManual}">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Manual.Count}" Theme="{StaticResource Muted}" FontSize="12"/>
+                                        <TextBlock Text="Manuell geprüft" Theme="{StaticResource FieldLabel}" Margin="0"/>
+                                    </DockPanel>
+                                    <ListBox x:Name="ManualList" ItemTemplate="{StaticResource InvoiceRowTemplate}" SelectionChanged="SelectionChanged"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
                         <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource EmptyState}" IsVisible="{Binding Empty}"/>
                         <ui:NoResults Search="{Binding #Search}"/>
                     </Grid>
@@ -50,74 +82,7 @@
                                    Text="Gescannte Belege werden gelesen und danach zur Durchsicht vorgelegt; XML-Rechnungen werden direkt übernommen."/>
                     </StackPanel>
                 </Grid>
-                <Grid x:Name="Detail" IsVisible="False">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="9*" MinHeight="160"/>
-                        <RowDefinition Height="6"/>
-                        <RowDefinition Height="11*" MinHeight="160"/>
-                    </Grid.RowDefinitions>
-                    <Border Theme="{StaticResource Panel}" Padding="16,12">
-                        <DockPanel>
-                            <StackPanel DockPanel.Dock="Top">
-                                <TextBlock x:Name="Supplier" Theme="{StaticResource SectionHeader}"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <TextBlock Text="Nummer" Theme="{StaticResource KeyLabel}" Margin="0,0,8,0"/>
-                                    <TextBlock x:Name="Number" FontWeight="SemiBold" Margin="0,0,24,0"/>
-                                    <TextBlock Text="Datum" Theme="{StaticResource KeyLabel}" Margin="0,0,8,0"/>
-                                    <TextBlock x:Name="Date" FontWeight="SemiBold"/>
-                                    <Border x:Name="DateWarning" Theme="{StaticResource BadgeWarning}" Margin="8,0,0,0" IsVisible="False">
-                                        <TextBlock Text="Außerhalb des Zeitraums" Theme="{StaticResource BadgeText}"/>
-                                    </Border>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                    <TextBlock Text="Netto" Theme="{StaticResource KeyLabel}" Margin="0,0,8,0"/>
-                                    <TextBlock x:Name="Net" Theme="{StaticResource Number}" Margin="0,0,24,0"/>
-                                    <TextBlock Text="Brutto" Theme="{StaticResource KeyLabel}" Margin="0,0,8,0"/>
-                                    <TextBlock x:Name="Gross" Theme="{StaticResource Number}"/>
-                                </StackPanel>
-                                <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}"/>
-                            </StackPanel>
-                            <DataGrid x:Name="LinesGrid" Theme="{StaticResource Grid}" IsReadOnly="True">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Position" Binding="{Binding Name, DataType=ui:InvoiceLineRow}" Width="*"/>
-                                    <DataGridTemplateColumn Header="Menge" Width="100" SortMemberPath="Quantity">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:InvoiceLineRow">
-                                                <TextBlock Text="{Binding Quantity}" Theme="{StaticResource Number}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Einzelpreis" Width="110" SortMemberPath="UnitPrice">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:InvoiceLineRow">
-                                                <TextBlock Text="{Binding UnitPrice}" Theme="{StaticResource Number}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Netto" Width="110" SortMemberPath="LineNet">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:InvoiceLineRow">
-                                                <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Number}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="USt." Width="70" SortMemberPath="Vat">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate x:DataType="ui:InvoiceLineRow">
-                                                <TextBlock Text="{Binding Vat}" Theme="{StaticResource Number}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </DockPanel>
-                    </Border>
-                    <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <Border Grid.Row="2" Theme="{StaticResource Panel}">
-                        <ui:SourceView x:Name="Source"/>
-                    </Border>
-                </Grid>
-                <ContentControl x:Name="VerifyHost" IsVisible="False"/>
+                <ContentControl x:Name="EditorHost" IsVisible="False"/>
             </Grid>
             <Grid Grid.ColumnSpan="3" Margin="8" IsVisible="{Binding DropHint}" IsHitTestVisible="False">
                 <Rectangle Theme="{StaticResource DropZone}" Classes="over"/>

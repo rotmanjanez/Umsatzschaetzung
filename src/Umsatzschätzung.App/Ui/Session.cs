@@ -42,6 +42,7 @@ public sealed class Session : Observable
     public RuleSetResp? Rules { get; private set; }
     public StatusResp? Status { get; private set; }
     public Dictionary<string, OcrResp> Drafts { get; } = [];
+    public Dictionary<string, InvoiceSourceResp> Sources { get; } = [];
 
     public string Error { get => error; set => Set(ref error, value); }
 

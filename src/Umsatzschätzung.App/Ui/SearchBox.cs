@@ -32,8 +32,7 @@ public sealed class SearchBox : Grid
         HorizontalAlignment = HorizontalAlignment.Right,
         VerticalAlignment = VerticalAlignment.Stretch,
     };
-    IEnumerable source = Array.Empty<object>();
-    Func<object, string> text = _ => "";
+    readonly List<(DataGridCollectionView View, IEnumerable Source)> views = [];
 
     public SearchBox()
     {
@@ -45,7 +44,7 @@ public sealed class SearchBox : Grid
         Children.Add(clear);
         box.TextChanged += (_, _) =>
         {
-            View?.Refresh();
+            foreach (var v in views) v.View.Refresh();
             Update();
         };
         clear.Click += (_, _) => Reset();
@@ -53,16 +52,16 @@ public sealed class SearchBox : Grid
 
     // Avalonia has no ICollectionView: the filtered view is a separate object, so
     // consumers bind their ItemsSource to View rather than to the source collection.
-    public DataGridCollectionView? View { get; private set; }
+    public DataGridCollectionView? View => views.Count > 0 ? views[0].View : null;
 
     public bool NoMatches { get => GetValue(NoMatchesProperty); private set => SetValue(NoMatchesProperty, value); }
 
-    public void Attach<T>(IEnumerable<T> items, Func<T, string> text)
+    public DataGridCollectionView Attach<T>(IEnumerable<T> items, Func<T, string> text)
     {
-        this.text = o => text((T)o);
-        source = (IEnumerable)items;
-        View = new DataGridCollectionView(source) { Filter = Match };
-        View.CollectionChanged += (_, _) => Update();
+        var view = new DataGridCollectionView((IEnumerable)items) { Filter = o => Match(text((T)o)) };
+        view.CollectionChanged += (_, _) => Update();
+        views.Add((view, (IEnumerable)items));
+        return view;
     }
 
     public void Reset()
@@ -76,15 +75,13 @@ public sealed class SearchBox : Grid
         var filtering = box.Text is not (null or "");
         hint.IsVisible = !filtering;
         clear.IsVisible = filtering;
-        NoMatches = filtering && View is { Count: 0 } && source.Cast<object>().Any();
+        NoMatches = filtering && views.All(v => v.View.Count == 0) && views.Any(v => v.Source.Cast<object>().Any());
     }
 
-    bool Match(object item)
+    bool Match(string s)
     {
         var terms = (box.Text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (terms.Length == 0) return true;
-        var s = text(item);
-        return terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));
+        return terms.Length == 0 || terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));
     }
 }
 

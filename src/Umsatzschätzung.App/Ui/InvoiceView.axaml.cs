@@ -12,6 +12,23 @@ using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.App.Ui;
 
+public enum Checked { Automatic, Manual, Pending }
+
+public static class Checks
+{
+    public static Checked Of(Invoice inv) =>
+        inv.Verification is not null ? Checked.Manual
+        : inv.Source == Source.Scan ? Checked.Pending
+        : Checked.Automatic;
+
+    public static string Text(Invoice inv) => Of(inv) switch
+    {
+        Checked.Manual => "Manuell geprüft am " + Format.Timestamp(inv.Verification!.At),
+        Checked.Automatic => "Automatisch geprüft",
+        _ => "Prüfung offen",
+    };
+}
+
 public sealed class LineRow : Observable
 {
     string quantity, unit, name, unitPrice, lineNet, vat;
@@ -82,21 +99,44 @@ public sealed class LineRow : Observable
     }
 }
 
-public sealed class VerifyModel : Observable
+public sealed class InvoiceModel : Observable
 {
-    string supplier = "", number = "", date = "", netTotal = "", grossTotal = "";
+    string supplier = "", number = "", date = "", netTotal = "", grossTotal = "", fileName = "", stateText = "", periodHint = "";
     string? netFlag, grossFlag;
-    bool canConfirm, confirming;
+    Checked state = Checked.Pending;
+    bool valid, saving, dirty, outsidePeriod;
 
     public string Supplier { get => supplier; set => Set(ref supplier, value); }
     public string Number { get => number; set => Set(ref number, value); }
     public string Date { get => date; set => Set(ref date, value); }
     public string NetTotal { get => netTotal; set => Set(ref netTotal, value); }
     public string GrossTotal { get => grossTotal; set => Set(ref grossTotal, value); }
-    public bool CanConfirm { get => canConfirm; set { if (Set(ref canConfirm, value)) Raise(nameof(ConfirmReady)); } }
-    public bool Confirming { get => confirming; set { if (Set(ref confirming, value)) { Raise(nameof(ConfirmReady)); Raise(nameof(ConfirmLabel)); } } }
-    public bool ConfirmReady => canConfirm && !confirming;
-    public string ConfirmLabel => confirming ? "Wird übernommen …" : "Bestätigen";
+    public string FileName { get => fileName; set => Set(ref fileName, value); }
+    public string PeriodHint { get => periodHint; set => Set(ref periodHint, value); }
+    public bool OutsidePeriod { get => outsidePeriod; set => Set(ref outsidePeriod, value); }
+
+    public Checked State
+    {
+        get => state;
+        set
+        {
+            if (!Set(ref state, value)) return;
+            foreach (var p in new[] { nameof(IsAutomatic), nameof(IsManual), nameof(IsPending), nameof(SaveLabel), nameof(SaveReady) }) Raise(p);
+        }
+    }
+
+    public string StateText { get => stateText; set => Set(ref stateText, value); }
+    public bool IsAutomatic => state == Checked.Automatic;
+    public bool IsManual => state == Checked.Manual;
+    public bool IsPending => state == Checked.Pending;
+
+    public bool Valid { get => valid; set { if (Set(ref valid, value)) Raise(nameof(SaveReady)); } }
+    public bool Dirty { get => dirty; set { if (Set(ref dirty, value)) Raise(nameof(SaveReady)); } }
+    public bool Saving { get => saving; set { if (Set(ref saving, value)) { Raise(nameof(SaveReady)); Raise(nameof(SaveLabel)); } } }
+
+    public bool SaveReady => valid && !saving && (dirty || state == Checked.Pending);
+    public string SaveLabel => saving ? "Wird gespeichert …" : state == Checked.Pending ? "Bestätigen" : "Änderungen speichern";
+
     public string? NetFlag => netFlag;
     public string? GrossFlag => grossFlag;
     public ObservableCollection<string> HeaderFlags { get; } = [];
@@ -120,31 +160,34 @@ public sealed class VerifyModel : Observable
     }
 }
 
-public partial class VerifyView : Screen
+// One editor for every invoice, whether it still awaits review or was taken over long ago: the
+// document sits below the values, and the values it was read from light up on the document.
+public partial class InvoiceView : Screen
 {
     static readonly HashSet<string> Blocking = ["line_total", "sum_net"];
     static readonly Field[] LineFields = [Field.Quantity, Field.Unit, Field.Name, Field.UnitPrice, Field.LineNet, Field.Vat];
 
     static readonly string[] HeaderFields =
-        [nameof(VerifyModel.Supplier), nameof(VerifyModel.Number), nameof(VerifyModel.Date)];
+        [nameof(InvoiceModel.Supplier), nameof(InvoiceModel.Number), nameof(InvoiceModel.Date)];
 
-    readonly VerifyModel model = new();
+    readonly InvoiceModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
-    readonly Action<CaseResp> onStored;
+    readonly Action<CaseResp> onSaved;
     readonly List<OcrPage> pages;
-    Invoice draft;
+    Invoice invoice;
     InvoiceDisplay display;
     List<Flag> flags = [];
     int currentPage = -1;
     int previewSeq;
-    bool applying;
+    bool applying, sourceLoaded;
 
-    public VerifyView(Session session, Invoice invoice, InvoiceDisplay invoiceDisplay, OcrResp? ocr, Action<CaseResp> onStored) : base(session)
+
+    public InvoiceView(Session session, Invoice stored, InvoiceDisplay storedDisplay, OcrResp? ocr, Action<CaseResp> onSaved) : base(session)
     {
         InitializeComponent();
-        this.onStored = onStored;
-        draft = invoice;
-        display = invoiceDisplay;
+        this.onSaved = onSaved;
+        invoice = Copy(stored);
+        display = storedDisplay;
         pages = ocr?.Pages ?? [];
         DataContext = model;
         model.PropertyChanged += HeaderEdited;
@@ -153,7 +196,7 @@ public partial class VerifyView : Screen
             timer.Stop();
             _ = Preview();
         };
-        LoadDraft();
+        Load();
         if (pages.Count > 0)
         {
             foreach (var p in pages)
@@ -173,47 +216,74 @@ public partial class VerifyView : Screen
         ApplyFlags(flags);
     }
 
+    public string Id => invoice.Id;
+
+    // Worth keeping around once the user leaves it: unsaved edits, or a review still to be done.
+    public bool Keep => model.Dirty || model.State == Checked.Pending;
+
     protected override async void OnEnter()
     {
-        if (pages.Count > 0 || Session.Case is null) return;
+        if (pages.Count > 0 || sourceLoaded || Session.Case is null) return;
+        if (Session.Sources.TryGetValue(invoice.Id, out var cached))
+        {
+            Source.Show(cached, cached.FileName);
+            sourceLoaded = true;
+            return;
+        }
         var caseId = Session.Case.Id;
         Source.Show(null, "Beleg wird geladen …");
         var ok = await Session.Run(async () =>
         {
-            var src = await Session.Service.InvoiceSource(caseId, draft.Id, Ct);
+            var src = await Session.Service.InvoiceSource(caseId, invoice.Id, Ct);
+            Session.Sources[invoice.Id] = src;
             Source.Show(src, src.FileName);
+            sourceLoaded = true;
         });
         if (!ok && IsActive) Source.Show(null, "Kein Beleg gespeichert.");
     }
 
-    void LoadDraft()
+    // The case keeps the stored invoice; edits stay in this copy until they are saved.
+    static Invoice Copy(Invoice inv) => Json.Deserialize<Invoice>(Json.Serialize(inv));
+
+    void Load()
     {
         applying = true;
-        model.Supplier = draft.SupplierName;
-        model.Number = draft.Number;
+        model.Supplier = invoice.SupplierName;
+        model.Number = invoice.Number;
         model.Date = display.Date;
         model.NetTotal = display.NetTotal;
         model.GrossTotal = display.GrossTotal;
+        model.FileName = invoice.FileName;
+        model.State = Checks.Of(invoice);
+        model.StateText = Checks.Text(invoice);
+        ShowPeriod();
         foreach (var row in model.Lines) row.Changed -= LineEdited;
         model.Lines.Clear();
         var refs = pages.SelectMany((p, i) => p.Lines.Select(l => (Page: i, Line: (OcrLine?)l))).ToList();
-        for (var i = 0; i < draft.Lines.Count; i++)
+        for (var i = 0; i < invoice.Lines.Count; i++)
         {
             var d = i < display.Lines.Count ? display.Lines[i] : new LineDisplay("", "", "", "", "");
             var r = i < refs.Count ? refs[i] : (Page: Math.Max(currentPage, 0), Line: null);
-            var row = new LineRow(draft.Lines[i], d, r.Page, r.Line?.Cells ?? []);
+            var row = new LineRow(invoice.Lines[i], d, r.Page, r.Line?.Cells ?? []);
             row.Changed += LineEdited;
             model.Lines.Add(row);
         }
         applying = false;
     }
 
+    void ShowPeriod()
+    {
+        model.OutsidePeriod = Session.Case is { } k && invoice.Date is { } d && (d < k.PeriodFrom || d > k.PeriodTo);
+        model.PeriodHint = "Prüfungszeitraum " + (Session.Display?.Period ?? "");
+    }
+
     void HeaderEdited(object? sender, PropertyChangedEventArgs e)
     {
         if (applying || Array.IndexOf(HeaderFields, e.PropertyName) < 0) return;
-        draft.SupplierName = model.Supplier;
-        draft.Number = model.Number;
-        if (Input.Date(model.Date) is { } d) draft.Date = d;
+        invoice.SupplierName = model.Supplier;
+        invoice.Number = model.Number;
+        if (Input.Date(model.Date) is { } d) invoice.Date = d;
+        ShowPeriod();
         Schedule();
     }
 
@@ -224,14 +294,15 @@ public partial class VerifyView : Screen
 
     void Schedule()
     {
+        model.Dirty = true;
         timer.Stop();
         timer.Start();
     }
 
     Invoice Current()
     {
-        draft.Lines = model.Lines.Select(r => r.Line).ToList();
-        return draft;
+        invoice.Lines = model.Lines.Select(r => r.Line).ToList();
+        return invoice;
     }
 
     async Task Preview()
@@ -248,8 +319,8 @@ public partial class VerifyView : Screen
 
     void ApplyTotals(VerifyResp v)
     {
-        draft.NetTotal = v.Invoice.NetTotal;
-        draft.GrossTotal = v.Invoice.GrossTotal;
+        invoice.NetTotal = v.Invoice.NetTotal;
+        invoice.GrossTotal = v.Invoice.GrossTotal;
         display = display with { NetTotal = v.Display.NetTotal, GrossTotal = v.Display.GrossTotal };
         applying = true;
         model.NetTotal = display.NetTotal;
@@ -260,9 +331,9 @@ public partial class VerifyView : Screen
 
     void Apply(VerifyResp v)
     {
-        draft = v.Invoice;
+        invoice = Copy(v.Invoice);
         display = v.Display;
-        LoadDraft();
+        Load();
         ApplyFlags(v.Flags);
     }
 
@@ -271,30 +342,30 @@ public partial class VerifyView : Screen
         flags = all;
         model.SetHeaderFlags(all.Where(f => f.LineNo == 0));
         foreach (var row in model.Lines) row.SetFlags(all.Where(f => f.LineNo == row.Line.No && f.LineNo != 0));
-        model.CanConfirm = !all.Any(f => Blocking.Contains(f.Code));
+        model.Valid = !all.Any(f => Blocking.Contains(f.Code));
         RenderFlagged();
     }
 
-    async void Confirm(object? sender, RoutedEventArgs e)
+    async void Save(object? sender, RoutedEventArgs e)
     {
         if (Session.Case is null) return;
         timer.Stop();
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
         var req = new VerifyReq(Session.Case.Id, Current(), true, false, null, null);
-        model.Confirming = true;
+        model.Saving = true;
         await Session.Run(async () =>
         {
             var v = await Session.Service.VerifyInvoice(req, Ct);
+            Apply(v);
             if (!v.Accepted || v.Case is null)
             {
-                Apply(v);
-                Session.Fail("Nicht übernommen, bitte die markierten Werte korrigieren.");
+                Session.Fail("Nicht gespeichert, bitte die markierten Werte korrigieren.");
                 return;
             }
-            Session.Drafts.Remove(v.Invoice.Id);
-            onStored(v.Case);
+            model.Dirty = false;
+            onSaved(v.Case);
         });
-        model.Confirming = false;
+        model.Saving = false;
     }
 
     void AddLine(object? sender, RoutedEventArgs e)
