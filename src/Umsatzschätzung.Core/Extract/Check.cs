@@ -6,13 +6,9 @@ public static class Check
 {
     public static List<Flag> Invoice(Invoice inv)
     {
+        // Number, date and supplier are nice to have: only the positions and the totals
+        // decide whether an invoice adds up.
         var flags = new List<Flag>();
-        if (inv.Number == "")
-            flags.Add(new Flag { Code = "missing_field", Field = Field.InvoiceNumber, Message = "Rechnungsnummer fehlt" });
-        if (inv.Date is null)
-            flags.Add(new Flag { Code = "missing_field", Field = Field.InvoiceDate, Message = "Rechnungsdatum fehlt" });
-        if (inv.SupplierName == "")
-            flags.Add(new Flag { Code = "missing_field", Field = Field.Supplier, Message = "Lieferant fehlt" });
         long sum = 0;
         long vat = 0;
         var singleVat = inv.Lines.Count > 0;

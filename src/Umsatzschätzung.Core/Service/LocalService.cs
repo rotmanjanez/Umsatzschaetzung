@@ -18,7 +18,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     const int AutoMapMinConfidence = 60;
     const int ScanDpi = 300;
     const int PreviewDpi = 150;
-    static readonly HashSet<string> BlockingFlags = ["line_total", "sum_net", "missing_field"];
+    static readonly HashSet<string> BlockingFlags = ["line_total", "sum_net"];
 
     readonly Matcher matcher = new();
 
@@ -214,10 +214,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceSourceResp(name, pages);
     });
 
-    public Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplierVatId, CancellationToken ct) => Guard(() =>
+    public Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
-        var sugs = matcher.Suggest(rs, supplierVatId, line);
+        var sugs = matcher.Suggest(rs, supplier, line);
         return new MappingSuggestResp(sugs
             .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind, Display.CandidateLabel(rs, sg.Mapping)))
             .ToList());
@@ -295,13 +295,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     async Task<RuleSet> MapLine(RuleSet rs, Invoice inv, InvoiceLine l, bool ask, CancellationToken ct)
     {
-        if (Match.Mapping(rs, inv.SupplierVatId, inv.Date ?? Today(), l) is { } hit)
+        if (Match.Mapping(rs, inv.SupplierName, inv.Date ?? Today(), l) is { } hit)
         {
             l.MappingId = hit.Id;
             return rs;
         }
         if (!ask) return rs;
-        var sugs = matcher.Suggest(rs, inv.SupplierVatId, l);
+        var sugs = matcher.Suggest(rs, inv.SupplierName, l);
         if (sugs.Count == 0) return rs;
         var sg = sugs[0];
         if (sg.Kind == OriginKind.Exact)

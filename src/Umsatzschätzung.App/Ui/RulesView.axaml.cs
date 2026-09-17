@@ -68,8 +68,6 @@ public sealed class YieldItem(YieldRule rule)
     public YieldRule Rule { get; } = rule;
     public string Title => Rule.Name;
     public string Standard => Rule.Default ? "Standard" : "";
-    public string Source => Rule.Source;
-    public string Tip => Source == "" ? Title : Title + "\n" + Source;
 }
 
 // A row of the left column: the category (or ingredient) whose rules are alternatives,
@@ -151,9 +149,9 @@ public sealed class YieldForm : EntityForm<ScopeItem>
 {
     public static readonly Ingredient None = new() { Id = "", Name = "keine" };
 
-    string scopeTitle = "", name = "", shrinkage = "", ownUse = "", staff = "", free = "", source = "";
+    string scopeTitle = "", name = "", shrinkage = "", ownUse = "", staff = "", free = "";
     int scopeIndex;
-    bool isDefault, nameInvalid, scopeInvalid, sourceInvalid;
+    bool isDefault, nameInvalid, scopeInvalid;
     readonly bool[] rateInvalid = new bool[4];
     Ingredient? ingredient = None;
     List<Ingredient> ingredientOptions = [None];
@@ -181,13 +179,11 @@ public sealed class YieldForm : EntityForm<ScopeItem>
     public string OwnUse { get => ownUse; set { if (Set(ref ownUse, value)) OwnUseInvalid = false; } }
     public string Staff { get => staff; set { if (Set(ref staff, value)) StaffInvalid = false; } }
     public string Free { get => free; set { if (Set(ref free, value)) FreeInvalid = false; } }
-    public string Source { get => source; set { if (Set(ref source, value)) SourceInvalid = false; } }
     public bool IsDefault { get => isDefault; set => Set(ref isDefault, value); }
     public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) ScopeInvalid = false; } }
     public List<Ingredient> IngredientOptions { get => ingredientOptions; set => Set(ref ingredientOptions, value); }
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
     public bool ScopeInvalid { get => scopeInvalid; set => Set(ref scopeInvalid, value); }
-    public bool SourceInvalid { get => sourceInvalid; set => Set(ref sourceInvalid, value); }
     public bool ShrinkageInvalid { get => rateInvalid[0]; set => Set(ref rateInvalid[0], value); }
     public bool OwnUseInvalid { get => rateInvalid[1]; set => Set(ref rateInvalid[1], value); }
     public bool StaffInvalid { get => rateInvalid[2]; set => Set(ref rateInvalid[2], value); }
@@ -444,7 +440,7 @@ public partial class RulesView : Screen
             var label = ingredient ? Session.IngredientName(id) : Session.CategoryName(id);
             if (label == "") label = "(ohne Zuordnung)";
             var items = rules.OrderBy(r => r.Name, StringComparer.Ordinal).Select(r => new YieldItem(r)).ToList();
-            var search = label + " " + string.Join(" ", rules.Select(r => r.Name + " " + r.Source));
+            var search = label + " " + string.Join(" ", rules.Select(r => r.Name));
             scopes.Add(new ScopeItem(id, ingredient, label, search, items));
         }
         return scopes.OrderBy(s => s.Ingredient).ThenBy(s => s.Label, StringComparer.Ordinal).ToList();
@@ -490,7 +486,6 @@ public partial class RulesView : Screen
         f.OwnUse = Input.BpText(y.OwnUse);
         f.Staff = Input.BpText(y.Staff);
         f.Free = Input.BpText(y.Free);
-        f.Source = y.Source;
     }
 
     void NewYield(object? sender, RoutedEventArgs e)
@@ -504,7 +499,7 @@ public partial class RulesView : Screen
         f.Existing = false;
         f.Active = true;
         f.Title = "Neue Ertragsregel";
-        f.Name = f.Shrinkage = f.OwnUse = f.Staff = f.Free = f.Source = "";
+        f.Name = f.Shrinkage = f.OwnUse = f.Staff = f.Free = "";
         f.IsDefault = false;
         // A new rule starts in the scope that is open — almost always the one meant.
         f.ScopeIndex = scope is { Ingredient: true } ? 1 : 0;
@@ -524,7 +519,6 @@ public partial class RulesView : Screen
         f.ScopeInvalid = f.ScopeIsIngredient
             ? ingredientId is null
             : !f.Category.Creating && f.Category.Selected?.Id is null or "";
-        f.SourceInvalid = f.Source.Trim() == "";
         f.ShrinkageInvalid = rates[0] is not >= 0;
         f.OwnUseInvalid = rates[1] is not >= 0;
         f.StaffInvalid = rates[2] is not >= 0;
@@ -532,14 +526,13 @@ public partial class RulesView : Screen
         var rated = rates.All(r => r is >= 0);
         var over = rated && rates.Sum(r => r!.Value) > Bp.Full;
         if (over) f.MarkRates(true);
-        if (f.NameInvalid || f.ScopeInvalid || f.SourceInvalid || !rated || over)
+        if (f.NameInvalid || f.ScopeInvalid || !rated || over)
         {
             Session.Fail(Missing(
                 f.NameInvalid ? "Name" : null,
                 f.ScopeInvalid ? f.ScopeKind : null,
                 rated ? null : "Anteile (Prozentwerte, nicht negativ)",
-                over ? "Anteile (zusammen höchstens 100 %)" : null,
-                f.SourceInvalid ? "Quelle" : null));
+                over ? "Anteile (zusammen höchstens 100 %)" : null));
             return;
         }
         var data = new YieldRule
@@ -552,7 +545,6 @@ public partial class RulesView : Screen
             OwnUse = rates[1]!.Value,
             Staff = rates[2]!.Value,
             Free = rates[3]!.Value,
-            Source = f.Source.Trim(),
         };
         await Compose(async () =>
         {

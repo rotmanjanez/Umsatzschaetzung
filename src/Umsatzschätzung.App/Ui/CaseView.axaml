@@ -27,7 +27,7 @@
                          Background="Transparent" BorderThickness="0" Padding="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="ui:RuleOption">
-                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" ToolTip.Tip="{Binding Source}"/>
+                            <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

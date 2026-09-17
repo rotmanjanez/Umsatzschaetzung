@@ -21,7 +21,7 @@ public interface IService
     Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct);                                    // POST /cases/{id}/invoices/{inv}/verify   Confirm without blocking flag persists as verified, Draft persists unverified
     Task<CaseResp> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct);                    // DELETE /cases/{id}/invoices/{inv}   drops the invoice and its stored file, resp is the saved case
     Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct);           // GET  /cases/{id}/invoices/{inv}/source
-    Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplierVatId, CancellationToken ct); // POST /mappings/suggest
+    Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplier, CancellationToken ct); // POST /mappings/suggest
 
     Task<ReportDisplay> Calculate(string caseId, CancellationToken ct);                                     // POST /cases/{id}/calc
     Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct);                           // POST /cases/{id}/report

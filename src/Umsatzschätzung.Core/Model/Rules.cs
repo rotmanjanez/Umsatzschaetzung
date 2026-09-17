@@ -58,7 +58,7 @@ public sealed class Ingredient : IRuleEntity
 public sealed class ArticleMapping : IRuleEntity
 {
     public string Id { get; set; } = "";
-    public string? SupplierVatId { get; set; }
+    public string? SupplierName { get; set; }
     public string? SupplierArticleId { get; set; }
     public string? Gtin { get; set; }
     public string? Name { get; set; }
@@ -96,7 +96,7 @@ public enum OriginKind { Exact, Lexical, Manual }
 
 public static class Match
 {
-    public static ArticleMapping? Mapping(RuleSet rs, string? supplierVatId, DateOnly? date, InvoiceLine line)
+    public static ArticleMapping? Mapping(RuleSet rs, string? supplier, DateOnly? date, InvoiceLine line)
     {
         if (!string.IsNullOrEmpty(line.MappingId) && rs.Mappings.TryGetValue(line.MappingId, out var direct))
             return direct;
@@ -113,9 +113,9 @@ public static class Match
             candidates.Add(m);
         }
 
-        if (!string.IsNullOrEmpty(supplierVatId) && !string.IsNullOrEmpty(line.SellerArticleId))
+        if (!string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(line.SellerArticleId))
             foreach (var m in candidates)
-                if (m.SupplierVatId == supplierVatId && m.SupplierArticleId == line.SellerArticleId) return m;
+                if (m.SupplierName == supplier && m.SupplierArticleId == line.SellerArticleId) return m;
 
         if (!string.IsNullOrEmpty(line.Gtin))
             foreach (var m in candidates)
@@ -182,7 +182,6 @@ public sealed class YieldRule : IRuleEntity
     public long OwnUse { get; set; }
     public long Staff { get; set; }
     public long Free { get; set; }
-    public string Source { get; set; } = "";
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Default { get; set; }
     public Meta Meta { get; set; } = new();

@@ -16,7 +16,6 @@ public sealed class Invoice
     public Source Source { get; set; }
     public string FileName { get; set; } = "";
     public string SupplierName { get; set; } = "";
-    public string? SupplierVatId { get; set; }
     public string Number { get; set; } = "";
     public DateOnly? Date { get; set; }
     public string Currency { get; set; } = "";
