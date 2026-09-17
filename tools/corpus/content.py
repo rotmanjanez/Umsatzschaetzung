@@ -92,13 +92,25 @@ def invoice_number(rng, date, seq):
     ][style]
 
 
-def supplier(rng, category):
-    name = " ".join(x for x in [
+def company_name(rng, category):
+    """Firmenname im Stil eines Lieferanten. Auch der Kunde zieht daraus: eine
+    Rechnung geht selten an "Gasthaus Zur Alten Post", sondern meist an eine GmbH,
+    die genauso heißt wie der Absender — und genau diese Verwechslung kostete den
+    Kopf bisher den `supplier`."""
+    return " ".join(x for x in [
         rng.choice(vocab.SUPPLIER_HEADS) if rng.random() < 0.45 else "",
         rng.choice(vocab.SUPPLIER_NAMES),
         vocab.TRADES[category] if rng.random() < 0.4 else "",
         rng.choice(vocab.SUPPLIER_TAILS),
     ] if x)
+
+
+def person(rng):
+    return f"{rng.choice(vocab.FIRST_NAMES)} {rng.choice(vocab.SUPPLIER_NAMES)}"
+
+
+def supplier(rng, category):
+    name = company_name(rng, category)
     zipc, city = rng.choice(vocab.CITIES)
     at = len(zipc) == 4
     return {
@@ -110,7 +122,11 @@ def supplier(rng, category):
         "vatId": (f"ATU{rng.randint(10000000, 99999999)}" if at
                   else f"DE{rng.randint(100000000, 999999999)}"),
         "phone": f"+{'43' if at else '49'} {rng.randint(100, 999)} {rng.randint(100000, 9999999)}",
+        "fax": f"+{'43' if at else '49'} {rng.randint(100, 999)} {rng.randint(100000, 9999999)}-{rng.randint(10, 99)}",
         "mail": "office@" + "".join(c for c in name.split()[0].lower() if c.isalpha()) + (".at" if at else ".de"),
+        "web": "www." + "".join(c for c in name.split()[0].lower() if c.isalpha()) + (".at" if at else ".de"),
+        "taxNumber": (f"{rng.randint(10, 99)}-{rng.randint(100, 999)}/{rng.randint(1000, 9999)}" if at
+                      else f"{rng.randint(10, 99)}/{rng.randint(100, 999)}/{rng.randint(10000, 99999)}"),
         "bank": f"{rng.choice(vocab.BANKS)} {city}",
         "iban": ("AT" if at else "DE") + f"{rng.randint(10, 99)} {rng.randint(1000, 9999)} "
                 f"{rng.randint(1000, 9999)} {rng.randint(1000, 9999)} {rng.randint(1000, 9999)}",
@@ -156,6 +172,11 @@ def detail(rng):
 
 def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share):
     cat = vocab.CATEGORIES[category]
+    # Steuerschlüssel und Warengruppe sind die beiden unbeschrifteten Codes, die
+    # neben Preis und Artikelnummer stehen und wie eine Zahl von uns aussehen.
+    scheme = rng.choice([["A", "B", "C"], ["1", "2", "3"], ["N", "E", "H"], ["V", "R", "S"]])
+    tax_codes = {r: scheme[i % len(scheme)] for i, r in enumerate(sorted(set(vat_rates)))}
+    wg_codes = {g: f"{rng.randint(1, 99):02d}" for g in GROUPS.get(category, ["Sortiment"])}
     lines = []
     for no in range(1, count + 1):
         unit_text, pack = rng.choice(cat["units"])
@@ -190,6 +211,8 @@ def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share):
             "group": rng.choice(GROUPS.get(category, ["Sortiment"])),
             "detail": detail(rng),
         })
+        lines[-1]["taxCode"] = tax_codes[vat]
+        lines[-1]["wg"] = wg_codes[lines[-1]["group"]]
     return lines
 
 
@@ -277,12 +300,14 @@ def make(seed, index):
                                      "unitCode", "unitPrice", "priceBaseQty", "lineNet", "vat")}
                   for l in lines],
     }
+    skonto_pct = rng.choice([2, 2, 3])
     meta = {
         "category": category,
         "kind": kind,
         "supplier": sup,
         "customer": {
-            "name": rng.choice(vocab.CUSTOMERS),
+            "name": company_name(rng, rng.choice(sorted(vocab.CATEGORIES)))
+                    if rng.random() < 0.4 else rng.choice(vocab.CUSTOMERS),
             "street": f"{rng.choice(vocab.STREETS)} {rng.randint(1, 90)}",
             "zip": rng.choice(vocab.CITIES)[0],
             "city": rng.choice(vocab.CITIES)[1],
@@ -292,6 +317,26 @@ def make(seed, index):
         "due": (date + dt.timedelta(days=rng.choice([8, 14, 21, 30]))).isoformat(),
         "delivery": (date - dt.timedelta(days=rng.randint(0, 3))).isoformat(),
         "order": f"B{rng.randint(10000, 999999)}" if rng.random() < 0.5 else None,
+        "owner_line": f"Inh. {person(rng)}",
+        "tagline": rng.choice([vocab.TRADES[category], vocab.TRADES[category],
+                               f"{vocab.TRADES[category]} seit {rng.randint(1890, 1995)}",
+                               "Großhandel", "Zustellservice"]),
+        # Ablenker im Kopf: eine Lieferschein-Nummer ist eine Nummer und kein
+        # Datum, ein Sachbearbeiter ist ein Name und kein Lieferant.
+        "extras": {
+            "delivery_note": f"LS-{rng.randint(10000, 999999)}",
+            "order2": f"A{date.year % 100}-{rng.randint(1000, 99999)}",
+            "taxno": sup["taxNumber"] if rng.random() < 0.5 else sup["vatId"],
+            "clerk": person(rng),
+            "ref": rng.choice([f"P-{date.year}-{rng.randint(10, 99)}",
+                               f"{rng.choice('ABCDEFGHKLMRSTW')}{rng.choice('ABCDEFGHKLMRSTW')}/"
+                               f"{rng.randint(100, 999)}",
+                               person(rng)]),
+        },
+        "skonto_pct": skonto_pct,
+        "skonto": money.round_div(gross * skonto_pct * 100, money.BP),
+        "skonto_date": (date + dt.timedelta(days=rng.choice([7, 8, 10, 14]))).isoformat(),
+        "paid": (gross // 2 // 100) * 100,
         "defect": defect,
         "opaque_share": round(opaque_share, 2),
         "needs_discount_column": any(l["discount"] for l in lines),

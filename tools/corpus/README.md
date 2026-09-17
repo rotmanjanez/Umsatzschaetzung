@@ -57,9 +57,10 @@ numbers, so the same ground truth grades all of them. Each variation draws a fre
 template, so one invoice appears in many unrelated layouts.
 
 `truth.json` carries, per page, every rendered word with its box in *that image's*
-pixel coordinates and its label — one of the twelve `Field` values or `O` — plus region
-boxes tagged `line-item`, `column-header`, `continuation`, `group`, `total`, `carry`,
-`footer`. The boxes are transported through the geometric part of the degradation, so
+pixel coordinates and its label — one of the twelve value classes, one of the six
+label classes (`numberLabel`, `dateLabel`, `netLabel`, `grossLabel`, `vatLabel`,
+`otherLabel`) or `O` — plus region boxes tagged `line-item`, `column-header`,
+`continuation`, `group`, `total`, `carry`, `footer`. The boxes are transported through the geometric part of the degradation, so
 they stay correct under rotation and skew.
 
 Template ids are stable hashes and each is assigned to `train` or `val`, so the
@@ -69,7 +70,8 @@ layouts.
 ## What varies
 
 **Columns.** Presence and order of Pos, Artikel-Nr., EAN, Bezeichnung, Menge, Einheit,
-Preisbasis, Einzelpreis, Rabatt, MwSt and Betrag, from ten base orderings. Quantity
+Preisbasis, Einzelpreis, Rabatt, MwSt, Betrag and the three unlabelled collision columns
+Währung, Steuerschlüssel and Warengruppe, from sixteen base orderings. Quantity
 before or after the name; unit as its own column or glued to the quantity ("12 Kt");
 VAT per line or only in the totals block; discount column only when the invoice
 actually carries discounts.
@@ -129,9 +131,10 @@ Preis/Einh. / EP / à Preis, Gesamt / Betrag / Summe / Netto / Wert, and so on �
 and boxed header styles.
 
 **Furniture.** Procedural logos (mark, wordmark, colour band, none), address block in
-either corner, four metadata block styles, three totals styles, footers with bank
-details in one to three columns, multi-page invoices with `Übertrag` carried totals and
-page numbers, and delivery notes that carry no prices at all.
+either corner or centred, eight metadata block styles at five places, seven totals
+styles, footers with bank details in one to three columns, multi-page invoices with
+`Übertrag` carried totals and page numbers, and delivery notes that carry no prices at
+all. Der ganze Raum steht unter „Breite des Template-Raums (v9)" weiter unten.
 
 **Gebindegrößen.** `sizes.py` builds the size that goes *into the article name* —
 "0,7 l", "Kt 6 x 0,7 l", "Btl. 20 Stk" — instead of drawing from the short hand-written
@@ -185,6 +188,159 @@ for empty patches, fine so individual strokes break up instead of merely greying
 `ink_dropout` punches the last few holes. It is photometric only, so word boxes are
 untouched.
 
+## Kopfblock: Beschriftungen, Formen, Ablenker (v9)
+
+Der Tagger las die Positionstabelle gut und verlor fast jeden Fehler im Kopf. Vier
+Ursachen, alle im Korpus und keine im Modell:
+
+1. Die Zusammensetzung nimmt je Feld den *ersten* getaggten Lauf der Seite. Ein früh
+   falsch getaggtes Wort gewinnt damit gegen das richtige weiter unten — Telefonnummer,
+   Kundennummer, Lieferschein-Nr. oder Steuernummer statt der Rechnungsnummer, ein
+   MwSt-Betrag oder ein Währungszeichen statt der Summe. Genau diese Ablenker standen
+   im Korpus so gut wie nie.
+2. Kopfwerte wurden nur in der Form erkannt, in der der Korpus sie druckte: der
+   Lieferantenname im Fließsatz auf einer eigenen Zeile, das Datum direkt hinter seiner
+   Beschriftung in derselben Zeile. Eine Wortmarke, Versalien oder eine Beschriftung in
+   einer anderen Zeile als ihr Wert bekamen keinen Tag — dafür bekamen ihn die
+   Ähnlichkeiten daneben ("Inh."-Zeile, Kundenname).
+3. Die Beschriftungen selbst trugen keine Klasse. Damit hatte das Modell keinen Anker,
+   der "Rechnungsnummer" an das Wort daneben bindet, und keinen Weg, sie von
+   "Kundennummer" zu unterscheiden.
+4. Unbeschriftete Spalten kollidierten mit unseren: Pos/Artikelnummer neben der Menge,
+   Prozent- und Steuerschlüssel neben dem Preis, Währungsspalte neben dem Betrag.
+
+**Beschriftungsklassen.** Jedes Schlüsselwort im Kopf- und Summenblock trägt jetzt eine
+eigene Klasse: `numberLabel`, `dateLabel`, `netLabel`, `grossLabel`, `vatLabel` — und
+`otherLabel` für jeden Schlüssel, der *nicht* unserer ist (Kundennummer, Bestellnummer,
+Lieferdatum, Fällig am, UID, USt-IdNr., Steuernummer, Tel, Fax, Mail, Web, IBAN, BIC,
+Sachbearbeiter, Ihr Zeichen, Lieferschein-Nr., Auftrags-Nr. …). Ein getrennt gesetzter
+Doppelpunkt gehört zur Beschriftung und bekommt deren Klasse. Die *Werte* der fremden
+Schlüssel bleiben `O` — sie sind der Ablenker, nicht die Supervision. Die Spaltenköpfe
+der Positionstabelle bleiben ebenfalls `O`: die tragen schon die Region `column-header`,
+und eine zweite Beschriftungsklasse darüber würde nur die Kopfzeile verwässern.
+`otherLabel` ist mit Abstand die häufigste der sechs, und das ist beabsichtigt: es ist
+die Klasse, die "das hier ist eine Beschriftung, aber nicht unsere" trägt.
+
+Der Doppelpunkt hat dabei eine eigene Falle. Gedruckt klebt er am Schlüssel, die OCR
+liest also ein Wort "Rechnungsnummer:". Steht er in der Wahrheit als eigenes Token
+daneben, sieht ihn niemand: seine IoU mit dem OCR-Wort liegt bei einer langen
+Beschriftung unter der Schwelle von `align.py`, und er zählt als ungesehen. Gemessen auf
+v9: einzeln gesetzte ":" sind zu 84–94 % ungesehen, alle anderen Wörter derselben Klassen
+zu 5,0 % (`numberLabel`), 5,0 % (`dateLabel`) und 4,9 % (`otherLabel`) — also genau im
+Bereich der Wertklassen (quantity 5,0 %, vat 5,0 %, unit 3,9 %). Nur weil der
+Doppelpunkt in 35 % der Vorlagen an seinem Schlüssel klebt (ein Token) und lediglich in
+20 % daneben steht, bleibt die Gesamtquote der Beschriftungsklassen bei rund 12 % statt
+bei 25 %. Das ist kein Schaden an der Supervision — ein ungesehenes Wahrheitswort
+erzeugt einfach keine Trainingszeile —, aber es verzerrt die Deckenrechnung, und wer die
+Zahl ohne diese Aufschlüsselung liest, hält die Beschriftungsklassen für unlesbar.
+
+**Kopfformen.** `meta_style` kennt neben `pairs`, `stack`, `boxed` und `row` vier neue:
+
+* `stacked` — Beschriftung auf eigener Zeile, Wert darunter (kleiner gesetzter Schlüssel),
+  höchstens vier Angaben, sonst wird der Block zu hoch.
+* `grid` — eine Zeile Beschriftungen, eine Zeile Werte darunter, 3–5 Spalten
+  (Rechnungsnummer | Datum | Kundennummer | …). Auf echten Rechnungen die häufigste
+  Kopfform überhaupt und im Korpus bisher gar nicht vorhanden.
+* `title` — Nummer und Datum stehen in der Überschrift: "Rechnung Nr. 2025/0123 vom
+  12.03.2025". Die Überschrift ist dann selbst die Beschriftung (`numberLabel`), "vom"
+  bzw. "Datum" ist `dateLabel`, und eine Meta-Zeile für Nummer und Datum gibt es nicht
+  mehr — andere Schlüssel dürfen weiter in einer kleinen Tabelle stehen.
+* `dateline` — "Wien, 12.03.2025" rechtsbündig über der Überschrift, *ohne*
+  Datumsbeschriftung; der Ort ist `O`. Die Nummer steht dann in der Überschrift oder in
+  einer Tabelle.
+
+`row` bleibt auf schmalen Blättern ausgeschlossen (siehe oben) und ist seit v9 auf fünf
+Angaben gedeckelt: mit allen Ablenkern darin schrumpfte `render.build` bis an den
+Schriftboden und schnitt die Rechnungsnummer trotzdem ab.
+
+Dazu `meta_place`: der Block sitzt unter der Überschrift, rechts oben neben der
+Anschrift, in einem randlosen Panel über die volle Breite, direkt über der Tabelle, oder
+geteilt — Nummer und Datum oben rechts, der Rest unten.
+
+**Briefkopf.** Die Wortmarke druckte bisher nur das *erste* Wort des Lieferantennamens
+und ließ es unbeschriftet. Sie brachte dem Modell damit aktiv bei, dass die größte
+Schrift am Seitenkopf gerade *nicht* der Lieferant ist — und daran scheiterte es auf
+echten Briefköpfen. Jetzt trägt die Wortmarke den vollen Namen und ist `supplier`, groß
+gesetzt, ein- oder zweizeilig, mit optionaler Tagline (`O`). Versalien gibt es in zwei
+Varianten: `text-transform:uppercase` ändert den DOM-Text *nicht*, die Sonde liest also
+weiter gemischte Schreibung — für die Ausrichtung ist das folgenlos, weil `align.py`
+casefold vergleicht, aber die Tokens unterscheiden sich dann eben nicht. Deshalb gibt es
+daneben die echte Versalform, bei der der gedruckte Name wirklich aus anderen Tokens
+besteht. In etwa 30 % der Wortmarken-Templates entfällt der Absenderblock, dann ist die
+Wortmarke die einzige beschriftete Nennung. Fehlen Absender *und* Wortmarke, trägt die
+Fußzeile den Namen beschriftet — `validate.py` besteht seit v9 darauf, dass jede
+Variation irgendwo einen `supplier` hat, genau weil dieser Fall sonst still durchrutscht.
+
+Neu daneben: eine "Inh. Vorname Nachname"-Zeile unter dem Absender (`O`, sieht aus wie
+ein Lieferantenname und ist keiner), 0–4 Kontaktzeilen (Tel/Fax/E-Mail/Web/UID/Steuernr.,
+Schlüssel `otherLabel`, Werte `O`) und eine optionale Überschrift
+"Lieferadresse"/"Rechnungsadresse" über der Kundenanschrift. Der Kundenname kommt in
+40 % der Fälle aus demselben Generator wie der Lieferantenname: eine Rechnung geht selten
+an "Gasthaus Zur Alten Post", sondern meist an eine GmbH, die genauso klingt wie der
+Absender. `expected.json` führt weiter den vollen gedruckten und beschrifteten Namen.
+
+**Ablenker.** Im Kopf optional Lieferschein-Nr. (eine *Nummer*, kein Datum), Auftrags-Nr.,
+Steuernummer/UID, Sachbearbeiter (ein Personenname), Ihr Zeichen, Kundennummer. Im
+Summenblock optional "Skonto 2 % bis 20.03.2025: 124,60 €", "Bereits bezahlt 3.000,00 €"
+und "Zahlbar bis 03.03.2025" — Schlüssel `otherLabel`, Beträge `O`. Der MwSt-*Betrag*
+bleibt `O`, der *Satz* `vat`, die Beschriftung `vatLabel`.
+
+**Kollisionsspalten.** Drei neue, alle unbeschriftet (`O`): `waehrung` (EUR/€ direkt
+neben Betrag oder Preis, Kopf "Währ."/"EUR"/"Whg"), `steuercode` (A/B/1/2/N/E neben
+Preis oder Betrag, Kopf "St"/"StC"/"Code"/"MwSt-Kz") und `wg` (Warengruppe, Kopf
+"WG"/"WGr"/"Gruppe"). Sie stehen in eigenen Spaltenreihenfolgen und werden sonst an
+ihrem natürlichen Platz eingeschoben (`insert_column`), damit sie in *jeder* Reihenfolge
+vorkommen können und nicht nur in den sechs, die sie zufällig führen. Auf A5/B5 sind sie
+nachrangig (Faktor 0,35), also dort selten bis gar nicht — das ist der bewusst
+akzeptierte Rest der `NARROW_COLUMNS`-Abwägung.
+
+Dazu in ~40 % der Templates ein Währungszeichen in der Preis- oder Betragszelle selbst
+("12,50 €", "€ 12,50", "12,50 EUR", "EUR 12,50"). Das Zeichen ist ein eigenes Token und
+bleibt `O`, die Zahl behält ihre Klasse; geklebt ginge es nicht, weil das Token dann
+"12,50€" hieße und `validate.py` es gegen `expected.json` prüft. `tools/eval/parse.py`
+entfernt €/EUR ohnehin vor dem Parsen. Und `pos` wird gemischt als "1", "1.", "001" oder
+"0010" gesetzt — eine Zahl links neben der Menge, die keine Menge ist.
+
+## Breite des Template-Raums (v9)
+
+Die vier Fehlerbilder oben waren der Anlass, der kombinatorische Raum von
+`layout.template()` ist das eigentliche Produkt: jede Achse wird je Template gezogen, und
+zwei Variationen derselben Rechnung haben nichts miteinander gemein außer den Zahlen.
+Mit v9 dazugekommen oder verbreitert:
+
+* **Briefkopf** — Logo links, rechts, mittig oder keins; Absender unter, neben oder über
+  dem Logo, rechtsbündig, oder gar nicht (dann trägt ihn die Fußzeile); Wortmarke ein-
+  oder zweizeilig, mit Tagline, in Versalien (CSS oder echt).
+* **Anschrift** — links, rechts oder mittig (Fensterposition), mit oder ohne Rücksendezeile,
+  mit optionaler Überschrift.
+* **Kopfdaten** — acht Formen (`meta_style`) an fünf Plätzen (`meta_place`), Reihenfolge
+  der Angaben gemischt, Datum auch vor der Nummer, Doppelpunkt an oder aus.
+* **Überschrift** — normal, gesperrt, Kapitälchen, unterstrichen, gerahmt, als Farbband,
+  linksbündig/zentriert/rechtsbündig, und in ~8 % gar keine.
+* **Schrift** — 28 Familien, Kopf- und Fließschrift getrennt gezogen (Serifen im Satz,
+  Grotesk im Kopf und umgekehrt), Grade 6,9–11,4 pt, Durchschuss 1,06–1,72,
+  Zellenabstände 0,5–4,0 mm × 0,5–5,2 mm, Seitenränder 9–26 mm.
+* **Tabelle** — elf Bilder: Gitter, Linien, Zebra, linienlos, doppelte Kopflinie, nur
+  eine dicke Kopflinie, nur senkrechte Striche, gepunktet, getönte Spalten.
+* **Spaltenköpfe** — acht Stile inklusive Kapitälchen, Akzentfarbe und gesperrt.
+* **Summen** — Block, gerahmt, Tabelle, Panel mit dicker Oberlinie, und einzeilig inline
+  ("Netto 100,00 MwSt 20,00 Brutto 120,00"); rechts, links oder über die volle Breite.
+* **Fußzeile** — Bankblock, zwei oder drei Spalten, einzeilig, Adresszeile, keine;
+  Seitenzahl oben rechts, unten mittig oder unten links, als "Seite 1 von 2",
+  "Seite 1/2", "- 1 -" oder "1 / 2".
+* **Farbe und Kontrast** — 16 Akzentfarben, sieben Grauwerte für den Fließsatz, getrennt
+  gezogene Linienfarben und -stärken.
+* **Wortlose Flächen** — in ~10 % ein QR-ähnlicher Block, in ~8 % ein schräg gesetzter
+  Stempelrahmen. Beide tragen kein `span.w`, stehen also in keiner Wahrheit; die OCR
+  sieht sie trotzdem und liefert Rauschwörter. Genau das tun echte Scans auch.
+
+Jede Kombination muss ausrichtbar bleiben und `validate.py` bestehen. Was dabei nicht
+auffällt, zeigt `coverage.py`: Wörter je Seite, je Klasse und je Seitenformat. Eine Null
+darin heißt, dass das Modell für dieses Format "gibt es hier nicht" lernt — der gleiche
+Fehler wie damals bei der gestrichenen Artikelspalte auf A5.
+
+    python3 coverage.py /var/tmp/rotman/corpus-v9
+
 ## Checking the labels
 
     python3 overlay.py ../../fixtures/dataset/gen/inv-000042/v03-scan_worn-2ce4897604d1 --out /tmp/ov
@@ -217,11 +373,16 @@ Zeichenerkennung“ feature under the Deutsch language options) — without it t
 exits and lists what is installed. The same tool dumps the real scans in
 `fixtures/dataset/2025`, which is what lets the eval run off Windows.
 
-## Still to come
+## Von hier zu den Trainingszeilen
 
-Transferring the labels from `truth.json` onto the OCR words by IoU plus text
-similarity. That is the step that turns the two files above into training rows, and
-it is where the genuine OCR errors become part of the supervision.
+`tools/train/align.py` trägt die Klassen aus `truth.json` per IoU (plus Textähnlichkeit
+in den Zweifelsfällen) auf die OCR-Wörter und schreibt `page.jsonl`. Das ist der Schritt,
+der aus den beiden Dateien oben Trainingszeilen macht, und dort werden die echten
+OCR-Fehler Teil der Supervision. Er meldet auch die Decke — ungesehen, verlesen,
+erreichbar —, je Feld und je Degradationsprofil.
+
+    python3 ../train/align.py --corpus /var/tmp/rotman/corpus-v9 --out page-v9.jsonl --workers 48
+    python3 coverage.py /var/tmp/rotman/corpus-v9 --jsonl page-v9.jsonl
 
 ## Einheiten
 
