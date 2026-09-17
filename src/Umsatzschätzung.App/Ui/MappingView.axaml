@@ -92,9 +92,10 @@
                                     <ui:IngredientBox ItemsSource="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Faktor *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Faktor" ToolTip.Tip="Inhalt eines Gebindes in der Rezepteinheit. Bei kg, l und Stück rechnet das Programm selbst um."
+                                               Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
                                     <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Factor, Mode=TwoWay}"/>
-                                    <TextBlock Text="Basiseinheiten je Rechnungseinheit" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBlock Text="nur bei Gebinden nötig" Theme="{StaticResource Muted}" FontSize="12"/>
                                 </StackPanel>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">

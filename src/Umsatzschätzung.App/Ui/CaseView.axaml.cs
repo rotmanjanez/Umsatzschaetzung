@@ -10,11 +10,14 @@ public sealed class StockRow : Observable
 {
     Ingredient? ingredient;
     string opening = "0", closing = "0";
+    int unitIndex;
 
     public StockRow(List<Ingredient> options) => Options = options;
 
     public List<Ingredient> Options { get; }
+    public List<string> Units { get; } = [.. RulesView.RecipeUnits.Select(Model.Units.Label)];
     public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
+    public int UnitIndex { get => unitIndex; set => Set(ref unitIndex, value); }
     public string Opening { get => opening; set => Set(ref opening, value); }
     public string Closing { get => closing; set => Set(ref closing, value); }
 }
@@ -113,6 +116,7 @@ public sealed class CaseModel : Observable
                 Ingredient = ingredients.Find(i => i.Id == e.IngredientId),
                 Opening = e.Opening.ToString(),
                 Closing = e.Closing.ToString(),
+                UnitIndex = Math.Max(Array.IndexOf(RulesView.RecipeUnits, e.Unit), 0),
             });
         Yields.Clear();
         Detail = null;
@@ -166,7 +170,13 @@ public sealed class CaseModel : Observable
             var opening = Input.Int(row.Opening);
             var closing = Input.Int(row.Closing);
             if (row.Ingredient is null || opening is null || closing is null) return false;
-            k.Inventory.Add(new InventoryEntry { IngredientId = row.Ingredient.Id, Opening = opening.Value, Closing = closing.Value });
+            k.Inventory.Add(new InventoryEntry
+            {
+                IngredientId = row.Ingredient.Id,
+                Opening = opening.Value,
+                Closing = closing.Value,
+                Unit = RulesView.RecipeUnits[row.UnitIndex],
+            });
         }
         k.Yields = Yields
             .SelectMany(g => g.Rows)

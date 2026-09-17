@@ -42,28 +42,13 @@
                                 <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
                                 <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
                                 <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Basiseinheit *" Theme="{StaticResource FieldLabel}"/>
-                                        <ComboBox SelectedIndex="{Binding UnitIndex}" Classes.invalid="{Binding UnitInvalid}">
-                                            <ComboBoxItem Content="Milliliter (ml)"/>
-                                            <ComboBoxItem Content="Gramm (g)"/>
-                                            <ComboBoxItem Content="Stück"/>
-                                        </ComboBox>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                        <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
-                                                  DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"/>
-                                        <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
-                                                 IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
-                                    </StackPanel>
-                                </Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
+                                    <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
+                                              DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"/>
+                                    <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
+                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
+                                </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveIngredient" Margin="0,0,8,0"/>
                                     <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteIngredient" IsVisible="{Binding Existing}"/>
@@ -113,7 +98,7 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="240"/>
                                         <ColumnDefinition Width="90"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
@@ -125,14 +110,14 @@
                                             <Grid Margin="0,0,0,6">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="240"/>
                                                     <ColumnDefinition Width="90"/>
                                                 </Grid.ColumnDefinitions>
                                                 <ui:IngredientBox ItemsSource="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
                                                                   Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"/>
                                                 <DockPanel Grid.Column="1" Margin="8,0,0,0">
-                                                    <TextBlock DockPanel.Dock="Right" Text="{Binding UnitLabel}" Theme="{StaticResource Muted}"
-                                                               FontSize="12" Width="42" Margin="6,0,0,0"/>
+                                                    <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
+                                                              Width="104" Margin="6,0,0,0"/>
                                                     <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}"
                                                              Classes.invalid="{Binding AmountInvalid}"/>
                                                 </DockPanel>

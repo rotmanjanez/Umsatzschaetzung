@@ -50,7 +50,6 @@ public sealed class Ingredient : IRuleEntity
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public Unit BaseUnit { get; set; }
     public string CategoryId { get; set; } = "";
     public Meta Meta { get; set; } = new();
 }
@@ -67,7 +66,8 @@ public sealed class ArticleMapping : IRuleEntity
     public string? Observed { get; set; }
     public string? UnitCode { get; set; }
     public string IngredientId { get; set; } = "";
-    public long Factor { get; set; }
+    // Inhalt eines Gebindes in der Rezepteinheit; null, wo die Einheitentabelle schon umrechnet.
+    public long? Factor { get; set; }
     public bool Confirmed { get; set; }
     public Meta Meta { get; set; } = new();
 }
@@ -162,6 +162,7 @@ public sealed class RecipeLine
 {
     public string IngredientId { get; set; } = "";
     public long Amount { get; set; }
+    public string Unit { get; set; } = "";
 }
 
 public sealed class Product : IRuleEntity

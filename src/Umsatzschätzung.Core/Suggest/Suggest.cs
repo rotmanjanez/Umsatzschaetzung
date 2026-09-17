@@ -31,11 +31,9 @@ public sealed class Matcher
             .OrderByDescending(s => s.Value)
             .ThenBy(s => s.Key, StringComparer.Ordinal)
             .Select(s => (Score: s.Value, Ingredient: rs.Ingredients[s.Key]))
-            .Select(c => (c.Score, c.Ingredient, Factor: Factor(pack, line.UnitCode, c.Ingredient.BaseUnit)))
-            .Where(c => c.Factor is not null)
             .Take(Candidates)
             .Select(c => new Suggestion(
-                Mapping(supplier, line, c.Ingredient.Id, c.Factor!.Value),
+                Mapping(supplier, line, c.Ingredient.Id, Factor(pack, line.UnitCode, Scale.Of(rs, c.Ingredient.Id))),
                 Confidence(c.Score),
                 OriginKind.Lexical))
             .ToList();
@@ -78,7 +76,7 @@ public sealed class Matcher
 
     static int Confidence(double score) => Math.Clamp((int)Math.Round(score * 100), 1, 99);
 
-    static ArticleMapping Mapping(string? supplier, InvoiceLine line, string ingredientId, long factor)
+    static ArticleMapping Mapping(string? supplier, InvoiceLine line, string ingredientId, long? factor)
     {
         var m = new ArticleMapping
         {
@@ -93,23 +91,15 @@ public sealed class Matcher
         return m;
     }
 
-    // One invoice unit in base units. From the pack size in the description, or
-    // else from the billed unit when that alone already fixes the amount.
-    public static long? Factor(Pack? pack, string unitCode, Unit baseUnit)
+    // Der Inhalt eines Gebindes in der Rezepteinheit, aus der Packungsangabe in der
+    // Bezeichnung. Null heißt: entweder rechnet die Einheitentabelle ohnehin um, oder
+    // die Zeile braucht einen Faktor, den nur ein Mensch kennt.
+    public static long? Factor(Pack? pack, string unitCode, Unit? recipeUnit)
     {
-        if (Packed(pack, baseUnit) is { } packed) return packed;
-        if (Units.Lookup(unitCode) is not { } u || u.Base != baseUnit) return null;
-        return u.Factor;
-    }
-
-    // A pack size that does not fit the base unit says nothing about the amount —
-    // "Brötchen Weizen 55 g" billed per piece is a weight per piece, not a pack.
-    // The billed unit still answers it, so a mismatch here falls through rather
-    // than dropping the candidate.
-    static long? Packed(Pack? pack, Unit baseUnit)
-    {
+        if (recipeUnit is not { } unit) return null;
+        if (Units.Lookup(unitCode) is { Container: false } u && u.Base == unit) return null;
         if (pack is not { } p) return null;
-        if (baseUnit == Unit.Piece) return p.Base == Unit.Piece ? p.Count : null;
-        return p.Base == baseUnit || p.Base is null ? p.Count * p.Size : null;
+        if (unit == Unit.Piece) return p.Base == Unit.Piece ? p.Count : null;
+        return p.Base == unit || p.Base is null ? p.Count * p.Size : null;
     }
 }

@@ -25,7 +25,7 @@ public static class Bp
     public const long Full = 10000;
 }
 
-public sealed record UnitInfo(string Code, string Name, Unit Base, long Factor, string[] Aliases);
+public sealed record UnitInfo(string Code, string Name, Unit Base, long Factor, bool Container, string[] Aliases);
 
 public static class Units
 {
@@ -49,6 +49,7 @@ public static class Units
             u.GetProperty("name").GetString()!,
             u.GetProperty("base").GetString() switch { "ml" => Unit.Ml, "g" => Unit.G, _ => Unit.Piece },
             u.GetProperty("factor").GetInt64(),
+            u.TryGetProperty("container", out var c) && c.GetBoolean(),
             [.. u.GetProperty("aliases").EnumerateArray().Select(a => a.GetString()!)]))];
     }
 

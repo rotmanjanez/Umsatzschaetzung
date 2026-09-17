@@ -98,19 +98,21 @@
 
                 <TextBlock Text="Bestand" Theme="{StaticResource SectionHeader}"/>
                 <StackPanel Margin="0,0,0,24">
-                    <Grid ColumnDefinitions="*,140,140,90" Margin="0,0,0,4">
+                    <Grid ColumnDefinitions="*,140,140,104,90" Margin="0,0,0,4">
                         <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}"/>
                         <TextBlock Grid.Column="1" Text="Anfangsbestand" Theme="{StaticResource FieldLabel}" Margin="8,10,0,4"/>
                         <TextBlock Grid.Column="2" Text="Endbestand" Theme="{StaticResource FieldLabel}" Margin="8,10,0,4"/>
+                        <TextBlock Grid.Column="3" Text="Einheit" Theme="{StaticResource FieldLabel}" Margin="8,10,0,4"/>
                     </Grid>
                     <ItemsControl ItemsSource="{Binding Stock}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="ui:StockRow">
-                                <Grid ColumnDefinitions="*,140,140,90" Margin="0,0,0,6">
+                                <Grid ColumnDefinitions="*,140,140,104,90" Margin="0,0,0,6">
                                     <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=model:Ingredient}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
                                     <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Opening, Mode=TwoWay}"/>
                                     <TextBox Grid.Column="2" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Closing, Mode=TwoWay}"/>
-                                    <Button Grid.Column="3" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveStock" HorizontalAlignment="Right">
+                                    <ComboBox Grid.Column="3" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Margin="8,0,0,0" HorizontalAlignment="Stretch"/>
+                                    <Button Grid.Column="4" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveStock" HorizontalAlignment="Right">
                                         <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                     </Button>
                                 </Grid>

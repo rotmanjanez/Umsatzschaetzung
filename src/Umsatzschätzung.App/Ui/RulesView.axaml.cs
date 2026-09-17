@@ -9,9 +9,8 @@ public sealed class IngredientItem(Ingredient ingredient, string category)
 {
     public Ingredient Ingredient { get; } = ingredient;
     public string Name => Ingredient.Name;
-    public string UnitLabel => Format.UnitName(Ingredient.BaseUnit);
     public string Category { get; } = category;
-    public string Tip => Category == "" ? Name + " · " + UnitLabel : Name + " · " + Category + " · " + UnitLabel;
+    public string Tip => Category == "" ? Name : Name + " · " + Category;
 }
 
 public sealed class CategoryOption(string? id, string name)
@@ -87,20 +86,17 @@ public sealed class RecipeRow(List<Ingredient> options) : Observable
 {
     Ingredient? ingredient;
     string amount = "";
+    int unitIndex;
     bool ingredientInvalid, amountInvalid;
 
     public List<Ingredient> Options { get; } = options;
+    public List<string> Units { get; } = [.. RulesView.RecipeUnits.Select(c => Model.Units.Label(c))];
     public Ingredient? Ingredient
     {
         get => ingredient;
-        set
-        {
-            if (!Set(ref ingredient, value)) return;
-            IngredientInvalid = false;
-            Raise(nameof(UnitLabel));
-        }
+        set { if (Set(ref ingredient, value)) IngredientInvalid = false; }
     }
-    public string UnitLabel => ingredient is null ? "–" : Format.UnitName(ingredient.BaseUnit);
+    public int UnitIndex { get => unitIndex; set => Set(ref unitIndex, value); }
     public string Amount { get => amount; set { if (Set(ref amount, value)) AmountInvalid = false; } }
     public bool IngredientInvalid { get => ingredientInvalid; set => Set(ref ingredientInvalid, value); }
     public bool AmountInvalid { get => amountInvalid; set => Set(ref amountInvalid, value); }
@@ -125,14 +121,11 @@ public abstract class EntityForm<T> : EntityForm
 public sealed class IngredientForm : EntityForm<IngredientItem>
 {
     string name = "";
-    int unitIndex = -1;
-    bool nameInvalid, unitInvalid;
+    bool nameInvalid;
 
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
     public CategoryPicker Category { get; } = new();
-    public int UnitIndex { get => unitIndex; set { if (Set(ref unitIndex, value)) UnitInvalid = false; } }
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
-    public bool UnitInvalid { get => unitInvalid; set => Set(ref unitInvalid, value); }
 }
 
 public sealed class ProductForm : EntityForm<ProductItem>
@@ -204,7 +197,7 @@ public sealed class RulesModel
 
 public partial class RulesView : Screen
 {
-    static readonly Unit[] Units = [Unit.Ml, Unit.G, Unit.Piece];
+    public static readonly string[] RecipeUnits = ["GRM", "KGM", "MLT", "LTR", "H87"];
 
     readonly RulesModel model = new();
     bool loading, saving;
@@ -213,7 +206,7 @@ public partial class RulesView : Screen
     {
         InitializeComponent();
         DataContext = model;
-        IngredientSearch.Attach(model.Ingredients.Items, i => i.Name + " " + i.Category + " " + i.UnitLabel);
+        IngredientSearch.Attach(model.Ingredients.Items, i => i.Name + " " + i.Category);
         ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
         YieldSearch.Attach(model.Yields.Items, s => s.Search);
         IngredientGrid.ItemsSource = IngredientSearch.View;
@@ -285,7 +278,6 @@ public partial class RulesView : Screen
         f.Existing = f.Active = true;
         f.Title = i.Name;
         f.Name = i.Name;
-        f.UnitIndex = Array.IndexOf(Units, i.BaseUnit);
         f.Category.Load(Session.Categories(), i.CategoryId);
     }
 
@@ -298,7 +290,6 @@ public partial class RulesView : Screen
         f.Active = true;
         f.Title = "Neue Zutat";
         f.Name = "";
-        f.UnitIndex = -1;
         f.Category.Load(Session.Categories(), null);
     }
 
@@ -306,14 +297,13 @@ public partial class RulesView : Screen
     {
         var f = model.Ingredients;
         f.NameInvalid = f.Name.Trim() == "";
-        f.UnitInvalid = f.UnitIndex < 0;
-        if (f.NameInvalid || f.UnitInvalid)
+        if (f.NameInvalid)
         {
-            Session.Fail(Missing(f.NameInvalid ? "Name" : null, f.UnitInvalid ? "Basiseinheit" : null));
+            Session.Fail(Missing("Name"));
             return;
         }
         var id = f.CurrentId ?? Session.NewId("ingredient");
-        var data = new Ingredient { Id = id, Name = f.Name.Trim(), BaseUnit = Units[f.UnitIndex] };
+        var data = new Ingredient { Id = id, Name = f.Name.Trim() };
         await Compose(async () =>
         {
             if (await CategoryId(f.Category) is not { } categoryId) return;
@@ -340,7 +330,12 @@ public partial class RulesView : Screen
         f.Name = p.Name;
         f.Recipe.Clear();
         foreach (var l in p.Recipe)
-            f.Recipe.Add(new RecipeRow(options) { Ingredient = options.Find(i => i.Id == l.IngredientId), Amount = l.Amount.ToString() });
+            f.Recipe.Add(new RecipeRow(options)
+            {
+                Ingredient = options.Find(i => i.Id == l.IngredientId),
+                Amount = l.Amount.ToString(),
+                UnitIndex = Math.Max(Array.IndexOf(RecipeUnits, l.Unit), 0),
+            });
     }
 
     void NewProduct(object? sender, RoutedEventArgs e)
@@ -375,7 +370,7 @@ public partial class RulesView : Screen
             row.IngredientInvalid = row.Ingredient is null;
             row.AmountInvalid = amount is not > 0;
             if (row.IngredientInvalid || row.AmountInvalid) lines = false;
-            else data.Recipe.Add(new RecipeLine { IngredientId = row.Ingredient!.Id, Amount = amount!.Value });
+            else data.Recipe.Add(new RecipeLine { IngredientId = row.Ingredient!.Id, Amount = amount!.Value, Unit = RecipeUnits[row.UnitIndex] });
         }
         if (f.NameInvalid || !lines || data.Recipe.Count == 0)
         {
