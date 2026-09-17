@@ -46,7 +46,9 @@ public sealed class Tagger : IDisposable
     static string ModelPath => Path.Combine(Dir, "tagger.int8.onnx");
 
     readonly Lock gate = new();
-    InferenceSession? session;
+    // IDisposable, not InferenceSession: naming that type in Dispose makes the JIT load
+    // Microsoft.ML.OnnxRuntime on every shutdown, even when nothing was ever tagged.
+    IDisposable? session;
     Bpe? bpe;
 
     public void Dispose() => session?.Dispose();
@@ -57,7 +59,7 @@ public sealed class Tagger : IDisposable
         {
             bpe ??= Bpe.Open(Dir);
             session ??= Open();
-            return Run(session, bpe, words, width, height);
+            return Run((InferenceSession)session, bpe, words, width, height);
         }
     }
 
