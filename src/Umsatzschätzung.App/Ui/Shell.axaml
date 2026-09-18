@@ -14,8 +14,15 @@
             <ContentControl x:Name="CasesHost"/>
             <DockPanel x:Name="CaseUi" Margin="24,16,24,16" IsVisible="False">
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                    <Button DockPanel.Dock="Left" Content="← Prüfungen" Theme="{StaticResource LinkButton}" VerticalAlignment="Center" Margin="0,0,20,0" Click="Back"/>
-                    <Button DockPanel.Dock="Right" Content="Regeln …" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" Click="ShowRules"/>
+                    <Button DockPanel.Dock="Left" Theme="{StaticResource BackButton}" Margin="-6,0,8,0" ToolTip.Tip="Zurück zu den Prüfungen" Click="Back">
+                        <PathIcon Data="{StaticResource BackIcon}" Width="14" Height="14"/>
+                    </Button>
+                    <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" Click="ShowRules">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
+                            <TextBlock Text="Regeln"/>
+                        </StackPanel>
+                    </Button>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="CaseLabel" Theme="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis"/>
                         <TextBlock x:Name="CasePeriod" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>

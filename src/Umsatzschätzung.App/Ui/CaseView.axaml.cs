@@ -28,13 +28,10 @@ public sealed class RuleOption(YieldRule rule, string text)
     public string Text { get; } = text;
 }
 
-public sealed class YieldKindGroup(string kind, List<YieldGroupRow> rows) : Observable
+public sealed class YieldKindGroup(string kind, List<YieldGroupRow> rows)
 {
-    YieldGroupRow? selectedRow;
-
     public string Kind { get; } = kind;
     public List<YieldGroupRow> Rows { get; } = rows;
-    public YieldGroupRow? SelectedRow { get => selectedRow; set => Set(ref selectedRow, value); }
 }
 
 public sealed class YieldGroupRow : Observable
@@ -51,7 +48,7 @@ public sealed class YieldGroupRow : Observable
     public YieldChoice Choice { get; }
     public string Label { get; }
     public List<RuleOption> Options { get; }
-    // The detail list nulls its selection while it rebinds; a row always has a rule, so ignore that.
+    // The box nulls its selection while it rebinds; a row always has a rule, so ignore that.
     public RuleOption? Selected { get => selected; set { if (value is not null) Set(ref selected, value); } }
 }
 
@@ -61,8 +58,7 @@ public sealed class CaseModel : Observable
 
     string label = "", from = "", to = "", name = "", taxNumber = "", pab = "", gewerbe = "";
     readonly string[] declared = ["", "", ""];
-    YieldGroupRow? detail;
-    bool noYields = true, noInvoices, syncing;
+    bool noYields = true, noInvoices;
 
     public string Label { get => label; set => Set(ref label, value); }
     public string From { get => from; set => Set(ref from, value); }
@@ -78,22 +74,6 @@ public sealed class CaseModel : Observable
     public bool NoInvoices { get => noInvoices; private set => Set(ref noInvoices, value); }
     public ObservableCollection<StockRow> Stock { get; } = [];
     public ObservableCollection<YieldKindGroup> Yields { get; } = [];
-
-    // Which scope the right-hand column shows. View state, not case data — it deliberately
-    // raises without Changed so browsing the list never marks the Prüfung dirty.
-    public YieldGroupRow? Detail
-    {
-        get => detail;
-        private set
-        {
-            if (ReferenceEquals(detail, value)) return;
-            detail = value;
-            Raise();
-            Raise(nameof(NoDetail));
-        }
-    }
-
-    public bool NoDetail => detail is null;
 
     public void Load(Session session)
     {
@@ -121,26 +101,12 @@ public sealed class CaseModel : Observable
                 UnitIndex = Math.Max(Array.IndexOf(RulesView.RecipeUnits, e.Unit), 0),
             });
         Yields.Clear();
-        Detail = null;
         foreach (var group in YieldGroups(session, ingredients))
         {
             foreach (var row in group.Rows) row.Selected = Chosen(k, row);
-            group.Changed += () => Show(group);
             Yields.Add(group);
         }
         NoYields = Yields.Count == 0;
-        if (Yields.Count > 0) Yields[0].SelectedRow = Yields[0].Rows[0];
-    }
-
-    // One selection across both lists: picking in one clears the other.
-    void Show(YieldKindGroup active)
-    {
-        if (syncing) return;
-        syncing = true;
-        foreach (var g in Yields)
-            if (!ReferenceEquals(g, active)) g.SelectedRow = null;
-        syncing = false;
-        Detail = active.SelectedRow;
     }
 
     public bool Collect(Case k)
