@@ -109,11 +109,11 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Einheit" Width="70" SortMemberPath="Unit">
+                        <DataGridTemplateColumn Header="Einheit" Width="110" SortMemberPath="UnitLabel">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding UnitFlagged}" ToolTip.Tip="{Binding UnitFlag}">
-                                        <TextBlock Text="{Binding Unit}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding UnitLabel}" VerticalAlignment="Center"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -127,7 +127,11 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding NameFlagged}" ToolTip.Tip="{Binding NameFlag}">
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                        <DockPanel>
+                                            <PathIcon DockPanel.Dock="Right" Theme="{StaticResource RowWarning}"
+                                                      IsVisible="{Binding RowFlagged}" ToolTip.Tip="{Binding RowFlag}"/>
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </DockPanel>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -178,15 +182,6 @@
                                     <TextBox Text="{Binding Vat, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Hinweis" Width="200" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="ui:LineRow">
-                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding Flagged}" ToolTip.Tip="{Binding Flag}">
-                                        <TextBlock Text="{Binding Flag}" Theme="{StaticResource BadgeText}" TextTrimming="CharacterEllipsis" MaxWidth="180"/>
-                                    </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>

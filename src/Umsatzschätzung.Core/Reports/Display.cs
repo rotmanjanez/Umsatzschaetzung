@@ -331,7 +331,7 @@ public static class Display
         Format.Date(inv.Date),
         Format.Cents(inv.NetTotal),
         Format.Cents(inv.GrossTotal),
-        inv.Lines.Select(l => new LineDisplay(LineQuantity(l), LineUnitPrice(l), Format.Cents(l.LineNet), Format.Bp(l.Vat), MappingLabel(rs, l.MappingId))).ToList());
+        inv.Lines.Select(l => new LineDisplay(Format.Milli(l.Quantity), LineUnitPrice(l), Format.Cents(l.LineNet), Format.Bp(l.Vat), MappingLabel(rs, l.MappingId))).ToList());
 
     public static string MappingLabel(RuleSet rs, string? id)
     {
