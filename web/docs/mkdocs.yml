@@ -6,6 +6,7 @@ site_dir: site
 theme:
   name: material
   language: de
+  custom_dir: overrides
   features:
     - navigation.sections
     - content.code.copy
