@@ -1,0 +1,47 @@
+name: netcup-deploy
+description: Ship a built directory into a netcup document root over SSH.
+
+inputs:
+  source:
+    required: true
+  deploy-path:
+    required: true
+  host:
+    required: true
+  user:
+    required: true
+  password:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        SSH_PW: ${{ inputs.password }}
+        SSH_HOST: ${{ inputs.host }}
+        SSH_USER: ${{ inputs.user }}
+        DEPLOY_PATH: ${{ inputs.deploy-path }}
+        SOURCE: ${{ inputs.source }}
+      run: |
+        set -euo pipefail
+
+        if ! command -v sshpass >/dev/null 2>&1; then
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+        fi
+
+        mkdir -p ~/.ssh
+        ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+        tar -czf /tmp/deploy.tar.gz --exclude='./.git' -C "$SOURCE" .
+
+        ARCHIVE="/tmp/deploy-$(date +%s)-$$.tar.gz"
+        sshpass -p "$SSH_PW" scp /tmp/deploy.tar.gz "${SSH_USER}@${SSH_HOST}:${ARCHIVE}"
+        sshpass -p "$SSH_PW" ssh "${SSH_USER}@${SSH_HOST}" "
+          set -e
+          mkdir -p ${DEPLOY_PATH}
+          rm -rf ${DEPLOY_PATH}/* ${DEPLOY_PATH}/.htaccess
+          tar -xzf ${ARCHIVE} -C ${DEPLOY_PATH}
+          rm ${ARCHIVE}
+        "

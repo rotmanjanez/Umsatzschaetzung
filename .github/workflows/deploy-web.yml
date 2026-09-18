@@ -1,0 +1,82 @@
+name: deploy-web
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths: ['web/**', '.github/workflows/deploy-web.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+jobs:
+  landing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+        working-directory: web/landing
+      - run: bun run build
+        working-directory: web/landing
+      - uses: ./.github/actions/netcup-deploy
+        if: github.event_name != 'pull_request'
+        with:
+          source: web/landing/dist
+          deploy-path: ${{ vars.LANDING_DEPLOY_PATH }}
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PW }}
+
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: web/docs/requirements.txt
+      - run: pip install -r requirements.txt
+        working-directory: web/docs
+
+      - name: Resolve version
+        id: v
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "name=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+            echo "alias=latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=dev" >> "$GITHUB_OUTPUT"
+            echo "alias=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: mike deploy
+        working-directory: web/docs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages || true
+          mike deploy --branch gh-pages --push --update-aliases \
+            "${{ steps.v.outputs.name }}" ${{ steps.v.outputs.alias }}
+          mike set-default --branch gh-pages --push latest || true
+
+      - name: Materialise built tree
+        run: |
+          git fetch origin gh-pages:gh-pages
+          git worktree add web/docs/publish gh-pages
+          cp web/docs/htaccess web/docs/publish/.htaccess
+
+      - uses: ./.github/actions/netcup-deploy
+        with:
+          source: web/docs/publish
+          deploy-path: ${{ vars.DOCS_DEPLOY_PATH }}
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PW }}

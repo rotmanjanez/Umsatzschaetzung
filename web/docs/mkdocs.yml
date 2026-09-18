@@ -1,0 +1,40 @@
+site_name: Umsatzschätzung
+site_url: https://docs.umsatzschaetzung.amtstools.de/
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: de
+  features:
+    - navigation.sections
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dunkles Design
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Helles Design
+
+plugins:
+  - search:
+      lang: de
+
+extra:
+  version:
+    provider: mike
+
+markdown_extensions:
+  - admonition
+  - footnotes
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+
+nav:
+  - Start: index.md
