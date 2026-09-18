@@ -233,8 +233,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(async () =>
     {
-        if (cases.LoadReading(caseId, invoiceId) is not { } stored) return new InvoiceReadingResp([]);
-        var pages = Json.Deserialize<List<OcrPage>>(stored);
+        if (cases.LoadReading(caseId, invoiceId) is not { } pages) return new InvoiceReadingResp([]);
         byte[] data;
         try
         {
@@ -315,26 +314,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var c = LoadCase(caseId);
         // The document first: storing it clears whatever else the invoice kept.
         if (data.Length > 0) cases.SaveFile(caseId, inv.Id, fileName, data);
-        if (reading is { Count: > 0 }) cases.SaveReading(caseId, inv.Id, Reading(reading));
+        if (reading is { Count: > 0 }) cases.SaveReading(caseId, inv.Id, reading);
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
         SaveCase(c);
         return Resp(c);
     }
-
-    // The images are what the pages were read from, and the document they came from is stored: they
-    // are rendered again rather than written a second time.
-    static byte[] Reading(List<OcrPage> pages) =>
-        Encoding.UTF8.GetBytes(Json.Serialize(pages.Select(p => new OcrPage
-        {
-            Width = p.Width,
-            Height = p.Height,
-            Words = p.Words,
-            Header = p.Header,
-            Lines = p.Lines,
-            Flags = p.Flags,
-        }).ToList()) + "\n");
 
     string Gewerbe(string caseId)
     {
