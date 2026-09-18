@@ -65,7 +65,11 @@ jobs:
           git fetch origin gh-pages:gh-pages || true
           mike deploy --branch gh-pages --push --update-aliases \
             "${{ steps.v.outputs.name }}" ${{ steps.v.outputs.alias }}
-          mike set-default --branch gh-pages --push latest || true
+          if mike list --branch gh-pages | grep -qw latest; then
+            mike set-default --branch gh-pages --push latest
+          else
+            mike set-default --branch gh-pages --push "${{ steps.v.outputs.name }}"
+          fi
 
       - name: Materialise built tree
         run: |
