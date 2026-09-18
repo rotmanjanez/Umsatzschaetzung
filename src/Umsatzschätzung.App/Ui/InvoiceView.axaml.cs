@@ -30,7 +30,7 @@ public static class Checks
 public sealed class LineRow : Observable
 {
     string quantity, unit, name, unitPrice, lineNet, vat;
-    string? flag, quantityFlag, unitFlag, nameFlag, unitPriceFlag, lineNetFlag, vatFlag;
+    string? rowFlag, quantityFlag, unitFlag, nameFlag, unitPriceFlag, lineNetFlag, vatFlag;
 
     public LineRow(InvoiceLine line, LineDisplay display, int page, Dictionary<Field, OcrWord> cells)
     {
@@ -50,14 +50,26 @@ public sealed class LineRow : Observable
     public Dictionary<Field, OcrWord> Cells { get; }
 
     public string Quantity { get => quantity; set { if (Set(ref quantity, value) && Input.Milli(value) is { } v) Line.Quantity = v; } }
-    public string Unit { get => unit; set { if (Set(ref unit, value)) Line.UnitCode = value; } }
+    public string Unit
+    {
+        get => unit;
+        set
+        {
+            var code = Units.Lookup(value)?.Code ?? value;
+            if (!Set(ref unit, code)) return;
+            Line.UnitCode = code;
+            Raise(nameof(UnitLabel));
+        }
+    }
+
+    public string UnitLabel => Units.Label(unit);
     public string Name { get => name; set { if (Set(ref name, value)) Line.Name = value; } }
     public string UnitPrice { get => unitPrice; set { if (Set(ref unitPrice, value) && Input.Micro(value) is { } v) Line.UnitPrice = v; } }
     public string LineNet { get => lineNet; set { if (Set(ref lineNet, value) && Input.Cents(value) is { } v) Line.LineNet = v; } }
     public string Vat { get => vat; set { if (Set(ref vat, value) && Input.Bp(value) is { } v) Line.Vat = v; } }
 
-    public string? Flag => flag;
-    public bool Flagged => flag is not null;
+    public string? RowFlag => rowFlag;
+    public bool RowFlagged => rowFlag is not null;
     public string? QuantityFlag => quantityFlag;
     public bool QuantityFlagged => quantityFlag is not null;
     public string? UnitFlag => unitFlag;
@@ -73,10 +85,9 @@ public sealed class LineRow : Observable
 
     public void SetFlags(IEnumerable<Flag> flags)
     {
-        flag = quantityFlag = unitFlag = nameFlag = unitPriceFlag = lineNetFlag = vatFlag = null;
+        rowFlag = quantityFlag = unitFlag = nameFlag = unitPriceFlag = lineNetFlag = vatFlag = null;
         foreach (var f in flags)
         {
-            flag ??= f.Message;
             switch (f.Field)
             {
                 case Field.Quantity: quantityFlag ??= f.Message; break;
@@ -85,11 +96,13 @@ public sealed class LineRow : Observable
                 case Field.UnitPrice: unitPriceFlag ??= f.Message; break;
                 case Field.LineNet: lineNetFlag ??= f.Message; break;
                 case Field.Vat: vatFlag ??= f.Message; break;
+                default: rowFlag = rowFlag is null ? f.Message : rowFlag + "\n" + f.Message; break;
             }
         }
         foreach (var p in new[]
                  {
-                     nameof(Flag), nameof(Flagged), nameof(QuantityFlag), nameof(QuantityFlagged), nameof(UnitFlag), nameof(UnitFlagged),
+                     nameof(RowFlag), nameof(RowFlagged),
+                     nameof(QuantityFlag), nameof(QuantityFlagged), nameof(UnitFlag), nameof(UnitFlagged),
                      nameof(NameFlag), nameof(NameFlagged), nameof(UnitPriceFlag), nameof(UnitPriceFlagged), nameof(LineNetFlag),
                      nameof(LineNetFlagged), nameof(VatFlag), nameof(VatFlagged),
                  })
