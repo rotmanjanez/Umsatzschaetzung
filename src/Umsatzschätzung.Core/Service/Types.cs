@@ -68,7 +68,7 @@ public sealed record NodeDisplay(string Label, string Value, string? Formula, Li
 
 public sealed record ReportResp(string Html, byte[]? Pdf, string FileName);
 
-public enum ExportFormat { Json, Csv }
+public enum ExportFormat { Case, Csv }
 
 public sealed record ExportResp(byte[] Data, string FileName);
 

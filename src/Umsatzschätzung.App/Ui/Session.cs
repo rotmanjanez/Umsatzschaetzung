@@ -18,7 +18,7 @@ public sealed class Session : Observable
         new("Rechnungen") { Patterns = ["*.xml", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff"] },
         new("Alle Dateien") { Patterns = ["*"] },
     ];
-    public static readonly FilePickerFileType[] CaseFilter = [new("Prüfung") { Patterns = ["*.json"] }];
+    public static readonly FilePickerFileType[] CaseFilter = [new("Prüfung") { Patterns = ["*.db"] }];
     public static readonly FilePickerFileType[] PdfFilter = [new("PDF") { Patterns = ["*.pdf"] }];
     public static readonly FilePickerFileType[] CsvFilter = [new("CSV") { Patterns = ["*.csv"] }];
 
