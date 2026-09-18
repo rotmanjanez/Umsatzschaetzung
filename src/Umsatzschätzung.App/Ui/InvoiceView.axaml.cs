@@ -172,13 +172,15 @@ public sealed class InvoiceModel : Observable
 }
 
 // One editor for every invoice, whether it still awaits review or was taken over long ago: the
-// document sits below the values, and the values it was read from light up on the document.
+// document sits next to the values, and the values it was read from light up on the document.
 public partial class InvoiceView : Screen
 {
     static readonly Field[] LineFields = [Field.Quantity, Field.Unit, Field.Name, Field.UnitPrice, Field.LineNet, Field.Vat];
 
     static readonly string[] HeaderFields =
         [nameof(InvoiceModel.Supplier), nameof(InvoiceModel.Number), nameof(InvoiceModel.Date)];
+
+    const double SideBySideAt = 1150;
 
     readonly InvoiceModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
@@ -189,7 +191,7 @@ public partial class InvoiceView : Screen
     List<Flag> flags = [];
     int currentPage = -1;
     int previewSeq;
-    bool applying, sourceLoaded, checkedOnce;
+    bool applying, sourceLoaded, checkedOnce, sideBySide;
 
 
     public InvoiceView(Session session, Invoice stored, InvoiceDisplay storedDisplay, OcrResp? ocr, Action<CaseResp> onSaved) : base(session)
@@ -224,6 +226,38 @@ public partial class InvoiceView : Screen
             Source.IsVisible = true;
         }
         ApplyFlags(flags);
+        SizeChanged += (_, e) => Arrange(e.NewSize.Width >= SideBySideAt);
+    }
+
+    // Stacked the scan and the lines share the height; once the window is wide enough both get all
+    // of it and split the width instead.
+    void Arrange(bool side)
+    {
+        if (side == sideBySide) return;
+        sideBySide = side;
+        Panes.RowDefinitions = side
+            ? [new RowDefinition(GridLength.Star)]
+            : [new RowDefinition(11, GridUnitType.Star) { MinHeight = 240 },
+               new RowDefinition(new GridLength(6)),
+               new RowDefinition(9, GridUnitType.Star) { MinHeight = 120 }];
+        Panes.ColumnDefinitions = side
+            ? [new ColumnDefinition(11, GridUnitType.Star) { MinWidth = 520 },
+               new ColumnDefinition(new GridLength(6)),
+               new ColumnDefinition(9, GridUnitType.Star) { MinWidth = 340 }]
+            : [new ColumnDefinition(GridLength.Star)];
+        Place(FormPane, 0);
+        Place(PaneSplit, 1);
+        Place(ScanPane, 2);
+        PaneSplit.ResizeDirection = side ? GridResizeDirection.Columns : GridResizeDirection.Rows;
+        PaneSplit.Width = side ? 6 : double.NaN;
+        PaneSplit.Height = side ? double.NaN : 6;
+        if (pages.Count > 0) Dispatcher.UIThread.Post(FitPage);
+    }
+
+    void Place(Control pane, int index)
+    {
+        Grid.SetRow(pane, sideBySide ? 0 : index);
+        Grid.SetColumn(pane, sideBySide ? index : 0);
     }
 
     public string Id => invoice.Id;

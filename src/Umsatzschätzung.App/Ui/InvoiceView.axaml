@@ -31,17 +31,18 @@
             <Setter Property="VerticalAlignment" Value="Stretch"/>
         </Style>
     </ui:Screen.Styles>
-    <Grid>
+    <Grid x:Name="Panes">
         <Grid.RowDefinitions>
             <RowDefinition Height="11*" MinHeight="240"/>
             <RowDefinition Height="6"/>
             <RowDefinition Height="9*" MinHeight="120"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12" ClipToBounds="True">
-            <DockPanel>
+        <Border x:Name="FormPane" Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12" ClipToBounds="True">
+            <DockPanel LastChildFill="False">
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
-                    <Border x:Name="State" Theme="{StaticResource Badge}" Margin="12,0,0,0"
+                    <Border x:Name="State" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="12,0"
+                            VerticalAlignment="Center"
                             Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">
                         <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}"/>
                     </Border>
@@ -92,8 +93,7 @@
                     </ItemsControl>
                     <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8"/>
                 </StackPanel>
-                <Button DockPanel.Dock="Bottom" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Margin="0,8,0,0" Click="AddLine"/>
-                <DataGrid x:Name="Lines" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged">
+                <DataGrid x:Name="Lines" DockPanel.Dock="Top" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Menge" Width="90" SortMemberPath="Quantity">
                             <DataGridTemplateColumn.CellTemplate>
@@ -194,12 +194,13 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                <Button DockPanel.Dock="Top" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine"/>
             </DockPanel>
         </Border>
 
-        <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+        <GridSplitter x:Name="PaneSplit" Grid.Row="1" Height="6" ResizeDirection="Rows" Background="Transparent"/>
 
-        <Border Grid.Row="2" Theme="{StaticResource Panel}" ClipToBounds="True">
+        <Border x:Name="ScanPane" Grid.Row="2" Theme="{StaticResource Panel}" ClipToBounds="True">
             <Grid>
                 <DockPanel x:Name="OcrPane">
                     <DockPanel DockPanel.Dock="Top" Margin="12,8">

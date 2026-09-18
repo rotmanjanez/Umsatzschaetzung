@@ -7,6 +7,10 @@ namespace Umsatzschätzung.App.Ui;
 
 public static class Grids
 {
+    // Snapped to device pixels the columns can end up a fraction wider than their share, and that
+    // fraction is enough for a horizontal scrollbar: the flex column stays just short of the room.
+    const double Slack = 2;
+
     public static readonly AttachedProperty<int> FlexProperty =
         AvaloniaProperty.RegisterAttached<DataGrid, int>("Flex", typeof(Grids), -1);
 
@@ -42,7 +46,7 @@ public static class Grids
             if (column != flex && column.IsVisible)
                 used += column.ActualWidth;
 
-        var room = grid.Bounds.Width - used - ScrollbarWidth(grid);
+        var room = grid.Bounds.Width - used - ScrollbarWidth(grid) - Slack;
         if (room < Math.Max(flex.MinWidth, grid.MinColumnWidth) || Math.Abs(room - flex.ActualWidth) < 1)
         {
             grid.SetValue(AppliedProperty, flex.ActualWidth);
