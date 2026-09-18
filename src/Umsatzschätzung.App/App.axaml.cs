@@ -18,6 +18,8 @@ public partial class App : Application
 {
     readonly List<IDisposable> owned = [];
 
+    static string Version => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
+
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
@@ -50,6 +52,12 @@ public partial class App : Application
         desktop.MainWindow = new Shell(service);
     }
 
+    void About(object? sender, EventArgs e)
+    {
+        var owner = (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        _ = Dialog.Alert(owner, $"Umsatzschätzung {Version}\n© Janez Rotman", "Über Umsatzschätzung");
+    }
+
     static void ShowError(IClassicDesktopStyleApplicationLifetime desktop, string message, string title)
     {
         try
@@ -74,7 +82,6 @@ public partial class App : Application
         var config = AppConfig.Load();
         Directory.CreateDirectory(AppData.Dir);
         var rules = new RuleStore(config.Store, Path.Combine(AppData.Dir, "snapshots"), RuleStore.Seed());
-        var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
         var ocr = new RapidOcr();
         owned.Add(ocr);
         var tagger = new Tagger();
@@ -82,6 +89,6 @@ public partial class App : Application
         var pdf = new PdfiumPages();
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
-        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, version);
+        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, Version);
     }
 }
