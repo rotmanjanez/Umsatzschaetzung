@@ -17,16 +17,14 @@ public enum Checked { Automatic, Manual, Pending }
 public static class Checks
 {
     public static Checked Of(Invoice inv) =>
-        inv.Verification is not null ? Checked.Manual
+        inv.Verification is { } v ? (v.Auto ? Checked.Automatic : Checked.Manual)
         : inv.Source == Source.Scan ? Checked.Pending
         : Checked.Automatic;
 
-    public static string Text(Invoice inv) => Of(inv) switch
-    {
-        Checked.Manual => "Manuell geprüft am " + Format.Timestamp(inv.Verification!.At),
-        Checked.Automatic => "Automatisch geprüft",
-        _ => "Prüfung offen",
-    };
+    public static string Text(Invoice inv) =>
+        inv.Verification is { } v
+            ? (v.Auto ? "Automatisch geprüft am " : "Manuell geprüft am ") + Format.Timestamp(v.At)
+            : inv.Source == Source.Scan ? "Prüfung offen" : "Automatisch übernommen";
 }
 
 public sealed class LineRow : Observable
@@ -164,7 +162,6 @@ public sealed class InvoiceModel : Observable
 // document sits below the values, and the values it was read from light up on the document.
 public partial class InvoiceView : Screen
 {
-    static readonly HashSet<string> Blocking = ["line_total", "sum_net"];
     static readonly Field[] LineFields = [Field.Quantity, Field.Unit, Field.Name, Field.UnitPrice, Field.LineNet, Field.Vat];
 
     static readonly string[] HeaderFields =
@@ -179,7 +176,7 @@ public partial class InvoiceView : Screen
     List<Flag> flags = [];
     int currentPage = -1;
     int previewSeq;
-    bool applying, sourceLoaded;
+    bool applying, sourceLoaded, checkedOnce;
 
 
     public InvoiceView(Session session, Invoice stored, InvoiceDisplay storedDisplay, OcrResp? ocr, Action<CaseResp> onSaved) : base(session)
@@ -223,6 +220,11 @@ public partial class InvoiceView : Screen
 
     protected override async void OnEnter()
     {
+        if (!checkedOnce)
+        {
+            checkedOnce = true;
+            await Preview();
+        }
         if (pages.Count > 0 || sourceLoaded || Session.Case is null) return;
         if (Session.Sources.TryGetValue(invoice.Id, out var cached))
         {
@@ -309,7 +311,7 @@ public partial class InvoiceView : Screen
     {
         if (Session.Case is null) return;
         var seq = ++previewSeq;
-        var req = new VerifyReq(Session.Case.Id, Current(), false, false, null, null);
+        var req = new VerifyReq(Session.Case.Id, Current(), Intent.Check, null, null);
         await Session.Run(async () =>
         {
             var v = await Session.Service.VerifyInvoice(req, Ct);
@@ -326,7 +328,7 @@ public partial class InvoiceView : Screen
         model.NetTotal = display.NetTotal;
         model.GrossTotal = display.GrossTotal;
         applying = false;
-        ApplyFlags(v.Flags);
+        ApplyFlags(v.Flags, v.Blocked);
     }
 
     void Apply(VerifyResp v)
@@ -334,15 +336,17 @@ public partial class InvoiceView : Screen
         invoice = Copy(v.Invoice);
         display = v.Display;
         Load();
-        ApplyFlags(v.Flags);
+        ApplyFlags(v.Flags, v.Blocked);
     }
 
-    void ApplyFlags(List<Flag> all)
+    // Whether a flag blocks is the service's call: on open the reading's own flags are only drawn,
+    // and the first check that comes back decides.
+    void ApplyFlags(List<Flag> all, bool blocked = false)
     {
         flags = all;
         model.SetHeaderFlags(all.Where(f => f.LineNo == 0));
         foreach (var row in model.Lines) row.SetFlags(all.Where(f => f.LineNo == row.Line.No && f.LineNo != 0));
-        model.Valid = !all.Any(f => Blocking.Contains(f.Code));
+        model.Valid = !blocked;
         RenderFlagged();
     }
 
@@ -351,7 +355,7 @@ public partial class InvoiceView : Screen
         if (Session.Case is null) return;
         timer.Stop();
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
-        var req = new VerifyReq(Session.Case.Id, Current(), true, false, null, null);
+        var req = new VerifyReq(Session.Case.Id, Current(), Intent.Confirm, null, null);
         model.Saving = true;
         await Session.Run(async () =>
         {

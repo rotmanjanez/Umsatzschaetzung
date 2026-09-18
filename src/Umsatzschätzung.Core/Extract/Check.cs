@@ -9,6 +9,8 @@ public static class Check
         // Number, date and supplier are nice to have: only the positions and the totals
         // decide whether an invoice adds up.
         var flags = new List<Flag>();
+        var net = inv.StatedNet ?? inv.NetTotal;
+        var gross = inv.StatedGross ?? inv.GrossTotal;
         long sum = 0;
         long vat = 0;
         var singleVat = inv.Lines.Count > 0;
@@ -33,30 +35,46 @@ public static class Check
             if (vat == 0) vat = l.Vat;
             else if (l.Vat != vat) singleVat = false;
         }
-        if (inv.NetTotal <= 0)
+        if (net <= 0)
             flags.Add(new Flag { Code = "nonpositive", Field = Field.NetTotal, Message = "Nettobetrag ist nicht positiv" });
-        if (inv.GrossTotal <= 0)
+        if (gross <= 0)
             flags.Add(new Flag { Code = "nonpositive", Field = Field.GrossTotal, Message = "Bruttobetrag ist nicht positiv" });
-        if (inv.Lines.Count > 0 && !Within(sum, inv.NetTotal))
+        if (inv.Lines.Count > 0 && !Within(sum, net))
             flags.Add(new Flag
             {
                 Code = "sum_net",
                 Field = Field.NetTotal,
-                Message = $"Summe der Positionen {Format.Cents(sum)} weicht vom Nettobetrag {Format.Cents(inv.NetTotal)} ab",
+                Message = $"Summe der Positionen {Format.Cents(sum)} weicht vom Nettobetrag {Format.Cents(net)} ab",
             });
         if (singleVat && vat > 0)
         {
-            var expected = InvoiceMath.RoundDiv(inv.NetTotal * (Bp.Full + vat), Bp.Full);
-            if (!Within(expected, inv.GrossTotal))
+            var expected = InvoiceMath.RoundDiv(net * (Bp.Full + vat), Bp.Full);
+            if (!Within(expected, gross))
                 flags.Add(new Flag
                 {
                     Code = "gross_check",
                     Field = Field.GrossTotal,
-                    Message = $"Netto {Format.Cents(inv.NetTotal)} zzgl. {Format.Bp(vat)} MwSt ergibt {Format.Cents(expected)}, Bruttobetrag ist {Format.Cents(inv.GrossTotal)}",
+                    Message = $"Netto {Format.Cents(net)} zzgl. {Format.Bp(vat)} MwSt ergibt {Format.Cents(expected)}, Bruttobetrag ist {Format.Cents(gross)}",
                 });
         }
         return flags;
     }
+
+    // Taking an invoice over without a human means nobody ever looks at it: that needs a complete
+    // reading whose positions add up to the totals the document itself prints.
+    public static bool Complete(Invoice inv, List<Flag> flags) =>
+        flags.Count == 0
+        && inv.Lines.Count > 0
+        && inv.SupplierName != ""
+        && inv.Number != ""
+        && inv.Date is not null
+        && inv.StatedNet is > 0
+        && inv.StatedGross is > 0;
+
+    // A mismatch against a printed total is the reader's word against the document, so it only
+    // stops the automatic route; totals that an invoice carries itself are binding.
+    public static bool Blocks(Invoice inv, Flag flag) =>
+        flag.Code == "line_total" || (flag.Code == "sum_net" && inv.StatedNet is null);
 
     static long ExpectedLineNet(InvoiceLine l)
     {

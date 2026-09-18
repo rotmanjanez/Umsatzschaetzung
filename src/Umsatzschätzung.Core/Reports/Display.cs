@@ -282,7 +282,8 @@ public static class Display
         _ => s.ToString(),
     };
 
-    public static string Verified(Verification? v) => v is null ? "" : "geprüft am " + Format.Timestamp(v.At);
+    public static string Verified(Verification? v) =>
+        v is null ? "" : (v.Auto ? "automatisch geprüft am " : "geprüft am ") + Format.Timestamp(v.At);
 
     public static string InvoiceNumber(Case c, string id)
     {

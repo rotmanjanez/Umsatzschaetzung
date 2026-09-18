@@ -21,6 +21,10 @@ public sealed class Invoice
     public string Currency { get; set; } = "";
     public long NetTotal { get; set; }
     public long GrossTotal { get; set; }
+    // What the document itself prints, where a scan could read it: the totals above are the sum of
+    // the positions, so only these two can tell whether the reading missed anything.
+    public long? StatedNet { get; set; }
+    public long? StatedGross { get; set; }
     public List<InvoiceLine> Lines { get; set; } = [];
     public Verification? Verification { get; set; }
 }
@@ -43,6 +47,7 @@ public sealed class InvoiceLine
 public sealed class Verification
 {
     public DateTimeOffset At { get; set; }
+    public bool Auto { get; set; }
 }
 
 public enum Field

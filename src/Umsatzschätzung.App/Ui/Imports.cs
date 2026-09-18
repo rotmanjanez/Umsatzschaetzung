@@ -149,9 +149,14 @@ public sealed class Imports
         job.Progress.Begin(ImportStage.Ocr);
         var ocr = await session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct);
         job.Progress.Begin(ImportStage.Verify);
-        var v = await session.Service.VerifyInvoice(new VerifyReq(job.CaseId, ocr.Draft, false, true, file.Name, file.Data), job.Ct);
+        var v = await session.Service.VerifyInvoice(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data), job.Ct);
         session.Drafts[v.Invoice.Id] = ocr;
         Adopt(job, v.Case);
+        if (v.Accepted)
+        {
+            job.Stored++;
+            return;
+        }
         job.Drafts++;
         job.FirstDraft ??= v.Invoice.Id;
     }
