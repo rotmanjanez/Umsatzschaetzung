@@ -8,12 +8,17 @@ public sealed class RuleStore
 {
     const int KeptSnapshots = 10;
     const string SammlungPrefix = "richtsatz/";
-    const string Schema = """
+    // Der Schritt ist folgenlos, wo seine Tabellen schon stehen: bestehende Dateien ohne
+    // user_version wachsen so in Version 1 hinein. meta.value zählt Regeländerungen und
+    // hat mit der Schemaversion nichts zu tun.
+    static readonly string[] Migrations = [
+        """
         CREATE TABLE IF NOT EXISTS rule(kind TEXT NOT NULL, id TEXT NOT NULL, json TEXT NOT NULL, deleted_at TEXT, PRIMARY KEY(kind, id)) WITHOUT ROWID;
         CREATE TABLE IF NOT EXISTS sammlung(year INTEGER PRIMARY KEY, klassen INTEGER NOT NULL, quelle TEXT NOT NULL, imported_at TEXT NOT NULL, json TEXT NOT NULL) WITHOUT ROWID;
         CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value INTEGER NOT NULL) WITHOUT ROWID;
         INSERT OR IGNORE INTO meta VALUES('version', 0);
-        """;
+        """,
+    ];
 
     readonly string file;
     readonly string snapshotDir;
@@ -34,7 +39,7 @@ public sealed class RuleStore
             if (existed && !Healthy()) Restore();
             using var db = Open();
             if (existed) Snapshot(db);
-            Exec(db, Schema);
+            Schema.Migrate(db, Migrations);
             using var tx = db.BeginTransaction(deferred: false);
             foreach (var e in Entities(seed)) Upsert(db, tx, Kind(e), e, "INSERT OR IGNORE INTO rule(kind, id, json) VALUES(@kind, @id, @json)");
             SeedSammlungen(db, tx);
@@ -314,7 +319,7 @@ public sealed class RuleStore
         {
             return body();
         }
-        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException or SchemaTooNewException)
         {
             throw new StoreUnavailableException("Regelspeicher: " + e.Message, e);
         }
