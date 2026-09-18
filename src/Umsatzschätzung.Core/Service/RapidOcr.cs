@@ -1,5 +1,4 @@
 using RapidOcrNet;
-using System.Runtime.InteropServices;
 using SkiaSharp;
 using Umsatzschätzung.Model;
 using Engine = RapidOcrNet.RapidOcr;

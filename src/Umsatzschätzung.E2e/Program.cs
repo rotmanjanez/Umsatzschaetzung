@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Data.Sqlite;
 using Umsatzschätzung.Casefile;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Rulestore;
@@ -26,10 +27,38 @@ void Check(bool ok, string what)
     if (!ok) throw new Exception("FAIL: " + what);
 }
 
+static Case Fixture(string sql, string id)
+{
+    var dir = Directory.CreateTempSubdirectory("umsatzschätzung-vorlage-").FullName;
+    var store = new CaseStore(dir);
+    store.Save(new Case
+    {
+        Id = id,
+        Label = "Vorlage",
+        PeriodFrom = new DateOnly(2024, 1, 1),
+        PeriodTo = new DateOnly(2024, 12, 31),
+        Taxpayer = new Taxpayer { Name = "-", TaxNumber = "-", PabNumber = "-" },
+        CreatedAt = Clock.Now(),
+        UpdatedAt = Clock.Now(),
+    });
+    using (var db = new SqliteConnection(new SqliteConnectionStringBuilder
+    {
+        DataSource = Path.Combine(dir, id + ".db"),
+        Pooling = false,
+    }.ToString()))
+    {
+        db.Open();
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = File.ReadAllText(sql);
+        cmd.ExecuteNonQuery();
+    }
+    return store.Load(id);
+}
+
 var status = await svc.Status(ct);
 Check(status.RulesVersion == 0 && status.Problem is null, "status reads the seeded rule set");
 
-var kase = await svc.PutCase(CaseStore.Decode(File.ReadAllText(Path.Combine(data, "case.json"))), ct);
+var kase = await svc.PutCase(Fixture(Path.Combine(data, "case.sql"), "case.bar.2024"), ct);
 Check(kase.Case.Id == "case.bar.2024" && kase.Case.Invoices.Count == 1, "case stored");
 
 var neu = await svc.PutCase(new Case

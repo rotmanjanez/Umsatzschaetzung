@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Avalonia.Threading;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Service;

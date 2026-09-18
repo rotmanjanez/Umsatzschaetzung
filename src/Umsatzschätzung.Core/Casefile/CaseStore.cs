@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Data.Sqlite;
 using Umsatzschätzung.Model;
@@ -247,23 +246,6 @@ public sealed partial class CaseStore(string dir)
             throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
         return (r.GetString(0), (byte[])r.GetValue(1));
     });
-
-    // Der Fall als JSON: die Form, in der eine Vorlage hereinkommt, nicht die, in der er liegt.
-    public static Case Decode(string json)
-    {
-        Case c;
-        try
-        {
-            c = Json.Deserialize<Case>(json);
-        }
-        catch (JsonException e)
-        {
-            throw new CaseInvalidException("Falldatei ungültig: " + e.Message, e);
-        }
-        Defaults(c);
-        Validate(c);
-        return c;
-    }
 
     static void Write(SqliteConnection db, SqliteTransaction tx, Case c)
     {
