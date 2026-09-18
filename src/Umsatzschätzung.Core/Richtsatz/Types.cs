@@ -19,3 +19,10 @@ public sealed record Synonym(string Begriff, string Klasse);
 // The Sammlung sets the Pauschbeträge per period, which is the calendar year except where
 // a change of the tax rate splits it into half years.
 public sealed record Pauschbetrag(DateOnly Von, DateOnly Bis, string Gewerbezweig, long Ermäßigt, long Voll, long Gesamt);
+
+// Was der Speicher über eine Sammlung weiß, ohne sie zu lesen. Quelle ist der Dateiname
+// der importierten PDF, bei den mitgelieferten Sammlungen leer.
+public sealed record SammlungInfo(int Year, int Klassen, string Quelle, DateTimeOffset ImportedAt)
+{
+    public bool Mitgeliefert => Quelle == "";
+}

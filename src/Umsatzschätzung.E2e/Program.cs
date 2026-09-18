@@ -182,6 +182,34 @@ Check(learned.Count > 0 && learned[0].Mapping.IngredientId == "ing.bier.fass" &&
     "suggest: one confirmation teaches the wording and the new pack size still decides the factor");
 Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: what was learnt does not drag the deposit line along");
 
+var sammlungen = await svc.Sammlungen(ct);
+Check(sammlungen.Sammlungen.Count > 0 && sammlungen.Sammlungen.TrueForAll(s => s.Mitgeliefert),
+    "richtsatz: the shipped Sammlungen seed themselves");
+Check(sammlungen.Sammlungen[0].Year > sammlungen.Sammlungen[^1].Year, "richtsatz: newest year first");
+var jüngste = sammlungen.Sammlungen[0].Year;
+var nach = await svc.DeleteSammlung(jüngste, ct);
+Check(nach.Sammlungen.Count == sammlungen.Sammlungen.Count - 1, "richtsatz: a Sammlung can be dropped");
+try
+{
+    await svc.ImportSammlung("kaputt.pdf", [1, 2, 3], ct);
+    Check(false, "richtsatz: a broken PDF is refused");
+}
+catch (ServiceError e)
+{
+    Check(e.Code == ErrorCode.Invalid, "richtsatz: a broken PDF is refused");
+}
+var pdfPfad = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "fixtures", "richtsatzsammlung", $"richtsatzsammlung-{jüngste}.pdf");
+if (File.Exists(pdfPfad))
+{
+    var importiert = await svc.ImportSammlung(Path.GetFileName(pdfPfad), File.ReadAllBytes(pdfPfad), ct);
+    var wieder = importiert.Sammlungen.Find(s => s.Year == jüngste);
+    Check(wieder is { Mitgeliefert: false, Klassen: > 0 } && wieder.Quelle == Path.GetFileName(pdfPfad),
+        "richtsatz: an imported PDF takes the place of its year");
+    Check((await svc.DeleteSammlung(jüngste, ct)).Sammlungen.TrueForAll(s => s.Year != jüngste), "richtsatz: the import can be dropped again");
+}
+Check(new RuleStore(store, snapshots, seed).Sammlungen().Exists(s => s.Year == jüngste && s.Mitgeliefert),
+    "richtsatz: a dropped Sammlung is seeded again on the next start");
+
 work.Delete(true);
 Console.WriteLine($"ok, {checks} checks");
 

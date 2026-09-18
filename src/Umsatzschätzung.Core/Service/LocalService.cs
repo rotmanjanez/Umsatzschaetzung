@@ -6,6 +6,7 @@ using Umsatzschätzung.Extract;
 using Umsatzschätzung.Invoices;
 using Umsatzschätzung.Model;
 using Umsatzschätzung.Reports;
+using Umsatzschätzung.Richtsatz;
 using Umsatzschätzung.Rules;
 using Umsatzschätzung.Rulestore;
 using Umsatzschätzung.Suggest;
@@ -55,6 +56,22 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     });
 
     static RuleSetResp RulesResp(RuleSet rs) => new(rs, Display.Rules(rs));
+
+    public Task<SammlungenResp> Sammlungen(CancellationToken ct) => Guard(() => SammlungenResp(rules.Sammlungen()));
+
+    public Task<SammlungenResp> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct) => Guard(() =>
+    {
+        if (pdf.Length == 0) throw new ServiceError(ErrorCode.Invalid, "Leere Datei");
+        return SammlungenResp(rules.ImportSammlung(Richtsätze.Read(pdf), fileName));
+    });
+
+    public Task<SammlungenResp> DeleteSammlung(int year, CancellationToken ct) => Guard(() =>
+    {
+        if (!rules.Sammlungen().Exists(s => s.Year == year)) throw new ServiceError(ErrorCode.NotFound, $"Richtsatzsammlung {year}");
+        return SammlungenResp(rules.DeleteSammlung(year));
+    });
+
+    static SammlungenResp SammlungenResp(List<SammlungInfo> infos) => new(infos, Display.Sammlungen(infos));
 
     public Task<ListCasesResp> ListCases(CancellationToken ct) => Guard(() => Task.FromResult(new ListCasesResp(
         cases.List().Select(c => new CaseRow(c, Display.Period(c.PeriodFrom, c.PeriodTo), Format.Day(c.UpdatedAt), c.Invoices.Count)).ToList())));

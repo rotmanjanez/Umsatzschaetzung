@@ -1,0 +1,4731 @@
+{
+  "year": 2014,
+  "klassen": [
+    {
+      "name": "Ambulante soziale Dienste",
+      "kennzahlen": [
+        "88101.2"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 45,
+              "bis": 84,
+              "mittel": 67
+            },
+            "reingewinn": {
+              "von": 11,
+              "bis": 70,
+              "mittel": 39
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 32,
+              "bis": 84,
+              "mittel": 65
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 40,
+              "mittel": 23
+            }
+          }
+        }
+      ],
+      "seite": 11
+    },
+    {
+      "name": "Apotheken",
+      "kennzahlen": [
+        "47730.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 30,
+              "bis": 41,
+              "mittel": 35
+            },
+            "rohgewinnI": {
+              "von": 23,
+              "bis": 29,
+              "mittel": 26
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 23,
+              "mittel": 19
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 13,
+              "mittel": 8
+            }
+          }
+        }
+      ],
+      "seite": 11
+    },
+    {
+      "name": "Bäckerei, Konditorei Brot- und Feinbäckerei",
+      "kennzahlen": [
+        "10710.0",
+        "47240.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 156,
+              "bis": 400,
+              "mittel": 245
+            },
+            "rohgewinnI": {
+              "von": 61,
+              "bis": 80,
+              "mittel": 71
+            },
+            "halbreingewinn": {
+              "von": 30,
+              "bis": 62,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 32,
+              "mittel": 20
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "bis": 50000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 156,
+              "bis": 400,
+              "mittel": 245
+            },
+            "rohgewinnI": {
+              "von": 61,
+              "bis": 80,
+              "mittel": 71
+            },
+            "halbreingewinn": {
+              "von": 30,
+              "bis": 62,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 24,
+              "mittel": 16
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 50000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 156,
+              "bis": 400,
+              "mittel": 245
+            },
+            "rohgewinnI": {
+              "von": 61,
+              "bis": 80,
+              "mittel": 71
+            },
+            "halbreingewinn": {
+              "von": 30,
+              "bis": 62,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 17,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 11
+    },
+    {
+      "name": "Bau- und Heimwerkerbedarf, Anstrichmittel, Eh.",
+      "kennzahlen": [
+        "47523.0",
+        "47530.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 60000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 35,
+              "bis": 163,
+              "mittel": 72
+            },
+            "rohgewinnI": {
+              "von": 26,
+              "bis": 62,
+              "mittel": 42
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 45,
+              "mittel": 27
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 24,
+              "mittel": 14
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 60000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 25,
+              "bis": 113,
+              "mittel": 54
+            },
+            "rohgewinnI": {
+              "von": 20,
+              "bis": 53,
+              "mittel": 35
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 35,
+              "mittel": 21
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 14,
+              "mittel": 8
+            }
+          }
+        }
+      ],
+      "seite": 11
+    },
+    {
+      "name": "Bauunternehmen (mit Materiallieferung)",
+      "kennzahlen": [
+        "41201.0",
+        "43999.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 72
+            },
+            "rohgewinnII": {
+              "von": 41,
+              "bis": 82,
+              "mittel": 60
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 62,
+              "mittel": 35
+            },
+            "reingewinn": {
+              "von": 13,
+              "bis": 64,
+              "mittel": 31
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "bis": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 69
+            },
+            "rohgewinnII": {
+              "von": 32,
+              "bis": 62,
+              "mittel": 46
+            },
+            "halbreingewinn": {
+              "von": 11,
+              "bis": 35,
+              "mittel": 21
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 27,
+              "mittel": 16
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 57
+            },
+            "rohgewinnII": {
+              "von": 22,
+              "bis": 51,
+              "mittel": 34
+            },
+            "halbreingewinn": {
+              "von": 5,
+              "bis": 25,
+              "mittel": 13
+            },
+            "reingewinn": {
+              "von": 2,
+              "bis": 19,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 11
+    },
+    {
+      "name": "Hotels, Gasthöfe und Pensionen mit Halb und Vollpension",
+      "kennzahlen": [
+        "55101.0",
+        "55103.0",
+        "55104.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 50000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 257,
+              "bis": 1329,
+              "mittel": 456
+            },
+            "rohgewinnI": {
+              "von": 72,
+              "bis": 93,
+              "mittel": 82
+            },
+            "halbreingewinn": {
+              "von": 36,
+              "bis": 65,
+              "mittel": 50
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 33,
+              "mittel": 21
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 50000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 257,
+              "bis": 1329,
+              "mittel": 456
+            },
+            "rohgewinnI": {
+              "von": 72,
+              "bis": 93,
+              "mittel": 82
+            },
+            "halbreingewinn": {
+              "von": 36,
+              "bis": 65,
+              "mittel": 50
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 20,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Hotels garnis, Gasthöfe und Pensionen mit Frühstück",
+      "kennzahlen": [
+        "55102.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 40,
+              "bis": 75,
+              "mittel": 57
+            },
+            "reingewinn": {
+              "von": 12,
+              "bis": 45,
+              "mittel": 28
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 40,
+              "bis": 75,
+              "mittel": 57
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 36,
+              "mittel": 20
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Bestattungsunternehmen",
+      "kennzahlen": [
+        "96031.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 233,
+              "bis": 1150,
+              "mittel": 456
+            },
+            "rohgewinnI": {
+              "von": 70,
+              "bis": 92,
+              "mittel": 82
+            },
+            "halbreingewinn": {
+              "von": 35,
+              "bis": 65,
+              "mittel": 51
+            },
+            "reingewinn": {
+              "von": 20,
+              "bis": 53,
+              "mittel": 36
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 233,
+              "bis": 1150,
+              "mittel": 456
+            },
+            "rohgewinnI": {
+              "von": 70,
+              "bis": 92,
+              "mittel": 82
+            },
+            "halbreingewinn": {
+              "von": 35,
+              "bis": 65,
+              "mittel": 51
+            },
+            "reingewinn": {
+              "von": 15,
+              "bis": 44,
+              "mittel": 29
+            }
+          }
+        }
+      ],
+      "bemerkung": "Vermittlungsprovisionen sind einbezogen",
+      "seite": 12
+    },
+    {
+      "name": "Blumen und Pflanzen, Eh. (ohne Gärtnerei)",
+      "kennzahlen": [
+        "47761.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 64,
+              "bis": 163,
+              "mittel": 104
+            },
+            "rohgewinnI": {
+              "von": 39,
+              "bis": 62,
+              "mittel": 51
+            },
+            "halbreingewinn": {
+              "von": 22,
+              "bis": 47,
+              "mittel": 35
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 29,
+              "mittel": 16
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Brennstoffe, Eh.",
+      "kennzahlen": [
+        "47991.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 100000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 5,
+              "bis": 69,
+              "mittel": 30
+            },
+            "rohgewinnI": {
+              "von": 5,
+              "bis": 41,
+              "mittel": 23
+            },
+            "halbreingewinn": {
+              "von": 3,
+              "bis": 25,
+              "mittel": 13
+            },
+            "reingewinn": {
+              "von": 2,
+              "bis": 16,
+              "mittel": 9
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 100000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 4,
+              "bis": 11,
+              "mittel": 8
+            },
+            "rohgewinnI": {
+              "von": 4,
+              "bis": 10,
+              "mittel": 7
+            },
+            "halbreingewinn": {
+              "von": 2,
+              "bis": 6,
+              "mittel": 4
+            },
+            "reingewinn": {
+              "von": 1,
+              "bis": 5,
+              "mittel": 3
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Bücher, Eh. (auch in Verbindung mit Schreibwaren)",
+      "kennzahlen": [
+        "47610.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 32,
+              "bis": 64,
+              "mittel": 45
+            },
+            "rohgewinnI": {
+              "von": 24,
+              "bis": 39,
+              "mittel": 31
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 30,
+              "mittel": 21
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 15,
+              "mittel": 9
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Cafés",
+      "kennzahlen": [
+        "56104.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 186,
+              "bis": 376,
+              "mittel": 257
+            },
+            "rohgewinnI": {
+              "von": 65,
+              "bis": 79,
+              "mittel": 72
+            },
+            "halbreingewinn": {
+              "von": 34,
+              "bis": 63,
+              "mittel": 48
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 32,
+              "mittel": 19
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Chemische Reinigung und Wäscherei",
+      "kennzahlen": [
+        "96010.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 36,
+              "bis": 72,
+              "mittel": 54
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 41,
+              "mittel": 24
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 36,
+              "bis": 72,
+              "mittel": 54
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 28,
+              "mittel": 19
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Computer und Software, Eh.",
+      "kennzahlen": [
+        "47410.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 41,
+              "bis": 223,
+              "mittel": 89
+            },
+            "rohgewinnI": {
+              "von": 29,
+              "bis": 69,
+              "mittel": 47
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 48,
+              "mittel": 30
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 37,
+              "mittel": 24
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 22,
+              "bis": 144,
+              "mittel": 64
+            },
+            "rohgewinnI": {
+              "von": 18,
+              "bis": 59,
+              "mittel": 39
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 40,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 24,
+              "mittel": 14
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Dachdeckerei und Bauspenglerei",
+      "kennzahlen": [
+        "43911.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 66
+            },
+            "rohgewinnII": {
+              "von": 36,
+              "bis": 65,
+              "mittel": 50
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 38,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 34,
+              "mittel": 20
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 61
+            },
+            "rohgewinnII": {
+              "von": 28,
+              "bis": 53,
+              "mittel": 40
+            },
+            "halbreingewinn": {
+              "von": 9,
+              "bis": 29,
+              "mittel": 18
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 24,
+              "mittel": 13
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Drogerien und Parfümerien",
+      "kennzahlen": [
+        "47750.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 47,
+              "bis": 285,
+              "mittel": 100
+            },
+            "rohgewinnI": {
+              "von": 32,
+              "bis": 74,
+              "mittel": 50
+            },
+            "halbreingewinn": {
+              "von": 18,
+              "bis": 47,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 32,
+              "mittel": 16
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 43,
+              "bis": 113,
+              "mittel": 75
+            },
+            "rohgewinnI": {
+              "von": 30,
+              "bis": 53,
+              "mittel": 43
+            },
+            "halbreingewinn": {
+              "von": 18,
+              "bis": 40,
+              "mittel": 29
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 18,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Druckereien",
+      "kennzahlen": [
+        "18120.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 73
+            },
+            "rohgewinnII": {
+              "von": 47,
+              "bis": 83,
+              "mittel": 63
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 55,
+              "mittel": 35
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 41,
+              "mittel": 25
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "bis": 40000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 73
+            },
+            "rohgewinnII": {
+              "von": 46,
+              "bis": 73,
+              "mittel": 56
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 42,
+              "mittel": 29
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 32,
+              "mittel": 19
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 40000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 70
+            },
+            "rohgewinnII": {
+              "von": 37,
+              "bis": 62,
+              "mittel": 49
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 30,
+              "mittel": 21
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 21,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Eisdielen",
+      "kennzahlen": [
+        "56105.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 223,
+              "bis": 525,
+              "mittel": 335
+            },
+            "rohgewinnI": {
+              "von": 69,
+              "bis": 84,
+              "mittel": 77
+            },
+            "halbreingewinn": {
+              "von": 37,
+              "bis": 69,
+              "mittel": 52
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 42,
+              "mittel": 24
+            }
+          }
+        }
+      ],
+      "seite": 12
+    },
+    {
+      "name": "Elektroinstallation (auch mit Einzelhandel)",
+      "kennzahlen": [
+        "43210.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 66
+            },
+            "rohgewinnII": {
+              "von": 40,
+              "bis": 72,
+              "mittel": 56
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 51,
+              "mittel": 33
+            },
+            "reingewinn": {
+              "von": 13,
+              "bis": 49,
+              "mittel": 29
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "bis": 40000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 63
+            },
+            "rohgewinnII": {
+              "von": 32,
+              "bis": 63,
+              "mittel": 47
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 42,
+              "mittel": 28
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 34,
+              "mittel": 22
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 40000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 55
+            },
+            "rohgewinnII": {
+              "von": 24,
+              "bis": 46,
+              "mittel": 35
+            },
+            "halbreingewinn": {
+              "von": 9,
+              "bis": 28,
+              "mittel": 17
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 21,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Elektrotechnische Erzeugnisse, Eh. (auch mit Reparatur- und Installationsarbeiten)",
+      "kennzahlen": [
+        "47540.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 39,
+              "bis": 186,
+              "mittel": 82
+            },
+            "rohgewinnI": {
+              "von": 28,
+              "bis": 65,
+              "mittel": 45
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 45,
+              "mittel": 28
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 37,
+              "mittel": 19
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 35,
+              "bis": 133,
+              "mittel": 67
+            },
+            "rohgewinnI": {
+              "von": 26,
+              "bis": 57,
+              "mittel": 40
+            },
+            "halbreingewinn": {
+              "von": 16,
+              "bis": 36,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 20,
+              "mittel": 11
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Fahrräder, Eh. (auch mit Reparaturen und Einzelhandel mit Ersatzteilen und Zubehör)",
+      "kennzahlen": [
+        "47641.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 41,
+              "bis": 85,
+              "mittel": 59
+            },
+            "rohgewinnI": {
+              "von": 29,
+              "bis": 46,
+              "mittel": 37
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 36,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 22,
+              "mittel": 13
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Fahrschulen",
+      "kennzahlen": [
+        "85530.0",
+        "85530.2"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 18000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 38,
+              "bis": 72,
+              "mittel": 55
+            },
+            "reingewinn": {
+              "von": 19,
+              "bis": 55,
+              "mittel": 36
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 18000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 38,
+              "bis": 72,
+              "mittel": 55
+            },
+            "reingewinn": {
+              "von": 16,
+              "bis": 46,
+              "mittel": 29
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Fische, Fischerzeugnisse, Eh.",
+      "kennzahlen": [
+        "47230.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 52,
+              "bis": 133,
+              "mittel": 82
+            },
+            "rohgewinnI": {
+              "von": 34,
+              "bis": 57,
+              "mittel": 45
+            },
+            "halbreingewinn": {
+              "von": 16,
+              "bis": 40,
+              "mittel": 27
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 25,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Fitnesszentren",
+      "kennzahlen": [
+        "93130.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "halbreingewinn": {
+              "von": 37,
+              "bis": 72,
+              "mittel": 55
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 33,
+              "mittel": 17
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Fleischerei, Metzgerei, Schlachterei (auch mit Fleisch- und Handelswarenzukauf)",
+      "kennzahlen": [
+        "10130.0",
+        "47220.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 79,
+              "bis": 150,
+              "mittel": 108
+            },
+            "rohgewinnI": {
+              "von": 44,
+              "bis": 60,
+              "mittel": 52
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 42,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 21,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Fotografen (Portrait und Werbefotografen)",
+      "kennzahlen": [
+        "74201.2"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 10000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 32,
+              "bis": 74,
+              "mittel": 53
+            },
+            "reingewinn": {
+              "von": 18,
+              "bis": 71,
+              "mittel": 42
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 10000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 32,
+              "bis": 74,
+              "mittel": 53
+            },
+            "reingewinn": {
+              "von": 16,
+              "bis": 56,
+              "mittel": 34
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Frisörgewerbe (auch mit Einzelhandel)",
+      "kennzahlen": [
+        "96021.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 90
+            },
+            "rohgewinnII": {
+              "von": 53,
+              "bis": 89,
+              "mittel": 68
+            },
+            "halbreingewinn": {
+              "von": 26,
+              "bis": 63,
+              "mittel": 42
+            },
+            "reingewinn": {
+              "von": 17,
+              "bis": 48,
+              "mittel": 31
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 88
+            },
+            "rohgewinnII": {
+              "von": 42,
+              "bis": 66,
+              "mittel": 54
+            },
+            "halbreingewinn": {
+              "von": 19,
+              "bis": 42,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 35,
+              "mittel": 21
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Güterbeförderung mit Kraftfahrzeugen",
+      "kennzahlen": [
+        "49410.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 22,
+              "bis": 62,
+              "mittel": 42
+            },
+            "reingewinn": {
+              "von": 16,
+              "bis": 52,
+              "mittel": 35
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "bis": 50000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 61,
+              "mittel": 36
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 31,
+              "mittel": 19
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 50000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 11,
+              "bis": 44,
+              "mittel": 27
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 20,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Taxigewerbe und Mietwagen mit Fahrer",
+      "kennzahlen": [
+        "49320.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 7500000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 26,
+              "bis": 63,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 25,
+              "bis": 60,
+              "mittel": 43
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 7500000,
+          "bis": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 26,
+              "bis": 63,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 14,
+              "bis": 46,
+              "mittel": 29
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 26,
+              "bis": 63,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 34,
+              "mittel": 19
+            }
+          }
+        }
+      ],
+      "seite": 13
+    },
+    {
+      "name": "Busunternehmen",
+      "kennzahlen": [
+        "49310.0",
+        "49391.0",
+        "49392.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 40000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 60,
+              "mittel": 39
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 34,
+              "mittel": 22
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 40000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 52,
+              "mittel": 34
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 18,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Fußboden-, Fliesen- und Plattenlegerei (mit Materiallieferung)",
+      "kennzahlen": [
+        "43331.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 74
+            },
+            "rohgewinnII": {
+              "von": 48,
+              "bis": 90,
+              "mittel": 68
+            },
+            "halbreingewinn": {
+              "von": 24,
+              "bis": 58,
+              "mittel": 41
+            },
+            "reingewinn": {
+              "von": 19,
+              "bis": 58,
+              "mittel": 37
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "bis": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 66
+            },
+            "rohgewinnII": {
+              "von": 34,
+              "bis": 69,
+              "mittel": 51
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 45,
+              "mittel": 29
+            },
+            "reingewinn": {
+              "von": 14,
+              "bis": 41,
+              "mittel": 26
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 64
+            },
+            "rohgewinnII": {
+              "von": 28,
+              "bis": 55,
+              "mittel": 41
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 34,
+              "mittel": 21
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 29,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Garten- und Landschaftsbau",
+      "kennzahlen": [
+        "81301.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 77
+            },
+            "rohgewinnII": {
+              "von": 42,
+              "bis": 85,
+              "mittel": 62
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 54,
+              "mittel": 32
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 46,
+              "mittel": 27
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "bis": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 73
+            },
+            "rohgewinnII": {
+              "von": 36,
+              "bis": 74,
+              "mittel": 52
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 38,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 34,
+              "mittel": 20
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 72
+            },
+            "rohgewinnII": {
+              "von": 33,
+              "bis": 54,
+              "mittel": 44
+            },
+            "halbreingewinn": {
+              "von": 9,
+              "bis": 27,
+              "mittel": 17
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 22,
+              "mittel": 13
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Gast-, Speise- und Schankwirtschaften",
+      "kennzahlen": [
+        "56101.0",
+        "56107.0",
+        "56301.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 186,
+              "bis": 376,
+              "mittel": 257
+            },
+            "rohgewinnI": {
+              "von": 65,
+              "bis": 79,
+              "mittel": 72
+            },
+            "halbreingewinn": {
+              "von": 33,
+              "bis": 65,
+              "mittel": 49
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 38,
+              "mittel": 22
+            }
+          }
+        }
+      ],
+      "bemerkung": "bei Restaurants mitasiatischem Speiseangebot Rohgewinnaufschlagobere Rahmenhälfte",
+      "seite": 14
+    },
+    {
+      "name": "Pizzerien",
+      "kennzahlen": [
+        "56106.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 203,
+              "bis": 400,
+              "mittel": 270
+            },
+            "rohgewinnI": {
+              "von": 67,
+              "bis": 80,
+              "mittel": 73
+            },
+            "halbreingewinn": {
+              "von": 33,
+              "bis": 61,
+              "mittel": 48
+            },
+            "reingewinn": {
+              "von": 13,
+              "bis": 45,
+              "mittel": 30
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 203,
+              "bis": 400,
+              "mittel": 270
+            },
+            "rohgewinnI": {
+              "von": 67,
+              "bis": 80,
+              "mittel": 73
+            },
+            "halbreingewinn": {
+              "von": 33,
+              "bis": 61,
+              "mittel": 48
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 35,
+              "mittel": 22
+            }
+          }
+        }
+      ],
+      "bemerkung": "Überwiegend Pizzagerichte und Teigwaren im Warenangebot",
+      "seite": 14
+    },
+    {
+      "name": "Gerüstbau",
+      "kennzahlen": [
+        "43991.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 40000000,
+          "sätze": {
+            "rohgewinnII": {
+              "von": 62,
+              "bis": 91,
+              "mittel": 77
+            },
+            "halbreingewinn": {
+              "von": 24,
+              "bis": 56,
+              "mittel": 37
+            },
+            "reingewinn": {
+              "von": 15,
+              "bis": 50,
+              "mittel": 32
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 40000000,
+          "sätze": {
+            "rohgewinnII": {
+              "von": 54,
+              "bis": 83,
+              "mittel": 67
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 46,
+              "mittel": 30
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 36,
+              "mittel": 20
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Getränke, Eh. (auch Wein und Spirituosen)",
+      "kennzahlen": [
+        "47250.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 27,
+              "bis": 72,
+              "mittel": 43
+            },
+            "rohgewinnI": {
+              "von": 21,
+              "bis": 42,
+              "mittel": 30
+            },
+            "halbreingewinn": {
+              "von": 11,
+              "bis": 26,
+              "mittel": 19
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 19,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Glasergewerbe",
+      "kennzahlen": [
+        "43342.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 66
+            },
+            "rohgewinnII": {
+              "von": 48,
+              "bis": 77,
+              "mittel": 62
+            },
+            "halbreingewinn": {
+              "von": 24,
+              "bis": 54,
+              "mittel": 39
+            },
+            "reingewinn": {
+              "von": 17,
+              "bis": 44,
+              "mittel": 29
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "bis": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 65
+            },
+            "rohgewinnII": {
+              "von": 38,
+              "bis": 65,
+              "mittel": 52
+            },
+            "halbreingewinn": {
+              "von": 18,
+              "bis": 46,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 11,
+              "bis": 37,
+              "mittel": 23
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 60
+            },
+            "rohgewinnII": {
+              "von": 31,
+              "bis": 55,
+              "mittel": 43
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 35,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 28,
+              "mittel": 17
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Glas- und Gebäudereinigung",
+      "kennzahlen": [
+        "81210.0",
+        "81229.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 10000000,
+          "sätze": {
+            "rohgewinnII": {
+              "von": 64,
+              "bis": 100,
+              "mittel": 84
+            },
+            "halbreingewinn": {
+              "von": 29,
+              "bis": 76,
+              "mittel": 53
+            },
+            "reingewinn": {
+              "von": 25,
+              "bis": 75,
+              "mittel": 48
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 10000000,
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnII": {
+              "von": 50,
+              "bis": 92,
+              "mittel": 68
+            },
+            "halbreingewinn": {
+              "von": 24,
+              "bis": 66,
+              "mittel": 44
+            },
+            "reingewinn": {
+              "von": 19,
+              "bis": 62,
+              "mittel": 38
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 20000000,
+          "bis": 40000000,
+          "sätze": {
+            "rohgewinnII": {
+              "von": 43,
+              "bis": 72,
+              "mittel": 56
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 46,
+              "mittel": 32
+            },
+            "reingewinn": {
+              "von": 15,
+              "bis": 41,
+              "mittel": 26
+            }
+          }
+        },
+        {
+          "stufe": "D",
+          "von": 40000000,
+          "sätze": {
+            "rohgewinnII": {
+              "von": 37,
+              "bis": 65,
+              "mittel": 48
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 34,
+              "mittel": 23
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 26,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Haushaltsgegenstände, Eh.",
+      "kennzahlen": [
+        "47521.0",
+        "47592.0",
+        "47599.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 49,
+              "bis": 163,
+              "mittel": 85
+            },
+            "rohgewinnI": {
+              "von": 33,
+              "bis": 62,
+              "mittel": 46
+            },
+            "halbreingewinn": {
+              "von": 19,
+              "bis": 42,
+              "mittel": 30
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 27,
+              "mittel": 14
+            }
+          }
+        }
+      ],
+      "seite": 14
+    },
+    {
+      "name": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs und Klimatechnik",
+      "kennzahlen": [
+        "43220.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 57
+            },
+            "rohgewinnII": {
+              "von": 38,
+              "bis": 64,
+              "mittel": 51
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 45,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 15,
+              "bis": 42,
+              "mittel": 28
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "bis": 60000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 55
+            },
+            "rohgewinnII": {
+              "von": 29,
+              "bis": 52,
+              "mittel": 40
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 35,
+              "mittel": 22
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 30,
+              "mittel": 17
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 60000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 52
+            },
+            "rohgewinnII": {
+              "von": 23,
+              "bis": 42,
+              "mittel": 32
+            },
+            "halbreingewinn": {
+              "von": 9,
+              "bis": 27,
+              "mittel": 17
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 20,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Imbissbetriebe",
+      "kennzahlen": [
+        "56103.0",
+        "56108.0",
+        "56109.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 10000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 144,
+              "bis": 376,
+              "mittel": 223
+            },
+            "rohgewinnI": {
+              "von": 59,
+              "bis": 79,
+              "mittel": 69
+            },
+            "halbreingewinn": {
+              "von": 32,
+              "bis": 63,
+              "mittel": 48
+            },
+            "reingewinn": {
+              "von": 15,
+              "bis": 46,
+              "mittel": 31
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 10000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 144,
+              "bis": 376,
+              "mittel": 223
+            },
+            "rohgewinnI": {
+              "von": 59,
+              "bis": 79,
+              "mittel": 69
+            },
+            "halbreingewinn": {
+              "von": 32,
+              "bis": 63,
+              "mittel": 48
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 39,
+              "mittel": 23
+            }
+          }
+        }
+      ],
+      "bemerkung": "bei Imbissbetrieben mit asiatischem Speiseangebot Rohgewinnaufschlag obere Rahmenhälfte",
+      "seite": 15
+    },
+    {
+      "name": "Kfz-Einzelhandel",
+      "kennzahlen": [
+        "45110.0",
+        "45190.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 50000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 14,
+              "bis": 89,
+              "mittel": 33
+            },
+            "rohgewinnI": {
+              "von": 12,
+              "bis": 47,
+              "mittel": 25
+            },
+            "halbreingewinn": {
+              "von": 4,
+              "bis": 27,
+              "mittel": 14
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 20,
+              "mittel": 10
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 50000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 10,
+              "bis": 54,
+              "mittel": 23
+            },
+            "rohgewinnI": {
+              "von": 9,
+              "bis": 35,
+              "mittel": 19
+            },
+            "halbreingewinn": {
+              "von": 4,
+              "bis": 20,
+              "mittel": 11
+            },
+            "reingewinn": {
+              "von": 2,
+              "bis": 12,
+              "mittel": 6
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Kfz-Lackiererei",
+      "kennzahlen": [
+        "45201.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 78
+            },
+            "rohgewinnII": {
+              "von": 50,
+              "bis": 82,
+              "mittel": 67
+            },
+            "halbreingewinn": {
+              "von": 19,
+              "bis": 62,
+              "mittel": 41
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 44,
+              "mittel": 26
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "bis": 40000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 77
+            },
+            "rohgewinnII": {
+              "von": 43,
+              "bis": 67,
+              "mittel": 55
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 42,
+              "mittel": 30
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 33,
+              "mittel": 20
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 40000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 76
+            },
+            "rohgewinnII": {
+              "von": 38,
+              "bis": 60,
+              "mittel": 49
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 37,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 26,
+              "mittel": 14
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Kfz-Reparatur (ohne Tankstelle, Garagenvermietung und Fahrschule)",
+      "kennzahlen": [
+        "45203.0",
+        "45204.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 58
+            },
+            "rohgewinnII": {
+              "von": 36,
+              "bis": 64,
+              "mittel": 50
+            },
+            "halbreingewinn": {
+              "von": 18,
+              "bis": 43,
+              "mittel": 30
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 33,
+              "mittel": 21
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 55
+            },
+            "rohgewinnII": {
+              "von": 28,
+              "bis": 53,
+              "mittel": 40
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 34,
+              "mittel": 23
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 25,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Kfz-Zubehörhandel (Einzelhandel mit Kraftwagenteilen und –zubehör)",
+      "kennzahlen": [
+        "45320.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 37,
+              "bis": 144,
+              "mittel": 82
+            },
+            "rohgewinnI": {
+              "von": 27,
+              "bis": 59,
+              "mittel": 45
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 37,
+              "mittel": 27
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 33,
+              "mittel": 18
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 35,
+              "bis": 92,
+              "mittel": 56
+            },
+            "rohgewinnI": {
+              "von": 26,
+              "bis": 48,
+              "mittel": 36
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 32,
+              "mittel": 23
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 17,
+              "mittel": 10
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Kioske und Verkaufsstände",
+      "kennzahlen": [
+        "56309.0",
+        "47260.0",
+        "47621.0",
+        "47110.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {}
+        }
+      ],
+      "bemerkung": "Je nach überwiegendem Warensortiment: - Nahrungs- und Genussmittel, Eh. - Tabakwaren und Zeitschriften, Eh.",
+      "seite": 15
+    },
+    {
+      "name": "Kosmetiksalons",
+      "kennzahlen": [
+        "96022.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 7500000,
+          "sätze": {
+            "aufschlag": {
+              "von": 150,
+              "bis": 1011,
+              "mittel": 317
+            },
+            "rohgewinnI": {
+              "von": 60,
+              "bis": 91,
+              "mittel": 76
+            },
+            "halbreingewinn": {
+              "von": 36,
+              "bis": 72,
+              "mittel": 54
+            },
+            "reingewinn": {
+              "von": 18,
+              "bis": 58,
+              "mittel": 38
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 7500000,
+          "sätze": {
+            "aufschlag": {
+              "von": 150,
+              "bis": 1011,
+              "mittel": 317
+            },
+            "rohgewinnI": {
+              "von": 60,
+              "bis": 91,
+              "mittel": 76
+            },
+            "halbreingewinn": {
+              "von": 32,
+              "bis": 68,
+              "mittel": 47
+            },
+            "reingewinn": {
+              "von": 12,
+              "bis": 45,
+              "mittel": 27
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Kunstgewerbliche Erzeugnisse, Geschenkartikel, Eh.",
+      "kennzahlen": [
+        "47783.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 59,
+              "bis": 213,
+              "mittel": 108
+            },
+            "rohgewinnI": {
+              "von": 37,
+              "bis": 68,
+              "mittel": 52
+            },
+            "halbreingewinn": {
+              "von": 19,
+              "bis": 46,
+              "mittel": 33
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 30,
+              "mittel": 18
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Lederwaren und Reisegepäck, Eh.",
+      "kennzahlen": [
+        "47722.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 67,
+              "bis": 163,
+              "mittel": 100
+            },
+            "rohgewinnI": {
+              "von": 40,
+              "bis": 62,
+              "mittel": 50
+            },
+            "halbreingewinn": {
+              "von": 22,
+              "bis": 46,
+              "mittel": 34
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 25,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 15
+    },
+    {
+      "name": "Maler- und Lackierergewerbe",
+      "kennzahlen": [
+        "43341.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 10000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 80
+            },
+            "rohgewinnII": {
+              "von": 53,
+              "bis": 86,
+              "mittel": 71
+            },
+            "halbreingewinn": {
+              "von": 27,
+              "bis": 62,
+              "mittel": 44
+            },
+            "reingewinn": {
+              "von": 22,
+              "bis": 61,
+              "mittel": 41
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 10000000,
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 80
+            },
+            "rohgewinnII": {
+              "von": 44,
+              "bis": 77,
+              "mittel": 58
+            },
+            "halbreingewinn": {
+              "von": 21,
+              "bis": 53,
+              "mittel": 35
+            },
+            "reingewinn": {
+              "von": 16,
+              "bis": 51,
+              "mittel": 30
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 20000000,
+          "bis": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 76
+            },
+            "rohgewinnII": {
+              "von": 32,
+              "bis": 62,
+              "mittel": 47
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 38,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 32,
+              "mittel": 20
+            }
+          }
+        },
+        {
+          "stufe": "D",
+          "von": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 75
+            },
+            "rohgewinnII": {
+              "von": 29,
+              "bis": 53,
+              "mittel": 41
+            },
+            "halbreingewinn": {
+              "von": 11,
+              "bis": 29,
+              "mittel": 20
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 26,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Möbel und sonstige Einrichtungsgegenstände, Eh.",
+      "kennzahlen": [
+        "47591.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 49,
+              "bis": 138,
+              "mittel": 75
+            },
+            "rohgewinnI": {
+              "von": 33,
+              "bis": 58,
+              "mittel": 43
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 37,
+              "mittel": 26
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 22,
+              "mittel": 11
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Nahrungs- und Genussmittel versch. Art einschl. Reformwaren (Naturkost)",
+      "kennzahlen": [
+        "47110.0",
+        "47290.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 40000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 27,
+              "bis": 122,
+              "mittel": 54
+            },
+            "rohgewinnI": {
+              "von": 21,
+              "bis": 55,
+              "mittel": 35
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 41,
+              "mittel": 24
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 23,
+              "mittel": 14
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 40000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 22,
+              "bis": 45,
+              "mittel": 33
+            },
+            "rohgewinnI": {
+              "von": 18,
+              "bis": 31,
+              "mittel": 25
+            },
+            "halbreingewinn": {
+              "von": 10,
+              "bis": 24,
+              "mittel": 17
+            },
+            "reingewinn": {
+              "von": 2,
+              "bis": 9,
+              "mittel": 6
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Obst, Gemüse, Südfrüchte und Kartoffeln, Eh.",
+      "kennzahlen": [
+        "47210.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 35,
+              "bis": 96,
+              "mittel": 61
+            },
+            "rohgewinnI": {
+              "von": 26,
+              "bis": 49,
+              "mittel": 38
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 36,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 32,
+              "mittel": 17
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 32,
+              "bis": 92,
+              "mittel": 54
+            },
+            "rohgewinnI": {
+              "von": 24,
+              "bis": 48,
+              "mittel": 35
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 32,
+              "mittel": 22
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 18,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Optiker",
+      "kennzahlen": [
+        "47781.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 156,
+              "bis": 270,
+              "mittel": 203
+            },
+            "rohgewinnI": {
+              "von": 61,
+              "bis": 73,
+              "mittel": 67
+            },
+            "halbreingewinn": {
+              "von": 34,
+              "bis": 57,
+              "mittel": 46
+            },
+            "reingewinn": {
+              "von": 11,
+              "bis": 40,
+              "mittel": 25
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Raumausstatter",
+      "kennzahlen": [
+        "43332.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 65
+            },
+            "rohgewinnII": {
+              "von": 45,
+              "bis": 80,
+              "mittel": 60
+            },
+            "halbreingewinn": {
+              "von": 18,
+              "bis": 55,
+              "mittel": 35
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 46,
+              "mittel": 26
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 60
+            },
+            "rohgewinnII": {
+              "von": 35,
+              "bis": 57,
+              "mittel": 46
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 38,
+              "mittel": 26
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 31,
+              "mittel": 17
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Säge- und Hobelwerke",
+      "kennzahlen": [
+        "16100.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 61
+            },
+            "rohgewinnII": {
+              "von": 32,
+              "bis": 77,
+              "mittel": 50
+            },
+            "halbreingewinn": {
+              "von": 9,
+              "bis": 39,
+              "mittel": 23
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 35,
+              "mittel": 18
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 52
+            },
+            "rohgewinnII": {
+              "von": 24,
+              "bis": 47,
+              "mittel": 35
+            },
+            "halbreingewinn": {
+              "von": 7,
+              "bis": 24,
+              "mittel": 14
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 17,
+              "mittel": 9
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Schlosserei",
+      "kennzahlen": [
+        "25620.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 75
+            },
+            "rohgewinnII": {
+              "von": 48,
+              "bis": 90,
+              "mittel": 67
+            },
+            "halbreingewinn": {
+              "von": 23,
+              "bis": 62,
+              "mittel": 42
+            },
+            "reingewinn": {
+              "von": 12,
+              "bis": 55,
+              "mittel": 34
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "bis": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 70
+            },
+            "rohgewinnII": {
+              "von": 39,
+              "bis": 72,
+              "mittel": 53
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 48,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 11,
+              "bis": 41,
+              "mittel": 24
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 30000000,
+          "bis": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 69
+            },
+            "rohgewinnII": {
+              "von": 36,
+              "bis": 56,
+              "mittel": 46
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 35,
+              "mittel": 24
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 30,
+              "mittel": 18
+            }
+          }
+        },
+        {
+          "stufe": "D",
+          "von": 50000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 63
+            },
+            "rohgewinnII": {
+              "von": 29,
+              "bis": 53,
+              "mittel": 40
+            },
+            "halbreingewinn": {
+              "von": 12,
+              "bis": 34,
+              "mittel": 21
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 24,
+              "mittel": 14
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Schreib- und Papierwaren, Schul- und Büroartikel, Eh.",
+      "kennzahlen": [
+        "47622.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 33,
+              "bis": 100,
+              "mittel": 59
+            },
+            "rohgewinnI": {
+              "von": 25,
+              "bis": 50,
+              "mittel": 37
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 36,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 21,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Schreinerei, Tischlerei (auch Bautischlerei und Bauschlosserei)",
+      "kennzahlen": [
+        "16230.0",
+        "31099.0",
+        "43320.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 15000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 63
+            },
+            "rohgewinnII": {
+              "von": 40,
+              "bis": 74,
+              "mittel": 59
+            },
+            "halbreingewinn": {
+              "von": 16,
+              "bis": 55,
+              "mittel": 34
+            },
+            "reingewinn": {
+              "von": 10,
+              "bis": 46,
+              "mittel": 27
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 15000000,
+          "bis": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 60
+            },
+            "rohgewinnII": {
+              "von": 33,
+              "bis": 64,
+              "mittel": 47
+            },
+            "halbreingewinn": {
+              "von": 15,
+              "bis": 42,
+              "mittel": 28
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 33,
+              "mittel": 21
+            }
+          }
+        },
+        {
+          "stufe": "C",
+          "von": 30000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 57
+            },
+            "rohgewinnII": {
+              "von": 26,
+              "bis": 49,
+              "mittel": 37
+            },
+            "halbreingewinn": {
+              "von": 10,
+              "bis": 29,
+              "mittel": 19
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 24,
+              "mittel": 14
+            }
+          }
+        }
+      ],
+      "seite": 16
+    },
+    {
+      "name": "Schuhe und Schuhwaren, Eh. (auch mit Reparaturen)",
+      "kennzahlen": [
+        "47721.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 59,
+              "bis": 117,
+              "mittel": 85
+            },
+            "rohgewinnI": {
+              "von": 37,
+              "bis": 54,
+              "mittel": 46
+            },
+            "halbreingewinn": {
+              "von": 22,
+              "bis": 42,
+              "mittel": 32
+            },
+            "reingewinn": {
+              "von": 5,
+              "bis": 26,
+              "mittel": 14
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Solarien",
+      "kennzahlen": [
+        "96040.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "halbreingewinn": {
+              "von": 36,
+              "bis": 72,
+              "mittel": 51
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 32,
+              "mittel": 17
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Spielhallen und Betrieb von Spielautomaten",
+      "kennzahlen": [
+        "92001.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "halbreingewinn": {
+              "von": 24,
+              "bis": 61,
+              "mittel": 41
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 36,
+              "mittel": 19
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Spielwaren, Eh.",
+      "kennzahlen": [
+        "47650.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 37,
+              "bis": 104,
+              "mittel": 64
+            },
+            "rohgewinnI": {
+              "von": 27,
+              "bis": 51,
+              "mittel": 39
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 37,
+              "mittel": 26
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 24,
+              "mittel": 13
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Sport- und Campingartikel, Eh.",
+      "kennzahlen": [
+        "47642.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 43,
+              "bis": 108,
+              "mittel": 67
+            },
+            "rohgewinnI": {
+              "von": 30,
+              "bis": 52,
+              "mittel": 40
+            },
+            "halbreingewinn": {
+              "von": 14,
+              "bis": 36,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 22,
+              "mittel": 12
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Steinbildhauerei und Steinmetzerei",
+      "kennzahlen": [
+        "23700.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 72
+            },
+            "rohgewinnII": {
+              "von": 49,
+              "bis": 79,
+              "mittel": 64
+            },
+            "halbreingewinn": {
+              "von": 23,
+              "bis": 52,
+              "mittel": 38
+            },
+            "reingewinn": {
+              "von": 17,
+              "bis": 46,
+              "mittel": 30
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 70
+            },
+            "rohgewinnII": {
+              "von": 38,
+              "bis": 64,
+              "mittel": 51
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 42,
+              "mittel": 28
+            },
+            "reingewinn": {
+              "von": 7,
+              "bis": 30,
+              "mittel": 18
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Tabakwaren und Zeitschriften, Eh.",
+      "kennzahlen": [
+        "47260.0",
+        "47621.0"
+      ],
+      "staffeln": [
+        {
+          "sätze": {
+            "aufschlag": {
+              "von": 14,
+              "bis": 33,
+              "mittel": 22
+            },
+            "rohgewinnI": {
+              "von": 12,
+              "bis": 25,
+              "mittel": 18
+            },
+            "halbreingewinn": {
+              "von": 7,
+              "bis": 19,
+              "mittel": 13
+            },
+            "reingewinn": {
+              "von": 2,
+              "bis": 12,
+              "mittel": 7
+            }
+          }
+        }
+      ],
+      "bemerkung": "Hinweis auf Tz. 8.1.1 der Vorbemerkungen",
+      "seite": 17
+    },
+    {
+      "name": "Telekommunikationsgeräte und Mobiltelefone, Eh.",
+      "kennzahlen": [
+        "47420.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 43,
+              "bis": 1900,
+              "mittel": 163
+            },
+            "rohgewinnI": {
+              "von": 30,
+              "bis": 95,
+              "mittel": 62
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 69,
+              "mittel": 42
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 49,
+              "mittel": 27
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 43,
+              "bis": 1900,
+              "mittel": 163
+            },
+            "rohgewinnI": {
+              "von": 30,
+              "bis": 95,
+              "mittel": 62
+            },
+            "halbreingewinn": {
+              "von": 17,
+              "bis": 69,
+              "mittel": 42
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 40,
+              "mittel": 19
+            }
+          }
+        }
+      ],
+      "bemerkung": "Vermittlungsprovisionen sind einbezogen.",
+      "seite": 17
+    },
+    {
+      "name": "Textilwaren verschiedener Art und Oberbekleidung, Eh.",
+      "kennzahlen": [
+        "47510.0",
+        "47710.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 56,
+              "bis": 150,
+              "mittel": 92
+            },
+            "rohgewinnI": {
+              "von": 36,
+              "bis": 60,
+              "mittel": 48
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 44,
+              "mittel": 33
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 32,
+              "mittel": 19
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 56,
+              "bis": 150,
+              "mittel": 92
+            },
+            "rohgewinnI": {
+              "von": 36,
+              "bis": 60,
+              "mittel": 48
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 44,
+              "mittel": 33
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 25,
+              "mittel": 13
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Textilwaren verschiedener Art und Oberbekleidung, Eh.",
+      "kennzahlen": [
+        "47510.0",
+        "47710.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 56,
+              "bis": 150,
+              "mittel": 92
+            },
+            "rohgewinnI": {
+              "von": 36,
+              "bis": 60,
+              "mittel": 48
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 44,
+              "mittel": 33
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 32,
+              "mittel": 19
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 25000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 56,
+              "bis": 150,
+              "mittel": 92
+            },
+            "rohgewinnI": {
+              "von": 36,
+              "bis": 60,
+              "mittel": 48
+            },
+            "halbreingewinn": {
+              "von": 20,
+              "bis": 44,
+              "mittel": 33
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 25,
+              "mittel": 13
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Uhren, Edelmetall- und Schmuckwaren, Eh. (auch mit Reparaturen)",
+      "kennzahlen": [
+        "47770.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 75,
+              "bis": 178,
+              "mittel": 113
+            },
+            "rohgewinnI": {
+              "von": 43,
+              "bis": 64,
+              "mittel": 53
+            },
+            "halbreingewinn": {
+              "von": 25,
+              "bis": 50,
+              "mittel": 37
+            },
+            "reingewinn": {
+              "von": 9,
+              "bis": 36,
+              "mittel": 22
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 54,
+              "bis": 170,
+              "mittel": 92
+            },
+            "rohgewinnI": {
+              "von": 35,
+              "bis": 63,
+              "mittel": 48
+            },
+            "halbreingewinn": {
+              "von": 22,
+              "bis": 42,
+              "mittel": 32
+            },
+            "reingewinn": {
+              "von": 8,
+              "bis": 28,
+              "mittel": 17
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Unterhaltungselektronik, Eh. (auch mit Reparaturen und Eh. mit sonstigen elektrotechnischen Erzeugnissen in geringem Umfang)",
+      "kennzahlen": [
+        "47430.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 43,
+              "bis": 138,
+              "mittel": 75
+            },
+            "rohgewinnI": {
+              "von": 30,
+              "bis": 58,
+              "mittel": 43
+            },
+            "halbreingewinn": {
+              "von": 16,
+              "bis": 36,
+              "mittel": 25
+            },
+            "reingewinn": {
+              "von": 4,
+              "bis": 26,
+              "mittel": 15
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 30000000,
+          "sätze": {
+            "aufschlag": {
+              "von": 32,
+              "bis": 82,
+              "mittel": 54
+            },
+            "rohgewinnI": {
+              "von": 24,
+              "bis": 45,
+              "mittel": 35
+            },
+            "halbreingewinn": {
+              "von": 13,
+              "bis": 33,
+              "mittel": 22
+            },
+            "reingewinn": {
+              "von": 3,
+              "bis": 16,
+              "mittel": 9
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Versicherungsmakler (inkl. Versicherungsvertreter)",
+      "kennzahlen": [
+        "66220.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 53,
+              "bis": 84,
+              "mittel": 68
+            },
+            "reingewinn": {
+              "von": 38,
+              "bis": 76,
+              "mittel": 57
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "sätze": {
+            "halbreingewinn": {
+              "von": 53,
+              "bis": 84,
+              "mittel": 68
+            },
+            "reingewinn": {
+              "von": 27,
+              "bis": 64,
+              "mittel": 43
+            }
+          }
+        }
+      ],
+      "seite": 17
+    },
+    {
+      "name": "Zimmerei (mit Materiallieferung)",
+      "kennzahlen": [
+        "43912.0"
+      ],
+      "staffeln": [
+        {
+          "stufe": "A",
+          "bis": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 63
+            },
+            "rohgewinnII": {
+              "von": 38,
+              "bis": 74,
+              "mittel": 55
+            },
+            "halbreingewinn": {
+              "von": 16,
+              "bis": 47,
+              "mittel": 31
+            },
+            "reingewinn": {
+              "von": 12,
+              "bis": 42,
+              "mittel": 27
+            }
+          }
+        },
+        {
+          "stufe": "B",
+          "von": 20000000,
+          "sätze": {
+            "rohgewinnI": {
+              "mittel": 57
+            },
+            "rohgewinnII": {
+              "von": 28,
+              "bis": 51,
+              "mittel": 38
+            },
+            "halbreingewinn": {
+              "von": 10,
+              "bis": 33,
+              "mittel": 19
+            },
+            "reingewinn": {
+              "von": 6,
+              "bis": 26,
+              "mittel": 15
+            }
+          }
+        }
+      ],
+      "seite": 18
+    }
+  ],
+  "synonyme": [
+    {
+      "begriff": "Anstreicher",
+      "klasse": "Maler- und Lackierergewerbe"
+    },
+    {
+      "begriff": "Anstrichbedarf, Eh.",
+      "klasse": "Bau- und Heimwerkerbedarf, Anstrichmittel, Eh."
+    },
+    {
+      "begriff": "Asia-Imbiss",
+      "klasse": "Imbissbetriebe"
+    },
+    {
+      "begriff": "Auto...",
+      "klasse": "Kfz..."
+    },
+    {
+      "begriff": "Baugeschäft",
+      "klasse": "Bauunternehmen"
+    },
+    {
+      "begriff": "Baumaler und -lackierer",
+      "klasse": "Maler- und Lackierergewerbe"
+    },
+    {
+      "begriff": "Bauschreiner",
+      "klasse": "Schreiner, Tischlerei"
+    },
+    {
+      "begriff": "Bausteinmetz",
+      "klasse": "Steinbildhauerei und Steinmetzerei"
+    },
+    {
+      "begriff": "Bauspenglerei",
+      "klasse": "Dachdeckerei und Bauspenglerei"
+    },
+    {
+      "begriff": "Bauschlosser",
+      "klasse": "Schreinerei, Tischlerei"
+    },
+    {
+      "begriff": "Bautischler",
+      "klasse": "Schreinerei, Tischlerei"
+    },
+    {
+      "begriff": "Beamer",
+      "klasse": "Unterhaltungselektronik, Eh."
+    },
+    {
+      "begriff": "Beerdigungsinstitut",
+      "klasse": "Bestattungsunternehmen"
+    },
+    {
+      "begriff": "Bekleidung, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Bekleidungszubehör, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Bierwirtschaft",
+      "klasse": "Gaststätten"
+    },
+    {
+      "begriff": "Blechner",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Bräunungsstudio",
+      "klasse": "Solarien"
+    },
+    {
+      "begriff": "Brotbäckerei",
+      "klasse": "Bäckerei, Konditorei"
+    },
+    {
+      "begriff": "Buchdruckerei",
+      "klasse": "Druckereien"
+    },
+    {
+      "begriff": "Büglerei",
+      "klasse": "Chemische Reinigung und Wäscherei"
+    },
+    {
+      "begriff": "Büroartikel, Eh.",
+      "klasse": "Schreib- und Papierwaren, Schul- und Büroartikel, Eh."
+    },
+    {
+      "begriff": "Büromaschinen",
+      "klasse": "Computer und Software, Eh."
+    },
+    {
+      "begriff": "Busunternehmen",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Campingartikel, Eh.",
+      "klasse": "Sport- und Campingartikel, Eh."
+    },
+    {
+      "begriff": "CDs (Musik) , Eh.",
+      "klasse": "Unterhaltungselektronik, Eh."
+    },
+    {
+      "begriff": "Damen- und Herrenfrisör",
+      "klasse": "Frisörgewerbe"
+    },
+    {
+      "begriff": "Damenbekleidung, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Damenfrisör",
+      "klasse": "Frisörgewerbe"
+    },
+    {
+      "begriff": "Datenverarbeitungsgeräte",
+      "klasse": "Computer und Software, Eh."
+    },
+    {
+      "begriff": "Dekorateur",
+      "klasse": "Raumausstatter"
+    },
+    {
+      "begriff": "Diktiergeräte",
+      "klasse": "Computer und Software, Eh."
+    },
+    {
+      "begriff": "Döner-Imbiss",
+      "klasse": "Imbissbetriebe"
+    },
+    {
+      "begriff": "Drucker, Eh.",
+      "klasse": "Computer und Software, Eh"
+    },
+    {
+      "begriff": "Edelmetallwaren, Eh.",
+      "klasse": "Uhren, Edelmetall- und Schmuckwaren, Eh."
+    },
+    {
+      "begriff": "Einrichtungsgegenstände, Eh.",
+      "klasse": "Möbel und sonstige Einrichtungsgegenstände, Eh."
+    },
+    {
+      "begriff": "Eiscafés",
+      "klasse": "Eisdielen"
+    },
+    {
+      "begriff": "Eisenwaren, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Elektrogeräte, Eh.",
+      "klasse": "Elektrotechnische Erzeugnisse, Eh."
+    },
+    {
+      "begriff": "Estrichlegerei",
+      "klasse": "Fußboden-, Fliesen- und Plattenlegerei"
+    },
+    {
+      "begriff": "Farben",
+      "klasse": "Bau- und Heimwerkerbedarf, Anstrichmittel, Eh."
+    },
+    {
+      "begriff": "Feinbäckerei",
+      "klasse": "Bäckerei, Konditorei"
+    },
+    {
+      "begriff": "Feinkeramikwaren, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Feinkostwaren, Eh.",
+      "klasse": "Nahrungs- und Genussmittel versch. Art einschl. Reformwaren (Naturkost)"
+    },
+    {
+      "begriff": "Fernsehgeräte, Eh.",
+      "klasse": "Unterhaltungselektronik, Eh"
+    },
+    {
+      "begriff": "Fingernagelstudio",
+      "klasse": "Kosmetiksalons"
+    },
+    {
+      "begriff": "Flaschnerei",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Fliesenleger",
+      "klasse": "Fußboden-, Fliesen- und Plattenlegerei"
+    },
+    {
+      "begriff": "Flipperautomaten",
+      "klasse": "Spielhallen und Betrieb von Spielautomaten"
+    },
+    {
+      "begriff": "Fußbodenbelag, Eh.",
+      "klasse": "Bau- und Heimwerkerbedarf, Anstrichmittel, Eh."
+    },
+    {
+      "begriff": "Fußpflege",
+      "klasse": "Kosmetiksalons"
+    },
+    {
+      "begriff": "Gasinstallation",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Gasthof",
+      "klasse": "Beherbergungsgewerbe"
+    },
+    {
+      "begriff": "Gebäudereinigung",
+      "klasse": "Glas- und Gebäudereinigung"
+    },
+    {
+      "begriff": "Geldspielautomaten",
+      "klasse": "Spielhallen und Betrieb von Spielautomaten"
+    },
+    {
+      "begriff": "Gemüse, Eh.",
+      "klasse": "Obst, Gemüse, Südfrüchte und Kartoffeln, Eh."
+    },
+    {
+      "begriff": "Genussmittel, Eh.",
+      "klasse": "Nahrungs- und Genussmittel versch. Art einschl. Reformwaren (Naturkost)"
+    },
+    {
+      "begriff": "Geschenkartikel, Eh.",
+      "klasse": "Kunstgewerbliche Erzeugnisse, Geschenkartikel, Eh."
+    },
+    {
+      "begriff": "Gesichtsmassage",
+      "klasse": "Kosmetiksalons"
+    },
+    {
+      "begriff": "Glaswaren, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Goldschmiedewaren, Eh.",
+      "klasse": "Uhren, Edelmetall- und Schmuckwaren, Eh."
+    },
+    {
+      "begriff": "Güterbeförderung mit Kraftfahrzeugen",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Grabsteingeschäft",
+      "klasse": "Steinbildhauerei und Steinmetzerei"
+    },
+    {
+      "begriff": "Güternahverkehr",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Handarbeiten",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Handarbeitsbedarf, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Handyshop",
+      "klasse": "Telekommunikationsgeräte und Mobiltelefone, Eh."
+    },
+    {
+      "begriff": "Hausrat, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Heißmangel",
+      "klasse": "Chemische Reinigung und Wäscherei"
+    },
+    {
+      "begriff": "Heizöl, Eh.",
+      "klasse": "Brennstoffe, Eh."
+    },
+    {
+      "begriff": "Herrenbekleidung, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Herrenfrisör",
+      "klasse": "Frisörgewerbe"
+    },
+    {
+      "begriff": "Hobelwerke",
+      "klasse": "Säge- und Hobelwerke"
+    },
+    {
+      "begriff": "Holzbau",
+      "klasse": "Zimmerei"
+    },
+    {
+      "begriff": "Holzhausrat, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Hotel",
+      "klasse": "Beherbergungsgewerbe"
+    },
+    {
+      "begriff": "Hüte, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Imbissbetriebe mit asiatischem Speiseangebot",
+      "klasse": "Imbissbetriebe"
+    },
+    {
+      "begriff": "Installation von Gas- und Flüssigkeitsleitungen",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Kartoffeln, Eh.",
+      "klasse": "Obst, Gemüse, Südfrüchte und Kartoffeln, Eh."
+    },
+    {
+      "begriff": "Keramik, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Kinderbekleidung, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Klempnerei",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Klimatechnik",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Kohlen, Eh.",
+      "klasse": "Brennstoffe, Eh."
+    },
+    {
+      "begriff": "Konditorei",
+      "klasse": "Bäckerei, Konditorei"
+    },
+    {
+      "begriff": "Körperpflegemittel, Eh.",
+      "klasse": "Drogerien und Parfümerien"
+    },
+    {
+      "begriff": "Kopiergeräte, Eh.",
+      "klasse": "Computer und Software, Eh."
+    },
+    {
+      "begriff": "Kosmetik",
+      "klasse": "Drogerien und Parfümerien"
+    },
+    {
+      "begriff": "Kraftfahrschulen",
+      "klasse": "Fahrschulen"
+    },
+    {
+      "begriff": "Kraftwagenverkehr",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Küchengeräte, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Kunstschlosserei",
+      "klasse": "Schlosserei"
+    },
+    {
+      "begriff": "Kunststoffhausrat, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Kurzwaren, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Lacke, Eh.",
+      "klasse": "Bau- und Heimwerkerbedarf, Anstrichmittel, Eh."
+    },
+    {
+      "begriff": "Lackierer",
+      "klasse": "Maler- und Lackierergewerbe"
+    },
+    {
+      "begriff": "Lackierung von Straßenfahrzeugen",
+      "klasse": "Kfz-Lackiererei"
+    },
+    {
+      "begriff": "Landschaftsgärtner, -gestaltung",
+      "klasse": "Garten- u. Landschaftsbau"
+    },
+    {
+      "begriff": "Lebensmittel, Eh.",
+      "klasse": "Nahrungs- und Genussmittel versch. Art einschl. Reformwaren (Naturkost)"
+    },
+    {
+      "begriff": "Leuchten, Eh.",
+      "klasse": "Elektrotechnische Erzeugnisse, Eh."
+    },
+    {
+      "begriff": "Lüftungstechnik",
+      "klasse": "Heizungs-, Gas- und Wasserinstallation, Klempnerei, Lüftungs- und Klimatechnik"
+    },
+    {
+      "begriff": "Maniküre",
+      "klasse": "Kosmetiksalons"
+    },
+    {
+      "begriff": "Metallwaren, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Meterwaren, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Metzgerei",
+      "klasse": "Fleischerei, Metzgerei, Schlachterei"
+    },
+    {
+      "begriff": "Mietwagen mit Fahrer",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Möbelschreinerei",
+      "klasse": "Schreinerei, Tischlerei"
+    },
+    {
+      "begriff": "Möbeltischlerei",
+      "klasse": "Schreinerei, Tischlerei"
+    },
+    {
+      "begriff": "Mobiltelefone",
+      "klasse": "Telekommunikationsgeräte und Mobiltelefone, Eh."
+    },
+    {
+      "begriff": "Mosaikleger",
+      "klasse": "Fußboden-, Fliesen- und Plattenlegerei"
+    },
+    {
+      "begriff": "Mützen, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Naturkost, Eh.",
+      "klasse": "Nahrungs- und Genussmittel versch. Art einschl. Reformwaren (Naturkost)"
+    },
+    {
+      "begriff": "Oberbekleidung, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Omnibusunternehmen",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Papierwaren, Eh.",
+      "klasse": "Schreib- und Papierwaren, Schul- und Büroartikel, Eh."
+    },
+    {
+      "begriff": "Parfümerien",
+      "klasse": "Drogerien und Parfümerien"
+    },
+    {
+      "begriff": "Pediküre",
+      "klasse": "Kosmetiksalons"
+    },
+    {
+      "begriff": "Pension",
+      "klasse": "Beherbergungsgewerbe"
+    },
+    {
+      "begriff": "Personenbeförderung mit Kraftfahrzeugen",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Pflanzen, Eh.",
+      "klasse": "Blumen und Pflanzen, Eh."
+    },
+    {
+      "begriff": "Pizzerien",
+      "klasse": "Gaststätten"
+    },
+    {
+      "begriff": "Pflegedienst",
+      "klasse": "Ambulante soziale Dienste"
+    },
+    {
+      "begriff": "Plattenleger",
+      "klasse": "Fußboden-, Fliesen- und Plattenlegerei"
+    },
+    {
+      "begriff": "Polsterer",
+      "klasse": "Raumausstatter"
+    },
+    {
+      "begriff": "Polsterwaren, Eh.",
+      "klasse": "Möbel und sonstige Einrichtungsgegenstände, Eh."
+    },
+    {
+      "begriff": "Portraitfotograf",
+      "klasse": "Fotografen (Portrait- und Werbefotografen)"
+    },
+    {
+      "begriff": "Porzellanwaren, Eh.",
+      "klasse": "Haushaltsgegenstände, Eh."
+    },
+    {
+      "begriff": "Radiogeräte, Eh.",
+      "klasse": "Unterhaltungselektronik, Eh."
+    },
+    {
+      "begriff": "Reformwaren, Eh.",
+      "klasse": "Nahrungs- und Genussmittel versch. Art einschl. Reformwaren (Naturkost)"
+    },
+    {
+      "begriff": "Restaurant",
+      "klasse": "Gaststätten"
+    },
+    {
+      "begriff": "Restaurant mit asiatischem Speiseangebot",
+      "klasse": "Gaststätten"
+    },
+    {
+      "begriff": "Rundfunkgeräte, Eh.",
+      "klasse": "Unterhaltungselektronik, Eh."
+    },
+    {
+      "begriff": "Säuglingsbekleidung, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Scanner, Eh.",
+      "klasse": "Computer und Software, Eh."
+    },
+    {
+      "begriff": "Schallplatten, Eh.",
+      "klasse": "Unterhaltungselektronik, Eh."
+    },
+    {
+      "begriff": "Schankwirtschaft",
+      "klasse": "Gaststätten"
+    },
+    {
+      "begriff": "Schirme, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Schlachterei",
+      "klasse": "Fleischerei, Metzgerei, Schlachterei"
+    },
+    {
+      "begriff": "Schmied",
+      "klasse": "Schlosserei"
+    },
+    {
+      "begriff": "Schmuckwaren, Eh.",
+      "klasse": "Uhren, Edelmetall- und Schmuckwaren, Eh."
+    },
+    {
+      "begriff": "Schneidereibedarf, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Schnellimbiss",
+      "klasse": "Imbissbetriebe"
+    },
+    {
+      "begriff": "Schnellreinigung",
+      "klasse": "Chemische Reinigung und Wäscherei"
+    },
+    {
+      "begriff": "Schuhwaren, Eh.",
+      "klasse": "Schuhe und Schuhwaren, Eh."
+    },
+    {
+      "begriff": "Schulartikel, Eh.",
+      "klasse": "Schreib- und Papierwaren, Schul- und Büroartikel, Eh."
+    },
+    {
+      "begriff": "Silberwaren, Eh.",
+      "klasse": "Uhren, Edelmetall- und Schmuckwaren, Eh."
+    },
+    {
+      "begriff": "Software",
+      "klasse": "Computer und Software, Eh."
+    },
+    {
+      "begriff": "Speiseeis",
+      "klasse": "Eisdielen"
+    },
+    {
+      "begriff": "Speisewirtschaft",
+      "klasse": "Gaststätten"
+    },
+    {
+      "begriff": "Spenglerei",
+      "klasse": "Dachdeckerei und Bauspenglerei"
+    },
+    {
+      "begriff": "Spielautomaten",
+      "klasse": "Spielhallen und Betrieb von Spielautomaten"
+    },
+    {
+      "begriff": "Spirituosen, Eh.",
+      "klasse": "Getränke, Eh."
+    },
+    {
+      "begriff": "Steinmetz",
+      "klasse": "Steinbildhauerei und Steinmetzerei"
+    },
+    {
+      "begriff": "Strickwaren, Eh.",
+      "klasse": "Textilwaren verschiedener Art und Oberbekleidung, Eh."
+    },
+    {
+      "begriff": "Südfrüchte, Eh.",
+      "klasse": "Obst, Gemüse, Südfrüchte und Kartoffeln, Eh."
+    },
+    {
+      "begriff": "Tapeten, Eh.",
+      "klasse": "Bau- und Heimwerkerbedarf, Anstrichmittel, Eh."
+    },
+    {
+      "begriff": "Tapezierer",
+      "klasse": "Raumausstatter"
+    },
+    {
+      "begriff": "Täschnerwaren, Eh.",
+      "klasse": "Lederwaren und Reisegepäck, Eh."
+    },
+    {
+      "begriff": "Taxigewerbe",
+      "klasse": "Fuhrgewerbe"
+    },
+    {
+      "begriff": "Tischlerei",
+      "klasse": "Schreinerei, Tischlerei"
+    },
+    {
+      "begriff": "Tüncher",
+      "klasse": "Maler- und Lackierergewerbe"
+    },
+    {
+      "begriff": "Unterhaltungszeitschriften, Eh.",
+      "klasse": "Tabakwaren und Zeitschriften, Eh."
+    },
+    {
+      "begriff": "Verkaufsstände",
+      "klasse": "Kioske und Verkaufsstände"
+    }
+  ],
+  "pauschbeträge": [
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Bäckerei",
+      "ermäßigt": 117600,
+      "voll": 39700,
+      "gesamt": 157300
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Fleischerei/Metzgerei",
+      "ermäßigt": 91200,
+      "voll": 82000,
+      "gesamt": 173200
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Gaststätten aller Art a) mit Abgabe von kalten Speisen",
+      "ermäßigt": 115000,
+      "voll": 96500,
+      "gesamt": 211500
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Gaststätten aller Art b) mit Abgabe von kalten und warmen Speisen",
+      "ermäßigt": 158600,
+      "voll": 173100,
+      "gesamt": 331700
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Getränkeeinzelhandel",
+      "ermäßigt": 9300,
+      "voll": 29100,
+      "gesamt": 38400
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Café und Konditorei",
+      "ermäßigt": 113700,
+      "voll": 63500,
+      "gesamt": 177200
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Milch, Milcherzeugnisse, Fettwaren und Eier",
+      "ermäßigt": 63500,
+      "voll": 6700,
+      "gesamt": 70200
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Nahrungs- und Genussmittel (Eh.)",
+      "ermäßigt": 129500,
+      "voll": 74000,
+      "gesamt": 203500
+    },
+    {
+      "von": "2014-01-01",
+      "bis": "2014-12-31",
+      "gewerbezweig": "Obst, Gemüse, Südfrüchte und Kartoffeln (Eh.)",
+      "ermäßigt": 29100,
+      "voll": 21200,
+      "gesamt": 50300
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Bäckerei",
+      "ermäßigt": 119200,
+      "voll": 40200,
+      "gesamt": 159400
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Fleischerei/Metzgerei",
+      "ermäßigt": 92500,
+      "voll": 83100,
+      "gesamt": 175600
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Gaststätten aller Art a) mit Abgabe von kalten Speisen",
+      "ermäßigt": 116600,
+      "voll": 97800,
+      "gesamt": 214400
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Gaststätten aller Art b) mit Abgabe von kalten und warmen Speisen",
+      "ermäßigt": 160800,
+      "voll": 175500,
+      "gesamt": 336300
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Getränkeeinzelhandel",
+      "ermäßigt": 9400,
+      "voll": 29500,
+      "gesamt": 38900
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Café und Konditorei",
+      "ermäßigt": 115200,
+      "voll": 64300,
+      "gesamt": 179500
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Milch, Milcherzeugnisse, Fettwaren und Eier",
+      "ermäßigt": 64300,
+      "voll": 6700,
+      "gesamt": 71000
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Nahrungs- und Genussmittel (Eh.)",
+      "ermäßigt": 131300,
+      "voll": 75000,
+      "gesamt": 206300
+    },
+    {
+      "von": "2015-01-01",
+      "bis": "2015-12-31",
+      "gewerbezweig": "Obst, Gemüse, Südfrüchte und Kartoffeln (Eh.)",
+      "ermäßigt": 29500,
+      "voll": 21500,
+      "gesamt": 51000
+    }
+  ]
+}
