@@ -1,14 +1,15 @@
 Amtliche Richtsatzsammlung (BMF), Tabellenteil je Kalenderjahr.
 Basis-URL: https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Weitere_Steuerthemen/Betriebspruefung/Richtsatzsammlung/
 Alle URLs mit ?__blob=publicationFile
+Jahrgänge ohne PDF liegen nur als Quellenangabe hier; ihr Tabellenteil bricht den Parser.
 
-2011  001_2.pdf?v=6 (nur noch via web.archive.org/web/2012id_/)
+2011  001_2.pdf?v=6 (nur noch via web.archive.org/web/2012id_/)  [nicht im Repo: Tabellenteil in einem Layout, das der Parser nicht liest]
 2012  2013-07-18-download-richtsatzsammlung-2012.pdf
 2013  2014-07-29-download-richtsatzsammlung-2013.pdf
 2014  2015-07-14-download-richtsatzsammlung-2014.pdf
 2015  2016-07-28-download-richtsatzsammlung-2015.pdf
-2016  2017-06-08-download-richtsatzsammlung-2016.pdf
-2017  2018-07-05-download-richtsatzsammlung-2017.pdf
+2016  2017-06-08-download-richtsatzsammlung-2016.pdf  [nicht im Repo: Tabellenteil in einem Layout, das der Parser nicht liest]
+2017  2018-07-05-download-richtsatzsammlung-2017.pdf  [nicht im Repo: Tabellenteil in einem Layout, das der Parser nicht liest]
 2018  2019-07-08-download-richtsatzsammlung-2018.pdf
 2019  2021-01-20-download-richtsatzsammlung-2019.pdf
 2020  2021-12-20-download-richtsatzsammlung-2020.pdf

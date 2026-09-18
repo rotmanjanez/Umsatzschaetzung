@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.Json.Serialization;
+using Umsatzschätzung.Richtsatz;
 
 namespace Umsatzschätzung.Model;
 
@@ -20,6 +21,7 @@ namespace Umsatzschätzung.Model;
 [JsonSerializable(typeof(Invoice))]
 [JsonSerializable(typeof(OcrPage))]
 [JsonSerializable(typeof(List<OcrPage>))]
+[JsonSerializable(typeof(Sammlung))]
 public sealed partial class ModelJsonContext : JsonSerializerContext
 {
 }

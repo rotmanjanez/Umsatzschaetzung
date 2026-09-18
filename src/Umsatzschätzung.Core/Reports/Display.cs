@@ -1,4 +1,5 @@
 using Umsatzschätzung.Model;
+using Umsatzschätzung.Richtsatz;
 using Umsatzschätzung.Service;
 
 namespace Umsatzschätzung.Reports;
@@ -78,6 +79,9 @@ public static class Display
             c.Pinned.Select(p => new PinnedRow(ProductName(rs, p.ProductId), Format.Portions(p.Portions), p.Reason)).ToList(),
             r.Warnings.Select(w => w.Message).ToList());
     }
+
+    public static List<SammlungRow> Sammlungen(List<SammlungInfo> infos) =>
+        infos.Select(i => new SammlungRow(i.Year, i.Klassen + " Gewerbeklassen", i.Mitgeliefert ? "mitgeliefert" : i.Quelle, Format.Day(i.ImportedAt))).ToList();
 
     public static List<KV> Summary(Model.Report r)
     {

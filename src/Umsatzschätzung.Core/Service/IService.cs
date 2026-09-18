@@ -9,6 +9,10 @@ public interface IService
     Task<RuleSetResp> SaveRule(IRuleEntity rule, CancellationToken ct);                                     // PUT  /rules/{kind}/{id}   last write wins, resp holds the whole set
     Task<RuleSetResp> DeleteRule(Entity kind, string id, CancellationToken ct);                             // DELETE /rules/{kind}/{id}   refused while other entries reference it, resp holds the whole set
 
+    Task<SammlungenResp> Sammlungen(CancellationToken ct);                                                  // GET    /richtsatz
+    Task<SammlungenResp> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct);                 // POST   /richtsatz/import   liest die PDF und ersetzt die Sammlung ihres Jahres
+    Task<SammlungenResp> DeleteSammlung(int year, CancellationToken ct);                                    // DELETE /richtsatz/{year}   eine mitgelieferte Sammlung kehrt beim nächsten Start zurück
+
     Task<ListCasesResp> ListCases(CancellationToken ct);                                                    // GET    /cases
     Task<CaseResp> GetCase(string caseId, CancellationToken ct);                                            // GET    /cases/{id}
     Task<CaseResp> PutCase(Case kase, CancellationToken ct);                                                // PUT    /cases/{id}

@@ -1,4 +1,5 @@
 using Umsatzschätzung.Model;
+using Umsatzschätzung.Richtsatz;
 
 namespace Umsatzschätzung.Service;
 
@@ -9,6 +10,10 @@ public sealed record RuleSetResp(RuleSet RuleSet, RuleSetDisplay Display);
 public sealed record RuleSetDisplay(Dictionary<string, ProductDisplay> Products, Dictionary<string, string> Categories);
 
 public sealed record ProductDisplay(string Recipe);
+
+public sealed record SammlungenResp(List<SammlungInfo> Sammlungen, List<SammlungRow> Display);
+
+public sealed record SammlungRow(int Year, string Klassen, string Quelle, string Importiert);
 
 public sealed record ListCasesResp(List<CaseRow> Cases);
 
