@@ -204,6 +204,9 @@ public static class Parse
     public static string UnitCode(string text)
     {
         text = text.Trim();
+        // An e-invoice viewer can print the code in both the unit and the code column.
+        var parts = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 1 && parts.All(p => p == parts[0])) text = parts[0];
         if (Units.Resolve(text.Trim('.')) is { } code) return code;
         if (text.Contains(' ') || text.Contains('\t') || text.EnumerateRunes().Count() > MaxUnitLen) return "";
         return text;
