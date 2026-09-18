@@ -30,6 +30,24 @@ public static partial class PackSize
     [GeneratedRegex(@"[^\p{L}\p{N}]+")]
     private static partial Regex NotWord();
 
+    [GeneratedRegex(@"(?<v>\d{1,5}[.,]\d{1,3})[1Il](?![\p{L}\p{N}])")]
+    private static partial Regex GluedLitre();
+
+    // "0,7 l" comes back from the recogniser as "0,71" -- the litre read as the digit it
+    // is drawn like. Only where the line bills a container and the description yields no
+    // pack size at all, so there is nothing to overwrite, and only if the split produces
+    // one. Without the split the mapping needs a factor a human has to type in.
+    public static string Recover(string text, string unitCode)
+    {
+        if (Units.Lookup(unitCode) is not { Container: true } || Read(text) is not null) return text;
+        foreach (RxMatch m in GluedLitre().Matches(text))
+        {
+            var candidate = text[..m.Index] + m.Groups["v"].Value + " l" + text[(m.Index + m.Length)..];
+            if (Read(candidate) is not null) return candidate;
+        }
+        return text;
+    }
+
     // The description with the packaging taken out: the spans a pack size was read
     // from, plus the unit and container words. What is left is what the line is
     // about. Numbers outside a pack span stay — "Mehl Type 550" is not a size.
