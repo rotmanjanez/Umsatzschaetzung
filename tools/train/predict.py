@@ -139,6 +139,9 @@ def main():
     ap.add_argument("--dump", type=Path, required=True,
                     help="where to write the tagged pages, for tools/eval to score")
     ap.add_argument("--truth-only", action="store_true", help="the assembly ceiling, no model")
+    ap.add_argument("--keep-fine", action="store_true",
+                    help="write the v11 fine classes (buyer, gtin ...) into the dump instead of "
+                         "folding them into O; the C# scorer only knows the first 19 names")
     ap.add_argument("--onnx", type=Path,
                     help="tag with the int8 ONNX through the C# inference path instead "
                          "of PyTorch, so quantisation is measured end to end")
@@ -171,9 +174,21 @@ def main():
         else:
             got[key].append(tag_page(model, tk, p, device))
 
+    coarse = set(LABELS[:19])
+
+    def fold(words):
+        if a.keep_fine:
+            return words
+        for w in words:
+            for key in ("pred", "field"):
+                if key in w and w[key] not in coarse:
+                    w[key] = "O"
+        return words
+
     with a.dump.open("w") as f:
         for k in rows:
             for p, words in zip(rows[k], got[k]):
+                words = fold(words)
                 f.write(json.dumps({**{n: p[n] for n in
                                        ("split", "invoice", "template", "page", "w", "h")},
                                     "words": words}, ensure_ascii=False) + "\n")

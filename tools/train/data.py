@@ -52,6 +52,17 @@ def augment(words, h, rng):
     return out
 
 
+# v11 ablation: with LABEL_CAP = 19 the nineteen fine classes fold back into `O`, so
+# the same corpus trains a 19-way head — the only clean test of whether over-labeling
+# helps the twelve value classes. None keeps every class.
+LABEL_CAP = None
+
+
+def label_id(field):
+    i = LABEL_ID.get(field, 0)
+    return 0 if LABEL_CAP is not None and i >= LABEL_CAP else i
+
+
 def encode_page(page, tk, rng=None):
     """One page to flat per-subword arrays; the first subword of a word carries its label."""
     words = page["words"]
@@ -67,7 +78,7 @@ def encode_page(page, tk, rng=None):
         for k, s in enumerate(sub):
             ids.append(s)
             boxes.append(box)
-            labels.append(LABEL_ID.get(w.get("field", "O"), 0) if k == 0 else IGNORE)
+            labels.append(label_id(w.get("field", "O")) if k == 0 else IGNORE)
             rows.append(w["row"] if k == 0 else -1)
 
     role_of = {}

@@ -8,9 +8,12 @@ from pathlib import Path
 import torch
 from torch.utils.data import DataLoader
 
+import data
 from data import IGNORE, Windows, class_weights, collate
 from model import Tagger, tokenizer
 from schema import LABELS, ROLES
+
+NAMES = list(LABELS)  # narrowed by --n-labels
 
 
 def param_groups(model, lr_body, lr_head, lr_layout):
@@ -57,7 +60,7 @@ class Counts:
 def evaluate(model, loader, device):
     """Word-head macro-F1 over the twelve fields, role-head macro-F1 over the roles."""
     model.eval()
-    word = Counts(len(LABELS), device)
+    word = Counts(len(NAMES), device)
     role = Counts(len(ROLES), device)
     for b in loader:
         b = {k: v.to(device) for k, v in b.items()}
@@ -68,7 +71,7 @@ def evaluate(model, loader, device):
         keep = b["role_labels"] != IGNORE
         role.add(rl.argmax(-1)[keep], b["role_labels"][keep])
     model.train()
-    macro, per_class = word.report(LABELS, macro_from=1)
+    macro, per_class = word.report(NAMES, macro_from=1)
     role_macro, role_per_class = role.report(ROLES)
     return {"macro": macro, "o_f1": per_class.get("O", {}).get("f1", 0.0),
             "per_class": per_class, "role_macro": role_macro,
@@ -104,9 +107,16 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--max-steps", type=int, default=0, help="smoke runs")
+    ap.add_argument("--init", type=Path,
+                    help="warm-start from PATH/model.pt; both head widths must match")
+    ap.add_argument("--n-labels", type=int, default=len(LABELS),
+                    help="head width; classes with id >= N fold into O (ablation)")
     ap.add_argument("--eval-only", action="store_true",
                     help="score an existing checkpoint in --out and stop")
     a = ap.parse_args()
+    global NAMES
+    data.LABEL_CAP = a.n_labels if a.n_labels < len(LABELS) else None
+    names = NAMES = LABELS[:a.n_labels]
 
     torch.manual_seed(a.seed)
     a.out.mkdir(parents=True, exist_ok=True)
@@ -115,7 +125,7 @@ def main():
 
     val = Windows(a.rows, tk, split="val")
     if a.eval_only:
-        model = Tagger().to(device).eval()
+        model = Tagger(n_labels=len(names)).to(device).eval()
         model.load_state_dict(torch.load(a.out / "model.pt", map_location=device,
                                          weights_only=True))
         vdl = DataLoader(val, batch_size=a.batch, collate_fn=collate, num_workers=a.workers)
@@ -127,13 +137,21 @@ def main():
     train = Windows(a.rows, tk, split="train", augment=True, seed=a.seed)
     print(f"{len(train)} train windows, {len(val)} val windows")
 
-    model = Tagger().to(device)
+    model = Tagger(n_labels=len(names)).to(device)
+    if a.init:
+        state = torch.load(a.init / "model.pt", map_location=device, weights_only=True)
+        for head, width in (("word_head", len(names)), ("role_head", len(ROLES))):
+            got = state[f"{head}.weight"].shape[0]
+            if got != width:
+                raise SystemExit(f"--init {a.init}: {head} is {got} wide, this run needs {width}")
+        model.load_state_dict(state)
+        print(f"initialised from {a.init}/model.pt", flush=True)
     if a.freeze_layout:
         for n, p in model.body.named_parameters():
             if "layout" in n:
                 p.requires_grad_(False)
 
-    word_w = class_weights(train, len(LABELS), "labels").to(device)
+    word_w = class_weights(train, len(names), "labels").to(device)
     role_w = class_weights(train, len(ROLES), "role_labels")
     for part in filter(None, a.role_boost.split(",")):
         name, factor = part.split("=")
@@ -162,7 +180,7 @@ def main():
             b = {k: v.to(device, non_blocking=True) for k, v in b.items()}
             with torch.autocast("cuda", torch.float16, enabled=device.type == "cuda"):
                 wl, rl = model(b["input_ids"], b["bbox"], b["attention_mask"], b["row_pool"])
-                loss = (word_loss(wl.reshape(-1, len(LABELS)), b["labels"].reshape(-1))
+                loss = (word_loss(wl.reshape(-1, len(names)), b["labels"].reshape(-1))
                         + a.row_weight * role_loss(rl.reshape(-1, len(ROLES)),
                                                    b["role_labels"].reshape(-1)))
             scaler.scale(loss / a.accum).backward()

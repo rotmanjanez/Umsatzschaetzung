@@ -1,8 +1,8 @@
 # The tagger — LiLT layout stream + GottBERT
 
 `docs/models.md` §2. The pretrained LiLT layout transformer with its English
-RoBERTa text side replaced by German GottBERT, two heads (13 word classes,
-9 row roles), trained on `page.jsonl`.
+RoBERTa text side replaced by German GottBERT, two heads (`schema.LABELS` word
+classes, 9 row roles), trained on `page.jsonl`.
 
     model.py             the backbone swap and the two heads
     export_onnx.py       ONNX opset 17 + int8 dynamic quantisation
@@ -23,6 +23,57 @@ Scoring is `tools/eval`, in C#, against the same `Assemble` the app ships.
     dotnet run --project tools/eval -- --rows pred.jsonl --split val
 
 `align.py` builds `page.jsonl` from the corpus; scoring is not owned here.
+
+## The word head is sized from the checkpoint
+
+`LABELS` grew from 13 to 19 when the header label classes were appended, and the
+value classes kept their ids, so `LABELS[:n]` still decodes a narrower head.
+`Tagger(n_labels=...)` takes the width; `predict.head_size` reads it off
+`word_head.weight` in the state dict, and `predict.py` and `export_onnx.py --run`
+both size the model that way. Only `train.py` uses `len(LABELS)`, because a new
+run is what grows the head.
+
+## Confidence
+
+`tag_page` puts `conf` on every word: the winning class's softmax probability
+over the stitched logits, to three decimals. `onnx_page` does the same over the
+summed window logits. Assembly ranks competing header runs by it and treats a
+missing `conf` as 1.0, which is what makes truth words score exactly as before.
+
+## v9 — label-keyed header selection, 2101 val variations
+
+`b-v8/v8-body5e5-lay-s0` (a 13-way head, so no label class is ever predicted and
+only the fallback path runs), scored against `expected.json`. Old and new
+assembly on byte-identical predictions:
+
+                      old     new
+    clean rate       0.024   0.024
+    number           0.932   0.932    +1 invoice  -0
+    date             0.930   0.932    +5          -0
+    supplierName     0.865   0.865    +0          -0
+    netTotal         0.956   0.956    +1          -1
+    grossTotal       0.984   0.985    +1          -0
+
+The one netTotal loss is the confidence tie-break doing its job on a page where
+the model is wrong: two netTotal runs in the totals block, and it is more sure of
+the subtotal (0.975) than of the real net (0.899). A `netLabel` settles it once
+the corpus emits one.
+
+The label path itself cannot be measured on a v8 model. Injecting the label
+classes onto 201 val variations synthetically, then planting one false positive
+of each header field ahead of the true value — which is what a real scan looks
+like — separates the two rules completely:
+
+                      old     new
+    number           0.204   0.940    +148 invoices  -0
+    grossTotal       0.353   0.990    +128           -0
+    netTotal         0.955   0.980    +5             -0
+
+With the labels injected but no false positives planted, old and new agree on
+every field, so the label path costs nothing where "first" was already right.
+That selection now lives in `Extract.Assemble`, the one the app ships; the
+Python reference it was ported from is gone. `tools/eval/README.md` has the
+order.
 
 ## The latency gate (2026-09-15, M1 Pro, 4 threads, untrained, measured once)
 
@@ -49,7 +100,12 @@ efficiency cores. Pin the ONNX session to four.
     python3 tokenizer_parity.py dump --out tokenizer
     python3 tokenizer_parity.py selfcheck
     python3 train.py --rows page.jsonl --out runs/b-001
+    python3 train.py --rows page.jsonl --out runs/b-002 --init ../../checkpoints/b-v9/v9-...
     python3 predict.py --rows page.jsonl --run runs/b-001
+
+`--init PATH` warm-starts training from `PATH/model.pt` instead of the plain
+pretrained backbone, and stops with a message when either head in that
+checkpoint is a different width from this run's.
 
 `predict.py --truth-only` is the assembly ceiling: it scores the ground-truth
 labels through the same path and no model can beat that number.
@@ -262,3 +318,14 @@ case take the label of the truth word with the largest overlap area.
 Report the share of OCR words that got a field label and the share of truth field
 words with no OCR word at all. That second number is the **OCR ceiling** from
 `extraction-eval.md` §5, and it caps every model that follows.
+
+### v11: 38 classes and the over-labeling ablation
+
+`schema.FIELDS` grew by nineteen fine classes (buyer, customerNumber, orderNumber,
+deliveryNoteNumber, taxId, bankId, postcode, phone, orderDate, deliveryDate, dueDate,
+gtin, lineDiscount, lineGross, priceBasis, subtotal, charge, discount, amountDue).
+Assembly never reads them; they exist so the model has to tell a customer number
+from the invoice number by context. `train.py --n-labels 19` folds them back into `O`
+at load time (`data.LABEL_CAP`) and trains the old 19-way head on the same corpus —
+the control run for whether over-labeling helps. Older heads still decode via
+`LABELS[:n]`.

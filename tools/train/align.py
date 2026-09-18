@@ -121,11 +121,35 @@ def covered(truth_words, ocr_words, band):
 # that lands on its own all belong to one item. Regions match expected.json lines
 # exactly, so carrying the index is what lets assembly rebuild the invoice. -1 is
 # a word outside any line item.
+def in_quad(x, y, quad):
+    """Point in a convex quadrilateral (same-sign cross products around the edges)."""
+    sign = 0
+    for i in range(4):
+        ax, ay = quad[i]
+        bx, by = quad[(i + 1) % 4]
+        cross = (bx - ax) * (y - ay) - (by - ay) * (x - ax)
+        if cross == 0:
+            continue
+        s = 1 if cross > 0 else -1
+        if sign and s != sign:
+            return False
+        sign = s
+    return True
+
+
+# v11: a skewed region's bounding box is up to three times taller than the line
+# and overlaps its neighbours, which put 19.5 % of the labelled words on a 2° page
+# into the wrong item. degrade.warp_quads writes the rotated quad next to the box;
+# where it exists the test is point-in-quad, and only pre-v11 corpora fall back to
+# the box.
 def item_of(box, items):
     cx = box[0] + box[2] / 2
     cy = box[1] + box[3] / 2
     for i, r in enumerate(items):
-        if r[0] <= cx <= r[0] + r[2] and r[1] <= cy <= r[1] + r[3]:
+        if r["quad"] is not None:
+            if in_quad(cx, cy, r["quad"]):
+                return i
+        elif r["box"][0] <= cx <= r["box"][0] + r["box"][2] and r["box"][1] <= cy <= r["box"][1] + r["box"][3]:
             return i
     return -1
 
@@ -228,7 +252,8 @@ def one_variation(args):
             for w, f in zip(ocr["words"], label_words(ocr["words"], tp["words"], band)):
                 w["field"] = f
         grouped = group_rows(ocr["words"])
-        items = [r["box"] for r in tp.get("regions", []) if r["role"] == "line-item"]
+        items = [{"box": r["box"], "quad": r.get("quad")}
+                 for r in tp.get("regions", []) if r["role"] == "line-item"]
         roles = wrap_rows(grouped, row_roles(grouped, tp.get("regions", [])), items)
         words = []
         for ri, (r, role) in enumerate(zip(grouped, roles)):
