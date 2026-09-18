@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="ocr-check" />
+    <InternalsVisibleTo Include="richtsatz" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../../docs/rechenweg.md" LogicalName="rechenweg.md" />
