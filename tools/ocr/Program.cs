@@ -1,19 +1,16 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Umsatzschätzung.Service;
-using Windows.Data.Pdf;
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
 
 namespace Umsatzschätzung.Ocr;
 
 // Walks a directory, runs the app's own RapidOCR over every page image it finds and
 // drops the word list next to the source as <name>.ocr.json. Gives the synthetic
 // corpus in tools/corpus real OCR text to train on, and dumps the real scans in
-// fixtures/dataset/2025 so the eval can run off Windows.
+// fixtures/dataset/2025 for the eval. PDFs go through the app's own renderer, so the
+// page images are the ones the app would have read.
 static class Program
 {
     static readonly string[] Extensions = [".png", ".jpg", ".jpeg", ".pdf"];
@@ -131,7 +128,7 @@ static class Program
     {
         var bytes = await File.ReadAllBytesAsync(file, ct);
         var images = Path.GetExtension(file).Equals(".pdf", StringComparison.OrdinalIgnoreCase)
-            ? await Rasterize(bytes, dpi, ct)
+            ? await Pdf.Render(bytes, dpi, ct)
             : [bytes];
         var pages = new List<Page>(images.Count);
         foreach (var image in images)
@@ -144,30 +141,7 @@ static class Program
         return pages;
     }
 
-    static async Task<List<byte[]>> Rasterize(byte[] pdf, int dpi, CancellationToken ct)
-    {
-        using var source = new InMemoryRandomAccessStream();
-        await source.WriteAsync(pdf.AsBuffer()).AsTask(ct);
-        source.Seek(0);
-        var document = await PdfDocument.LoadFromStreamAsync(source).AsTask(ct);
-        var pages = new List<byte[]>((int)document.PageCount);
-        for (uint i = 0; i < document.PageCount; i++)
-        {
-            using var page = document.GetPage(i);
-            var options = new PdfPageRenderOptions
-            {
-                DestinationWidth = (uint)Math.Max(1, Math.Round(page.Size.Width * dpi / 96.0)),
-                DestinationHeight = (uint)Math.Max(1, Math.Round(page.Size.Height * dpi / 96.0)),
-                BitmapEncoderId = BitmapEncoder.PngEncoderId,
-            };
-            using var png = new InMemoryRandomAccessStream();
-            await page.RenderToStreamAsync(png, options).AsTask(ct);
-            png.Seek(0);
-            var buffer = new Windows.Storage.Streams.Buffer((uint)png.Size);
-            pages.Add((await png.ReadAsync(buffer, buffer.Capacity, InputStreamOptions.None).AsTask(ct)).ToArray());
-        }
-        return pages;
-    }
+    static readonly PdfiumPages Pdf = new();
 
     static readonly JsonWriterOptions Layout = new()
     {

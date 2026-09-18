@@ -13,24 +13,16 @@ public sealed class PdfiumPages : IPdfPages
     // invoice are content, not decoration.
     const int WithAnnotations = 0x01;
 
-    // pdfium keeps process-wide state and is not built thread-safe, so one page at a
-    // time. The corpus tool runs a worker per core; rasterising is a small part of
-    // what a worker does, OCR is the rest, so serialising here costs little.
-    static readonly Lock Gate = new();
-    static bool started;
-
     public Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct) =>
         Task.Run(() => RenderPages(pdf, dpi, ct), ct);
 
     static List<byte[]> RenderPages(byte[] pdf, int dpi, CancellationToken ct)
     {
-        lock (Gate)
+        // One page at a time: the corpus tool runs a worker per core, but rasterising is
+        // a small part of what a worker does and OCR is the rest, so the gate costs little.
+        lock (Pdfium.Gate)
         {
-            if (!started)
-            {
-                Pdfium.FPDF_InitLibrary();
-                started = true;
-            }
+            Pdfium.Start();
 
             // The document reads from the buffer for as long as it is open.
             var pinned = GCHandle.Alloc(pdf, GCHandleType.Pinned);
@@ -92,22 +84,4 @@ public sealed class PdfiumPages : IPdfPages
             Pdfium.FPDF_ClosePage(page);
         }
     }
-}
-
-file static class Pdfium
-{
-    const string Lib = "pdfium";
-
-    [DllImport(Lib)] public static extern void FPDF_InitLibrary();
-    [DllImport(Lib)] public static extern nint FPDF_LoadMemDocument64(nint data, nuint size, string? password);
-    [DllImport(Lib)] public static extern void FPDF_CloseDocument(nint document);
-    [DllImport(Lib)] public static extern int FPDF_GetPageCount(nint document);
-    [DllImport(Lib)] public static extern nint FPDF_LoadPage(nint document, int index);
-    [DllImport(Lib)] public static extern void FPDF_ClosePage(nint page);
-    [DllImport(Lib)] public static extern float FPDF_GetPageWidthF(nint page);
-    [DllImport(Lib)] public static extern float FPDF_GetPageHeightF(nint page);
-    [DllImport(Lib)] public static extern nint FPDFBitmap_CreateEx(int width, int height, int format, nint buffer, int stride);
-    [DllImport(Lib)] public static extern void FPDFBitmap_Destroy(nint bitmap);
-    [DllImport(Lib)] public static extern void FPDFBitmap_FillRect(nint bitmap, int left, int top, int width, int height, uint color);
-    [DllImport(Lib)] public static extern void FPDF_RenderPageBitmap(nint bitmap, nint page, int x, int y, int width, int height, int rotate, int flags);
 }
