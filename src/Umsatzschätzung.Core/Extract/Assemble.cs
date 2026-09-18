@@ -76,10 +76,13 @@ public static class Assemble
         inv.SupplierName = header.GetValueOrDefault(Field.Supplier, "");
         inv.Number = header.GetValueOrDefault(Field.InvoiceNumber, "");
         inv.Date = Parse.Date(header.GetValueOrDefault(Field.InvoiceDate, ""));
-        inv.NetTotal = Parse.Number(header.GetValueOrDefault(Field.NetTotal, ""), Parse.ScaleCents);
-        inv.GrossTotal = Parse.Number(header.GetValueOrDefault(Field.GrossTotal, ""), Parse.ScaleCents);
+        inv.StatedNet = Stated(header, Field.NetTotal);
+        inv.StatedGross = Stated(header, Field.GrossTotal);
         return inv;
     }
+
+    static long? Stated(Dictionary<Field, string> header, Field field) =>
+        Parse.Number(header.GetValueOrDefault(field, ""), Parse.ScaleCents) is var v and > 0 ? v : null;
 
     static List<List<TaggedWord>> Items(List<TaggedWord> words)
     {

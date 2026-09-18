@@ -57,5 +57,5 @@ static bool VatExempt(Variation variation, Doc want) =>
 
 static Doc Doc(Invoice inv) => new(
     inv.Number, inv.Date?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "", inv.SupplierName,
-    inv.NetTotal, inv.GrossTotal,
+    inv.StatedNet ?? inv.NetTotal, inv.StatedGross ?? inv.GrossTotal,
     [.. inv.Lines.Select(l => new Line(l.Name, l.Quantity, l.UnitCode, l.UnitPrice, l.LineNet, l.Vat))]);

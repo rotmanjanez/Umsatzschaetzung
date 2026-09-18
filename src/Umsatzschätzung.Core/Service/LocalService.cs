@@ -18,7 +18,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     const int AutoMapMinConfidence = 60;
     const int ScanDpi = 300;
     const int PreviewDpi = 150;
-    static readonly HashSet<string> BlockingFlags = ["line_total", "sum_net"];
 
     readonly Matcher matcher = new();
 
@@ -170,13 +169,19 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         if (inv.Source == Source.Scan)
             (inv.NetTotal, inv.GrossTotal) = InvoiceMath.LineTotals(inv.Lines);
         var flags = Check.Invoice(inv);
-        var blocked = flags.Any(f => BlockingFlags.Contains(f.Code));
-        var confirm = req.Confirm && !blocked;
-        if ((confirm || req.Draft) && req.CaseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
+        var blocked = flags.Any(f => Check.Blocks(inv, f));
+        var confirm = req.Intent switch
+        {
+            Intent.Confirm => !blocked,
+            Intent.Auto => Check.Complete(inv, flags),
+            _ => false,
+        };
+        var store = confirm || req.Intent is Intent.Store or Intent.Auto;
+        if (store && req.CaseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
         var (rs, _) = await MapLines(inv, Gewerbe(req.CaseId), confirm, ct);
-        var resp = new VerifyResp(inv, flags, Display.Invoice(inv, rs), false, null);
-        if (!confirm && !req.Draft) return resp;
-        if (confirm) inv.Verification = new Verification { At = Clock.Now() };
+        var resp = new VerifyResp(inv, flags, blocked, Display.Invoice(inv, rs), false, null);
+        if (!store) return resp;
+        if (confirm) inv.Verification = new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto };
         var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? []);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });

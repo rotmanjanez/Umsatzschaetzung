@@ -26,9 +26,13 @@ public sealed record LineDisplay(string Quantity, string UnitPrice, string LineN
 
 public sealed record OcrResp(string InvoiceId, List<OcrPage> Pages, Invoice Draft, InvoiceDisplay Display);
 
-public sealed record VerifyReq(string CaseId, Invoice Invoice, bool Confirm, bool Draft, string? FileName, byte[]? Data);
+// Check looks without storing, Store keeps the invoice for review, Confirm takes it over unless a
+// flag blocks it, and Auto takes it over only if the reading is complete and adds up on its own.
+public enum Intent { Check, Store, Confirm, Auto }
 
-public sealed record VerifyResp(Invoice Invoice, List<Flag> Flags, InvoiceDisplay Display, bool Accepted, CaseResp? Case);
+public sealed record VerifyReq(string CaseId, Invoice Invoice, Intent Intent, string? FileName, byte[]? Data);
+
+public sealed record VerifyResp(Invoice Invoice, List<Flag> Flags, bool Blocked, InvoiceDisplay Display, bool Accepted, CaseResp? Case);
 
 public sealed record SourcePage(byte[]? Image, string? Text);
 
