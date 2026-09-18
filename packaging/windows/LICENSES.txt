@@ -1,7 +1,24 @@
 Umsatzschätzung - Hinweise zu Drittkomponenten
 
-==== Microsoft .NET Runtime und WPF (MIT) ====
+==== Microsoft .NET Runtime (MIT) ====
 https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+
+==== Avalonia (MIT) ====
+Enthält Avalonia.Controls.DataGrid, Avalonia.Themes.Fluent und Avalonia.Controls.WebView.
+https://github.com/AvaloniaUI/Avalonia/blob/master/licence.md
+https://github.com/AvaloniaUI/Avalonia.Controls.WebView/blob/main/LICENSE
+
+==== HarfBuzz (MIT), HarfBuzzSharp (MIT) ====
+https://github.com/harfbuzz/harfbuzz/blob/main/COPYING
+https://github.com/mono/SkiaSharp/blob/main/LICENSE.md
+
+==== ANGLE (BSD-3-Clause) ====
+Unter Windows als av_libGLESv2.dll mitgeliefert.
+https://chromium.googlesource.com/angle/angle/+/main/LICENSE
+
+==== Inter (SIL Open Font License 1.1) ====
+Die mitgelieferte Schriftart. "Inter" ist ein Reserved Font Name im Sinne der OFL.
+https://github.com/rsms/inter/blob/master/LICENSE.txt
 
 ==== Microsoft Edge WebView2 SDK ====
 https://www.nuget.org/packages/Microsoft.Web.WebView2 (Microsoft Software License Terms)
@@ -16,9 +33,15 @@ https://github.com/AngusJohnson/Clipper2/blob/main/LICENSE
 ==== ONNX Runtime (MIT) ====
 https://github.com/microsoft/onnxruntime/blob/main/LICENSE
 
-==== PP-OCRv5, lateinische Modelle (Apache-2.0) ====
-Die mitgelieferten Gewichte unter models/v5 stammen aus PaddleOCR.
+==== PP-OCRv5 und PP-OCRv6, lateinische Modelle (Apache-2.0) ====
+Die mitgelieferten Gewichte unter models/v5 und models/v6 stammen aus PaddleOCR.
 https://github.com/PaddlePaddle/PaddleOCR/blob/main/LICENSE
+
+==== Feldmodell unter models/b (MIT) ====
+Die mitgelieferten Gewichte sind ein Fine-Tuning von LiLT (Layout-Strom) und
+GottBERT (Textencoder); beide Ausgangsmodelle stehen unter MIT.
+https://github.com/jpWang/LiLT/blob/main/LICENSE
+https://huggingface.co/TUM/GottBERT_base_last
 
 ==== SkiaSharp (MIT), Skia (BSD-3-Clause) ====
 https://github.com/mono/SkiaSharp/blob/main/LICENSE.md
