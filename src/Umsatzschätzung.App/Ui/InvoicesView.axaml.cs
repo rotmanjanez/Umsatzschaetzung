@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -16,28 +17,45 @@ public sealed class InvoiceRow(Invoice invoice, InvoiceDisplay display)
     public InvoiceDisplay Display { get; } = display;
     public string Id => Invoice.Id;
     public string Supplier => Invoice.SupplierName;
+    public string Number => Invoice.Number;
+    public string Date => Display.Date;
+    public string NetTotal => Display.NetTotal;
+    public string FileName => Invoice.FileName;
     public Checked State => Checks.Of(Invoice);
-    public string Sub => Invoice.Number + " · " + Display.Date + " · " + Display.NetTotal;
+    public bool IsAutomatic => State == Checked.Automatic;
+    public bool IsManual => State == Checked.Manual;
+    public bool IsPending => State == Checked.Pending;
+    public string StateText => State switch
+    {
+        Checked.Automatic => "Automatisch",
+        Checked.Manual => "Manuell",
+        _ => "Prüfung offen",
+    };
+
+    // What the three sortable columns sort by: the review still to be done comes first.
+    public int Rank => State == Checked.Pending ? 0 : State == Checked.Manual ? 1 : 2;
+    public DateOnly Sort => Invoice.Date ?? DateOnly.MinValue;
+    public long Net => Invoice.NetTotal;
 }
 
 public sealed class InvoicesModel : Observable
 {
+    string summary = "";
     bool empty = true;
     bool dragging;
-    bool selected;
 
-    public ObservableCollection<InvoiceRow> Automatic { get; } = [];
-    public ObservableCollection<InvoiceRow> Manual { get; } = [];
-    public ObservableCollection<InvoiceRow> Pending { get; } = [];
+    public ObservableCollection<InvoiceRow> Invoices { get; } = [];
 
-    public bool HasAutomatic => Automatic.Count > 0;
-    public bool HasManual => Manual.Count > 0;
-    public bool HasPending => Pending.Count > 0;
+    public string Summary
+    {
+        get => summary;
+        set => Set(ref summary, value);
+    }
 
     public bool Empty
     {
         get => empty;
-        set => Set(ref empty, value);
+        set { if (Set(ref empty, value)) Raise(nameof(DropHint)); }
     }
 
     public bool Dragging
@@ -46,39 +64,32 @@ public sealed class InvoicesModel : Observable
         set { if (Set(ref dragging, value)) Raise(nameof(DropHint)); }
     }
 
-    public bool Selected
+    public bool DropHint => dragging && !empty;
+
+    public void Counted()
     {
-        get => selected;
-        set { if (Set(ref selected, value)) { Raise(nameof(Idle)); Raise(nameof(DropHint)); } }
+        Empty = Invoices.Count == 0;
+        Summary = Empty ? "" : Count(Checked.Pending) + " offen · " + Count(Checked.Automatic) + " automatisch · " + Count(Checked.Manual) + " manuell";
     }
 
-    public bool Idle => !selected;
-
-    public bool DropHint => dragging && selected;
-
-    public void Sections()
-    {
-        Empty = Automatic.Count + Manual.Count + Pending.Count == 0;
-        foreach (var p in new[] { nameof(HasAutomatic), nameof(HasManual), nameof(HasPending) }) Raise(p);
-    }
+    int Count(Checked state) => Invoices.Count(r => r.State == state);
 }
 
 public partial class InvoicesView : Screen
 {
     readonly InvoicesModel model = new();
     readonly Dictionary<string, InvoiceView> editors = [];
-    readonly ListBox[] lists;
-    InvoiceView? editor;
+    readonly Dictionary<string, InvoiceWindow> windows = [];
     bool refreshing;
 
     public InvoicesView(Session session) : base(session)
     {
         InitializeComponent();
         DataContext = model;
-        lists = [PendingList, AutomaticList, ManualList];
-        AutomaticList.ItemsSource = Search.Attach(model.Automatic, Text);
-        ManualList.ItemsSource = Search.Attach(model.Manual, Text);
-        PendingList.ItemsSource = Search.Attach(model.Pending, Text);
+        var view = Search.Attach(model.Invoices, Text);
+        view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(InvoiceRow.Rank)));
+        view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(InvoiceRow.Supplier)));
+        List.ItemsSource = view;
         AddHandler(DragDrop.DragOverEvent, DragOverFiles);
         AddHandler(DragDrop.DragLeaveEvent, DragLeft);
         AddHandler(DragDrop.DropEvent, Dropped);
@@ -87,92 +98,76 @@ public partial class InvoicesView : Screen
         Session.Imports.Finished += ImportFinished;
     }
 
-    static string Text(InvoiceRow r) => r.Supplier + " " + r.Invoice.Number + " " + r.Display.Date + " " + r.Display.NetTotal;
+    static string Text(InvoiceRow r) => r.Supplier + " " + r.Number + " " + r.Date + " " + r.NetTotal + " " + r.FileName + " " + r.StateText;
 
-    protected override void OnEnter()
-    {
-        Refresh();
-        editor?.Enter();
-    }
-
-    protected override void OnLeave() => editor?.Leave();
+    protected override void OnEnter() => Refresh();
 
     void CaseClosed()
     {
         Session.Sources.Clear();
+        foreach (var w in windows.Values.ToList()) w.Close();
         foreach (var e in editors.Values) e.Leave();
         editors.Clear();
-        Swap(null);
     }
 
     void Refresh()
     {
         if (!IsActive || refreshing) return;
         refreshing = true;
-        var selected = Selected()?.Id;
-        foreach (var c in new[] { model.Automatic, model.Manual, model.Pending }) c.Clear();
+        var selected = (List.SelectedItem as InvoiceRow)?.Id;
+        model.Invoices.Clear();
         if (Session.Case is { } k && Session.Display is { } d)
             foreach (var inv in k.Invoices)
-            {
-                var row = new InvoiceRow(inv, d.Invoices.GetValueOrDefault(inv.Id) ?? new InvoiceDisplay("", "", "", []));
-                Section(row.State).Add(row);
-            }
-        model.Sections();
-        foreach (var l in lists) l.SelectedItem = null;
-        var current = Rows().FirstOrDefault(r => r.Id == selected);
-        if (current is not null) List(current.State).SelectedItem = current;
+                model.Invoices.Add(new InvoiceRow(inv, d.Invoices.GetValueOrDefault(inv.Id) ?? new InvoiceDisplay("", "", "", [])));
+        model.Counted();
+        List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == selected);
         refreshing = false;
-        ShowEditor(current);
     }
 
-    IEnumerable<InvoiceRow> Rows() => model.Automatic.Concat(model.Manual).Concat(model.Pending);
-
-    ObservableCollection<InvoiceRow> Section(Checked state) => state switch
+    void RowOpened(object? sender, TappedEventArgs e)
     {
-        Checked.Automatic => model.Automatic,
-        Checked.Manual => model.Manual,
-        _ => model.Pending,
-    };
-
-    ListBox List(Checked state) => state switch
-    {
-        Checked.Automatic => AutomaticList,
-        Checked.Manual => ManualList,
-        _ => PendingList,
-    };
-
-    InvoiceRow? Selected() => lists.Select(l => l.SelectedItem).OfType<InvoiceRow>().FirstOrDefault();
-
-    void SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (refreshing || sender is not ListBox list || list.SelectedItem is not InvoiceRow row) return;
-        foreach (var other in lists.Where(l => l != list)) other.SelectedItem = null;
-        ShowEditor(row);
+        if ((e.Source as Visual)?.FindAncestorOfType<DataGridRow>(true) is not null) OpenSelected();
     }
 
-    void ListPressed(object? sender, PointerPressedEventArgs e)
+    void ListKey(object? sender, KeyEventArgs e)
     {
-        if ((e.Source as Visual)?.FindAncestorOfType<ListBoxItem>(true) is not null) return;
-        foreach (var l in lists) l.SelectedItem = null;
-        ShowEditor(null);
+        if (e.Key is not (Key.Enter or Key.Return)) return;
+        OpenSelected();
+        e.Handled = true;
     }
 
-    void ShowEditor(InvoiceRow? row)
+    void Open(object? sender, RoutedEventArgs e)
     {
-        model.Selected = row is not null;
-        Swap(row is null ? null : EditorFor(row));
+        if ((sender as Control)?.DataContext is InvoiceRow row) Show(row);
     }
 
-    void Swap(InvoiceView? next)
+    void OpenSelected()
     {
-        if (editor == next) return;
-        editor?.Leave();
+        if (List.SelectedItem is InvoiceRow row) Show(row);
+    }
+
+    // One window per invoice: the lines and the scan both want the room, and a second invoice can
+    // be opened next to the first one to compare.
+    void Show(InvoiceRow row)
+    {
+        if (windows.TryGetValue(row.Id, out var open))
+        {
+            open.Activate();
+            return;
+        }
+        var window = new InvoiceWindow(EditorFor(row), row.Supplier + " · " + row.Number);
+        windows[row.Id] = window;
+        window.Closed += (_, _) => Closed(row.Id);
+        if (TopLevel.GetTopLevel(this) is Window owner) window.Show(owner);
+        else window.Show();
+    }
+
+    void Closed(string id)
+    {
+        if (!windows.Remove(id) || !editors.TryGetValue(id, out var view)) return;
+        view.Leave();
         // Only reviews in progress stay cached; a read invoice would just hold on to its page images.
-        if (editor is { Keep: false }) editors.Remove(editor.Id);
-        editor = next;
-        EditorHost.Content = next;
-        EditorHost.IsVisible = next is not null;
-        if (next is not null && IsActive) next.Enter();
+        if (!view.Keep) editors.Remove(id);
     }
 
     InvoiceView EditorFor(InvoiceRow row)
@@ -187,7 +182,7 @@ public partial class InvoicesView : Screen
     {
         if ((sender as Control)?.DataContext is not InvoiceRow row || Session.Case is not { } k) return;
         var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
-            "Die Rechnung „" + row.Supplier + " · " + row.Invoice.Number + "“ wird mit dem Beleg unwiderruflich gelöscht.",
+            "Die Rechnung „" + row.Supplier + " · " + row.Number + "“ wird mit dem Beleg unwiderruflich gelöscht.",
             "Rechnung löschen");
         if (!answer) return;
         await Session.Run(async () =>
@@ -202,9 +197,8 @@ public partial class InvoicesView : Screen
     {
         Session.Drafts.Remove(id);
         Session.Sources.Remove(id);
-        if (!editors.Remove(id, out var gone)) return;
-        if (editor == gone) Swap(null);
-        else gone.Leave();
+        if (windows.Remove(id, out var window)) window.Close();
+        if (editors.Remove(id, out var gone)) gone.Leave();
     }
 
     async void AddFiles(object? sender, RoutedEventArgs e)
@@ -234,9 +228,12 @@ public partial class InvoicesView : Screen
         if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, files);
     }
 
+    // A freshly read scan is what the user asked for: put it up for review right away.
     void ImportFinished(ImportJob job)
     {
         if (job.FirstDraft is not { } id || Session.Case?.Id != job.CaseId || !IsActive) return;
-        if (Rows().FirstOrDefault(r => r.Id == id) is { } row) List(row.State).SelectedItem = row;
+        if (model.Invoices.FirstOrDefault(r => r.Id == id) is not { } row) return;
+        List.SelectedItem = row;
+        Show(row);
     }
 }

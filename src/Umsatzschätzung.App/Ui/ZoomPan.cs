@@ -19,6 +19,9 @@ public static class ZoomPan
     // Avalonia exposes no system scrollbar metric; the Fluent bar is 16px wide.
     const double ScrollBarWidth = 16;
 
+    // How tall a revealed word has to end up before it is worth looking at.
+    const double Legible = 30;
+
     public static readonly AttachedProperty<bool> EnabledProperty =
         AvaloniaProperty.RegisterAttached<ScrollViewer, bool>("Enabled", typeof(ZoomPan));
 
@@ -70,13 +73,32 @@ public static class ZoomPan
         return room > 0 ? room / content.Bounds.Width : null;
     }
 
+    // Fitted into a narrow pane a page sits at a zoom where a single word is a few pixels tall and
+    // scrolling to it moves nothing: zoom in on it first, and then it is worth centring.
     public static void Reveal(ScrollViewer viewer, Rect box)
     {
+        var enlarged = Enlarge(viewer, box);
         var zoom = Scale(viewer);
         var scaled = new Rect(box.X * zoom, box.Y * zoom, box.Width * zoom, box.Height * zoom);
+        if (enlarged)
+        {
+            viewer.UpdateLayout();
+            viewer.Offset = new Vector(
+                scaled.Center.X - viewer.Viewport.Width / 2,
+                scaled.Center.Y - viewer.Viewport.Height / 2);
+            return;
+        }
         viewer.Offset = new Vector(
             Clamp(viewer.Offset.X, scaled.Left, scaled.Right, viewer.Viewport.Width),
             Clamp(viewer.Offset.Y, scaled.Top, scaled.Bottom, viewer.Viewport.Height));
+    }
+
+    static bool Enlarge(ScrollViewer viewer, Rect box)
+    {
+        if (box.Height <= 0 || box.Height * Scale(viewer) >= Legible) return false;
+        var before = GetZoom(viewer);
+        SetZoom(viewer, Legible / box.Height / GetFit(viewer));
+        return GetZoom(viewer) != before;
     }
 
     static double Clamp(double offset, double near, double far, double viewport)
