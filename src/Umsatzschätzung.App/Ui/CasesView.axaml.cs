@@ -39,7 +39,7 @@ public partial class CasesView : Screen
         Search.Attach(model.Cases, r => r.Case.Label + " " + r.Period + " " + r.Case.Taxpayer.Name);
         Grid.ItemsSource = Search.View;
         Grid.AddHandler(PointerReleasedEvent, RowClicked, RoutingStrategies.Bubble);
-        fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab];
+        fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab, NewGewerbe];
         foreach (var field in fields) field.TextChanged += (s, _) => ((TextBox)s!).Classes.Set("invalid", false);
     }
 
@@ -72,6 +72,7 @@ public partial class CasesView : Screen
             Name = (NewName.Text ?? "").Trim(),
             TaxNumber = (NewTaxNumber.Text ?? "").Trim(),
             PabNumber = (NewPab.Text ?? "").Trim(),
+            Gewerbe = (NewGewerbe.Text ?? "").Trim(),
         };
 
         var problems = new List<string>();
@@ -91,6 +92,7 @@ public partial class CasesView : Screen
         Check(NewName, taxpayer.Name != "", "Name");
         Check(NewTaxNumber, taxpayer.TaxNumber != "", "Steuernummer");
         Check(NewPab, taxpayer.PabNumber != "", "PaB-Nr.");
+        Check(NewGewerbe, taxpayer.Gewerbe == "" || Gewerbe.Kennzahl(taxpayer.Gewerbe), "Gewerbekennzahl");
         if (problems.Count > 0)
         {
             Session.Fail("Bitte prüfen: " + string.Join(", ", problems) + ".");
@@ -104,7 +106,7 @@ public partial class CasesView : Screen
             var resp = await Session.Service.PutCase(kase, Ct);
             model.Creating = false;
             NewLabel.Text = NewFrom.Text = NewTo.Text = "";
-            NewName.Text = NewTaxNumber.Text = NewPab.Text = "";
+            NewName.Text = NewTaxNumber.Text = NewPab.Text = NewGewerbe.Text = "";
             Session.Open(resp);
         });
     }
