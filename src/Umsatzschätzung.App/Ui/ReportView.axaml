@@ -32,7 +32,7 @@
             </Grid>
             <TextBlock Text="Keine" Theme="{StaticResource Muted}" IsVisible="{Binding NoExcluded}"/>
             <Expander Header="Positionen anzeigen" IsVisible="{Binding HasExcluded}">
-                <DataGrid Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" MaxHeight="240" Margin="0,8,0,0">
+                <DataGrid ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" MaxHeight="240" Margin="0,8,0,0">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Rechnung" Binding="{Binding Invoice, DataType=ui:ExcludedLineRow}" Width="160"/>
                         <DataGridTemplateColumn Header="Pos." Width="60" SortMemberPath="LineNo">
@@ -42,7 +42,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name, DataType=ui:ExcludedLineRow}" Width="*"/>
+                        <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name, DataType=ui:ExcludedLineRow}" Width="260" MinWidth="140"/>
                         <DataGridTemplateColumn Header="Grund" Width="220" SortMemberPath="Reason">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:ExcludedLineRow">

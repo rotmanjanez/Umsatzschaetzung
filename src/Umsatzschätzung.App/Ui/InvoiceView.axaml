@@ -93,7 +93,7 @@
                     <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8"/>
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Margin="0,8,0,0" Click="AddLine"/>
-                <DataGrid x:Name="Lines" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged">
+                <DataGrid x:Name="Lines" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Menge" Width="90" SortMemberPath="Quantity">
                             <DataGridTemplateColumn.CellTemplate>
@@ -123,7 +123,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Position" Width="*" SortMemberPath="Name">
+                        <DataGridTemplateColumn Header="Position" Width="280" MinWidth="140" SortMemberPath="Name">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding NameFlagged}" ToolTip.Tip="{Binding NameFlag}">
