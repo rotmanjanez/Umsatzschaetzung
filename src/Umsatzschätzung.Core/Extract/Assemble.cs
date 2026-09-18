@@ -1,4 +1,5 @@
 using Umsatzschätzung.Model;
+using Umsatzschätzung.Suggest;
 using Umsatzschätzung.Tagging;
 
 namespace Umsatzschätzung.Extract;
@@ -44,13 +45,14 @@ public static class Assemble
             {
                 var cells = Cells(item);
                 if (!cells.ContainsKey(Field.Name) && !cells.ContainsKey(Field.LineNet)) continue;
+                var unit = units(Text(cells, Field.Unit));
                 var line = new InvoiceLine
                 {
                     No = inv.Lines.Count + 1,
-                    Name = Text(cells, Field.Name),
+                    Name = PackSize.Recover(Parse.Litres(Text(cells, Field.Name)), unit),
                     SellerArticleId = cells.TryGetValue(Field.ArticleId, out var article) ? article.Text : null,
                     Quantity = Parse.Number(Text(cells, Field.Quantity), Parse.ScaleMilli),
-                    UnitCode = units(Text(cells, Field.Unit)),
+                    UnitCode = unit,
                     UnitPrice = Parse.Number(Text(cells, Field.UnitPrice), Parse.ScaleMicro),
                     PriceBaseQty = 1000,
                     LineNet = Parse.Number(Text(cells, Field.LineNet), Parse.ScaleCents),

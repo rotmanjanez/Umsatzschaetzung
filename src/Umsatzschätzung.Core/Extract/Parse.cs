@@ -201,6 +201,18 @@ public static class Parse
             ? new DateOnly(year, month, day)
             : null;
 
+    // The litre in a pack size comes back as a one or a capital i: "Frittieröl 10 1" for
+    // "Frittieröl 10 l". Only right after a number, where neither reads as a word, and only
+    // inside an item name, where a lone digit has nothing to do anyway.
+    public static string Litres(string name)
+    {
+        var parts = name.Split(' ');
+        for (var i = 1; i < parts.Length; i++)
+            if (parts[i] is "1" or "I" or "|" && parts[i - 1].Length > 0 && char.IsAsciiDigit(parts[i - 1][^1]))
+                parts[i] = "l";
+        return string.Join(' ', parts);
+    }
+
     public static string UnitCode(string text)
     {
         text = text.Trim();
