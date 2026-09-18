@@ -69,9 +69,9 @@ layouts.
 
 ## What varies
 
-**Columns.** Presence and order of Pos, Artikel-Nr., EAN, Bezeichnung, Menge, Einheit,
-Preisbasis, Einzelpreis, Rabatt, MwSt, Betrag and the three unlabelled collision columns
-Währung, Steuerschlüssel and Warengruppe, from sixteen base orderings. Quantity
+**Columns.** Presence and order of Pos, Artikel-Nr., EAN, Bezeichnung, Größe/Variante,
+Menge, Einheit, Preisbasis, Einzelpreis, Rabatt, MwSt, Betrag and the three unlabelled
+collision columns Währung, Steuerschlüssel and Warengruppe, from twenty base orderings. Quantity
 before or after the name; unit as its own column or glued to the quantity ("12 Kt");
 VAT per line or only in the totals block; discount column only when the invoice
 actually carries discounts.
@@ -339,7 +339,7 @@ auffällt, zeigt `coverage.py`: Wörter je Seite, je Klasse und je Seitenformat.
 darin heißt, dass das Modell für dieses Format "gibt es hier nicht" lernt — der gleiche
 Fehler wie damals bei der gestrichenen Artikelspalte auf A5.
 
-    python3 coverage.py /var/tmp/rotman/corpus-v9
+    python3 coverage.py /var/tmp/rotman/corpus-v10
 
 ## Checking the labels
 
@@ -391,3 +391,346 @@ gedruckten Einheitentext und die Stückzahl je Gebinde; den Code holt `content.p
 über `tools/units.py` aus derselben Datei, die `Umsatzschätzung.Core/Model/Units.cs`
 einbettet. UN/ECE Rec 20: Packmittel aus Rec 21 tragen dort das Präfix X — `XCT`,
 nicht `CT`.
+
+## Korpus v10: Breite
+
+v9 machte den Kopfblock lesbar. Danach gemessen — 1500 Variationen des Korpus gegen die
+echten Belege des Nutzers — blieb der Befund, dass der Korpus zu *schmal* ist: er druckt
+jede Rechnung nach derselben Grundidee und variiert nur die Oberfläche. Echte Rechnungen
+kommen aus einer Handvoll Programme, und jedes druckt Dinge, die der Korpus gar nicht
+kannte. v10 fügt sie hinzu.
+
+### Familien statt Würfel
+
+Der rein zufällige Wurf über alle Achsen erzeugt Vorlagen, die es so nie gibt — eine
+Garamond mit Farbband und Kassenbon-Summen. `layout.FAMILIES` legt deshalb zehn benannte
+Vorlagenfamilien an, jede ein zusammenhängender Satz von Achsen, wie ihn ein bestimmtes
+Programm druckt. Gezogen wird zuerst die Familie, dann wie bisher jede Achse einzeln; die
+Familie überschreibt anschließend nur die Achsen, die sie ausmachen. Alles andere bleibt
+gewürfelt, der Raum wird also nicht enger, nur plausibler.
+
+| Familie | Anteil | Was sie festlegt |
+|---|---|---|
+| `free` | 42 % | nichts — die freie Ziehung wie in v9 |
+| `form` | 8 % | Formularsatz: gerahmter Kopfblock rechts mit Doppelpunktspalte, gesperrte Überschrift mit der Nummer, Bildwortmarke statt Absender, Summen ganz unten, Barcode, winzige Spaltenfußzeile |
+| `word` | 8 % | klassischer Briefsatz aus der Textverarbeitung, Serifen, schlichte Tabelle, Summen auch als Satz |
+| `lexware` | 7 % | Lexware/sevDesk: gerahmter Kopf rechts oben, Gittertabelle, Grotesk |
+| `shop` | 7 % | WooCommerce/Shopify: Farbband, Webschrift, Summen als Schlüssel-/Wertzeile |
+| `datev` | 6 % | nüchtern, Linien, gerahmter Kopf |
+| `sap` | 6 % | ERP-Ausdruck: dicht, schmal oder dicktengleich, alle drei Codespalten, Einheiten im Spaltenkopf |
+| `ninja` | 6 % | InvoiceNinja: Absender mittig oben, Kunde neben den Kopfdaten, Einheit vor dem Preis, Währung in jeder Zelle |
+| `amazon` | 5 % | schmale Grotesk, Kopfraster, winzige Fußzeile |
+| `receipt` | 5 % | Kassenbon auf 80 mm |
+
+Die Familie steht in `truth.json` unter `layout.family`, `coverage.py` berichtet ihre
+Verteilung.
+
+### Neue Achsen
+
+* **Nackte Mengen.** 25 % der Rechnungen drucken bei Stückware **gar keine Einheit** —
+  weder als Spalte noch an der Menge. Auf den echten Belegen sind das 14,5 % der Zeilen,
+  im Korpus 20,8 %.
+* **Wortlose Flächen hinter dem Satz.** Große blasse Form (Kreis, Ringe, Dreieck,
+  Streifen, Klecks, Raster) mit Deckkraft 0,06–0,18 hinter der Tabelle oder über die
+  ganze Seite, farbiges Kopfband, getöntes Panel hinter den Kopfdaten, grauer Kasten
+  hinter den Summen. **Nie Text**: eine verblasste Wortmarke aus Buchstaben läse die OCR
+  mit, und die Wahrheit könnte sie nicht sauber beschriften. Nur Formen, nur SVG.
+* **Freizeilen.** 12 % der Rechnungen tragen 1–3 Beigaben ("Herzlichen Dank", "Flyer",
+  "Paketbeilage") mit Menge 1 und **leerer** Preis- und Betragszelle.
+* **Zweizeilige Spaltenköpfe** ("Einzelpreis / netto", "Menge / Einheit") und Köpfe mit
+  der Einheit in Klammern ("Menge (Stk)", "Betrag (EUR)").
+* **Summenzeilen, die den Nettobetrag verändern.** Versandkosten, Fracht, Verpackung,
+  Pfand/Leergut (plus oder minus), Rabatt, Rundung, Mindermengenzuschlag. Dazu die
+  Summen als Schlüsselzeile über Wertzeile (Warenwert | Versand | Steuerpflichtiger
+  Betrag | MwSt % | MwSt.-Betrag | Summe), links statt rechts, und als Satz
+  ("Rechnungsbetrag: 70,81 EUR").
+* **Größen-/Variantenspalte** zwischen Artikelnummer und Bezeichnung (S/M/L/XL, 42,
+  0,5 l, Farbe), unbeschriftet `O`.
+* **Positionen über mehrere Zeilen.** Bezeichnung auf zwei Zeilen mit eingerücktem
+  Rest, oder Mengen- und Preisangaben in einer Zeile für sich unter dem Namen, dazu die
+  Detailzeile mit Charge/MHD/Seriennummer/Farbe.
+* **Gutschriften und negative Beträge.** 8 % der Belege sind Gutschriften
+  ("Gutschrift", "Rechnungskorrektur", "Stornorechnung") mit durchgehend negativen
+  Beträgen; dazu Pfand- und Leergutzeilen mit negativem Positionsbetrag auf normalen
+  Rechnungen.
+* **Zahl- und Datumsformate.** Tausendertrennung als Punkt, als Leerzeichen ("1 234,56"
+  — zwei Tokens!) oder gar nicht; Minus vorn oder hinten ("70,81-"); Preise mit 2, 3
+  oder 4 Nachkommastellen; Mengen getrimmt, zwei- oder dreistellig ("2,5" / "2,50" /
+  "2,500"); Datum als 14.07.2026, 14.7.26, 14. Juli 2026, 2026-07-14, 14/07/2026.
+* **Kassenbon.** Eigenes Seitenformat `receipt` (80 × 240 mm) mit eigenem Zeilenbudget,
+  dicktengleicher oder schmaler Schrift, zentriertem Kopf, ohne Linien, "2 Stk x 1,50"
+  auf einer Zeile und dem Betrag daneben oder darunter. Mehrseitig wie jede andere
+  Rechnung, `render.build` deckelt den Überlauf genauso.
+* **Fotorealismus.** Das Profil `photo` legt jetzt eine Unterlage rings um das Blatt
+  (Schreibtisch, Kuvert, dunkle Platte), einen Schlagschatten unter der Blattkante, ein
+  bis zwei waagrechte Knickfalten und gelegentlich eine perspektivische Verzerrung an.
+  Bild **und Wahrheitsboxen** laufen durch dieselbe 3x3-Abbildung (`degrade.geometry`);
+  `warp_boxes` teilt seit v10 durch die dritte Zeile, rechnet also auch projektiv
+  richtig.
+* **Ablenkerziffern.** Barcode mit seiner Nummer darunter (die Nummer ist gedruckter
+  Text und bleibt `O`), Druckcode "R1 31550133" in der Fußzeile, Kundennummer im
+  Anschriftenfenster, und die Kopfzeile als *eine* Zeile
+  ("Kunden-Nr. K31550133   Rechnung R185518416   14.07.2026   Seite 1/1").
+* **Schriften und Schnitte.** Die Familienliste führt nur Schriften, die auf dem
+  Rechner wirklich installiert sind — eine Wunschliste fällt still auf dieselbe
+  Ersatzschrift zurück und bringt keine Varianz. 20 Grotesk, 8 schmale, 21 Serifen,
+  10 dicktengleiche, dazu zehn Display-Schriften für Wortmarken. Fließsatz in vier
+  Schnitten (300–600), leicht gesperrt oder leicht geschlossen, Fußzeilen 0,55–0,82 em,
+  Überschriften 1,3–2,9 em.
+* **Kopfzeile der Tabelle.** Zusätzlich ein Stil `bodyrow` (die Kopfzeile sieht aus wie
+  eine Datenzeile), eine Überschriftzeile über der Tabelle statt einer Kopfzeile, und
+  die Kopfzeile steht wie bisher auf jeder Seite.
+* **Nordfoto-Merkmale.** Doppelpunkt als eigene Spalte ("Datum      :  17.03.2025"),
+  ein Formularfeld mit leerem Wert ("Kd-UStIdNr. :"), gesperrte Überschrift mit der
+  Nummer ("R E C H N U N G   N R.   2503561" — der ganze Schlüssellauf ist
+  `numberLabel`), zweiteilige Bildwortmarke mit Schwung und Werbesatz statt Absender,
+  Informationszeilen mitten in der Tabelle ("Shopbestellung: 116573 / 17.03.2025 / 2"),
+  Seriennummernzeilen, gekaufter Zahlungsweg in einem Kasten zwischen Tabelle und
+  Summen, Summen ganz unten auf der Seite, Lieferanschrift als Fließsatz,
+  vier- bis fünfspaltige Fußzeile in 5–6 pt mit Kapitälchen-Überschriften.
+
+### Konventionen der Wahrheit
+
+Drei Regeln, die aus den echten `expected.json` des Nutzers kommen und die der Korpus
+seit v10 einhält:
+
+1. **Keine gedruckte Einheit heißt `unitText: null` und `unitCode: "H87"`.** Nicht
+   "Stk" raten, nicht die Einheit aus dem Gebinde im Namen ziehen. `validate.py` prüft
+   beides: der Code muss H87 sein, und für so eine Zeile darf **kein** `unit`-Wort in
+   der Wahrheit stehen.
+2. **Versand und Zuschläge stecken im Nettobetrag, nicht in den Positionen.**
+   `netTotal` = Summe der Positionen + Summe der gedruckten Zuschlagszeilen. Die Zeile
+   "Warenwert" darüber ist damit **nicht** der Nettobetrag und bleibt `O`; die
+   Zuschlagsbeschriftung ist `otherLabel`, ihr Betrag `O`. `validate.py` rechnet das
+   nach (die Zuschläge stehen in `source.json`, weil `expected.json` die Form der App
+   behält).
+3. **Freizeilen drucken leere Zellen, keine Null.** In `expected.json` stehen sie mit
+   `unitPrice` 0 und `lineNet` 0; gedruckt ist die Zelle leer. Eine gedruckte "0,00"
+   wäre eine andere Rechnung. `validate.py` besteht darauf, dass für so eine Zeile kein
+   `unitPrice`- und kein `lineNet`-Wort in der Wahrheit steht.
+
+`validate.py` vergleicht Beträge seit v10 nicht mehr gegen *eine* Schreibweise, sondern
+gegen alle, die die Vorlagen drucken können (`money.forms`): Punkt-, Leerzeichen- oder
+keine Tausendertrennung, Minus vorn oder hinten.
+
+### Regionen bei mehrzeiligen Positionen
+
+Eine Position kann über zwei oder drei gedruckte Zeilen gehen. Die Region `line-item`
+muss sie alle umfassen und es darf **genau eine** Region je Position geben:
+`align.py` nummeriert die Positionen über die Reihenfolge der `line-item`-Regionen, und
+zwei Regionen für eine Position brächten die Zusammensetzung aus dem Tritt. Deshalb
+liegt die Region seit v10 auf einem eigenen `tbody` je Position statt auf der
+einzelnen `tr`; die Folgezeilen bekommen in `align.wrap_rows` von selbst die Rolle
+`line-wrap`. Die Detailzeile (Charge, MHD, Seriennummer) steht weiter in einem eigenen
+`tbody` mit der Rolle `continuation` und gehört damit wie bisher zu keiner Position —
+das war schon in v9 so und bleibt es.
+
+### Verwaiste Chrome-Prozesse
+
+v9 hinterließ nach jeder Generierung Hunderte Chrome-Prozesse an init. Die Ursache ist
+nicht das fehlende Aufräumen, sondern dass `chromium` auf diesen Rechnern ein AppImage
+ist: unser Kindprozess ist nur dessen Starter, und ein SIGTERM an ihn lässt Browser,
+Zygoten und Renderer stehen. `cdp.Browser` startet den Browser jetzt in einer eigenen
+Prozessgruppe (`start_new_session`) und schießt beim Schließen die ganze Gruppe ab;
+`render.reset()` schließt Seite *und* Browser, und `generate.one()` ruft es am Ende
+jeder Rechnung — ein multiprocessing-Worker verlässt den Prozess mit `os._exit()` und
+führt weder `atexit` noch einen anderen Haken aus. Nachgemessen: 0 statt 126 verwaiste
+Prozesse.
+
+### Was v10 gekostet hat: die Decke
+
+`align.py` über den fertigen Korpus (20 000 Variationen, 34 150 Seiten, 4 464 139
+OCR-Wörter, 44,2 % beschriftet):
+
+    ungesehen 6,10 %   verlesen 4,74 %   erreichbar 89,16 %
+
+Das ist mehr als die 3,24 % von v9, und die Aufschlüsselung sagt, warum — jedes Stück
+davon ist eine Achse, die v10 absichtlich dazugenommen hat:
+
+| Klasse | ungesehen | davon |
+|---|---|---|
+| `numberLabel` | 16,4 % | einzeln gesetzter Doppelpunkt 62,3 % (337 Wörter), Einzelbuchstaben der gesperrten Überschrift 15,4 % (1512), **normaler Text 4,6 %** |
+| `otherLabel` | 14,8 % | einzeln gesetzter Doppelpunkt 85,0 % (1515), **normaler Text 5,4 %** |
+| `dateLabel` | 20,5 % | Doppelpunkt 86,4 %, **Text 4,5 %** |
+| `quantity` | 6,6 % | Tokens bis zwei Zeichen 12,5 %, **längere 0,8 %** |
+| `unit` | 5,6 % | bis zwei Zeichen 8,5 %, längere 2,5 % |
+| `vat` | 5,6 % | bis zwei Zeichen 5,8 % |
+| `name`, `lineNet`, `unitPrice`, `netTotal`, `grossTotal`, `articleId`, `invoiceNumber`, `invoiceDate` | 0,9–2,3 % | — |
+
+Der Doppelpunkt in eigener Spalte (`meta_colon: "column"`, 16 % der Vorlagen) und die
+gesperrte Überschrift sind beide gewollt und beide für die OCR unsichtbar: ein einzelner
+Doppelpunkt in einer eigenen Tabellenzelle wird gar nicht erst als Wort erkannt, und aus
+"R E C H N U N G" liest die OCR ein Wort statt acht. Beides kostet keine Supervision — ein
+ungesehenes Wahrheitswort erzeugt keine Trainingszeile —, es verzerrt nur die
+Deckenrechnung. Die nackten Mengen kosten echte Decke: ein einzelnes "1" in einer Spalte
+ist ein Ziel, das die OCR oft nicht als eigenes Wort schneidet. Das ist der Preis dafür,
+dass der Tagger diese Zeilen überhaupt zu sehen bekommt.
+
+Je Profil: `scan_clean` 2,4 %, `crisp` 3,3 %, `scan_worn`/`faded` 4,1 %, `dark` 4,4 %,
+`photo` 5,9 %, `photocopy` 6,3 %, `low_ink` 6,7 %, `washed` 7,5 %, **`fax` 17,4 %**.
+Je Seitenformat: `receipt` **2,3 %** (der Bon ist dicktengleich und sauber gesetzt),
+letter/legal 4,9 %, a4 5,7 %, folio 6,2 %, a5 6,8 %, b5 7,6 %, a4 quer 7,8 %.
+
+## Korpus v11: hundert Familien statt zehn
+
+v10 hatte zehn benannte Familien und 42 % freien Wurf; das war der größte Gewinn von v1
+auf v10, also wurde er vervielfacht. `layout.FAMILIES` führt jetzt **113** Familien, die
+103 neuen stehen samt allen neuen Bausteinen in **`families.py`**. `free` hält weiter
+26,6 % — die Familien sollen den Raum ordnen, nicht einengen. Die Tabelle aller 113 mit
+Gewicht, Vorbild und prägenden Achsen steht in `../../v11/REPORT-families.md`, eine
+Musterseite je Familie unter `../../v11/samples/`.
+
+Gruppen: Rechnungsprogramme (sevDesk, Lexoffice, easybill, Billomat, FastBill, Zervant,
+orgaMAX, WISO, Sage, Odoo, Xero, QuickBooks, Stripe, PayPal, SumUp, InvoiceNinja, Word-
+und Excel-Eigenbau, LibreOffice, JTL-Wawi), Shops und Marktplätze (Amazon, Otto, Zalando,
+eBay, Etsy, Shopify, WooCommerce, Shopware, JTL, Magento, Conrad, Reichelt, Würth,
+Baumarkt, IKEA, App-Store), Lebensmittel- und Getränkehandel (Metro, Selgros,
+Transgourmet, Chefs Culinar, Edeka Foodservice, Rewe-Sammelrechnung, Discounter-Bon,
+Großmarkt-Thermobon, Getränkemarkt, Brauerei, Bäckerei, Metzgerei, Wochenmarkt-Quittung,
+Kaffeerösterei, Obst/Gemüse, Fisch, Weinhandel, Tiefkühl), Dienstleistung und Versorger
+(Telekom, Vodafone, 1&1, Stadtwerke, Gasversorger, DHL, Paketdienst, Versicherung, Miete,
+Kfz-Werkstatt, Handwerker, Hotel, Bewirtungsbeleg, Taxi, Tankstelle, Bahn, Fluglinie,
+Arzt, Apotheke, Dienstleister), Belegarten (Gutschrift, Kleinunternehmer, Reverse Charge,
+Schweiz, Abschlag, Schlussrechnung, Proforma, Lieferschein+Rechnung, Sammelrechnung,
+Österreich, englisch, niederländisch, italienisch, polnisch), E-Rechnungs-Viewer
+(XRechnung, ZUGFeRD, Portal, Peppol) und reine Strukturfamilien (zweispaltig,
+Schlüssel-Wert, Querformat, Seitenstreifen, Nadeldrucker, invertiert, Riesenlogo,
+linienlos, Nordfoto-Formular, Doppelpunktspalte, Halbbogen).
+
+### E-Rechnungs-Viewer
+
+Vier der acht echten Spirituosen-Fehler sehen aus wie der Ausdruck eines
+XRechnung-Viewers, und die Form kannte der Korpus gar nicht. `families.einvoice_page`
+baut die Seite vollständig selbst: jeder Wert hinter einem Schlüssel, **Käuferblock vor
+Verkäuferblock**, Abschnitte in Kästen, der Lieferantenname bricht im schmalen
+Formularfeld über zwei Zeilen, eine Position ist ein Block aus drei bis vier Zeilen mit
+`Artikelnummer:`/`Artikelkennung:`/`Schema der Artikelkennung: 0160`, eine
+`Preiseinheit`-Spalte (`1 XBO` → Zahl `priceBasis`, Code `unit`) zwischen Preis und
+Prozentspalte, und ein Summenblock mit `Summe aller Positionen`,
+`Summe Fremdforderungen 0,00`, **zwei** `Gesamtsumme`-Zeilen und `Fälliger Betrag`.
+
+### Belegarten, die Zahlen verändern
+
+`expected.json` wird je *Rechnung* geschrieben, die Familie aber je *Variation* gezogen.
+Eine Kleinunternehmerrechnung kann deshalb keine Familie sein: zwei Variationen derselben
+Rechnung müssten sonst verschiedene Beträge drucken. Sie ist eine eigene Achse `doctype`,
+die `generate.one()` je Rechnung zieht (`families.DOCTYPES`, 90/4/3/3);
+`families.adapt()` rechnet die Summen neu und `layout.template()` zieht die Familie dann
+aus `families.DOCTYPE_FAMILIES`. `--doctype` erzwingt sie.
+
+* `kleinunternehmer` / `reverse_charge`: jeder Satz 0, `vatBreakdown` leer, keine MwSt-
+  und keine Steuerschlüsselspalte, §19- bzw. §13b-Hinweis. **Diese beiden Familien
+  tragen die Klasse `vat` nicht — Absicht, kein Loch** (`v11/famcheck.py` führt das als
+  `BY_DESIGN`).
+* `swiss`: 8,10 % und 2,60 %, CHF, QR-Rechnung am Blattfuß.
+
+### Eine Achse, zwei Würfe
+
+`layout.template()` zieht das Seitenformat **vor** `apply_family`, weil `receipt`,
+`narrow_page` und die Spaltenauswahl daran hängen. Zog `apply_family` es danach ein
+zweites Mal, fielen die Würfe verschieden aus, und eine Familie mit
+`page_format: ["a5","a4","receipt"]` bekam `page_format "receipt"` bei `receipt False`:
+den vollen A4-Satz auf 80 mm Rollenbreite. `render.build` schrumpfte bis an den
+Schriftboden, die Betragsspalte lief trotzdem aus der Seite, `overflow:hidden` schnitt
+sie ab, und die Wörter fehlten in der Wahrheit — 74 Beanstandungen in der ersten
+v11-Probe, alle aus dieser einen Zeile. **Jede Achse, die `template()` vor
+`apply_family` auswertet, gehört in `CONTROL_KEYS`**: heute `font_pool`, `force_codes`,
+`order_pick` und `page_format`.
+
+### Schräglage: die Zeile zerfällt, die Rolle bleibt
+
+`align.group_rows` (Portierung von `Rows.GroupRows`) hängt ein Wort an die erste Zeile,
+deren *Anker* senkrecht mit ihm überlappt — und der Anker wächst nie mit. Eine 180 mm
+breite Positionszeile fällt bei 2° Drehung um gut zwei Zeilenhöhen ab, also zerfällt sie.
+Gemessen mit `v11/skewrows.py` über 2 672 Seiten: **1,61 OCR-Zeilen je Position bei 0°,
+3,00 bei 2°, 3,46 darüber**. Die *Rollen* bleiben dabei korrekt — genau eine
+`line-item`-Zeile je Position in 98,6–100 % der Fälle, der Rest `line-wrap`.
+
+Kaputt ist etwas anderes: `align.item_of` prüft Punkt-in-**Rechteck**, und das Rechteck
+einer gedrehten Positionszeile ist dreimal so hoch wie die Zeile und überlappt die
+Nachbarn. **19,5 % der beschrifteten Wörter landen bei 2° bei der falschen Position.**
+`degrade.warp_quads()` legt deshalb seit v11 neben `box` auch `quad` (vier Ecken) in
+jede Region; mit einer Punkt-in-Polygon-Prüfung fällt der Fehler auf 0,0 %. Die
+Änderung in `align.item_of` steht noch aus.
+
+Dazu die Ursache, warum der Fall im Training kaum vorkam: `|Drehung| ≥ 1,75°` lag bei
+**2,8 %** der Seiten, und fast alles davon im Profil `photo` — also im Handyfoto mit
+Unterlage und Knick, nicht im Scan. v11 fügt das Profil **`scan_skew`** hinzu (rotate
+3,0, sonst ein normaler Scan) und weitet die scanartigen Profile (`scan_worn` 1,8 → 2,4,
+`photocopy` 1,4 → 2,0, `washed` 1,5 → 2,2, `dark` 1,3 → 1,9, `fax` 1,2 → 1,8).
+Gemessen: `≥ 1,75°` **2,8 % → 13,6 %**, `≥ 2,25°` **0,3 % → 2,5 %**, während `≥ 1,0°`
+nur von 29,9 % auf 34,4 % steigt.
+
+### Prüfen
+
+    python3 generate.py --out /var/tmp/rotman/probe --count 8 --variations 113 \
+        --workers 10 --scale 2 --formats png,jpg --family "$(python3 -c '
+import layout; print(",".join(layout.FAMILY_NAMES))')"
+    python3 validate.py /var/tmp/rotman/probe
+    python3 coverage.py /var/tmp/rotman/probe
+    python3 ../../v11/famcheck.py /var/tmp/rotman/probe    # Klassendeckung je Familie
+    python3 ../../v11/skewrows.py /var/tmp/rotman/probe    # Schräglage -> Zeilen, Rollen
+
+`famcheck.py` steht neben `coverage.py`, weil es etwas anderes misst: `coverage.py` zählt
+je Seitenformat, `famcheck.py` je Familie. Eine Familie, die über alle ihre Variationen
+nie eine `articleId` druckt, bringt dem Modell „so ein Beleg hat keine Artikelnummer"
+bei — derselbe Fehler wie damals die gestrichene Artikelspalte auf A5, nur eine Ebene
+tiefer.
+
+### Die Achse `tagline`: der Werbesatz neben dem Namen
+
+Gemessen an den 109 echten Scans hat v11 genau eine Gruppe verschlechtert (26 Belege
+eines Lieferanten). Der Briefkopf dort liest
+
+    METZGEREI HOFMANN
+    Inh. Georg Hofmann   Fleisch und Wurst aus eigener Schlachtung
+
+und v11 taggte `Fleisch und Wurst aus eigener Schlachtung` mit 0,83–0,91 Konfidenz als
+`supplier`, also hiess der zusammengesetzte Name
+`METZGEREI HOFMANN Fleisch und Wurst aus eigener Schlachtung`. v10 tat das nicht.
+
+Die Ursache liegt im Korpus, nicht im Modell: den Werbesatz kannte er nur in **einer**
+Gestalt — VERSALIEN, Akzentfarbe, oben rechts (`vocab.CLAIMS`, `blocks.head_block`,
+`render.py .claim`). Eine gemischt gesetzte Zeile *neben* dem Namen hat er nie als `O`
+gezeigt. v11 hat daneben lange, mehrwortige Lieferantennamen gelehrt (`sender_keyed`,
+4–6 Wörter, Zeilenumbruch mitten im Namen) — also war eine mehrwortige Zeile am Namen
+ein starkes `supplier`-Merkmal ohne Gegenbeispiel.
+
+Die Achse füllt die Lücke. ~30 % der Vorlagen drucken einen gemischt gesetzten
+Werbesatz im Briefkopf; **jedes seiner Wörter ist `O`**:
+
+| Achse | Werte |
+|---|---|
+| `tagline_axis` | 30 % der Vorlagen (mit `CORPUS_FORCE_TAGLINE=1`: alle) |
+| `tagline_place` | `sender` (eigene Zeile direkt unter dem Namen), `sender_owner` (eigene Zeile unter der Inhaberzeile), `owner` (**in derselben Zeile neben der Inhaberzeile** — die Form, die v11 gekostet hat), `logo` (Subzeile unter der Wortmarke, kleiner gesetzt), `sender_caps` (die VERSALFORM im Absenderblock statt oben rechts), `receipt` (im Bonkopf unter dem Namen) |
+| `tagline_style` | `plain`, `italic`, `accent` (Akzentfarbe), `accent_italic`, `smallcaps`, `light` |
+
+Der Satzbestand steht in `vocab.SLOGANS` (28 allgemeine, mit `{trade}`- und
+`{year}`-Füllung) und `vocab.SLOGAN_TRADE` (34 fachspezifische, je Warengruppe, doppelt
+gewichtet — `Fleisch und Wurst aus eigener Schlachtung`, `Getränke-Fachgroßhandel seit
+1924`, `Obst · Gemüse · Feinkost`), zusammen **71**. `content.slogan()` zieht daraus,
+setzt in ~12 % Title Case und hängt in ~18 % einen Punkt an; Trennzeichen `·`, `|`, `—`
+stehen im Satz selbst.
+
+Zwei Regeln, an denen die Achse hängt:
+
+1. **Der Werbesatz steht immer in einem eigenen `<span>`**, und ausser bei `owner` in
+   einer eigenen Zeile. Der Lieferantenname hat damit in jeder Form seine Zeile für
+   sich, und der Satz kann in der Wahrheit nie in einen `supplier`-Lauf geraten. Bei
+   `owner` trennen 6 mm (`.slogan.beside`) die Inhaberzeile vom Satz — und der Name
+   steht ohnehin eine Zeile höher.
+2. **Die Inhaberzeile bleibt häufig, wenn ein Werbesatz danebensteht** (`show_owner`
+   wird bei `owner`/`sender_owner` erzwungen, sonst in 45 % zugeschaltet): sonst lernt
+   das Modell „Werbesatz *statt* Inhaberzeile" statt „beides ist `O`".
+
+Ausgenommen sind die E-Rechnungs-Viewer (`einvoice`, ~3 % der Vorlagen): die bauen die
+Seite aus Formularfeldern und haben keinen Briefkopf, in den ein Werbesatz gehörte.
+
+`CORPUS_FORCE_TAGLINE=1` erzwingt die Achse für einen ganzen Lauf — so ist der
+Ergänzungskorpus `corpus-v11s` gebaut. Eine Umgebungsvariable statt eines Schalters,
+weil `generate.py` die Vorlagen in Worker-Prozessen zieht; sie erbt jeder Worker von
+selbst. Hat eine Vorlage weder Absenderblock noch Wortmarke, setzt der Zwang
+`sender_place` auf `under` — die einzige Achse, die er ausser der eigenen anfasst.
+
+    CORPUS_FORCE_TAGLINE=1 nice python3 generate.py --out /var/tmp/rotman/corpus-v11s \
+        --count 300 --variations 10 --workers 24 --seed umsatz-v11s

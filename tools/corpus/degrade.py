@@ -9,7 +9,10 @@ def profile(**kw):
     base = dict(rotate=0.0, skew=0.0, blur=0.0, noise=0.0, jpeg=0, gamma=1.0, contrast=1.0,
                 speckle=0.0, vignette=0.0, texture=0.0, shadow=0.0, edge=0.0, gray=0.0, bilevel=0.0,
                 black=0.0, white=255.0,
-                ink_erode=0.0, ink_bands=0.0, ink_blotch=0.0, ink_dropout=0.0)
+                ink_erode=0.0, ink_bands=0.0, ink_blotch=0.0, ink_dropout=0.0,
+                # Fotoseitige Achsen: Unterlage rings um das Blatt, Schlagschatten,
+                # Knickfalten, perspektivische Verzerrung.
+                backdrop=0.0, perspective=0.0, folds=0, fold_strength=0.0, desk=0)
     base.update(kw)
     return base
 
@@ -18,24 +21,31 @@ PROFILES = {
     "crisp": profile(),
     "scan_clean": profile(rotate=0.5, skew=0.2, blur=0.7, noise=4.0, jpeg=86, gamma=1.03,
                           speckle=0.00008, vignette=0.05, texture=0.018, gray=0.35),
-    "scan_worn": profile(rotate=1.8, skew=0.6, blur=1.5, noise=10.0, jpeg=58, gamma=1.15, contrast=0.9,
+    "scan_worn": profile(rotate=2.4, skew=0.6, blur=1.5, noise=10.0, jpeg=58, gamma=1.15, contrast=0.9,
                          speckle=0.0006, vignette=0.2, texture=0.05, edge=0.4, gray=0.6),
-    "photocopy": profile(rotate=1.4, skew=0.5, blur=1.9, noise=13.0, jpeg=72, gamma=1.45, contrast=1.5,
+    "photocopy": profile(rotate=2.0, skew=0.5, blur=1.9, noise=13.0, jpeg=72, gamma=1.45, contrast=1.5,
                          speckle=0.0014, vignette=0.3, texture=0.035, edge=0.9, gray=1.0),
     "photo": profile(rotate=2.4, skew=1.0, blur=1.8, noise=8.0, jpeg=52, gamma=0.9, contrast=0.88,
-                     speckle=0.0003, vignette=0.24, texture=0.03, shadow=0.6),
-    "fax": profile(rotate=1.2, skew=0.4, blur=2.2, noise=16.0, gamma=1.5, contrast=1.9,
+                     speckle=0.0003, vignette=0.24, texture=0.03, shadow=0.6,
+                     backdrop=0.075, perspective=1.0, folds=1, fold_strength=1.0),
+    "fax": profile(rotate=1.8, skew=0.4, blur=2.2, noise=16.0, gamma=1.5, contrast=1.9,
                    speckle=0.0024, vignette=0.1, texture=0.015, edge=0.6, gray=1.0, bilevel=1.0),
     "faded": profile(rotate=1.0, skew=0.3, blur=1.2, noise=5.0, jpeg=74, gamma=0.85,
                      speckle=0.0002, vignette=0.06, texture=0.02, gray=0.8,
                      black=152.0, white=253.0),
-    "dark": profile(rotate=1.3, skew=0.4, blur=1.4, noise=9.0, jpeg=60, gamma=1.1,
+    "dark": profile(rotate=1.9, skew=0.4, blur=1.4, noise=9.0, jpeg=60, gamma=1.1,
                     speckle=0.0005, vignette=0.32, texture=0.04, shadow=0.35, gray=0.7,
                     black=4.0, white=143.0),
     "low_ink": profile(rotate=1.1, skew=0.35, blur=1.1, noise=7.0, jpeg=70, gamma=1.08, contrast=0.95,
                        speckle=0.0004, vignette=0.1, texture=0.03, gray=0.75,
                        ink_erode=0.55, ink_bands=0.45, ink_blotch=0.38, ink_dropout=0.018),
-    "washed": profile(rotate=1.5, skew=0.5, blur=1.6, noise=11.0, jpeg=56, gamma=1.05,
+    # Schief eingezogenes Blatt: sonst ein ganz normaler Scan. Bis v10 erreichte
+    # nur `photo` zwei Grad, und das Profil bringt Unterlage, Knickfalte und
+    # Perspektive mit — den sauberen Scan mit 2° Schräglage, an dem `group_rows`
+    # jede Positionszeile in zwei zerlegt, kannte der Korpus gar nicht.
+    "scan_skew": profile(rotate=3.0, skew=0.8, blur=1.2, noise=7.0, jpeg=70, gamma=1.08,
+                         speckle=0.0004, vignette=0.12, texture=0.03, edge=0.3, gray=0.55),
+    "washed": profile(rotate=2.2, skew=0.5, blur=1.6, noise=11.0, jpeg=56, gamma=1.05,
                       speckle=0.0007, vignette=0.14, texture=0.05, edge=0.3, gray=0.9,
                       black=92.0, white=186.0),
 }
@@ -53,6 +63,15 @@ def jitter(rng, profile, amount=1.0):
         p["gray"] = min(0.94, p["gray"] * rng.uniform(0.6, 1.25)) * amount
     if p["jpeg"]:
         p["jpeg"] = max(30, min(95, int(p["jpeg"] * rng.uniform(0.9, 1.1))))
+    if p["backdrop"] > 0.0:
+        p["backdrop"] *= rng.uniform(0.45, 1.5)
+        p["desk"] = int(rng.integers(0, len(DESKS)))
+    # Perspektive nur gelegentlich: die meisten Handyfotos einer Rechnung sind
+    # fast frontal, ein Teil davon deutlich schräg.
+    p["perspective"] = 0.0 if rng.random() < 0.45 else p["perspective"] * rng.uniform(0.35, 1.3)
+    if p["folds"]:
+        p["folds"] = int(rng.integers(0, 3))
+        p["fold_strength"] *= rng.uniform(0.6, 1.5)
     p["gamma"] *= rng.uniform(0.94, 1.06)
     p["contrast"] *= rng.uniform(0.92, 1.08)
     spread = p["white"] - p["black"]
@@ -62,6 +81,12 @@ def jitter(rng, profile, amount=1.0):
     p["black"] = max(0.0, mid - spread * squeeze / 2)
     p["white"] = min(255.0, mid + spread * squeeze / 2)
     return p
+
+
+# Unterlagen, auf denen ein Handyfoto einer Rechnung entsteht: Schreibtisch aus
+# Holz, graue Tischplatte, Kuvert, dunkle Unterlage, Papierstapel.
+DESKS = [(126, 98, 66), (168, 143, 104), (96, 96, 100), (58, 58, 62), (206, 198, 182),
+         (142, 116, 88), (32, 34, 38), (188, 182, 170)]
 
 
 def matrix(p, w, h):
@@ -75,14 +100,117 @@ def matrix(p, w, h):
     return centre @ m @ back
 
 
+def quad_homography(src, dst):
+    """Die 3x3-Abbildung, die vier Punkte auf vier Punkte legt."""
+    rows, rhs = [], []
+    for (x, y), (u, v) in zip(src, dst):
+        rows.append([x, y, 1, 0, 0, 0, -u * x, -u * y])
+        rhs.append(u)
+        rows.append([0, 0, 0, x, y, 1, -v * x, -v * y])
+        rhs.append(v)
+    solved = np.linalg.solve(np.array(rows, dtype=np.float64), np.array(rhs, dtype=np.float64))
+    return np.append(solved, 1.0).reshape(3, 3)
+
+
+def geometry(p, w, h, rng):
+    """Die *eine* Abbildung, die Bild und Wahrheitsboxen gemeinsam durchlaufen.
+
+    Drehung und Scherung wie bisher, dazu optional eine perspektivische
+    Verzerrung (das Blatt liegt schräg vor der Kamera) und eine Verschiebung,
+    weil rings um das Blatt noch Unterlage sichtbar ist. Alles in einer Matrix:
+    `warp_boxes` rechnet damit dieselbe Bewegung auf die Boxen, die das Bild
+    genommen hat — anders ließe sich die Wahrheit nicht halten.
+    """
+    m = matrix(p, w, h)
+    if p["perspective"] > 1e-4:
+        k = 0.035 * p["perspective"]
+        src = [(0, 0), (w, 0), (w, h), (0, h)]
+        dst = [(x + float(rng.uniform(-k, k)) * w, y + float(rng.uniform(-k, k)) * h)
+               for x, y in src]
+        m = quad_homography(src, dst) @ m
+    pad_x = pad_y = 0
+    if p["backdrop"] > 0.001:
+        pad_x = int(w * p["backdrop"] * float(rng.uniform(0.6, 1.4)))
+        pad_y = int(h * p["backdrop"] * float(rng.uniform(0.4, 1.2)))
+        m = np.array([[1, 0, pad_x], [0, 1, pad_y], [0, 0, 1.0]]) @ m
+    return m, w + 2 * pad_x, h + 2 * pad_y
+
+
+def coefficients(m):
+    """Die acht Zahlen, die PIL für `Image.PERSPECTIVE` erwartet: die *inverse*
+    Abbildung, normiert auf [2][2] == 1."""
+    inv = np.linalg.inv(m)
+    return tuple((inv / inv[2, 2]).flatten()[:8])
+
+
 def warp_boxes(m, boxes):
     out = []
     for x, y, w, h in boxes:
-        pts = np.array([[x, y, 1], [x + w, y, 1], [x + w, y + h, 1], [x, y + h, 1]]).T
-        q = (m @ pts)[:2]
+        pts = np.array([[x, y, 1], [x + w, y, 1], [x + w, y + h, 1], [x, y + h, 1]], dtype=float).T
+        q = m @ pts
+        q = q[:2] / q[2]
         x0, y0 = q[0].min(), q[1].min()
         out.append([float(x0), float(y0), float(q[0].max() - x0), float(q[1].max() - y0)])
     return out
+
+
+def warp_quads(m, boxes):
+    """Dieselbe Abbildung, aber als *Viereck* statt als umschließendes Rechteck.
+
+    Für ein Wort genügt das Rechteck: es ist kurz, und der Fehler bleibt klein.
+    Für eine Positionsregion nicht. Eine Positionszeile ist ~180 mm breit; bei 2°
+    Schräglage liegt ihr rechtes Ende rund zwei Zeilenhöhen unter ihrem linken,
+    das umschließende Rechteck ist also dreimal so hoch wie die Zeile und
+    überlappt die Regionen der Nachbarpositionen. `align.item_of` prüft
+    Punkt-in-Rechteck und nimmt die *erste* Region, die trifft — bei 2° schlägt es
+    Wörter reihenweise der falschen Position zu. Mit dem Viereck ist das eine
+    Punkt-in-Polygon-Prüfung und der Fehler verschwindet.
+
+    Die Ecken kommen in der Reihenfolge oben-links, oben-rechts, unten-rechts,
+    unten-links zurück.
+    """
+    out = []
+    for x, y, w, h in boxes:
+        pts = np.array([[x, y, 1], [x + w, y, 1], [x + w, y + h, 1], [x, y + h, 1]], dtype=float).T
+        q = m @ pts
+        q = q[:2] / q[2]
+        out.append([[float(q[0][i]), float(q[1][i])] for i in range(4)])
+    return out
+
+
+def fold_gain(shape, count, strength, rng):
+    """Ein bis zwei waagrechte Knicke: eine dunkle Linie, ein weicher Schatten
+    daneben, die eine Hälfte des Blattes minimal heller."""
+    h, w = shape
+    gain = np.ones(shape, dtype=np.float32)
+    for _ in range(count):
+        y = int(float(rng.uniform(0.16, 0.84)) * h)
+        reach = max(6, int(h * 0.03))
+        lo, hi = max(0, y - reach), min(h, y + reach)
+        ramp = np.linspace(-1.0, 1.0, hi - lo, dtype=np.float32)
+        gain[lo:hi] *= (1.0 - strength * 0.13 * np.exp(-ramp ** 2 * 5.0))[:, None]
+        gain[max(0, y - 1):y + 2] *= 1.0 - strength * 0.22
+        gain[hi:] *= 1.0 + strength * 0.025
+    return gain
+
+
+def backdrop(image, mask, p, rng, out_size):
+    """Unterlage rings um das Blatt plus Schlagschatten unter der Kante."""
+    w, h = out_size
+    colour = DESKS[int(p["desk"]) % len(DESKS)]
+    canvas = np.zeros((h, w, 3), dtype=np.float32)
+    canvas[:, :] = colour
+    canvas += rng.standard_normal((h, w, 1), dtype=np.float32) * 6.0
+    alpha = np.asarray(mask, dtype=np.float32) / 255.0
+    shadow = np.asarray(Image.fromarray((alpha * 255).astype(np.uint8), "L")
+                        .filter(ImageFilter.GaussianBlur(max(2.0, min(w, h) * 0.012))),
+                        dtype=np.float32) / 255.0
+    drop = int(min(w, h) * 0.01)
+    shadow = np.roll(np.roll(shadow, drop, axis=0), drop, axis=1)
+    canvas *= (1.0 - 0.45 * shadow * (1.0 - alpha))[:, :, None]
+    page = np.asarray(image, dtype=np.float32)
+    out = page * alpha[:, :, None] + canvas * (1.0 - alpha[:, :, None])
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGB")
 
 
 def grain(rng, shape, strength):
@@ -176,12 +304,20 @@ def starve(image, p, rng):
 
 def apply(image, p, rng):
     w, h = image.size
-    m = matrix(p, w, h)
+    m, ow, oh = geometry(p, w, h, rng)
     mono = p["gray"] >= 0.95
-    if p["rotate"] or p["skew"]:
-        inv = np.linalg.inv(m)
-        image = image.transform((w, h), Image.AFFINE, tuple(inv[:2].flatten()),
-                                resample=Image.BICUBIC, fillcolor=(255, 255, 255))
+    if p["rotate"] or p["skew"] or p["perspective"] > 1e-4 or (ow, oh) != (w, h):
+        coeffs = coefficients(m)
+        page = image.transform((ow, oh), Image.PERSPECTIVE, coeffs,
+                               resample=Image.BICUBIC, fillcolor=(255, 255, 255))
+        if p["backdrop"] > 0.001:
+            # Die Silhouette des Blattes, durch dieselbe Abbildung geschickt: nur
+            # darin steht Papier, außen liegt die Unterlage.
+            mask = Image.new("L", (w, h), 255).transform(
+                (ow, oh), Image.PERSPECTIVE, coeffs, resample=Image.BILINEAR, fillcolor=0)
+            page = backdrop(page, mask, p, rng, (ow, oh))
+        image = page
+        w, h = ow, oh
     if mono:
         image = image.convert("L")
     elif p["gray"] > 0.05:
@@ -206,6 +342,9 @@ def apply(image, p, rng):
     if p["edge"] > 0.02:
         bands = edge_gain(shape, p["edge"], rng)
         gain = bands if gain is None else gain * bands
+    if p["folds"]:
+        folds = fold_gain(shape, int(p["folds"]), p["fold_strength"], rng)
+        gain = folds if gain is None else gain * folds
 
     add = None
     if p["texture"] > 0.001:
