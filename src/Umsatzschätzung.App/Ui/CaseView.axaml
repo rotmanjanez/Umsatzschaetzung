@@ -75,6 +75,8 @@
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Steuernummer" Theme="{StaticResource FieldLabel}"/>
                                 <TextBox Text="{Binding TaxNumber, Mode=TwoWay}"/>
+                                <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox Text="{Binding Gewerbe, Mode=TwoWay}" PlaceholderText="z. B. 56101.0 (Richtsatzsammlung)"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

@@ -10,17 +10,19 @@ public sealed class Matcher
     const double MinScore = 0.4;
 
     // Load() hands out a fresh RuleSet every call, so the version is the key: one
-    // Matcher belongs to one rule store and reindexes only once a save bumps it.
+    // Matcher belongs to one rule store and reindexes only once a save bumps it or a
+    // case from another Gewerbe asks.
     long indexed = -1;
+    string indexedGewerbe = "";
     Lexicon? lexicon;
     Evidence? evidence;
 
-    public List<Suggestion> Suggest(RuleSet rs, string? supplier, InvoiceLine line)
+    public List<Suggestion> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line)
     {
         if (Match.Mapping(rs, supplier, DateOnly.FromDateTime(DateTime.Now), line) is { } hit)
             return [new Suggestion(hit, 100, OriginKind.Exact)];
 
-        Index(rs);
+        Index(rs, gewerbe);
         var scores = lexicon!.Score(line.Name);
         foreach (var (id, learned) in evidence!.Score(line.Name, supplier))
             scores[id] = Fuse(scores.GetValueOrDefault(id), learned);
@@ -44,11 +46,14 @@ public sealed class Matcher
     // and the name match decides, as it did before there was anything to learn from.
     static double Fuse(double name, double learned) => 1 - (1 - name) * (1 - learned);
 
-    void Index(RuleSet rs)
+    // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never
+    // offered Blondierpulver, and the words that tell its own goods apart weigh more.
+    void Index(RuleSet rs, string gewerbe)
     {
-        if (indexed == rs.Version && lexicon is not null && evidence is not null) return;
+        if (indexed == rs.Version && indexedGewerbe == gewerbe && lexicon is not null && evidence is not null) return;
         var today = DateOnly.FromDateTime(DateTime.Now);
-        var active = rs.Ingredients.Values.Where(i => i.Meta.ValidOn(today))
+        var active = rs.Ingredients.Values
+            .Where(i => i.Meta.ValidOn(today) && (!rs.Categories.TryGetValue(i.CategoryId, out var c) || c.Covers(gewerbe)))
             .OrderBy(i => i.Id, StringComparer.Ordinal).ToList();
         var ids = active.Select(i => i.Id).ToHashSet(StringComparer.Ordinal);
         var log = rs.Mappings.Keys.Order(StringComparer.Ordinal)
@@ -58,6 +63,7 @@ public sealed class Matcher
         lexicon = new Lexicon(Names(active, ids, log));
         evidence = new Evidence(log, ids);
         indexed = rs.Version;
+        indexedGewerbe = gewerbe;
     }
 
     // Character matching sees the ingredient's own name and the wording of mappings

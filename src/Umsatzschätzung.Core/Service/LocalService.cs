@@ -110,7 +110,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         }
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = NewId("re-");
-        var (rs, unmapped) = await MapLines(inv, true, ct);
+        var (rs, unmapped) = await MapLines(inv, Gewerbe(caseId), true, ct);
         var c = caseId == "" ? null : Attach(caseId, inv, fileName, data);
         return new ParseResp(inv, unmapped, Display.Invoice(inv, rs), false, c);
     });
@@ -136,7 +136,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         draft.Id = NewId("re-");
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
-        var (rs, _) = await MapLines(draft, false, ct);
+        var (rs, _) = await MapLines(draft, Gewerbe(caseId), false, ct);
         return new OcrResp(draft.Id, output, draft, Display.Invoice(draft, rs));
     });
 
@@ -173,7 +173,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var blocked = flags.Any(f => BlockingFlags.Contains(f.Code));
         var confirm = req.Confirm && !blocked;
         if ((confirm || req.Draft) && req.CaseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
-        var (rs, _) = await MapLines(inv, confirm, ct);
+        var (rs, _) = await MapLines(inv, Gewerbe(req.CaseId), confirm, ct);
         var resp = new VerifyResp(inv, flags, Display.Invoice(inv, rs), false, null);
         if (!confirm && !req.Draft) return resp;
         if (confirm) inv.Verification = new Verification { At = Clock.Now() };
@@ -214,10 +214,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceSourceResp(name, pages);
     });
 
-    public Task<MappingSuggestResp> SuggestMapping(InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
+    public Task<MappingSuggestResp> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
-        var sugs = matcher.Suggest(rs, supplier, line);
+        var sugs = matcher.Suggest(rs, Gewerbe(caseId), supplier, line);
         return new MappingSuggestResp(sugs
             .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind, Display.CandidateLabel(rs, sg.Mapping)))
             .ToList());
@@ -281,19 +281,26 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return Resp(c);
     }
 
-    async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, bool ask, CancellationToken ct)
+    string Gewerbe(string caseId)
+    {
+        if (caseId == "") return "";
+        try { return cases.Load(caseId).Taxpayer.Gewerbe; }
+        catch (CaseNotFoundException) { return ""; }
+    }
+
+    async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, string gewerbe, bool ask, CancellationToken ct)
     {
         var rs = rules.Load();
         var unmapped = new List<int>();
         foreach (var l in inv.Lines)
         {
-            if (string.IsNullOrEmpty(l.MappingId)) rs = await MapLine(rs, inv, l, ask, ct);
+            if (string.IsNullOrEmpty(l.MappingId)) rs = await MapLine(rs, gewerbe, inv, l, ask, ct);
             if (string.IsNullOrEmpty(l.MappingId)) unmapped.Add((int)l.No);
         }
         return (rs, unmapped);
     }
 
-    async Task<RuleSet> MapLine(RuleSet rs, Invoice inv, InvoiceLine l, bool ask, CancellationToken ct)
+    async Task<RuleSet> MapLine(RuleSet rs, string gewerbe, Invoice inv, InvoiceLine l, bool ask, CancellationToken ct)
     {
         if (Match.Mapping(rs, inv.SupplierName, inv.Date ?? Today(), l) is { } hit)
         {
@@ -301,7 +308,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             return rs;
         }
         if (!ask) return rs;
-        var sugs = matcher.Suggest(rs, inv.SupplierName, l);
+        var sugs = matcher.Suggest(rs, gewerbe, inv.SupplierName, l);
         if (sugs.Count == 0) return rs;
         var sg = sugs[0];
         if (sg.Kind == OriginKind.Exact)

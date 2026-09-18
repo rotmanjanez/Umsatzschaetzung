@@ -59,7 +59,7 @@ public sealed class CaseModel : Observable
 {
     public static readonly long[] VatValues = [1900, 700, 0];
 
-    string label = "", from = "", to = "", name = "", taxNumber = "", pab = "";
+    string label = "", from = "", to = "", name = "", taxNumber = "", pab = "", gewerbe = "";
     readonly string[] declared = ["", "", ""];
     YieldGroupRow? detail;
     bool noYields = true, noInvoices, syncing;
@@ -70,6 +70,7 @@ public sealed class CaseModel : Observable
     public string Name { get => name; set => Set(ref name, value); }
     public string TaxNumber { get => taxNumber; set => Set(ref taxNumber, value); }
     public string Pab { get => pab; set => Set(ref pab, value); }
+    public string Gewerbe { get => gewerbe; set => Set(ref gewerbe, value); }
     public string Declared19 { get => declared[0]; set => Set(ref declared[0], value); }
     public string Declared7 { get => declared[1]; set => Set(ref declared[1], value); }
     public string Declared0 { get => declared[2]; set => Set(ref declared[2], value); }
@@ -104,6 +105,7 @@ public sealed class CaseModel : Observable
         Name = k.Taxpayer.Name;
         TaxNumber = k.Taxpayer.TaxNumber;
         Pab = k.Taxpayer.PabNumber;
+        Gewerbe = k.Taxpayer.Gewerbe;
         NoInvoices = k.Invoices.Count == 0;
         Declared19 = Input.Edit(d.Declared.GetValueOrDefault(1900, ""));
         Declared7 = Input.Edit(d.Declared.GetValueOrDefault(700, ""));
@@ -153,9 +155,11 @@ public sealed class CaseModel : Observable
             Name = Name.Trim(),
             TaxNumber = TaxNumber.Trim(),
             PabNumber = Pab.Trim(),
+            Gewerbe = Gewerbe.Trim(),
         };
         var valid = k.Label != "" && from is not null && to is not null
-            && k.Taxpayer.Name != "" && k.Taxpayer.TaxNumber != "" && k.Taxpayer.PabNumber != "";
+            && k.Taxpayer.Name != "" && k.Taxpayer.TaxNumber != "" && k.Taxpayer.PabNumber != ""
+            && (k.Taxpayer.Gewerbe == "" || Model.Gewerbe.Kennzahl(k.Taxpayer.Gewerbe));
         k.Declared = [];
         for (var i = 0; i < declared.Length; i++)
         {

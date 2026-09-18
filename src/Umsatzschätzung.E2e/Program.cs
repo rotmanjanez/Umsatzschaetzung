@@ -75,7 +75,7 @@ Check(Matcher.Factor(new Pack(20, 500, Unit.Ml), "XCS", Unit.Ml) == 10000, "fact
 Check(Matcher.Factor(new Pack(1, 750, Unit.Ml), "XBO", Unit.G) is null, "factor rejects a size in the wrong base unit");
 
 async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
-    (await svc.SuggestMapping(new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct)).Candidates;
+    (await svc.SuggestMapping("", new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct)).Candidates;
 
 var keg = await Suggest("Fassbier Pils, Keg 50 l", "XKG");
 Check(keg.Count > 0 && keg[0].Mapping.IngredientId == "ing.bier.fass" && keg[0].Mapping.Factor == 50000,
@@ -89,6 +89,17 @@ Check(schnaps.Count > 0 && schnaps[0].Mapping.IngredientId == "ing.korn" && schn
 
 Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: deposit has no ingredient");
 Check((await Suggest("Fassbier Pils, Keg 50 l", "XKG"))[0].Mapping.Factor == 50000, "suggest: index is reused");
+
+var friseur = await svc.PutCase(new Case
+{
+    Label = "Salon",
+    PeriodFrom = new DateOnly(2024, 1, 1),
+    PeriodTo = new DateOnly(2024, 12, 31),
+    Taxpayer = new Taxpayer { Name = "Schnitt", TaxNumber = "1/2", PabNumber = "3", Gewerbe = "96021.0" },
+}, ct);
+var line = new InvoiceLine { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", UnitCode = "XBO" };
+Check((await svc.SuggestMapping(friseur.Case.Id, line, null, ct)).Candidates.Count == 0, "suggest: a Friseur is never offered Korn");
+Check((await svc.SuggestMapping(neu.Case.Id, line, null, ct)).Candidates[0].Mapping.IngredientId == "ing.korn", "suggest: a case without Gewerbe sees everything");
 
 var parsed = await svc.ParseInvoice(kase.Case.Id, "zugferd.pdf", File.ReadAllBytes(Path.Combine(data, "zugferd.pdf")), ct);
 Check(!parsed.NeedsOcr && parsed.Invoice.Number == "RE-20201121/508" && parsed.Invoice.Lines.Count == 3, "zugferd parse");

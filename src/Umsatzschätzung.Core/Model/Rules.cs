@@ -43,7 +43,13 @@ public sealed class Category : IRuleEntity
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
+    // Gewerbekennzahlen der Richtsatzsammlung, auch als Präfix ("561" für alle Gastronomie).
+    // Leer heißt: in jedem Gewerbe.
+    public List<string> Gewerbe { get; set; } = [];
     public Meta Meta { get; set; } = new();
+
+    public bool Covers(string? kennzahl) =>
+        string.IsNullOrEmpty(kennzahl) || Gewerbe.Count == 0 || Gewerbe.Exists(kennzahl.StartsWith);
 }
 
 public sealed class Ingredient : IRuleEntity

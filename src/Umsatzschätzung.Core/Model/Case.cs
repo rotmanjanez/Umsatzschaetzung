@@ -35,6 +35,7 @@ public sealed class Taxpayer
     public string Name { get; set; } = "";
     public string TaxNumber { get; set; } = "";
     public string PabNumber { get; set; } = "";
+    public string Gewerbe { get; set; } = "";
 }
 
 public sealed class CaseProduct

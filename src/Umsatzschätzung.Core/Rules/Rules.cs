@@ -48,6 +48,8 @@ public static class RuleCheck
     static void ValidateCategory(Category e)
     {
         if (e.Name == "") throw new RulesException("Kategorie: Name darf nicht leer sein");
+        foreach (var g in e.Gewerbe)
+            if (!Gewerbe.Kennzahl(g)) throw new RulesException($"Kategorie \"{e.Name}\": Gewerbekennzahl \"{g}\" ist ungültig");
     }
 
     static void ValidateIngredient(RuleSet rs, Ingredient e)

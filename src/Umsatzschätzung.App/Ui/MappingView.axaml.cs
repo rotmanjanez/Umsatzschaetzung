@@ -162,7 +162,7 @@ public partial class MappingView : Screen
         var lineItem = Session.Case.Invoices[inv].Lines[line];
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.SuggestMapping(lineItem, g.Supplier, Ct);
+            var resp = await Session.Service.SuggestMapping(Session.Case.Id, lineItem, g.Supplier, Ct);
             if (seq != suggestSeq) return;
             model.Loading = false;
             model.SetCandidates(resp.Candidates);
