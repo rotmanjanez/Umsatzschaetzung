@@ -49,12 +49,14 @@ mkdir -p "$contents/Resources"
 mv "$contents/MacOS/models" "$contents/Resources/models"
 sed "s/@VERSION@/$plistversion/g" "$here/Info.plist" > "$contents/Info.plist"
 cp "$root/packaging/windows/LICENSES.txt" "$contents/Resources/LICENSES.txt"
+cp "$root/LICENSE" "$contents/Resources/LICENSE.txt"
+cp "$root/LIZENZ" "$contents/Resources/LIZENZ.txt"
 sh "$here/icon.sh" "$contents/Resources"
 
 for required in \
     MacOS/umsatzschaetzung MacOS/libAvaloniaNative.dylib MacOS/libSkiaSharp.dylib \
     MacOS/libe_sqlite3.dylib MacOS/libonnxruntime.dylib MacOS/libpdfium.dylib \
-    Resources/AppIcon.icns Resources/LICENSES.txt Info.plist
+    Resources/AppIcon.icns Resources/LICENSES.txt Resources/LICENSE.txt Resources/LIZENZ.txt Info.plist
 do
     [ -e "$contents/$required" ] || { echo "$required fehlt in $app" >&2; exit 1; }
 done
