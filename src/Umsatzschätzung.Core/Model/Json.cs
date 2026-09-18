@@ -11,7 +11,6 @@ namespace Umsatzschätzung.Model;
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     UseStringEnumConverter = true,
     WriteIndented = true)]
-[JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(RuleSet))]
 [JsonSerializable(typeof(Invoice))]
 [JsonSerializable(typeof(Sammlung))]
