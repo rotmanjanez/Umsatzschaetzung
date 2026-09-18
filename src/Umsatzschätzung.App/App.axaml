@@ -3,6 +3,11 @@
              x:Class="Umsatzschätzung.App.App"
              Name="Umsatzschätzung"
              RequestedThemeVariant="Default">
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="Über Umsatzschätzung" Click="About"/>
+        </NativeMenu>
+    </NativeMenu.Menu>
     <Application.Styles>
         <FluentTheme/>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
