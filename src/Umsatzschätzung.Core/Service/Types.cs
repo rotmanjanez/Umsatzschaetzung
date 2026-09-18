@@ -30,13 +30,18 @@ public sealed record OcrResp(string InvoiceId, List<OcrPage> Pages, Invoice Draf
 // flag blocks it, and Auto takes it over only if the reading is complete and adds up on its own.
 public enum Intent { Check, Store, Confirm, Auto }
 
-public sealed record VerifyReq(string CaseId, Invoice Invoice, Intent Intent, string? FileName, byte[]? Data);
+// Reading is kept with the invoice when the intent stores it; the page images are left out of what
+// is written, they are rendered from the document again.
+public sealed record VerifyReq(string CaseId, Invoice Invoice, Intent Intent, string? FileName, byte[]? Data, List<OcrPage>? Reading = null);
 
 public sealed record VerifyResp(Invoice Invoice, List<Flag> Flags, bool Blocked, InvoiceDisplay Display, bool Accepted, CaseResp? Case);
 
 public sealed record SourcePage(byte[]? Image, string? Text);
 
 public sealed record InvoiceSourceResp(string FileName, List<SourcePage> Pages);
+
+// Empty when the invoice was never read from a scan.
+public sealed record InvoiceReadingResp(List<OcrPage> Pages);
 
 public sealed record MappingSuggestResp(List<MappingCandidate> Candidates);
 

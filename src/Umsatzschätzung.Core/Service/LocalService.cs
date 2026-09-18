@@ -182,7 +182,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var resp = new VerifyResp(inv, flags, blocked, Display.Invoice(inv, rs), false, null);
         if (!store) return resp;
         if (confirm) inv.Verification = new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto };
-        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? []);
+        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], req.Reading);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
@@ -217,6 +217,29 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             _ => [new SourcePage(null, Encoding.UTF8.GetString(data))],
         };
         return new InvoiceSourceResp(name, pages);
+    });
+
+    public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(async () =>
+    {
+        if (cases.LoadReading(caseId, invoiceId) is not { } stored) return new InvoiceReadingResp([]);
+        var pages = Json.Deserialize<List<OcrPage>>(stored);
+        byte[] data;
+        try
+        {
+            (_, data) = cases.LoadFile(caseId, invoiceId);
+        }
+        catch (CaseNotFoundException)
+        {
+            return new InvoiceReadingResp([]);
+        }
+        var images = InvoiceParser.Detect(data) switch
+        {
+            Kind.Image => [data],
+            Kind.Pdf => await RenderPdf(data, ScanDpi, ct) ?? [],
+            _ => new List<byte[]>(),
+        };
+        for (var i = 0; i < pages.Count && i < images.Count; i++) pages[i].Image = images[i];
+        return new InvoiceReadingResp(pages);
     });
 
     public Task<MappingSuggestResp> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
@@ -275,16 +298,31 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     CaseResp Resp(Case c) => new(c, Display.Case(c, rules.Load()));
 
-    CaseResp Attach(string caseId, Invoice inv, string fileName, byte[] data)
+    CaseResp Attach(string caseId, Invoice inv, string fileName, byte[] data, List<OcrPage>? reading = null)
     {
         var c = LoadCase(caseId);
+        // The document first: storing it clears whatever else the invoice kept.
         if (data.Length > 0) cases.SaveFile(caseId, inv.Id, fileName, data);
+        if (reading is { Count: > 0 }) cases.SaveReading(caseId, inv.Id, Reading(reading));
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
         SaveCase(c);
         return Resp(c);
     }
+
+    // The images are what the pages were read from, and the document they came from is stored: they
+    // are rendered again rather than written a second time.
+    static byte[] Reading(List<OcrPage> pages) =>
+        Encoding.UTF8.GetBytes(Json.Serialize(pages.Select(p => new OcrPage
+        {
+            Width = p.Width,
+            Height = p.Height,
+            Words = p.Words,
+            Header = p.Header,
+            Lines = p.Lines,
+            Flags = p.Flags,
+        }).ToList()) + "\n");
 
     string Gewerbe(string caseId)
     {

@@ -11,6 +11,10 @@ public sealed class CaseNotFoundException(string message) : Exception(message);
 
 public sealed partial class CaseStore(string dir)
 {
+    // Beside the document, skipped by LoadFile like every other dot file: what the scan was read
+    // as, so a stored invoice can still show where each of its values came from.
+    const string ReadingName = ".reading.json";
+
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
 
@@ -80,8 +84,10 @@ public sealed partial class CaseStore(string dir)
         var target = FileDir(caseId, invoiceId);
         name = Path.GetFileName(name);
         if (name == "" || name.StartsWith('.')) throw new CaseInvalidException($"ungültiger Dateiname \"{name}\"");
-        if (Directory.Exists(target)) Directory.Delete(target, true);
         Directory.CreateDirectory(target);
+        // An invoice keeps one document, so the old one goes; what is stored beside it stays.
+        foreach (var old in Directory.EnumerateFiles(target).Where(f => !Path.GetFileName(f).StartsWith('.')).ToList())
+            File.Delete(old);
         WriteAtomic(Path.Combine(target, name), data);
     }
 
@@ -89,6 +95,15 @@ public sealed partial class CaseStore(string dir)
     {
         var target = FileDir(caseId, invoiceId);
         if (Directory.Exists(target)) Directory.Delete(target, true);
+    }
+
+    public void SaveReading(string caseId, string invoiceId, byte[] data) =>
+        WriteAtomic(Path.Combine(FileDir(caseId, invoiceId), ReadingName), data);
+
+    public byte[]? LoadReading(string caseId, string invoiceId)
+    {
+        var path = Path.Combine(FileDir(caseId, invoiceId), ReadingName);
+        return File.Exists(path) ? File.ReadAllBytes(path) : null;
     }
 
     public (string Name, byte[] Data) LoadFile(string caseId, string invoiceId)
