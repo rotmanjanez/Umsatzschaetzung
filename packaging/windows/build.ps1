@@ -47,9 +47,12 @@ Remove-Item -Recurse -Force $dist -ErrorAction Ignore
 dotnet publish (Join-Path $root "src\Umsatzschätzung.App") -c Release -r $Arch --self-contained -p:PublishSingleFile=true -p:Version=$msiVersion -o $dist
 if ($LASTEXITCODE -ne 0) { throw "publish failed" }
 Copy-Item (Join-Path $PSScriptRoot "LICENSES.txt") $dist
+Copy-Item (Join-Path $root "LICENSE") (Join-Path $dist "LICENSE.txt")
+Copy-Item (Join-Path $root "LIZENZ") (Join-Path $dist "LIZENZ.txt")
 
 foreach ($required in "umsatzschätzung.exe", "WebView2Loader.dll", "e_sqlite3.dll", "pdfium.dll", "LICENSES.txt",
-                      "PresentationNative_cor3.dll", "wpfgfx_cor3.dll", "PenImc_cor3.dll", "vcruntime140_cor3.dll") {
+                      "PresentationNative_cor3.dll", "wpfgfx_cor3.dll", "PenImc_cor3.dll", "vcruntime140_cor3.dll",
+                      "LICENSE.txt", "LIZENZ.txt") {
     if (-not (Test-Path (Join-Path $dist $required))) { throw "$required missing from $dist" }
 }
 foreach ($required in "tagger.int8.onnx", "vocab.json", "merges.txt", "byte_to_unicode.json", "spec.json") {
