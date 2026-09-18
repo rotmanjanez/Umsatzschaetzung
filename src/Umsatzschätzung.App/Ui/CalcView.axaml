@@ -18,6 +18,9 @@
         <Style Selector="DataGrid#ProductGrid DataGridRow" x:DataType="ui:ProductRowModel">
             <Setter Property="Opacity" Value="{Binding Fade}"/>
         </Style>
+        <Style Selector="DataGrid#RevenueGrid DataGridRow">
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
         <Style Selector="TextBlock.total">
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
@@ -36,9 +39,9 @@
                 <StackPanel Margin="0,0,16,0">
                     <TextBlock Text="Produkte" Theme="{StaticResource SectionHeader}"/>
                     <StackPanel Margin="0,0,0,24">
-                        <DataGrid x:Name="ProductGrid" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True">
+                        <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Produkt" Width="*" SortMemberPath="Name">
+                                <DataGridTemplateColumn Header="Produkt" Width="260" MinWidth="120" SortMemberPath="Name">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ProductRowModel">
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
@@ -118,9 +121,9 @@
                     </StackPanel>
 
                     <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}"/>
-                    <DataGrid Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True" IsHitTestVisible="False">
+                    <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Steuersatz" Width="*" SortMemberPath="Vat">
+                            <DataGridTemplateColumn Header="Steuersatz" Width="220" MinWidth="120" SortMemberPath="Vat">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="svc:RevenueRow">
                                         <TextBlock Text="{Binding Vat}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>

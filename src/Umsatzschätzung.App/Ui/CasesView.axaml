@@ -57,9 +57,9 @@
             </StackPanel>
         </Border>
         <Grid>
-            <DataGrid x:Name="Grid" Theme="{StaticResource Grid}" IsReadOnly="True" KeyDown="GridKeyDown">
+            <DataGrid x:Name="Grid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" IsReadOnly="True" KeyDown="GridKeyDown">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Bezeichnung" Width="*">
+                    <DataGridTemplateColumn Header="Bezeichnung" Width="320" MinWidth="160">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="svc:CaseRow">
                                 <TextBlock Text="{Binding Case.Label}" FontWeight="SemiBold" VerticalAlignment="Center"/>
