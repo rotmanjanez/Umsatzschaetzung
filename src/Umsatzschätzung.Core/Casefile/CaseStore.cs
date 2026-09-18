@@ -13,10 +13,14 @@ public sealed class CaseNotFoundException(string message) : Exception(message);
 // gelesen wurde, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen.
 public sealed partial class CaseStore(string dir)
 {
-    const string Schema = """
+    // Der Schritt ist folgenlos, wo seine Tabellen schon stehen: bestehende Falldateien
+    // ohne user_version wachsen so in Version 1 hinein.
+    static readonly string[] Migrations = [
+        """
         CREATE TABLE IF NOT EXISTS kase(id TEXT PRIMARY KEY, json TEXT NOT NULL) WITHOUT ROWID;
         CREATE TABLE IF NOT EXISTS document(invoice_id TEXT PRIMARY KEY, name TEXT, data BLOB, reading BLOB) WITHOUT ROWID;
-        """;
+        """,
+    ];
 
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
@@ -115,8 +119,9 @@ public sealed partial class CaseStore(string dir)
         try
         {
             File.WriteAllBytes(temp, data);
+            Check(temp);
             Case c;
-            using (var db = Reader(temp)) c = Verify(db);
+            using (var db = Reader(temp)) c = Read(db);
             File.Move(temp, PathOf(c.Id), true);
             return c;
         }
@@ -215,12 +220,33 @@ public sealed partial class CaseStore(string dir)
     SqliteConnection Writer(string id)
     {
         Directory.CreateDirectory(dir);
-        var db = Connect(PathOf(id), SqliteOpenMode.ReadWriteCreate);
-        Exec(db, Schema);
-        return db;
+        return Open(PathOf(id), SqliteOpenMode.ReadWriteCreate);
     }
 
-    static SqliteConnection Reader(string path) => Connect(path, SqliteOpenMode.ReadOnly);
+    static SqliteConnection Reader(string path) => Open(path, SqliteOpenMode.ReadOnly);
+
+    // Eine Falldatei ist ein Dokument und wird beim Öffnen nachgezogen. Die Fassung davor
+    // bleibt daneben liegen, falls ein Schritt sich später als falsch herausstellt.
+    static SqliteConnection Open(string path, SqliteOpenMode mode)
+    {
+        var db = Connect(path, mode);
+        var from = Schema.Version(db);
+        if (from == Migrations.Length) return db;
+        db.Dispose();
+        if (from > 0 && from < Migrations.Length) File.Copy(path, $"{path}.v{from}.bak", true);
+        using (var writer = Connect(path, SqliteOpenMode.ReadWriteCreate))
+        {
+            try
+            {
+                Schema.Migrate(writer, Migrations);
+            }
+            catch (SchemaTooNewException e)
+            {
+                throw new CaseInvalidException("Falldatei " + e.Message, e);
+            }
+        }
+        return Connect(path, mode);
+    }
 
     static SqliteConnection Connect(string path, SqliteOpenMode mode)
     {
@@ -235,12 +261,13 @@ public sealed partial class CaseStore(string dir)
         return db;
     }
 
-    static Case Verify(SqliteConnection db)
+    // Vor dem Nachziehen, damit eine beschädigte Datei gar nicht erst migriert wird.
+    static void Check(string path)
     {
         try
         {
+            using var db = Connect(path, SqliteOpenMode.ReadOnly);
             if (Scalar(db, "PRAGMA quick_check") as string != "ok") throw new CaseInvalidException("Falldatei ist beschädigt");
-            return Read(db);
         }
         catch (SqliteException e)
         {
