@@ -21,6 +21,7 @@ public interface IService
     Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct);                                    // POST /cases/{id}/invoices/{inv}/verify   see Intent
     Task<CaseResp> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct);                    // DELETE /cases/{id}/invoices/{inv}   drops the invoice and its stored file, resp is the saved case
     Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct);           // GET  /cases/{id}/invoices/{inv}/source
+    Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct);         // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading, images rendered again
     Task<MappingSuggestResp> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct); // POST /cases/{id}/mappings/suggest   caseId "" suggests without a Gewerbe filter
 
     Task<ReportDisplay> Calculate(string caseId, CancellationToken ct);                                     // POST /cases/{id}/calc

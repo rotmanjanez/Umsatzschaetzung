@@ -41,7 +41,8 @@ public sealed class Session : Observable
     public CaseDisplay? Display { get; private set; }
     public RuleSetResp? Rules { get; private set; }
     public StatusResp? Status { get; private set; }
-    public Dictionary<string, OcrResp> Drafts { get; } = [];
+    // What a scan was read as, freshly from an import or fetched back from the case it was stored with.
+    public Dictionary<string, OcrResp> Readings { get; } = [];
     public Dictionary<string, InvoiceSourceResp> Sources { get; } = [];
 
     public string Error { get => error; set => Set(ref error, value); }

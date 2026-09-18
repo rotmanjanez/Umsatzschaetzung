@@ -185,7 +185,7 @@ public partial class InvoiceView : Screen
     readonly InvoiceModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
     readonly Action<CaseResp> onSaved;
-    readonly List<OcrPage> pages;
+    List<OcrPage> pages;
     Invoice invoice;
     InvoiceDisplay display;
     List<Flag> flags = [];
@@ -216,9 +216,7 @@ public partial class InvoiceView : Screen
                 flags.AddRange(p.Flags);
                 foreach (var l in p.Lines) flags.AddRange(l.Flags);
             }
-            for (var i = 0; i < pages.Count; i++) PageSelect.Items.Add("Seite " + (i + 1));
-            PageSelect.SelectedIndex = 0;
-            PageSelect.IsVisible = pages.Count > 1;
+            Show();
         }
         else
         {
@@ -260,6 +258,17 @@ public partial class InvoiceView : Screen
         Grid.SetColumn(pane, sideBySide ? index : 0);
     }
 
+    void Show()
+    {
+        PageSelect.Items.Clear();
+        for (var i = 0; i < pages.Count; i++) PageSelect.Items.Add("Seite " + (i + 1));
+        PageSelect.IsVisible = pages.Count > 1;
+        OcrPane.IsVisible = true;
+        Source.IsVisible = false;
+        currentPage = -1;
+        PageSelect.SelectedIndex = 0;
+    }
+
     public string Id => invoice.Id;
 
     // Worth keeping around once the user leaves it: unsaved edits, or a review still to be done.
@@ -273,6 +282,7 @@ public partial class InvoiceView : Screen
             await Preview();
         }
         if (pages.Count > 0 || sourceLoaded || Session.Case is null) return;
+        if (await Read(Session.Case.Id)) return;
         if (Session.Sources.TryGetValue(invoice.Id, out var cached))
         {
             Source.Show(cached, cached.FileName);
@@ -289,6 +299,21 @@ public partial class InvoiceView : Screen
             sourceLoaded = true;
         });
         if (!ok && IsActive) Source.Show(null, "Kein Beleg gespeichert.");
+    }
+
+    // A scan keeps its reading with the case, so an invoice read long ago can still show where each
+    // of its values was found. The rows are built again for their cells to learn their boxes.
+    async Task<bool> Read(string caseId)
+    {
+        var read = new List<OcrPage>();
+        await Session.Run(async () => read = (await Session.Service.InvoiceReading(caseId, invoice.Id, Ct)).Pages);
+        if (read.Count == 0 || !IsActive) return false;
+        Session.Readings[invoice.Id] = new OcrResp(invoice.Id, read, invoice, display);
+        pages = read;
+        Load();
+        Show();
+        ApplyFlags(flags);
+        return true;
     }
 
     // The case keeps the stored invoice; edits stay in this copy until they are saved.

@@ -173,7 +173,7 @@ public partial class InvoicesView : Screen
     InvoiceView EditorFor(InvoiceRow row)
     {
         if (editors.TryGetValue(row.Id, out var existing)) return existing;
-        var view = new InvoiceView(Session, row.Invoice, row.Display, Session.Drafts.GetValueOrDefault(row.Id), Session.SetCase);
+        var view = new InvoiceView(Session, row.Invoice, row.Display, Session.Readings.GetValueOrDefault(row.Id), Session.SetCase);
         editors[row.Id] = view;
         return view;
     }
@@ -195,7 +195,7 @@ public partial class InvoicesView : Screen
 
     void Forget(string id)
     {
-        Session.Drafts.Remove(id);
+        Session.Readings.Remove(id);
         Session.Sources.Remove(id);
         if (windows.Remove(id, out var window)) window.Close();
         if (editors.Remove(id, out var gone)) gone.Leave();
