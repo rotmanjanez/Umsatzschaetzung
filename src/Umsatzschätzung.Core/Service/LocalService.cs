@@ -91,20 +91,15 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return Task.FromResult(0);
     });
 
-    public Task<CaseResp> ImportCase(string fileName, byte[] data, CancellationToken ct) => Guard(() =>
-    {
-        var c = CaseStore.Decode(data);
-        SaveCase(c);
-        return Resp(c);
-    });
+    public Task<CaseResp> ImportCase(string fileName, byte[] data, CancellationToken ct) => Guard(() => Resp(cases.Import(data)));
 
     public Task<ExportResp> ExportCase(string caseId, ExportFormat format, CancellationToken ct) => Guard(() =>
     {
         var c = LoadCase(caseId);
         switch (format)
         {
-            case ExportFormat.Json:
-                return new ExportResp(CaseStore.Encode(c), FileName(c, "json"));
+            case ExportFormat.Case:
+                return new ExportResp(cases.Export(caseId), FileName(c, "db"));
             case ExportFormat.Csv:
                 var (rep, rs) = Compute(c);
                 return new ExportResp(Csv.Render(c, rep, rs), FileName(c, "csv"));

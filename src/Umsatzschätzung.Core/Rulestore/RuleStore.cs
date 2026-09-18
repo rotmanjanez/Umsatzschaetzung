@@ -4,8 +4,6 @@ using Umsatzschätzung.Richtsatz;
 
 namespace Umsatzschätzung.Rulestore;
 
-public sealed class StoreUnavailableException(string message, Exception? inner = null) : Exception(message, inner);
-
 public sealed class RuleStore
 {
     const int KeptSnapshots = 10;

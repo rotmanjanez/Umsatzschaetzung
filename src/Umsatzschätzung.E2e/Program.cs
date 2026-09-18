@@ -15,10 +15,8 @@ var work = Directory.CreateTempSubdirectory("umsatzschätzung-e2e-");
 var store = Path.Combine(work.FullName, "store");
 var snapshots = Path.Combine(work.FullName, "snapshots");
 var seed = Json.Deserialize<RuleSet>(File.ReadAllBytes(Path.Combine(data, "ruleset.json")));
-IService svc = new LocalService(
-    new RuleStore(store, snapshots, seed),
-    new CaseStore(Path.Combine(work.FullName, "cases")),
-    null, new Tagger(), null, null, "e2e");
+var cases = new CaseStore(Path.Combine(work.FullName, "cases"));
+IService svc = new LocalService(new RuleStore(store, snapshots, seed), cases, null, new Tagger(), null, null, "e2e");
 var ct = CancellationToken.None;
 var checks = 0;
 
@@ -31,8 +29,8 @@ void Check(bool ok, string what)
 var status = await svc.Status(ct);
 Check(status.RulesVersion == 0 && status.Problem is null, "status reads the seeded rule set");
 
-var kase = await svc.ImportCase("case.json", File.ReadAllBytes(Path.Combine(data, "case.json")), ct);
-Check(kase.Case.Id == "case.bar.2024" && kase.Case.Invoices.Count == 1, "case import");
+var kase = await svc.PutCase(CaseStore.Decode(File.ReadAllText(Path.Combine(data, "case.json"))), ct);
+Check(kase.Case.Id == "case.bar.2024" && kase.Case.Invoices.Count == 1, "case stored");
 
 var neu = await svc.PutCase(new Case
 {
@@ -112,6 +110,21 @@ try
 catch (ServiceError e)
 {
     Check(e.Code == ErrorCode.Unsupported, "pdf preview without renderer is Unsupported, got " + e.Code);
+}
+
+var dump = await svc.ExportCase(kase.Case.Id, ExportFormat.Case, ct);
+var back = await svc.ImportCase(dump.FileName, dump.Data, ct);
+Check(dump.FileName.EndsWith(".db") && back.Case.Id == kase.Case.Id && back.Case.Invoices.Count == 2,
+    "a case exports and imports as one file");
+Check(cases.LoadFile(kase.Case.Id, parsed.Invoice.Id).Name == "zugferd.pdf", "the document travels inside it");
+try
+{
+    await svc.ImportCase("kaputt.db", [1, 2, 3], ct);
+    Check(false, "a file that is not a case must be refused");
+}
+catch (ServiceError e)
+{
+    Check(e.Code == ErrorCode.Invalid, "broken case file refused with Invalid, got " + e.Code);
 }
 
 var korn = (await svc.Rules(ct)).RuleSet.Products["prod.korn.4cl"];

@@ -1,6 +1,6 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Data.Sqlite;
 using Umsatzschätzung.Model;
 
 namespace Umsatzschätzung.Casefile;
@@ -9,11 +9,14 @@ public sealed class CaseInvalidException(string message, Exception? inner = null
 
 public sealed class CaseNotFoundException(string message) : Exception(message);
 
+// Ein Fall ist eine Datei: <id>.db trägt den Fall, jeden Beleg und das, was der Scan
+// gelesen wurde, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen.
 public sealed partial class CaseStore(string dir)
 {
-    // Beside the document, skipped by LoadFile like every other dot file: what the scan was read
-    // as, so a stored invoice can still show where each of its values came from.
-    const string ReadingName = ".reading.json";
+    const string Schema = """
+        CREATE TABLE IF NOT EXISTS kase(id TEXT PRIMARY KEY, json TEXT NOT NULL) WITHOUT ROWID;
+        CREATE TABLE IF NOT EXISTS document(invoice_id TEXT PRIMARY KEY, name TEXT, data BLOB, reading BLOB) WITHOUT ROWID;
+        """;
 
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
@@ -21,24 +24,23 @@ public sealed partial class CaseStore(string dir)
     public static bool ValidId(string id) => IdPattern().IsMatch(id) && !id.Contains("..");
 
     string PathOf(string id) =>
-        ValidId(id) ? Path.Combine(dir, id + ".json") : throw new CaseInvalidException($"ungültige Fall-ID \"{id}\"");
+        ValidId(id) ? Path.Combine(dir, id + ".db") : throw new CaseInvalidException($"ungültige Fall-ID \"{id}\"");
 
-    string FileDir(string caseId, string invoiceId) =>
-        ValidId(caseId) && ValidId(invoiceId)
-            ? Path.Combine(dir, caseId + ".files", invoiceId)
-            : throw new CaseInvalidException($"ungültige ID \"{caseId}\"/\"{invoiceId}\"");
+    static string InvoiceKey(string caseId, string invoiceId) =>
+        ValidId(invoiceId) ? invoiceId : throw new CaseInvalidException($"ungültige ID \"{caseId}\"/\"{invoiceId}\"");
 
-    public List<Case> List()
+    public List<Case> List() => Guarded<List<Case>>(() =>
     {
         if (!Directory.Exists(dir)) return [];
         var cases = new List<Case>();
-        foreach (var path in Directory.EnumerateFiles(dir, "*.json"))
+        foreach (var path in Directory.EnumerateFiles(dir, "*.db"))
         {
             var name = Path.GetFileName(path);
             if (name.StartsWith('.')) continue;
             try
             {
-                cases.Add(Decode(File.ReadAllBytes(path)));
+                using var db = Reader(path);
+                cases.Add(Read(db));
             }
             catch (CaseInvalidException e)
             {
@@ -49,16 +51,17 @@ public sealed partial class CaseStore(string dir)
             .OrderByDescending(s => s.UpdatedAt)
             .ThenBy(s => s.Id, StringComparer.Ordinal)
             .ToList();
-    }
+    });
 
-    public Case Load(string id)
+    public Case Load(string id) => Guarded(() =>
     {
         var path = PathOf(id);
         if (!File.Exists(path)) throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
         Case c;
         try
         {
-            c = Decode(File.ReadAllBytes(path));
+            using var db = Reader(path);
+            c = Read(db);
         }
         catch (CaseInvalidException e)
         {
@@ -66,92 +69,131 @@ public sealed partial class CaseStore(string dir)
         }
         if (c.Id != id) throw new CaseInvalidException($"Fall \"{id}\": Datei enthält Fall \"{c.Id}\"");
         return c;
-    }
+    });
 
-    public void Save(Case c) => WriteAtomic(PathOf(c.Id), Encode(c));
+    public void Save(Case c) => Guarded(() =>
+    {
+        var json = Encode(c);
+        using var db = Writer(c.Id);
+        Exec(db, "DELETE FROM kase WHERE id <> @id;"
+            + "INSERT INTO kase(id, json) VALUES(@id, @json) ON CONFLICT(id) DO UPDATE SET json = excluded.json",
+            ("@id", c.Id), ("@json", json));
+        return 0;
+    });
 
-    public void Delete(string id)
+    public void Delete(string id) => Guarded(() =>
     {
         var path = PathOf(id);
-        var files = path[..^".json".Length] + ".files";
-        if (Directory.Exists(files)) Directory.Delete(files, true);
         if (!File.Exists(path)) throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
         File.Delete(path);
-    }
+        File.Delete(path + "-journal");
+        return 0;
+    });
 
-    public void SaveFile(string caseId, string invoiceId, string name, byte[] data)
+    // Der Fall wandert als eine Datei: die Kopie ist in sich abgeschlossen und trägt die Belege mit.
+    public byte[] Export(string id) => Guarded(() =>
     {
-        var target = FileDir(caseId, invoiceId);
-        name = Path.GetFileName(name);
-        if (name == "" || name.StartsWith('.')) throw new CaseInvalidException($"ungültiger Dateiname \"{name}\"");
-        Directory.CreateDirectory(target);
-        // An invoice keeps one document, so the old one goes; what is stored beside it stays.
-        foreach (var old in Directory.EnumerateFiles(target).Where(f => !Path.GetFileName(f).StartsWith('.')).ToList())
-            File.Delete(old);
-        WriteAtomic(Path.Combine(target, name), data);
-    }
-
-    public void DeleteFile(string caseId, string invoiceId)
-    {
-        var target = FileDir(caseId, invoiceId);
-        if (Directory.Exists(target)) Directory.Delete(target, true);
-    }
-
-    public void SaveReading(string caseId, string invoiceId, byte[] data) =>
-        WriteAtomic(Path.Combine(FileDir(caseId, invoiceId), ReadingName), data);
-
-    public byte[]? LoadReading(string caseId, string invoiceId)
-    {
-        var path = Path.Combine(FileDir(caseId, invoiceId), ReadingName);
-        return File.Exists(path) ? File.ReadAllBytes(path) : null;
-    }
-
-    public (string Name, byte[] Data) LoadFile(string caseId, string invoiceId)
-    {
-        var target = FileDir(caseId, invoiceId);
-        if (!Directory.Exists(target)) throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
-        var path = Directory.EnumerateFiles(target)
-            .Where(p => !Path.GetFileName(p).StartsWith('.'))
-            .Order(StringComparer.Ordinal)
-            .FirstOrDefault()
-            ?? throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
-        return (Path.GetFileName(path), File.ReadAllBytes(path));
-    }
-
-    static void WriteAtomic(string path, byte[] data)
-    {
-        var parent = Path.GetDirectoryName(path)!;
-        Directory.CreateDirectory(parent);
-        var tmp = Path.Combine(parent, "." + Path.GetFileName(path) + "." + Guid.NewGuid().ToString("N") + ".tmp");
+        var path = PathOf(id);
+        if (!File.Exists(path)) throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
+        var temp = Temp();
         try
         {
-            using (var f = new FileStream(tmp, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-            {
-                f.Write(data);
-                f.Flush(true);
-            }
-            File.Move(tmp, path, true);
+            using (var db = Reader(path)) Exec(db, "VACUUM INTO @path", ("@path", temp));
+            return File.ReadAllBytes(temp);
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    });
+
+    public Case Import(byte[] data) => Guarded(() =>
+    {
+        if (data.Length == 0) throw new CaseInvalidException("Falldatei ist leer");
+        Directory.CreateDirectory(dir);
+        var temp = Temp();
+        try
+        {
+            File.WriteAllBytes(temp, data);
+            Case c;
+            using (var db = Reader(temp)) c = Verify(db);
+            File.Move(temp, PathOf(c.Id), true);
+            return c;
         }
         catch
         {
-            File.Delete(tmp);
+            File.Delete(temp);
             throw;
         }
-    }
+    });
 
-    public static byte[] Encode(Case c)
+    public void SaveFile(string caseId, string invoiceId, string name, byte[] data) => Guarded(() =>
+    {
+        var key = InvoiceKey(caseId, invoiceId);
+        name = Path.GetFileName(name);
+        if (name == "" || name.StartsWith('.')) throw new CaseInvalidException($"ungültiger Dateiname \"{name}\"");
+        using var db = Attached(caseId);
+        // Ein Beleg trägt ein Dokument, das alte geht; die Lesung daneben bleibt.
+        Exec(db, "INSERT INTO document(invoice_id, name, data) VALUES(@id, @name, @data) "
+            + "ON CONFLICT(invoice_id) DO UPDATE SET name = excluded.name, data = excluded.data",
+            ("@id", key), ("@name", name), ("@data", data));
+        return 0;
+    });
+
+    public void DeleteFile(string caseId, string invoiceId) => Guarded(() =>
+    {
+        var key = InvoiceKey(caseId, invoiceId);
+        if (!File.Exists(PathOf(caseId))) return 0;
+        using var db = Writer(caseId);
+        Exec(db, "DELETE FROM document WHERE invoice_id = @id", ("@id", key));
+        return 0;
+    });
+
+    public void SaveReading(string caseId, string invoiceId, byte[] data) => Guarded(() =>
+    {
+        var key = InvoiceKey(caseId, invoiceId);
+        using var db = Attached(caseId);
+        Exec(db, "INSERT INTO document(invoice_id, reading) VALUES(@id, @reading) "
+            + "ON CONFLICT(invoice_id) DO UPDATE SET reading = excluded.reading",
+            ("@id", key), ("@reading", data));
+        return 0;
+    });
+
+    public byte[]? LoadReading(string caseId, string invoiceId) => Guarded(() =>
+    {
+        var key = InvoiceKey(caseId, invoiceId);
+        var path = PathOf(caseId);
+        if (!File.Exists(path)) return null;
+        using var db = Reader(path);
+        return Scalar(db, "SELECT reading FROM document WHERE invoice_id = @id", ("@id", key)) as byte[];
+    });
+
+    public (string Name, byte[] Data) LoadFile(string caseId, string invoiceId) => Guarded(() =>
+    {
+        var key = InvoiceKey(caseId, invoiceId);
+        var path = PathOf(caseId);
+        if (!File.Exists(path)) throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
+        using var db = Reader(path);
+        using var cmd = Command(db, "SELECT name, data FROM document WHERE invoice_id = @id", ("@id", key));
+        using var r = cmd.ExecuteReader();
+        if (!r.Read() || r.IsDBNull(0) || r.IsDBNull(1))
+            throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
+        return (r.GetString(0), (byte[])r.GetValue(1));
+    });
+
+    public static string Encode(Case c)
     {
         Defaults(c);
         Validate(c);
-        return Encoding.UTF8.GetBytes(Json.Serialize(c) + "\n");
+        return Json.Serialize(c);
     }
 
-    public static Case Decode(ReadOnlySpan<byte> data)
+    public static Case Decode(string json)
     {
         Case c;
         try
         {
-            c = Json.Deserialize<Case>(data);
+            c = Json.Deserialize<Case>(json);
         }
         catch (JsonException e)
         {
@@ -160,6 +202,64 @@ public sealed partial class CaseStore(string dir)
         Defaults(c);
         Validate(c);
         return c;
+    }
+
+    string Temp() => Path.Combine(dir, "." + Guid.NewGuid().ToString("N") + ".tmp");
+
+    SqliteConnection Attached(string caseId)
+    {
+        if (!File.Exists(PathOf(caseId))) throw new CaseNotFoundException($"Fall \"{caseId}\": Fall nicht gefunden");
+        return Writer(caseId);
+    }
+
+    SqliteConnection Writer(string id)
+    {
+        Directory.CreateDirectory(dir);
+        var db = Connect(PathOf(id), SqliteOpenMode.ReadWriteCreate);
+        Exec(db, Schema);
+        return db;
+    }
+
+    static SqliteConnection Reader(string path) => Connect(path, SqliteOpenMode.ReadOnly);
+
+    static SqliteConnection Connect(string path, SqliteOpenMode mode)
+    {
+        var db = new SqliteConnection(new SqliteConnectionStringBuilder
+        {
+            DataSource = path,
+            Mode = mode,
+            Pooling = false,
+            DefaultTimeout = 10,
+        }.ToString());
+        db.Open();
+        return db;
+    }
+
+    static Case Verify(SqliteConnection db)
+    {
+        try
+        {
+            if (Scalar(db, "PRAGMA quick_check") as string != "ok") throw new CaseInvalidException("Falldatei ist beschädigt");
+            return Read(db);
+        }
+        catch (SqliteException e)
+        {
+            throw new CaseInvalidException("Falldatei ungültig: " + e.Message, e);
+        }
+    }
+
+    static Case Read(SqliteConnection db)
+    {
+        try
+        {
+            return Scalar(db, "SELECT json FROM kase") is string json
+                ? Decode(json)
+                : throw new CaseInvalidException("Falldatei enthält keinen Fall");
+        }
+        catch (SqliteException e)
+        {
+            throw new CaseInvalidException("Falldatei ungültig: " + e.Message, e);
+        }
     }
 
     static void Defaults(Case c)
@@ -212,5 +312,37 @@ public sealed partial class CaseStore(string dir)
         }
         if (c.CreatedAt == default) throw new CaseInvalidException("Erstellungszeitpunkt fehlt");
         if (c.UpdatedAt == default) throw new CaseInvalidException("Änderungszeitpunkt fehlt");
+    }
+
+    static SqliteCommand Command(SqliteConnection db, string sql, params (string Name, object Value)[] args)
+    {
+        var cmd = db.CreateCommand();
+        cmd.CommandText = sql;
+        foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
+        return cmd;
+    }
+
+    static void Exec(SqliteConnection db, string sql, params (string Name, object Value)[] args)
+    {
+        using var cmd = Command(db, sql, args);
+        cmd.ExecuteNonQuery();
+    }
+
+    static object? Scalar(SqliteConnection db, string sql, params (string Name, object Value)[] args)
+    {
+        using var cmd = Command(db, sql, args);
+        return cmd.ExecuteScalar();
+    }
+
+    static T Guarded<T>(Func<T> body)
+    {
+        try
+        {
+            return body();
+        }
+        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
+        {
+            throw new StoreUnavailableException("Fallspeicher: " + e.Message, e);
+        }
     }
 }
