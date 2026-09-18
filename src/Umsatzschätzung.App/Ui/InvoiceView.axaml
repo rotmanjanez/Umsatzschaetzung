@@ -31,8 +31,13 @@
             <Setter Property="VerticalAlignment" Value="Stretch"/>
         </Style>
     </ui:Screen.Styles>
-    <Grid RowDefinitions="11*,6,9*">
-        <Border Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="11*" MinHeight="240"/>
+            <RowDefinition Height="6"/>
+            <RowDefinition Height="9*" MinHeight="120"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12" ClipToBounds="True">
             <DockPanel>
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
@@ -199,7 +204,7 @@
 
         <GridSplitter Grid.Row="1" Height="6" HorizontalAlignment="Stretch" Background="Transparent"/>
 
-        <Border Grid.Row="2" Theme="{StaticResource Panel}">
+        <Border Grid.Row="2" Theme="{StaticResource Panel}" ClipToBounds="True">
             <Grid>
                 <DockPanel x:Name="OcrPane">
                     <DockPanel DockPanel.Dock="Top" Margin="12,8">
