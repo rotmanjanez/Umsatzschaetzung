@@ -1,8 +1,10 @@
 import atexit
 import base64
+import multiprocessing.util
 import json
 import os
 import shutil
+import signal
 import socket
 import struct
 import subprocess
@@ -134,12 +136,21 @@ class Browser:
     def __init__(self, chrome, flags=()):
         self.dir = tempfile.mkdtemp(prefix="cdp-")
         self.port = free_port()
+        # Eigene Prozessgruppe: das `chromium` auf dem Rechner ist ein AppImage,
+        # unser Kindprozess also nur dessen Starter. Ein SIGTERM an ihn lässt den
+        # eigentlichen Browser samt Zygoten und Renderern stehen — deshalb wird
+        # beim Schließen die ganze Gruppe abgeräumt.
         self.process = subprocess.Popen(
             [chrome, *flags, "--remote-debugging-port=%d" % self.port,
              "--user-data-dir=" + self.dir, "about:blank"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
         self.wait_ready()
         atexit.register(self.close)
+        # Ein multiprocessing-Worker verlässt den Prozess mit `os._exit()`, und das
+        # überspringt `atexit`. Ohne diesen zweiten Haken bleibt nach jedem Lauf je
+        # Worker ein ganzer Chrome-Baum an init hängen — in v9 waren das 561
+        # verwaiste Prozesse.
+        multiprocessing.util.Finalize(self, self.close, exitpriority=16)
 
     def wait_ready(self, timeout=40):
         deadline = time.time() + timeout
@@ -176,11 +187,16 @@ class Browser:
 
     def close(self):
         if self.process.poll() is None:
-            self.process.terminate()
-            try:
-                self.process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
+            for sig, wait in ((signal.SIGTERM, 5), (signal.SIGKILL, 2)):
+                try:
+                    os.killpg(os.getpgid(self.process.pid), sig)
+                except (ProcessLookupError, PermissionError):
+                    break
+                try:
+                    self.process.wait(timeout=wait)
+                    break
+                except subprocess.TimeoutExpired:
+                    continue
         shutil.rmtree(self.dir, ignore_errors=True)
 
 

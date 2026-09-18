@@ -15,11 +15,20 @@ from PIL import Image
 
 import content
 import degrade
+import families
 import layout
 import render
 
+# Nicht in truth.json["layout"]: Wörterbücher mit einem Eintrag je Spalte oder
+# Schlüssel. Die gedruckten Spaltenköpfe stehen unter `headers`.
+LAYOUT_SKIP = {"id", "headers", "headers2", "header_hints", "contact_labels",
+               "meta_extra_labels", "extra_labels", "charge_labels", "footer_heads_text",
+               "title", "title_key", "name_pct"}
+
+# `scan_skew` ist neu in v11 und steht hier, weil es sonst nie gezogen wuerde. Ein
+# Profil, das in PROFILES steht und nicht in dieser Liste, existiert nicht.
 PROFILE_MIX = ["scan_clean", "scan_worn", "photocopy", "washed", "scan_clean", "photo",
-               "faded", "scan_worn", "dark", "crisp", "fax", "low_ink"]
+               "faded", "scan_worn", "dark", "crisp", "fax", "low_ink", "scan_skew"]
 FORMATS = ["jpg", "jpg", "jpg", "pdf"]
 
 
@@ -53,11 +62,13 @@ def save(image, path, fmt, quality, scale, mono):
         image.save(path, "PNG", optimize=True)
 
 
-def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, formats):
+def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, formats,
+              family=None):
     rng = random.Random(seed)
     nprng = np.random.default_rng(int(digest(seed), 16) % (2 ** 32))
     template_id = digest("tpl", seed)
-    spec = layout.fit(layout.template(template_id), meta)
+    spec = layout.fit(layout.template(template_id, family=family,
+                                      doctype=meta.get("doctype", "plain")), meta)
     choices = [f for f in FORMATS if f in formats] or list(formats)
     if profile == "crisp" and "png" in formats:
         choices = ["png"]
@@ -71,6 +82,11 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
         doc, probes, used = render.build(spec, invoice, meta, seed, work)
         shots = render.shoot(doc, probes, work, scale)
         params = degrade.jitter(nprng, profile)
+        # Stempel und Kugelschreiber werden je Seite gewürfelt, standen aber bis v9
+        # in keiner truth.json — genau wie `decor_stamp`. Was gezogen wird, muss
+        # auch protokolliert werden, sonst steht die Achse in jeder Auswertung auf
+        # null und niemand merkt es.
+        params = dict(params, stamp=False, scribble=False)
         pages = []
         written = 0
         for i, (png, probe) in enumerate(shots):
@@ -78,19 +94,26 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
                 image = raw.convert("RGB")
             if rng.random() < 0.12:
                 image = degrade.stamp(image, nprng)
+                params["stamp"] = True
             if rng.random() < 0.08:
                 image = degrade.scribble(image, nprng)
+                params["scribble"] = True
             image, matrix = degrade.apply(image, params, nprng)
             boxes = [[w["box"][0] * scale, w["box"][1] * scale,
                       w["box"][2] * scale, w["box"][3] * scale] for w in probe["words"]]
             warped = degrade.warp_boxes(matrix, boxes)
             kept = [(w, clip(box, image.size)) for w, box in zip(probe["words"], warped)]
             kept = [(w, box) for w, box in kept if box]
-            regions = [(r, clip(box, image.size, keep=0.2)) for r, box in zip(
-                probe["regions"], degrade.warp_boxes(matrix, [
-                    [r["box"][0] * scale, r["box"][1] * scale,
-                     r["box"][2] * scale, r["box"][3] * scale] for r in probe["regions"]]))]
-            regions = [(r, box) for r, box in regions if box]
+            region_boxes = [[r["box"][0] * scale, r["box"][1] * scale,
+                             r["box"][2] * scale, r["box"][3] * scale] for r in probe["regions"]]
+            # Neben dem umschließenden Rechteck auch das *Viereck*: bei 2°
+            # Schräglage ist das Rechteck einer 180 mm breiten Positionszeile
+            # dreimal so hoch wie die Zeile und überlappt die Nachbarpositionen,
+            # und `align.item_of` schlägt Wörter dann der falschen Position zu.
+            quads = degrade.warp_quads(matrix, region_boxes)
+            regions = [(r, clip(box, image.size, keep=0.2), quad) for r, box, quad in zip(
+                probe["regions"], degrade.warp_boxes(matrix, region_boxes), quads)]
+            regions = [(r, box, quad) for r, box, quad in regions if box]
             page_name = f"page-{i + 1}.{fmt}"
             page_path = os.path.join(path, page_name)
             save(image, page_path, fmt, rng.randint(62, 82), scale, mono)
@@ -101,8 +124,9 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
                 "height": image.height,
                 "words": [{"t": w["t"], "f": w["f"], "l": w["l"],
                            "box": [round(v, 1) for v in box]} for w, box in kept],
-                "regions": [{"role": r["role"], "l": r["l"], "box": [round(v, 1) for v in box]}
-                            for r, box in regions],
+                "regions": [{"role": r["role"], "l": r["l"], "box": [round(v, 1) for v in box],
+                             "quad": [[round(x, 1), round(y, 1)] for x, y in quad]}
+                            for r, box, quad in regions],
             })
         record = {
             "template": template_id,
@@ -113,14 +137,12 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
             "scale": scale,
             "degradation": {k: (round(v, 3) if isinstance(v, float) else v)
                             for k, v in params.items()},
-            "layout": {k: used[k] for k in ("page_format", "columns", "glue_unit", "no_header_row", "header_style",
-                                            "table_style", "align", "font", "size", "narrow_name",
-                                            "logo", "address_corner", "meta_style", "totals_style",
-                                            "footer", "uppercase_headers", "group_headings",
-                                            "second_row_details", "meta_table", "meta_place",
-                                            "sender_place", "wordmark_caps", "title_style",
-                                            "logo_side", "pos_format", "cell_currency",
-                                            "totals_side", "pageno_place", "decor_qr")},
+            # Jede Achse der Vorlage wird protokolliert, nicht eine ausgewählte
+            # Liste: in v9 fehlte `decor_stamp` in genau dieser Aufzählung, und
+            # damit stand die Achse in jeder Auswertung auf 0 %, obwohl sie
+            # gezogen und gezeichnet wurde. Ausgenommen sind nur die Wörterbücher,
+            # die je Spalte eine Beschriftung führen — die stehen unter `headers`.
+            "layout": {k: v for k, v in used.items() if k not in LAYOUT_SKIP},
             "headers": {c: used["headers"][c] for c in used["columns"]},
             "pages": pages,
         }
@@ -133,10 +155,17 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
 
 
 def one(args):
-    index, seed, root, variations, scale, val_share, formats, page_mix = args
+    index, seed, root, variations, scale, val_share, formats, page_mix, pick, doctypes = args
     if page_mix:
         layout.PAGE_MIX = page_mix
     invoice, meta = content.make(digest(seed, "inv", index), index)
+    # Die Belegart fällt je *Rechnung*, nicht je Variation: sie verändert die
+    # Zahlen, und `expected.json` wird einmal je Rechnung geschrieben. Alle
+    # Variationen einer Rechnung drucken deshalb dieselben Beträge.
+    drng = random.Random(digest(seed, "doctype", index))
+    doctype = (drng.choice(doctypes) if doctypes
+               else drng.choices(*families.DOCTYPES, k=1)[0])
+    invoice, meta = families.adapt(invoice, meta, doctype)
     name = f"inv-{index:06d}"
     out_dir = os.path.join(root, name)
     os.makedirs(out_dir, exist_ok=True)
@@ -147,16 +176,33 @@ def one(args):
     with open(os.path.join(out_dir, "source.json"), "w", encoding="utf-8") as f:
         json.dump({"category": meta["category"], "kind": meta["kind"], "defect": meta["defect"],
                    "supplier": meta["supplier"], "customer": meta["customer"],
-                   "lines": len(invoice["lines"])}, f, ensure_ascii=False, indent=1)
+                   "lines": len(invoice["lines"]),
+                   # Was `expected.json` nicht tragen kann, `validate.py` aber
+                   # braucht: die gedruckten Zuschlagszeilen gehen in den
+                   # Nettobetrag ein, stehen aber in keiner Position.
+                   "charges": meta["charges"], "goods_net": meta["goods_net"],
+                   "bare_units": meta["bare_units"], "free_lines": meta["free_lines"],
+                   "deposit_lines": meta["deposit_lines"], "doctype": doctype,
+                   # Der gemischt gesetzte Werbesatz (v11, Achse `tagline`). Er steht
+                   # in keinem `expected.json`-Feld, und ohne ihn hier lässt sich von
+                   # der Platte nicht prüfen, dass jedes seiner Wörter `O` trägt.
+                   "slogan": meta["slogan"]},
+                  f, ensure_ascii=False, indent=1)
     order = list(PROFILE_MIX)
     random.Random(digest(seed, "profiles", index)).shuffle(order)
     made = []
-    for v in range(variations):
-        try:
-            made.append(variation(invoice, meta, digest(seed, index, v), v, out_dir, scale,
-                                  val_share, order[v % len(order)], formats))
-        except Exception:
-            traceback.print_exc()
+    try:
+        for v in range(variations):
+            try:
+                made.append(variation(invoice, meta, digest(seed, index, v), v, out_dir, scale,
+                                      val_share, order[v % len(order)], formats,
+                                      family=pick[v % len(pick)] if pick else None))
+            except Exception:
+                traceback.print_exc()
+    finally:
+        # Der Browser gehört zur Rechnung, nicht zum Worker: ein Worker endet mit
+        # `os._exit()` und führt keinen Aufräumhaken mehr aus.
+        render.reset()
     return {"invoice": name, "category": meta["category"], "kind": meta["kind"],
             "lines": len(invoice["lines"]), "variations": made,
             "expected_variations": variations}
@@ -246,6 +292,14 @@ def main():
     ap.add_argument("--verbose", action="store_true", help="one line per invoice")
     ap.add_argument("--formats", default="png,jpg,pdf",
                     help="comma-separated subset of png,jpg,pdf")
+    ap.add_argument("--family", default="",
+                    help="comma-separated layout families to force, e.g. "
+                         "'xrechnung,metro'. Variation i of every invoice takes "
+                         "family i%%len. Default: draw by weight from layout.FAMILIES.")
+    ap.add_argument("--doctype", default="",
+                    help="comma-separated document types to force "
+                         "(plain, kleinunternehmer, reverse_charge, swiss). They change "
+                         "the numbers, so they are drawn per invoice, not per variation.")
     ap.add_argument("--page-mix", default="",
                     help="override the page-format weights, e.g. "
                          "'letter=38,a5=14,b5=12,legal=14,folio=12,a4_land=10'. "
@@ -256,7 +310,22 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     formats = tuple(f.strip() for f in args.formats.split(",") if f.strip())
     page_mix = parse_page_mix(args.page_mix)
-    jobs = [(i, args.seed, args.out, args.variations, args.scale, args.val_share, formats, page_mix)
+    pick = [n.strip() for n in args.family.split(",") if n.strip()]
+    for name in pick:
+        if name not in layout.FAMILIES:
+            raise SystemExit(f"unknown family {name!r}; known: {', '.join(layout.FAMILY_NAMES)}")
+    doctypes = [n.strip() for n in args.doctype.split(",") if n.strip()]
+    for name in doctypes:
+        if name not in families.DOCTYPES[0]:
+            raise SystemExit(f"unknown doctype {name!r}; known: {', '.join(families.DOCTYPES[0])}")
+    # Eine erzwungene Familie mit eigener Belegart zieht sie sich selbst, damit
+    # `--family kleinunternehmer` nicht auf eine Rechnung mit MwSt fällt.
+    if pick and not doctypes:
+        forced = {families.FAMILY_DOCTYPE.get(n, "plain") for n in pick}
+        if forced != {"plain"}:
+            doctypes = sorted(forced)
+    jobs = [(i, args.seed, args.out, args.variations, args.scale, args.val_share, formats,
+             page_mix, pick, doctypes)
             for i in range(args.start, args.start + args.count)]
     done = []
     bar = Progress(len(jobs))

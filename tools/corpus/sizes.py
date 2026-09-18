@@ -50,8 +50,8 @@ GENERIC = (
 )
 LIQUID = (
     ["Fl.", "Flasche", "Kanister", "Bag in Box", "Eimer", "Dose", "Becher", "Fass",
-     "Schlauch", "Träger"],
-    [8, 5, 5, 3, 4, 4, 3, 3, 2, 3],
+     "Schlauch", "Träger", "keg", "Keg", "KEG", "Partyfass", "Glas", "Bügelflasche"],
+    [8, 5, 5, 3, 4, 4, 3, 3, 2, 3, 3, 3, 2, 2, 4, 2],
 )
 DRY = (
     ["Beutel", "Btl.", "Btl", "Netz", "Sack", "Steige", "Bund", "Schale", "Block",
@@ -70,6 +70,18 @@ def containers(inner_kind):
 # Multiplikator-Schreibweisen: 6 x 0,7 l
 TIMES = (["x", "x", "×", "à", "a"], [58, 22, 10, 7, 3])
 PACKCOUNT = ["2", "3", "4", "6", "8", "10", "12", "20", "24", "30"]
+
+# Anhängsel hinter der Größe: "24 x 0,33 l MW", "0,5 l Glas", "5 kg TK". Sie stehen auf
+# echten Getränke- und Tiefkühlrechnungen hinter jeder zweiten Größe und gehören zum
+# Namen — der Tagger hat sie in v10 abgeschnitten (name 0.728, v10/REPORT.md Lücke 7).
+TAILS = (["MW", "EW", "Mehrweg", "Einweg", "Glas", "PET", "Dose", "TK", "tiefgekühlt",
+          "lose", "vak.", "Bio"],
+         [10, 6, 3, 2, 7, 5, 4, 8, 2, 3, 3, 2])
+TAIL_SHARE = 0.16
+
+# Brüche als Größe: "1/2 l", "1/4 kg", "3/4 Fass". Eine Zahl mit Schrägstrich in der
+# Bezeichnung sieht aus wie ein Datum oder eine Positionsnummer und ist keines.
+FRACTIONS = ["1/2", "1/4", "3/4", "1/3", "1/8", "1/1"]
 
 # Welche Maße welche Warengruppe druckt, und wie oft.
 SIZE_MIX = {
@@ -129,6 +141,9 @@ def join(rng, number, unit):
 
 
 def measure(rng, kind):
+    # Brüche nur bei Maßen, die man wirklich geteilt kauft: ein "1/2 %" gibt es nicht.
+    if kind in ("l", "kg", "m") and rng.random() < 0.06:
+        return f"{rng.choice(FRACTIONS)} {spell(rng, kind)}"
     return join(rng, rng.choice(VALUES[kind]), spell(rng, kind))
 
 
@@ -149,7 +164,9 @@ def packed(rng, inner_kinds):
     if roll < 0.88:
         times = pick(rng, *TIMES)
         return f"{rng.choice(PACKCOUNT)} {times} {inner}"
-    return f"{rng.choice(PACKCOUNT)}er {container}"
+    # "6er Pack", "24er Kiste" — und in einem Teil der Fälle ohne Gebindewort dahinter.
+    return (f"{rng.choice(PACKCOUNT)}er {container}" if rng.random() < 0.7
+            else f"{rng.choice(PACKCOUNT)}er")
 
 
 def corrupt(rng, text):
@@ -187,6 +204,9 @@ def phrase(rng, cat, category=None):
         text = packed(rng, inner)
     else:
         text = measure(rng, kind)
+    # Das Anhängsel steht *hinter* der Größe und gehört noch zum Namen: "24 x 0,33 l MW".
+    if rng.random() < TAIL_SHARE:
+        text += " " + pick(rng, *TAILS)
     if rng.random() < ADVERSARIAL_SHARE:
         text = corrupt(rng, text)
     return text
