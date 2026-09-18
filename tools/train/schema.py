@@ -11,7 +11,27 @@ FIELDS = ["quantity", "unit", "name", "articleId", "unitPrice", "lineNet", "vat"
           # `otherLabel` is every key that is not ours (Kundennummer, Bestellnummer,
           # Lieferdatum, UID, Tel ...), which is what separates "Rechnungsnummer"
           # from "Kundennummer" for the model.
-          "numberLabel", "dateLabel", "netLabel", "grossLabel", "vatLabel", "otherLabel"]
+          "numberLabel", "dateLabel", "netLabel", "grossLabel", "vatLabel", "otherLabel",
+          # v11: fine classes for everything that used to be `O` although it looks
+          # like one of ours. A customer number that is its own class forces the
+          # model to tell it from the invoice number by context; as `O` it could
+          # get away with "digits near the top". Assembly ignores all of these;
+          # they exist to sharpen the twelve value classes. Appended, so a 19-way
+          # head still decodes via LABELS[:19].
+          "buyer",             # the customer's name words (counterpart of `supplier`)
+          "customerNumber", "orderNumber", "deliveryNoteNumber",  # header numbers
+          "taxId",             # USt-IdNr / Steuernummer / UID values
+          "bankId",            # IBAN, BIC
+          "postcode", "phone", # address and contact digits
+          "orderDate", "deliveryDate", "dueDate",  # the dates that are not the invoice date
+          "gtin",              # EAN/GTIN in the item table or inline in the name
+          "lineDiscount",      # per-line Rabatt (% or amount)
+          "lineGross",         # per-line gross amount when net and gross columns coexist
+          "priceBasis",        # Preiseinheit / "per 100" cells
+          "subtotal",          # Zwischensumme / Warenwert when charge rows follow
+          "charge",            # Versand / Verpackung / Pfand amounts in the totals
+          "discount",          # Skonto / Rabatt amounts in the totals
+          "amountDue"]         # Zahlbetrag / Fälliger Betrag / Restbetrag when it differs from gross
 LABEL_OF = {"numberLabel": "invoiceNumber", "dateLabel": "invoiceDate",
             "netLabel": "netTotal", "grossLabel": "grossTotal", "vatLabel": "vat"}
 LABELS = ["O"] + FIELDS
