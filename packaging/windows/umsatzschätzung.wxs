@@ -17,7 +17,6 @@
     <Property Id="STOREPATH" Secure="yes" />
     <Property Id="STORESCOPE" Value="local" />
     <Property Id="CASEDIR" Secure="yes" />
-    <Property Id="ARPNOMODIFY" Value="1" />
     <Icon Id="Umsatzschaetzung.exe" SourceFile="$(var.Dist)/umsatzschätzung.exe" />
     <Property Id="ARPPRODUCTICON" Value="Umsatzschaetzung.exe" />
     <Property Id="WEBVIEW2">
@@ -65,7 +64,6 @@
           <RegistryValue Name="ModelDir" Type="string" Value="[ModelFolder]" KeyPath="yes" />
         </RegistryKey>
       </Component>
-      <Files Include="$(var.Models)\belegtagger\**" Directory="ModelBelegtaggerFolder" />
     </ComponentGroup>
 
     <!-- Der gemeinsame Ordner einer Freigabe gehört der IT; nur den Ordner auf diesem
