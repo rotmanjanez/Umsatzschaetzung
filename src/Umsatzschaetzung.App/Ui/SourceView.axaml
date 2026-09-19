@@ -1,0 +1,23 @@
+<UserControl x:Class="Umsatzschaetzung.App.Ui.SourceView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="12,8">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="−" Theme="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"/>
+                <TextBlock Text="{Binding #Viewer.(ui:ZoomPan.Zoom), StringFormat='{}{0:P0}'}"
+                           VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
+                <Button Content="+" Theme="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"/>
+                <Button Content="Anpassen" Theme="{StaticResource LinkButton}" Click="ZoomReset"/>
+            </StackPanel>
+            <TextBlock x:Name="Note" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+        </DockPanel>
+        <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <LayoutTransformControl HorizontalAlignment="Left" VerticalAlignment="Top">
+                <StackPanel x:Name="Pages" HorizontalAlignment="Left"/>
+            </LayoutTransformControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

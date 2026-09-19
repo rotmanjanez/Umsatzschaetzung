@@ -1,4 +1,4 @@
-namespace Umsatzschätzung.Eval;
+namespace Umsatzschaetzung.Eval;
 
 // difflib.SequenceMatcher(None, a, b).ratio(), character-wise. The line matcher's threshold
 // was tuned against those numbers, so an approximation would silently move every match.

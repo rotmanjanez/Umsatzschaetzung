@@ -1,0 +1,81 @@
+publiccodeYmlVersion: "0.4"
+
+name: Umsatzschätzung
+url: https://github.com/rotmanjanez/Umsatzschaetzung
+landingURL: https://umsatzschaetzung.amtstools.de
+softwareVersion: 0.0.1-alpha.1
+releaseDate: 2026-09-16
+logo: src/Umsatzschaetzung.App/Ui/Assets/logo.svg
+
+platforms:
+  - windows
+  - mac
+
+categories:
+  - taxes-management
+  - data-analytics
+  - document-management
+
+developmentStatus: development
+softwareType: standalone/desktop
+
+description:
+  de:
+    shortDescription: Nachvollziehbare Umsatzkalkulation aus Eingangsrechnungen für die steuerliche Betriebsprüfung
+    longDescription: >
+      Umsatzschätzung leitet aus den Eingangsrechnungen eines Betriebs einen
+      kalkulierten Umsatz ab und legt dabei jeden Rechenschritt offen. Rechnungen
+      kommen als E-Rechnung oder als Scan herein, Rechnungszeilen werden über
+      Rezepturen und benannte, versionierte Ertragsregeln in verkaufsfähige
+      Portionen umgerechnet. Der Bericht weist zu jeder Zahl die angewandte Regel
+      aus. Die Anwendung läuft vollständig lokal.
+    documentation: https://docs.umsatzschaetzung.amtstools.de/
+    features:
+      - Einlesen von E-Rechnungen (XRechnung UBL/CII, ZUGFeRD/Factur-X)
+      - Beleglesung gescannter Rechnungen mit Plausibilitätsprüfung gegen die Belegsumme
+      - Artikelzuordnung mit Mengen- und Gebindeumrechnung
+      - Rezepturen und versionierte Ertragsregeln als gemeinsames Regelwerk
+      - Ausbeutekalkulation mit Allokation auf Produkte
+      - Prüfbericht mit vollständigem Rechenweg (HTML, PDF, CSV)
+      - Ausweis ungeklärter und unberücksichtigter Positionen
+      - Vollständig lokale Verarbeitung ohne Netzwerkzugriff
+  en:
+    shortDescription: Auditable revenue calculation from purchase invoices for German tax audits
+    longDescription: >
+      Umsatzschätzung derives a calculated revenue figure from a business's purchase
+      invoices and documents every step. It reads electronic and scanned invoices and
+      converts invoice lines into sellable portions via recipes and named, versioned
+      yield rules. Built for the German Betriebsprüfung: the report states which rule
+      version produced each figure. Runs entirely locally.
+    documentation: https://docs.umsatzschaetzung.amtstools.de/
+    features:
+      - Electronic invoice import (XRechnung UBL/CII, ZUGFeRD/Factur-X)
+      - OCR for scanned invoices with consistency checks against document totals
+      - Article mapping with unit and packaging conversion
+      - Recipes and versioned yield rules as a shared rule set
+      - Yield calculation with allocation across products
+      - Audit report with the complete calculation path (HTML, PDF, CSV)
+      - Separate reporting of unmapped and excluded line items
+      - Fully local processing, no network access
+
+legal:
+  license: EUPL-1.2
+  repoOwner: Janez Rotman
+
+maintenance:
+  type: community
+  contacts:
+    - name: Janez Rotman
+      email: janez@janez.at
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - de
+
+intendedAudience:
+  countries:
+    - de
+  scope:
+    - government
+    - finance-and-economic-development

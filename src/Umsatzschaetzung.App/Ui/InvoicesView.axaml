@@ -1,0 +1,115 @@
+<ui:Screen x:Class="Umsatzschaetzung.App.Ui.InvoicesView"
+           xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
+           x:DataType="ui:InvoicesModel"
+           Margin="0,12,0,0" DragDrop.AllowDrop="True">
+    <ui:Screen.Styles>
+        <Style Selector="Border.state.auto">
+            <Setter Property="Background" Value="{DynamicResource InfoSoftBrush}"/>
+        </Style>
+        <Style Selector="Border.state.manual">
+            <Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}"/>
+        </Style>
+        <Style Selector="Border.state.pending">
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
+        </Style>
+        <Style Selector="DataGridRow TextBlock.cell">
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+    </ui:Screen.Styles>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Button DockPanel.Dock="Right" Content="Rechnungen hinzufügen" Theme="{StaticResource PrimaryButton}" Click="AddFiles"/>
+            <ui:SearchBox x:Name="Search" DockPanel.Dock="Right" Margin="0,0,12,0"/>
+            <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
+        </DockPanel>
+        <Grid>
+            <Border Theme="{StaticResource Panel}" ClipToBounds="True" IsVisible="{Binding !Empty}">
+                <DataGrid x:Name="List" ui:Grids.Flex="1" Theme="{StaticResource Grid}" IsReadOnly="True"
+                          DoubleTapped="RowOpened" KeyDown="ListKey">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Status" Width="150" SortMemberPath="Rank">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <Border Theme="{StaticResource Badge}" Classes="state" Margin="8,0"
+                                            Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">
+                                        <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Lieferant" Width="260" MinWidth="140" SortMemberPath="Supplier">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <TextBlock Classes="cell" Text="{Binding Supplier}" FontWeight="SemiBold" ToolTip.Tip="{Binding Supplier}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Rechnungsnummer" Width="170" SortMemberPath="Number">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <TextBlock Classes="cell" Text="{Binding Number}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Datum" Width="120" SortMemberPath="Sort">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <TextBlock Classes="cell" Text="{Binding Date}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Netto" Width="130" SortMemberPath="Net">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <TextBlock Text="{Binding NetTotal}" Theme="{StaticResource Number}" Margin="8,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Beleg" Width="220" SortMemberPath="FileName">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <TextBlock Classes="cell" Text="{Binding FileName}" Theme="{StaticResource Muted}" ToolTip.Tip="{Binding FileName}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:InvoiceRow">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Öffnen" Theme="{StaticResource LinkButton}" Click="Open"/>
+                                        <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
+                                            <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+            <Grid x:Name="Intro" Margin="8" IsVisible="{Binding Empty}">
+                <Rectangle Theme="{StaticResource DropZone}" Classes.over="{Binding Dragging}"/>
+                <StackPanel MaxWidth="460" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="32">
+                    <PathIcon Theme="{StaticResource DropIcon}"/>
+                    <TextBlock Text="Rechnungen hierher ziehen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
+                               Text="PDF, Bilder (PNG, JPG, TIFF) und XML-Rechnungen."/>
+                    <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0"
+                               Text="Gescannte Belege werden gelesen und danach zur Durchsicht vorgelegt; XML-Rechnungen werden direkt übernommen."/>
+                </StackPanel>
+            </Grid>
+            <ui:NoResults Search="{Binding #Search}"/>
+            <Grid Margin="8" IsVisible="{Binding DropHint}" IsHitTestVisible="False">
+                <Rectangle Theme="{StaticResource DropZone}" Classes="over"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <PathIcon Theme="{StaticResource DropIcon}"/>
+                    <TextBlock Text="Zum Hinzufügen loslassen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</ui:Screen>

@@ -25,7 +25,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - run: dotnet build
-      - run: dotnet run --project src/Umsatzschätzung.E2e
+      - run: dotnet run --project src/Umsatzschaetzung.E2e
 
   msi:
     needs: test

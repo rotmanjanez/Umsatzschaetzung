@@ -1,5 +1,5 @@
-using Umsatzschätzung.Model;
-using Umsatzschätzung.Richtsatz;
+using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Richtsatz;
 
 string? seedDir = null;
 var pdfs = new List<string>();

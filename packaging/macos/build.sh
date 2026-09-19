@@ -39,7 +39,7 @@ plistversion=$(printf '%s' "$version" | sed -n 's/^v\{0,1\}\([0-9]\{1,\}\.[0-9]\
 [ -n "$plistversion" ] || plistversion=0.0.0
 
 rm -rf "$dist"
-"$dotnet" publish "$root/src/Umsatzschätzung.App" -c Release -f net10.0 -r "$arch" \
+"$dotnet" publish "$root/src/Umsatzschaetzung.App" -c Release -f net10.0 -r "$arch" \
     --self-contained -p:PublishSingleFile=true -p:DebugType=none -p:Version="$plistversion" -o "$contents/MacOS"
 
 # In Contents/MacOS darf nur Code liegen: alles andere dort hält codesign für

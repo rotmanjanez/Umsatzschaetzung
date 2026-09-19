@@ -44,7 +44,7 @@ $msiVersion = "0.0.0"
 if ($Version -match '^v?(\d+\.\d+\.\d+)') { $msiVersion = $Matches[1] }
 
 Remove-Item -Recurse -Force $dist -ErrorAction Ignore
-dotnet publish (Join-Path $root "src\Umsatzschätzung.App") -c Release -r $Arch --self-contained -p:PublishSingleFile=true -p:Version=$msiVersion -o $dist
+dotnet publish (Join-Path $root "src\Umsatzschaetzung.App") -c Release -r $Arch --self-contained -p:PublishSingleFile=true -p:Version=$msiVersion -o $dist
 if ($LASTEXITCODE -ne 0) { throw "publish failed" }
 Copy-Item (Join-Path $PSScriptRoot "LICENSES.txt") $dist
 Copy-Item (Join-Path $root "LICENSE") (Join-Path $dist "LICENSE.txt")

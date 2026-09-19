@@ -1,0 +1,154 @@
+<ui:Screen x:Class="Umsatzschaetzung.App.Ui.CaseView"
+           xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
+           xmlns:model="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
+           x:DataType="ui:CaseModel"
+           Margin="0,12,0,0">
+    <ui:Screen.Resources>
+        <DataTemplate x:Key="YieldGroupTemplate" x:DataType="ui:YieldKindGroup">
+            <StackPanel Margin="0,0,0,16">
+                <TextBlock Text="{Binding Kind}" Theme="{StaticResource FieldLabel}"/>
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="ui:YieldGroupRow">
+                            <Grid ColumnDefinitions="260,16,*" Margin="0,0,0,6">
+                                <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="2" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected, Mode=TwoWay}"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="ui:RuleOption">
+                                            <TextBlock Text="{Binding Text}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+    </ui:Screen.Resources>
+
+    <DockPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,16,0">
+                <Border Theme="{StaticResource Card}" IsVisible="{Binding NoInvoices}" MaxWidth="960" HorizontalAlignment="Left">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" VerticalAlignment="Center" Margin="16,0,0,0" Click="GoInvoices"/>
+                        <StackPanel>
+                            <TextBlock Text="Nächster Schritt: Rechnungen" Theme="{StaticResource SectionHeader}"/>
+                            <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
+                                       Text="Zuordnung und Kalkulation entstehen aus den Rechnungen des Zeitraums. Angaben auf dieser Seite können jederzeit nachgetragen werden."/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <Border Theme="{StaticResource SectionRule}"/>
+                <TextBlock Text="Erklärte Umsätze, netto in €" Theme="{StaticResource SectionHeader}"/>
+                <Grid Margin="0,0,0,24" ColumnDefinitions="*,16,*,16,*" MaxWidth="960" HorizontalAlignment="Left">
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Umsatz zu 19 %" Theme="{StaticResource FieldLabel}"/>
+                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Declared19, Mode=TwoWay}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Umsatz zu 7 %" Theme="{StaticResource FieldLabel}"/>
+                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Declared7, Mode=TwoWay}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Umsatz zu 0 %" Theme="{StaticResource FieldLabel}"/>
+                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Declared0, Mode=TwoWay}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Theme="{StaticResource SectionRule}"/>
+                <TextBlock Text="Bestand" Theme="{StaticResource SectionHeader}"/>
+                <StackPanel Margin="0,0,0,24">
+                    <DataGrid ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Stock}" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Zutat" Width="260" MinWidth="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:StockRow">
+                                        <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=model:Ingredient}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Anfangsbestand" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:StockRow">
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Opening, Mode=TwoWay}" Margin="2"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Endbestand" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:StockRow">
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Closing, Mode=TwoWay}" Margin="2"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Einheit" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:StockRow">
+                                        <ComboBox ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:StockRow">
+                                        <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveStock" HorizontalAlignment="Right">
+                                            <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <Border Theme="{StaticResource SectionRule}"/>
+                <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
+                <StackPanel Margin="0,0,0,24">
+                    <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding NoYields}"
+                               Text="Sobald Rechnungen zugeordnet sind, erscheinen hier die Ertragsregeln der betroffenen Kategorien und Zutaten."/>
+                    <ItemsControl ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}"/>
+                </StackPanel>
+
+                <Border Theme="{StaticResource SectionRule}"/>
+                <TextBlock Text="Eckdaten" Theme="{StaticResource SectionHeader}"/>
+                <StackPanel MaxWidth="960" HorizontalAlignment="Left" Margin="0,0,0,24">
+                    <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding Label, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Zeitraum" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                    <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Von *" Theme="{StaticResource FieldLabel}"/>
+                            <ui:DateBox Text="{Binding From, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Bis *" Theme="{StaticResource FieldLabel}"/>
+                            <ui:DateBox Text="{Binding To, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                    <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                            <TextBlock Text="PaB-Nr." Theme="{StaticResource FieldLabel}"/>
+                            <TextBox Text="{Binding Pab, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Steuernummer" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox Text="{Binding TaxNumber, Mode=TwoWay}"/>
+                            <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox Text="{Binding Gewerbe, Mode=TwoWay}" PlaceholderText="z. B. 56101.0 (Richtsatzsammlung)"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</ui:Screen>

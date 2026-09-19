@@ -1,7 +1,7 @@
 using System.Globalization;
-using Umsatzschätzung.Eval;
-using Umsatzschätzung.Extract;
-using Umsatzschätzung.Model;
+using Umsatzschaetzung.Eval;
+using Umsatzschaetzung.Extract;
+using Umsatzschaetzung.Model;
 
 var rows = "tools/train/page.jsonl";
 var corpus = "fixtures/dataset/gen";
