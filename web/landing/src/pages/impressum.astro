@@ -1,0 +1,65 @@
+---
+import '@fontsource/sora/400.css';
+import '@fontsource/sora/600.css';
+
+const docs = 'https://docs.umsatzschaetzung.amtstools.de/';
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Impressum — Umsatzschätzung</title>
+    <meta name="description" content="Offenlegung nach § 25 Mediengesetz." />
+  </head>
+  <body>
+    <main>
+      <div class="top"><a href="/">Umsatzschätzung</a><a href={docs}>Dokumentation</a></div>
+
+      <h1>Impressum</h1>
+      <p class="sub">Offenlegung nach § 25 Mediengesetz</p>
+
+      <dl>
+        <dt>Medieninhaber und Herausgeber</dt>
+        <dd>Janez Rotman</dd>
+
+        <dt>Wohnort</dt>
+        <dd>Graz, Österreich</dd>
+
+        <dt>Unternehmensgegenstand</dt>
+        <dd>
+          Entwicklung und unentgeltliche Bereitstellung quelloffener Software für die
+          steuerliche Betriebsprüfung.
+        </dd>
+
+        <dt>Kontakt</dt>
+        <dd><a href="mailto:janez@amtstools.de">janez@amtstools.de</a></dd>
+      </dl>
+
+      <p class="note">
+        Die Software wird unentgeltlich unter der
+        <a href="https://github.com/rotmanjanez/Umsatzschaetzung/blob/main/LIZENZ">EUPL-1.2</a>
+        bereitgestellt. Es besteht kein Anspruch auf Gewährleistung oder Unterstützung.
+      </p>
+
+      <p class="note"><a href="/datenschutz">Datenschutz</a></p>
+    </main>
+  </body>
+</html>
+
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e6df; color: #1c1b19; font: 17px/1.5 "Sora", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 40px 16px 80px; }
+  .top { display: flex; justify-content: space-between; margin-bottom: 64px; }
+  .top a { color: inherit; text-decoration: none; }
+  h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .sub { color: #6b6862; margin: 0 0 48px; }
+  dl { margin: 0; }
+  dt { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #6b6862; margin-bottom: 6px; }
+  dd { margin: 0 0 32px; max-width: 52ch; text-wrap: pretty; }
+  .note { margin-top: 24px; padding-top: 24px; border-top: 1px solid #d8d4cb; color: #6b6862; font-size: 15px; max-width: 52ch; text-wrap: pretty; }
+  a { color: inherit; }
+  a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+</style>
