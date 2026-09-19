@@ -28,7 +28,7 @@ public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row, 
 // One page of OCR words in, one label and one row role per word out. docs/models.md §2.
 public sealed class Tagger : IDisposable
 {
-    public const string Name = "lilt-gottbert-b/int8";
+    public const string Name = "belegtagger-1.0.0/int8";
 
     // tools/train/data.py: 512 subwords per window, 128 of overlap, at most 96 rows
     // pooled per window. model.py quantises boxes into 1024 bins, not 1000.
@@ -42,8 +42,8 @@ public sealed class Tagger : IDisposable
     // extra work on efficiency cores. The default is not good enough here.
     const int Threads = 4;
 
-    static string Dir => AppFiles.Beside(Path.Combine("models", "b"));
-    static string ModelPath => Path.Combine(Dir, "tagger.int8.onnx");
+    static string Dir => AppFiles.Beside(Path.Combine("models", "belegtagger"));
+    static string ModelPath => Path.Combine(Dir, "belegtagger.int8.onnx");
 
     readonly Lock gate = new();
     // IDisposable, not InferenceSession: naming that type in Dispose makes the JIT load

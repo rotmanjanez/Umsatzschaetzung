@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $dist = Join-Path $root "dist\$Arch"
-$models = Join-Path $root "models"
+$models = Join-Path $dist "models"
 
 function Resolve-SignTool {
     if ($script:tool) { return $script:tool }
@@ -55,12 +55,9 @@ foreach ($required in "umsatzschätzung.exe", "WebView2Loader.dll", "e_sqlite3.d
                       "LICENSE.txt", "LIZENZ.txt") {
     if (-not (Test-Path (Join-Path $dist $required))) { throw "$required missing from $dist" }
 }
-foreach ($required in "tagger.int8.onnx", "vocab.json", "merges.txt", "byte_to_unicode.json", "spec.json") {
-    $file = Get-Item (Join-Path $models "b\$required") -ErrorAction Ignore
-    if (-not $file) { throw "models\b\$required missing; run git lfs pull" }
-    if ($file.Length -lt 1kb -and (Get-Content $file -First 1) -like "version https://git-lfs*") {
-        throw "models\b\$required is an LFS pointer; run git lfs pull"
-    }
+foreach ($required in "belegtagger\belegtagger.int8.onnx", "belegtagger\vocab.json", "belegtagger\merges.txt",
+                      "belegtagger\byte_to_unicode.json", "belegtagger\spec.json", "v6\PP-OCRv6_det_small.onnx") {
+    if (-not (Test-Path (Join-Path $models $required))) { throw "models\$required missing from $dist; the build fetches it, see Models.targets" }
 }
 Sign (Get-ChildItem $dist -Include *.exe, *.dll -Recurse).FullName
 if ($NoInstaller) { Get-ChildItem $dist; exit 0 }

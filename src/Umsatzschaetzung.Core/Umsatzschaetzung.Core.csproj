@@ -26,16 +26,9 @@
     <EmbeddedResource Include="../../data/units.json" LogicalName="units.json" />
     <EmbeddedResource Include="../../data/richtsatz/*.json" LogicalName="richtsatz/%(Filename).json" />
   </ItemGroup>
-  <!-- The tagger ships the same way, out of models/b at the repo root. Those files
-       are in the repo, but through Git LFS: see .gitattributes. -->
-  <ItemGroup>
-    <ContentWithTargetPath Include="../../models/b/*" TargetPath="models/b/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-  <!-- The v6 detector is not in the RapidOcrNet package; it sits beside the tagger
-       models under models/v6 and ships the same way. -->
-  <ItemGroup>
-    <ContentWithTargetPath Include="models/v6/*" TargetPath="models/v6/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+  <!-- The tagger and the v6 detector are not in the repo: they are fetched from their
+       own releases, verified and declared as content. See Models.targets. -->
+  <Import Project="../../Models.targets" />
   <!-- RapidOcrNet copies its ONNX models next to its own build output, and build
        targets do not travel across a project reference, so anything referencing Core
        would come up without models. Declare them as content instead: that does travel. -->
