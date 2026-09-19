@@ -86,11 +86,11 @@ $licenseRtf = Join-Path $root "dist\lizenz.rtf"
 Write-LicenseRtf (Join-Path $root "LIZENZ") $licenseRtf
 # Ohne Version zieht wix die neueste Erweiterung, die zur CLI nicht passen muss.
 $wixVersion = (wix --version) -replace '\+.*', ''
-foreach ($ext in "WixToolset.UI.wixext", "WixToolset.Util.wixext") {
+foreach ($ext in "WixToolset.UI.wixext") {
     wix extension add -g "$ext/$wixVersion"
     if ($LASTEXITCODE -ne 0) { throw "wix extension add $ext failed" }
 }
-wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext `
+wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext `
     -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "Models=$models" -d "LicenseRtf=$licenseRtf" `
     -o (Join-Path $out "umsatzschaetzung-$msiVersion-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
 if ($LASTEXITCODE -ne 0) { throw "wix failed" }

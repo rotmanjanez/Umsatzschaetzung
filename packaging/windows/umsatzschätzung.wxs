@@ -1,6 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
-     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="Umsatzschätzung"
            Manufacturer="$(var.Manufacturer)"
            Version="$(var.Version)"
@@ -15,7 +14,7 @@
 
     <Property Id="STORE" Secure="yes" />
     <Property Id="STORELOCAL" Secure="yes" />
-    <Property Id="STOREPATH" />
+    <Property Id="STOREPATH" Secure="yes" />
     <Property Id="STORESCOPE" Value="local" />
     <Property Id="CASEDIR" Secure="yes" />
     <Property Id="ARPNOMODIFY" Value="1" />
@@ -74,7 +73,7 @@
     <ComponentGroup Id="LocalStore" Directory="StoreFolder">
       <Component Id="LocalStoreFolder" Guid="7C1E4C0E-9C58-4F1E-9E4C-3A2D6B5F8A11" Condition="STORELOCAL">
         <CreateFolder>
-          <util:PermissionEx Sddl="D:(A;OICI;0x1301bf;;;BU)" />
+          <PermissionEx Sddl="D:(A;OICI;0x1301bf;;;BU)" />
         </CreateFolder>
       </Component>
     </ComponentGroup>
@@ -105,14 +104,10 @@
           </RadioButtonGroup>
         </Control>
 
-        <Control Id="PfadLabel" Type="Text" X="36" Y="102" Width="300" Height="10" NoPrefix="yes" Text="Pfad der Freigabe:">
-          <Condition Action="hide" Condition="STORESCOPE = &quot;local&quot;" />
-          <Condition Action="show" Condition="STORESCOPE = &quot;share&quot;" />
-        </Control>
-        <Control Id="Pfad" Type="Edit" X="36" Y="114" Width="300" Height="17" Property="STOREPATH" Indirect="no">
-          <Condition Action="hide" Condition="STORESCOPE = &quot;local&quot;" />
-          <Condition Action="show" Condition="STORESCOPE = &quot;share&quot;" />
-        </Control>
+        <Control Id="PfadLabel" Type="Text" X="36" Y="102" Width="300" Height="10" NoPrefix="yes" Text="Pfad der Freigabe:"
+                 HideCondition="STORESCOPE = &quot;local&quot;" ShowCondition="STORESCOPE = &quot;share&quot;" />
+        <Control Id="Pfad" Type="Edit" X="36" Y="114" Width="300" Height="17" Property="STOREPATH" Indirect="no"
+                 HideCondition="STORESCOPE = &quot;local&quot;" ShowCondition="STORESCOPE = &quot;share&quot;" />
 
         <Control Id="Hinweis" Type="Text" X="20" Y="145" Width="330" Height="80" NoPrefix="yes" Text="Der Ordner enthält die Datenbank rules.db und deren Sicherungen &#8211; die gesammelte Arbeit der Prüfung. Er gehört in die Datensicherung.&#10;&#10;Auf einem Terminalserver und in einer nicht dauerhaften VDI überlebt ein Ordner auf dem Rechner die Abmeldung nicht; dort gehört der Regelspeicher auf eine Freigabe, in der die Anwender lesen, schreiben, anlegen und löschen dürfen.&#10;&#10;Die Gruppenrichtlinie »Gemeinsamer Regelspeicher« hat später Vorrang vor dieser Angabe." />
 
