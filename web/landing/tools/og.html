@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- Source for public/og.png. Regenerate:
+     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless \
+       --screenshot=public/og.png --window-size=1200,630 --hide-scrollbars tools/og.html -->
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/sora/400.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/sora/600.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/sora/700.css" />
+  </head>
+  <body>
+    <div class="card">
+      <div>
+        <h1><span class="scan">Scannen</span> statt abtippen.</h1>
+        <p>Computergestützte Ausbeutekalkulation für Papier- und Digitalrechnungen.</p>
+      </div>
+      <svg viewBox="0 0 256 256" aria-hidden="true">
+        <path class="glass" d="M68 52h120l-14 132a26 26 0 0 1-26 23h-40a26 26 0 0 1-26-23z" />
+        <g class="bars"><rect x="94" y="156" width="26" height="38" rx="5" /><rect x="136" y="116" width="26" height="78" rx="5" /></g>
+      </svg>
+    </div>
+  </body>
+</html>
+
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1200px; height: 630px; background: #e9e6df; color: #1c1b19; font: 28px/1.5 "Sora", sans-serif; }
+  .card { height: 100%; display: grid; grid-template-columns: 1fr 340px; gap: 64px; align-items: center; padding: 0 88px; }
+  h1 { font-size: 78px; line-height: 1.05; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 28px; }
+  .scan { position: relative; display: inline-block; }
+  .scan::after {
+    content: ""; position: absolute; left: -0.04em; right: -0.04em; top: 86%; height: 5px;
+    background: #2f63d8; box-shadow: 0 0 22px 9px rgba(47, 99, 216, 0.22);
+  }
+  p { margin: 0; max-width: 26ch; color: #4a4843; }
+  svg { width: 100%; height: auto; }
+  .glass { fill: #1c1b19; }
+  .bars rect { fill: #e9e6df; }
+</style>
