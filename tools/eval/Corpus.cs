@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Umsatzschätzung.Model;
-using Umsatzschätzung.Tagging;
+using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Tagging;
 
-namespace Umsatzschätzung.Eval;
+namespace Umsatzschaetzung.Eval;
 
 public sealed record Variation(string Invoice, string Template, List<List<TaggedWord>> Pages, bool PerLineVat);
 

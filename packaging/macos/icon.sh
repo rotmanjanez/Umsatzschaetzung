@@ -4,7 +4,7 @@
 # sonst als Ersatz aus logo.svg bzw. logo-512.png.
 set -eu
 
-assets=$(cd "$(dirname "$0")/../../src/Umsatzschätzung.App/Ui/Assets" && pwd)
+assets=$(cd "$(dirname "$0")/../../src/Umsatzschaetzung.App/Ui/Assets" && pwd)
 icon=$assets/Umsatzschätzung.icon
 out=$1
 

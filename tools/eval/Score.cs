@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Umsatzschätzung.Eval;
+namespace Umsatzschaetzung.Eval;
 
 public sealed record Line(string Name, long Quantity, string UnitCode, long UnitPrice, long LineNet, long Vat);
 

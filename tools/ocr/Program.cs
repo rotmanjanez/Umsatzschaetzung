@@ -2,9 +2,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using Umsatzschätzung.Service;
+using Umsatzschaetzung.Service;
 
-namespace Umsatzschätzung.Ocr;
+namespace Umsatzschaetzung.Ocr;
 
 // Walks a directory, runs the app's own RapidOCR over every page image it finds and
 // drops the word list next to the source as <name>.ocr.json. Gives the synthetic

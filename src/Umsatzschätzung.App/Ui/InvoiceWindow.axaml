@@ -1,7 +1,0 @@
-<Window x:Class="Umsatzschätzung.App.Ui.InvoiceWindow"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Rechnung" Width="1500" Height="940" MinWidth="900" MinHeight="600"
-        WindowStartupLocation="CenterOwner">
-    <ContentControl x:Name="Body" Margin="16"/>
-</Window>
