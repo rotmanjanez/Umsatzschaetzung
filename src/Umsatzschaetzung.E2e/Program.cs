@@ -14,10 +14,9 @@ if (args is ["tokenizer", var tokenizerDir, ..])
 var data = Path.Combine(AppContext.BaseDirectory, "data");
 var work = Directory.CreateTempSubdirectory("umsatzschätzung-e2e-");
 var store = Path.Combine(work.FullName, "store");
-var snapshots = Path.Combine(work.FullName, "snapshots");
 var seed = Json.Deserialize<RuleSet>(File.ReadAllBytes(Path.Combine(data, "ruleset.json")));
 var cases = new CaseStore(Path.Combine(work.FullName, "cases"));
-IService svc = new LocalService(new RuleStore(store, snapshots, seed), cases, null, new Tagger(), null, null, "e2e");
+IService svc = new LocalService(new RuleStore(store, seed), cases, null, new Tagger(), null, null, "e2e");
 var ct = CancellationToken.None;
 var checks = 0;
 
@@ -198,9 +197,9 @@ Check(pruned.Version == 4 && !pruned.Products.ContainsKey("prod.korn.2cl"), "del
 var recalced = await svc.Calculate(kase.Case.Id, ct);
 Check(recalced.Products.All(p => p.ProductId != "prod.korn.4cl"), "retired product leaves the calculation");
 
-RuleStore Reopen() => new(store, snapshots, seed);
+RuleStore Reopen() => new(store, seed);
 Check(!Reopen().Load().Products.ContainsKey("prod.korn.2cl"), "the seed does not resurrect a deleted entity");
-Check(Directory.GetFiles(snapshots).Length == 1, "second start snapshots the store");
+Check(Directory.GetFiles(Path.Combine(store, "snapshots")).Length == 1, "second start snapshots the store");
 File.WriteAllText(Path.Combine(store, "rules.db"), "kaputt");
 var restored = Reopen();
 Check(restored.Notice is not null && restored.Load().Version == 4, "corrupt store restored from snapshot");
@@ -249,7 +248,7 @@ if (File.Exists(pdfPfad))
         "richtsatz: an imported PDF takes the place of its year");
     Check((await svc.DeleteSammlung(jüngste, ct)).Sammlungen.TrueForAll(s => s.Year != jüngste), "richtsatz: the import can be dropped again");
 }
-Check(new RuleStore(store, snapshots, seed).Sammlungen().Exists(s => s.Year == jüngste && s.Mitgeliefert),
+Check(new RuleStore(store, seed).Sammlungen().Exists(s => s.Year == jüngste && s.Mitgeliefert),
     "richtsatz: a dropped Sammlung is seeded again on the next start");
 
 // Zwei gleichzeitig startende Instanzen legen denselben Speicher an: der zweite darf
@@ -262,7 +261,7 @@ var starter = Enumerable.Range(0, 2).Select(_ => new Thread(() =>
     try
     {
         start.SignalAndWait();
-        var rs = new RuleStore(gleichzeitig, Path.Combine(gleichzeitig, "snapshots"), seed).Load();
+        var rs = new RuleStore(gleichzeitig, seed).Load();
         if (rs.Products.Count != seed.Products.Count) throw new Exception("Regelsatz unvollständig");
     }
     catch (Exception e)

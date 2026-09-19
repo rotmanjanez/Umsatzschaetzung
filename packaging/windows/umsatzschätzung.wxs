@@ -1,4 +1,6 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Name="Umsatzschätzung"
            Manufacturer="$(var.Manufacturer)"
            Version="$(var.Version)"
@@ -12,6 +14,9 @@
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <Property Id="STORE" Secure="yes" />
+    <Property Id="STORELOCAL" Secure="yes" />
+    <Property Id="STOREPATH" />
+    <Property Id="STORESCOPE" Value="local" />
     <Property Id="CASEDIR" Secure="yes" />
     <Property Id="ARPNOMODIFY" Value="1" />
     <Icon Id="Umsatzschaetzung.exe" SourceFile="$(var.Dist)/umsatzschätzung.exe" />
@@ -30,6 +35,11 @@
       </Directory>
     </StandardDirectory>
     <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="CommonAppDataFolder">
+      <Directory Id="StoreParentFolder" Name="Umsatzschätzung">
+        <Directory Id="StoreFolder" Name="store" />
+      </Directory>
+    </StandardDirectory>
 
     <ComponentGroup Id="App" Directory="INSTALLFOLDER">
       <Component Id="Exe">
@@ -61,9 +71,85 @@
       <Files Include="$(var.Models)\belegtagger\**" Directory="ModelBelegtaggerFolder" />
     </ComponentGroup>
 
+    <!-- Der gemeinsame Ordner einer Freigabe gehört der IT; nur den Ordner auf diesem
+         Rechner legt das Paket an und öffnet ihn für die Gruppe der Anwender. -->
+    <ComponentGroup Id="LocalStore" Directory="StoreFolder">
+      <Component Id="LocalStoreFolder" Guid="7C1E4C0E-9C58-4F1E-9E4C-3A2D6B5F8A11" Condition="STORELOCAL">
+        <CreateFolder>
+          <util:PermissionEx Sddl="D:(A;OICI;0x1301bf;;;BU)" />
+        </CreateFolder>
+      </Component>
+    </ComponentGroup>
+
     <Feature Id="Main" Title="Umsatzschätzung" Level="1">
       <ComponentGroupRef Id="App" />
       <ComponentGroupRef Id="Model" />
+      <ComponentGroupRef Id="LocalStore" />
     </Feature>
+
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtf)" />
+
+    <UI>
+      <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+      <Dialog Id="StoreDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Banner" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Regelspeicher" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="330" Height="15" Transparent="yes" NoPrefix="yes"
+                 Text="Wo liegen Regeln, Rezepturen und Artikelzuordnungen?" />
+
+        <Control Id="Scope" Type="RadioButtonGroup" X="20" Y="60" Width="330" Height="40" Property="STORESCOPE">
+          <RadioButtonGroup Property="STORESCOPE">
+            <RadioButton Value="local" X="0" Y="0" Width="330" Height="16" Text="Nur auf &amp;diesem Rechner" />
+            <RadioButton Value="share" X="0" Y="20" Width="330" Height="16" Text="In einem &amp;gemeinsamen Ordner" />
+          </RadioButtonGroup>
+        </Control>
+
+        <Control Id="PfadLabel" Type="Text" X="36" Y="102" Width="300" Height="10" NoPrefix="yes" Text="Pfad der Freigabe:">
+          <Condition Action="hide" Condition="STORESCOPE = &quot;local&quot;" />
+          <Condition Action="show" Condition="STORESCOPE = &quot;share&quot;" />
+        </Control>
+        <Control Id="Pfad" Type="Edit" X="36" Y="114" Width="300" Height="17" Property="STOREPATH" Indirect="no">
+          <Condition Action="hide" Condition="STORESCOPE = &quot;local&quot;" />
+          <Condition Action="show" Condition="STORESCOPE = &quot;share&quot;" />
+        </Control>
+
+        <Control Id="Hinweis" Type="Text" X="20" Y="145" Width="330" Height="80" NoPrefix="yes" Text="Der Ordner enthält die Datenbank rules.db und deren Sicherungen &#8211; die gesammelte Arbeit der Prüfung. Er gehört in die Datensicherung.&#10;&#10;Auf einem Terminalserver und in einer nicht dauerhaften VDI überlebt ein Ordner auf dem Rechner die Abmeldung nicht; dort gehört der Regelspeicher auf eine Freigabe, in der die Anwender lesen, schreiben, anlegen und löschen dürfen.&#10;&#10;Die Gruppenrichtlinie »Gemeinsamer Regelspeicher« hat später Vorrang vor dieser Angabe." />
+
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Zurück" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Weiter" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Abbrechen">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="StoreDlg" Order="10"
+               Condition="WIXUI_INSTALLDIR_VALID = &quot;1&quot;" />
+      <Publish Dialog="StoreDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" />
+      <Publish Dialog="StoreDlg" Control="Next" Property="STORELOCAL" Value="1" Order="1"
+               Condition="STORESCOPE = &quot;local&quot;" />
+      <Publish Dialog="StoreDlg" Control="Next" Property="STORELOCAL" Value="{}" Order="1"
+               Condition="STORESCOPE &lt;&gt; &quot;local&quot;" />
+      <Publish Dialog="StoreDlg" Control="Next" Property="STORE" Value="[CommonAppDataFolder]Umsatzschätzung\store" Order="2"
+               Condition="STORESCOPE = &quot;local&quot;" />
+      <Publish Dialog="StoreDlg" Control="Next" Property="STORE" Value="[STOREPATH]" Order="2"
+               Condition="STORESCOPE = &quot;share&quot; AND STOREPATH" />
+      <Publish Dialog="StoreDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="3"
+               Condition="STORESCOPE = &quot;local&quot; OR STOREPATH" />
+      <Publish Dialog="StoreDlg" Control="Next" Event="SpawnDialog" Value="StorePfadFehltDlg" Order="4"
+               Condition="STORESCOPE = &quot;share&quot; AND NOT STOREPATH" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="StoreDlg" Order="10" Condition="NOT Installed" />
+
+      <Dialog Id="StorePfadFehltDlg" Width="260" Height="85" Title="[ProductName] Setup" NoMinimize="yes">
+        <Control Id="Text" Type="Text" X="15" Y="15" Width="230" Height="30" NoPrefix="yes"
+                 Text="Bitte den Pfad des gemeinsamen Ordners angeben." />
+        <Control Id="OK" Type="PushButton" X="100" Y="57" Width="56" Height="17" Default="yes" Cancel="yes" Text="OK">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+      </Dialog>
+    </UI>
   </Package>
 </Wix>

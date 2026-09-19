@@ -82,10 +82,10 @@ public sealed class RuleStore
 
     public string? Notice { get; private set; }
 
-    public RuleStore(string dir, string snapshotDir, RuleSet seed)
+    public RuleStore(string dir, RuleSet seed)
     {
         file = Path.Combine(dir, "rules.db");
-        this.snapshotDir = snapshotDir;
+        snapshotDir = Path.Combine(dir, "snapshots");
         connectionString = new SqliteConnectionStringBuilder { DataSource = file, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = false, DefaultTimeout = 10 }.ToString();
         Guarded(() =>
         {
@@ -523,13 +523,21 @@ public sealed class RuleStore
         {
             Exec(db, null, "VACUUM INTO @path", ("@path", temp));
             File.Move(temp, path, true);
-            foreach (var old in Directory.EnumerateFiles(snapshotDir, "rules-*.db").OrderDescending(StringComparer.Ordinal).Skip(KeptSnapshots))
-                File.Delete(old);
         }
         catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
         {
             try { File.Delete(temp); } catch (IOException) { }
+            throw new StoreUnavailableException(
+                $"Im Regelspeicher lässt sich keine Sicherung anlegen: {snapshotDir}\n\n{e.Message}\n\n"
+                + "Die Gruppe der Anwender braucht in diesem Ordner Lese-, Schreib-, Erstell- und Löschrechte.", e);
         }
+        // Zwei gleichzeitig startende Instanzen räumen denselben Ordner auf.
+        try
+        {
+            foreach (var old in Directory.EnumerateFiles(snapshotDir, "rules-*.db").OrderDescending(StringComparer.Ordinal).Skip(KeptSnapshots))
+                File.Delete(old);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
 
     static IEnumerable<IRuleEntity> Entities(RuleSet rs) =>

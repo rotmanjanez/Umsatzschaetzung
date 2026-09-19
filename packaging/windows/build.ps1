@@ -13,6 +13,22 @@ $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $dist = Join-Path $root "dist\$Arch"
 $models = Join-Path $dist "models"
 
+# Der Lizenzdialog des Installationspakets will RTF; LIZENZ bleibt die einzige Quelle.
+function Write-LicenseRtf([string]$source, [string]$target) {
+    $rtf = [Text.StringBuilder]::new()
+    [void]$rtf.Append('{\rtf1\ansi\deff0{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}}\fs18 ')
+    foreach ($line in [IO.File]::ReadAllLines($source, [Text.Encoding]::UTF8)) {
+        foreach ($c in $line.ToCharArray()) {
+            if ($c -in '\', '{', '}') { [void]$rtf.Append('\').Append($c) }
+            elseif ([int]$c -gt 127) { [void]$rtf.Append('\u').Append([int]$c).Append('?') }
+            else { [void]$rtf.Append($c) }
+        }
+        [void]$rtf.Append("\par`r`n")
+    }
+    [void]$rtf.Append('}')
+    [IO.File]::WriteAllText($target, $rtf.ToString(), [Text.Encoding]::ASCII)
+}
+
 function Resolve-SignTool {
     if ($script:tool) { return $script:tool }
     $onPath = @(Get-Command signtool.exe -CommandType Application -ErrorAction Ignore)[0]
@@ -66,8 +82,14 @@ $out = Join-Path $root "dist\msi"
 Remove-Item -Recurse -Force $out -ErrorAction Ignore
 New-Item -ItemType Directory $out | Out-Null
 $wixArch = if ($Arch -eq "win-arm64") { "arm64" } else { "x64" }
-wix build -arch $wixArch -culture de-DE `
-    -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "Models=$models" `
+$licenseRtf = Join-Path $root "dist\lizenz.rtf"
+Write-LicenseRtf (Join-Path $root "LIZENZ") $licenseRtf
+foreach ($ext in "WixToolset.UI.wixext", "WixToolset.Util.wixext") {
+    wix extension add -g $ext
+    if ($LASTEXITCODE -ne 0) { throw "wix extension add $ext failed" }
+}
+wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext `
+    -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "Models=$models" -d "LicenseRtf=$licenseRtf" `
     -o (Join-Path $out "umsatzschaetzung-$msiVersion-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
 if ($LASTEXITCODE -ne 0) { throw "wix failed" }
 Sign (Get-ChildItem $out -Filter *.msi).FullName

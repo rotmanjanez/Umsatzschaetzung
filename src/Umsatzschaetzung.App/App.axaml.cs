@@ -125,7 +125,7 @@ public partial class App : Application
     IService CreateService(Config config)
     {
         Directory.CreateDirectory(AppData.Dir);
-        var rules = new RuleStore(config.Store, Path.Combine(AppData.Dir, "snapshots"), RuleStore.Seed());
+        var rules = new RuleStore(config.Store, RuleStore.Seed());
         var ocr = new RapidOcr();
         owned.Add(ocr);
         var tagger = new Tagger();
