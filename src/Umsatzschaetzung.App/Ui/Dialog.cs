@@ -71,6 +71,13 @@ public sealed class Dialog : Window
     // The crash path may have no window yet; the caller owns and shows this one.
     public static Window Standalone(string message, string title) => new Dialog(message, title, false);
 
+    // Likewise before the shell exists, but the answer decides whether it ever does.
+    public static (Window Window, Task<bool> Answer) StandaloneConfirm(string message, string title)
+    {
+        var dialog = new Dialog(message, title, true);
+        return (dialog, dialog.answered.Task);
+    }
+
     static Task<bool> Ask(Window? owner, string message, string title, bool confirm)
     {
         var dialog = new Dialog(message, title, confirm);

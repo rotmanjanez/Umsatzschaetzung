@@ -1,5 +1,6 @@
 using System.Reflection;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
@@ -31,23 +32,68 @@ public partial class App : Application
     {
         CrashLog.ShowError = (message, title) => ShowError(desktop, message, title);
         CrashLog.Install();
+        Config config;
+        try
+        {
+            config = AppConfig.Load();
+        }
+        catch (Exception ex)
+        {
+            Fatal(desktop, CrashLog.Describe(ex), "Start fehlgeschlagen", false);
+            return;
+        }
+        var instance = InstanceLock.Acquire(config.Store);
+        owned.Add(instance);
+        if (instance.Held)
+        {
+            Launch(desktop, config, false);
+            return;
+        }
+        // Bis die Frage beantwortet ist, hängt am Programm nur dieser Dialog. Ohne
+        // OnExplicitShutdown wäre mit seinem Schließen auch das Programm beendet.
+        desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        var (window, answer) = Dialog.StandaloneConfirm(
+            "Umsatzschätzung läuft bereits in dieser Umgebung.\n\nZwei Fenster sehen die Regeln "
+            + "getrennt voneinander: was im einen geändert wird, überschreibt das andere beim "
+            + "nächsten Speichern wieder. Trotzdem ein zweites Fenster öffnen?",
+            "Umsatzschätzung läuft bereits");
+        desktop.MainWindow = window;
+        _ = Second(desktop, config, answer);
+    }
+
+    async Task Second(IClassicDesktopStyleApplicationLifetime desktop, Config config, Task<bool> answer)
+    {
+        if (!await answer)
+        {
+            desktop.Shutdown();
+            return;
+        }
+        desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+        Launch(desktop, config, true);
+    }
+
+    // Vor dem ersten Fenster zeigt der Lebenszyklus das MainWindow selbst, danach niemand mehr.
+    void Launch(IClassicDesktopStyleApplicationLifetime desktop, Config config, bool show)
+    {
         IService service;
         try
         {
-            service = CreateService();
+            service = CreateService(config);
         }
         catch (StoreUnavailableException ex)
         {
-            Fatal(desktop, ex.Message, "Regelspeicher nicht verfügbar");
+            Fatal(desktop, ex.Message, "Datenbankfehler", show);
             return;
         }
         catch (Exception ex)
         {
-            Fatal(desktop, CrashLog.Describe(ex), "Start fehlgeschlagen");
+            Fatal(desktop, CrashLog.Describe(ex), "Start fehlgeschlagen", show);
             return;
         }
         desktop.ShutdownRequested += (_, _) => { foreach (var d in owned) d.Dispose(); };
-        desktop.MainWindow = new Shell(service);
+        var shell = new Shell(service);
+        desktop.MainWindow = shell;
+        if (show) shell.Show();
     }
 
     void About(object? sender, EventArgs e)
@@ -68,16 +114,16 @@ public partial class App : Application
         }
     }
 
-    static void Fatal(IClassicDesktopStyleApplicationLifetime desktop, string message, string title)
+    static void Fatal(IClassicDesktopStyleApplicationLifetime desktop, string message, string title, bool show)
     {
         var window = Dialog.Standalone(message, title);
         window.Closed += (_, _) => desktop.Shutdown(1);
         desktop.MainWindow = window;
+        if (show) window.Show();
     }
 
-    IService CreateService()
+    IService CreateService(Config config)
     {
-        var config = AppConfig.Load();
         Directory.CreateDirectory(AppData.Dir);
         var rules = new RuleStore(config.Store, Path.Combine(AppData.Dir, "snapshots"), RuleStore.Seed());
         var ocr = new RapidOcr();

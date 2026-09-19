@@ -706,7 +706,7 @@ public sealed partial class CaseStore(string dir)
         }
         catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
         {
-            throw new StoreUnavailableException("Fallspeicher: " + e.Message, e);
+            throw new StoreUnavailableException("Datenbank: " + e.Message, e);
         }
     }
 }

@@ -252,6 +252,28 @@ if (File.Exists(pdfPfad))
 Check(new RuleStore(store, snapshots, seed).Sammlungen().Exists(s => s.Year == jüngste && s.Mitgeliefert),
     "richtsatz: a dropped Sammlung is seeded again on the next start");
 
+// Zwei gleichzeitig startende Instanzen legen denselben Speicher an: der zweite darf
+// die Schritte des ersten nicht wiederholen.
+var gleichzeitig = Path.Combine(work.FullName, "gleichzeitig");
+var start = new Barrier(2);
+var fehler = new List<Exception>();
+var starter = Enumerable.Range(0, 2).Select(_ => new Thread(() =>
+{
+    try
+    {
+        start.SignalAndWait();
+        var rs = new RuleStore(gleichzeitig, Path.Combine(gleichzeitig, "snapshots"), seed).Load();
+        if (rs.Products.Count != seed.Products.Count) throw new Exception("Regelsatz unvollständig");
+    }
+    catch (Exception e)
+    {
+        lock (fehler) fehler.Add(e);
+    }
+})).ToList();
+starter.ForEach(t => t.Start());
+starter.ForEach(t => t.Join());
+Check(fehler.Count == 0, "two stores open one directory at once: " + string.Join(" | ", fehler.Select(e => e.Message)));
+
 work.Delete(true);
 Console.WriteLine($"ok, {checks} checks");
 
