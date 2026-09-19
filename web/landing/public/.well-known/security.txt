@@ -1,0 +1,5 @@
+Contact: mailto:security@amtstools.de
+Expires: 2027-09-19T00:00:00.000Z
+Preferred-Languages: de, en
+Canonical: https://umsatzschaetzung.amtstools.de/.well-known/security.txt
+Policy: https://github.com/rotmanjanez/Umsatzschaetzung/blob/main/SECURITY.md

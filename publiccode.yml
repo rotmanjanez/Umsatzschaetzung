@@ -66,7 +66,7 @@ maintenance:
   type: community
   contacts:
     - name: Janez Rotman
-      email: janez@janez.at
+      email: janez@amtstools.de
 
 localisation:
   localisationReady: false
