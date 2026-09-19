@@ -15,7 +15,16 @@ public static class RegistryConfig
 
     public static Config Load() => new(
         Value("Store") ?? Path.Combine(AppData.Dir, "store"),
-        Value("CaseDir") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents", "Umsatzschätzung"));
+        Value("CaseDir") ?? DefaultCaseDir());
+
+    // MyDocuments folgt der Ordnerumleitung, %USERPROFILE%\Documents nicht.
+    static string DefaultCaseDir()
+    {
+        var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        if (string.IsNullOrEmpty(documents))
+            documents = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents");
+        return Path.Combine(documents, "Umsatzschätzung");
+    }
 
     static string? Value(string name)
     {
@@ -23,7 +32,7 @@ public static class RegistryConfig
         {
             using var key = hive.OpenSubKey(path);
             if (key?.GetValue(name) is string s && s.Length > 0)
-                return s;
+                return Environment.ExpandEnvironmentVariables(s);
         }
         return null;
     }

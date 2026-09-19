@@ -6,11 +6,11 @@
     <stringTable>
       <string id="Umsatzschätzung">Umsatzschätzung</string>
       <string id="Store">Gemeinsamer Regelspeicher</string>
-      <string id="StoreExplain">Ordner (lokal oder UNC-Pfad einer Freigabe) mit der Datenbank rules.db, in der alle Installationen die gemeinsamen Regeln, Rezepturen und Artikelzuordnungen ablegen. Die Gruppe der Anwender benötigt Lese-, Schreib-, Erstell- und Löschrechte in diesem Ordner. Jede Installation sichert beim Start eine Kopie unter %LOCALAPPDATA%\Umsatzschätzung\snapshots und stellt eine beschädigte Datenbank daraus wieder her.</string>
+      <string id="StoreExplain">Ordner (lokal oder UNC-Pfad einer Freigabe) mit der Datenbank rules.db, in der alle Installationen die gemeinsamen Regeln, Rezepturen und Artikelzuordnungen ablegen. Die Gruppe der Anwender benötigt Lese-, Schreib-, Erstell- und Löschrechte in diesem Ordner. Umgebungsvariablen wie %ProgramData% werden aufgelöst. Jede Installation sichert beim Start eine Kopie unter %LOCALAPPDATA%\Umsatzschätzung\snapshots und stellt eine beschädigte Datenbank daraus wieder her.</string>
       <string id="CaseDir">Ordner für Prüfungsakten</string>
-      <string id="CaseDirExplain">Ordner, in dem die Prüfungsakten der angemeldeten Person liegen. Umgebungsvariablen wie %USERPROFILE% werden aufgelöst. Standard: Dokumente\Umsatzschätzung.</string>
+      <string id="CaseDirExplain">Ordner, in dem die Prüfungsakten der angemeldeten Person liegen. Umgebungsvariablen wie %USERPROFILE% werden aufgelöst. Standard: der Ordner »Dokumente« der angemeldeten Person, Unterordner Umsatzschätzung. Bei aktivierter Ordnerumleitung ist das der umgeleitete Pfad.</string>
       <string id="ModelDir">Ordner des Sprachmodells</string>
-      <string id="ModelDirExplain">Ordner mit den Gewichten des Sprachmodells für die Artikelzuordnung. Standard: der vom Installationspaket angelegte Unterordner models.</string>
+      <string id="ModelDirExplain">Ordner mit den Gewichten des Sprachmodells für die Artikelzuordnung. Umgebungsvariablen wie %ProgramFiles% werden aufgelöst. Standard: der vom Installationspaket angelegte Unterordner models.</string>
     </stringTable>
     <presentationTable>
       <presentation id="Store"><textBox refId="Store"><label>Pfad:</label></textBox></presentation>
