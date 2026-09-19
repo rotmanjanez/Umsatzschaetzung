@@ -37,7 +37,7 @@ https://github.com/microsoft/onnxruntime/blob/main/LICENSE
 Die mitgelieferten Gewichte unter models/v5 und models/v6 stammen aus PaddleOCR.
 https://github.com/PaddlePaddle/PaddleOCR/blob/main/LICENSE
 
-==== Feldmodell unter models/b (MIT) ====
+==== Feldmodell unter models/belegtagger (MIT) ====
 Die mitgelieferten Gewichte sind ein Fine-Tuning von LiLT (Layout-Strom) und
 GottBERT (Textencoder); beide Ausgangsmodelle stehen unter MIT.
 https://github.com/jpWang/LiLT/blob/main/LICENSE

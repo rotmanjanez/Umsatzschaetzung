@@ -60,13 +60,11 @@ for required in \
 do
     [ -e "$contents/$required" ] || { echo "$required fehlt in $app" >&2; exit 1; }
 done
-for required in models/b/tagger.int8.onnx models/b/vocab.json models/b/merges.txt \
-                models/b/byte_to_unicode.json models/b/spec.json \
-                models/v6/PP-OCRv6_det_small.onnx
+for required in models/belegtagger/belegtagger.int8.onnx models/belegtagger/vocab.json \
+                models/belegtagger/merges.txt models/belegtagger/byte_to_unicode.json \
+                models/belegtagger/spec.json models/v6/PP-OCRv6_det_small.onnx
 do
-    file=$contents/Resources/$required
-    [ -f "$file" ] || { echo "$required fehlt; git lfs pull" >&2; exit 1; }
-    case $(head -c 43 "$file") in "version https://git-lfs"*) echo "$required ist ein LFS-Zeiger; git lfs pull" >&2; exit 1 ;; esac
+    [ -f "$contents/Resources/$required" ] || { echo "$required fehlt; der Build holt es, siehe Models.targets" >&2; exit 1; }
 done
 
 # Ein Zeitstempel braucht ein echtes Zertifikat, ad-hoc-Signaturen tragen keinen.

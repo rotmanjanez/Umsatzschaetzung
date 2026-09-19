@@ -25,7 +25,7 @@
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="Umsatzschätzung">
         <Directory Id="ModelFolder" Name="models">
-          <Directory Id="ModelBFolder" Name="b" />
+          <Directory Id="ModelBelegtaggerFolder" Name="belegtagger" />
         </Directory>
       </Directory>
     </StandardDirectory>
@@ -58,7 +58,7 @@
           <RegistryValue Name="ModelDir" Type="string" Value="[ModelFolder]" KeyPath="yes" />
         </RegistryKey>
       </Component>
-      <Files Include="$(var.Models)\b\**" Directory="ModelBFolder" />
+      <Files Include="$(var.Models)\belegtagger\**" Directory="ModelBelegtaggerFolder" />
     </ComponentGroup>
 
     <Feature Id="Main" Title="Umsatzschätzung" Level="1">

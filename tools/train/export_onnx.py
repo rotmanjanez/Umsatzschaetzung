@@ -130,7 +130,7 @@ def quantise(fp32, int8, per_channel=True, reduce_range=False, weight_type="quin
 
 def export(out, seq=512, run=None, **quant):
     fp32, params, embed = graph_fp32(out, seq, run)
-    int8 = out / quant.pop("name", "tagger.int8.onnx")
+    int8 = out / quant.pop("name", "belegtagger.int8.onnx")
     quantise(fp32, int8, **quant)
     return params, embed, fp32, int8
 
@@ -140,7 +140,7 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("runs/gate"))
     ap.add_argument("--seq", type=int, default=512)
     ap.add_argument("--run", type=Path, help="checkpoint to export; without it the graph is untrained")
-    ap.add_argument("--name", default="tagger.int8.onnx", help="file name of the quantised graph")
+    ap.add_argument("--name", default="belegtagger.int8.onnx", help="file name of the quantised graph")
     ap.add_argument("--from-fp32", type=Path,
                     help="quantise this existing tagger.onnx instead of re-exporting one")
     ap.add_argument("--per-channel", dest="per_channel", action="store_true", default=True,
