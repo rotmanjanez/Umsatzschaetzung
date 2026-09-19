@@ -1,5 +1,9 @@
 ---
-const title = 'Umsatzschätzung';
+import '@fontsource/sora/400.css';
+import '@fontsource/sora/600.css';
+import '@fontsource/sora/700.css';
+
+const docs = 'https://docs.umsatzschaetzung.amtstools.de/';
 ---
 
 <!doctype html>
@@ -7,12 +11,96 @@ const title = 'Umsatzschätzung';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <title>Umsatzschätzung</title>
+    <meta name="description" content="Computergestützte Ausbeutekalkulation für Papier- und Digitalrechnungen. Jede Rechnungszeile mit Menge, Einheit und Preis, geprüft gegen die Belegsumme." />
   </head>
   <body>
     <main>
-      <h1>{title}</h1>
-      <p><a href="https://docs.umsatzschaetzung.amtstools.de/">Dokumentation</a></p>
+      <div class="hero">
+        <div>
+          <h1><span class="scanline"><span class="scan">Scannen</span></span> statt <span class="type" data-word="abtippen"><i class="out">abtippen</i></span><span class="dot">.</span></h1>
+          <p>Computergestützte Ausbeutekalkulation für Papier- und Digitalrechnungen.</p>
+          <div class="acts">
+            <a href="#">Für Windows</a>
+            <a href="#">Für macOS</a>
+            <a class="doc" href={docs}>Dokumentation</a>
+          </div>
+        </div>
+        <div class="mark">
+          <svg viewBox="0 0 256 256" aria-hidden="true">
+            <path class="glass" d="M68 52h120l-14 132a26 26 0 0 1-26 23h-40a26 26 0 0 1-26-23z" />
+            <g class="bars"><rect x="94" y="156" width="26" height="38" rx="5" /><rect x="136" y="116" width="26" height="78" rx="5" /></g>
+          </svg>
+        </div>
+      </div>
+      <footer><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></footer>
     </main>
   </body>
 </html>
+
+<style>
+  :root { --blue: #2f63d8; --rule: 86%; }  /* --rule: where the scan bar comes to rest, just under the baseline */
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e6df; color: #1c1b19; font: 17px/1.5 "Sora", sans-serif; }
+  main { max-width: 1140px; margin: 0 auto; padding: 40px 16px 80px; overflow: hidden; }
+  .hero { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; min-height: 560px; }
+  h1 { font-size: clamp(40px, 5.4vw, 72px); line-height: 1; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 20px; }
+  .scanline { position: relative; display: inline-block; white-space: nowrap; }
+  .scanline::after {
+    content: ""; position: absolute; left: -0.04em; right: -0.04em; top: 0; height: 4px; opacity: 0;
+    background: var(--blue); box-shadow: 0 0 18px 7px rgba(47, 99, 216, 0.22);
+    animation: scanbar 0.85s 0.3s ease-in-out forwards;
+  }
+  .scan { display: inline-block; clip-path: inset(0 0 100% 0); animation: scanreveal 0.85s 0.3s ease-in-out forwards; }
+  .type { position: relative; display: inline-block; white-space: nowrap; }
+  .type::before { content: attr(data-word); visibility: hidden; white-space: nowrap; }
+  .out { position: absolute; left: 0; top: 0; white-space: nowrap; }
+  .out::after { content: ""; display: inline-block; width: 0.07em; height: 0.82em; margin-left: 0.06em; vertical-align: -0.04em; background: currentColor; animation: caret 1s steps(2) infinite; }
+  .type.done .out::after { display: none; }
+  p { margin: 0 0 40px; max-width: 44ch; text-wrap: pretty; }
+  .acts { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .acts a { text-decoration: none; font-weight: 600; background: #1c1b19; color: #fff; padding: 14px 24px; transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
+  .acts a:hover { background: var(--blue); }
+  .acts a.doc { background: none; color: #1c1b19; padding: 0; border-bottom: 2px solid #1c1b19; }
+  .acts a.doc:hover { background: none; color: var(--blue); border-color: var(--blue); }
+  a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+  footer { margin-top: 72px; font-size: 15px; display: flex; gap: 24px; }
+  footer a { color: #6b6862; transition: color 0.15s; }
+  footer a:hover { color: var(--blue); }
+
+  .mark { display: flex; justify-content: center; align-items: center; }
+  .mark svg { width: min(100%, 420px); height: auto; }
+  .glass { fill: #1c1b19; }
+  .bars rect { fill: #e9e6df; }
+
+  @keyframes scanreveal { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes scanbar { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 100% { top: var(--rule); opacity: 1; } }
+  @keyframes caret { from { opacity: 1; } to { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .scanline::after { animation: none; top: var(--rule); opacity: 1; }
+    .out::after { display: none; }
+    .scan { clip-path: none; animation: none; }
+  }
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .mark svg { width: min(72%, 300px); }
+  }
+</style>
+
+<script>
+  const type = document.querySelector('.type');
+  const out = type?.querySelector('.out');
+  if (out && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const typo = 'abtippne';
+    const steps = [...typo].map((_, i) => [typo.slice(0, i + 1), 200]);
+    steps.push(['abtippn', 700], ['abtipp', 130], ['abtippe', 240], ['abtippen', 240], ['abtippen.', 900]);
+    out.textContent = '';
+    document.querySelector('.dot').style.visibility = 'hidden';
+    let at = 100;
+    for (const [text, wait] of steps) {
+      at += wait;
+      setTimeout(() => { out.textContent = text; }, at);
+    }
+    setTimeout(() => type.classList.add('done'), at + 500);
+  }
+</script>
