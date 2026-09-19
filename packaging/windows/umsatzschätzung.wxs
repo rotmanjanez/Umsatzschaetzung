@@ -51,8 +51,6 @@
       <Files Include="$(var.Dist)\**">
         <Exclude Files="$(var.Dist)\umsatzschätzung.exe" />
         <Exclude Files="$(var.Dist)\**.pdb" />
-        <Exclude Files="$(var.Dist)\Microsoft.Web.WebView2.*.xml" />
-        <Exclude Files="$(var.Dist)\runtimes\**\WebView2Loader.dll" />
       </Files>
       <Component Id="RegistryStore" Condition="STORE">
         <RegistryValue Root="HKLM" Key="SOFTWARE\Umsatzschätzung" Name="Store" Type="string" Value="[STORE]" KeyPath="yes" />

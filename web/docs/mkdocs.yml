@@ -31,6 +31,9 @@ extra:
   version:
     provider: mike
 
+extra_css:
+  - stylesheets/umsatzschaetzung.css
+
 markdown_extensions:
   - admonition
   - footnotes

@@ -66,9 +66,9 @@ Copy-Item (Join-Path $PSScriptRoot "LICENSES.txt") $dist
 Copy-Item (Join-Path $root "LICENSE") (Join-Path $dist "LICENSE.txt")
 Copy-Item (Join-Path $root "LIZENZ") (Join-Path $dist "LIZENZ.txt")
 
-foreach ($required in "umsatzschätzung.exe", "WebView2Loader.dll", "e_sqlite3.dll", "pdfium.dll", "LICENSES.txt",
-                      "PresentationNative_cor3.dll", "wpfgfx_cor3.dll", "PenImc_cor3.dll", "vcruntime140_cor3.dll",
-                      "LICENSE.txt", "LIZENZ.txt") {
+foreach ($required in "umsatzschätzung.exe", "e_sqlite3.dll", "pdfium.dll", "onnxruntime.dll",
+                      "av_libglesv2.dll", "libSkiaSharp.dll", "libHarfBuzzSharp.dll",
+                      "LICENSES.txt", "LICENSE.txt", "LIZENZ.txt") {
     if (-not (Test-Path (Join-Path $dist $required))) { throw "$required missing from $dist" }
 }
 foreach ($required in "belegtagger\belegtagger.int8.onnx", "belegtagger\vocab.json", "belegtagger\merges.txt",
