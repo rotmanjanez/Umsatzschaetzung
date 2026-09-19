@@ -84,8 +84,10 @@ New-Item -ItemType Directory $out | Out-Null
 $wixArch = if ($Arch -eq "win-arm64") { "arm64" } else { "x64" }
 $licenseRtf = Join-Path $root "dist\lizenz.rtf"
 Write-LicenseRtf (Join-Path $root "LIZENZ") $licenseRtf
+# Ohne Version zieht wix die neueste Erweiterung, die zur CLI nicht passen muss.
+$wixVersion = (wix --version) -replace '\+.*', ''
 foreach ($ext in "WixToolset.UI.wixext", "WixToolset.Util.wixext") {
-    wix extension add -g $ext
+    wix extension add -g "$ext/$wixVersion"
     if ($LASTEXITCODE -ne 0) { throw "wix extension add $ext failed" }
 }
 wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext `
