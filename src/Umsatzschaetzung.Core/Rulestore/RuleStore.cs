@@ -508,11 +508,11 @@ public sealed class RuleStore
         var latest = Directory.EnumerateFiles(snapshotDir, "rules-*.db").Order(StringComparer.Ordinal).LastOrDefault();
         if (latest is null)
         {
-            Notice = "Regelspeicher war beschädigt und wurde neu angelegt.";
+            Notice = "Die Datenbank war beschädigt und wurde neu angelegt.";
             return;
         }
         File.Copy(latest, file);
-        Notice = $"Regelspeicher war beschädigt und wurde aus der Sicherung vom {File.GetLastWriteTime(latest):dd.MM.yyyy HH:mm} wiederhergestellt.";
+        Notice = $"Die Datenbank war beschädigt und wurde aus der Sicherung vom {File.GetLastWriteTime(latest):dd.MM.yyyy HH:mm} wiederhergestellt.";
     }
 
     void Snapshot(SqliteConnection db)
@@ -598,7 +598,7 @@ public sealed class RuleStore
         }
         catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException or SchemaTooNewException)
         {
-            throw new StoreUnavailableException("Regelspeicher: " + e.Message, e);
+            throw new StoreUnavailableException("Datenbank: " + e.Message, e);
         }
     }
 }

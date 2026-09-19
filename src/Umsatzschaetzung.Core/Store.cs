@@ -21,10 +21,10 @@ static class Schema
 
     public static void Migrate(SqliteConnection db, string[] steps)
     {
-        var from = Version(db);
-        if (from > steps.Length) throw new SchemaTooNewException(from, steps.Length);
-        if (from == steps.Length) return;
+        if (Known(db, steps) == steps.Length) return;
         using var tx = db.BeginTransaction(deferred: false);
+        var from = Known(db, steps);
+        if (from == steps.Length) return;
         using var cmd = db.CreateCommand();
         cmd.Transaction = tx;
         for (var i = from; i < steps.Length; i++)
@@ -35,5 +35,15 @@ static class Schema
         cmd.CommandText = $"PRAGMA user_version = {steps.Length}";
         cmd.ExecuteNonQuery();
         tx.Commit();
+    }
+
+    // Der Stand wird noch einmal unter der Schreibsperre gelesen: sonst gehen zwei
+    // gleichzeitig startende Prozesse von derselben Fassung aus und der zweite
+    // wiederholte Schritte, die der erste schon angewandt hat.
+    static int Known(SqliteConnection db, string[] steps)
+    {
+        var found = Version(db);
+        if (found > steps.Length) throw new SchemaTooNewException(found, steps.Length);
+        return found;
     }
 }
