@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
@@ -58,6 +59,7 @@ public static class Assemble
                     LineNet = Parse.Number(Text(cells, Field.LineNet), Parse.ScaleCents),
                     Vat = Parse.Number(Text(cells, Field.Vat), Parse.ScaleBp),
                 };
+                Regroup(line, Text(cells, Field.Quantity));
                 inv.Lines.Add(line);
                 pages[p].Lines.Add(new OcrLine { Cells = cells, Parsed = line });
             }
@@ -80,6 +82,26 @@ public static class Assemble
         inv.StatedGross = Stated(header, Field.GrossTotal);
         return inv;
     }
+
+    // Only a trailing group of exactly three digits is ambiguous: "5,450 kg" is five and a
+    // half kilos, but German grouping writes thousands the same way, so Parse.Number reads
+    // 5450. A separator the scan lost altogether arrives as two words and is the same case.
+    // Nothing else may be regrouped — a quantity without that shape was not misread this
+    // way, and the row would otherwise absorb a wrong unit price instead.
+    static readonly Regex Grouped = new(@"^\d{1,3}[.,\s]\d{3}$");
+
+    // The row decides: quantity times unit price is the line net.
+    public static void Regroup(InvoiceLine line, string quantityText)
+    {
+        if (line.LineNet == 0 || line.UnitPrice == 0 || line.PriceBaseQty == 0) return;
+        if (!Grouped.IsMatch(quantityText.Trim())) return;
+        if (Net(line, line.Quantity) == line.LineNet) return;
+        if (Net(line, line.Quantity / 1000) == line.LineNet) line.Quantity /= 1000;
+    }
+
+    static long Net(InvoiceLine line, long quantity) =>
+        (long)Math.Round(quantity * (double)line.UnitPrice / (line.PriceBaseQty * 10000.0),
+            MidpointRounding.AwayFromZero);
 
     static long? Stated(Dictionary<Field, string> header, Field field) =>
         Parse.Number(header.GetValueOrDefault(field, ""), Parse.ScaleCents) is var v and > 0 ? v : null;

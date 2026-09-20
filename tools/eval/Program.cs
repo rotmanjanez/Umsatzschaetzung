@@ -9,6 +9,7 @@ var split = "val";
 var repair = true;
 var output = "";
 var detail = "";
+var full = false;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -20,8 +21,9 @@ for (var i = 0; i < args.Length; i++)
         case "--no-repair": repair = false; break;
         case "--out": output = args[++i]; break;
         case "--detail": detail = args[++i]; break;
+        case "--full": full = true; break;
         case "-h" or "--help":
-            Console.WriteLine("eval [--rows page.jsonl] [--corpus fixtures/dataset/gen] [--split val] [--no-repair] [--out datei] [--detail datei]");
+            Console.WriteLine("eval [--rows page.jsonl] [--corpus fixtures/dataset/gen] [--split val] [--no-repair] [--out datei] [--detail datei] [--full]");
             return 0;
         default:
             Console.Error.WriteLine($"unbekannte Option: {args[i]}");
@@ -36,14 +38,14 @@ foreach (var variation in Corpus.Read(rows, split, repair))
     var want = Corpus.Expected(Path.Combine(corpus, variation.Invoice, "expected.json"));
     var pages = variation.Pages.Select(_ => new OcrPage()).ToList();
     var got = Assemble.Invoice(variation.Pages, pages);
-    var r = Score.One(Doc(got), want, VatExempt(variation, want));
+    var r = Score.One(Doc(got), want, VatExempt(variation, want), full);
     results.Add(r);
     rowsOut.Add($"{variation.Invoice}\t{variation.Template}\t{r.CellsWrong}\t{r.CellsTotal}\t{r.LinesMatched}\t{r.LinesGot}\t{r.LinesWant}\t" +
         string.Join(",", Score.HeaderFields.Select(f => r.Header[f] ? 1 : 0)));
 }
 
-var title = $"C# / {split}" + (repair ? "" : ", repair off");
-var text = $"[{title}]\n" + Score.Report(results);
+var title = $"C# / {split}" + (repair ? "" : ", repair off") + (full ? ", full" : ", core");
+var text = $"[{title}]\n" + Score.Report(results, full);
 Console.WriteLine(text);
 if (output != "") File.WriteAllText(output, text + "\n");
 if (detail != "") File.WriteAllLines(detail, rowsOut.Order(StringComparer.Ordinal));

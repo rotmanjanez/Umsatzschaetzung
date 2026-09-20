@@ -220,6 +220,7 @@ public static class Parse
         var parts = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length > 1 && parts.All(p => p == parts[0])) text = parts[0];
         if (Units.Resolve(text.Trim('.')) is { } code) return code;
+        if (Units.Unconfuse(text.Trim('.')) is { } repaired) return repaired;
         if (text.Contains(' ') || text.Contains('\t') || text.EnumerateRunes().Count() > MaxUnitLen) return "";
         return text;
     }

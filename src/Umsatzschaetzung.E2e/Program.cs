@@ -5,6 +5,7 @@ using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.Service;
 using Umsatzschaetzung.E2e;
+using Umsatzschaetzung.Extract;
 using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
 
@@ -99,6 +100,28 @@ Check(PackSize.Strip("Mehl Type 550 25 kg Sack") == "Mehl Type 550", "strip: a n
 Check(Matcher.Factor(null, "KGM", Unit.G) is null, "factor: kg needs none, the unit table converts");
 Check(Matcher.Factor(new Pack(20, 500, Unit.Ml), "XCS", Unit.Ml) == 10000, "factor: a crate is only known from its pack size");
 Check(Matcher.Factor(new Pack(1, 750, Unit.Ml), "XBO", Unit.G) is null, "factor rejects a size in the wrong base unit");
+
+Check(Parse.UnitCode("Fl") == "XBO" && Parse.UnitCode("kg") == "KGM", "unit: the table resolves exactly");
+Check(Parse.UnitCode("F1") == "XBO", "unit: a bottle read with a one comes back");
+Check(Parse.UnitCode("17F1") == "XBO", "unit: the quantity column bleeding in is stripped");
+Check(Parse.UnitCode("1") == "1" && Parse.UnitCode("0") == "0", "unit: a lone digit is a stray, not a litre");
+Check(Parse.UnitCode("Zi") == "Zi", "unit: an unknown short code still passes through");
+Check(Units.NoFoldCollisions, "unit: no two aliases in units.json fold together");
+
+static InvoiceLine Regrouped(string text, long quantity, long unitPrice, long lineNet)
+{
+    var line = new InvoiceLine { Quantity = quantity, UnitPrice = unitPrice, LineNet = lineNet, PriceBaseQty = 1000 };
+    Assemble.Regroup(line, text);
+    return line;
+}
+
+Check(Regrouped("5,450", 5450000, 12000000, 6540).Quantity == 5450, "regroup: a lost decimal comma is taken back by the line net");
+Check(Regrouped("4 670", 4670000, 6900000, 3222).Quantity == 4670, "regroup: a separator the scan dropped arrives as two words");
+Check(Regrouped("134", 134000, 340000, 4556).Quantity == 134000, "regroup: a line that already adds up is left alone");
+Check(Regrouped("5450", 5450000, 12000000, 6540).Quantity == 5450000, "regroup: a quantity written without a separator is never regrouped");
+Check(Regrouped("1,25", 1250, 12000000, 1500).Quantity == 1250, "regroup: a two-digit decimal is not the ambiguous shape");
+Check(Regrouped("5,450", 5450000, 12000000, 0).Quantity == 5450000, "regroup: without a line net nothing is inferred");
+Check(Regrouped("5,450", 5450000, 12000000, 9999).Quantity == 5450000, "regroup: a line that adds up neither way is left alone");
 
 async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
     (await svc.SuggestMapping("", new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct)).Candidates;

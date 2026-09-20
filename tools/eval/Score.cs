@@ -21,6 +21,12 @@ public static class Score
     public static readonly string[] HeaderFields = ["number", "date", "supplierName", "netTotal", "grossTotal"];
     public static readonly string[] LineFields = ["name", "quantity", "unitCode", "unitPrice", "lineNet", "vat"];
 
+    // Date and supplier name are bookkeeping, not the estimate. By default they are still
+    // measured and reported, but they stay out of the clean rate and the correction cost.
+    public static readonly string[] CoreHeaderFields = ["number", "netTotal", "grossTotal"];
+
+    public static string[] Scored(bool full) => full ? HeaderFields : CoreHeaderFields;
+
     static readonly Regex Legal = new(@"\b(gmbh|co|kg|ag|ohg|gbr|mbh|e\.?k\.?|ug|se|kgaa|ges\.?m\.?b\.?h\.?)\b",
         RegexOptions.IgnoreCase);
     static readonly Regex Space = new(@"\s+");
@@ -30,9 +36,10 @@ public static class Score
     public static string NormSupplier(string? s) =>
         Space.Replace(Legal.Replace(Norm(s), "").Replace(".", "").Trim(), " ");
 
-    public static Result One(Doc got, Doc want, bool skipVat)
+    public static Result One(Doc got, Doc want, bool skipVat, bool full = true)
     {
         var fields = LineFields.Where(f => !skipVat || f != "vat").ToArray();
+        var scored = Scored(full);
         int wrong = 0, total = 0;
         var header = new Dictionary<string, bool>();
         foreach (var f in HeaderFields)
@@ -46,6 +53,7 @@ public static class Score
                 _ => got.GrossTotal == want.GrossTotal,
             };
             header[f] = ok;
+            if (!scored.Contains(f)) continue;
             total++;
             if (!ok) wrong++;
         }
@@ -104,12 +112,13 @@ public static class Score
         return pairs;
     }
 
-    public static string Report(IReadOnlyList<Result> results)
+    public static string Report(IReadOnlyList<Result> results, bool full = true)
     {
         var n = results.Count == 0 ? 1 : results.Count;
         var text = new StringBuilder();
+        var scored = Scored(full);
         var header = HeaderFields.Append("supplierName_fuzzy")
-            .Select(f => (f, results.Count(r => r.Header[f]) / (double)n));
+            .Select(f => (f: f + (scored.Contains(f) ? "" : " (not scored)"), results.Count(r => r.Header[f]) / (double)n));
         var perField = LineFields.Select(f => (f, Ratio(
             results.Sum(r => r.PerField.GetValueOrDefault(f).Hit),
             results.Sum(r => r.PerField.GetValueOrDefault(f).Total))));
@@ -122,10 +131,10 @@ public static class Score
         text.AppendLine($"correction cost     mean {(costs.Count == 0 ? 0 : costs.Average()).ToString("F1", CultureInfo.InvariantCulture)}  p90 {P90(costs)}");
         text.AppendLine();
         text.AppendLine("header");
-        foreach (var (k, v) in header) text.AppendLine($"  {k,-22}{F(v)}");
+        foreach (var (k, v) in header) text.AppendLine($"  {k,-34}{F(v)}");
         text.AppendLine();
         text.AppendLine("line fields");
-        foreach (var (k, v) in perField) text.AppendLine($"  {k,-22}{F(v)}");
+        foreach (var (k, v) in perField) text.AppendLine($"  {k,-34}{F(v)}");
         return text.ToString().TrimEnd('\n', '\r');
     }
 

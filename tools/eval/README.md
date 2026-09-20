@@ -12,6 +12,7 @@ one the app ships — so the number is not about a second implementation.
     --no-repair assemble without the OCR digit repair, for the A/B
     --out       the report
     --detail    per-variation TSV, for diffing two runs
+    --full      score every header field, not just the ones that carry the estimate
 
 A word is `{t, box, row, pred|field, role}`. `pred` wins over `field`, so the
 same code scores a prediction or verifies a ground truth end to end.
@@ -79,8 +80,11 @@ quantity 134000, unitPrice 340000, lineNet 4556.
 ## Metrics
 
 Header exact-match after normalisation on number, date, supplierName, netTotal,
-grossTotal, plus a fuzzy supplier variant that ignores legal-form suffixes. Lines
-matched greedily on name similarity plus lineNet agreement, then precision,
+grossTotal, plus a fuzzy supplier variant that ignores legal-form suffixes. All of
+them are always measured and printed; by default only invoice number, netTotal,
+grossTotal and the line items count towards the clean rate and the correction cost,
+and the rest are marked `(not scored)`. `--full` counts date and supplier name too.
+Lines are matched greedily on name similarity plus lineNet agreement, then precision,
 recall and per-field accuracy on matched lines. Invoice clean rate is the share
 with every cell right. Correction cost is wrong cells per invoice, mean and p90;
 unmatched expected lines count as fully wrong.
