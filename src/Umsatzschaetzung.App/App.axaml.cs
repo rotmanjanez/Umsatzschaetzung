@@ -1,4 +1,3 @@
-using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -16,8 +15,6 @@ namespace Umsatzschaetzung.App;
 public partial class App : Application
 {
     readonly List<IDisposable> owned = [];
-
-    static string Version => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -99,7 +96,7 @@ public partial class App : Application
     void About(object? sender, EventArgs e)
     {
         var owner = (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
-        _ = Dialog.Alert(owner, $"Umsatzschätzung {Version}\n© Janez Rotman", "Über Umsatzschätzung");
+        _ = Dialog.Alert(owner, $"Umsatzschätzung {Release.Version}\n© Janez Rotman", "Über Umsatzschätzung");
     }
 
     static void ShowError(IClassicDesktopStyleApplicationLifetime desktop, string message, string title)
@@ -133,6 +130,6 @@ public partial class App : Application
         var pdf = new PdfiumPages();
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
-        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, Version);
+        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, Release.Version);
     }
 }
