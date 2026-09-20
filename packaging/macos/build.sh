@@ -101,7 +101,7 @@ rm -rf "$stage"
 mkdir -p "$stage"
 cp -R "$app" "$stage/"
 ln -s /Applications "$stage/Applications"
-dmg=$out/umsatzschaetzung-$plistversion-$arch.dmg
+dmg=$out/umsatzschaetzung-$arch.dmg
 rm -f "$dmg"
 hdiutil create -volname Umsatzschätzung -srcfolder "$stage" -fs HFS+ -format UDZO -ov -quiet "$dmg"
 rm -rf "$stage"

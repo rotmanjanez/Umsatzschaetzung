@@ -92,7 +92,7 @@ foreach ($ext in "WixToolset.UI.wixext") {
 }
 wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext `
     -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "Models=$models" -d "LicenseRtf=$licenseRtf" `
-    -o (Join-Path $out "umsatzschaetzung-$msiVersion-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
+    -o (Join-Path $out "umsatzschaetzung-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
 if ($LASTEXITCODE -ne 0) { throw "wix failed" }
 Sign (Get-ChildItem $out -Filter *.msi).FullName
 
