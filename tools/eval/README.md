@@ -123,10 +123,25 @@ The 108 files in 2025 are PDFs and `tools/ocr` still rasterises those through
 `Windows.Data.Pdf`, so that directory is Windows-bound until the dependency is
 replaced. `tools/rapidocr/run.py` is the Python path and may already sidestep it.
 
-### Preprocessing: none
+### Preprocessing: straightening only
 
-`RapidOcr` does no preprocessing of its own. The `AutoLevels` histogram stretch
-that `WindowsOcr` carried was measured against RapidOCR, came out slightly worse,
-and has been removed along with the `--raw` and `--no-levels` switches.
+`RapidOcr` straightens a page before it reads it (`Deskew`) and does nothing else.
+The `AutoLevels` histogram stretch that `WindowsOcr` carried was measured against
+RapidOCR, came out slightly worse, and has been removed along with the `--raw` and
+`--no-levels` switches.
+
+The lean is the angle whose horizontal projection is most peaked: straight text piles
+into sharp bands and the profile spikes. The sweep runs coarse to fine over the bracket
+a sheet feeder can produce — the worst real scan measured 4.9 degrees. The outer 15 % of
+the page is cropped away first, because edge shadow and the sheet boundary stay axis
+aligned however the sheet lay and otherwise outvote the text they frame; against the
+generated corpus, which records the rotation it applied, cropping lifts the pages that
+lock on from 28/40 to 39/40 and the rest land within 0.054 degrees of true.
+
+It matters because word grouping bands by y. Once the lean carries a line further than
+half a row height across the sheet, the far end of one line joins the next: names lose
+their head, phantom lines appear, whole lines go missing. Measured on the three real
+scans that lean that far, straightening takes 11 wrong cells to 6 and line recall from
+0.778 to 1.000.
 
 The corpus dumps and the real scans must be produced by the same engine.

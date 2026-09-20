@@ -57,14 +57,25 @@ public sealed class RapidOcr : IOcr, IDisposable
     public Task<OcrPageWords> Recognize(byte[] image, CancellationToken ct) => Task.Run(() =>
     {
         using var decoded = Decode(image);
-        var first = Read(decoded);
+        // The reverse of the sheet goes first, on the original pixels: it would otherwise
+        // survive a resample and vote on the lean it is not part of.
+        using var cleaned = Deink.Apply(decoded);
+        // Straightened before the first read, so a leaning page costs no extra pass.
+        using var straightened = Deskew.Apply(cleaned ?? decoded);
+        var page = straightened ?? cleaned ?? decoded;
+        var first = Read(page);
         var turn = Correction(first);
-        if (turn == 0) return new OcrPageWords(decoded.Width, decoded.Height, Words(first));
+        if (turn == 0)
+            return new OcrPageWords(page.Width, page.Height, Words(first),
+                                    ReferenceEquals(page, decoded) ? null : Encode(page));
         // The boxes from the first pass sit in the rotated frame, and reading the page
         // the right way up is a little better than reading it sideways, so the corrected
-        // page is read again rather than having its boxes turned.
-        using var turned = Rotate(decoded, turn);
-        return new OcrPageWords(turned.Width, turned.Height, Words(Read(turned)), Encode(turned));
+        // page is read again rather than having its boxes turned. A quarter turn also
+        // makes the lean measurable for the first time, so it is taken out here.
+        using var turned = Rotate(page, turn);
+        using var settled = Deskew.Apply(turned);
+        var upright = settled ?? turned;
+        return new OcrPageWords(upright.Width, upright.Height, Words(Read(upright)), Encode(upright));
     }, ct);
 
     OcrResult Read(SKBitmap page)

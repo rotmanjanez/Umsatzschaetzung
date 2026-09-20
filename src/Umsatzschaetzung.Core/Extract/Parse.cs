@@ -201,15 +201,22 @@ public static class Parse
             ? new DateOnly(year, month, day)
             : null;
 
-    // The litre in a pack size comes back as a one or a capital i: "Frittieröl 10 1" for
-    // "Frittieröl 10 l". Only right after a number, where neither reads as a word, and only
-    // inside an item name, where a lone digit has nothing to do anyway.
-    public static string Litres(string name)
+    // The unit letter of a pack size comes back as the digit it resembles: "Frittieröl 10 1"
+    // for "Frittieröl 10 l", "Bratwurst 120 8" for "Bratwurst 120 g". Only right after a
+    // number, where neither reads as a word, and only inside an item name, where a lone
+    // digit has nothing to do anyway.
+    static readonly Dictionary<string, string> UnitLetters = new()
+    {
+        ["1"] = "l", ["I"] = "l", ["|"] = "l", ["8"] = "g",
+    };
+
+    public static string PackUnit(string name)
     {
         var parts = name.Split(' ');
         for (var i = 1; i < parts.Length; i++)
-            if (parts[i] is "1" or "I" or "|" && parts[i - 1].Length > 0 && char.IsAsciiDigit(parts[i - 1][^1]))
-                parts[i] = "l";
+            if (UnitLetters.TryGetValue(parts[i], out var letter)
+                && parts[i - 1].Length > 0 && char.IsAsciiDigit(parts[i - 1][^1]))
+                parts[i] = letter;
         return string.Join(' ', parts);
     }
 

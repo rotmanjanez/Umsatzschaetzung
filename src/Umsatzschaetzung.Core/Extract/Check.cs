@@ -23,6 +23,11 @@ public static class Check
                 flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.UnitPrice, Message = $"Zeile {l.No}: Einzelpreis ist nicht positiv" });
             if (l.LineNet <= 0)
                 flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.LineNet, Message = $"Zeile {l.No}: Gesamtpreis ist nicht positiv" });
+            // A position always states what it is billed in; an empty one is a reading that
+            // lost it, and only the unit says how much of the ingredient was bought. Left
+            // alone it surfaces far later, as a missing factor in the calculation.
+            if (l.UnitCode == "")
+                flags.Add(new Flag { Code = "no_unit", LineNo = l.No, Field = Field.Unit, Message = $"Zeile {l.No}: Einheit fehlt" });
             var expected = ExpectedLineNet(l);
             if (!Within(expected, l.LineNet))
                 flags.Add(new Flag
@@ -82,10 +87,8 @@ public static class Check
         return InvoiceMath.RoundDiv(l.Quantity * l.UnitPrice, b * 10000);
     }
 
-    static bool Within(long expected, long actual)
-    {
-        var diff = Math.Abs(expected - actual);
-        var reference = Math.Max(Math.Abs(expected), Math.Abs(actual));
-        return diff <= 1 + reference / 200;
-    }
+    // Exactly. Every one of these is integer arithmetic the document itself did, so a
+    // reading that does not reproduce it to the cent is a reading, not a rounding: across
+    // the real invoices all 239 line nets, 41 line sums and 39 gross totals come back exact.
+    static bool Within(long expected, long actual) => expected == actual;
 }

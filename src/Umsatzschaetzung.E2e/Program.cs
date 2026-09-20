@@ -108,6 +108,13 @@ Check(Parse.UnitCode("1") == "1" && Parse.UnitCode("0") == "0", "unit: a lone di
 Check(Parse.UnitCode("Zi") == "Zi", "unit: an unknown short code still passes through");
 Check(Units.NoFoldCollisions, "unit: no two aliases in units.json fold together");
 
+Check(Parse.PackUnit("Frittieröl 10 1") == "Frittieröl 10 l", "pack unit: a litre read as a one");
+Check(Parse.PackUnit("Bratwurst grob, fränkisch, 120 8") == "Bratwurst grob, fränkisch, 120 g",
+    "pack unit: a gram read as an eight");
+Check(Parse.PackUnit("Trg 6er Limo 8 x 0,33 l") == "Trg 6er Limo 8 x 0,33 l",
+    "pack unit: an eight that is not a unit letter is left alone");
+Check(Parse.PackUnit("8 Stück Semmeln") == "8 Stück Semmeln", "pack unit: nothing before it, nothing to fix");
+
 static InvoiceLine Regrouped(string text, long quantity, long unitPrice, long lineNet)
 {
     var line = new InvoiceLine { Quantity = quantity, UnitPrice = unitPrice, LineNet = lineNet, PriceBaseQty = 1000 };
@@ -122,6 +129,117 @@ Check(Regrouped("5450", 5450000, 12000000, 6540).Quantity == 5450000, "regroup: 
 Check(Regrouped("1,25", 1250, 12000000, 1500).Quantity == 1250, "regroup: a two-digit decimal is not the ambiguous shape");
 Check(Regrouped("5,450", 5450000, 12000000, 0).Quantity == 5450000, "regroup: without a line net nothing is inferred");
 Check(Regrouped("5,450", 5450000, 12000000, 9999).Quantity == 5450000, "regroup: a line that adds up neither way is left alone");
+
+static InvoiceLine Repaired(long quantity, long unitPrice, long lineNet)
+{
+    var line = new InvoiceLine { Quantity = quantity, UnitPrice = unitPrice, LineNet = lineNet, PriceBaseQty = 1000 };
+    Assemble.Repair(line);
+    return line;
+}
+
+Check(Repaired(6000, 900000, 810).Quantity == 9000, "repair: a nine read as a six is put back by the row");
+Check(Repaired(3750, 5900000, 2588).UnitPrice == 6900000, "repair: a six read as a five in the unit price");
+Check(Repaired(134000, 340000, 4556).Quantity == 134000, "repair: a row that adds up is never touched");
+Check(Repaired(13640, 6200000, 8467).LineNet == 8457, "repair: a six read as a seven in the line net");
+// 6000 x 1,00 reads 8,00: the eight could be the line net (6,00) or the quantity (8000).
+var ambiguous = Repaired(6000, 1000000, 800);
+Check(ambiguous.Quantity == 6000 && ambiguous.LineNet == 800,
+    "repair: two digits explain the row equally well, so it is left wrong");
+
+static List<Flag> Checked(string unitCode)
+{
+    var inv = new Invoice { Number = "1", SupplierName = "X", Date = new DateOnly(2025, 1, 1), StatedNet = 500, StatedGross = 595 };
+    inv.Lines.Add(new InvoiceLine { No = 1, Name = "X", Quantity = 1000, UnitPrice = 5000000, LineNet = 500, Vat = 1900, PriceBaseQty = 1000, UnitCode = unitCode });
+    return Umsatzschaetzung.Extract.Check.Invoice(inv);
+}
+
+Check(Checked("KGM").Count == 0, "check: a line that states its unit and adds up is clean");
+Check(Checked("").Any(f => f.Code == "no_unit"), "check: a line without a unit is reported");
+Check(!Umsatzschaetzung.Extract.Check.Complete(new Invoice(), Checked("")), "check: and such an invoice is not complete");
+Check(Repaired(5000, 1234567, 9999).Quantity == 5000, "repair: no single digit explains the row");
+Check(Repaired(0, 900000, 810).Quantity == 0, "repair: an unread cell is not guessed at");
+
+static SkiaSharp.SKBitmap Ruled(double lean)
+{
+    var page = new SkiaSharp.SKBitmap(new SkiaSharp.SKImageInfo(600, 800,
+        SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul));
+    using (var canvas = new SkiaSharp.SKCanvas(page))
+    {
+        canvas.Clear(SkiaSharp.SKColors.White);
+        using var paint = new SkiaSharp.SKPaint { Color = SkiaSharp.SKColors.Black };
+        for (var y = 60; y < 740; y += 24)
+            for (var x = 60; x < 540; x += 40)
+                canvas.DrawRect(x, y, 28, 8, paint);
+    }
+    if (lean == 0) return page;
+    using (page) return Deskew.Straighten(page, lean);
+}
+
+using (var flat = Ruled(0))
+{
+    Check(Math.Abs(Deskew.Angle(flat)) < 0.05, "deskew: a straight page reads as straight");
+    Check(Deskew.Apply(flat) is null, "deskew: a straight page is not resampled");
+}
+foreach (var lean in new[] { -3.0, -0.8, 0.8, 3.0 })
+{
+    using var page = Ruled(lean);
+    Check(Math.Abs(Deskew.Angle(page) + lean) < 0.1, $"deskew: recovers a {lean} degree lean");
+}
+using (var leaning = Ruled(2.0))
+using (var straight = Deskew.Apply(leaning))
+{
+    Check(straight is not null, "deskew: a leaning page is straightened");
+    Check(Math.Abs(Deskew.Angle(straight!)) < 0.05, "deskew: straightening leaves no lean");
+}
+
+// A sheet printed both sides: the front in solid ink, the reverse showing through faintly
+// and mirrored. Only the front may survive.
+static SkiaSharp.SKBitmap Doubled()
+{
+    var page = new SkiaSharp.SKBitmap(new SkiaSharp.SKImageInfo(600, 800,
+        SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul));
+    using var canvas = new SkiaSharp.SKCanvas(page);
+    canvas.Clear(SkiaSharp.SKColors.White);
+    using var ghost = new SkiaSharp.SKPaint { Color = new SkiaSharp.SKColor(205, 205, 205) };
+    for (var y = 70; y < 730; y += 24)
+        for (var x = 330; x < 560; x += 40)
+            canvas.DrawRect(x, y, 26, 7, ghost);
+    using var front = new SkiaSharp.SKPaint { Color = new SkiaSharp.SKColor(20, 20, 20) };
+    for (var y = 60; y < 740; y += 24)
+        for (var x = 40; x < 300; x += 40)
+            canvas.DrawRect(x, y, 28, 8, front);
+    return page;
+}
+
+static (int Front, int Ghost) Survivors(SkiaSharp.SKBitmap page)
+{
+    int front = 0, ghost = 0;
+    for (var y = 0; y < page.Height; y++)
+        for (var x = 0; x < page.Width; x++)
+        {
+            if (page.GetPixel(x, y).Red >= 250) continue;
+            if (x < 310) front++; else ghost++;
+        }
+    return (front, ghost);
+}
+
+using (var sheet = Doubled())
+using (var cleaned = Deink.Apply(sheet))
+{
+    Check(cleaned is not null, "deink: a page carrying show-through is cleaned");
+    var before = Survivors(sheet);
+    var after = Survivors(cleaned!);
+    Check(after.Ghost == 0, $"deink: the reverse is gone, {before.Ghost} -> {after.Ghost}");
+    Check(after.Front >= before.Front * 0.95,
+        $"deink: the front survives whole, {before.Front} -> {after.Front}");
+}
+
+using (var flat = Ruled(0))
+using (var cleaned = Deink.Apply(flat))
+{
+    var kept = cleaned is null ? Survivors(flat) : Survivors(cleaned);
+    Check(kept.Front >= Survivors(flat).Front * 0.95, "deink: a single-sided page keeps its ink");
+}
 
 async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
     (await svc.SuggestMapping("", new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct)).Candidates;

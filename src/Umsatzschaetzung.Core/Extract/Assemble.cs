@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Suggest;
@@ -50,7 +51,7 @@ public static class Assemble
                 var line = new InvoiceLine
                 {
                     No = inv.Lines.Count + 1,
-                    Name = PackSize.Recover(Parse.Litres(Text(cells, Field.Name)), unit),
+                    Name = PackSize.Recover(Parse.PackUnit(Text(cells, Field.Name)), unit),
                     SellerArticleId = cells.TryGetValue(Field.ArticleId, out var article) ? article.Text : null,
                     Quantity = Parse.Number(Text(cells, Field.Quantity), Parse.ScaleMilli),
                     UnitCode = unit,
@@ -60,6 +61,7 @@ public static class Assemble
                     Vat = Parse.Number(Text(cells, Field.Vat), Parse.ScaleBp),
                 };
                 Regroup(line, Text(cells, Field.Quantity));
+                Repair(line);
                 inv.Lines.Add(line);
                 pages[p].Lines.Add(new OcrLine { Cells = cells, Parsed = line });
             }
@@ -98,6 +100,66 @@ public static class Assemble
         if (Net(line, line.Quantity) == line.LineNet) return;
         if (Net(line, line.Quantity / 1000) == line.LineNet) line.Quantity /= 1000;
     }
+
+    // Digits a worn scan swaps, because they share a shape. Symmetric: the pass has no
+    // idea which of the two was printed, only that the row disagrees with itself.
+    static readonly Dictionary<char, string> Confusable = Shapes(
+        ["08", "06", "09", "17", "38", "56", "58", "68", "69", "27", "49", "39"]);
+
+    static Dictionary<char, string> Shapes(string[] pairs)
+    {
+        var map = new Dictionary<char, string>();
+        foreach (var pair in pairs)
+        {
+            map[pair[0]] = map.GetValueOrDefault(pair[0], "") + pair[1];
+            map[pair[1]] = map.GetValueOrDefault(pair[1], "") + pair[0];
+        }
+        return map;
+    }
+
+    // One misread digit anywhere in the row, put back by the row itself: quantity times unit
+    // price is the line net, and that is a tight enough constraint that a wrong digit almost
+    // never satisfies it. Only where exactly one candidate does — several, and the row cannot
+    // say which, so it stays wrong and the check that follows reports it.
+    public static void Repair(InvoiceLine line)
+    {
+        if (line.Quantity <= 0 || line.UnitPrice <= 0 || line.LineNet <= 0) return;
+        if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, line.LineNet)) return;
+
+        var found = new List<(int Field, long Value)>();
+        foreach (var q in Confusions(line.Quantity))
+            if (Adds(q, line.UnitPrice, line.PriceBaseQty, line.LineNet)) found.Add((1, q));
+        foreach (var p in Confusions(line.UnitPrice))
+            if (Adds(line.Quantity, p, line.PriceBaseQty, line.LineNet)) found.Add((2, p));
+        foreach (var n in Confusions(line.LineNet))
+            if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, n)) found.Add((3, n));
+        if (found.Count != 1) return;
+
+        var (field, value) = found[0];
+        if (field == 1) line.Quantity = value;
+        else if (field == 2) line.UnitPrice = value;
+        else line.LineNet = value;
+    }
+
+    static HashSet<long> Confusions(long value)
+    {
+        var digits = value.ToString(CultureInfo.InvariantCulture);
+        var seen = new HashSet<long>();
+        for (var i = 0; i < digits.Length; i++)
+            foreach (var swap in Confusable.GetValueOrDefault(digits[i], ""))
+            {
+                if (i == 0 && swap == '0' && digits.Length > 1) continue;
+                seen.Add(long.Parse(digits[..i] + swap + digits[(i + 1)..], CultureInfo.InvariantCulture));
+            }
+        seen.Remove(value);
+        return seen;
+    }
+
+    // Exactly, in whole cents: measured across the real invoices every printed line net is
+    // the rounded product to the cent, so slack buys nothing and lets a wrong digit fit by
+    // coincidence — which on a row wrong in more than one place is how a guess gets in.
+    static bool Adds(long quantity, long price, long baseQty, long net) =>
+        InvoiceMath.RoundDiv(quantity * price, (baseQty > 0 ? baseQty : 1000) * 10000) == net;
 
     static long Net(InvoiceLine line, long quantity) =>
         (long)Math.Round(quantity * (double)line.UnitPrice / (line.PriceBaseQty * 10000.0),
