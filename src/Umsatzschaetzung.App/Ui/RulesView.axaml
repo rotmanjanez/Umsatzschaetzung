@@ -5,6 +5,7 @@
            x:DataType="ui:RulesModel"
            Margin="24">
     <DockPanel>
+        <Button DockPanel.Dock="Right" VerticalAlignment="Top" Theme="{StaticResource HelpButton}" Click="ShowHelp"/>
         <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0">
 
             <TabItem Header="Zutaten">

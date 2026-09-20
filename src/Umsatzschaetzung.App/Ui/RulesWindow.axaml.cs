@@ -12,6 +12,7 @@ public partial class RulesWindow : Window
         view = new RulesView(session);
         Body.Content = view;
         view.Enter();
+        Help.OnF1(this, () => view.Topic);
         Closed += (_, _) => view.Leave();
     }
 }

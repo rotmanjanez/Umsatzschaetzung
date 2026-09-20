@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Umsatzschaetzung.Service;
 
@@ -36,6 +37,9 @@ public partial class Shell : Window
         session.RulesRequested += ShowRules;
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
+        if (OperatingSystem.IsMacOS()) NativeMenu.SetMenu(this, HelpMenu());
+        else MenuBar.IsVisible = true;
+        Help.OnF1(this, () => current?.Topic ?? Help.Start);
         Loaded += async (_, _) =>
         {
             Show(cases);
@@ -49,6 +53,22 @@ public partial class Shell : Window
             rules?.Close();
         };
     }
+
+    // Windows zeigt die Menüleiste im Fenster, macOS erwartet sie oben am Bildschirm.
+    NativeMenu HelpMenu()
+    {
+        var here = new NativeMenuItem("Hilfe zu dieser Seite") { Gesture = new KeyGesture(Key.F1) };
+        here.Click += (_, _) => Help.Open(this, current?.Topic ?? Help.Start);
+        var manual = new NativeMenuItem("Handbuch");
+        manual.Click += (_, _) => Help.Open(this, Help.Start);
+        return new NativeMenu { Items = { new NativeMenuItem("Hilfe") { Menu = new NativeMenu { Items = { here, manual } } } } };
+    }
+
+    void ShowHelp(object? sender, RoutedEventArgs e) => Help.Open(this, current?.Topic ?? Help.Start);
+
+    void ShowManual(object? sender, RoutedEventArgs e) => Help.Open(this, Help.Start);
+
+    void ShowAbout(object? sender, RoutedEventArgs e) => App.ShowAbout(this);
 
     void ImportsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {

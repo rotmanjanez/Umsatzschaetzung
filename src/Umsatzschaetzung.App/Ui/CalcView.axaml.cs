@@ -71,6 +71,8 @@ public sealed class CalcModel : Observable
 
 public partial class CalcView : Screen
 {
+    public override string Topic => Help.Calc;
+
     readonly CalcModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(600) };
     int generation;

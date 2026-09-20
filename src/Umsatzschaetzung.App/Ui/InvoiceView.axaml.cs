@@ -174,6 +174,8 @@ public sealed class InvoiceModel : Observable
 // document sits next to the values, and the values it was read from light up on the document.
 public partial class InvoiceView : Screen
 {
+    public override string Topic => Help.Invoice;
+
     static readonly Field[] LineFields = [Field.Quantity, Field.Unit, Field.Name, Field.UnitPrice, Field.LineNet, Field.Vat];
 
     static readonly string[] HeaderFields =

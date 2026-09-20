@@ -17,6 +17,7 @@
                 <Button Content="Regeln" Theme="{StaticResource SecondaryButton}" Click="ShowRules"/>
                 <Button Content="Importieren" Theme="{StaticResource SecondaryButton}" Click="Import"/>
                 <Button Content="Neue Prüfung" Theme="{StaticResource PrimaryButton}" Click="StartNew"/>
+                <Button Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
             </StackPanel>
             <TextBlock Text="Prüfungen" Theme="{StaticResource PageTitle}"/>
         </DockPanel>

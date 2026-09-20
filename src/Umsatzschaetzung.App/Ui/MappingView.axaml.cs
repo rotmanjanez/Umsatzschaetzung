@@ -93,6 +93,8 @@ public sealed class MappingModel : Observable
 
 public partial class MappingView : Screen
 {
+    public override string Topic => Help.Mapping;
+
     readonly MappingModel model = new();
     int suggestSeq;
 

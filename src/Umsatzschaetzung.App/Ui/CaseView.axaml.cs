@@ -215,6 +215,8 @@ public sealed class CaseModel : Observable
 
 public partial class CaseView : Screen
 {
+    public override string Topic => Help.Case;
+
     readonly CaseModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(600) };
     bool loading;

@@ -202,6 +202,13 @@ public partial class RulesView : Screen
     readonly RulesModel model = new();
     bool loading, saving;
 
+    public override string Topic => Tabs.SelectedIndex switch
+    {
+        1 => Help.Rules + "#produkte",
+        2 => Help.Rules + "#ertragsregeln",
+        _ => Help.Rules + "#zutaten",
+    };
+
     public RulesView(Session session) : base(session)
     {
         InitializeComponent();

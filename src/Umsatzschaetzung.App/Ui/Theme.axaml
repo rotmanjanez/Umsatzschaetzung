@@ -138,6 +138,14 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </ControlTheme>
 
+    <ControlTheme x:Key="HelpButton" TargetType="Button" BasedOn="{StaticResource BackButton}">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+        <Setter Property="Content" Value="?"/>
+        <Setter Property="ToolTip.Tip" Value="Hilfe zu dieser Seite (F1)"/>
+    </ControlTheme>
+
     <ControlTheme x:Key="DangerIcon" TargetType="Button" BasedOn="{StaticResource IconButton}">
         <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
     </ControlTheme>

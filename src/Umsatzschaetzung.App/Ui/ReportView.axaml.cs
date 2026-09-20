@@ -44,6 +44,8 @@ public sealed class ReportModel : Observable
 
 public partial class ReportView : Screen
 {
+    public override string Topic => Help.Report;
+
     const string Unavailable = "Berichtsvorschau nicht verfügbar, Web-Komponente konnte nicht geladen werden";
 
     readonly ReportModel model = new();

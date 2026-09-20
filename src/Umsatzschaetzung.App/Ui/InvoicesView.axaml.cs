@@ -77,6 +77,8 @@ public sealed class InvoicesModel : Observable
 
 public partial class InvoicesView : Screen
 {
+    public override string Topic => Help.Invoices;
+
     readonly InvoicesModel model = new();
     readonly Dictionary<string, InvoiceView> editors = [];
     readonly Dictionary<string, InvoiceWindow> windows = [];

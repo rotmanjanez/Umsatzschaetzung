@@ -15,6 +15,7 @@ public partial class InvoiceWindow : Window
         Title = title;
         Body.Content = view;
         view.Enter();
+        Help.OnF1(this, () => view.Topic);
         Opened += (_, _) => Fit();
         // The view outlives the window when its review is unfinished, so it is handed back first.
         Closed += (_, _) => Body.Content = null;

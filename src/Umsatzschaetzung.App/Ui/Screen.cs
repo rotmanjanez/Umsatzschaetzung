@@ -1,14 +1,20 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public class Screen : UserControl
+public abstract class Screen : UserControl
 {
     CancellationTokenSource? cts;
 
     protected Screen(Session session) => Session = session;
 
     protected Session Session { get; }
+
+    public abstract string Topic { get; }
+
+    protected void ShowHelp(object? sender, RoutedEventArgs e) =>
+        Help.Open(TopLevel.GetTopLevel(this) as Window, Topic);
 
     public bool IsActive => cts is not null;
 

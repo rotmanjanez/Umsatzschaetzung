@@ -29,6 +29,8 @@ public sealed class CasesModel : Observable
 
 public partial class CasesView : Screen
 {
+    public override string Topic => Help.Cases;
+
     readonly CasesModel model = new();
     readonly TextBox[] fields;
 

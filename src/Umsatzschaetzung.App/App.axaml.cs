@@ -93,11 +93,11 @@ public partial class App : Application
         if (show) shell.Show();
     }
 
-    void About(object? sender, EventArgs e)
-    {
-        var owner = (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+    public static void ShowAbout(Window? owner) =>
         _ = Dialog.Alert(owner, $"Umsatzschätzung {Release.Version}\n© Janez Rotman", "Über Umsatzschätzung");
-    }
+
+    void About(object? sender, EventArgs e) =>
+        ShowAbout((ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow);
 
     static void ShowError(IClassicDesktopStyleApplicationLifetime desktop, string message, string title)
     {

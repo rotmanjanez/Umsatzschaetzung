@@ -40,6 +40,7 @@
         <Border x:Name="FormPane" Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12" ClipToBounds="True">
             <DockPanel LastChildFill="False">
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
                     <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
                     <Border x:Name="State" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="12,0"
                             VerticalAlignment="Center"
