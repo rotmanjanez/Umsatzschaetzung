@@ -71,7 +71,7 @@ public static class Units
 
     static readonly Dictionary<char, char> Confusable = new()
     {
-        ['1'] = 'l', ['i'] = 'l', ['|'] = 'l', ['0'] = 'o', ['5'] = 's', ['8'] = 'b', ['2'] = 'z', ['6'] = 'g',
+        ['1'] = 'l', ['i'] = 'l', ['|'] = 'l', ['0'] = 'o', ['5'] = 's', ['8'] = 'b', ['2'] = 'z', ['6'] = 'g', ['e'] = 'f',
     };
 
     static string Fold(string s) =>
@@ -87,7 +87,7 @@ public static class Units
 
     public static bool NoFoldCollisions => FoldedAlias.Count == Alias.Select(a => Fold(a.Key)).Distinct().Count();
 
-    // Second attempt only, after Resolve missed: a bottle's "Fl" comes back as "F1" and the
+    // Second attempt only, after Resolve missed: a bottle's "Fl" comes back as "F1" or "EI" and the
     // quantity column bleeds in as "17F1". Single characters stay out — "l" already resolves
     // exactly, so a lone digit here is a stray, not a litre.
     public static string? Unconfuse(string text)

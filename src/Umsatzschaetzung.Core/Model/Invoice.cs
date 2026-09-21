@@ -73,6 +73,10 @@ public enum Field
     [JsonStringEnumMemberName("grossLabel")] GrossLabel,
     [JsonStringEnumMemberName("vatLabel")] VatLabel,
     [JsonStringEnumMemberName("otherLabel")] OtherLabel,
+
+    // v13: a word inside an item table. The model no longer types table cells; which of the
+    // line fields a cell holds is decided by its column, in Extract/Table.cs.
+    [JsonStringEnumMemberName("cell")] Cell,
 }
 
 public sealed record Box(int X, int Y, int W, int H);

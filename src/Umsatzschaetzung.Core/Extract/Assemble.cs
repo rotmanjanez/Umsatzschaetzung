@@ -42,29 +42,34 @@ public static class Assemble
     {
         units ??= Parse.UnitCode;
         var inv = new Model.Invoice { Source = Source.Scan, Currency = "EUR" };
+        Table? layout = null;
         for (var p = 0; p < tagged.Count; p++)
-            foreach (var item in Items(tagged[p]))
+        {
+            var table = Table.Read(tagged[p], layout);
+            if (table.HasColumns) layout = table;
+            foreach (var cells in table.Items)
             {
-                var cells = Cells(item);
                 if (!cells.ContainsKey(Field.Name) && !cells.ContainsKey(Field.LineNet)) continue;
                 var unit = units(Text(cells, Field.Unit));
+                var quantity = Parse.Digits(Text(cells, Field.Quantity));
                 var line = new InvoiceLine
                 {
                     No = inv.Lines.Count + 1,
                     Name = PackSize.Recover(Parse.PackUnit(Text(cells, Field.Name)), unit),
                     SellerArticleId = cells.TryGetValue(Field.ArticleId, out var article) ? article.Text : null,
-                    Quantity = Parse.Number(Text(cells, Field.Quantity), Parse.ScaleMilli),
+                    Quantity = Parse.Number(quantity, Parse.ScaleMilli),
                     UnitCode = unit,
-                    UnitPrice = Parse.Number(Text(cells, Field.UnitPrice), Parse.ScaleMicro),
+                    UnitPrice = Parse.Number(Parse.Digits(Text(cells, Field.UnitPrice)), Parse.ScaleMicro),
                     PriceBaseQty = 1000,
-                    LineNet = Parse.Number(Text(cells, Field.LineNet), Parse.ScaleCents),
-                    Vat = Parse.Number(Text(cells, Field.Vat), Parse.ScaleBp),
+                    LineNet = Parse.Number(Parse.Digits(Text(cells, Field.LineNet)), Parse.ScaleCents),
+                    Vat = Parse.Number(Parse.Digits(Text(cells, Field.Vat)), Parse.ScaleBp),
                 };
-                Regroup(line, Text(cells, Field.Quantity));
+                Regroup(line, quantity);
                 Repair(line);
                 inv.Lines.Add(line);
                 pages[p].Lines.Add(new OcrLine { Cells = cells, Parsed = line });
             }
+        }
 
         if (TotalsVat(tagged) is { } rate)
             foreach (var l in inv.Lines.Where(l => l.Vat == 0)) l.Vat = rate;
@@ -123,6 +128,7 @@ public static class Assemble
     // say which, so it stays wrong and the check that follows reports it.
     public static void Repair(InvoiceLine line)
     {
+        if (Restore(line)) return;
         if (line.Quantity <= 0 || line.UnitPrice <= 0 || line.LineNet <= 0) return;
         if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, line.LineNet)) return;
 
@@ -139,6 +145,31 @@ public static class Assemble
         if (field == 1) line.Quantity = value;
         else if (field == 2) line.UnitPrice = value;
         else line.LineNet = value;
+    }
+
+    // A cell the scan lost outright — a quantity read as a black square — comes back from the
+    // other two where the division is exact and the result is a plain number. Never the line
+    // net: quantity times price is its definition, not a check, so a missing net stays
+    // missing and is flagged.
+    static bool Restore(InvoiceLine line)
+    {
+        if (line.LineNet <= 0) return false;
+        var baseQty = line.PriceBaseQty > 0 ? line.PriceBaseQty : 1000;
+        if (line.Quantity <= 0 && line.UnitPrice > 0)
+        {
+            var q = InvoiceMath.RoundDiv(line.LineNet * baseQty * 10000, line.UnitPrice);
+            if (q <= 0 || q % 10 != 0 || !Adds(q, line.UnitPrice, baseQty, line.LineNet)) return false;
+            line.Quantity = q;
+            return true;
+        }
+        if (line.UnitPrice <= 0 && line.Quantity > 0)
+        {
+            var p = InvoiceMath.RoundDiv(line.LineNet * baseQty * 10000, line.Quantity);
+            if (p <= 0 || p % 10000 != 0 || !Adds(line.Quantity, p, baseQty, line.LineNet)) return false;
+            line.UnitPrice = p;
+            return true;
+        }
+        return false;
     }
 
     static HashSet<long> Confusions(long value)
@@ -166,26 +197,7 @@ public static class Assemble
             MidpointRounding.AwayFromZero);
 
     static long? Stated(Dictionary<Field, string> header, Field field) =>
-        Parse.Number(header.GetValueOrDefault(field, ""), Parse.ScaleCents) is var v and > 0 ? v : null;
-
-    static List<List<TaggedWord>> Items(List<TaggedWord> words)
-    {
-        var items = new List<List<TaggedWord>>();
-        List<TaggedWord>? current = null;
-        foreach (var row in Group(words))
-        {
-            var role = row[0].Role;
-            if (current is not null && role is Role.LineWrap or Role.Continuation)
-            {
-                current.AddRange(row);
-                continue;
-            }
-            if (current is not null) items.Add(current);
-            current = role == Role.LineItem ? [.. row] : null;
-        }
-        if (current is not null) items.Add(current);
-        return items;
-    }
+        Parse.Number(Parse.Digits(header.GetValueOrDefault(field, "")), Parse.ScaleCents) is var v and > 0 ? v : null;
 
     // Two rates cannot be attributed without a per-line marker, so that yields nothing. The
     // vatLabel retry drops a rate read off some other totals row.
@@ -205,26 +217,11 @@ public static class Assemble
                 if (labelledOnly && !row.Any(w => w.Field == Field.VatLabel)) continue;
                 foreach (var w in row.Where(w => w.Field == Field.Vat))
                 {
-                    var rate = Parse.Number(w.Word.Text, Parse.ScaleBp);
+                    var rate = Parse.Number(Parse.Digits(w.Word.Text), Parse.ScaleBp);
                     if (rate != 0) rates.Add(rate);
                 }
             }
         return rates;
-    }
-
-    static Dictionary<Field, OcrWord> Cells(List<TaggedWord> item)
-    {
-        var cells = new Dictionary<Field, OcrWord>();
-        foreach (var group in item.Where(w => w.Field is not null && !IsLabel(w.Field)).GroupBy(w => w.Field!.Value))
-            cells[group.Key] = Cell(group)!;
-        return cells;
-    }
-
-    static OcrWord? Cell(IEnumerable<TaggedWord> words)
-    {
-        var list = words.ToList();
-        if (list.Count == 0) return null;
-        return new OcrWord { Text = string.Join(" ", list.Select(w => w.Word.Text)), Box = Union(list) };
     }
 
     static string Text(Dictionary<Field, OcrWord> cells, Field f) => cells.TryGetValue(f, out var w) ? w.Text : "";
@@ -286,19 +283,21 @@ public static class Assemble
     static double Extent(List<TaggedWord> words) =>
         words.Count == 0 ? 1.0 : Math.Max(1.0, words.Max(w => w.Word.Box.X + w.Word.Box.W));
 
-    // A row opening a key of its own starts a new block: a stacked meta block prints
-    // "Kundennummer 48211" above "Rechnungsnummer RE250292/6" and those are two values.
+    // A segment opening with a key of its own starts a new block: a stacked meta block prints
+    // "Kundennummer 48211" above "Rechnungsnummer RE250292/6" and those are two values. The
+    // key is the word directly before the segment, not any label on the printed line — a form
+    // sets "Adresszeile 1:" at the left margin of the line that carries the name's second half.
     static List<Run> Runs(List<List<TaggedWord>> rows, Field field)
     {
         var all = new List<Run>();
         var open = new List<Run>();
         for (var i = 0; i < rows.Count; i++)
         {
-            var keyed = rows[i].Any(w => IsLabel(w.Field));
             var next = new List<Run>();
             foreach (var seg in Segments(rows[i], field))
             {
                 var box = Union(seg);
+                var keyed = IsLabel(rows[i].LastOrDefault(w => w.Word.Box.X < seg[0].Word.Box.X)?.Field);
                 var cur = open.FirstOrDefault(b => SameLine(b.Last, box));
                 var same = cur is not null;
                 if (cur is null && !keyed) cur = open.FirstOrDefault(b => OverlapsX(b.Last, box));

@@ -128,6 +128,26 @@ public static class Parse
 
     static readonly Regex Currency = new(@"[€$%]|EUR|Eur");
 
+    // Letters a worn scan puts where a digit was printed, in a cell already known to hold a
+    // number. Only where the text does not read as one before and does after, so a genuine
+    // word is never touched.
+    static readonly Dictionary<char, char> DigitShapes = new()
+    {
+        ['ø'] = '0', ['Ø'] = '0', ['O'] = '0', ['o'] = '0', ['D'] = '0',
+        ['l'] = '1', ['I'] = '1', ['i'] = '1', ['|'] = '1', ['!'] = '1',
+        ['S'] = '5', ['s'] = '5', ['B'] = '8', ['Z'] = '2', ['z'] = '2',
+        ['G'] = '6', ['b'] = '6', ['g'] = '9', ['q'] = '9', ['A'] = '4',
+    };
+
+    static readonly Regex Numeric = new(@"^[-+]?[€$]?\s*\d[\d.,\s]*\s*[%€]?-?$");
+
+    public static string Digits(string text)
+    {
+        if (text.Length == 0 || Numeric.IsMatch(text.Trim())) return text;
+        var repaired = string.Concat(text.Select(c => DigitShapes.GetValueOrDefault(c, c)));
+        return Numeric.IsMatch(repaired.Trim()) ? repaired : text;
+    }
+
     // Searches rather than matches: the date cell carries its label often enough
     // ("Rechnungsdatum: 08.11.2025") that anchoring loses it.
     static readonly (Regex Rx, int Y, int M, int D)[] DatePatterns =

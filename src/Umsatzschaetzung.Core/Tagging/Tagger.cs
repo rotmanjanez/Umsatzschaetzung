@@ -21,14 +21,25 @@ public enum Role
 }
 
 // Conf is the winning class's softmax probability, as tools/train/predict.py dumps it; a word
-// that carries none counts as 1.
-public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row, float Conf = 1f);
+// that carries none counts as 1. Col is the model's column index inside an item table, 0 when
+// the word is not in one; CellStart marks the first word of a table cell in reading order.
+public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row, float Conf = 1f,
+    int Col = 0, bool CellStart = false);
 
 // Model B: the LiLT layout stream with GottBERT as its text side, exported to int8 ONNX.
-// One page of OCR words in, one label and one row role per word out. docs/models.md §2.
+// One page of OCR words in; per word a class, a column and a cell start, per row a role.
+// docs/models.md §2.
 public sealed class Tagger : IDisposable
 {
-    public const string Name = "belegtagger-1.0.0/int8";
+    public const string Name = "belegtagger-2.0.0/int8";
+
+    // STRUCT_LABELS in tools/train/schema.py: the word head's classes, in order.
+    static readonly Field?[] Classes =
+    [
+        null, Field.Cell, Field.InvoiceNumber, Field.InvoiceDate, Field.Supplier, Field.NetTotal,
+        Field.GrossTotal, Field.Vat, Field.NumberLabel, Field.DateLabel, Field.NetLabel, Field.GrossLabel,
+        Field.VatLabel, Field.OtherLabel,
+    ];
 
     // tools/train/data.py: 512 subwords per window, 128 of overlap, at most 96 rows
     // pooled per window. model.py quantises boxes into 1024 bins, not 1000.
@@ -37,6 +48,7 @@ public sealed class Tagger : IDisposable
     const int MaxRows = 96;
     const int BoxBins = 1024;
     const int Roles = 9;
+    const int CellClasses = 2;
 
     // Eight threads measured 2.3x slower than four on an M1 Pro: the scheduler puts the
     // extra work on efficiency cores. The default is not good enough here.
@@ -55,11 +67,22 @@ public sealed class Tagger : IDisposable
 
     public List<TaggedWord> Tag(IReadOnlyList<OcrWord> words, int width, int height)
     {
+        var rows = Rows.GroupRows(words);
+        var ordered = new List<(OcrWord Word, int Row)>();
+        for (var r = 0; r < rows.Count; r++)
+            foreach (var w in rows[r].Words) ordered.Add((w, r));
+        return Tag(ordered, width, height);
+    }
+
+    // Words already in reading order with their row: the eval feeds a dump's rows back in
+    // unchanged so the C# path can be compared word for word with the Python one.
+    public List<TaggedWord> Tag(IReadOnlyList<(OcrWord Word, int Row)> ordered, int width, int height)
+    {
         lock (gate)
         {
             bpe ??= Bpe.Open(Dir);
             session ??= Open();
-            return Run((InferenceSession)session, bpe, words, width, height);
+            return Run((InferenceSession)session, bpe, ordered, width, height);
         }
     }
 
@@ -68,7 +91,11 @@ public sealed class Tagger : IDisposable
         var options = new SessionOptions { IntraOpNumThreads = Threads, InterOpNumThreads = 1 };
         try
         {
-            return new InferenceSession(ModelPath, options);
+            var session = new InferenceSession(ModelPath, options);
+            Check(session, "word_logits", Classes.Length);
+            Check(session, "role_logits", Roles);
+            Check(session, "cell_logits", CellClasses);
+            return session;
         }
         catch (Exception e)
         {
@@ -78,35 +105,42 @@ public sealed class Tagger : IDisposable
         }
     }
 
-    // 13 for a checkpoint predating the header label classes, 19 with them.
-    static int LabelCount(InferenceSession session)
+    static void Check(InferenceSession session, string output, int width)
     {
-        var dims = session.OutputMetadata["word_logits"].Dimensions;
-        var n = dims[^1];
-        if (n <= 0) throw new InvalidOperationException("Das Belegerkennungsmodell gibt die Klassenzahl nicht an.");
+        if (Width(session, output) != width)
+            throw new InvalidOperationException($"Das Belegerkennungsmodell liefert \"{output}\" nicht {width}-fach.");
+    }
+
+    static int Width(InferenceSession session, string output)
+    {
+        if (!session.OutputMetadata.TryGetValue(output, out var meta))
+            throw new InvalidOperationException($"Das Belegerkennungsmodell liefert keinen Ausgang \"{output}\".");
+        var n = meta.Dimensions[^1];
+        if (n <= 0) throw new InvalidOperationException($"Das Belegerkennungsmodell gibt die Breite von \"{output}\" nicht an.");
         return n;
     }
 
-    static List<TaggedWord> Run(InferenceSession session, Bpe bpe, IReadOnlyList<OcrWord> words, int width, int height)
+    sealed class Logits(int tokens, int width)
     {
-        var labels = LabelCount(session);
-        var rows = Rows.GroupRows(words);
-        var ordered = new List<(OcrWord Word, int Row)>();
-        for (var r = 0; r < rows.Count; r++)
-            foreach (var w in rows[r].Words) ordered.Add((w, r));
+        public readonly int Width = width;
+        public readonly float[] Sum = new float[tokens * width];
+    }
 
+    static List<TaggedWord> Run(InferenceSession session, Bpe bpe, IReadOnlyList<(OcrWord Word, int Row)> ordered,
+        int width, int height)
+    {
         var ids = new List<int>();
         var boxes = new List<int[]>();
         var rowOf = new List<int>();
         var starts = new List<int>();
         var kept = new List<(OcrWord Word, int Row)>();
-        foreach (var (word, row) in ordered)
+        foreach (var (w, row) in ordered)
         {
-            var sub = bpe.Word(word.Text);
+            var sub = bpe.Word(w.Text);
             if (sub.Length == 0) continue;
-            var box = Quantise(word.Box, width, height);
+            var box = Quantise(w.Box, width, height);
             starts.Add(ids.Count);
-            kept.Add((word, row));
+            kept.Add((w, row));
             for (var k = 0; k < sub.Length; k++)
             {
                 ids.Add(sub[k]);
@@ -118,7 +152,9 @@ public sealed class Tagger : IDisposable
 
         // Overlapping windows are summed rather than averaged: every class at one
         // position shares the same window count, so argmax is unaffected.
-        var wordAcc = new float[ids.Count * labels];
+        var word = new Logits(ids.Count, Classes.Length);
+        var col = new Logits(ids.Count, Width(session, "col_logits"));
+        var cell = new Logits(ids.Count, CellClasses);
         var role = new Dictionary<int, float[]>();
 
         var body = MaxLen - 2;
@@ -126,26 +162,29 @@ public sealed class Tagger : IDisposable
         for (var s = 0; s < ids.Count; s += step)
         {
             var e = Math.Min(s + body, ids.Count);
-            Window(session, bpe, ids, boxes, rowOf, s, e, wordAcc, role, labels);
+            Window(session, bpe, ids, boxes, rowOf, s, e, word, col, cell, role);
             if (e == ids.Count) break;
         }
 
         var tagged = new List<TaggedWord>(kept.Count);
         for (var i = 0; i < kept.Count; i++)
         {
-            var label = ArgMax(wordAcc, starts[i] * labels, labels);
+            var at = starts[i];
+            var label = ArgMax(word, at);
             tagged.Add(new TaggedWord(
                 kept[i].Word,
-                label == 0 ? null : (Field)(label - 1),
+                Classes[label],
                 role.TryGetValue(kept[i].Row, out var acc) ? (Role)ArgMax(acc, 0, Roles) : Role.LineItem,
                 kept[i].Row,
-                Softmax(wordAcc, starts[i] * labels, labels, label)));
+                Softmax(word, at, label),
+                ArgMax(col, at),
+                ArgMax(cell, at) == 1));
         }
         return tagged;
     }
 
     static void Window(InferenceSession session, Bpe bpe, List<int> ids, List<int[]> boxes, List<int> rowOf,
-                       int from, int to, float[] wordAcc, Dictionary<int, float[]> role, int labels)
+                       int from, int to, Logits word, Logits col, Logits cell, Dictionary<int, float[]> role)
     {
         var n = to - from + 2;
         var input = new DenseTensor<long>([1, n]);
@@ -166,14 +205,10 @@ public sealed class Tagger : IDisposable
             NamedOnnxValue.CreateFromTensor("bbox", bbox),
             NamedOnnxValue.CreateFromTensor("attention_mask", mask),
         ]);
-        var wordLogits = Output(results, "word_logits");
+        Add(Output(results, "word_logits"), from, to, word);
+        Add(Output(results, "col_logits"), from, to, col);
+        Add(Output(results, "cell_logits"), from, to, cell);
         var roleLogits = Output(results, "role_logits");
-
-        for (var i = from; i < to; i++)
-        {
-            var at = (i - from + 1) * labels;
-            for (var c = 0; c < labels; c++) wordAcc[i * labels + c] += wordLogits[at + c];
-        }
 
         // The exported role head runs per token; it is affine, so averaging its logits over
         // a row's first subwords is exactly the row_pool mean-pool the model was trained
@@ -201,6 +236,16 @@ public sealed class Tagger : IDisposable
         }
     }
 
+    static void Add(float[] logits, int from, int to, Logits acc)
+    {
+        var w = acc.Width;
+        for (var i = from; i < to; i++)
+        {
+            var at = (i - from + 1) * w;
+            for (var c = 0; c < w; c++) acc.Sum[i * w + c] += logits[at + c];
+        }
+    }
+
     static float[] Output(IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results, string name)
     {
         foreach (var r in results)
@@ -220,6 +265,8 @@ public sealed class Tagger : IDisposable
     static int Bin(int v, int size) =>
         Math.Min(BoxBins - 1, Math.Max(0, (int)(v * (double)(BoxBins - 1) / Math.Max(size, 1))));
 
+    static int ArgMax(Logits acc, int token) => ArgMax(acc.Sum, token * acc.Width, acc.Width);
+
     static int ArgMax(float[] values, int offset, int count)
     {
         var best = 0;
@@ -228,11 +275,12 @@ public sealed class Tagger : IDisposable
         return best;
     }
 
-    static float Softmax(float[] values, int offset, int count, int index)
+    static float Softmax(Logits acc, int token, int index)
     {
-        var max = values[offset + ArgMax(values, offset, count)];
+        var offset = token * acc.Width;
+        var max = acc.Sum[offset + ArgMax(acc, token)];
         double sum = 0;
-        for (var i = 0; i < count; i++) sum += Math.Exp(values[offset + i] - max);
-        return (float)(Math.Exp(values[offset + index] - max) / sum);
+        for (var i = 0; i < acc.Width; i++) sum += Math.Exp(acc.Sum[offset + i] - max);
+        return (float)(Math.Exp(acc.Sum[offset + index] - max) / sum);
     }
 }
