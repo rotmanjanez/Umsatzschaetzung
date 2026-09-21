@@ -155,6 +155,16 @@ public partial class CasesView : Screen
         });
     }
 
+    async void Export(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is not CaseRow row) return;
+        await Session.Run(async () =>
+        {
+            var resp = await Session.Service.ExportCase(row.Case.Id, Ct);
+            await Session.SaveFile(resp.FileName, resp.Data, Session.CaseFilter);
+        });
+    }
+
     async void Import(object? sender, RoutedEventArgs e)
     {
         var files = await Session.PickFiles(Session.CaseFilter, false);

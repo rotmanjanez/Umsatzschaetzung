@@ -78,9 +78,14 @@
                     <DataGridTemplateColumn Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="svc:CaseRow">
-                                <Button x:Name="DeleteCase" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
-                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
-                                </Button>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="ExportCase" Theme="{StaticResource IconButton}" ToolTip.Tip="Exportieren" Click="Export">
+                                        <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                    <Button x:Name="DeleteCase" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

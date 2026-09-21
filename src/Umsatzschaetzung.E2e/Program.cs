@@ -84,8 +84,9 @@ Check(calc.Excluded.Unmapped.Count == 0 && calc.Excluded.Unused.Count == 0, "not
 var report = await svc.RenderReport(kase.Case.Id, false, ct);
 Check(report.Html.Contains("7.335,95 €") && report.Html.Contains("Anhang E"), "html report");
 
-var csv = Encoding.UTF8.GetString((await svc.ExportCase(kase.Case.Id, ExportFormat.Csv, ct)).Data);
-Check(csv.Contains("Kalkulierter Umsatz (netto);7.335,95 €"), "csv export");
+var csv = Encoding.UTF8.GetString((await svc.ExportInvoice(kase.Case.Id, "inv.bar.1", ct)).Data);
+Check(csv.Contains("Rechnungsnummer;2024-04711") && csv.Contains("Netto;1.690,00 €"), "invoice csv carries the header");
+Check(csv.Contains("1;Pils Fass 50 l;31090;;12 Keg;92,50 €;1.110,00 €;19 %;Fassbier Pils × 50 l"), "invoice csv carries the lines with their mapping");
 
 Pack? Size(string text) => PackSize.Read(text);
 Check(Size("Kiste Pils 20 x 0,5 l") == new Pack(20, 500, Unit.Ml), "pack: count times litres");
@@ -309,7 +310,7 @@ catch (ServiceError e)
     Check(e.Code == ErrorCode.Unsupported, "pdf preview without renderer is Unsupported, got " + e.Code);
 }
 
-var dump = await svc.ExportCase(kase.Case.Id, ExportFormat.Case, ct);
+var dump = await svc.ExportCase(kase.Case.Id, ct);
 var back = await svc.ImportCase(dump.FileName, dump.Data, ct);
 Check(dump.FileName.EndsWith(".db") && back.Case.Id == kase.Case.Id && back.Case.Invoices.Count == 2,
     "a case exports and imports as one file");

@@ -141,10 +141,11 @@ public sealed class InvoiceModel : Observable
     public bool IsPending => state == Checked.Pending;
 
     public bool Valid { get => valid; set { if (Set(ref valid, value)) Raise(nameof(SaveReady)); } }
-    public bool Dirty { get => dirty; set { if (Set(ref dirty, value)) Raise(nameof(SaveReady)); } }
-    public bool Saving { get => saving; set { if (Set(ref saving, value)) { Raise(nameof(SaveReady)); Raise(nameof(SaveLabel)); } } }
+    public bool Dirty { get => dirty; set { if (Set(ref dirty, value)) { Raise(nameof(SaveReady)); Raise(nameof(CanExport)); } } }
+    public bool Saving { get => saving; set { if (Set(ref saving, value)) { Raise(nameof(SaveReady)); Raise(nameof(SaveLabel)); Raise(nameof(CanExport)); } } }
 
     public bool SaveReady => valid && !saving && (dirty || state == Checked.Pending);
+    public bool CanExport => !dirty && !saving;
     public string SaveLabel => saving ? "Wird gespeichert …" : state == Checked.Pending ? "Bestätigen" : "Änderungen speichern";
 
     public string? NetFlag => netFlag;
@@ -443,6 +444,16 @@ public partial class InvoiceView : Screen
             onSaved(v.Case);
         });
         model.Saving = false;
+    }
+
+    async void ExportCsv(object? sender, RoutedEventArgs e)
+    {
+        if (Session.Case is null) return;
+        await Session.Run(async () =>
+        {
+            var resp = await Session.Service.ExportInvoice(Session.Case.Id, invoice.Id, Ct);
+            await Session.SaveFile(resp.FileName, resp.Data, Session.CsvFilter);
+        });
     }
 
     void AddLine(object? sender, RoutedEventArgs e)

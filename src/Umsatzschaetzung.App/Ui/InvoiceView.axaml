@@ -42,6 +42,7 @@
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
                     <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
+                    <Button DockPanel.Dock="Right" Content="CSV exportieren" Theme="{StaticResource SecondaryButton}" IsEnabled="{Binding CanExport}" Click="ExportCsv"/>
                     <Border x:Name="State" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="12,0"
                             VerticalAlignment="Center"
                             Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">

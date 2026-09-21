@@ -25,13 +25,13 @@ Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter
     Unter Windows kann der Ordner per Gruppenrichtlinie umgelegt sein, etwa auf
     ein Netzlaufwerk.
 
-## Importieren
+## Importieren und Exportieren
 
 **Importieren** übernimmt eine Falldatei in das Programm und öffnet sie. Sie
 liegt danach im selben Ordner wie die übrigen Prüfungen.
 
-Eine Falldatei entsteht über den Export in der Prüfung selbst, siehe
-[Import und Export](import-export.md).
+Das Pfeilsymbol in der Zeile legt umgekehrt eine Kopie der Prüfung ab, wo Sie
+wollen. Genaueres unter [Import und Export](import-export.md).
 
 
 ## Löschen

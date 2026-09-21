@@ -102,19 +102,19 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         }
     });
 
-    public Task<ExportResp> ExportCase(string caseId, ExportFormat format, CancellationToken ct) => Guard(() =>
+    public Task<ExportResp> ExportCase(string caseId, CancellationToken ct) => Guard(() =>
     {
         var c = LoadCase(caseId);
-        switch (format)
-        {
-            case ExportFormat.Case:
-                return new ExportResp(cases.Export(caseId), FileName(c, "db"));
-            case ExportFormat.Csv:
-                var (rep, rs) = Compute(c);
-                return new ExportResp(Csv.Render(c, rep, rs), FileName(c, "csv"));
-            default:
-                throw new ServiceError(ErrorCode.Unsupported, $"Exportformat \"{format}\" nicht unterstützt");
-        }
+        return new ExportResp(cases.Export(caseId), FileName(c.Label, "db"));
+    });
+
+    public Task<ExportResp> ExportInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(() =>
+    {
+        var c = LoadCase(caseId);
+        var inv = c.Invoices.Find(i => i.Id == invoiceId)
+            ?? throw new ServiceError(ErrorCode.NotFound, $"Rechnung \"{invoiceId}\" nicht gefunden");
+        var label = inv.Number != "" ? inv.Number : inv.FileName;
+        return new ExportResp(Csv.Invoice(c, inv, rules.Load()), FileName(c.Label + " " + label, "csv"));
     });
 
     public Task<ParseResp> ParseInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
@@ -246,9 +246,9 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var c = LoadCase(caseId);
         var (rep, rs) = Compute(c);
         var html = Html.Render(c, rs, rep);
-        if (!pdf) return new ReportResp(html, null, FileName(c, "html"));
+        if (!pdf) return new ReportResp(html, null, FileName(c.Label, "html"));
         if (printer is null) throw new ServiceError(ErrorCode.Unsupported, "PDF-Ausgabe nicht verfügbar");
-        return new ReportResp(html, await printer.Print(html, ct), FileName(c, "pdf"));
+        return new ReportResp(html, await printer.Print(html, ct), FileName(c.Label, "pdf"));
     });
 
     (Model.Report Report, RuleSet Rules) Compute(Case c)
@@ -347,10 +347,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return rs;
     }
 
-    static string FileName(Case c, string ext)
+    static string FileName(string label, string ext)
     {
         var b = new StringBuilder();
-        foreach (var r in c.Label)
+        foreach (var r in label)
         {
             switch (r)
             {
@@ -365,8 +365,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
                 case ' ': b.Append('_'); break;
             }
         }
-        var label = b.Length == 0 ? c.Id : b.ToString();
-        return "Umsatzschätzung-" + label + "-" + Today().ToString("yyyy-MM-dd") + "." + ext;
+        var name = b.Length == 0 ? "Prüfung" : b.ToString();
+        return "Umsatzschätzung-" + name + "-" + Today().ToString("yyyy-MM-dd") + "." + ext;
     }
 
     static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);

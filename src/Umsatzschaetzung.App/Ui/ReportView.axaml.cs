@@ -20,11 +20,9 @@ public sealed class ReportModel : Observable
     public bool HasExcluded { get => hasExcluded; set { if (Set(ref hasExcluded, value)) Raise(nameof(NoExcluded)); } }
     public bool NoExcluded => !hasExcluded;
     public bool Ready { get => ready; set { if (Set(ref ready, value)) Raise(nameof(CanSave)); } }
-    public bool Busy { get => busy; set { if (Set(ref busy, value)) { Raise(nameof(CanSave)); Raise(nameof(CanExport)); Raise(nameof(PdfLabel)); Raise(nameof(CsvLabel)); } } }
+    public bool Busy { get => busy; set { if (Set(ref busy, value)) { Raise(nameof(CanSave)); Raise(nameof(PdfLabel)); } } }
     public bool CanSave => ready && !busy;
-    public bool CanExport => !busy;
     public string PdfLabel => busy ? "Wird erstellt …" : "Als PDF speichern";
-    public string CsvLabel => busy ? "Wird exportiert …" : "CSV exportieren";
     public string Saved { get => saved; set { if (Set(ref saved, value)) Raise(nameof(ShowSaved)); } }
     public bool ShowSaved => saved != "";
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }
@@ -109,22 +107,6 @@ public partial class ReportView : Screen
             }
             model.Busy = false;
             if (await Session.SaveFile(resp.FileName, resp.Pdf, Session.PdfFilter) is { } name)
-                model.Saved = "Gespeichert: " + name;
-        });
-        model.Busy = false;
-    }
-
-    async void ExportCsv(object? sender, RoutedEventArgs e)
-    {
-        if (Session.Case is null) return;
-        var caseId = Session.Case.Id;
-        model.Saved = "";
-        model.Busy = true;
-        await Session.Run(async () =>
-        {
-            var resp = await Session.Service.ExportCase(caseId, ExportFormat.Csv, Ct);
-            model.Busy = false;
-            if (await Session.SaveFile(resp.FileName, resp.Data, Session.CsvFilter) is { } name)
                 model.Saved = "Gespeichert: " + name;
         });
         model.Busy = false;
