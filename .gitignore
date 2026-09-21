@@ -9,3 +9,6 @@ dist
 *.pfx.base64
 
 __pycache__
+
+web/docs/pages/img/
+web/docs/pages/guide/img/
