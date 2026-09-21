@@ -8,5 +8,6 @@
     <Project Path="tools/eval/Umsatzschaetzung.Eval.csproj" />
     <Project Path="tools/ocr/Umsatzschaetzung.Ocr.csproj" />
     <Project Path="tools/richtsatz/Umsatzschaetzung.Richtsatz.csproj" />
+    <Project Path="tools/headless/Umsatzschaetzung.Headless.csproj" />
   </Folder>
 </Solution>

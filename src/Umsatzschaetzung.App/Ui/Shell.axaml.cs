@@ -54,6 +54,8 @@ public partial class Shell : Window
         };
     }
 
+    internal Session Session => session;
+
     // Windows zeigt die Menüleiste im Fenster, macOS erwartet sie oben am Bildschirm.
     NativeMenu HelpMenu()
     {

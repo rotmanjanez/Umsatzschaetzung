@@ -20,6 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="headless" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AvaloniaResource Include="Ui/Assets/logo.svg" />
     <AvaloniaResource Include="Ui/Assets/logo-256.png" />
   </ItemGroup>
