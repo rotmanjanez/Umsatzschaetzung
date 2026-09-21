@@ -1,6 +1,6 @@
 site_name: Umsatzschätzung
 site_url: https://docs.umsatzschaetzung.amtstools.de/
-docs_dir: docs
+docs_dir: pages
 site_dir: site
 
 theme:
