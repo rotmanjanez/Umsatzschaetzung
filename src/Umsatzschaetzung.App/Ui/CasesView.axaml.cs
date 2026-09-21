@@ -159,10 +159,22 @@ public partial class CasesView : Screen
     {
         var files = await Session.PickFiles(Session.CaseFilter, false);
         if (files.Count == 0) return;
-        await Session.Run(async () =>
-        {
-            var resp = await Session.Service.ImportCase(files[0].Name, files[0].Data, Ct);
-            Session.Open(resp);
-        });
+        await Import(files[0], false);
     }
+
+    Task Import(PickedFile file, bool overwrite) => Session.Run(async () =>
+    {
+        try
+        {
+            Session.Open(await Session.Service.ImportCase(file.Name, file.Data, overwrite, Ct));
+        }
+        catch (ServiceError err) when (err.Code == ErrorCode.Conflict && !overwrite)
+        {
+            var label = err.Details as string ?? "";
+            var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+                "„" + label + "“ ist bereits vorhanden und wird mit allen Rechnungen durch die Datei ersetzt.",
+                "Prüfung ersetzen");
+            if (answer) await Import(file, true);
+        }
+    });
 }

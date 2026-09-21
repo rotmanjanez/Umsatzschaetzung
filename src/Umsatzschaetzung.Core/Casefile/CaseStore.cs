@@ -9,6 +9,11 @@ public sealed class CaseInvalidException(string message, Exception? inner = null
 
 public sealed class CaseNotFoundException(string message) : Exception(message);
 
+public sealed class CaseExistsException(string message, string label) : Exception(message)
+{
+    public string Label { get; } = label;
+}
+
 // Ein Fall ist eine Datei: <id>.db trägt den Fall, jeden Beleg und das, was der Scan
 // gelesen hat, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen.
 public sealed partial class CaseStore(string dir)
@@ -168,7 +173,7 @@ public sealed partial class CaseStore(string dir)
         }
     });
 
-    public Case Import(byte[] data) => Guarded(() =>
+    public Case Import(byte[] data, bool overwrite) => Guarded(() =>
     {
         if (data.Length == 0) throw new CaseInvalidException("Falldatei ist leer");
         Directory.CreateDirectory(dir);
@@ -179,6 +184,8 @@ public sealed partial class CaseStore(string dir)
             Check(temp);
             Case c;
             using (var db = Reader(temp)) c = Read(db);
+            if (!overwrite && File.Exists(PathOf(c.Id)))
+                throw new CaseExistsException($"Fall \"{c.Id}\": Fall ist bereits vorhanden", Load(c.Id).Label);
             File.Move(temp, PathOf(c.Id), true);
             return c;
         }

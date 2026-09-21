@@ -90,7 +90,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return Task.FromResult(0);
     });
 
-    public Task<CaseResp> ImportCase(string fileName, byte[] data, CancellationToken ct) => Guard(() => Resp(cases.Import(data)));
+    public Task<CaseResp> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) => Guard(() =>
+    {
+        try
+        {
+            return Resp(cases.Import(data, overwrite));
+        }
+        catch (CaseExistsException e)
+        {
+            throw new ServiceError(ErrorCode.Conflict, e.Message, e.Label, e);
+        }
+    });
 
     public Task<ExportResp> ExportCase(string caseId, ExportFormat format, CancellationToken ct) => Guard(() =>
     {
