@@ -37,6 +37,7 @@ for (var i = 0; i < args.Length; i++)
 using var tagger = rows == "" || parity ? new Tagger() : null;
 var agree = new Agreement();
 var results = new List<Result>();
+int accepted = 0, acceptedClean = 0;
 var rowsOut = new List<string>();
 foreach (var variation in rows == "" ? Corpus.ReadDumps(corpus) : Corpus.ReadRows(rows, split))
 {
@@ -47,16 +48,23 @@ foreach (var variation in rows == "" ? Corpus.ReadDumps(corpus) : Corpus.ReadRow
         : p.Words).ToList();
     var pages = tagged.Select(_ => new OcrPage()).ToList();
     var got = Assemble.Invoice(tagged, pages);
+    (got.NetTotal, got.GrossTotal) = InvoiceMath.LineTotals(got.Lines);
+    var flags = Check.Invoice(got);
+    var auto = Check.Complete(got, flags);
+    if (auto) accepted++;
     var r = Score.One(got, want, VatExempt(pages, want), full);
+    if (auto && r.Clean) acceptedClean++;
     if (show != "" && variation.Invoice.Contains(show)) Show(variation, tagged, got, want, r);
     results.Add(r);
     rowsOut.Add($"{variation.Invoice}\t{variation.Template}\t{r.CellsWrong}\t{r.CellsTotal}\t{r.LinesMatched}\t{r.LinesGot}\t{r.LinesWant}\t" +
-        string.Join(",", Score.HeaderFields.Select(f => r.Header[f] ? 1 : 0)));
+        string.Join(",", Score.HeaderFields.Select(f => r.Header[f] ? 1 : 0)) +
+        $"\t{(auto ? "auto" : "review")}\t{string.Join(",", flags.Select(f => f.Code).Distinct().Order(StringComparer.Ordinal))}");
 }
 
 if (parity) Console.WriteLine(agree.Report() + "\n");
 var title = (rows == "" ? $"{corpus}, app path" : $"{rows} / {split}" + (parity ? ", C# tagger" : "")) + (full ? ", full" : ", core");
-var text = $"[{title}]\n" + Score.Report(results, full);
+var text = $"[{title}]\n" + Score.Report(results, full)
+    + $"\nauto accept         {(results.Count == 0 ? 0 : accepted / (double)results.Count):F3}  ({accepted}, davon {acceptedClean} fehlerfrei)";
 Console.WriteLine(text);
 if (output != "") File.WriteAllText(output, text + "\n");
 if (detail != "") File.WriteAllLines(detail, rowsOut.Order(StringComparer.Ordinal));
