@@ -1,4 +1,5 @@
 ﻿// Apache-2.0 license
+// Modified for Umsatzschätzung; the changes against the vendored commit are in the git history.
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/OcrLite.cs
 
@@ -79,9 +80,21 @@ public sealed class RapidOcr : IDisposable
     /// </summary>
     public void InitModels(RapidOcrModelSet models, SessionOptions op)
     {
+        InitModels(models, op, op);
+    }
+
+    /// <summary>
+    /// Initialize using a model set with separate session options for the detector, whose
+    /// single large input suits an accelerator, and for the classifier and recognizer.
+    /// <paramref name="detectorLock"/> serializes detector runs across instances sharing
+    /// that accelerator.
+    /// </summary>
+    public void InitModels(RapidOcrModelSet models, SessionOptions detector, SessionOptions op, object? detectorLock = null)
+    {
         ArgumentNullException.ThrowIfNull(models);
 
-        _textDetector.InitModel(models.DetModelPath, models.DetMean, models.DetStd, op);
+        _textDetector.RunLock = detectorLock;
+        _textDetector.InitModel(models.DetModelPath, models.DetMean, models.DetStd, detector);
         _textClassifier.InitModel(models.ClsModelPath, op);
         _textRecognizer.InitModel(models.RecModelPath, models.KeysPath, op);
     }

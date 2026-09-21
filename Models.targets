@@ -7,6 +7,10 @@
        Each file is pinned by SHA256. A mismatch deletes the cached copy and fails the
        build, so a truncated download heals on the next run instead of being baked into
        an installer. -->
+  <PropertyGroup>
+    <RapidOcrNetModels>https://raw.githubusercontent.com/BobLd/RapidOcrNet/590d44b2efc7ecbef446c36bb6359ebbfcffeb50/RapidOcrNet/models/v5</RapidOcrNetModels>
+  </PropertyGroup>
+
   <ItemGroup>
     <ModelFile Include="belegtagger.int8.onnx;vocab.json;merges.txt;byte_to_unicode.json;spec.json">
       <Dir>belegtagger</Dir>
@@ -16,6 +20,12 @@
       <Dir>v6</Dir>
       <Release>ppocr-v6.0.0</Release>
     </ModelFile>
+    <!-- The classifier, recogniser and dictionary of the vendored RapidOcrNet, from the
+         commit src/RapidOcrNet was copied from. -->
+    <ModelFile Include="ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx;latin_PP-OCRv5_rec_mobile_infer.onnx;ppocrv5_latin_dict.txt">
+      <Dir>v5</Dir>
+      <Release>rapidocrnet-3.0.0</Release>
+    </ModelFile>
 
     <ModelFile Update="belegtagger.int8.onnx" Sha256="20e008dc763f0be6332b343d348de1fc22461d05fedb5b7a58433c56cd5a22ca" />
     <ModelFile Update="vocab.json" Sha256="58f7ec138a70ded60140087b6ae1a7a63bcbd16c4b59fd128fb2fc49b2b8aeb0" />
@@ -23,6 +33,9 @@
     <ModelFile Update="byte_to_unicode.json" Sha256="cbb1623eed136cceb032401db5efec4d36c8e1608810c0e7d4ef533d586960df" />
     <ModelFile Update="spec.json" Sha256="37f94f042c4bb411ba9de2413a2b2b5783c567489caeb889f4a5f7ada4b7e05a" />
     <ModelFile Update="PP-OCRv6_det_small.onnx" Sha256="090f04abcd9d9a7498bc4ebf677e4cb9bdce1fe4197ddb7e529f1ef44e1ff94f" />
+    <ModelFile Update="ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx" Sha256="54379ae5174d026780215fc748a7f31910dee36818e63d49e17dc598ecc82df7" Url="$(RapidOcrNetModels)/ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx" />
+    <ModelFile Update="latin_PP-OCRv5_rec_mobile_infer.onnx" Sha256="b20bd37c168a570f583afbc8cd7925603890efbcdc000a59e22c269d160b5f5a" Url="$(RapidOcrNetModels)/latin_PP-OCRv5_rec_mobile_infer.onnx" />
+    <ModelFile Update="ppocrv5_latin_dict.txt" Sha256="3c0a8a79b612653c25f765271714f71281e4e955962c153e272b7b8c1d2b13ff" Url="$(RapidOcrNetModels)/ppocrv5_latin_dict.txt" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -36,6 +49,7 @@
     <ItemGroup>
       <ModelFile>
         <Path>$(ModelCacheDir)/%(ModelFile.Release)/%(ModelFile.Dir)/%(ModelFile.Identity)</Path>
+        <Url Condition="'%(ModelFile.Url)' == ''">$(ModelRepository)/%(ModelFile.Release)/%(ModelFile.Identity)</Url>
       </ModelFile>
       <MissingModel Include="@(ModelFile)" Condition="!Exists('%(ModelFile.Path)')" />
     </ItemGroup>
@@ -46,7 +60,7 @@
     <Message Importance="high" Condition="'@(MissingModel)' != ''"
              Text="Fetching @(MissingModel->Count()) model file(s) into $(ModelCacheDir)" />
     <DownloadFile Condition="'@(MissingModel)' != ''"
-                  SourceUrl="$(ModelRepository)/%(MissingModel.Release)/%(MissingModel.Identity)"
+                  SourceUrl="%(MissingModel.Url)"
                   DestinationFolder="$(ModelCacheDir)/%(MissingModel.Release)/%(MissingModel.Dir)"
                   DestinationFileName="%(MissingModel.Identity)"
                   Retries="3" />

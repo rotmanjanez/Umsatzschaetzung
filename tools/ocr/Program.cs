@@ -37,7 +37,7 @@ static class Program
         if (!Directory.Exists(root)) { Console.Error.WriteLine($"kein Verzeichnis: {root}"); return 2; }
 
         var todo = Walk(root, force).Order(StringComparer.Ordinal).ToList();
-        Console.WriteLine($"{todo.Count} Seiten, {workers} parallel, PDF-Raster {dpi} dpi");
+        Console.WriteLine($"{todo.Count} Seiten, {workers} parallel, PDF-Raster {dpi} dpi, Erkennung auf {RapidOcr.Detector}");
 
         var pdf = new PdfiumPages();
         var pool = new ConcurrentBag<RapidOcr>();

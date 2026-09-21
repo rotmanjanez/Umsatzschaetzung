@@ -1,4 +1,5 @@
 ﻿// Apache-2.0 license
+// Modified for Umsatzschätzung; the changes against the vendored commit are in the git history.
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/CrnnNet.cs
 
@@ -127,6 +128,8 @@ public sealed class TextRecognizer : IDisposable
         int h = dimensions[1];
         int w = dimensions[2];
 
+        ReadOnlySpan<float> data = (srcData as DenseTensor<float> ?? srcData.ToDenseTensor()).Buffer.Span;
+
         int lastIndex = 0;
         var scores = new List<float>();
         var chars = new List<string>();
@@ -136,10 +139,11 @@ public sealed class TextRecognizer : IDisposable
         {
             int maxIndex = 0;
             float maxValue = -1000F;
+            ReadOnlySpan<float> row = data.Slice(i * w, w);
 
             for (int j = 0; j < w; j++)
             {
-                float v = srcData[0, i, j];
+                float v = row[j];
                 if (v > maxValue)
                 {
                     maxIndex = j;

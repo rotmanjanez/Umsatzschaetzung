@@ -125,6 +125,7 @@ public partial class App : Application
         var rules = new RuleStore(config.Store, RuleStore.Seed());
         var ocr = new RapidOcr();
         owned.Add(ocr);
+        _ = ocr.Warm();
         var tagger = new Tagger();
         owned.Add(tagger);
         var pdf = new PdfiumPages();

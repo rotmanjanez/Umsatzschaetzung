@@ -1,3 +1,5 @@
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.EP.WebGpu;
 using RapidOcrNet;
 using SkiaSharp;
 using Umsatzschaetzung.Model;
@@ -19,6 +21,8 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     static readonly RapidOcrOptions Options =
         RapidOcrOptions.PPOCRv6 with { ReturnWordBox = true, MaxSideLen = MaxImageDimension };
 
+    public static string Detector => Accelerator.Available ? "WebGPU" : "CPU";
+
     static readonly RapidOcrModelSet Models = RapidOcrModelSet.PPOCRv5Latin with
     {
         DetModelPath = AppFiles.Beside("models/v6/PP-OCRv6_det_small.onnx"),
@@ -29,9 +33,20 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         KeysPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.KeysPath),
     };
 
+    readonly Lock gate = new();
     Engine? engine;
+    bool accelerated;
 
     public void Dispose() => engine?.Dispose();
+
+    // Compiles the detector's shaders for the accelerator before the first import asks for
+    // them, on a blank A4 page at the import's resolution.
+    public Task Warm() => Task.Run(() =>
+    {
+        using var blank = new SKBitmap(new SKImageInfo(2480, 3508, SKColorType.Bgra8888, SKAlphaType.Opaque));
+        blank.Erase(SKColors.White);
+        Read(blank);
+    });
 
     public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(async () =>
     {
@@ -65,10 +80,24 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     static OcrPage Page(SKBitmap page, OcrResult result, byte[] image) =>
         new() { Width = page.Width, Height = page.Height, Words = Words(result), Image = image };
 
+    // A detector that fails on the accelerator, at load or on a page, is replaced by one on
+    // the CPU and the page read again.
     OcrResult Read(SKBitmap page)
     {
-        engine ??= Open();
-        return engine.Detect(page, Options);
+        lock (gate)
+        {
+            engine ??= Open(Accelerator.Available);
+            try
+            {
+                return engine.Detect(page, Options);
+            }
+            catch (OnnxRuntimeException) when (accelerated)
+            {
+                engine.Dispose();
+                engine = Open(false);
+                return engine.Detect(page, Options);
+            }
+        }
     }
 
     static List<OcrWord> Words(OcrResult result)
@@ -102,10 +131,21 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         };
     }
 
-    Engine Open()
+    Engine Open(bool gpu)
     {
         var engine = new Engine();
-        try { if (threads > 0) engine.InitModels(Models, threads); else engine.InitModels(Models); }
+        try
+        {
+            using var detector = gpu ? Accelerator.Session(threads) : Engine.GetDefaultSessionOptions(threads);
+            using var reader = Engine.GetDefaultSessionOptions(threads);
+            if (gpu) lock (Accelerator.Gate) engine.InitModels(Models, detector, reader, Accelerator.Gate);
+            else engine.InitModels(Models, detector, reader);
+        }
+        catch (OnnxRuntimeException) when (gpu)
+        {
+            engine.Dispose();
+            return Open(false);
+        }
         catch (Exception e)
         {
             engine.Dispose();
@@ -113,6 +153,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
                 "Die Texterkennungsmodelle konnten nicht geladen werden. Erwartet unter " +
                 AppFiles.Beside("models") + ".", e);
         }
+        accelerated = gpu;
         return engine;
     }
 
@@ -155,4 +196,38 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     }
 
     static byte[] Encode(SKBitmap bitmap) => PdfiumPages.Png(bitmap);
+}
+
+// The WebGPU plugin: DirectX 12 on Windows, Metal on macOS, loaded beside the CPU runtime
+// the tagger is pinned to. No adapter, no library, or a runtime that refuses it all mean CPU.
+// The device takes one session at a time, at load and per run: the corpus tool runs a
+// reader per core and they all queue here for the detector.
+static class Accelerator
+{
+    static readonly Lazy<OrtEpDevice?> device = new(Find);
+
+    public static readonly object Gate = new();
+
+    public static bool Available => device.Value is not null;
+
+    public static SessionOptions Session(int threads)
+    {
+        var options = Engine.GetDefaultSessionOptions(threads);
+        if (device.Value is { } gpu) options.AppendExecutionProvider(OrtEnv.Instance(), [gpu], new Dictionary<string, string>());
+        return options;
+    }
+
+    static OrtEpDevice? Find()
+    {
+        try
+        {
+            var env = OrtEnv.Instance();
+            env.RegisterExecutionProviderLibrary("webgpu", WebGpuEp.GetLibraryPath());
+            return env.GetEpDevices().FirstOrDefault(d => d.EpName == WebGpuEp.GetEpName());
+        }
+        catch (Exception e) when (e is OnnxRuntimeException or IOException or PlatformNotSupportedException or DllNotFoundException)
+        {
+            return null;
+        }
+    }
 }

@@ -24,6 +24,8 @@ https://github.com/rsms/inter/blob/master/LICENSE.txt
 https://www.nuget.org/packages/Microsoft.Web.WebView2 (Microsoft Software License Terms)
 
 ==== RapidOcrNet (Apache-2.0) ====
+Im Quelltext unter src/RapidOcrNet enthalten und dort verändert; die geänderten
+Dateien tragen einen Hinweis.
 https://github.com/BobLd/RapidOcrNet/blob/master/LICENSE
 
 ==== Clipper2 (Boost Software License 1.0) ====
@@ -32,6 +34,16 @@ https://github.com/AngusJohnson/Clipper2/blob/main/LICENSE
 
 ==== ONNX Runtime (MIT) ====
 https://github.com/microsoft/onnxruntime/blob/main/LICENSE
+
+==== ONNX Runtime WebGPU Execution Provider (MIT) ====
+Rechnet die Textrahmenerkennung auf der GPU, unter Windows über DirectX 12, unter
+macOS über Metal. Enthält Dawn (BSD-3-Clause) und Abseil (Apache-2.0); unter Windows
+dazu den DirectX Shader Compiler als dxcompiler.dll und dxil.dll (University of
+Illinois/NCSA Open Source License).
+https://github.com/microsoft/onnxruntime/blob/main/LICENSE
+https://dawn.googlesource.com/dawn/+/refs/heads/main/LICENSE
+https://github.com/abseil/abseil-cpp/blob/master/LICENSE
+https://github.com/microsoft/DirectXShaderCompiler/blob/main/LICENSE.TXT
 
 ==== PP-OCRv5 und PP-OCRv6, lateinische Modelle (Apache-2.0) ====
 Die mitgelieferten Gewichte unter models/v5 und models/v6 stammen aus PaddleOCR.

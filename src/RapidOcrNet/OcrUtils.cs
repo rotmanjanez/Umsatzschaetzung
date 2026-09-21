@@ -1,4 +1,5 @@
 ﻿// Apache-2.0 license
+// Modified for Umsatzschätzung; the changes against the vendored commit are in the git history.
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/OcrUtils.cs
 
@@ -62,33 +63,28 @@ internal static class OcrUtils
 
     public static Tensor<float> SubtractMeanNormalize(SKBitmap src, float[] meanVals, float[] normVals)
     {
-        const int index = 0; // Corresponds to index in batch (currently a single image per batch)
-        const int batchSize = 1;
-
         int cols = src.Width;
         int rows = src.Height;
-        int channels = src.BytesPerPixel;
         int rowBytes = src.RowBytes; // Use actual row stride (may include padding)
+        int plane = rows * cols;
 
-        const int expChannels = 3; // Size of meanVals, we ignore alpha channel
-
-        Tensor<float> inputTensor = new DenseTensor<float>([batchSize, expChannels, rows, cols]);
-
+        var inputTensor = new DenseTensor<float>([1, 3, rows, cols]);
+        Span<float> data = inputTensor.Buffer.Span;
         ReadOnlySpan<byte> span = src.GetPixelSpan();
 
         if (src.Info.ColorType == SKColorType.Gray8)
         {
-            float mean0 = meanVals[0], mean1 = meanVals[1], mean2 = meanVals[2];
-            float norm0 = normVals[0], norm1 = normVals[1], norm2 = normVals[2];
             for (int r = 0; r < rows; ++r)
             {
-                int rowBase = r * rowBytes;
-                for (int c = 0; c < cols; ++c)
+                ReadOnlySpan<byte> row = span.Slice(r * rowBytes, cols);
+                for (int ch = 0; ch < 3; ++ch)
                 {
-                    byte value = span[rowBase + c];
-                    inputTensor[index, 0, r, c] = (value - mean0) * norm0;
-                    inputTensor[index, 1, r, c] = (value - mean1) * norm1;
-                    inputTensor[index, 2, r, c] = (value - mean2) * norm2;
+                    float mean = meanVals[ch], norm = normVals[ch];
+                    Span<float> dst = data.Slice(ch * plane + r * cols, cols);
+                    for (int c = 0; c < cols; ++c)
+                    {
+                        dst[c] = (row[c] - mean) * norm;
+                    }
                 }
             }
         }
@@ -96,14 +92,14 @@ internal static class OcrUtils
         {
             for (int r = 0; r < rows; ++r)
             {
-                int rowBase = r * rowBytes;
-                for (int c = 0; c < cols; ++c)
+                ReadOnlySpan<byte> row = span.Slice(r * rowBytes, cols * 4);
+                for (int ch = 0; ch < 3; ++ch)
                 {
-                    int pixelBase = rowBase + c * channels;
-                    for (int ch = 0; ch < expChannels; ++ch)
+                    float mean = meanVals[ch], norm = normVals[ch];
+                    Span<float> dst = data.Slice(ch * plane + r * cols, cols);
+                    for (int c = 0; c < cols; ++c)
                     {
-                        byte value = span[pixelBase + ch];
-                        inputTensor[index, ch, r, c] = (value - meanVals[ch]) * normVals[ch];
+                        dst[c] = (row[c * 4 + ch] - mean) * norm;
                     }
                 }
             }

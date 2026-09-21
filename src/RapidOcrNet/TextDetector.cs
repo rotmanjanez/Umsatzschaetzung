@@ -1,4 +1,5 @@
 ﻿// Apache-2.0 license
+// Modified for Umsatzschätzung; the changes against the vendored commit are in the git history.
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/DbNet.cs
 
@@ -31,6 +32,12 @@ public sealed class TextDetector : IDisposable
 
     private InferenceSession _dbNet;
     private string _inputName;
+
+    /// <summary>
+    /// Serializes inference across detectors that share one accelerator, which does not
+    /// take concurrent runs from several sessions.
+    /// </summary>
+    public object? RunLock { get; set; }
 
     public TextDetector()
     {
@@ -94,17 +101,13 @@ public sealed class TextDetector : IDisposable
         float unClipRatio)
     {
         Tensor<float> inputTensors;
-        using (var srcResize = src.Resize(new SKSizeI(scale.DstWidth, scale.DstHeight), OcrUtils.NetworkSampling))
+        if (src.Width == scale.DstWidth && src.Height == scale.DstHeight)
         {
-            /*
-#if DEBUG
-            using (var fs = new FileStream($"Detector_{Guid.NewGuid()}.png", FileMode.Create))
-            {
-                srcResize.Encode(fs, SKEncodedImageFormat.Png, 100);
-            }
-#endif
-            */
-
+            inputTensors = OcrUtils.SubtractMeanNormalize(src, _meanValues, _normValues);
+        }
+        else
+        {
+            using var srcResize = src.Resize(new SKSizeI(scale.DstWidth, scale.DstHeight), OcrUtils.NetworkSampling);
             inputTensors = OcrUtils.SubtractMeanNormalize(srcResize, _meanValues, _normValues);
         }
 
@@ -113,20 +116,17 @@ public sealed class TextDetector : IDisposable
                 NamedOnnxValue.CreateFromTensor(_inputName, inputTensors)
         };
 
-        try
+        IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results;
+        lock (RunLock ?? _dbNet)
         {
-            using (IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = _dbNet.Run(inputs))
-            {
-                return GetTextBoxes(results[0], scale.DstHeight, scale.DstWidth, scale, boxScoreThresh,
-                    boxThresh, unClipRatio);
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine(ex.Message + ex.StackTrace);
+            results = _dbNet.Run(inputs);
         }
 
-        return null;
+        using (results)
+        {
+            return GetTextBoxes(results[0], scale.DstHeight, scale.DstWidth, scale, boxScoreThresh,
+                boxThresh, unClipRatio);
+        }
     }
 
     private static SKPoint[][] FindContours(ReadOnlySpan<byte> array, int rows, int cols)
