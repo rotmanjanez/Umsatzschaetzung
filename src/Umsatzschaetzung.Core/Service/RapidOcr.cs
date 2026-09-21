@@ -33,23 +33,34 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
 
     public void Dispose() => engine?.Dispose();
 
-    // Show-through goes first, on the original pixels, so it cannot vote on the lean; then
-    // the page is straightened and read. A sideways or upside-down page is turned and read
-    // again, since the boxes of the first pass sit in the turned frame.
-    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(() =>
+    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(async () =>
     {
         using var decoded = Decode(image);
+        return await Recognize(decoded, image);
+    }, ct);
+
+    public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => Task.Run(() => Recognize(page, null), ct);
+
+    // Show-through goes first, on the original pixels, so it cannot vote on the lean; then
+    // the page is straightened and read. A sideways or upside-down page is turned and read
+    // again, since the boxes of the first pass sit in the turned frame. The record of the
+    // page is encoded beside the read: the read wants every core, the encoder one of them.
+    async Task<OcrPage> Recognize(SKBitmap decoded, byte[]? delivered)
+    {
         using var cleaned = Deink.Apply(decoded);
         using var straightened = Deskew.Apply(cleaned ?? decoded);
         var page = straightened ?? cleaned ?? decoded;
+        var image = delivered is not null && ReferenceEquals(page, decoded) ? Task.FromResult(delivered) : Task.Run(() => Encode(page));
         var first = Read(page);
         var turn = Correction(first);
-        if (turn == 0) return Page(page, first, ReferenceEquals(page, decoded) ? [] : Encode(page));
+        if (turn == 0) return Page(page, first, await image);
+        await image;
         using var turned = Rotate(page, turn);
         using var settled = Deskew.Apply(turned);
         var upright = settled ?? turned;
-        return Page(upright, Read(upright), Encode(upright));
-    }, ct);
+        var record = Task.Run(() => Encode(upright));
+        return Page(upright, Read(upright), await record);
+    }
 
     static OcrPage Page(SKBitmap page, OcrResult result, byte[] image) =>
         new() { Width = page.Width, Height = page.Height, Words = Words(result), Image = image };
@@ -143,9 +154,5 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         return turned;
     }
 
-    static byte[] Encode(SKBitmap bitmap)
-    {
-        using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
-        return data.ToArray();
-    }
+    static byte[] Encode(SKBitmap bitmap) => PdfiumPages.Png(bitmap);
 }

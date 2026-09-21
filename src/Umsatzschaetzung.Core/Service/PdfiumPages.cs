@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SkiaSharp;
 
@@ -13,75 +14,108 @@ public sealed class PdfiumPages : IPdfPages
     // invoice are content, not decoration.
     const int WithAnnotations = 0x01;
 
-    public Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct) =>
-        Task.Run(() => RenderPages(pdf, dpi, ct), ct);
-
-    static List<byte[]> RenderPages(byte[] pdf, int dpi, CancellationToken ct)
+    public async Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct)
     {
-        // One page at a time: the corpus tool runs a worker per core, but rasterising is
-        // a small part of what a worker does and OCR is the rest, so the gate costs little.
-        lock (Pdfium.Gate)
+        var pages = new List<byte[]>();
+        await foreach (var page in Rasterize(pdf, dpi, ct))
+            using (page)
+                pages.Add(await Task.Run(() => Png(page), ct));
+        return pages;
+    }
+
+    // One page at a time: a page is 35 MB of pixels where its PNG is under one.
+    public async IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, [EnumeratorCancellation] CancellationToken ct)
+    {
+        using var document = await Task.Run(() => new Document(pdf), ct);
+        for (var i = 0; i < document.Count; i++)
         {
-            Pdfium.Start();
-
-            // The document reads from the buffer for as long as it is open.
-            var pinned = GCHandle.Alloc(pdf, GCHandleType.Pinned);
-            var document = nint.Zero;
-            try
-            {
-                document = Pdfium.FPDF_LoadMemDocument64(pinned.AddrOfPinnedObject(), (nuint)pdf.Length, null);
-                if (document == 0) throw new InvalidDataException("pdf: nicht lesbar");
-
-                var count = Pdfium.FPDF_GetPageCount(document);
-                var pages = new List<byte[]>(count);
-                for (var i = 0; i < count; i++)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    pages.Add(RenderPage(document, i, dpi));
-                }
-                return pages;
-            }
-            finally
-            {
-                if (document != 0) Pdfium.FPDF_CloseDocument(document);
-                pinned.Free();
-            }
+            ct.ThrowIfCancellationRequested();
+            yield return await Task.Run(() => document.Render(i, dpi), ct);
         }
     }
 
-    static byte[] RenderPage(nint document, int index, int dpi)
+    public static byte[] Png(SKBitmap page)
     {
-        var page = Pdfium.FPDF_LoadPage(document, index);
-        if (page == 0) throw new InvalidDataException($"pdf: Seite {index + 1} nicht lesbar");
-        try
-        {
-            // Both the crop box and /Rotate are already in this size, and the render
-            // below applies them too, so there is no page transform left to build.
-            var width = Pdfium.FPDF_GetPageWidthF(page);
-            var height = Pdfium.FPDF_GetPageHeightF(page);
-            if (width <= 0 || height <= 0) throw new InvalidDataException("pdf: Seite ohne Abmessung");
+        using var data = page.Encode(SKEncodedImageFormat.Png, 100);
+        return data.ToArray();
+    }
 
-            var (w, h) = PdfRaster.Target(width, height, dpi / PointsPerInch);
-            using var bitmap = new SKBitmap(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Opaque));
-            var target = Pdfium.FPDFBitmap_CreateEx(w, h, Bgra, bitmap.GetPixels(), bitmap.RowBytes);
-            if (target == 0) throw new InvalidOperationException("FPDFBitmap_CreateEx");
-            try
-            {
-                // A PDF page paints no background, and the recogniser wants paper.
-                Pdfium.FPDFBitmap_FillRect(target, 0, 0, w, h, White);
-                Pdfium.FPDF_RenderPageBitmap(target, page, 0, 0, w, h, 0, WithAnnotations);
-            }
-            finally
-            {
-                Pdfium.FPDFBitmap_Destroy(target);
-            }
-            bitmap.NotifyPixelsChanged();
-            using var png = bitmap.Encode(SKEncodedImageFormat.Png, 100);
-            return png.ToArray();
-        }
-        finally
+    // Pdfium takes one caller at a time. The gate is held per call rather than for the life
+    // of the document, so a page can be read while another document renders.
+    sealed class Document : IDisposable
+    {
+        readonly GCHandle pinned;
+        readonly nint document;
+
+        public int Count { get; }
+
+        public Document(byte[] pdf)
         {
-            Pdfium.FPDF_ClosePage(page);
+            // The document reads from the buffer for as long as it is open.
+            pinned = GCHandle.Alloc(pdf, GCHandleType.Pinned);
+            lock (Pdfium.Gate)
+            {
+                Pdfium.Start();
+                document = Pdfium.FPDF_LoadMemDocument64(pinned.AddrOfPinnedObject(), (nuint)pdf.Length, null);
+                if (document == 0)
+                {
+                    pinned.Free();
+                    throw new InvalidDataException("pdf: nicht lesbar");
+                }
+                Count = Pdfium.FPDF_GetPageCount(document);
+            }
+        }
+
+        public SKBitmap Render(int index, int dpi)
+        {
+            lock (Pdfium.Gate)
+            {
+                var page = Pdfium.FPDF_LoadPage(document, index);
+                if (page == 0) throw new InvalidDataException($"pdf: Seite {index + 1} nicht lesbar");
+                try
+                {
+                    // Both the crop box and /Rotate are already in this size, and the render
+                    // below applies them too, so there is no page transform left to build.
+                    var width = Pdfium.FPDF_GetPageWidthF(page);
+                    var height = Pdfium.FPDF_GetPageHeightF(page);
+                    if (width <= 0 || height <= 0) throw new InvalidDataException("pdf: Seite ohne Abmessung");
+
+                    var (w, h) = PdfRaster.Target(width, height, dpi / PointsPerInch);
+                    var bitmap = new SKBitmap(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Opaque));
+                    try
+                    {
+                        var target = Pdfium.FPDFBitmap_CreateEx(w, h, Bgra, bitmap.GetPixels(), bitmap.RowBytes);
+                        if (target == 0) throw new InvalidOperationException("FPDFBitmap_CreateEx");
+                        try
+                        {
+                            // A PDF page paints no background, and the recogniser wants paper.
+                            Pdfium.FPDFBitmap_FillRect(target, 0, 0, w, h, White);
+                            Pdfium.FPDF_RenderPageBitmap(target, page, 0, 0, w, h, 0, WithAnnotations);
+                        }
+                        finally
+                        {
+                            Pdfium.FPDFBitmap_Destroy(target);
+                        }
+                        bitmap.NotifyPixelsChanged();
+                        return bitmap;
+                    }
+                    catch
+                    {
+                        bitmap.Dispose();
+                        throw;
+                    }
+                }
+                finally
+                {
+                    Pdfium.FPDF_ClosePage(page);
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (Pdfium.Gate) Pdfium.FPDF_CloseDocument(document);
+            pinned.Free();
         }
     }
 }

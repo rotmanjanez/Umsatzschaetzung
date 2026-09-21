@@ -1,17 +1,20 @@
+using SkiaSharp;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Service;
 
-// Image stays empty when the page was read as delivered; a cleaned, straightened or
-// turned page comes back encoded, since its boxes sit in that frame.
+// The page comes back encoded in the frame its boxes sit in: as delivered when it was read
+// as delivered, otherwise cleaned, straightened or turned.
 public interface IOcr
 {
     Task<OcrPage> Recognize(byte[] image, CancellationToken ct);
+    Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct);
 }
 
 public interface IPdfPages
 {
     Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct);
+    IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, CancellationToken ct);
 }
 
 public interface IPdfPrinter

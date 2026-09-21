@@ -1,3 +1,4 @@
+using SkiaSharp;
 using Umsatzschaetzung.Invoices;
 using Umsatzschaetzung.Model;
 
@@ -10,23 +11,27 @@ public static class Scan
     public static async Task<List<OcrPage>> Read(IOcr? ocr, IPdfPages? pdf, string fileName, byte[] data, int dpi, CancellationToken ct)
     {
         if (ocr is null) throw new ServiceError(ErrorCode.Unsupported, "Texterkennung nicht verfügbar");
-        var images = InvoiceParser.Detect(data) switch
+        var pages = new List<OcrPage>();
+        switch (InvoiceParser.Detect(data))
         {
-            Kind.Image => [data],
-            Kind.Pdf or Kind.Zugferd => await Render(pdf, data, dpi, ct),
-            _ => throw new ServiceError(ErrorCode.Unsupported, $"\"{fileName}\" ist kein Scan"),
-        };
-        if (images.Count == 0) throw new ServiceError(ErrorCode.Unsupported, $"keine Seiten in \"{fileName}\" gefunden");
-        var pages = new List<OcrPage>(images.Count);
-        foreach (var image in images)
-        {
-            var page = await ocr.Recognize(image, ct);
-            if (page.Image.Length == 0) page.Image = image;
-            pages.Add(page);
+            case Kind.Image:
+                pages.Add(await ocr.Recognize(data, ct));
+                break;
+            case Kind.Pdf or Kind.Zugferd:
+                await foreach (var page in Rasterize(pdf, data, dpi, ct))
+                    using (page)
+                        pages.Add(await ocr.Recognize(page, ct));
+                break;
+            default:
+                throw new ServiceError(ErrorCode.Unsupported, $"\"{fileName}\" ist kein Scan");
         }
+        if (pages.Count == 0) throw new ServiceError(ErrorCode.Unsupported, $"keine Seiten in \"{fileName}\" gefunden");
         return pages;
     }
 
     public static Task<List<byte[]>> Render(IPdfPages? pdf, byte[] data, int dpi, CancellationToken ct) =>
         pdf?.Render(data, dpi, ct) ?? throw new ServiceError(ErrorCode.Unsupported, "PDF-Darstellung nicht verfügbar");
+
+    static IAsyncEnumerable<SKBitmap> Rasterize(IPdfPages? pdf, byte[] data, int dpi, CancellationToken ct) =>
+        pdf?.Rasterize(data, dpi, ct) ?? throw new ServiceError(ErrorCode.Unsupported, "PDF-Darstellung nicht verfügbar");
 }
