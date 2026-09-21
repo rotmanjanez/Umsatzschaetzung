@@ -55,7 +55,69 @@ AXES = [# v11, Beschriftung (labels-Agent)
         "uppercase_headers", "bg_art", "bg_place", "head_band", "tint_panel", "decor_qr",
         "decor_stamp", "decor_barcode", "addr_customer_no", "delivery_sentence", "pay_box",
         "minus_style", "group_sep", "qty_style", "price_decimals", "date_format", "body_weight",
-        "letter_tight", "cell_currency", "pageno_place", "receipt"]
+        "letter_tight", "cell_currency", "pageno_place", "receipt",
+        # v12, Inhalt (content-Agent)
+        "vat_rate_glued",
+        # v12, Familien (families-Agent)
+        "price_header_unit", "qty_unit_glue", "ei_bare", "ei_split", "vat_letter",
+        "deposit_column", "day_columns"]
+
+# ------------------------------------------------------------------ v12: Achsen mit Boden
+#
+# Eine Achse ohne Boden fällt nicht auf, wenn sie auf 0,3 % steht — und genau dann ist
+# sie im Training wirkungslos. Jede Zeile hier ist ein Fehlerbild aus v12/PLAN.md.
+# `coverage.py` endet mit 1, sobald eine davon unter ihrem Boden liegt.
+FLOORS = {
+    # Fehlerbild 1 — Wein: Jahrgang vor dem Namen, jahrgangscodierte Artikelnummer
+    "vintage_first": 0.020,           # Anteil aller Positionen
+    "vintage_first_wein": 0.30,       # Anteil der Positionen auf Weinrechnungen
+    "artid_year": 0.030,              # Anteil der Positionen mit Artikelnummer
+    "artid_year_wein": 0.30,
+    # Namensvielfalt
+    "opaque_name": 0.10,              # Name ist nur ein Code
+    "caps_name": 0.04,                # VERSALIEN
+    "long_name": 0.12,                # >= 6 Wörter, bricht über zwei bis drei Zeilen
+    # Fehlerbild 3/4 — Einheit im Preiskopf, Satz in der Beschriftung
+    "price_header_unit": 0.08,        # Anteil der Variationen (Achse der Familien)
+    "vat_rate_glued": 0.35,           # Vorlagen mit Satz *in* der Beschriftung
+    "mixed_rates": 0.35,              # Rechnungen mit zwei Sätzen in einer Tabelle (v12 voll: 39,6 %)
+    "per_line_rate": 0.25,            # Variationen mit MwSt-Spalte in der Tabelle
+    # Fehlerbild 6 — Mengen
+    "qty_3dec": 0.040,                # gedruckte Menge mit drei Nachkommastellen
+    "qty_thousands": 0.004,           # "1.200" — Punkt, der kein Komma ist
+    "qty_bare_int": 0.10,             # nackte Ganzzahl ohne Einheitenwort in der Zeile (v12 voll: 12,8 %)
+    "qty_glued_unit": 0.08,           # Variationen mit `qty_unit_glue`
+    # Spaltenreihenfolge (Achse der Familien, hier aus truth.layout.columns gemessen)
+    "name_before_artikel": 0.12,  # v12b: 14,1 % nach ORDER_WEIGHTS (gewollt)
+}
+
+YEAR_ID = re.compile(r"(?:^|[^0-9])(19|20)\d{2}(?:[^0-9]|$)")
+YEAR_ID2 = re.compile(r"^\d{2}-[A-Z]{1,2}-\d")
+WORD_ID = re.compile(r"^[A-Z]{3,6}-\d{1,3}$")
+# Zwei Formen von `content.year_article_id`, die absichtlich wie eine gewöhnliche
+# Artikelnummer aussehen: `2024578` (Jahr + drei Ziffern) und `S2417` (Kürzel +
+# zweistelliges Jahr + zwei Ziffern). Beide sind für das Modell der interessante Fall
+# und für die Messung ein Problem — deshalb hier zwei Muster, die eng genug sind, um
+# `article_id`s eigene Formen (`A12345`, `123456`, `07-4711`) nicht mitzuzählen.
+YEAR_ID3 = re.compile(r"^(19|20)\d{5}$")
+YEAR_ID4 = re.compile(r"^[A-Z]{1,2}\d{4}$")
+QTY_3DEC = re.compile(r"^-?\d+(?:[.\s]\d{3})*,\d{3}$")
+QTY_THOUSANDS = re.compile(r"^-?\d{1,3}\.\d{3}$")
+QTY_BARE_INT = re.compile(r"^\d{1,4}$")
+
+
+def looks_opaque(name):
+    """Ein Name, der nur ein Code ist. Kriterium: **kein** Token ist rein alphabetisch
+    und mindestens vier Zeichen lang. `content.opaque_name` hält sich daran (jedes
+    seiner Tokens trägt eine Ziffer), ein Versalname wie `RIESLING TROCKEN` dagegen
+    nicht — der zählt als Name, nicht als Code."""
+    return not any(tok.isalpha() and len(tok) >= 4 for tok in str(name).split())
+
+
+def year_coded(article_id):
+    a = str(article_id)
+    return bool(YEAR_ID.search(a) or YEAR_ID2.match(a) or WORD_ID.match(a)
+                or YEAR_ID3.match(a) or YEAR_ID4.match(a))
 
 # Was aus den Daten kommt, nicht aus der Vorlage: Anteile je Rechnung.
 SOURCE_AXES = ["kind", "bare_units", "free_lines", "deposit_lines", "code_units"]
@@ -148,10 +210,35 @@ def main():
     marks = Counter()
     part2 = Counter()
     present = {"pages": Counter(), "words": Counter()}
+    v12 = Counter()
     for path in sorted(Path(args.root).glob("*/*/truth.json")):
         truth = json.loads(path.read_text())
         fmt = truth["layout"]["page_format"]
         variations[fmt] += 1
+        cols = truth["layout"].get("columns") or []
+        if "name" in cols and "artikel" in cols and cols.index("name") < cols.index("artikel"):
+            v12["name_before_artikel"] += 1
+        if "mwst" in cols:
+            v12["per_line_rate"] += 1
+        if truth["layout"].get("price_header_unit"):
+            v12["price_header_unit"] += 1
+        if truth["layout"].get("qty_unit_glue"):
+            v12["qty_glued_unit"] += 1
+        if truth["layout"].get("vat_row_form") in ("gesamt", "gesamt_base", "zzgl",
+                                                   "enthalten"):
+            v12["vat_rate_glued"] += 1
+        for page in truth["pages"]:
+            unit_lines = {w["l"] for w in page["words"] if w["f"] == "unit"}
+            for w in page["words"]:
+                if w["f"] != "quantity":
+                    continue
+                v12["qty_words"] += 1
+                if QTY_3DEC.match(w["t"]):
+                    v12["qty_3dec"] += 1
+                if QTY_THOUSANDS.match(w["t"]):
+                    v12["qty_thousands"] += 1
+                if QTY_BARE_INT.match(w["t"]) and w["l"] and w["l"] not in unit_lines:
+                    v12["qty_bare_int"] += 1
         for c in truth["layout"]["columns"]:
             columns[fmt][c] += 1
         for axis in AXES:
@@ -229,6 +316,67 @@ def main():
             print(f"  {k:<44} {v:>7} {v / invoices:>7.1%}")
     print(f"\nWortmarken-Seiten ohne Absender: {marks['pages']}, "
           f"supplier-Wörter darauf: {marks['supplier']}")
+
+    # ---------------------------------------------------- v12: Achsen mit Boden
+    items = wein_items = ids = wein_ids = invoices2 = 0
+    names = Counter()
+    suppliers = set()
+    for path in sorted(Path(args.root).glob("*/expected.json")):
+        exp = json.loads(path.read_text())
+        src = json.loads((path.parent / "source.json").read_text()) \
+            if (path.parent / "source.json").exists() else {}
+        invoices2 += 1
+        suppliers.add(exp.get("supplierName", ""))
+        wein = src.get("category") == "wein"
+        if len(exp.get("vatBreakdown") or []) > 1:
+            v12["mixed_rates"] += 1
+        for line in exp["lines"]:
+            items += 1
+            names[line["name"]] += 1
+            head = line["name"].split()[:1]
+            first_is_year = bool(head and head[0].isdigit() and len(head[0]) == 4
+                                 and head[0][:2] in ("19", "20"))
+            if first_is_year:
+                v12["vintage_first"] += 1
+            if looks_opaque(line["name"]):
+                v12["opaque_name"] += 1
+            elif line["name"] == line["name"].upper():
+                v12["caps_name"] += 1
+            if len(line["name"].split()) >= 6:
+                v12["long_name"] += 1
+            if line.get("sellerArticleId"):
+                ids += 1
+                if year_coded(line["sellerArticleId"]):
+                    v12["artid_year"] += 1
+            if wein:
+                wein_items += 1
+                if first_is_year:
+                    v12["vintage_first_wein"] += 1
+                if line.get("sellerArticleId"):
+                    wein_ids += 1
+                    if year_coded(line["sellerArticleId"]):
+                        v12["artid_year_wein"] += 1
+    total_var = max(1, sum(variations.values()))
+    base = {"vintage_first": items, "opaque_name": items, "caps_name": items,
+            "long_name": items, "artid_year": ids or 1,
+            "vintage_first_wein": wein_items or 1, "artid_year_wein": wein_ids or 1,
+            "mixed_rates": invoices2 or 1,
+            "qty_3dec": v12["qty_words"] or 1, "qty_thousands": v12["qty_words"] or 1,
+            "qty_bare_int": v12["qty_words"] or 1}
+    print("\nv12-Achsen (mit Boden):")
+    floor_fails = []
+    for key, floor in FLOORS.items():
+        denom = base.get(key, total_var)
+        share = v12[key] / max(1, denom)
+        flag = "  UNTER BODEN" if share < floor else ""
+        print(f"  {key:<24} {v12[key]:>7} / {denom:<7} {share:>7.1%}   >= {floor:.1%}{flag}")
+        if share < floor:
+            floor_fails.append((key, share, floor))
+    if items:
+        repeat = sum(n for n in names.values() if n > 1)
+        print(f"\nNamensvielfalt: {len(names)} verschiedene von {items} Positionen, "
+              f"Mehrfachnennungen {repeat / items:.1%}; "
+              f"{len(suppliers)} verschiedene Lieferanten auf {invoices2} Rechnungen")
     if zeros:
         print("\nNULLEN:")
         for c, f in zeros:
@@ -237,7 +385,11 @@ def main():
         print("\nUNTER ZIEL (Anteil der Seiten mit dieser Klasse):")
         for c, share, target in fails:
             print(f"  {c:<20} {share:>7.1%} < {target:.0%}")
-    return 1 if zeros or fails or not marks["supplier"] else 0
+    if floor_fails:
+        print("\nUNTER BODEN (v12-Achsen):")
+        for key, share, floor in floor_fails:
+            print(f"  {key:<24} {share:>7.1%} < {floor:.1%}")
+    return 1 if zeros or fails or floor_fails or not marks["supplier"] else 0
 
 
 if __name__ == "__main__":

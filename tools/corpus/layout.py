@@ -1,7 +1,9 @@
 import os
 import random
+import zlib
 
 import families
+import vocab
 
 # Die Achse `tagline` (gemischt gesetzter Werbesatz im Briefkopf) erzwingen. Der
 # Ergänzungskorpus `corpus-v11s` wird damit gebaut: jede Variation trägt einen
@@ -13,6 +15,9 @@ import families
 # Worker-Prozessen zieht: die Variable erbt jeder Worker von selbst, ein Schalter
 # müsste durch `one()` und `variation()` durchgereicht werden.
 FORCE_TAGLINE = os.environ.get("CORPUS_FORCE_TAGLINE", "") not in ("", "0")
+# v12: dieselbe Mechanik für die beiden Replikproben (Fehlerbilder 4 und 6).
+FORCE_VAT_TOTAL = os.environ.get("CORPUS_FORCE_VAT_TOTAL", "") not in ("", "0")
+FORCE_QTY = os.environ.get("CORPUS_FORCE_QTY", "") not in ("", "0")
 
 LABELS = {
     "pos": ["Pos", "Pos.", "Nr.", "Position", "#", "Zeile"],
@@ -94,7 +99,41 @@ ORDERS = [
     # Größen-/Variantenspalte zwischen Artikelnummer und Bezeichnung.
     ["pos", "artikel", "groesse", "name", "menge", "preis", "mwst", "betrag"],
     ["artikel", "groesse", "name", "menge", "einheit", "preis", "betrag"],
+    # ------------------------------------------------------------------- v12
+    # Drei Fehlerbilder der echten Scans von 2025 hängen an der Spaltenfolge, und
+    # keines davon war in den zwanzig Grundfolgen oben häufig genug vertreten:
+    #
+    # 1. **Bezeichnung VOR Artikelnummer** (Index 20-22, 29-31). Auf der
+    #    Weingutrechnung steht die Art.-Nr. RECHTS der Bezeichnung; der Tagger hat
+    #    dort den Jahrgang am Namensanfang für die Artikelnummer gehalten und die
+    #    Art.-Nr. für einen Teil des Namens. In v11 konnten das nur zwei von zwanzig
+    #    Folgen (10 %), jetzt acht von zweiunddreißig (25 %).
+    # 2. **Einheit VOR der Menge** (23, 24, 31): "Fl 12" statt "12 Fl". Die Zahl
+    #    rechts eines Einheitenworts ist die Menge, nicht der Preis.
+    # 3. **Menge RECHTS des Preises** (25, 26): die einzige Zahl links vom Betrag
+    #    ist dann keine Menge.
+    # 4. **Steuersatz zwischen Bezeichnung und Menge** (27-29): "19,00" direkt
+    #    links neben der Menge sieht aus wie eine Menge.
+    ["pos", "name", "artikel", "menge", "einheit", "preis", "betrag"],
+    ["name", "artikel", "menge", "einheit", "preis", "mwst", "betrag"],
+    ["pos", "name", "menge", "einheit", "preis", "betrag", "artikel"],
+    ["pos", "artikel", "name", "einheit", "menge", "preis", "betrag"],
+    ["artikel", "name", "einheit", "menge", "preis", "rabatt", "betrag", "mwst"],
+    ["pos", "name", "preis", "menge", "einheit", "betrag"],
+    ["artikel", "name", "preis", "menge", "betrag", "mwst"],
+    ["pos", "name", "mwst", "menge", "einheit", "preis", "betrag"],
+    ["name", "mwst", "menge", "preis", "betrag"],
+    ["pos", "name", "artikel", "mwst", "menge", "einheit", "preis", "betrag"],
+    ["menge", "einheit", "name", "artikel", "preis", "betrag"],
+    ["pos", "einheit", "menge", "name", "artikel", "preis", "betrag"],
 ]
+
+# Die Folgen, in denen die Bezeichnung LINKS der Artikelnummer steht. Nur zum
+# Nachmessen (`v12/axes.py`) und als Dokumentation — gezogen wird gleichverteilt
+# über ORDERS.
+NAME_BEFORE_ARTICLE = [4, 5, 20, 21, 22, 29, 30, 31]
+
+ORDER_WEIGHTS = [2.0] * 20 + [1.0] * (len(ORDERS) - 20)
 
 # Schriftfamilien, die auf dem Rechner wirklich installiert sind — eine Liste mit
 # Wunschnamen bringt keine Varianz, sie fällt still auf dieselbe Ersatzschrift
@@ -360,7 +399,10 @@ NARROW_COLUMNS = {"pos", "name", "menge", "einheit", "preis", "betrag", "rabatt"
 FAMILIES = {
     # Die freie Ziehung bleibt der größte Anteil: die Familien sollen den Raum
     # ordnen, nicht einengen.
-    "free": {"weight": 40, "set": {}},
+    # v12: 52 statt 40. Die vierzig neuen Familien aus `families.py` heben die Summe
+    # der uebrigen Gewichte von 110,4 auf rund 141; bei Gewicht 40 faellt `free` auf
+    # 22 % und damit unter die Untergrenze von 25 % aus PLAN.md.
+    "free": {"weight": 56, "set": {}},
     # Lexware / sevDesk: gerahmter Kopfblock rechts, Gittertabelle, Grotesk.
     "lexware": {"weight": 2.5, "set": {
         "font_pool": "sans", "meta_style": "boxed", "meta_place": "top_right",
@@ -399,7 +441,7 @@ FAMILIES = {
         "size": [7.8, 8.0, 8.4], "title_style": ["plain", "smallcaps"]}},
     # InvoiceNinja (die GastroMarkt-Vorlage): Absender mittig oben, Kunde rechts
     # neben den Kopfdaten, Einheit vor dem Preis, Währung in jeder Zelle.
-    "ninja": {"weight": 2, "set": {
+    "ninja": {"weight": 3, "set": {
         "font_pool": "sans", "logo_side": "center", "sender_place": "under",
         "address_corner": "left", "meta_place": "top_right", "meta_style": ["pairs", "stacked"],
         "order_pick": [16, 17], "cell_currency": ("post", "€"),
@@ -513,14 +555,21 @@ def template(seed, family=None, doctype="plain"):
     receipt = page_format == "receipt"
     narrow_page = PAGE_FORMATS[page_format][0] < 180.0
     order_pick = fixed.get("order_pick")
-    order = list(ORDERS[rng.choice(order_pick)] if order_pick else rng.choice(ORDERS))
+    # v12.1: die zwölf v12-Spaltenfolgen (Index 20-31) haben die zwanzig klassischen von
+    # 5 % auf 3 % je Vorlage verdünnt — auf den echten Bäckerei- und C+C-Belegen kostete
+    # das die Menge. Die klassischen Folgen bekommen doppeltes Gewicht (≈ 77 % der Masse).
+    order = list(ORDERS[rng.choice(order_pick)] if order_pick
+                 else rng.choices(ORDERS, ORDER_WEIGHTS, k=1)[0])
     # Die drei Kollisionsspalten sind auf schmalen Blättern nachrangig — dort steht
     # der Platz der Bezeichnung zu. Ganz ausgeschlossen sind sie nicht, sonst lernt
     # das Modell "schmale Seite heißt keine Währungsspalte".
     rare = 0.35 if narrow_page else 1.0
     codes = 1.0 if fixed.get("force_codes") else rare
     present = {"pos": rng.random() < 0.65, "artikel": rng.random() < 0.7, "gtin": rng.random() < 0.15,
-               "name": True, "menge": True, "einheit": rng.random() < 0.6, "preis": True,
+               # v12: 48 % statt 60 %. Ohne Einheitenspalte klebt die Einheit an der
+               # Menge ("12 Fl", mit `qty_unit_glue` auch "12Fl") oder es steht gar
+               # keine — beides ist die Form, an der der Tagger die Menge verliert.
+               "name": True, "menge": True, "einheit": rng.random() < 0.48, "preis": True,
                "basis": rng.random() < 0.12, "rabatt": False, "mwst": rng.random() < 0.45,
                "betrag": True, "groesse": rng.random() < 0.16,
                "waehrung": rng.random() < (0.55 if codes > rare else 0.15) * codes,
@@ -614,6 +663,13 @@ def template(seed, family=None, doctype="plain"):
         "columns": columns,
         "glue_unit": "einheit" not in columns,
         "headers": {c: rng.choice(LABELS[c]) for c in LABELS},
+        # `Anz.` / `Stk` / `Mge` / `Liefermenge` sind auf echten Lieferantenrechnungen
+        # mindestens so häufig wie `Menge`; gleichverteilt über acht Werte kam jeder
+        # davon nur auf 12,5 %. Nachgezogen, nachdem die Gleichverteilung oben schon
+        # stand — der Zufallsstrom bleibt damit an derselben Stelle.
+        "menge_head_v12": rng.choices(
+            ["Menge", "Anz.", "Stk", "Mge", "Liefermenge", "Anzahl", "Stück", "Mng."],
+            [26, 14, 14, 12, 12, 8, 8, 6], k=1)[0],
         "headers2": {c: rng.choice(LABELS2[c]) for c in LABELS2},
         "header_hints": {c: rng.choice(v) for c, v in HEADER_HINTS.items()},
         "header_two_line": rng.random() < 0.22,
@@ -681,7 +737,20 @@ def template(seed, family=None, doctype="plain"):
         "totals_shade": rng.random() < 0.18,
         "goods_label": rng.choice(GOODS_LABELS),
         "charge_labels": {k: rng.choice(v) for k, v in CHARGE_LABELS.items()},
-        "vat_row_form": rng.choices(["of", "bare", "base"], [40, 45, 15], k=1)[0],
+        # v12, Fehlerbild 4: vier neue Formen, bei denen der Steuersatz **in** der
+        # Beschriftung steht — `USt. gesamt 7%`, `MwSt. 7% auf 522,53`,
+        # `zzgl. 7 % MwSt.`, `enthaltene USt 19%`. Zusammen 42 % der Vorlagen.
+        # Nur der Satz ist `vat`, die Beschriftungswörter sind `vatLabel`, das `%`
+        # und der Bemessungsbetrag `O` (CONVENTIONS.md §1).
+        "vat_row_form": rng.choices(
+            ["of", "bare", "base", "gesamt", "gesamt_base", "zzgl", "enthalten"],
+            [22, 26, 10, 18, 8, 9, 7], k=1)[0],
+        "vat_total_label": rng.choice(vocab.VAT_TOTAL_LABELS),
+        "vat_zzgl_label": rng.choice(["zzgl.", "zzgl", "zuzüglich", "+"]),
+        "vat_base_join": rng.choice(vocab.VAT_BASE_JOINS),
+        # Der Satz klebt am Prozentzeichen (`7%` statt `7 %`) — gedruckt ein Wort,
+        # in der Wahrheit zwei Tokens mit verschiedenen Klassen.
+        "vat_rate_glued": rng.random() < 0.55,
         "total_extras": [k for k in ("skonto", "paid", "payuntil") if rng.random() < 0.18],
         "extra_labels": {k: rng.choice(v) for k, v in TOTAL_EXTRA_LABELS.items()},
         "sentence_net": rng.choice(TOTALS_SENTENCES["net"]),
@@ -823,6 +892,7 @@ def template(seed, family=None, doctype="plain"):
     spec["headers"]["brutto"] = rng.choice(["Brutto", "Bruttobetrag", "Gesamt brutto",
                                             "Betrag brutto", "inkl. MwSt", "Brutto EUR"])
     spec["align"]["brutto"] = rng.choice(["right", "right", "right", "center"])
+    spec["headers"]["menge"] = spec.pop("menge_head_v12")
     # Die neuen Achsen von v11 stehen in `families.defaults` und sind dort alle
     # auf "druckt nichts Neues" vorbelegt: nur eine Familie (oder eine Belegart)
     # schaltet sie ein. Sonst wanderte der halbe Korpus in die neuen Formen ab.
@@ -946,6 +1016,11 @@ def template(seed, family=None, doctype="plain"):
         spec["head_font"] = spec["font"]
         spec["table_style"] = "borderless"
         spec["bg_art"] = ""
+    if not spec["einvoice"]:
+        # Die beiden Viewer-Achsen sind ausserhalb des Viewers tot; in der
+        # Wahrheit sollen sie dann auch nicht als gezogen dastehen.
+        spec["ei_bare"] = False
+        spec["ei_split"] = False
     if spec["einvoice"]:
         # Der Viewer-Ausdruck baut die ganze Seite selbst: kein Briefkopf, keine
         # Anschrift, keine Meta-Tabelle. Was davon stehen bliebe, druckte den
@@ -997,7 +1072,90 @@ def template(seed, family=None, doctype="plain"):
         spec["item_form"] = "table" if spec["item_form"] == "twocol" else spec["item_form"]
     if spec["title_text"]:
         spec["title"] = spec["title_text"]
+    # --------------------------------------------- v12: Replikproben erzwingen
+    # Zwei Umgebungsvariablen, die einen ganzen Lauf auf *ein* Fehlerbild stellen.
+    # Sie stehen ganz am Ende, nach `apply_family` und allen Abhängigkeiten — eine
+    # Replikprobe soll genau die eine Achse zeigen und sonst der freie Korpus sein.
+    # Wie `CORPUS_FORCE_TAGLINE` eine Umgebungsvariable und kein Schalter, weil
+    # `generate.py` die Vorlagen in Worker-Prozessen zieht.
+    if FORCE_VAT_TOTAL and not spec["einvoice"]:
+        # Fehlerbild 4: Steuersatz *in* der Beschriftung, je Satz eine Zeile.
+        spec["vat_row_form"] = rng.choice(["gesamt", "gesamt", "gesamt_base", "zzgl",
+                                           "enthalten"])
+        spec["vat_rate_glued"] = rng.random() < 0.7
+        spec["totals_style"] = rng.choice(["block", "boxed", "table", "panel"])
+        if not spec["receipt"]:
+            insert_column(spec["columns"], "mwst", after=("preis", "rabatt"),
+                          before=("betrag",))
+    if FORCE_QTY:
+        # Fehlerbild 6: dreistellige Nachkommamenge, Einheit an der Zahl, keine
+        # eigene Einheitenspalte.
+        spec["qty_style"] = rng.choices(["d3", "d3", "trim", "d2"], [55, 20, 15, 10], k=1)[0]
+        if "einheit" in spec["columns"]:
+            spec["columns"] = [c for c in spec["columns"] if c != "einheit"]
+        spec["glue_unit"] = True
+        spec["qty_unit_glue"] = rng.random() < 0.6
     return spec
+
+
+# Die Einheit IM Preiskopf (v12, Fehlerbild 3 aus PLAN.md). Auf dem echten
+# Weingutbeleg heißt die Preisspalte `Preis je Fl`, auf dem echten Metzgereibeleg
+# steht sie zweizeilig als `Preis je` / `kg bzw. Stück` — und daneben `Betrag`
+# ebenfalls zweizeilig. Der Tagger hat dort das Einheitenwort im Kopf für einen
+# Einheitenwert gehalten und die Spalte darunter verloren.
+#
+# Die Form hängt an der *gedruckten* Einheit der Positionen, nicht am Zufall: eine
+# Weinrechnung schreibt `je Fl`, eine Fleischrechnung `je kg`. Deshalb wird sie
+# erst in `fit()` gesetzt, wo `meta["render_lines"]` bekannt ist.
+PRICE_HEAD_FORMS = {
+    "je":   ("Preis je {u}",  ("Preis je", "{u}")),
+    "pro":  ("Preis pro {u}", ("Preis pro", "{u}")),
+    "ep":   ("EP/{u}",        ("EP", "/{u}")),
+    "cur":  ("€/{u}",         ("€", "/{u}")),
+    "two":  ("Preis je {u}",  ("Preis je", "{u} bzw. Stück")),
+}
+# Zweizeiliger Betragskopf, der auf demselben echten Beleg danebensteht.
+BETRAG_TWO = [("Betrag", "EUR"), ("Gesamt-", "betrag"), ("Betrag", "netto")]
+
+
+def price_head_unit(meta):
+    """Das Einheitenwort, das in den Preiskopf gehört: das häufigste der Seite.
+
+    Druckt die Rechnung gar keine Einheit (nackte Mengen), bleibt der Kopf
+    unverändert — `Preis je Stk` über einer Spalte ohne Stück wäre eine Vorlage,
+    die es nicht gibt, und sie stünde gegen die Konvention „keine gedruckte
+    Einheit heißt unitText null"."""
+    counts = {}
+    for line in meta["render_lines"]:
+        unit = (line.get("unitText") or "").strip()
+        if unit:
+            counts[unit] = counts.get(unit, 0) + 1
+    if not counts:
+        return ""
+    return max(counts.items(), key=lambda kv: (kv[1], -len(kv[0])))[0]
+
+
+def apply_price_header(out, meta):
+    form = out.get("price_header_unit") or ""
+    if not form or form not in PRICE_HEAD_FORMS or "preis" not in out["columns"]:
+        out["price_header_unit"] = ""
+        return
+    unit = price_head_unit(meta)
+    if not unit:
+        out["price_header_unit"] = ""
+        return
+    one, two = PRICE_HEAD_FORMS[form]
+    out["headers"] = dict(out["headers"])
+    out["headers2"] = dict(out["headers2"])
+    out["headers"]["preis"] = one.format(u=unit)
+    out["headers2"]["preis"] = (two[0].format(u=unit), two[1].format(u=unit))
+    if form == "two":
+        # Der Metzgereibeleg setzt beide Köpfe zweizeilig.
+        out["header_two_line"] = True
+        out["headers2"]["betrag"] = BETRAG_TWO[len(unit) % len(BETRAG_TWO)]
+    # Die Einheit steht jetzt im Kopf; ein zusätzliches "(EUR)" daneben wäre
+    # dieselbe Klammer zweimal.
+    out["header_unit_hint"] = False
 
 
 def fit(spec, meta):
@@ -1026,7 +1184,21 @@ def fit(spec, meta):
     # auch keine Einheitenspalte — und `glue_unit` klebt nichts an die Menge.
     if not any(l["unitText"] for l in meta["render_lines"]):
         columns = [c for c in columns if c != "einheit"]
+    # v12, Fehlerbild 4: trägt die Rechnung **zwei** Steuersätze, dann zeigt die
+    # Tabelle den Satz je Zeile deutlich öfter als sonst — sonst steht der Unterschied
+    # nur im Summenblock, und der Tagger bekommt nie zu sehen, welche Position zu
+    # welchem Satz gehört. Deterministisch über die Template-Id, damit derselbe Seed
+    # denselben Korpus erzeugt. (content-Agent; `coverage.FLOORS["per_line_rate"]`.)
+    if (not meta.get("no_vat") and meta["kind"] != "delivery_note"
+            and "mwst" not in columns and not spec.get("receipt")
+            and len({l["vat"] for l in meta["render_lines"]}) > 1
+            and zlib.crc32(f"{spec['id']}|mwst".encode()) % 100 < 60):
+        insert_column(columns, "mwst", after=("preis", "rabatt"), before=("betrag",))
     out = dict(spec)
     out["columns"] = columns
     out["glue_unit"] = "einheit" not in columns
+    # Die Einheit an der Menge ohne Leerzeichen ("17Fl") gibt es nur, wo die Einheit
+    # überhaupt an der Menge klebt — mit eigener Einheitenspalte wäre die Achse tot.
+    out["qty_unit_glue"] = bool(spec.get("qty_unit_glue")) and out["glue_unit"]
+    apply_price_header(out, meta)
     return out

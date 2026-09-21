@@ -26,42 +26,185 @@ def opaque_name(rng):
         return f"{letters}{rng.randint(100, 99999)}{rng.choice(['', '/A', '-02', 'RT', '.5'])}"
     if style < 0.7:
         word = "".join(rng.choice(CONSONANTS) + rng.choice(VOWELS) for _ in range(rng.randint(2, 5)))
-        return word.upper() + " " + str(rng.randint(10, 9999))
+        # Ohne Leerzeichen: `coverage.py` erkennt einen undurchsichtigen Namen daran,
+        # dass **kein** Token rein alphabetisch und mindestens vier Zeichen lang ist.
+        # Mit Leerzeichen wäre "BAKOLE 1234" nicht von einem Versalnamen zu trennen.
+        return word.upper() + str(rng.randint(10, 9999))
     if style < 0.84:
-        return " ".join("".join(rng.choice(CONSONANTS + VOWELS + "0123456789")
-                                for _ in range(rng.randint(3, 9)))
+        return " ".join("".join(rng.choice(CONSONANTS + VOWELS) for _ in range(rng.randint(2, 6)))
+                        + str(rng.randint(1, 999))
                         for _ in range(rng.randint(1, 3))).upper()
     return rng.choice(["POS", "ART", "SON", "DIV", "NN", "X"]) + " " + \
         "".join(rng.choice("0123456789") for _ in range(rng.randint(4, 10)))
 
 
 def abbreviate(rng, name):
+    """Der stark abgekürzte Name, wie ihn eine Warenwirtschaft mit 24 Zeichen Feldbreite
+    druckt: `Schw.Schn.nat.ausgel.`, `PUTENSCHN. PAN. 180G`.
+
+    Die geklebte Form (ohne Leerzeichen zwischen den Abkürzungen) ist die schwierigere:
+    die OCR liest dann *ein* langes Token, das keinem Wort gleicht.
+    """
     parts = name.split()
     out = []
     for p in parts:
-        if len(p) > 5 and rng.random() < 0.6:
+        if len(p) > 4 and rng.random() < 0.7:
             p = p[:rng.randint(3, 5)] + "."
         out.append(p)
-    text = " ".join(out)
-    return text.upper() if rng.random() < 0.6 else text
+    glued = rng.random() < 0.35
+    text = ("".join(out) if glued else " ".join(out))
+    return text.upper() if rng.random() < 0.45 else text
 
 
-def article_name(rng, cat, opaque_share=0.0, category=None):
-    if rng.random() < opaque_share:
-        return opaque_name(rng)
-    base = rng.choice(cat["bases"])
-    parts = [base]
+def wine_name(rng, cat, category):
+    """Der Weinname, wie ein Weingut ihn druckt — **Jahrgang zuerst**.
+
+        2024 Iphöfer Kronsberg Silvaner trocken 0,75 l
+        2022 Domina trocken 0,75 l
+        Sommer Sekt b.A. brut 0,75 l
+
+    Fehlerbild 1 aus v12/PLAN.md. v11 druckte den Jahrgang als *Variante* am Ende
+    ("Grüner Veltliner Ried Hochrain 2022") und kannte nur österreichische Rieden.
+    Auf dem echten Weingut-Beleg stand er vorn, und das Modell hat ihn als Menge
+    gelesen und die Bezeichnung erst ab der Lage begonnen. Eine vierstellige Zahl am
+    Anfang der Bezeichnungsspalte **muss** im Korpus oft genug Teil des Namens sein.
+    """
+    vintage = rng.choice(vocab.WINE_VINTAGES)
+    roll = rng.random()
+    if roll < 0.18:
+        # Schaumwein trägt selten einen Jahrgang: "Sommer Sekt b.A. brut 0,75 l".
+        parts = []
+        if rng.random() < 0.55:
+            parts.append(rng.choice(vocab.SUPPLIER_NAMES))
+        parts.append(rng.choice(vocab.SEKT_FORMS))
+    elif roll < 0.62:
+        # Lagenwein: Jahrgang, Einzellage, Rebsorte, Geschmack.
+        parts = [rng.choice(vocab.WINE_SITES), rng.choice(vocab.WINE_GRAPES),
+                 rng.choice(vocab.WINE_QUALITY)]
+        if rng.random() < 0.18:
+            parts.insert(0, rng.choice(vocab.WINE_REGIONS))
+    else:
+        # Gutswein: nur Rebsorte und Geschmack — "2022 Domina trocken".
+        parts = [rng.choice(vocab.WINE_GRAPES), rng.choice(vocab.WINE_QUALITY)]
+        if rng.random() < 0.22:
+            parts.append(rng.choice(vocab.WINE_REGIONS))
+    if rng.random() < 0.72:
+        parts.append(sizes.phrase(rng, cat, category))
+    if rng.random() < 0.10:
+        parts.append(rng.choice(vocab.VOL_PERCENTS[:8]))
+    # Der Jahrgang steht auf rund 40 % der Weinzeilen **vor** dem Namen, auf weiteren
+    # 12 % hinten (die alte v11-Form bleibt im Korpus, sonst lernt das Modell nur den
+    # Tausch statt beider Formen).
+    place = rng.random()
+    if place < 0.66:
+        parts.insert(0, vintage)
+    elif place < 0.86:
+        parts.insert(min(1, len(parts)), vintage)
+    return " ".join(p for p in parts if p)
+
+
+def procedural_parts(rng, cat, category):
+    """Die Bausteine, die *zusätzlich* zur Basis in den Namen dürfen.
+
+    Marke, Güteklasse, Herkunft, Zuschnitt, Fett-/Alkoholgehalt, Farbe. Jeder davon
+    macht den Namen länger und weniger memorierbar; zusammen mit `sizes.phrase`
+    kommen aus 1162 Basen Zehntausende verschiedener gedruckter Namen.
+    """
+    lead, tail = [], []
+    if rng.random() < 0.22:
+        (lead if rng.random() < 0.6 else tail).append(rng.choice(vocab.BRANDS))
     if rng.random() < 0.75:
         v = rng.choice(cat["variants"])
         if v:
-            parts.append(v)
+            tail.append(v)
+    if rng.random() < 0.16:
+        tail.append(rng.choice(vocab.GRADES))
+    if rng.random() < 0.14:
+        tail.append(rng.choice(vocab.ORIGINS))
+    if category == "fisch" and rng.random() < 0.35:
+        tail.append(rng.choice(vocab.FISH_CUTS))
+    elif category in ("metzgerei", "gefluegel") and rng.random() < 0.35:
+        tail.append(rng.choice(vocab.CUTS))
+    if rng.random() < 0.10:
+        # Alkoholgehalt nur, wo es einen gibt; sonst Fettgehalt.
+        tail.append(rng.choice(vocab.VOL_PERCENTS
+                               if category in ("wein", "spirituosen", "brauerei")
+                               else vocab.FAT_PERCENTS))
+    if category in ("nonfood", "verpackung_einweg", "waesche_service", "blumen_deko",
+                    "gastrobedarf_technik") and rng.random() < 0.25:
+        tail.append(rng.choice(vocab.COLOURS))
+    if category in ("feinkost", "wein", "spirituosen", "kaffee") and rng.random() < 0.20:
+        tail.append(rng.choice(vocab.FOREIGN_TAILS))
+    return lead, tail
+
+
+def article_name(rng, cat, opaque_share=0.0, category=None):
+    """Der gedruckte Artikelname.
+
+    v11 setzte ihn aus Basis + einem Variantenwort + Größe zusammen; bei 136 Basen war
+    der ganze Namensraum kleiner als das, was ein Modell auswendig lernt. v12 zieht aus
+    1162 Basen, hängt prozedurale Bausteine an und würfelt danach eine **Schreibform**:
+    VERSALIEN, abgekürzt (`Schw.Schn.nat.ausgel.`), zahlenvoran (`12er Tray Cola 0,33`)
+    oder lang genug für zwei bis drei gedruckte Zeilen.
+    """
+    if rng.random() < opaque_share:
+        return opaque_name(rng)
+    if category == "wein" and rng.random() < 0.85:
+        return wine_name(rng, cat, category)
+    lead, tail = procedural_parts(rng, cat, category)
+    parts = lead + [rng.choice(cat["bases"])] + tail
     if rng.random() < 0.7:
         parts.append(sizes.phrase(rng, cat, category))
-    name = " ".join(parts)
-    return abbreviate(rng, name) if rng.random() < 0.18 else name
+    style = rng.random()
+    if style < 0.06:
+        # Zahl zuerst: "12er Tray Cola 0,33". Die Bezeichnungszelle beginnt mit einer
+        # Zahl — genau das, was der Tagger als Menge liest.
+        parts.insert(0, rng.choice(vocab.LEADING_PACKS))
+    elif style < 0.14:
+        # Langer Name, der im Satz über zwei bis drei Zeilen umbricht.
+        parts.append(rng.choice(vocab.ORIGINS))
+        parts.append(sizes.phrase(rng, cat, category))
+        if rng.random() < 0.5:
+            parts.append(rng.choice(vocab.GRADES))
+    name = " ".join(p for p in parts if p)
+    style = rng.random()
+    if style < 0.12:
+        return abbreviate(rng, name)
+    if style < 0.20:
+        return name.upper()
+    return name
 
 
-def article_id(rng):
+# Jahrgangscodierte Artikelnummern: `2024-S-01`, `24-R-003`, `2023/17`, `SEKT-01`.
+# Fehlerbild 1: auf dem echten Weingut-Beleg steht in der Artikelspalte eine Zahl, die
+# aussieht wie der Jahrgang im Namen daneben — und der Tagger hat beide verwechselt.
+# Global rund 4 % der Positionen, bei Wein und Spirituosen über 30 %.
+YEAR_ID_LETTERS = ["S", "R", "W", "T", "B", "G", "RW", "WW", "SE", "SP"]
+YEAR_ID_WORDS = ["SEKT", "WEIN", "ROT", "WEISS", "ROSE", "BRAND", "GIN", "RUM",
+                 "WHISKY", "LIKOER", "VELT", "RIES"]
+
+
+def year_article_id(rng, year=None):
+    y = year or rng.choice([int(v) for v in vocab.WINE_VINTAGES])
+    style = rng.random()
+    if style < 0.24:
+        return f"{y}-{rng.choice(YEAR_ID_LETTERS)}-{rng.randint(1, 99):02d}"
+    if style < 0.44:
+        return f"{y % 100:02d}-{rng.choice(YEAR_ID_LETTERS)}-{rng.randint(1, 999):03d}"
+    if style < 0.60:
+        return f"{y}/{rng.randint(1, 99)}"
+    if style < 0.72:
+        return f"{rng.choice(YEAR_ID_WORDS)}-{rng.randint(1, 99):02d}"
+    if style < 0.84:
+        return f"{y}{rng.randint(100, 999)}"
+    if style < 0.94:
+        return f"{rng.choice(YEAR_ID_LETTERS)}{y % 100:02d}{rng.randint(1, 99):02d}"
+    return f"{y}"
+
+
+def article_id(rng, year_share=0.0):
+    if year_share and rng.random() < year_share:
+        return year_article_id(rng)
     style = rng.random()
     if style < 0.28:
         return str(rng.randint(100, 9999))
@@ -83,6 +226,9 @@ def article_id(rng):
 
 def gtin(rng):
     return f"{rng.randint(4000000000000, 9999999999999)}"
+
+
+NUMERIC_ID_CATEGORIES = ("baeckerei", "metzgerei", "konditorei", "molkerei")
 
 
 def numeric_article_id(rng):
@@ -116,6 +262,21 @@ def company_name(rng, category):
     Rechnung geht selten an "Gasthaus Zur Alten Post", sondern meist an eine GmbH,
     die genauso heißt wie der Absender — und genau diese Verwechslung kostete den
     Kopf bisher den `supplier`."""
+    roll = rng.random()
+    if roll < 0.30:
+        # Familienbetrieb: `Metzgerei Hofmann`, `Weingut Zehentner`, `Bäckerei Krenn
+        # GmbH`. Die häufigste Form auf den echten Belegen und im Korpus bis v11 gar
+        # nicht vorhanden — dort hiess jeder Lieferant "<Kopfwort> <Nachname> <GmbH>".
+        head = rng.choice(vocab.TRADE_HEADS.get(category, ["Handelshaus"]))
+        return " ".join(x for x in [
+            head, rng.choice(vocab.SUPPLIER_NAMES),
+            rng.choice(vocab.SUPPLIER_TAILS) if rng.random() < 0.45 else "",
+        ] if x)
+    if roll < 0.40:
+        # Zwei Nachnamen: `Gebr. Pucher & Krenn OHG`, `Huemer & Ortner GmbH & Co. KG`.
+        a, b = rng.sample(vocab.SUPPLIER_NAMES, 2)
+        lead = "Gebr. " if rng.random() < 0.3 else ""
+        return f"{lead}{a} & {b} {rng.choice(vocab.SUPPLIER_TAILS)}"
     return " ".join(x for x in [
         rng.choice(vocab.SUPPLIER_HEADS) if rng.random() < 0.45 else "",
         rng.choice(vocab.SUPPLIER_NAMES),
@@ -134,6 +295,10 @@ def long_company_name(rng, category):
     Wort davon ist `supplier`, auch das `&`.
     """
     a, b = rng.sample(vocab.TRADE_WORDS, 2)
+    if rng.random() < 0.25:
+        return " ".join([rng.choice(vocab.TRADE_HEADS.get(category, ["Handelshaus"])),
+                         rng.choice(vocab.SUPPLIER_NAMES), "Inh.",
+                         rng.choice(vocab.FIRST_NAMES), rng.choice(vocab.SUPPLIER_NAMES)])
     middle = rng.choice([f"{a} & {b}", f"{a} und {b}", f"{a}-{b}", a, f"{a} {b}",
                          f"{a} & {b}"])
     return " ".join(x for x in [
@@ -305,6 +470,11 @@ def price_base(rng, unit_code, unit_text):
         number, word, qty = "10", (unit_text or ""), 10 * money.QTY
     else:
         number, word, qty = "1", (unit_text or ""), money.QTY
+    # `/kg`, `/Fl`, `/100 g`: der Schrägstrich statt „je". Ohne Zahl davor gibt es auf
+    # dieser Zeile keine `priceBasis` — die Zelle druckt dann nur die Einheit, und
+    # genau so steht es in der Preisspaltenkopfzeile echter Belege ("EP/kg").
+    if word and number == "1" and rng.random() < 0.14:
+        return qty, [("/", "O"), (word, "unit", 0, True)]
     tokens = ([(lead, "O")] if lead else []) + [(number, "priceBasis")]
     if word:
         tokens.append((word, "unit"))
@@ -320,6 +490,27 @@ GROUPS = {
     "wein": ["Weißwein", "Rotwein", "Schaumwein"],
     "spirituosen": ["Weiße Spirituosen", "Braune Spirituosen", "Liköre"],
     "kaffee": ["Kaffee", "Tee", "Schokolade"],
+    "gefluegel": ["Hähnchen", "Pute", "Ente & Gans", "Geflügelwurst"],
+    "fisch": ["Süßwasserfisch", "Seefisch", "Räucherware", "Krusten- & Schalentiere"],
+    "obst": ["Kernobst", "Steinobst", "Beeren", "Südfrüchte", "Zitrusfrüchte"],
+    "feinkost": ["Salumi", "Käse", "Antipasti", "Öle & Essige", "Pasta & Reis"],
+    "tiefkuehl": ["Kartoffelprodukte", "Gemüse TK", "Backwaren TK", "Fertiggerichte",
+                  "Desserts TK"],
+    "eis_dessert": ["Speiseeis", "Sorbets", "Desserts", "Torten"],
+    "suesswaren": ["Schokolade", "Zuckerwaren", "Gebäck", "Knabberartikel", "Nüsse"],
+    "tee_gewuerze": ["Tee", "Gewürze", "Kräuter", "Fonds & Brühen"],
+    "saefte_alkoholfrei": ["Direktsäfte", "Nektare", "Shots & Smoothies", "Schorlen"],
+    "brauerei": ["Fassbier", "Flaschenbier", "Alkoholfrei", "Craft"],
+    "reinigung_hygiene": ["Spülen", "Flächen", "Sanitär", "Desinfektion", "Wäsche"],
+    "verpackung_einweg": ["Menüverpackung", "Becher", "Folien & Papiere", "Besteck",
+                          "Etiketten"],
+    "gastrobedarf_technik": ["Kochgeschirr", "Geschirr", "Gläser", "Besteck",
+                             "Küchentechnik"],
+    "waesche_service": ["Tischwäsche", "Berufskleidung", "Frottee", "Serviceleistung"],
+    "blumen_deko": ["Schnittblumen", "Pflanzen", "Deko", "Kerzen"],
+    "bio_hof": ["Bio-Frischware", "Bio-Trockensortiment", "Bio-Molkerei", "Bio-Getränke"],
+    "catering": ["Buffet", "Platten", "Warme Küche", "Personal", "Logistik"],
+    "tabak": ["Zigaretten", "Feinschnitt", "Zigarren", "Zubehör"],
     "nonfood": ["Hygiene", "Reinigung", "Verpackung"],
     "cc": ["Tiefkühl", "Konserven", "Öle & Fette", "Trockensortiment"],
 }
@@ -399,7 +590,8 @@ def info_row(rng, date):
 
 
 def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share,
-                 sign=1, bare_units=False, with_variants=False, code_units=False):
+                 sign=1, bare_units=False, with_variants=False, code_units=False,
+                 year_ids=0.0):
     cat = vocab.CATEGORIES[category]
     # Steuerschlüssel und Warengruppe sind die beiden unbeschrifteten Codes, die
     # neben Preis und Artikelnummer stehen und wie eine Zahl von uns aussehen.
@@ -410,9 +602,20 @@ def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share,
     for no in range(1, count + 1):
         unit_text, pack = rng.choice(cat["units"])
         unit_code = units.code(unit_text)
-        quantity = rng.choice([1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 48, 60, 100, 120])
-        if unit_code in ("KGM", "LTR") and rng.random() < 0.5:
-            quantity = quantity * money.QTY + rng.choice([0, 250, 500, 750, 100, 400]) * (money.QTY // 1000)
+        # Fehlerbild 6: die Menge ist die unzuverlässigste der zwölf Klassen. v11 zog
+        # aus achtzehn kleinen Ganzzahlen; die echten Belege drucken `5,450`,
+        # `13,760 kg`, `57 Stk`, `1.200 Stk` und `68` nackt. Drei Ergänzungen:
+        # Kilo/Liter bekommen häufiger drei Nachkommastellen, es gibt vierstellige
+        # Mengen mit Tausendertrennung (ein Punkt, der **kein** Komma ist), und die
+        # kleinen Zahlen bleiben dominant, weil sie es in echt auch sind.
+        big = rng.random() < 0.07
+        quantity = (rng.choice([1000, 1200, 1500, 1800, 2000, 2400, 3000, 5000, 1100, 1250])
+                    if big else
+                    rng.choice([1, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 17, 20, 24, 30, 36,
+                                48, 57, 60, 68, 72, 96, 100, 120, 144, 200, 240]))
+        if unit_code in ("KGM", "LTR") and rng.random() < 0.72:
+            quantity = quantity * money.QTY + rng.choice(
+                [0, 50, 100, 120, 250, 330, 400, 450, 500, 640, 750, 760, 890]) * (money.QTY // 1000)
         else:
             quantity *= money.QTY
         # Nackte Menge ohne jede Einheit: auf echten Rechnungen 14,5 % der Zeilen.
@@ -427,6 +630,11 @@ def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share,
             unit_text = unit_code
         lo, hi = cat["price"]
         unit_price = rng.randint(lo, hi) * (money.PRICE // money.CENT)
+        # Vierstellige Mengen gibt es nur bei billiger Ware. Ohne die Kappung druckt
+        # der Korpus Positionsbeträge von 2,4 Mio € — eine Rechnung, die es nicht gibt,
+        # und der Tagger lernt daraus die falsche Größenordnung für `lineNet`.
+        if quantity >= 1000 * money.QTY:
+            unit_price = min(unit_price, rng.randint(15, 850) * (money.PRICE // money.CENT))
         base_qty, base_text = price_base(rng, unit_code, unit_text)
         if base_qty > money.QTY:
             unit_price = max(money.PRICE // 100, unit_price * base_qty // (money.QTY * 4))
@@ -440,8 +648,14 @@ def sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share,
             # dieses Paar hat in v10 die Menge gekostet (Lücke 5). Auf Rechnungen mit
             # nackten Mengen ist die Artikelnummer deshalb in der Hälfte der Fälle eine
             # blanke drei- bis vierstellige Zahl.
-            "sellerArticleId": (numeric_article_id(rng) if bare_units and rng.random() < 0.5
-                                else article_id(rng)) if rng.random() < 0.85 else None,
+            # v12.1: nicht nur bei nackten Mengen. Bäckerei, Metzgerei und Konditorei
+            # drucken auf den echten Belegen fast immer eine blanke 3-4-stellige
+            # Artikelnummer VOR dem Namen (101 Brötchen … 137 Stk) — v12 hat 101 als
+            # Menge gelesen, weil das Muster im Korpus verdünnt war.
+            "sellerArticleId": (numeric_article_id(rng)
+                                if rng.random() < (0.6 if category in NUMERIC_ID_CATEGORIES
+                                                   else 0.5 if bare_units else 0.15)
+                                else article_id(rng, year_ids)) if rng.random() < 0.85 else None,
             # Die GTIN wird jetzt viel öfter gezogen als sie gedruckt wird: die Spalte
             # gibt es nur in einem Teil der Vorlagen, und `layout.fit` streicht sie,
             # sobald keine Zeile eine GTIN führt.
@@ -635,7 +849,8 @@ LINE_WEIGHTS = [8, 10, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2.5, 2, 2, 1.5, 1.2, 1, 
 
 def make(seed, index):
     rng = random.Random(seed)
-    category = rng.choice(sorted(vocab.CATEGORIES))
+    names, weights = vocab.category_pool()
+    category = rng.choices(names, weights, k=1)[0]
     sup = supplier(rng, category)
     date = dt.date(2025, 1, 1) + dt.timedelta(days=rng.randint(0, 729))
     count = rng.choices(LINE_COUNTS, LINE_WEIGHTS, k=1)[0]
@@ -643,13 +858,25 @@ def make(seed, index):
     kinds = vocab.CATEGORIES[category]["rates"]
     if sup["country"] == "AT" and category == "wein" and rng.random() < 0.25:
         kinds = ["special"]
-    vat_rates = sorted({table[k] for k in (kinds if rng.random() < 0.45 else kinds[:1])})
+    # Fehlerbild 4: **gemischte Sätze in einer Tabelle**. v11 zog zwei Sätze nur, wenn
+    # die Warengruppe zwei führte *und* dann in 45 % davon — über alle Rechnungen
+    # gerechnet knapp 17 %. Auf echten Belegen ist die Mischung die Regel: eine
+    # Getränkerechnung führt Bier mit 19 % und Milchmixgetränke mit 7 %, eine
+    # Metzgereirechnung Wurst mit 7 % und Grillzubehör mit 19 %. Seit v12 tragen
+    # 55 % der Rechnungen zwei Sätze, unabhängig von der Warengruppe.
+    if len(kinds) == 1 and "special" not in kinds and rng.random() < 0.55:
+        kinds = sorted({kinds[0], "standard", "reduced"})
+    vat_rates = sorted({table[k] for k in (kinds if rng.random() < 0.82 else kinds[:1])})
     # v11: 35 % statt 25 %. Der Zeilenrabatt ist die einzige Quelle für `lineDiscount`,
     # und die Rabattspalte wird gestrichen, sobald keine Zeile einen Rabatt trägt
     # (`layout.fit`) — bei 25 % lag die Klasse unter dem Ziel von 15 % der Seiten.
     with_discounts = rng.random() < 0.35
     roll = rng.random()
-    opaque_share = 0.9 if roll < 0.08 else (rng.uniform(0.15, 0.5) if roll < 0.28 else 0.05)
+    # Undurchsichtige Namen (reine Codes, Buchstabensuppe): ~15 % aller Positionen.
+    # 8 % der Rechnungen sind fast ganz undurchsichtig, 22 % teilweise, der Rest
+    # streut einzelne Codes ein. Ohne sie findet das Modell die Bezeichnungsspalte
+    # daran, dass dort Lebensmittelwörter stehen.
+    opaque_share = 0.92 if roll < 0.06 else (rng.uniform(0.15, 0.45) if roll < 0.24 else 0.05)
     # Belegart zuerst: eine Gutschrift dreht das Vorzeichen jeder Position, und
     # das muss vor dem Ziehen der Preise feststehen.
     roll = rng.random()
@@ -659,9 +886,13 @@ def make(seed, index):
     with_variants = rng.random() < 0.3
     # E-Rechnungsausdruck: die Einheitenspalte führt den UN/ECE-Code statt des
     # deutschen Worts. Fünf Prozent, so oft wie in den echten Belegen des Nutzers.
-    code_units = rng.random() < 0.05
+    code_units = rng.random() < 0.07
+    # Jahrgangscodierte Artikelnummern (`2024-S-01`): bei Wein und Spirituosen die
+    # Regel, sonst die Ausnahme. Global landet das bei rund 4 % der Positionen.
+    year_ids = 0.45 if category in ("wein", "spirituosen") else (
+        0.10 if category in ("brauerei", "feinkost", "saefte_alkoholfrei") else 0.015)
     lines = sample_lines(rng, category, count, vat_rates, with_discounts, opaque_share,
-                         sign, bare_units, with_variants, code_units)
+                         sign, bare_units, with_variants, code_units, year_ids)
     free_count = rng.randint(1, 3) if rng.random() < 0.12 else 0
     deposit_count = (rng.randint(1, 2) if rng.random() < (0.3 if category == "getraenke" else 0.07)
                      and kind != "credit" else 0)
@@ -724,7 +955,13 @@ def make(seed, index):
                                    f"{rng.randint(100000, 9999999)}",
                                    f"AB{date.year % 100}{rng.randint(1000, 9999)}",
                                    f"PO-{rng.randint(10000, 99999)}"])),
-        "owner_line": f"Inh. {person(rng)}",
+        # Die Inhaberzeile trägt bei Familienbetrieben denselben Nachnamen wie der
+        # Briefkopf — `METZGEREI HOFMANN / Inh. Georg Hofmann`. Genau dieser Briefkopf
+        # hat v11 den Lieferantennamen gekostet (v11/REPORT-families.md, Achse
+        # `tagline`), und der Korpus kannte ihn nur mit zwei fremden Namen.
+        "owner_line": (f"Inh. {rng.choice(vocab.FIRST_NAMES)} {sup['name'].split()[-2]}"
+                       if len(sup["name"].split()) > 2 and rng.random() < 0.45
+                       else f"Inh. {person(rng)}"),
         # Der gemischt gesetzte Werbesatz neben dem Namen (v11, Achse `tagline`).
         # Er ist `O` — siehe vocab.SLOGANS.
         "slogan": slogan(rng, category, date.year),

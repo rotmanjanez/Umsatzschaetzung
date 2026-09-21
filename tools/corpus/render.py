@@ -60,13 +60,20 @@ MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August"
 PROBE = """(() => document.querySelectorAll('.page').length && [...document.querySelectorAll('.page')].map(p=>{
  const b=p.getBoundingClientRect();
  const limit=+p.dataset.bottom||b.height;
- const words=[];
+ const words=[],tables=[],tds=[];
  let overflow=0,hoverflow=0;
  for(const s of p.querySelectorAll('span.w')){
   const r=s.getBoundingClientRect();
   if(r.width<=0||r.height<=0) continue;
   const box=[r.x-b.x,r.y-b.y,r.width,r.height];
-  words.push({t:s.textContent,f:s.dataset.f,l:+s.dataset.l,box});
+  // v13: Zellen- und Spaltenstruktur der Positionstabelle. `ci` ist der Spaltenindex
+  // der umschließenden <td> (auch bei colspan-Unterzeilen), `tbl` die Nummer der
+  // umschließenden Positionstabelle auf der Seite, `cid` eine laufende Nummer der <td>.
+  const td=s.closest('td,th'), tb=td?td.closest('table.items'):null;
+  let ci=-1,tbl=-1,cid=-1;
+  if(td&&tb){ci=td.cellIndex;tbl=tables.indexOf(tb);if(tbl<0){tables.push(tb);tbl=tables.length-1;}
+   cid=tds.indexOf(td);if(cid<0){tds.push(td);cid=tds.length-1;}}
+  words.push({t:s.textContent,f:s.dataset.f,l:+s.dataset.l,box,ci,tbl,cid});
   // Fußzeile, Seitenzahl und Barcode stehen absolut am Blattfuß und sind kein
   // Überlauf. Der Fließsatz darf dafür nicht bis zu ihnen hinunterlaufen: er
   // wird gegen `data-bottom` gemessen, nicht gegen die Blatthöhe.
@@ -533,6 +540,12 @@ def document(spec, invoice, meta, seed, per_page=None):
     lines = meta["render_lines"]
     pages_html = []
     groups = chunk(lines, per_page or rows_per_page(spec))
+    if spec.get("ei_split"):
+        # Der Drei-Seiten-Schnitt des KoSIT-Ausdrucks: Uebersicht / Details /
+        # Zusaetze. Die erste und die letzte Seite tragen keine Positionen, also
+        # bekommen sie eine leere Gruppe. `families.einvoice_page` erkennt sie an
+        # `index == 0` bzw. `index + 1 == total`.
+        groups = [[]] + groups + [[]]
     carry = 0
     for i, group in enumerate(groups):
         carry += sum(l["lineNet"] for l in group)
@@ -619,6 +632,12 @@ def plan(spec, invoice, meta, seed, path):
     Seite kostet später wieder OCR.
     """
     count = len(meta["render_lines"]) or 1
+    if spec.get("ei_split"):
+        # Gemessen wird das Positionsbudget, nicht der Schnitt: mit Schnitt traegt
+        # `bodies[0]` die Uebersichtsseite und gar keine Position, und `plan()`
+        # faende keine `line-item`-Region.
+        spec = dict(spec)
+        spec["ei_split"] = False
     sheet, bodies, _ = document(spec, invoice, meta, seed, (count, count))
     with open(path, "w", encoding="utf-8") as f:
         f.write(page_document(sheet, bodies[0]))

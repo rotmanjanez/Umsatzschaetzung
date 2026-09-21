@@ -691,7 +691,12 @@ def item_cells(spec, line):
     out["name"] = name_cell(spec, line)
     qty = [(quantity(spec, line["quantity"]), "quantity", no)]
     if spec["glue_unit"] and line["unitText"] and not spec.get("name_unit_code"):
-        qty.append((line["unitText"], "unit", no))
+        # `qty_unit_glue`: die Einheit klebt ohne Leerzeichen an der Zahl — "17Fl",
+        # "10XBO", "5,450kg". Gedruckt ist das ein Wort, in der Wahrheit bleiben es
+        # zwei Tokens mit ihren eigenen Klassen (`quantity` und `unit`). Genau so
+        # steht es auf den echten Weingut- und Fischbelegen, und v11 kannte nur die
+        # getrennte Form.
+        qty.append((line["unitText"], "unit", no, bool(spec.get("qty_unit_glue"))))
     out["menge"] = qty
     out["einheit"] = [(line["unitText"] or "", "unit", no)]
     # Freizeilen drucken Preis und Betrag als *leere* Zelle, nicht als "0,00" —
@@ -710,8 +715,9 @@ def item_cells(spec, line):
     # Die Preisbasis *im* Preisfeld: "12,50 / 100 g". Eine zweite Zahl in der
     # Preisspalte, die kein Preis ist.
     if spec.get("basis_inline") and price and line["priceBaseText"]:
-        price = price + [("/", "O", no)] + [(t, f, no) for t, f in line["priceBaseText"]
-                                            if f != "O"]
+        price = price + [("/", "O", no)] + [(t, f, no) + tok[2:]
+                                            for tok in line["priceBaseText"]
+                                            for t, f in [tok[:2]] if f != "O"]
     out["preis"] = price
     out["betrag"] = amount
     # Brutto je Position — nur sinnvoll neben der Nettospalte, und nur, wenn die Zeile
@@ -725,7 +731,9 @@ def item_cells(spec, line):
     # Preiseinheit: die Zahl ist `priceBasis`, das Einheitenwort `unit`. Auf einer
     # Zeile mit nackter Menge (unitText null) steht dort nur die Zahl — sonst hätte
     # die Wahrheit ein `unit`-Wort für eine Zeile, die keine Einheit druckt.
-    out["basis"] = [(t, f, no) for t, f in line["priceBaseText"]]
+    # Die Tokens der Preisbasis sind (Text, Klasse) oder (Text, Klasse, _, glue) —
+    # die geklebte Form "/kg" braucht das vierte Feld von `cell()`.
+    out["basis"] = [(tok[0], tok[1], no) + tuple(tok[3:]) for tok in line["priceBaseText"]]
     out["rabatt"] = discount_cell(spec, line)
     out["mwst"] = vat_cell(spec, line)
     return out
@@ -867,15 +875,44 @@ def charge_rows(spec, meta):
             for c in meta["charges"]]
 
 
+# Die v12-Formen, bei denen der Steuersatz im Beschriftungslauf steht (Fehlerbild 4).
+VAT_GLUE_FORMS = ("gesamt", "gesamt_base", "zzgl", "enthalten")
+
+
 def vat_rows(spec, invoice, bare=False):
     """Nur der Satz selbst ist `vat`, nicht die Beschriftung, nicht das "%", nicht
     der Nettobetrag, auf den er sich bezieht. `assemble` greift auf den
     Summenblock zurück, sobald die Positionstabelle keine MwSt-Spalte hat — und
     das ist die Mehrheit der Rechnungen."""
     out = []
+    form = "bare" if bare else spec["vat_row_form"]
+    glue = bool(spec.get("vat_rate_glued"))
     for b in invoice["vatBreakdown"]:
-        key = [(alt(spec, "vat", spec["total_vat"]), "vatLabel", 0), (money.pct(b["vat"]), "vat", 0)]
-        form = "bare" if bare else spec["vat_row_form"]
+        rate = money.pct(b["vat"])
+        if form in VAT_GLUE_FORMS:
+            # Der Satz steckt **in** der Beschriftung, und die Zeile steht je Satz
+            # einmal untereinander:
+            #
+            #     USt. gesamt 7%      37,03
+            #     USt. gesamt 19%      2,83
+            #
+            # `7` ist `vat`, `%` und der Bemessungsbetrag sind `O`, alle
+            # Beschriftungswörter `vatLabel` (CONVENTIONS.md §1). Bis v11 druckte der
+            # Korpus nur `MwSt 19 %` mit *einem* Satz je Beleg; auf echten Belegen mit
+            # zwei Sätzen hat das Modell den zweiten gar nicht getaggt.
+            if form == "zzgl":
+                key = [(spec.get("vat_zzgl_label") or "zzgl.", "vatLabel", 0),
+                       (rate, "vat", 0), ("%", "O", 0, glue),
+                       (alt(spec, "vat", spec["total_vat"]), "vatLabel", 0)]
+            else:
+                key = [(spec.get("vat_total_label") or "USt. gesamt", "vatLabel", 0),
+                       (rate, "vat", 0), ("%", "O", 0, glue)]
+                if form == "gesamt_base":
+                    key += [(spec.get("vat_base_join") or "auf", "O", 0),
+                            (cents(spec, b["net"]), "O", 0)]
+            out.append((key, amount(spec, b["tax"]), "O"))
+            continue
+        key = [(alt(spec, "vat", spec["total_vat"]), "vatLabel", 0), (rate, "vat", 0)]
         if form == "of":
             key.append(("% von " + cents(spec, b["net"]), "O", 0))
         elif form == "base":
@@ -1208,7 +1245,8 @@ def receipt_items(spec, lines):
             left.append((unit_price(spec, line["unitPrice"]), "unitPrice", no))
             if "basis" in columns and line["priceBaseText"]:
                 left.append(("/", "O", no))
-                left += [(t, f, no) for t, f in line["priceBaseText"] if f != "O"]
+                left += [(tok[0], tok[1], no) for tok in line["priceBaseText"]
+                         if tok[1] != "O"]
         amount = ("" if line.get("free") or not with_amount
                   else cell([(cents(spec, line["lineNet"]), "lineNet", no)]))
         tax = words(line["taxCode"], "O", no) if spec["rc_articleid"] else ""

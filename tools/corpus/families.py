@@ -254,6 +254,35 @@ def defaults(rng):
         "hand": False,
         # Eine Zeile "Bewirtungsbeleg"-Felder (Anlass, Teilnehmer) unter den Summen.
         "host_fields": False,
+
+        # ------------------------------------------------------------------ v12
+        # Die Einheit IM Preiskopf: "Preis je Fl", "Preis je kg", "EP/kg", "EUR/Stk",
+        # und zweizeilig "Preis je" / "kg bzw. Stueck". Ausgespielt wird sie in
+        # `layout.apply_price_header`, weil erst dort das Einheitenwort der
+        # Positionen bekannt ist. 12 % frei gezogen, dazu die Familien, die sie
+        # fest setzen (Weingut, Metzgerei, Fisch, Kaese, Roesterei ...) — zusammen
+        # ueber der Untergrenze von 8 % aus PLAN.md.
+        "price_header_unit": rng.choices(["", "je", "pro", "ep", "cur", "two"],
+                                         [88, 4, 1, 3, 2, 2], k=1)[0],
+        # Menge und Einheit ohne Leerzeichen: "17Fl", "10XBO", "5,450kg". Greift nur
+        # bei `glue_unit` (keine eigene Einheitenspalte); `layout.fit` schaltet sie
+        # sonst ab. Gelesen wird sie von `blocks.item_cells` — bis der Content-Agent
+        # das vierte Feld durchreicht (Bitte 2 in STATUS-families.md), steht sie nur
+        # in der Wahrheit und aendert nichts.
+        "qty_unit_glue": rng.random() < 0.35,
+        # XRechnung-Viewer: die nackte Positionszeile (Name ohne den Schluessel
+        # "Bezeichnung:", darunter kursive Unterzeilen) statt der Schluesselform.
+        # Der echte KoSIT-Ausdruck kennt nur die nackte Form.
+        "ei_bare": rng.random() < 0.72,
+        # XRechnung-Viewer: der Drei-Seiten-Schnitt Uebersicht / Details / Zusaetze.
+        "ei_split": rng.random() < 0.40,
+        # NICHT vorhanden und mit Absicht nicht angelegt: `vat_letter` (Steuerbuchstabe
+        # je Position), `deposit_column` (Pfand-/Leergutspalte) und `day_columns`
+        # (Tagesspalten des Baeckerei-Lieferscheins). Alle drei brauchen eine neue
+        # Zelle in `blocks.item_cells`, und `blocks.py` gehoert in dieser Runde dem
+        # Content-Agenten. Eine Achse, die in truth.json steht und nichts druckt,
+        # laesst `coverage.py` einen Anteil melden, der nicht auf der Seite ist —
+        # also wird sie gar nicht erst gezogen.
     }
 
 
@@ -559,7 +588,7 @@ EXTRA_FAMILIES.update({
 EXTRA_FAMILIES.update({
     # Metro / C+C Grossmarkt, Rechnung (nicht Bon): sehr dichte Tabelle,
     # Warengruppe und Steuerschluessel, Pfandzeilen, Kundennummer im Kopf.
-    "metro": {"weight": 1.2, "set": {
+    "metro": {"weight": 2.0, "set": {
         "font_pool": ["condensed", "mono"], "size": [6.9, 7.2, 7.6], "force_codes": True,
         "order_pick": [13, 14], "table_style": ["rules", "borderless"],
         "header_style": ["bold", "bodyrow"], "cell_pad_x": 1.2, "cell_pad_y": 0.7,
@@ -636,8 +665,9 @@ EXTRA_FAMILIES.update({
         "doc_note": [("pfand",), ("pfand", "eigentum")], "accent": ["#7b1f1f", "#8a5a1f"]}},
     # Baeckerei-Sammelrechnung: viele kleine Positionen, Tagesueberschriften,
     # zweistellige Mengen, schmale Tabelle, Summen ganz unten.
-    "baeckerei": {"weight": 0.9, "set": {
+    "baeckerei": {"weight": 1.6, "set": {
         "font_pool": ["serif", "sans"], "group_headings": True, "sections": "days",
+        "order_pick": [0, 0, 0, 1, 26],
         "table_style": ["rules", "dotted"], "header_style": ["plain", "underline"],
         "narrow_name": False, "totals_bottom": True, "totals_style": ["block", "table"],
         "meta_style": ["stack", "pairs"], "logo": ["wordmark", "mark"], "footer": ["bank", "line"],
@@ -1115,6 +1145,386 @@ EXTRA_FAMILIES.update({
 })
 
 
+# ============================================================== v12: Gastronomie
+#
+# v11 hat 113 Familien gebaut, aber aus der Sicht der Rechnungen, die dieser
+# Nutzer wirklich bucht, war das eine schmale Auswahl: ein Gastronomiebetrieb
+# kauft bei Winzern, Getraenkefachgrosshaendlern, Metzgern, Fischhaendlern,
+# Baeckern, Kaesehaendlern, Roestereien, Importeuren, Mietgeschirrverleihern und
+# Waeschereien ein, und jede dieser Branchen druckt ihre eigene Tabelle. Die
+# vierzig Familien hier sind alle nach einem solchen Lieferantentyp modelliert
+# und bedienen die Fehlerbilder aus v12/PLAN.md:
+#
+#   1 Weinspalten-Tausch  -> weingut, weinhandel2, sektkellerei, winzergeno
+#   3 Einheit im Preiskopf -> weingut, metzgerei2, fisch2, kaese_affineur,
+#                             kaffee_roesterei2, wurstwaren, muehle, olivenoel ...
+#   4 Steuersaetze je Zeile -> cash_carry, selgros2, grosskueche, convenience
+#   6 Mengenzuverlaessigkeit -> alle mit `qty_unit_glue`, Einheit-vor-Menge-Folgen
+#                               (order_pick 23/24/31) und nackten Mengen
+#
+# Die Gewichte liegen bei 0,6-1,0; zusammen rund 30. `layout.FAMILIES["free"]`
+# steht deshalb auf 52 statt 40 und haelt die freie Ziehung ueber 25 %.
+V12_FAMILIES = {
+    # --------------------------------------------------------------- Wein, Sekt
+    # Weingut / Erzeugerabfuellung. Der Beleg, an dem v11 gescheitert ist: die
+    # Artikelnummer steht RECHTS der Bezeichnung, der Name beginnt mit dem
+    # Jahrgang ("2024 Iphoefer Kronsberg Silvaner trocken 0,75 l"), die SKU ist
+    # selbst jahrgangskodiert ("2024-S-01"), die Preisspalte heisst "Preis je Fl",
+    # gesetzt ist in einer Serife mit sehr breiter Namensspalte.
+    "weingut": {"weight": 1.0, "set": {
+        "font_pool": "serif", "order_pick": [20, 21, 22], "price_header_unit": "je",
+        "narrow_name": False, "name_width": [64.0, 70.0, 74.0],
+        "table_style": ["rules", "dotted", "borderless"],
+        "header_style": ["smallcaps", "plain", "underline"],
+        "totals_style": ["table", "block"], "totals_side": "right",
+        "meta_style": ["pairs", "boxed", "stack"], "meta_place": ["top_right", "under_title"],
+        "logo": ["wordmark2", "wordmark", "mark"], "footer": ["bank", "columns3"],
+        "title_style": ["letter", "smallcaps", "plain"], "pos_format": ["plain", "dot"],
+        "qty_style": ["trim", "d2"], "bg_art": "", "accent": ["#5a1f2d", "#3d3d3d", "#1f3864"]}},
+    # Weinhandel, zweite Auspraegung: wie `weinhandel`, aber die Art.-Nr. steht
+    # rechts und die Kopfzeile ist zweizeilig.
+    "weinhandel2": {"weight": 0.9, "set": {
+        "font_pool": ["serif", "sans"], "order_pick": [21, 22, 20],
+        "price_header_unit": ["je", "cur"], "header_two_line": True,
+        "table_style": ["rules", "grid"], "header_style": ["bold", "smallcaps"],
+        "totals_style": ["table", "block"], "meta_style": ["boxed", "pairs"],
+        "logo": ["wordmark", "wordmark2"], "footer": ["columns3", "bank"],
+        "name_width": [58.0, 66.0], "narrow_name": False}},
+    # Sektkellerei: Flaschen und Kartons, Jahrgang im Namen, Serife, Kapitaelchen.
+    "sektkellerei": {"weight": 0.7, "set": {
+        "font_pool": "serif", "order_pick": [20, 2, 21], "price_header_unit": ["je", ""],
+        "table_style": ["dotted", "rules"], "header_style": ["smallcaps", "letterspaced"],
+        "totals_style": ["block", "table"], "meta_style": ["pairs", "stack"],
+        "logo": ["wordmark2", "mark"], "footer": ["bank", "columns2"],
+        "title_style": ["letter", "smallcaps"]}},
+    # Winzergenossenschaft: nuechterner Warenwirtschaftsausdruck ueber Weine,
+    # Mitgliedsnummer im Kopf, Art.-Nr. rechts, Gebindespalte.
+    "winzergeno": {"weight": 0.7, "set": {
+        "font_pool": ["sans", "condensed"], "order_pick": [22, 29],
+        "price_header_unit": ["je", "ep"], "force_codes": True,
+        "table_style": ["rules", "grid"], "header_style": ["bold", "boxed"],
+        "totals_style": ["table", "grid"], "meta_style": ["grid", "row"],
+        "logo": ["mark", "none"], "footer": ["columns3", "columns4"]}},
+    # Spirituosen-Fachgrosshandel (der Brueckner-Typ): Barbedarf, lange Namen mit
+    # Volumenangabe, Art.-Nr. mal links mal rechts, englische Markennamen.
+    "spirituosen": {"weight": 0.9, "set": {
+        "font_pool": ["sans", "serif"], "order_pick": [20, 0, 22],
+        "price_header_unit": ["", "je"], "name_width": [56.0, 64.0],
+        "table_style": ["rules", "borderless"], "header_style": ["bold", "underline"],
+        "totals_style": ["table", "block"], "meta_style": ["boxed", "pairs"],
+        "logo": ["wordmark", "wordmark2"], "footer": ["bank", "columns3"],
+        "name_gtin": True}},
+    # ------------------------------------------------------ Getraenke, Leergut
+    # Getraenkefachgrosshandel: Pfand- und Leergutzeilen, Kastenmengen, Tour und
+    # Fahrer im Kopf, Steuerschluessel je Zeile.
+    "getraenke_fgh": {"weight": 1.0, "set": {
+        "doc_note": [("pfand",), ("pfand", "eigentum")],
+        "font_pool": ["sans", "condensed"], "order_pick": [23, 24, 13],
+        "force_codes": True, "qty_unit_glue": True,
+        "table_style": ["rules", "grid"], "header_style": ["bold", "inverted"],
+        "totals_style": ["table", "panel"], "meta_style": ["grid", "boxed"],
+        "logo": ["wordmark", "band"], "footer": ["columns3", "columns4"]}},
+    # Leergutabrechnung: ueberwiegend negative Positionsbetraege, Gebindenamen,
+    # keine Artikelnummern, "Rueckgabe" als Abschnitt.
+    "leergut": {"weight": 0.7, "set": {
+        "doc_note": [("pfand",)], "font_pool": ["condensed", "sans"],
+        "order_pick": [3, 2, 20, 25], "table_style": ["borderless", "rules"],
+        "header_style": ["plain", "bold"], "totals_style": ["block", "table"],
+        "meta_style": ["row", "grid"], "logo": ["none", "wordmark"], "footer": ["line", "bank"]}},
+    # Brauerei, Gebindeabrechnung: Faesser und Kaesten, "24 x 0,33 l MW",
+    # Pfandzeilen, Preis je Hektoliter.
+    "brauerei2": {"weight": 0.8, "set": {
+        "doc_note": [("pfand",), ("pfand", "eigentum")], 
+        "font_pool": ["serif", "sans"], "order_pick": [23, 31, 0],
+        "price_header_unit": ["", "je"], "table_style": ["rules", "dotted"],
+        "header_style": ["smallcaps", "bold"], "totals_style": ["table", "block"],
+        "meta_style": ["pairs", "boxed"], "logo": ["wordmark2", "mark"],
+        "footer": ["columns3", "bank"]}},
+    # Mineralbrunnen: Kastenlieferung an die Gastronomie, Leergutsaldo,
+    # Liefertour, sehr schmale Tabelle.
+    "mineralbrunnen": {"weight": 0.7, "set": {
+        "doc_note": [("pfand",)], "font_pool": ["sans", "condensed"],
+        "order_pick": [24, 30], "qty_unit_glue": True,
+        "table_style": ["rules", "borderless"], "header_style": ["bold", "plain"],
+        "totals_style": ["table", "block"], "meta_style": ["grid", "row"],
+        "logo": ["mark", "wordmark"], "footer": ["columns2", "line"]}},
+    # Getraenke auf Kommission: gelieferte und zurueckgenommene Mengen in einer
+    # Tabelle, die Differenz wird berechnet.
+    "getraenke_kommission": {"weight": 0.6, "set": {
+        "doc_note": [("pfand",), ()], "font_pool": ["condensed", "sans"],
+        "order_pick": [25, 26], "force_codes": True,
+        "table_style": ["grid", "rules"], "header_style": ["boxed", "bold"],
+        "totals_style": ["grid", "table"], "meta_style": ["grid", "boxed"],
+        "logo": ["none", "wordmark"], "footer": ["columns3", "line"]}},
+    # -------------------------------------------------------- Fleisch und Fisch
+    # Metzgerei, zweite Auspraegung — der Beleg mit dem zweizeiligen Preiskopf
+    # "Preis je" / "kg bzw. Stueck" und dem ebenfalls zweizeiligen "Betrag".
+    # Kilogrammmengen mit drei Nachkommastellen, Tagesueberschriften.
+    "metzgerei2": {"weight": 1.0, "set": {
+        "price_header_unit": "two", "qty_style": "d3", "sections": "days",
+        "font_pool": ["serif", "sans"], "order_pick": [0, 20, 27],
+        "table_style": ["rules", "grid"], "header_style": ["bold", "underline"],
+        "totals_style": ["table", "block"], "meta_style": ["pairs", "boxed"],
+        "logo": ["wordmark", "mark"], "footer": ["bank", "columns3"],
+        "second_row_details": True}},
+    # Wurst- und Fleischwarenfabrik: Chargennummern, MHD, Preis je kg, dichte
+    # Tabelle, Warengruppenspalte.
+    "wurstwaren": {"weight": 0.8, "set": {
+        "price_header_unit": ["je", "ep"], "qty_style": ["d3", "d2"], "force_codes": True,
+        "font_pool": ["condensed", "sans"], "order_pick": [13, 0],
+        "table_style": ["rules", "dotted"], "header_style": ["bold", "bodyrow"],
+        "totals_style": ["table", "grid"], "meta_style": ["grid", "row"],
+        "logo": ["wordmark", "none"], "footer": ["columns4", "columns3"],
+        "second_row_details": True}},
+    # Gefluegelhof: Direktvermarkter, wenige Positionen, Preis je kg, Serife.
+    "gefluegel": {"weight": 0.6, "set": {
+        "price_header_unit": ["je", "pro"], "qty_style": ["d3", "trim"],
+        "font_pool": "serif", "order_pick": [3, 20], "table_style": ["dotted", "borderless"],
+        "header_style": ["plain", "smallcaps"], "totals_style": ["block", "sentence"],
+        "meta_style": ["stack", "dateline"], "logo": ["mark", "none"], "footer": ["line", "bank"]}},
+    # Wildhandel: Saison, Zerlegehinweis in der Detailzeile, Preis je kg.
+    "wildhandel": {"weight": 0.6, "set": {
+        "price_header_unit": "je", "qty_style": "d3", "font_pool": ["serif", "sans"],
+        "order_pick": [21, 2], "table_style": ["rules", "dotted"],
+        "header_style": ["smallcaps", "bold"], "totals_style": ["block", "table"],
+        "meta_style": ["pairs", "stack"], "logo": ["wordmark2", "mark"],
+        "footer": ["bank", "columns2"], "second_row_details": True}},
+    # Fischgrosshandel, zweite Auspraegung: Gewichtsspalten, drei Nachkommastellen,
+    # Fanggebiet und Fangdatum in der Detailzeile, "EP/kg" als Preiskopf.
+    "fisch2": {"weight": 0.9, "set": {
+        "price_header_unit": ["ep", "je"], "qty_style": "d3", "force_codes": True,
+        "font_pool": ["sans", "condensed"], "order_pick": [24, 13, 0],
+        "table_style": ["grid", "rules"], "header_style": ["bold", "boxed"],
+        "totals_style": ["table", "grid"], "meta_style": ["grid", "boxed"],
+        "logo": ["wordmark", "mark"], "footer": ["columns3", "columns4"],
+        "second_row_details": True}},
+    # ----------------------------------------------------- Backwaren, Molkerei
+    # Baeckerei-Tageslieferschein: sehr viele kleine Positionen, Tagesspalten,
+    # nackte Mengen, schmale Tabelle, Summen ganz unten.
+    "baeckerei_ls": {"weight": 1.2, "set": {
+        "sections": "days", "font_pool": ["condensed", "sans"],
+        "order_pick": [8, 28, 26], "size": [7.0, 7.4, 7.8],
+        "table_style": ["rules", "dotted"], "header_style": ["plain", "bodyrow"],
+        "totals_style": ["block", "table"], "totals_bottom": True,
+        "meta_style": ["row", "grid"], "logo": ["none", "wordmark"],
+        "footer": ["line", "columns2"], "cell_pad_y": [0.6, 0.9]}},
+    # Konditorei / Patisserie: wenige, teure Positionen, lange Namen, Serife.
+    "konditorei": {"weight": 0.6, "set": {
+        "font_pool": "serif", "order_pick": [20, 3], "name_width": [60.0, 68.0],
+        "narrow_name": False, "table_style": ["borderless", "dotted"],
+        "header_style": ["smallcaps", "plain"], "totals_style": ["block", "sentence"],
+        "meta_style": ["stack", "dateline"], "logo": ["wordmark2", "mark"],
+        "footer": ["line", "bank"], "bg_art": ""}},
+    # Muehle / Backmittel: Saecke und Paletten, Preis je 100 kg, Lieferschein-Ton.
+    "muehle": {"weight": 0.7, "set": {
+        "price_header_unit": ["je", "pro"], "basis_inline": True,
+        "font_pool": ["sans", "condensed"], "order_pick": [7, 23],
+        "table_style": ["rules", "grid"], "header_style": ["bold", "underline"],
+        "totals_style": ["table", "block"], "meta_style": ["boxed", "grid"],
+        "logo": ["mark", "wordmark"], "footer": ["columns3", "bank"]}},
+    # Molkerei / Kaeserei: Kilogramm und Stueck gemischt, 7 % und 19 % in einer
+    # Tabelle, Steuerschluessel je Zeile.
+    "molkerei": {"weight": 0.8, "set": {
+        "price_header_unit": ["je", ""], "force_codes": True,
+        "font_pool": ["sans", "condensed"], "order_pick": [27, 13],
+        "table_style": ["rules", "zebra"], "header_style": ["bold", "inverted"],
+        "totals_style": ["table", "grid"], "meta_style": ["grid", "row"],
+        "logo": ["wordmark", "band"], "footer": ["columns3", "columns4"]}},
+    # Kaese-Affineur: franzoesische Artikelnamen auf deutscher Rechnung, Preis je
+    # kg, Reifegrad in der Detailzeile, Serife.
+    "kaese_affineur": {"weight": 0.7, "set": {
+        "price_header_unit": ["je", "ep"], "qty_style": "d3", "font_pool": "serif",
+        "order_pick": [21, 20], "name_width": [58.0, 66.0], "narrow_name": False,
+        "table_style": ["dotted", "rules"], "header_style": ["smallcaps", "plain"],
+        "totals_style": ["block", "table"], "meta_style": ["pairs", "stack"],
+        "logo": ["wordmark2", "mark"], "footer": ["bank", "columns2"],
+        "second_row_details": True}},
+    # Eierhof / Regionalvermarkter: wenige Positionen, Hoefliste, Handschrift-nahe
+    # Anmutung, keine Artikelnummern.
+    "eierhof": {"weight": 0.6, "set": {
+        "font_pool": ["serif", "sans"], "order_pick": [3, 8, 20], "table_style": "borderless",
+        "header_style": ["plain", "underline"], "totals_style": ["sentence", "block"],
+        "meta_style": ["dateline", "stack"], "logo": ["none", "mark"],
+        "footer": ["line", "address"], "page_format": ["a4", "a5"]}},
+    # ------------------------------------------------- Obst, Gemuese, Grossmarkt
+    # Grossmarkt-Abholbeleg auf A4 im Bonstil: dicktengleich, keine Linien,
+    # Warengruppenziffern, Uhrzeit und Standnummer im Kopf, Summen als Block.
+    "grossmarkt_a4": {"weight": 0.8, "set": {
+        "font_pool": "mono", "size": [7.2, 7.6, 8.0], "order_pick": [26, 8, 12],
+        "force_codes": True, "table_style": "borderless", "header_style": ["plain", "bodyrow"],
+        "totals_style": ["block", "table"], "totals_side": ["full", "left"],
+        "meta_style": ["row", "line"], "logo": ["none", "wordmark"],
+        "footer": ["line", "none"], "uppercase_headers": True}},
+    # Bio-Grosshandel: Zertifikatsnummer (DE-OEKO-006) in der Fusszeile, Herkunft
+    # in der Detailzeile, Kilogramm mit drei Stellen.
+    "bio_grosshandel": {"weight": 0.7, "set": {
+        "price_header_unit": ["je", ""], "qty_style": ["d3", "d2"],
+        "font_pool": ["sans", "serif"], "order_pick": [24, 2],
+        "table_style": ["rules", "dotted"], "header_style": ["plain", "bold"],
+        "totals_style": ["table", "block"], "meta_style": ["pairs", "grid"],
+        "logo": ["mark", "wordmark"], "footer": ["columns3", "bank"],
+        "second_row_details": True, "accent": ["#2f4f2f", "#1b6b5a"]}},
+    # Kraeuter und Gewuerze: kleine Mengen, Gramm, Preis je 100 g, Preisbasis.
+    "kraeuter": {"weight": 0.6, "set": {
+        "price_header_unit": ["je", "cur"], "basis_inline": True,
+        "font_pool": ["serif", "sans"], "order_pick": [7, 20],
+        "table_style": ["dotted", "rules"], "header_style": ["smallcaps", "plain"],
+        "totals_style": ["block", "table"], "meta_style": ["stack", "pairs"],
+        "logo": ["wordmark2", "none"], "footer": ["bank", "line"]}},
+    # ---------------------------------------------------- Kaffee, Tee, Feinkost
+    # Kaffeeroesterei, zweite Auspraegung: Preis je kg, Herkunft und Roestdatum
+    # unter der Position, englische Schluessel gemischt.
+    "kaffee_roesterei2": {"weight": 0.8, "set": {
+        "price_header_unit": ["je", "ep"], "qty_style": ["d3", "trim"],
+        "font_pool": ["serif", "sans"], "order_pick": [21, 20],
+        "table_style": "borderless", "header_style": ["smallcaps", "letterspaced"],
+        "totals_style": ["block", "sentence"], "meta_style": ["stacked", "dateline"],
+        "logo": "wordmark", "footer": ["line", "columns3"],
+        "second_row_details": True, "name_width": [58.0, 66.0], "narrow_name": False}},
+    # Teehandel: Gramm und Kilogramm gemischt, lange Sortennamen, Preisbasis.
+    "tee_handel": {"weight": 0.6, "set": {
+        "price_header_unit": ["je", "cur"], "font_pool": ["serif", "sans"],
+        "order_pick": [7, 22], "table_style": ["dotted", "borderless"],
+        "header_style": ["smallcaps", "plain"], "totals_style": ["block", "table"],
+        "meta_style": ["stack", "pairs"], "logo": ["wordmark2", "mark"],
+        "footer": ["bank", "line"]}},
+    # Feinkost-Import: italienische und franzoesische Artikelnamen, Herkunftsland
+    # als Spalte, Zollhinweis in der Fusszeile.
+    "feinkost_import": {"weight": 0.8, "set": {
+        "doc_note": [("innergemein",), ()], "font_pool": ["serif", "sans"],
+        "order_pick": [18, 19, 21], "name_width": [58.0, 68.0], "narrow_name": False,
+        "table_style": ["rules", "grid"], "header_style": ["bold", "smallcaps"],
+        "totals_style": ["table", "block"], "meta_style": ["boxed", "pairs"],
+        "logo": ["wordmark", "mark"], "footer": ["columns3", "columns4"]}},
+    # Olivenoel und Suedfruechte: Kanister und Kartons, Preis je Liter, spanische
+    # oder griechische Namen.
+    "olivenoel": {"weight": 0.6, "set": {
+        "price_header_unit": ["je", "pro"], "font_pool": ["serif", "sans"],
+        "order_pick": [20, 24], "table_style": ["rules", "dotted"],
+        "header_style": ["smallcaps", "bold"], "totals_style": ["block", "table"],
+        "meta_style": ["pairs", "stack"], "logo": ["wordmark2", "mark"],
+        "footer": ["bank", "columns2"]}},
+    # Nudel- und Teigwarenmanufaktur: Kartons, Preis je kg, Serife, kleine Tabelle.
+    "nudelmanufaktur": {"weight": 0.6, "set": {
+        "price_header_unit": ["je", ""], "font_pool": "serif", "order_pick": [20, 3],
+        "table_style": ["dotted", "borderless"], "header_style": ["plain", "smallcaps"],
+        "totals_style": ["block", "sentence"], "meta_style": ["stack", "dateline"],
+        "logo": ["wordmark2", "none"], "footer": ["line", "bank"]}},
+    # ------------------------------------------------- Tiefkuehl und Convenience
+    # Speiseeis und TK-Desserts: Temperaturzone, Liefertour, Kartons, Stueckzahlen.
+    "eis_grosshandel": {"weight": 0.7, "set": {
+        "force_codes": True, "font_pool": ["sans", "condensed"], "order_pick": [23, 13],
+        "qty_unit_glue": True, "table_style": ["grid", "rules"],
+        "header_style": ["inverted", "boxed"], "totals_style": ["table", "grid"],
+        "meta_style": ["grid", "row"], "logo": ["wordmark", "band"],
+        "footer": ["columns3", "columns4"], "second_row_details": True}},
+    # Frischeservice / Convenience: gemischte Steuersaetze in einer Tabelle,
+    # Steuerbuchstabe je Position, Tourennummer.
+    "convenience": {"weight": 0.8, "set": {
+        "force_codes": True, "font_pool": ["condensed", "sans"],
+        "order_pick": [27, 29, 13], "size": [7.2, 7.6],
+        "table_style": ["rules", "zebra"], "header_style": ["bold", "bodyrow"],
+        "totals_style": ["table", "grid"], "meta_style": ["grid", "row"],
+        "logo": ["wordmark", "none"], "footer": ["columns4", "columns3"]}},
+    # Grosskuechen-Lieferservice: sehr viele Positionen, Warengruppen als
+    # Zwischenueberschriften, Chargen, gemischte Saetze.
+    "grosskueche": {"weight": 0.8, "set": {
+        "sections": "goods", "force_codes": True,
+        "font_pool": ["condensed", "sans"], "order_pick": [13, 27], "size": [6.9, 7.3],
+        "table_style": ["rules", "dotted"], "header_style": ["bold", "bodyrow"],
+        "totals_style": ["table", "block"], "meta_style": ["grid", "row"],
+        "logo": ["wordmark", "band"], "footer": ["columns4", "columns5"],
+        "cell_pad_y": [0.6, 1.0]}},
+    # -------------------------------------------------------- Cash & Carry, SB
+    # Cash-&-Carry-Abholbeleg: Steuerbuchstabe A/B hinter jedem Betrag,
+    # Artikelcodes, Kassennummer und Uhrzeit, dicktengleich auf A4.
+    "cash_carry": {"weight": 0.9, "set": {
+        "force_codes": True, "font_pool": ["mono", "condensed"],
+        "order_pick": [12, 10, 26], "size": [7.0, 7.4],
+        "table_style": "borderless", "header_style": ["plain", "bodyrow"],
+        "totals_style": ["block", "table"], "meta_style": ["row", "line"],
+        "logo": ["none", "wordmark"], "footer": ["line", "columns2"],
+        "uppercase_headers": True, "pos_format": ["pad", "plain"]}},
+    # Selgros / Metro, zweite Auspraegung: Gittertabelle, Steuerbuchstabe je
+    # Position, Positionsnummern in Zehnerschritten, Kundennummer gross im Kopf.
+    "selgros2": {"weight": 0.8, "set": {
+        "force_codes": True, "font_pool": ["condensed", "sans"],
+        "order_pick": [13, 14], "pos_format": "step", "table_style": "grid",
+        "header_style": ["boxed", "inverted"], "totals_style": ["table", "panel"],
+        "meta_style": "boxed", "logo": ["wordmark", "band"], "footer": ["columns4", "columns3"]}},
+    # Gastro-Bestellportal: Sammelbeleg ueber mehrere Lieferanten, Bestellnummer
+    # prominent, Positionen ohne Artikelnummer, Provisionszeile im Summenblock.
+    "bestell_portal": {"weight": 0.7, "set": {
+        "font_pool": "sans", "order_pick": [28, 25, 22], "table_style": ["zebra", "borderless"],
+        "header_style": ["inverted", "accent"], "totals_style": ["panel", "grid"],
+        "meta_style": ["grid", "stacked"], "logo": ["wordmark", "band"],
+        "footer": ["line", "columns2"], "head_band": True}},
+    # ------------------------------------------------ Ausstattung und Dienste
+    # Gastronomiebedarf: Porzellan, Glaeser, Besteck; Stueckzahlen, Bruchersatz,
+    # lange Artikelnummern.
+    "gastro_bedarf": {"weight": 0.8, "set": {
+        "force_codes": True, "font_pool": ["sans", "condensed"], "order_pick": [0, 20],
+        "table_style": ["rules", "grid"], "header_style": ["bold", "boxed"],
+        "totals_style": ["table", "block"], "meta_style": ["boxed", "grid"],
+        "logo": ["wordmark", "mark"], "footer": ["columns3", "columns4"],
+        "name_gtin": True}},
+    # Kuechentechnik: Wartungsvertrag und Ersatzteile in einem Beleg, Abschnitte
+    # Lohn und Material, Arbeitswerte als Einheit.
+    "kuechentechnik": {"weight": 0.7, "set": {
+        "sections": "trade", "period_block": ["range", ""], "font_pool": ["sans", "serif"],
+        "order_pick": [0, 23], "table_style": ["rules", "grid"],
+        "header_style": ["bold", "underline"], "totals_style": ["table", "block"],
+        "meta_style": ["boxed", "pairs"], "logo": ["mark", "wordmark"],
+        "footer": ["columns3", "bank"]}},
+    # Schankanlagen-Wartung: Reinigungsintervalle als Positionen, Objektnummer,
+    # Zeitraum, wenige Zeilen.
+    "schankanlage": {"weight": 0.6, "set": {
+        "period_block": "range", "font_pool": ["sans", "condensed"], "order_pick": [3, 28, 20],
+        "table_style": ["rules", "borderless"], "header_style": ["bold", "plain"],
+        "totals_style": ["block", "table"], "meta_style": ["boxed", "grid"],
+        "logo": ["mark", "none"], "footer": ["columns2", "bank"]}},
+    # Mietgeschirr und Eventausstattung: Mietdauer als Zeitraum, Stueckzahlen,
+    # Rueckgabezeilen, Kaution im Summenblock.
+    "mietgeschirr": {"weight": 0.8, "set": {
+        "period_block": "range", "font_pool": ["sans", "serif"], "order_pick": [26, 25, 8],
+        "table_style": ["rules", "dotted"], "header_style": ["plain", "bold"],
+        "totals_style": ["table", "block"], "meta_style": ["pairs", "boxed"],
+        "logo": ["wordmark", "mark"], "footer": ["bank", "columns3"]}},
+    # Zelt- und Moebelvermietung: Auf- und Abbau als eigene Positionen, Zeitraum,
+    # Kaution, wenige Zeilen mit grossen Betraegen.
+    "zelt_event": {"weight": 0.6, "set": {
+        "period_block": "range", "prepaid": ["anzahlung", ""], "font_pool": ["sans", "serif"],
+        "order_pick": [8, 20, 22], "table_style": ["rules", "borderless"],
+        "header_style": ["bold", "smallcaps"], "totals_style": ["block", "table"],
+        "meta_style": ["pairs", "stack"], "logo": ["wordmark", "mark"],
+        "footer": ["bank", "columns2"]}},
+    # Waescherei / Textilservice: Stueckzahlen je Artikel (Tischdecke, Serviette,
+    # Kochjacke), Abrechnungszeitraum, nackte Mengen ohne Einheit.
+    "waescherei": {"weight": 0.8, "set": {
+        "period_block": "range", "font_pool": ["sans", "condensed"], "order_pick": [8, 26, 20],
+        "qty_unit_glue": True, "table_style": ["rules", "zebra"],
+        "header_style": ["bold", "bodyrow"], "totals_style": ["table", "block"],
+        "meta_style": ["grid", "row"], "logo": ["wordmark", "none"],
+        "footer": ["columns3", "line"]}},
+    # Berufskleidung im Leasing: monatliche Pauschale je Traeger, Zeitraum,
+    # Vertragsnummer, gleichfoermige Positionen.
+    "berufskleidung": {"weight": 0.6, "set": {
+        "period_block": "range", "font_pool": "sans", "order_pick": [28, 8, 20],
+        "table_style": ["rules", "borderless"], "header_style": ["plain", "bold"],
+        "totals_style": ["table", "panel"], "meta_style": ["grid", "boxed"],
+        "logo": ["wordmark", "band"], "footer": ["columns3", "columns2"]}},
+    # Hygiene- und Reinigungsmittel: Kanister und Gebinde, Gefahrstoffhinweis in
+    # der Fusszeile, Preis je Liter, Artikelnummern mit Punkten.
+    "hygiene_service": {"weight": 0.7, "set": {
+        "price_header_unit": ["je", "cur"], "force_codes": True,
+        "font_pool": ["sans", "condensed"], "order_pick": [0, 24],
+        "table_style": ["rules", "grid"], "header_style": ["bold", "inverted"],
+        "totals_style": ["table", "block"], "meta_style": ["grid", "boxed"],
+        "logo": ["wordmark", "band"], "footer": ["columns4", "columns3"]}},
+}
+EXTRA_FAMILIES.update(V12_FAMILIES)
+
+
 FAMILY_DOCTYPE = {n: f["doctype"] for n, f in EXTRA_FAMILIES.items() if f.get("doctype")}
 # Umkehrung: welche Familien eine Belegart bedienen duerfen.
 DOCTYPE_FAMILIES = {}
@@ -1560,6 +1970,72 @@ EI = {
 }
 
 
+# --------------------------------------------------------------- v12: der echte
+# KoSIT-Ausdruck. Fehlerbild 2 aus v12/PLAN.md, nachgemessen an den Scans von 2025:
+#
+#  * die Positionszeile druckt den Namen **nackt**, ohne den Schluessel
+#    "Bezeichnung:", und darunter stehen kursive Unterzeilen
+#    "Artikelnummer: 40070" / "Artikelkennung: 4009862310035" /
+#    "Schema der Artikelkennung: 0160". v11 kannte nur die Schluesselform.
+#  * der Summenblock druckt **"Gesamtsumme" nackt, zweimal** — erst netto, dann
+#    brutto —, dazu "Summe aller Positionen", "Summe Umsatzsteuer",
+#    "Summe Fremdforderungen 0,00" und "Faelliger Betrag".
+#  * darunter ein eigener Kasten "Aufschluesselung der Umsatzsteuer auf Ebene der
+#    Rechnung" mit "Umsatzsteuerkategorie: S", **noch einem** "Gesamtsumme",
+#    "Umsatzsteuersatz 19,00%" und "Umsatzsteuerbetrag".
+#
+# Damit steht dasselbe Wort "Gesamtsumme" dreimal auf der Seite und traegt jedes
+# Mal eine andere Klasse: `netLabel` (Nettosumme), `grossLabel` (Bruttosumme) und
+# `otherLabel` (Bemessungsgrundlage in der Aufschluesselung, Betrag `O`). Genau
+# das ist die Lektion von v12 — die Klasse haengt an der Stelle, nicht am Wort.
+EI_V12 = {
+    "xrechnung": {
+        "bare": "Gesamtsumme", "sumvat": "Summe Umsatzsteuer",
+        "breakdown": "Aufschlüsselung der Umsatzsteuer auf Ebene der Rechnung",
+        "cat": "Umsatzsteuerkategorie", "catval": "S", "rate2": "Umsatzsteuersatz",
+        "vatamt": "Umsatzsteuerbetrag", "overview": "Übersicht", "details": "Details",
+        "extras": "Zusätze", "extrahead": "Zusätzliche Angaben", "attach": "Anlage",
+        "remark": "Bemerkung", "contract": "Vertragsnummer", "project": "Projektnummer",
+        "means": "Zahlungsmittel", "meansval": "Überweisung (58)", "bic": "BIC",
+        "duedate": "Fälligkeitsdatum", "terms": "Zahlungsbedingungen"},
+    "zugferd": {
+        "bare": "Gesamtsumme", "sumvat": "Summe Umsatzsteuer",
+        "breakdown": "Aufschlüsselung der Umsatzsteuer auf Ebene der Rechnung",
+        "cat": "Umsatzsteuerkategorie", "catval": "S", "rate2": "Umsatzsteuersatz",
+        "vatamt": "Umsatzsteuerbetrag", "overview": "Übersicht", "details": "Details",
+        "extras": "Zusätze", "extrahead": "Weitere Angaben", "attach": "Anhang",
+        "remark": "Freitext", "contract": "Vertragsreferenz", "project": "Projektreferenz",
+        "means": "Zahlungsart", "meansval": "SEPA-Überweisung (58)", "bic": "BIC",
+        "duedate": "Fälligkeit", "terms": "Zahlungsbedingung"},
+    "portal": {
+        "bare": "Gesamtsumme", "sumvat": "Summe Umsatzsteuer",
+        "breakdown": "Aufschlüsselung der Umsatzsteuer auf Ebene der Rechnung",
+        "cat": "Umsatzsteuerkategorie", "catval": "S", "rate2": "Umsatzsteuersatz",
+        "vatamt": "Umsatzsteuerbetrag", "overview": "Übersicht", "details": "Details",
+        "extras": "Zusätze", "extrahead": "7. Zusätzliche Angaben", "attach": "Anlage",
+        "remark": "Bemerkung", "contract": "Vertragsnummer", "project": "Projektnummer",
+        "means": "Zahlungsmittel", "meansval": "58 Überweisung", "bic": "BIC",
+        "duedate": "Fälligkeitsdatum", "terms": "Zahlungsbedingungen"},
+    "peppol": {
+        "bare": "Total amount", "sumvat": "Invoice total VAT amount",
+        "breakdown": "VAT breakdown on document level", "cat": "VAT category",
+        "catval": "S", "rate2": "VAT rate", "vatamt": "VAT category tax amount",
+        "overview": "Overview", "details": "Details", "extras": "Additional information",
+        "extrahead": "Additional document information", "attach": "Attachment",
+        "remark": "Note", "contract": "Contract reference", "project": "Project reference",
+        "means": "Payment means type", "meansval": "58 Credit transfer", "bic": "BIC",
+        "duedate": "Payment due date", "terms": "Payment terms"},
+}
+for _v, _extra in EI_V12.items():
+    EI[_v].update(_extra)
+
+# Der Drei-Seiten-Schnitt druckt die Gesamtbetraege auf die **Uebersicht**, so wie der
+# echte KoSIT-Ausdruck. Moeglich, seit `validate.py` die Summen gegen jede Seite mit
+# einer Region `role == "total"` prueft statt gegen `pages[-1]` (validate.py:218-221);
+# vorher haette jede geschnittene Variation eine Beanstandung ergeben.
+EI_SPLIT_TOTALS_ON_PAGE1 = True
+
+
 # UN/ECE Rec 20/21 Codes, wie ein Viewer sie druckt. Der Code ersetzt den
 # Einheitentext NICHT — er steht in der Preiseinheit-Zelle daneben. Druckt die
 # Zeile gar keine Einheit (`unitText` null), steht dort auch kein Code: die
@@ -1610,8 +2086,13 @@ def einvoice_items(spec, T, lines, meta):
         price = [] if free else [(B.unit_price(spec, line["unitPrice"]), "unitPrice", no)]
         amount = [] if free else [(B.cents(spec, line["lineNet"]), "lineNet", no)]
         rate = [(money.pct(line["vat"]), "vat", no)]
+        # v12: der echte KoSIT-Ausdruck setzt den Namen NACKT in die Zelle, ohne
+        # den Schluessel "Bezeichnung:" davor. Das ist die Mehrheitsform
+        # (`ei_bare`, >= 60 %); die Schluesselform von v11 bleibt die Minderheit.
+        desc = ("" if spec.get("ei_bare")
+                else _w(T["desc"] + ":", "otherLabel", no) + " ")
         first = (f'<td class=ec0>{_w(B.pos_text(spec, no), "O", no)}</td>'
-                 f'<td class=ec1>{_w(T["desc"] + ":", "otherLabel", no)} '
+                 f'<td class=ec1>{desc}'
                  f'{_w(line["name"], "name", no)}</td>'
                  f'<td class="ec2 num">{B.cell(qty)}</td>'
                  f'<td class="ec3 num">{B.cell(basis)}</td>'
@@ -1623,10 +2104,14 @@ def einvoice_items(spec, T, lines, meta):
             subs.append((T["artno"], line["sellerArticleId"], "articleId"))
         if line["gtin"]:
             subs.append((T["artid"], line["gtin"], "gtin"))
+            # "Schema der Artikelkennung: 0160" — GS1. Der Wert ist eine
+            # vierstellige Zahl direkt unter einer dreizehnstelligen und bleibt `O`.
             subs.append((T["scheme"], "0160", "O"))
         elif line.get("variant"):
             subs.append((T["scheme"], line["variant"], "O"))
-        rest = "".join(f'<tr class=wrap><td class=ec0></td><td class=ec1 colspan=6>'
+        # Die Unterzeilen stehen im echten Ausdruck KURSIV unter dem Namen.
+        sub_cls = "wrap eisub" if spec.get("ei_bare") else "wrap"
+        rest = "".join(f'<tr class="{sub_cls}"><td class=ec0></td><td class=ec1 colspan=6>'
                        f'{_w(k + ":", "otherLabel", no)} {_w(v, f, no)}</td></tr>'
                        for k, v, f in subs)
         body += (f'<tbody class="itembox" data-role="line-item" data-l="{no}">'
@@ -1648,11 +2133,23 @@ def einvoice_totals(spec, T, invoice, meta):
         rows.append(((spec["charge_labels"][c["kind"]], "otherLabel"),
                      B.cents(spec, c["amount"]), "charge"))
     rows.append(((T["foreign"], "otherLabel"), B.cents(spec, 0), "O"))
-    rows.append(((T["net"], "netLabel"), B.cents(spec, invoice["netTotal"]), "netTotal"))
-    for b in invoice["vatBreakdown"]:
-        rows.append(((f'{T["vat"]} {money.pct(b["vat"])} %', "vatLabel"),
-                     B.cents(spec, b["tax"]), "O"))
-    rows.append(((T["gross"], "grossLabel"), B.cents(spec, invoice["grossTotal"]), "grossTotal"))
+    # v12: die nackte Form druckt ZWEIMAL "Gesamtsumme" — erst netto, dann brutto,
+    # dazwischen "Summe Umsatzsteuer". Der erste Betrag der Seite ist damit nicht
+    # der Nettobetrag, und zwei gleich beschriftete Zeilen unterscheiden sich nur
+    # noch durch ihre Stelle im Block. Die alte Form "(netto)"/"(brutto)" bleibt
+    # als Minderheit stehen.
+    bare = spec.get("ei_bare")
+    net_key, gross_key = (T["bare"], T["bare"]) if bare else (T["net"], T["gross"])
+    rows.append(((net_key, "netLabel"), B.cents(spec, invoice["netTotal"]), "netTotal"))
+    if bare:
+        total_tax = sum(b["tax"] for b in invoice["vatBreakdown"])
+        rows.append(((T["sumvat"], "vatLabel"), B.cents(spec, total_tax), "O"))
+    else:
+        for b in invoice["vatBreakdown"]:
+            rows.append(((f'{T["vat"]} {money.pct(b["vat"])} %', "vatLabel"),
+                         B.cents(spec, b["tax"]), "O"))
+    rows.append(((gross_key, "grossLabel"), B.cents(spec, invoice["grossTotal"]),
+                 "grossTotal"))
     due = prepaid_rows(spec, invoice, meta)
     if due:
         rows.append(((T["prepaid"], "otherLabel"), due[0][1], "discount"))
@@ -1667,7 +2164,11 @@ def einvoice_totals(spec, T, invoice, meta):
     for (key, kf), value, vf in rows:
         # Der MwSt-*Satz* steht im Schluessel und traegt dort seine Klasse; der
         # Betrag daneben bleibt `O`, wie ueberall im Summenblock.
-        if kf == "vatLabel":
+        if kf == "vatLabel" and key.endswith("%"):
+            # Nur die Form "Umsatzsteuer 19,00 %": dort traegt der Satz im
+            # Schluessel seine eigene Klasse. "Summe Umsatzsteuer" ist ein
+            # gewoehnlicher Schluessel und bekommt wie jeder andere den
+            # geklebten Doppelpunkt.
             parts = key.rsplit(" ", 2)
             keyhtml = (f'{_w(parts[0], "vatLabel")} {_w(parts[1], "vat")} '
                        f'{_w(parts[2], "O")}') if len(parts) == 3 else _w(key, "vatLabel")
@@ -1680,49 +2181,188 @@ def einvoice_totals(spec, T, invoice, meta):
             f'<table class="eitab totals" data-role="total">{body}</table></div>')
 
 
+def einvoice_breakdown(spec, T, invoice, meta):
+    """`Aufschluesselung der Umsatzsteuer auf Ebene der Rechnung`.
+
+    Je Steuersatz ein Viererblock: `Umsatzsteuerkategorie: S`, `Gesamtsumme` mit
+    der Bemessungsgrundlage, `Umsatzsteuersatz 19,00%`, `Umsatzsteuerbetrag`.
+
+    Die Klassen, und warum sie so sind:
+
+    * `Umsatzsteuerkategorie` ist ein fremder Schluessel -> `otherLabel`, das `S`
+      daneben `O`.
+    * `Gesamtsumme` heisst hier genauso wie die Nettosumme eine Zeile hoeher, ist
+      aber die Bemessungsgrundlage *eines Satzes* und nicht der Nettobetrag der
+      Rechnung. CONVENTIONS 3.3 laesst `subtotal` nur zu, wenn Zuschlagszeilen
+      folgen — hier folgt keine. Also Schluessel `otherLabel`, Betrag `O`. Das
+      dritte "Gesamtsumme" der Seite ist damit das einzige, das *nichts* ist, und
+      genau daran soll das Modell lernen, dass die Stelle entscheidet.
+    * Der *Satz* ist `vat`, das Prozentzeichen `O`, der Betrag `O` — wie ueberall
+      im Summenblock (CONVENTIONS, "Der MwSt-Betrag bleibt O, der Satz vat").
+    """
+    breakdown = invoice.get("vatBreakdown") or []
+    if not breakdown:
+        return ""
+    body = ""
+    for b in breakdown:
+        base = b.get("net", b.get("base", 0))
+        pct = money.de(b["vat"], money.BP // 100, 2)
+        for key, kf, value, vf, glue in (
+                (T["cat"], "otherLabel", T["catval"], "O", False),
+                (T["bare"], "otherLabel", B.cents(spec, base), "O", False),
+                (T["rate2"], "otherLabel", pct, "vat", True),
+                (T["vatamt"], "vatLabel", B.cents(spec, b["tax"]), "O", False)):
+            value_html = _w(value, vf)
+            if glue:
+                # "19,00%" ohne Leerzeichen — die Form, die das Modell auf einem
+                # echten Beleg als Einzelpreis gelesen hat.
+                value_html = (f'<span class=w data-f="{vf}" data-l="0">{B.esc(value)}</span>'
+                              f'<span class=w data-f="O" data-l="0">%</span>')
+            body += (f'<tr><td class=k>{_w(key + ":", kf)}</td>'
+                     f'<td class=v>{value_html}</td></tr>')
+    return (f'<div class="eibox eitotals eibreak"><div class=eihead>'
+            f'{_w(T["breakdown"])}</div>'
+            f'<table class="eitab totals">{body}</table></div>')
+
+
+def einvoice_pay(spec, T, invoice, meta):
+    """Der Kasten `Zahlungsdaten`: IBAN, BIC, Zahlungsmittel, Faelligkeit."""
+    sup = meta["supplier"]
+    rows = [(T["means"], "otherLabel", T["meansval"], "O"),
+            (T["iban"], "otherLabel", sup["iban"], "bankId"),
+            (T["bic"], "otherLabel", sup.get("bic") or "", "bankId"),
+            (T["duedate"], "otherLabel", meta.get("due_text") or "", "dueDate"),
+            (T["terms"], "otherLabel", spec.get("footer_terms") or "", "O")]
+    return _ei_box(spec, T["pay"], rows, "eipay")
+
+
+def einvoice_extras(spec, T, invoice, meta):
+    """Der Kasten `Zusaetzliche Angaben` auf der dritten Seite: Bemerkung,
+    Anlage, Vertrags- und Projektnummer. Reine Ablenker — Schluessel
+    `otherLabel`, Werte `O`."""
+    ident = _h(spec["id"])
+    rows = [(T["remark"], "otherLabel", spec.get("thanks_note") or "", "O"),
+            (T["attach"], "otherLabel", f'anhang-{ident % 9000 + 1000}.pdf', "O"),
+            (T["contract"], "otherLabel", f'V-{ident % 900000 + 100000}', "O"),
+            (T["project"], "otherLabel", f'P{ident % 9000 + 1000}-{ident % 90 + 10}', "O")]
+    return _ei_box(spec, T["extrahead"], rows, "eiextra")
+
+
+def _ei_pagehead(spec, T, invoice, section):
+    """Kopfzeile der zweiten und dritten Seite: Abschnittsname und die
+    Rechnungsnummer. Ohne sie traegt die Seite keine Rechnungsnummer, und
+    `validate.py` besteht auf genau einem Nummernlauf je Seite."""
+    return (f'<div class=eipagehead>{_w(section)} '
+            f'<span class=eipn>{_w(T["number"] + ":", "numberLabel")} '
+            f'{_w(invoice["number"], "invoiceNumber")}</span></div>')
+
+
 def einvoice_page(spec, invoice, meta, rng, page_lines, index, total, carry):
     """Der ganze Ausdruck eines E-Rechnungs-Viewers. `render.page_html` ruft ihn
-    statt des normalen Seitenaufbaus, sobald `spec["einvoice"]` gesetzt ist."""
+    statt des normalen Seitenaufbaus, sobald `spec["einvoice"]` gesetzt ist.
+
+    Zwei Formen:
+
+    * **ungeschnitten** (die Mehrheit): Kopf, Parteien, Positionen und — auf der
+      letzten Seite — Summen und Aufschluesselung auf denselben Seiten.
+    * **`ei_split`**: der Drei-Seiten-Schnitt des echten KoSIT-Ausdrucks,
+      `Uebersicht` / `Details` / `Zusaetze`. `render.document` haengt dafuer eine
+      leere Positionsgruppe vorn und hinten an, die erste und die letzte Seite
+      tragen also keine Positionen.
+
+      Abweichung vom Vorbild, bewusst und protokolliert: der Gesamtbetragskasten
+      steht beim Schnitt auf der **letzten** Seite, nicht auf der Uebersicht.
+      `validate.py` prueft `netTotal`/`grossTotal` gegen `truth["pages"][-1]`
+      (Bitte 1 in v12/STATUS-families.md); solange das so ist, waere jede
+      geschnittene Variation eine Beanstandung. `EI_SPLIT_TOTALS_ON_PAGE1`
+      schaltet es um, sobald die Pruefung steht.
+    """
     T = EI[spec["einvoice"]]
     sup, cus = meta["supplier"], meta["customer"]
-    parts = []
+    split = bool(spec.get("ei_split"))
     title = spec["title"] or "Rechnung"
-    parts.append(f'<div class="eititle a-{spec["title_align"]}">{_w(title)}</div>')
-    doc_rows = [(T["number"], "numberLabel", invoice["number"], "invoiceNumber"),
-                (T["date"], "dateLabel", invoice["date_text"], "invoiceDate"),
-                (T["kind"], "otherLabel", T["kindval"], "O"),
-                (T["currency"], "otherLabel", spec.get("currency", "EUR"), "O"),
-                (T["route"], "otherLabel",
-                 f'991-{_h(spec["id"]) % 90000 + 10000}-{_h(spec["id"] + "r") % 90 + 10}', "O")]
-    if meta["order"]:
-        doc_rows.append((spec["meta_order"], "otherLabel", meta["order"], "orderNumber"))
-    parts.append(_ei_box(spec, T["doc"], doc_rows, "eidoc"))
-    # Kaeufer VOR Verkaeufer: die Normalform jedes Viewers und der Grund, warum
-    # ein Tagger, der "der erste Firmenname oben ist der Lieferant" gelernt hat,
-    # hier den Kunden liefert.
-    buyer = _ei_box(spec, T["buyer"], _ei_party(spec, T, cus, "buyer", [
-        (T["custno"], "otherLabel", cus["number"], "customerNumber"),
-        (T["name"], "otherLabel", meta["extras"]["clerk"], "O")]), "eibuyer")
-    seller = _ei_box(spec, T["seller"], _ei_party(spec, T, sup, "supplier", [
-        (T["vatid"], "otherLabel", sup["vatId"], "taxId"),
-        (T["iban"], "otherLabel", sup["iban"], "bankId"),
-        (T["name"], "otherLabel", meta["owner_line"].replace("Inh. ", ""), "O")]), "eiseller")
-    parts.append(f'<div class=eirow>{buyer}{seller}</div>' if spec["buyer_first"]
-                 else f'<div class=eirow>{seller}{buyer}</div>')
-    parts.append(period_block(spec, invoice, meta))
-    parts.append(f'<div class="eibox eiitems"><div class=eihead>{_w(T["items"])}</div>'
-                 f'{einvoice_items(spec, T, page_lines, meta)}</div>')
-    if index + 1 < total:
-        parts.append(f'<div class=carry data-role="carry">{_w(spec["carry_label"])} '
-                     f'{_w(B.cents(spec, carry))}</div>')
+    is_delivery = meta["kind"] == "delivery_note"
+
+    def head_boxes():
+        out = []
+        doc_rows = [(T["number"], "numberLabel", invoice["number"], "invoiceNumber"),
+                    (T["date"], "dateLabel", invoice["date_text"], "invoiceDate"),
+                    (T["kind"], "otherLabel", T["kindval"], "O"),
+                    (T["currency"], "otherLabel", spec.get("currency", "EUR"), "O"),
+                    (T["route"], "otherLabel",
+                     f'991-{_h(spec["id"]) % 90000 + 10000}-'
+                     f'{_h(spec["id"] + "r") % 90 + 10}', "O")]
+        if meta["order"]:
+            doc_rows.append((spec["meta_order"], "otherLabel", meta["order"], "orderNumber"))
+        out.append(_ei_box(spec, T["doc"], doc_rows, "eidoc"))
+        # Kaeufer VOR Verkaeufer: die Normalform jedes Viewers und der Grund, warum
+        # ein Tagger, der "der erste Firmenname oben ist der Lieferant" gelernt hat,
+        # hier den Kunden liefert.
+        buyer = _ei_box(spec, T["buyer"], _ei_party(spec, T, cus, "buyer", [
+            (T["custno"], "otherLabel", cus["number"], "customerNumber"),
+            (T["name"], "otherLabel", meta["extras"]["clerk"], "O")]), "eibuyer")
+        seller = _ei_box(spec, T["seller"], _ei_party(spec, T, sup, "supplier", [
+            (T["vatid"], "otherLabel", sup["vatId"], "taxId"),
+            (T["iban"], "otherLabel", sup["iban"], "bankId"),
+            (T["name"], "otherLabel", meta["owner_line"].replace("Inh. ", ""), "O")]),
+            "eiseller")
+        out.append(f'<div class=eirow>{buyer}{seller}</div>' if spec["buyer_first"]
+                   else f'<div class=eirow>{seller}{buyer}</div>')
+        out.append(period_block(spec, invoice, meta))
+        return out
+
+    def items_box():
+        return (f'<div class="eibox eiitems"><div class=eihead>{_w(T["items"])}</div>'
+                f'{einvoice_items(spec, T, page_lines, meta)}</div>')
+
+    def totals_boxes():
+        if is_delivery:
+            return []
+        return [einvoice_totals(spec, T, invoice, meta),
+                einvoice_breakdown(spec, T, invoice, meta)]
+
+    def carry_line():
+        return (f'<div class=carry data-role="carry">{_w(spec["carry_label"])} '
+                f'{_w(B.cents(spec, carry))}</div>')
+
+    parts = []
+    if not split:
+        parts.append(f'<div class="eititle a-{spec["title_align"]}">{_w(title)}</div>')
+        parts += head_boxes()
+        parts.append(items_box())
+        if index + 1 < total:
+            parts.append(carry_line())
+        else:
+            parts += totals_boxes()
+            if not is_delivery:
+                parts.append(einvoice_pay(spec, T, invoice, meta))
+            parts.append(notes(spec, invoice, meta))
+    elif index == 0:
+        # Seite 1: Uebersicht. Parteien, Rechnungsdaten, Zahlungsdaten — und,
+        # sobald `validate.py` es zulaesst, auch die Gesamtbetraege.
+        parts.append(f'<div class="eititle a-{spec["title_align"]}">{_w(title)} '
+                     f'<span class=eisection>{_w(T["overview"])}</span></div>')
+        parts += head_boxes()
+        if EI_SPLIT_TOTALS_ON_PAGE1:
+            parts += totals_boxes()
+        if not is_delivery:
+            parts.append(einvoice_pay(spec, T, invoice, meta))
+    elif index + 1 < total:
+        # Seiten 2..n-1: Details, also nur die Positionen.
+        parts.append(_ei_pagehead(spec, T, invoice, T["details"]))
+        parts.append(items_box())
+        if index + 2 < total:
+            parts.append(carry_line())
     else:
-        if meta["kind"] != "delivery_note":
-            parts.append(einvoice_totals(spec, T, invoice, meta))
+        # Letzte Seite: Zusaetze.
+        parts.append(_ei_pagehead(spec, T, invoice, T["extras"]))
+        parts.append(einvoice_extras(spec, T, invoice, meta))
+        if not EI_SPLIT_TOTALS_ON_PAGE1:
+            parts += totals_boxes()
         parts.append(notes(spec, invoice, meta))
     parts.append(B.pageno(spec, index, total))
     parts.append(B.footer(spec, meta))
     return parts
-
 
 # ------------------------------------------------------------------- Stylesheet
 
@@ -1789,6 +2429,15 @@ table.items.ei td.ec1{{width:40%}}
 table.eitab.totals td.v,.eitotals td.v{{text-align:right;white-space:nowrap}}
 .eitotals table td.k{{width:62%}}
 .eitotals tr.grand td{{font-weight:700}}
+/* v12: die Unterzeilen der Position stehen im echten Ausdruck kursiv. */
+table.items.ei tr.eisub td{{font-style:italic;color:#2a2a2a}}
+.eisection{{font-weight:400;font-size:0.62em;letter-spacing:0.08em;
+  text-transform:uppercase;color:#555;margin-left:3mm}}
+.eipagehead{{font-weight:700;font-size:1.05em;margin-bottom:2.2mm;
+  border-bottom:1px solid #999;padding-bottom:0.8mm;color:{accent}}}
+.eipagehead .eipn{{float:right;font-weight:400;font-size:0.78em;color:#333}}
+.eibox.eibreak{{margin-top:2mm}}
+.eibox.eibreak table.eitab td.k{{width:58%}}
 """)
     if spec.get("sidebar"):
         side = spec["sidebar"]

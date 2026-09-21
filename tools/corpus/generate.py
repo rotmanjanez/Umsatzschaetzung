@@ -25,10 +25,14 @@ LAYOUT_SKIP = {"id", "headers", "headers2", "header_hints", "contact_labels",
                "meta_extra_labels", "extra_labels", "charge_labels", "footer_heads_text",
                "title", "title_key", "name_pct"}
 
-# `scan_skew` ist neu in v11 und steht hier, weil es sonst nie gezogen wuerde. Ein
-# Profil, das in PROFILES steht und nicht in dieser Liste, existiert nicht.
+# Ein Profil, das in `degrade.PROFILES` steht und nicht in dieser Liste, existiert
+# nicht. v12 nimmt `scan_skew` heraus: die App entzerrt auf +-0,1 Grad und dreht
+# 180-Grad-Seiten selbst (RapidOcr.cs Orientierungsabstimmung), also hat der Korpus
+# nichts mehr davon, Kapazitaet fuer Schraeglage aufzuwenden. Das Profil bleibt in
+# `degrade.PROFILES` definiert, damit `--profile`-Aufrufe und `v11/skewrows.py`
+# weiter laufen.
 PROFILE_MIX = ["scan_clean", "scan_worn", "photocopy", "washed", "scan_clean", "photo",
-               "faded", "scan_worn", "dark", "crisp", "fax", "low_ink", "scan_skew"]
+               "faded", "scan_worn", "dark", "crisp", "fax", "low_ink"]
 FORMATS = ["jpg", "jpg", "jpg", "pdf"]
 
 
@@ -122,8 +126,12 @@ def variation(invoice, meta, seed, index, out_dir, scale, val_share, profile, fo
                 "image": page_name,
                 "width": image.width,
                 "height": image.height,
+                # v13: `ci`/`tbl`/`cid` = cell index, item-table number and cell id of the
+                # enclosing <td>/<th> (−1 outside the item table) — the structure targets.
                 "words": [{"t": w["t"], "f": w["f"], "l": w["l"],
-                           "box": [round(v, 1) for v in box]} for w, box in kept],
+                           "box": [round(v, 1) for v in box],
+                           "ci": int(w.get("ci", -1)), "tbl": int(w.get("tbl", -1)),
+                           "cid": int(w.get("cid", -1))} for w, box in kept],
                 "regions": [{"role": r["role"], "l": r["l"], "box": [round(v, 1) for v in box],
                              "quad": [[round(x, 1), round(y, 1)] for x, y in quad]}
                             for r, box, quad in regions],

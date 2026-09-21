@@ -1,11 +1,13 @@
 import argparse
 import json
+import re
 import os
 import sys
 from collections import Counter
 from pathlib import Path
 
 import money
+import vocab
 
 # Die Klassenliste kommt aus tools/train/schema.py und wird **nicht** hier gepflegt:
 # eine zweite Kopie ist genau die Stelle, an der eine neue Klasse im Korpus landet,
@@ -15,6 +17,12 @@ sys.path[:0] = [str(Path(__file__).resolve().parent.parent / "train")]
 import schema  # noqa: E402
 
 FIELDS = set(schema.FIELDS)
+
+# v12: Einheitenwörter, die niemals die Klasse `quantity` tragen dürfen, und die Form,
+# die ein `vat`-Wort haben muss (nur der Satz, ohne Prozentzeichen).
+QTY_WORDS = {w.strip(".").casefold() for w in vocab.QTY_UNIT_WORDS} | {
+    w.casefold() for w in vocab.UNIT_CODE_TEXT}
+VAT_VALUE = re.compile(r"^-?\d{1,2}(?:,\d{1,2})?$")
 
 
 def join(words, field, line):
@@ -132,6 +140,24 @@ def check(directory):
         # ------------------------------------------------------------ v11-Prüfungen
         for page in truth["pages"]:
             pw = page["words"]
+            # ---------------------------------------------------- v12-Prüfungen
+            # Eine Menge ist nie ein Einheitenwort. Die geklebte Form (`17Fl`) steht
+            # in der Wahrheit als zwei Tokens — geht dabei das Leerzeichen an der
+            # falschen Stelle verloren, landet "Fl" als `quantity`, und das ist genau
+            # die Verwechslung, die Fehlerbild 6 ausmacht.
+            for w in pw:
+                if w["f"] == "quantity":
+                    if w["t"].strip(".").casefold() in QTY_WORDS:
+                        problems.append(f"{entry}/{page['image']}: quantity ist ein "
+                                        f"Einheitenwort ({w['t']!r})")
+                    elif not any(ch.isdigit() for ch in w["t"]):
+                        problems.append(f"{entry}/{page['image']}: quantity ohne Ziffer "
+                                        f"({w['t']!r})")
+                # Nur der *Satz* ist `vat`. Das Prozentzeichen steht als eigenes
+                # `O`-Token daneben, auch wenn es gedruckt daran klebt (`7%`).
+                elif w["f"] == "vat" and not VAT_VALUE.match(w["t"]):
+                    problems.append(f"{entry}/{page['image']}: vat-Wort {w['t']!r} ist "
+                                    f"kein reiner Satz")
             # Genau *ein* Lauf der Rechnungsnummer je Seite. Zwei Läufe hieße, dass
             # Überschrift und Kopfblock sie beide tragen — die Montage nimmt dann den
             # ersten, und welcher das ist, hängt an der Lesereihenfolge.
@@ -184,7 +210,15 @@ def check(directory):
                 problems.append(f"{entry}: line {line['no']} lineNet {net!r} != "
                                 f"{money.cents(line['lineNet'])!r}")
         if not delivery:
-            last = truth["pages"][-1]["words"]
+            # Die Gesamtbeträge stehen dort, wo eine Region mit der Rolle `total`
+            # steht — nicht zwingend auf der letzten Seite. Der XRechnung-Viewer
+            # druckt sie seit v12 im Drei-Seiten-Schnitt (Übersicht / Details /
+            # Zusätze) auf die **Übersicht**, also auf Seite 1. Die alte Prüfung
+            # gegen `pages[-1]` hätte jede solche Variation beanstandet.
+            totals_pages = [p for p in truth["pages"]
+                            if any(r.get("role") == "total"
+                                   for r in p.get("regions", []))] or truth["pages"][-1:]
+            last = [w for p in totals_pages for w in p["words"]]
             for field, value in (("netTotal", expected["netTotal"]),
                                  ("grossTotal", expected["grossTotal"])):
                 shown = join(last, field, 0)
@@ -203,10 +237,45 @@ def check(directory):
     return problems, counts
 
 
+def units_gate():
+    """Jedes Einheitenwort, das eine Warengruppe drucken kann, muss in
+    `data/units.json` stehen.
+
+    `units.code()` wirft absichtlich statt zu raten — und `content.make` ruft es je
+    Position. Eine neue Warengruppe mit einem Wort, das dort fehlt, tötet in
+    `generate.py` mitten im Lauf einen Worker (`pool.map` bricht ab, die Rechnungen
+    danach fehlen), und es fällt erst nach Stunden auf. Genau das ist am 20.09. mit
+    `Becher` und `Glas` passiert. Diese Prüfung läuft vor jedem `validate.py`-Lauf
+    und ist auch einzeln aufrufbar:
+
+        python3 -c "import validate; print(validate.units_gate())"
+    """
+    sys.path[:0] = [str(Path(__file__).resolve().parent.parent)]
+    import units as unit_table
+    import vocab as v
+    bad = []
+    for name, cat in v.CATEGORIES.items():
+        for word, _ in cat["units"]:
+            if unit_table.resolve(word.strip().strip(".")) is None:
+                bad.append(f"{name}: Einheit {word!r} fehlt in data/units.json")
+    for word in v.QTY_UNIT_WORDS:
+        if unit_table.resolve(word.strip().strip(".")) is None:
+            bad.append(f"QTY_UNIT_WORDS: {word!r} fehlt in data/units.json")
+    # Die UN/ECE-Codes werden als *Code* gedruckt, nicht als Alias — sie stehen in
+    # `units.TABLE`, nicht in `units.ALIAS`.
+    for word in v.UNIT_CODE_TEXT:
+        if word not in unit_table.TABLE:
+            bad.append(f"UNIT_CODE_TEXT: {word!r} ist kein Code in data/units.json")
+    return bad
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("root")
     args = ap.parse_args()
+    gate = units_gate()
+    for line in gate:
+        print(f"UNITS-GATE: {line}")
     total = Counter()
     failures = 0
     checked = 0
@@ -220,6 +289,7 @@ def main():
         for p in problems:
             print(f"{name}/{p}")
         failures += len(problems)
+    failures += len(gate)
     print(f"\n{checked} invoices checked, {failures} problems")
     for field, n in total.most_common():
         print(f"  {field:<14} {n:>7}")

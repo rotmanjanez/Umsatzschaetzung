@@ -17,35 +17,49 @@ def profile(**kw):
     return base
 
 
+# v12: die App entzerrt selbst auf +-0,1 Grad und dreht 180-Grad-Seiten ueber die
+# Orientierungsabstimmung in RapidOcr.cs. Alles, was der Korpus darueber hinaus an
+# Schraeglage lehrt, ist verschenkte Kapazitaet. `rotate` steht deshalb in JEDEM Profil
+# auf hoechstens 0,10 Grad und `skew` (Scherung) auf hoechstens 0,05; `jitter()` zieht
+# beide gleichverteilt aus [-p, +p], der Profilwert ist also zugleich der Hoechstwert.
+# `crisp` bleibt bei 0. Die kleinen Unterschiede zwischen den Profilen bleiben erhalten,
+# damit ein sauberer Scan weiter gerader steht als ein zerknitterter.
 PROFILES = {
     "crisp": profile(),
-    "scan_clean": profile(rotate=0.5, skew=0.2, blur=0.7, noise=4.0, jpeg=86, gamma=1.03,
+    "scan_clean": profile(rotate=0.06, skew=0.03, blur=0.7, noise=4.0, jpeg=86, gamma=1.03,
                           speckle=0.00008, vignette=0.05, texture=0.018, gray=0.35),
-    "scan_worn": profile(rotate=2.4, skew=0.6, blur=1.5, noise=10.0, jpeg=58, gamma=1.15, contrast=0.9,
+    "scan_worn": profile(rotate=0.10, skew=0.05, blur=1.5, noise=10.0, jpeg=58, gamma=1.15,
+                         contrast=0.9,
                          speckle=0.0006, vignette=0.2, texture=0.05, edge=0.4, gray=0.6),
-    "photocopy": profile(rotate=2.0, skew=0.5, blur=1.9, noise=13.0, jpeg=72, gamma=1.45, contrast=1.5,
+    "photocopy": profile(rotate=0.10, skew=0.05, blur=1.9, noise=13.0, jpeg=72, gamma=1.45,
+                         contrast=1.5,
                          speckle=0.0014, vignette=0.3, texture=0.035, edge=0.9, gray=1.0),
-    "photo": profile(rotate=2.4, skew=1.0, blur=1.8, noise=8.0, jpeg=52, gamma=0.9, contrast=0.88,
+    "photo": profile(rotate=0.10, skew=0.05, blur=1.8, noise=8.0, jpeg=52, gamma=0.9,
+                     contrast=0.88,
                      speckle=0.0003, vignette=0.24, texture=0.03, shadow=0.6,
-                     backdrop=0.075, perspective=1.0, folds=1, fold_strength=1.0),
-    "fax": profile(rotate=1.8, skew=0.4, blur=2.2, noise=16.0, gamma=1.5, contrast=1.9,
+                     backdrop=0.075, perspective=0.5, folds=1, fold_strength=1.0),
+    "fax": profile(rotate=0.09, skew=0.04, blur=2.2, noise=16.0, gamma=1.5, contrast=1.9,
                    speckle=0.0024, vignette=0.1, texture=0.015, edge=0.6, gray=1.0, bilevel=1.0),
-    "faded": profile(rotate=1.0, skew=0.3, blur=1.2, noise=5.0, jpeg=74, gamma=0.85,
+    "faded": profile(rotate=0.07, skew=0.03, blur=1.2, noise=5.0, jpeg=74, gamma=0.85,
                      speckle=0.0002, vignette=0.06, texture=0.02, gray=0.8,
                      black=152.0, white=253.0),
-    "dark": profile(rotate=1.9, skew=0.4, blur=1.4, noise=9.0, jpeg=60, gamma=1.1,
+    "dark": profile(rotate=0.09, skew=0.04, blur=1.4, noise=9.0, jpeg=60, gamma=1.1,
                     speckle=0.0005, vignette=0.32, texture=0.04, shadow=0.35, gray=0.7,
                     black=4.0, white=143.0),
-    "low_ink": profile(rotate=1.1, skew=0.35, blur=1.1, noise=7.0, jpeg=70, gamma=1.08, contrast=0.95,
+    "low_ink": profile(rotate=0.07, skew=0.03, blur=1.1, noise=7.0, jpeg=70, gamma=1.08,
+                       contrast=0.95,
                        speckle=0.0004, vignette=0.1, texture=0.03, gray=0.75,
                        ink_erode=0.55, ink_bands=0.45, ink_blotch=0.38, ink_dropout=0.018),
-    # Schief eingezogenes Blatt: sonst ein ganz normaler Scan. Bis v10 erreichte
-    # nur `photo` zwei Grad, und das Profil bringt Unterlage, Knickfalte und
-    # Perspektive mit — den sauberen Scan mit 2° Schräglage, an dem `group_rows`
-    # jede Positionszeile in zwei zerlegt, kannte der Korpus gar nicht.
-    "scan_skew": profile(rotate=3.0, skew=0.8, blur=1.2, noise=7.0, jpeg=70, gamma=1.08,
+    # v11 hat dieses Profil eingefuehrt, um den *schiefen* Scan zu lehren. v12 nimmt
+    # ihn wieder heraus: die App entzerrt inzwischen auf +-0,1 Grad und dreht
+    # 180-Grad-Seiten selbst, also ist jede Kapazitaet, die das Modell fuer
+    # Schraeglage aufwendet, verschenkt. Das Profil bleibt definiert (ein Aufruf
+    # `--profile scan_skew` und `v11/skewrows.py` sollen weiter laufen), steht aber
+    # NICHT mehr in `generate.PROFILE_MIX` und wird damit nie gezogen. Seine Drehung
+    # ist ebenfalls gedeckelt, damit kein Weg zurueck ueber drei Grad fuehrt.
+    "scan_skew": profile(rotate=0.10, skew=0.05, blur=1.2, noise=7.0, jpeg=70, gamma=1.08,
                          speckle=0.0004, vignette=0.12, texture=0.03, edge=0.3, gray=0.55),
-    "washed": profile(rotate=2.2, skew=0.5, blur=1.6, noise=11.0, jpeg=56, gamma=1.05,
+    "washed": profile(rotate=0.10, skew=0.05, blur=1.6, noise=11.0, jpeg=56, gamma=1.05,
                       speckle=0.0007, vignette=0.14, texture=0.05, edge=0.3, gray=0.9,
                       black=92.0, white=186.0),
 }
