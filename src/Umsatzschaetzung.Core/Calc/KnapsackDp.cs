@@ -30,6 +30,7 @@ sealed partial class Problem
         }
         foreach (var p in independent) Portions[p] = Math.Max(Bound[p], 0);
         if (candidates.Count == 0) return;
+        Shared.RemoveAll(i => !candidates.Exists(p => AmountOf(p, i) > 0));
         if (Shared.Count > Knapsack.MaxDpDimensions)
         {
             Greedy(candidates, res);
