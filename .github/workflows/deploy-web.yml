@@ -37,9 +37,6 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
-      # A script is named after what it photographs: guide.jsonl fills the guide's
-      # own img folder, every other script the one next to the pages. The images
-      # are collected beside the pages, so the artifact unpacks straight into them.
       - name: Take screenshots of the interface
         run: |
           for script in web/docs/shots/*.jsonl; do
