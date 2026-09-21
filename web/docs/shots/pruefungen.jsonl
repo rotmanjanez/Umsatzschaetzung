@@ -1,0 +1,41 @@
+// The case list: the toolbar, three created cases, the confirmation before deleting.
+
+{ "do": "click", "at": { "text": "Neue Prüfung" } }
+{ "do": "type", "at": { "name": "NewLabel" }, "text": "Gasthaus Zur Linde, Bp 2025" }
+{ "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2025" }
+{ "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2025" }
+{ "do": "type", "at": { "name": "NewName" }, "text": "Gasthaus Zur Linde, Inh. Renate Vogel e.K." }
+{ "do": "type", "at": { "name": "NewTaxNumber" }, "text": "203/128/40507" }
+{ "do": "type", "at": { "name": "NewPab" }, "text": "PaB 2025/0417" }
+{ "do": "type", "at": { "name": "NewGewerbe" }, "text": "56101.0" }
+{ "do": "click", "at": { "text": "Anlegen" } }
+{ "do": "click", "at": { "name": "BackButton" } }
+
+{ "do": "click", "at": { "text": "Neue Prüfung" } }
+{ "do": "type", "at": { "name": "NewLabel" }, "text": "Pizzeria Da Vinci, Bp 2024" }
+{ "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2024" }
+{ "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2024" }
+{ "do": "type", "at": { "name": "NewName" }, "text": "Pizzeria Da Vinci, Inh. Luca Ferrara" }
+{ "do": "type", "at": { "name": "NewTaxNumber" }, "text": "203/145/22981" }
+{ "do": "type", "at": { "name": "NewPab" }, "text": "PaB 2025/0388" }
+{ "do": "click", "at": { "text": "Anlegen" } }
+{ "do": "click", "at": { "name": "BackButton" } }
+
+{ "do": "click", "at": { "text": "Neue Prüfung" } }
+{ "do": "type", "at": { "name": "NewLabel" }, "text": "Bäckerei Sommer, Bp 2023-2024" }
+{ "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2023" }
+{ "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2024" }
+{ "do": "type", "at": { "name": "NewName" }, "text": "Bäckerei Sommer GmbH" }
+{ "do": "type", "at": { "name": "NewTaxNumber" }, "text": "203/119/70634" }
+{ "do": "type", "at": { "name": "NewPab" }, "text": "PaB 2025/0402" }
+{ "do": "click", "at": { "text": "Anlegen" } }
+{ "do": "click", "at": { "name": "BackButton" } }
+
+{ "do": "focus" }
+{ "do": "deselect", "at": { "text": "Bezeichnung", "up": "DataGrid" } }
+{ "do": "shot", "name": "pruefungen-leiste", "at": { "name": "Search", "up": "StackPanel" }, "trim": { "bottom": 12 } }
+{ "do": "shot", "name": "pruefungen-liste", "at": { "text": "Bezeichnung", "up": "DataGrid" }, "trim": { "top": 16 }, "clip": "DataGridRow" }
+
+{ "do": "click", "at": { "name": "DeleteCase" } }
+{ "do": "shot", "name": "pruefungen-loeschen", "window": "dialog" }
+{ "do": "click", "window": "dialog", "at": { "text": "Nein" } }

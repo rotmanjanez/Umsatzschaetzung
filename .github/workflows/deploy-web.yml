@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     tags: ['v*']
-    paths: ['web/**', '.github/workflows/deploy-web.yml']
+    paths: ['web/**', 'src/**', 'tools/headless/**', '.github/workflows/deploy-web.yml']
   workflow_dispatch:
 
 concurrency:
@@ -30,7 +30,28 @@ jobs:
           user: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PW }}
 
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Take screenshots of the interface
+        run: |
+          dotnet run --project tools/headless -- web/docs/shots/pruefungen.jsonl \
+            --width 1320 --height 860 --out web/docs/pages/img
+          dotnet run --project tools/headless -- web/docs/shots/guide.jsonl \
+            --width 1320 --height 860 --out web/docs/pages/guide/img
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shots
+          path: |
+            web/docs/pages/img
+            web/docs/pages/guide/img
+
   docs:
+    needs: shots
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -45,6 +66,11 @@ jobs:
           cache-dependency-path: web/docs/requirements.txt
       - run: pip install -r requirements.txt
         working-directory: web/docs
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: shots
+          path: web/docs/pages
 
       - name: Resolve version
         id: v

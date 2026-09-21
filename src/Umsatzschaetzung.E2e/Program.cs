@@ -316,7 +316,7 @@ Check(dump.FileName.EndsWith(".db") && back.Case.Id == kase.Case.Id && back.Case
 Check(cases.LoadFile(kase.Case.Id, parsed.Invoice.Id).Name == "zugferd.pdf", "the document travels inside it");
 try
 {
-    await svc.ImportCase("kaputt.db", [1, 2, 3], ct);
+    await svc.ImportCase("kaputt.db", [1, 2, 3], false, ct);
     Check(false, "a file that is not a case must be refused");
 }
 catch (ServiceError e)

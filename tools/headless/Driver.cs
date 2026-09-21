@@ -11,8 +11,8 @@ using Umsatzschaetzung.App.Ui;
 
 namespace Umsatzschaetzung.Headless;
 
-// Fährt die echte Oberfläche kopflos: jeder Schritt trifft dieselben Steuerelemente,
-// die auch ein Mensch trifft. Was gezeigt wird, steht im Skript.
+// Drives the real interface headlessly: every step hits the same controls a
+// person would. What is shown is up to the script.
 public sealed class Driver(Shell shell, int scale, double pad, string outDir)
 {
     public void Run(Step step)
@@ -52,8 +52,8 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     Window Window(string? which) => which switch
     {
         null => shell,
-        "dialog" => shell.OwnedWindows.LastOrDefault() ?? throw new InvalidOperationException("kein Fenster über dem Hauptfenster"),
-        _ => throw new ArgumentException("unbekanntes Fenster: " + which),
+        "dialog" => shell.OwnedWindows.LastOrDefault() ?? throw new InvalidOperationException("no window above the main window"),
+        _ => throw new ArgumentException("unknown window: " + which),
     };
 
     static Visual Find(Visual root, Target target)
@@ -62,13 +62,13 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         if (target.Name is { } name) hits = hits.Where(v => (v as StyledElement)?.Name == name);
         if (target.Text is { } text) hits = hits.Where(v => Label(v) == text);
         if (target.Type is { } type) hits = hits.Where(v => v.GetType().Name == type);
-        var hit = hits.FirstOrDefault() ?? throw new InvalidOperationException("nicht gefunden: " + target);
+        var hit = hits.FirstOrDefault() ?? throw new InvalidOperationException("not found: " + target);
         return target.Up is { } up ? Up(hit, up) : hit;
     }
 
     static Visual Up(Visual inner, string type) =>
         inner.GetVisualAncestors().FirstOrDefault(v => v.GetType().Name == type)
-        ?? throw new InvalidOperationException("kein " + type + " über " + inner.GetType().Name);
+        ?? throw new InvalidOperationException("no " + type + " above " + inner.GetType().Name);
 
     static string? Label(Visual visual) => visual switch
     {
@@ -81,7 +81,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     static void Click(Visual visual)
     {
         var button = visual as Button ?? visual.GetVisualAncestors().OfType<Button>().FirstOrDefault()
-            ?? throw new InvalidOperationException("kein Knopf: " + visual.GetType().Name);
+            ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
         button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     }
 
@@ -89,7 +89,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     {
         var target = (AvaloniaObject)visual;
         var property = AvaloniaPropertyRegistry.Instance.GetRegistered(target).FirstOrDefault(p => p.Name == name)
-            ?? throw new InvalidOperationException(visual.GetType().Name + " hat kein " + name);
+            ?? throw new InvalidOperationException(visual.GetType().Name + " has no " + name);
         target.SetValue(property, value);
     }
 
@@ -101,7 +101,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
 
     void Import(List<string> paths)
     {
-        var kase = shell.Session.Case ?? throw new InvalidOperationException("Import ohne offene Prüfung");
+        var kase = shell.Session.Case ?? throw new InvalidOperationException("import without an open case");
         var picked = paths
             .Select(p => new PickedFile(Path.GetFileName(p), File.ReadAllBytes(p)))
             .ToList();
@@ -128,7 +128,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         Console.WriteLine(path);
     }
 
-    // Ein Ausschnitt zeigt, worum es im Schritt geht; der Rand kommt beim Zuschneiden dazu.
+    // A crop shows what the step is about; the padding is added while cutting.
     static Rect? Focus(Window window, ShotStep step)
     {
         if (step.At is null) return null;

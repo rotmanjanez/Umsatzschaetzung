@@ -43,3 +43,4 @@ markdown_extensions:
 
 nav:
   - Start: index.md
+  - Prüfungen: pruefungen.md

@@ -3,8 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace Umsatzschaetzung.Headless;
 
-// Was ein Schritt anfasst: ein Name aus dem XAML, ein sichtbarer Text, ein
-// Steuerelementtyp - und optional der Vorfahr, um den es eigentlich geht.
+// What a step reaches for: a name from the XAML, a visible text, a control
+// type - and optionally the ancestor it actually means.
 public sealed record Target
 {
     public string? Name { get; init; }
@@ -32,7 +32,7 @@ public sealed record Inset
 [JsonDerivedType(typeof(WaitStep), "wait")]
 public abstract record Step
 {
-    // "dialog" meint das zuletzt geöffnete Fenster über dem Hauptfenster.
+    // "dialog" means the last window opened above the main window.
     public string? Window { get; init; }
 }
 
@@ -41,7 +41,7 @@ public sealed record ShotStep : Step
     public required string Name { get; init; }
     public Target? At { get; init; }
     public Inset? Trim { get; init; }
-    // Unten am letzten Element dieses Typs abschneiden, etwa "DataGridRow".
+    // Cut the bottom edge at the last element of this type, e.g. "DataGridRow".
     public string? Clip { get; init; }
 }
 
@@ -81,8 +81,8 @@ public sealed record WaitStep : Step
     public int Rounds { get; init; } = 1;
 }
 
-// Ein Schritt je Zeile: so bleibt eine Zeile im Diff eine Handlung, und ein
-// Skript lässt sich zusammensetzen, filtern und anhängen wie jede andere Liste.
+// One step per line: a line in the diff stays one action, and a script can be
+// composed, filtered and appended to like any other list.
 public static class Steps
 {
     static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)

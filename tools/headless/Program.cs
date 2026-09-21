@@ -1,14 +1,14 @@
-// Kopfloser Treiber für die echte Oberfläche: ein Skript sagt, was geklickt,
-// getippt, importiert und fotografiert wird. Gleicher Lauf, gleiche Bytes - eine
-// Änderung im Bild heißt, die Oberfläche hat sich geändert.
+// Headless driver for the real interface: a script says what is clicked, typed,
+// imported and photographed. Same run, same bytes - a change in an image means the
+// interface has changed.
 //
-//   dotnet run --project tools/headless -- <skript.jsonl> [--out DIR] [--rules DATEI]
+//   dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]
 //                                          [--width PT] [--height PT] [--scale N] [--pad PT]
 //
-//   --out     Zielordner für die Bilder (Vorgabe: neben dem Skript)
-//   --rules   Regelsatz als JSON (Vorgabe: der mitgelieferte Regelsatz der App)
-//   --width   Fensterbreite, --height Fensterhöhe (Vorgabe: wie die App sie öffnet)
-//   --scale   Bildpunkte je Punkt (Vorgabe 2), --pad Rand um einen Ausschnitt (Vorgabe 16)
+//   --out     target folder for the images (default: next to the script)
+//   --rules   rule set as JSON (default: the app's own seeded rule set)
+//   --width   window width, --height window height (default: as the app opens it)
+//   --scale   pixels per point (default 2), --pad padding around a crop (default 16)
 using System.Globalization;
 using Avalonia;
 using Avalonia.Headless;
@@ -26,10 +26,10 @@ string? scriptPath = null;
 for (var i = 0; i < args.Length; i++)
 {
     if (!args[i].StartsWith("--")) { scriptPath = args[i]; continue; }
-    if (i + 1 >= args.Length) return Usage("fehlender Wert für " + args[i]);
+    if (i + 1 >= args.Length) return Usage("missing value for " + args[i]);
     options[args[i][2..]] = args[++i];
 }
-if (scriptPath is null) return Usage("kein Skript angegeben");
+if (scriptPath is null) return Usage("no script given");
 
 var steps = Steps.Load(scriptPath).ToList();
 var outDir = options.GetValueOrDefault("out", Path.GetDirectoryName(Path.GetFullPath(scriptPath))!);
@@ -75,7 +75,7 @@ double? Number(string name) =>
 static int Usage(string problem)
 {
     Console.Error.WriteLine(problem);
-    Console.Error.WriteLine("dotnet run --project tools/headless -- <skript.jsonl> [--out DIR] [--rules DATEI]"
+    Console.Error.WriteLine("dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]"
         + " [--width PT] [--height PT] [--scale N] [--pad PT]");
     return 2;
 }

@@ -67,7 +67,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Zeitraum" Binding="{Binding Period, DataType=svc:CaseRow}" Width="200"/>
+                    <DataGridTextColumn Header="Zeitraum" Binding="{Binding Period, DataType=svc:CaseRow}" Width="240"/>
                     <DataGridTemplateColumn Header="Zuletzt geändert" Width="160">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="svc:CaseRow">
@@ -78,7 +78,7 @@
                     <DataGridTemplateColumn Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="svc:CaseRow">
-                                <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
+                                <Button x:Name="DeleteCase" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
                                     <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                 </Button>
                             </DataTemplate>

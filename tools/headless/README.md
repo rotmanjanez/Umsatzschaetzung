@@ -1,50 +1,56 @@
 # Headless
 
-Fährt die echte Oberfläche kopflos und fotografiert sie. Der Treiber kennt weder
-Prüfungen noch Dateinamen noch Zielordner - das steht alles im Skript und in den
-Schaltern. Gleicher Lauf, gleiche Bytes: ändert sich ein Bild, hat sich die
-Oberfläche geändert.
+Drives the real interface headlessly and photographs it. The driver knows neither
+cases nor file names nor target folders - all of that lives in the script and in
+the switches. Same run, same bytes: if an image changes, the interface changed.
 
     dotnet run --project tools/headless -- web/docs/shots/guide.jsonl \
-        --width 1320 --height 860 --out web/docs/docs/guide/img
+        --width 1320 --height 860 --out web/docs/pages/guide/img
 
-    --out     Zielordner für die Bilder (Vorgabe: neben dem Skript)
-    --rules   Regelsatz als JSON (Vorgabe: der mitgelieferte Regelsatz der App)
-    --width   Fensterbreite, --height Fensterhöhe (Vorgabe: wie die App sie öffnet)
-    --scale   Bildpunkte je Punkt (Vorgabe 2)
-    --pad     Rand um einen Ausschnitt (Vorgabe 16)
+    --out     target folder for the images (default: next to the script)
+    --rules   rule set as JSON (default: the app's own seeded rule set)
+    --width   window width, --height window height (default: as the app opens it)
+    --scale   pixels per point (default 2)
+    --pad     padding around a crop (default 16)
 
-Dateien im Skript liegen, wo sie liegen: absolut oder relativ zum Arbeitsverzeichnis.
-In CI heißt das: Datensatz dorthin auspacken, wo das Skript ihn erwartet, `--out` in
-den Docs-Baum, Bilder committen oder als Artefakt mitgeben.
+Files named in a script live where they live: absolute, or relative to the working
+directory.
 
-## Skript
+The images of the documentation are not kept in the repository. The `shots` job of
+`deploy-web` takes them and hands them to the docs job as an artifact. Anyone who
+needs them while writing takes them themselves - `web/docs/pages/img` and
+`web/docs/pages/guide/img` are ignored:
 
-Ein Schritt je Zeile, JSONL. Leere Zeilen und `//` trennen und erklären:
+    dotnet run --project tools/headless -- web/docs/shots/pruefungen.jsonl \
+        --width 1320 --height 860 --out web/docs/pages/img
+
+## Script
+
+One step per line, JSONL. Blank lines and `//` separate and explain:
 
     { "do": "click", "at": { "text": "Neue Prüfung" } }
     { "do": "shot", "name": "neue-pruefung", "at": { "name": "NewLabel", "up": "StackPanel" } }
 
-Jeder Schritt hat ein `do`, darf `"window": "dialog"` setzen (dann gilt er für das
-oberste Fenster über dem Hauptfenster) und wartet danach, bis die Oberfläche steht.
+Every step has a `do`, may set `"window": "dialog"` (it then applies to the topmost
+window above the main window) and waits afterwards until the interface has settled.
 
-| `do`       | Felder | tut |
-|------------|--------|-----|
-| `shot`     | `name`, `at?`, `trim?`, `clip?` | schreibt `<out>/<name>.png`; ohne `at` das ganze Fenster |
-| `click`    | `at` | löst den Knopf aus - trifft `at` keinen, wird der nächste darüber genommen |
-| `type`     | `at`, `text` | schreibt `text` in das Feld |
-| `focus`    | `at?` | setzt den Fokus; ohne `at` nimmt es ihn weg (sonst blinkt der Textcursor ins Bild) |
-| `deselect` | `at` | hebt die Auswahl einer Liste auf |
-| `tab`      | `header` | schaltet auf den Reiter mit dieser Beschriftung |
-| `import`   | `files` | importiert diese Dateien in die offene Prüfung und wartet sie ab |
-| `wait`     | `rounds?` | wartet weitere Runden, falls einmal nicht reicht |
+| `do`       | fields | does |
+|------------|--------|------|
+| `shot`     | `name`, `at?`, `trim?`, `clip?` | writes `<out>/<name>.png`; without `at` the whole window |
+| `click`    | `at` | triggers the button - if `at` is not one itself, the next one above it is taken |
+| `type`     | `at`, `text` | writes `text` into the field |
+| `focus`    | `at?` | sets the focus; without `at` it takes it away (otherwise the caret blinks into the image) |
+| `deselect` | `at` | clears the selection of a list |
+| `tab`      | `header` | switches to the tab with this caption |
+| `import`   | `files` | imports these files into the open case and waits for them |
+| `wait`     | `rounds?` | waits further rounds, in case one is not enough |
 
-`at` sucht ein Steuerelement: `name` ist das `x:Name` aus dem XAML, `text` die
-sichtbare Beschriftung, `type` der Typ (`"DataGrid"`). Mehrere Felder grenzen
-weiter ein, `up` geht danach zum nächsten Vorfahren dieses Typs hoch:
+`at` looks for a control: `name` is the `x:Name` from the XAML, `text` the visible
+caption, `type` the type (`"DataGrid"`). Several fields narrow it down further, and
+`up` then climbs to the nearest ancestor of that type:
 
     { "text": "Lieferant", "up": "DataGrid" }
 
-Ein `shot` schneidet auf `at` zu. `trim` verkleinert diesen Rahmen vorher
-(`{ "top": 16 }`), `clip` zieht die Unterkante auf das letzte Element eines Typs
-darin (`"DataGridRow"`, damit keine leeren Zeilen mitkommen).
+A `shot` crops to `at`. `trim` shrinks that frame beforehand (`{ "top": 16 }`),
+`clip` pulls the bottom edge onto the last element of a type inside it
+(`"DataGridRow"`, so that no empty rows come along).
