@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from model import quantise_box
-from schema import LABEL_ID, ROLE_ID, read_jsonl
+from schema import LABEL_ID, MAX_COLS, ROLE_ID, read_jsonl, struct_label
 
 IGNORE = -100
 MAX_LEN = 512
@@ -56,6 +56,10 @@ def augment(words, h, rng):
 # the same corpus trains a 19-way head — the only clean test of whether over-labeling
 # helps the twelve value classes. None keeps every class.
 LABEL_CAP = None
+# v13: structure targets. With STRUCT = True the word label is `struct_label(field, tbl)`
+# and every first subword also carries a column index (0 = none, 1..MAX_COLS) and a
+# cell-start flag (0/1), both IGNORE on continuation subwords.
+STRUCT = False
 
 
 def label_id(field):
@@ -69,38 +73,50 @@ def encode_page(page, tk, rng=None):
     if rng is not None:
         words = augment(words, page["h"], rng)
 
-    ids, boxes, labels, rows = [], [], [], []
+    ids, boxes, labels, rows, cols, cells = [], [], [], [], [], []
     for w in words:
         sub = tk.encode(" " + w["t"], add_special_tokens=False)
         if not sub:
             continue
         box = quantise_box(w["box"], page["w"], page["h"])
+        tbl = w.get("tbl", -1)
+        col = min(MAX_COLS, w.get("col", -1) + 1) if tbl >= 0 else 0
         for k, s in enumerate(sub):
             ids.append(s)
             boxes.append(box)
-            labels.append(label_id(w.get("field", "O")) if k == 0 else IGNORE)
+            if k == 0:
+                labels.append(struct_label(w.get("field", "O"), tbl) if STRUCT
+                              else label_id(w.get("field", "O")))
+                cols.append(col)
+                cells.append(int(w.get("cell_start", 0)) if tbl >= 0 else IGNORE)
+            else:
+                labels.append(IGNORE)
+                cols.append(IGNORE)
+                cells.append(IGNORE)
             rows.append(w["row"] if k == 0 else -1)
 
     role_of = {}
     for w in words:
         role_of.setdefault(w["row"], ROLE_ID.get(w.get("role", "header"), 0))
-    return np.array(ids), np.array(boxes), np.array(labels), np.array(rows), role_of
+    return (np.array(ids), np.array(boxes), np.array(labels), np.array(rows), role_of,
+            np.array(cols), np.array(cells))
 
 
 def windows(page, tk, rng=None, max_len=MAX_LEN, overlap=OVERLAP):
-    ids, boxes, labels, rows, role_of = encode_page(page, tk, rng)
+    ids, boxes, labels, rows, role_of, cols, cells = encode_page(page, tk, rng)
     body = max_len - 2
     step = max(1, body - overlap)
     starts = list(range(0, max(1, len(ids)), step))
     starts = [s for i, s in enumerate(starts) if i == 0 or s < len(ids)]
     for s in starts:
         e = min(s + body, len(ids))
-        yield _window(ids[s:e], boxes[s:e], labels[s:e], rows[s:e], role_of, s, tk)
+        yield _window(ids[s:e], boxes[s:e], labels[s:e], rows[s:e], role_of, s, tk,
+                      cols[s:e], cells[s:e])
         if e == len(ids):
             break
 
 
-def _window(ids, boxes, labels, rows, role_of, offset, tk):
+def _window(ids, boxes, labels, rows, role_of, offset, tk, cols=None, cells=None):
     bos, eos = tk.bos_token_id, tk.eos_token_id
     edge = np.zeros((1, 4), dtype=np.int64)
     w = {
@@ -109,6 +125,9 @@ def _window(ids, boxes, labels, rows, role_of, offset, tk):
         "labels": np.concatenate([[IGNORE], labels, [IGNORE]]).astype(np.int64),
         "offset": offset,
     }
+    if cols is not None:
+        w["col_labels"] = np.concatenate([[IGNORE], cols, [IGNORE]]).astype(np.int64)
+        w["cell_labels"] = np.concatenate([[IGNORE], cells, [IGNORE]]).astype(np.int64)
     present = [r for r in dict.fromkeys(rows.tolist()) if r >= 0][:MAX_ROWS]
     pool = np.zeros((len(present), len(w["input_ids"])), dtype=np.float32)
     for i, r in enumerate(present):
@@ -151,12 +170,18 @@ def collate(batch, pad_id=1):
         "row_pool": torch.zeros(len(batch), r, t),
         "role_labels": torch.full((len(batch), r), IGNORE, dtype=torch.long),
     }
+    if "col_labels" in batch[0]:
+        out["col_labels"] = torch.full((len(batch), t), IGNORE, dtype=torch.long)
+        out["cell_labels"] = torch.full((len(batch), t), IGNORE, dtype=torch.long)
     for i, b in enumerate(batch):
         n = len(b["input_ids"])
         out["input_ids"][i, :n] = torch.from_numpy(b["input_ids"])
         out["bbox"][i, :n] = torch.from_numpy(b["bbox"])
         out["attention_mask"][i, :n] = 1
         out["labels"][i, :n] = torch.from_numpy(b["labels"])
+        if "col_labels" in b:
+            out["col_labels"][i, :n] = torch.from_numpy(b["col_labels"])
+            out["cell_labels"][i, :n] = torch.from_numpy(b["cell_labels"])
         m = len(b["role_labels"])
         if m:
             out["row_pool"][i, :m, :n] = torch.from_numpy(b["row_pool"])

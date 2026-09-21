@@ -67,3 +67,20 @@ def read_jsonl(path):
         for line in f:
             if line.strip():
                 yield json.loads(line)
+
+# v13: structure, not types. The word head shrinks to the header/totals metadata plus one
+# class `cell` for "this word sits in an item-table cell"; the cell's column comes from the
+# column head (index 0 = not in a table, 1..MAX_COLS = column left-to-right) and its start
+# from the cell head. Nothing in the table is typed by the model any more.
+STRUCT_LABELS = ["O", "cell", "invoiceNumber", "invoiceDate", "supplier", "netTotal", "grossTotal",
+                 "vat", "numberLabel", "dateLabel", "netLabel", "grossLabel", "vatLabel", "otherLabel"]
+STRUCT_ID = {n: i for i, n in enumerate(STRUCT_LABELS)}
+MAX_COLS = 16
+
+
+def struct_label(field, tbl):
+    """The v13 word class of a rows-file word: `cell` inside an item table, else the metadata
+    class if it is one of ours, else O (all v11 fine classes fold to O here too)."""
+    if tbl is not None and tbl >= 0:
+        return STRUCT_ID["cell"]
+    return STRUCT_ID.get(field, 0)

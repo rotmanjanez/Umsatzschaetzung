@@ -84,16 +84,39 @@ def label_words(ocr_words, truth_words, band):
             if best is None or area > best[0]:
                 best = (area, u, t)
         if best is None:
-            out.append("O")
+            out.append(("O", None))
             continue
         _, u, t = best
         if u >= ACCEPT_IOU:
-            out.append(t["f"])
+            out.append((t["f"], t))
         elif SequenceMatcher(None, norm(w["t"]), norm(t["t"])).ratio() >= DOUBT_SIM:
-            out.append(t["f"])
+            out.append((t["f"], t))
         else:
-            out.append("O")
+            out.append(("O", None))
     return out
+
+
+def structure(w, t):
+    """v13: cell/column structure of the item table, carried from the truth word."""
+    if t is None or t.get("tbl", -1) < 0:
+        w["col"], w["tbl"], w["cell"] = -1, -1, -1
+    else:
+        w["col"], w["tbl"], w["cell"] = int(t.get("ci", -1)), int(t["tbl"]), int(t.get("cid", -1))
+
+
+def mark_cell_starts(page_words):
+    """cell_start = 1 on the first word of each table cell in reading order of its row."""
+    by_row = {}
+    for w in page_words:
+        by_row.setdefault(w["row"], []).append(w)
+    for ws in by_row.values():
+        seen = set()
+        for w in sorted(ws, key=lambda q: q["box"][0]):
+            if w["cell"] < 0:
+                w["cell_start"] = 0
+            else:
+                w["cell_start"] = 0 if w["cell"] in seen else 1
+                seen.add(w["cell"])
 
 
 def covered(truth_words, ocr_words, band):
@@ -240,7 +263,9 @@ def one_variation(args):
     for i, tp in enumerate(truth["pages"]):
         if perfect:
             ocr = {"width": tp["width"], "height": tp["height"],
-                   "words": [{"t": w["t"], "box": w["box"], "field": w["f"]}
+                   "words": [{"t": w["t"], "box": w["box"], "field": w["f"],
+                              "col": int(w.get("ci", -1)) if w.get("tbl", -1) >= 0 else -1,
+                              "tbl": int(w.get("tbl", -1)), "cell": int(w.get("cid", -1)) if w.get("tbl", -1) >= 0 else -1}
                              for w in tp["words"] if w["t"].strip()]}
         else:
             ocr = schema.ocr_pages(vdir, i)
@@ -249,8 +274,9 @@ def one_variation(args):
             continue
         band = max(20.0, tp["height"] / 100.0)
         if not perfect:
-            for w, f in zip(ocr["words"], label_words(ocr["words"], tp["words"], band)):
+            for w, (f, t) in zip(ocr["words"], label_words(ocr["words"], tp["words"], band)):
                 w["field"] = f
+                structure(w, t)
         grouped = group_rows(ocr["words"])
         items = [{"box": r["box"], "quad": r.get("quad")}
                  for r in tp.get("regions", []) if r["role"] == "line-item"]
@@ -260,7 +286,9 @@ def one_variation(args):
             for w in r["words"]:
                 words.append({"t": w["t"], "box": [round(float(v), 1) for v in w["box"]],
                               "field": w["field"], "row": ri, "role": role,
-                              "item": item_of(w["box"], items)})
+                              "item": item_of(w["box"], items),
+                              "col": w.get("col", -1), "tbl": w.get("tbl", -1), "cell": w.get("cell", -1)})
+        mark_cell_starts(words)
         pages.append({"template": truth["template"], "split": truth["split"],
                       "profile": truth["profile"], "invoice": vdir.parent.name,
                       "page": i + 1, "w": ocr["width"], "h": ocr["height"],

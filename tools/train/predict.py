@@ -15,8 +15,8 @@ import numpy as np
 import torch
 
 from data import MAX_LEN, MAX_ROWS, OVERLAP, stitch, windows
-from model import Tagger, quantise_box, tokenizer
-from schema import LABELS, ROLES, read_jsonl
+from model import Tagger, n_cols_of, n_layers, quantise_box, tokenizer
+from schema import STRUCT_LABELS, LABELS, ROLES, read_jsonl
 
 
 # LABELS grew from 13 to 19 when the label classes were appended; the value classes
@@ -33,7 +33,8 @@ def softmax(x):
 @torch.no_grad()
 def tag_page(model, tk, page, device):
     ws = list(windows(page, tk))
-    word_logits, role_logits = [], []
+    word_logits, role_logits, col_logits, cell_logits = [], [], [], []
+    struct = bool(getattr(model, "n_cols", None))
     for w in ws:
         out = model(torch.tensor(w["input_ids"])[None].to(device),
                     torch.tensor(w["bbox"])[None].to(device),
@@ -41,11 +42,16 @@ def tag_page(model, tk, page, device):
                     torch.tensor(w["row_pool"])[None].to(device))
         word_logits.append(out[0][0].float().cpu().numpy())
         role_logits.append((w["row_pool"], out[1][0].float().cpu().numpy()))
+        if struct:
+            col_logits.append(out[2][0].float().cpu().numpy())
+            cell_logits.append(out[3][0].float().cpu().numpy())
 
     n = sum(len(w["input_ids"]) - 2 for w in ws) - sum(
         max(0, ws[i - 1]["offset"] + len(ws[i - 1]["input_ids"]) - 2 - ws[i]["offset"])
         for i in range(1, len(ws)))
     seq = stitch(ws, word_logits, max(n, 1))
+    cseq = stitch(ws, col_logits, max(n, 1)) if struct else None
+    lseq = stitch(ws, cell_logits, max(n, 1)) if struct else None
 
     roles = defaultdict(list)
     for w, (pool, rl) in zip(ws, role_logits):
@@ -53,7 +59,7 @@ def tag_page(model, tk, page, device):
         for i, at in enumerate(present):
             roles[w["offset"] + at - 1].append(rl[i])
 
-    names = LABELS[:seq.shape[-1]]
+    names = STRUCT_LABELS if struct else LABELS[:seq.shape[-1]]
     out, at = [], 0
     for word in page["words"]:
         sub = tk.encode(" " + word["t"], add_special_tokens=False)
@@ -61,9 +67,19 @@ def tag_page(model, tk, page, device):
             continue
         role = roles.get(at)
         k = int(seq[at].argmax())
-        out.append({"t": word["t"], "box": word["box"], "row": word["row"],
-                    "pred": names[k], "conf": round(float(softmax(seq[at])[k]), 3),
-                    "role": ROLES[int(np.mean(role, 0).argmax())] if role else word.get("role", "line-item")})
+        rec = {"t": word["t"], "box": word["box"], "row": word["row"],
+               "pred": names[k], "conf": round(float(softmax(seq[at])[k]), 3),
+               "role": ROLES[int(np.mean(role, 0).argmax())] if role else word.get("role", "line-item")}
+        if struct:
+            # v13: predicted column (0 = none) and cell start; the truth, when the rows carry
+            # it, rides along under *_t so structscore.py can score the dump on its own
+            rec["col"] = int(cseq[at].argmax())
+            rec["cell_start"] = int(lseq[at].argmax())
+            for src, dst in (("field", "field_t"), ("col", "col_t"), ("cell_start", "cell_t"),
+                             ("role", "role_t"), ("tbl", "tbl_t")):
+                if src in word:
+                    rec[dst] = word[src]
+        out.append(rec)
         at += len(sub)
     return out
 
@@ -89,6 +105,9 @@ def onnx_page(sess, tk, page, bos, eos):
 
     word_acc = None
     role_acc = defaultdict(lambda: np.zeros(len(ROLES)))
+    outs = [o.name for o in sess.get_outputs()]
+    struct = "col_logits" in outs
+    col_acc = cell_acc = None
 
     body = MAX_LEN - 2
     step = max(1, body - OVERLAP)
@@ -100,12 +119,18 @@ def onnx_page(sess, tk, page, bos, eos):
         inp[0, 0], inp[0, n - 1] = bos, eos
         inp[0, 1:n - 1] = ids[s:e]
         bb[0, 1:n - 1] = boxes[s:e]
-        wl, rl = sess.run(["word_logits", "role_logits"],
-                          {"input_ids": inp, "bbox": bb,
-                           "attention_mask": np.ones((1, n), dtype=np.int64)})
+        res = sess.run(outs, {"input_ids": inp, "bbox": bb,
+                              "attention_mask": np.ones((1, n), dtype=np.int64)})
+        wl, rl = res[0], res[1]
         if word_acc is None:
             word_acc = np.zeros((len(ids), wl.shape[-1]), dtype=np.float64)
+            if struct:
+                col_acc = np.zeros((len(ids), res[2].shape[-1]), dtype=np.float64)
+                cell_acc = np.zeros((len(ids), 2), dtype=np.float64)
         word_acc[s:e] += wl[0, 1:n - 1]
+        if struct:
+            col_acc[s:e] += res[2][0, 1:n - 1]
+            cell_acc[s:e] += res[3][0, 1:n - 1]
 
         members = {}
         for i in range(s, e):
@@ -122,13 +147,23 @@ def onnx_page(sess, tk, page, bos, eos):
         if e == len(ids):
             break
 
-    names = LABELS[:word_acc.shape[-1]]
-    return [{"t": w["t"], "box": w["box"], "row": w["row"],
-             "pred": names[int(word_acc[st].argmax())],
-             "conf": round(float(softmax(word_acc[st]).max()), 3),
-             "role": ROLES[int(role_acc[w["row"]].argmax())] if w["row"] in role_acc
-             else "line-item"}
-            for w, st in zip(kept, starts)]
+    names = STRUCT_LABELS if struct else LABELS[:word_acc.shape[-1]]
+    out = []
+    for w, st in zip(kept, starts):
+        rec = {"t": w["t"], "box": w["box"], "row": w["row"],
+               "pred": names[int(word_acc[st].argmax())],
+               "conf": round(float(softmax(word_acc[st]).max()), 3),
+               "role": ROLES[int(role_acc[w["row"]].argmax())] if w["row"] in role_acc
+               else "line-item"}
+        if struct:
+            rec["col"] = int(col_acc[st].argmax())
+            rec["cell_start"] = int(cell_acc[st].argmax())
+            for src, dst in (("field", "field_t"), ("col", "col_t"), ("cell_start", "cell_t"),
+                             ("role", "role_t"), ("tbl", "tbl_t")):
+                if src in w:
+                    rec[dst] = w[src]
+        out.append(rec)
+    return out
 
 
 def main():
@@ -159,7 +194,7 @@ def main():
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tk = tokenizer()
         state = torch.load(a.run / "model.pt", map_location=device, weights_only=True)
-        model = Tagger(n_labels=head_size(state)).to(device).eval()
+        model = Tagger(n_labels=head_size(state), layers=n_layers(state), n_cols=n_cols_of(state)).to(device).eval()
         model.load_state_dict(state)
 
     rows, got = defaultdict(list), defaultdict(list)
@@ -174,7 +209,7 @@ def main():
         else:
             got[key].append(tag_page(model, tk, p, device))
 
-    coarse = set(LABELS[:19])
+    coarse = set(LABELS[:19]) | set(STRUCT_LABELS)
 
     def fold(words):
         if a.keep_fine:

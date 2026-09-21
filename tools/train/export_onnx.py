@@ -50,10 +50,10 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from model import BOX_BINS, Tagger
+from model import BOX_BINS, Tagger, n_cols_of, n_layers
 
 # The two classifier heads, as the exported graph names them.
-HEAD_NODES = ["/word_head/MatMul", "/role_head/MatMul"]
+HEAD_NODES = ["/word_head/MatMul", "/role_head/MatMul", "/col_head/MatMul", "/cell_head/MatMul"]
 
 
 def dummy_boxes(batch, seq):
@@ -72,14 +72,20 @@ class WordOnly(torch.nn.Module):
     def forward(self, input_ids, bbox, attention_mask):
         states = self.tagger.body(input_ids=input_ids, bbox=bbox,
                                   attention_mask=attention_mask).last_hidden_state
-        return self.tagger.word_head(states), self.tagger.role_head(states)
+        out = (self.tagger.word_head(states), self.tagger.role_head(states))
+        if getattr(self.tagger, "n_cols", None):
+            # v13: column index and cell-start logits per token, same shape family
+            out = out + (self.tagger.col_head(states), self.tagger.cell_head(states))
+        return out
 
 
 def graph_fp32(out, seq, run):
     """Write tagger.onnx and return (path, params, embedding params)."""
     out.mkdir(parents=True, exist_ok=True)
     state = None if run is None else torch.load(run / "model.pt", map_location="cpu", weights_only=True)
-    tagger = Tagger(n_labels=None if state is None else state["word_head.weight"].shape[0])
+    tagger = Tagger(n_labels=None if state is None else state["word_head.weight"].shape[0],
+                    layers=None if state is None else n_layers(state),
+                    n_cols=None if state is None else n_cols_of(state))
     if state is not None:
         tagger.load_state_dict(state)
     tagger = tagger.eval()
@@ -91,12 +97,13 @@ def graph_fp32(out, seq, run):
     mask = torch.ones(1, seq, dtype=torch.long)
 
     fp32 = out / "tagger.onnx"
+    outputs = ["word_logits", "role_logits"] + (["col_logits", "cell_logits"] if tagger.n_cols else [])
     torch.onnx.export(
         WordOnly(tagger), (ids, bbox, mask), str(fp32),
         input_names=["input_ids", "bbox", "attention_mask"],
-        output_names=["word_logits", "role_logits"],
+        output_names=outputs,
         dynamic_axes={n: {0: "batch", 1: "seq"} for n in
-                      ("input_ids", "bbox", "attention_mask", "word_logits", "role_logits")},
+                      ["input_ids", "bbox", "attention_mask"] + outputs},
         opset_version=17, dynamo=False)
     return fp32, params, embed
 
@@ -130,7 +137,7 @@ def quantise(fp32, int8, per_channel=True, reduce_range=False, weight_type="quin
 
 def export(out, seq=512, run=None, **quant):
     fp32, params, embed = graph_fp32(out, seq, run)
-    int8 = out / quant.pop("name", "belegtagger.int8.onnx")
+    int8 = out / quant.pop("name", "tagger.int8.onnx")
     quantise(fp32, int8, **quant)
     return params, embed, fp32, int8
 
@@ -140,7 +147,7 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("runs/gate"))
     ap.add_argument("--seq", type=int, default=512)
     ap.add_argument("--run", type=Path, help="checkpoint to export; without it the graph is untrained")
-    ap.add_argument("--name", default="belegtagger.int8.onnx", help="file name of the quantised graph")
+    ap.add_argument("--name", default="tagger.int8.onnx", help="file name of the quantised graph")
     ap.add_argument("--from-fp32", type=Path,
                     help="quantise this existing tagger.onnx instead of re-exporting one")
     ap.add_argument("--per-channel", dest="per_channel", action="store_true", default=True,
