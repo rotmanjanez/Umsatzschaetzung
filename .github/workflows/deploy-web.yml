@@ -37,18 +37,22 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
+      # A script is named after what it photographs: guide.jsonl fills the guide's
+      # own img folder, every other script the one next to the pages. The images
+      # are collected beside the pages, so the artifact unpacks straight into them.
       - name: Take screenshots of the interface
         run: |
-          dotnet run --project tools/headless -- web/docs/shots/pruefungen.jsonl \
-            --width 1320 --height 860 --out web/docs/pages/img
-          dotnet run --project tools/headless -- web/docs/shots/guide.jsonl \
-            --width 1320 --height 860 --out web/docs/pages/guide/img
+          for script in web/docs/shots/*.jsonl; do
+            name=$(basename "$script" .jsonl)
+            out=shots-out/img
+            [ -d "web/docs/pages/$name" ] && out="shots-out/$name/img"
+            dotnet run --project tools/headless -- "$script" \
+              --width 1320 --height 860 --out "$out"
+          done
       - uses: actions/upload-artifact@v7
         with:
           name: shots
-          path: |
-            web/docs/pages/img
-            web/docs/pages/guide/img
+          path: shots-out
 
   docs:
     needs: shots
