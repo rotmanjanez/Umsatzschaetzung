@@ -5,8 +5,7 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Tagging;
 
-// Nine row roles, in the order of ROLES in tools/train/schema.py. The ONNX role head
-// emits one logit per entry in that list, so the order is part of the model contract.
+// In the order of ROLES in tools/train/schema.py: the order is part of the model contract.
 public enum Role
 {
     Header,
@@ -20,15 +19,13 @@ public enum Role
     Carry,
 }
 
-// Conf is the winning class's softmax probability, as tools/train/predict.py dumps it; a word
-// that carries none counts as 1. Col is the model's column index inside an item table, 0 when
-// the word is not in one; CellStart marks the first word of a table cell in reading order.
+// Conf is the winning class's softmax probability; Col the model's column index inside an
+// item table, 0 outside one; CellStart marks the first word of a table cell.
 public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row, float Conf = 1f,
     int Col = 0, bool CellStart = false);
 
-// Model B: the LiLT layout stream with GottBERT as its text side, exported to int8 ONNX.
-// One page of OCR words in; per word a class, a column and a cell start, per row a role.
-// docs/models.md §2.
+// LiLT layout stream with GottBERT as its text side, int8 ONNX. One page of OCR words in;
+// per word a class, a column and a cell start, per row a role. docs/models.md §2.
 public sealed class Tagger : IDisposable
 {
     public const string Name = "belegtagger-2.0.0/int8";
@@ -41,8 +38,7 @@ public sealed class Tagger : IDisposable
         Field.VatLabel, Field.OtherLabel,
     ];
 
-    // tools/train/data.py: 512 subwords per window, 128 of overlap, at most 96 rows
-    // pooled per window. model.py quantises boxes into 1024 bins, not 1000.
+    // tools/train/data.py and model.py.
     const int MaxLen = 512;
     const int Overlap = 128;
     const int MaxRows = 96;
@@ -50,16 +46,14 @@ public sealed class Tagger : IDisposable
     const int Roles = 9;
     const int CellClasses = 2;
 
-    // Eight threads measured 2.3x slower than four on an M1 Pro: the scheduler puts the
-    // extra work on efficiency cores. The default is not good enough here.
+    // Eight threads measured 2.3x slower than four on an M1 Pro (efficiency cores).
     const int Threads = 4;
 
     static string Dir => AppFiles.Beside(Path.Combine("models", "belegtagger"));
     static string ModelPath => Path.Combine(Dir, "belegtagger.int8.onnx");
 
     readonly Lock gate = new();
-    // IDisposable, not InferenceSession: naming that type in Dispose makes the JIT load
-    // Microsoft.ML.OnnxRuntime on every shutdown, even when nothing was ever tagged.
+    // Not InferenceSession: naming it in Dispose loads OnnxRuntime on every shutdown.
     IDisposable? session;
     Bpe? bpe;
 
@@ -74,8 +68,7 @@ public sealed class Tagger : IDisposable
         return Tag(ordered, width, height);
     }
 
-    // Words already in reading order with their row: the eval feeds a dump's rows back in
-    // unchanged so the C# path can be compared word for word with the Python one.
+    // Rows given, for the eval's word-for-word comparison with a Python dump.
     public List<TaggedWord> Tag(IReadOnlyList<(OcrWord Word, int Row)> ordered, int width, int height)
     {
         lock (gate)
@@ -150,8 +143,7 @@ public sealed class Tagger : IDisposable
         }
         if (kept.Count == 0) return [];
 
-        // Overlapping windows are summed rather than averaged: every class at one
-        // position shares the same window count, so argmax is unaffected.
+        // Windows are summed, not averaged: every class at a position shares the window count.
         var word = new Logits(ids.Count, Classes.Length);
         var col = new Logits(ids.Count, Width(session, "col_logits"));
         var cell = new Logits(ids.Count, CellClasses);
@@ -210,9 +202,8 @@ public sealed class Tagger : IDisposable
         Add(Output(results, "cell_logits"), from, to, cell);
         var roleLogits = Output(results, "role_logits");
 
-        // The exported role head runs per token; it is affine, so averaging its logits over
-        // a row's first subwords is exactly the row_pool mean-pool the model was trained
-        // with. tools/train/data.py caps a window at 96 pooled rows.
+        // The role head is affine, so the mean of its logits over a row's first subwords is
+        // the row_pool the model was trained with.
         var seen = new List<int>();
         var members = new Dictionary<int, List<int>>();
         for (var i = from; i < to; i++)
@@ -253,8 +244,7 @@ public sealed class Tagger : IDisposable
         throw new InvalidOperationException($"Das Belegerkennungsmodell liefert keinen Ausgang \"{name}\".");
     }
 
-    // tools/train/model.py quantise_box: pixels to LiLT bin space, clamped inside the page,
-    // so the same invoice scanned at 200 and at 400 dpi produces identical position inputs.
+    // model.py quantise_box: pixels to bin space, so the dpi of the scan does not matter.
     static int[] Quantise(Box box, int width, int height)
     {
         var x0 = Bin(box.X, width);

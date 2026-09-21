@@ -1,6 +1,6 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using Umsatzschaetzung.Extract;
 using Umsatzschaetzung.Model;
 using RxMatch = System.Text.RegularExpressions.Match;
 
@@ -92,15 +92,11 @@ public static partial class PackSize
         return pre.Success ? Number(pre.Groups["c"].Value) : 1;
     }
 
-    static long Number(string s) => Parse.TryParseNumber(s, out var v, out var scale) && scale == 0 ? v : 0;
+    static long Number(string s) => long.Parse(s, CultureInfo.InvariantCulture);
 
     static long? Scaled(string s, long factor)
     {
-        if (!Parse.TryParseNumber(s, out var v, out var scale) || v <= 0) return null;
-        for (; scale > 0 && factor % 10 == 0; scale--) factor /= 10;
-        var div = 1L;
-        for (; scale > 0; scale--) div *= 10;
-        var size = (v * factor + div / 2) / div;
+        var size = (long)Math.Round(decimal.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture) * factor, MidpointRounding.AwayFromZero);
         return size > 0 ? size : null;
     }
 }

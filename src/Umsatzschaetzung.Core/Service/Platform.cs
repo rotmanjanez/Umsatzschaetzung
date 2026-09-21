@@ -2,11 +2,11 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Service;
 
-public sealed record OcrPageWords(int Width, int Height, List<OcrWord> Words, byte[]? Image = null);
-
+// Image stays empty when the page was read as delivered; a cleaned, straightened or
+// turned page comes back encoded, since its boxes sit in that frame.
 public interface IOcr
 {
-    Task<OcrPageWords> Recognize(byte[] image, CancellationToken ct);
+    Task<OcrPage> Recognize(byte[] image, CancellationToken ct);
 }
 
 public interface IPdfPages
@@ -21,10 +21,8 @@ public interface IPdfPrinter
 
 public static class PdfRaster
 {
-    // A scan wrapped one point per pixel reports an A4 page as 3307 x 4677 device
-    // units instead of 794 x 1123, so scaling it to 300 dpi renders it at 10333 px
-    // wide: a 600 MB bitmap holding no more detail than the 2480 px scan inside it.
-    // The recogniser reads nothing above MaxImageDimension anyway, so stop there.
+    // A scan wrapped one point per pixel reports A4 as 3307 x 4677 points, so 300 dpi would
+    // render 10333 px wide: a 600 MB bitmap with no more detail than the scan inside it.
     public static (int Width, int Height) Target(double width, double height, double scale)
     {
         var longest = Math.Max(width, height) * scale;

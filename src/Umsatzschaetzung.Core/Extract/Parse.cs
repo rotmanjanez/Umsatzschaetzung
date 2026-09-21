@@ -7,87 +7,19 @@ namespace Umsatzschaetzung.Extract;
 public static class Parse
 {
     const int MaxUnitLen = 8;
-
     public const int ScaleMilli = 3;
     public const int ScaleMicro = 6;
     public const int ScaleCents = 2;
     public const int ScaleBp = 2;
 
-    public static bool TryParseNumber(string input, out long value, out int scale)
-    {
-        value = 0;
-        scale = 0;
-        var s = CleanNumber(input);
-        if (s == "") return false;
-        var neg = false;
-        switch (s[0])
-        {
-            case '-':
-                neg = true;
-                s = s[1..];
-                break;
-            case '+':
-                s = s[1..];
-                break;
-        }
-        if (s == "" || s[0] < '0' || s[0] > '9') return false;
-        var lastSep = -1;
-        var sameKind = false;
-        for (var i = 0; i < s.Length; i++)
-        {
-            var ch = s[i];
-            if (ch >= '0' && ch <= '9') continue;
-            if (ch != '.' && ch != ',') return false;
-            if (lastSep >= 0 && s[lastSep] == ch) sameKind = true;
-            lastSep = i;
-        }
-        var intPart = s;
-        var fracPart = "";
-        if (lastSep >= 0)
-        {
-            var after = s.Length - lastSep - 1;
-            var decimalSep = !sameKind && !(s[lastSep] == '.' && after == 3 && s.Count(c => c == '.') == 1);
-            if (decimalSep)
-            {
-                intPart = s[..lastSep];
-                fracPart = s[(lastSep + 1)..];
-            }
-            if (!ValidGroups(intPart)) return false;
-        }
-        var digits = intPart.Replace(".", "").Replace(",", "") + fracPart;
-        if (digits.Length > 18) return false;
-        if (!long.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out var v)) return false;
-        value = neg ? -v : v;
-        scale = fracPart.Length;
-        return true;
-    }
-
-    static string CleanNumber(string s)
-    {
-        s = s.Trim().Replace("€", "").Replace("EUR", "").Replace("%", "").Replace(" ", "").Replace("–", "-");
-        if (s.EndsWith('-')) s = s[..^1];
-        if (s.EndsWith(',')) s += "00";
-        return s.Trim();
-    }
-
-    static bool ValidGroups(string intPart)
-    {
-        var parts = intPart.Split(['.', ','], StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length <= 1) return intPart.IndexOfAny(['.', ',']) < 0;
-        if (parts[0].Length == 0 || parts[0].Length > 3) return false;
-        return parts.Skip(1).All(p => p.Length == 3);
-    }
-
-    // The grouped-thousands branch must require a separator group: alternation is leftmost-
-    // first, so with `*` it matched the "78" of "78.49" and read 78,00. `;` and `:` are
-    // separators because that is what the heavier scan profiles turn a comma into.
+    // `;` and `:` are what a worn scan turns a comma into.
     static readonly Regex NumberRx =
         new(@"-?\d{1,3}(?:[.\s;:]\d{3})+(?:[.,;:]\d+)?|-?\d+(?:[.,;:]\d+)?");
 
     static readonly Regex Separator = new(@"[.,;:\s]");
 
-    // German grouping is always three digits, so a final group of exactly two is the cents
-    // whatever precedes it: `24.332.16` is 24 332,16, not 24 332.
+    // German grouping is three digits, so a final group of two is the cents whatever
+    // precedes it: `24.332.16` is 24 332,16.
     static bool IsDecimal(string[] groups, string matched)
     {
         if (groups.Length < 2) return false;
@@ -128,9 +60,8 @@ public static class Parse
 
     static readonly Regex Currency = new(@"[€$%]|EUR|Eur");
 
-    // Letters a worn scan puts where a digit was printed, in a cell already known to hold a
-    // number. Only where the text does not read as one before and does after, so a genuine
-    // word is never touched.
+    // Letters where a digit was printed, in a cell known to hold a number: only where the
+    // text reads as a number after and not before, so a word is never touched.
     static readonly Dictionary<char, char> DigitShapes = new()
     {
         ['ø'] = '0', ['Ø'] = '0', ['O'] = '0', ['o'] = '0', ['D'] = '0',
@@ -148,8 +79,7 @@ public static class Parse
         return Numeric.IsMatch(repaired.Trim()) ? repaired : text;
     }
 
-    // Searches rather than matches: the date cell carries its label often enough
-    // ("Rechnungsdatum: 08.11.2025") that anchoring loses it.
+    // Unanchored: the date cell often carries its label ("Rechnungsdatum: 08.11.2025").
     static readonly (Regex Rx, int Y, int M, int D)[] DatePatterns =
     [
         (new(@"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)"), 1, 2, 3),
@@ -172,9 +102,8 @@ public static class Parse
 
     static readonly Regex DateShape = new(@"^[\dOoIl|]{1,2}[.\-/][\dOoIl|]{1,2}[.\-/][\dOoIl|]{2,4}$");
 
-    // Second attempt only, so a date that already reads is never touched. A month is repaired
-    // only where exactly one of the twelve is one character away: `0ktober` comes back, `Ju1i`
-    // — one from both juli and juni — does not.
+    // A month is repaired only where exactly one of the twelve is one character away:
+    // `0ktober` comes back, `Ju1i` (juli or juni) does not.
     static string Unconfuse(string s)
     {
         var tokens = s.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
@@ -221,10 +150,7 @@ public static class Parse
             ? new DateOnly(year, month, day)
             : null;
 
-    // The unit letter of a pack size comes back as the digit it resembles: "Frittieröl 10 1"
-    // for "Frittieröl 10 l", "Bratwurst 120 8" for "Bratwurst 120 g". Only right after a
-    // number, where neither reads as a word, and only inside an item name, where a lone
-    // digit has nothing to do anyway.
+    // "Frittieröl 10 1" for "10 l", "Bratwurst 120 8" for "120 g": only right after a number.
     static readonly Dictionary<string, string> UnitLetters = new()
     {
         ["1"] = "l", ["I"] = "l", ["|"] = "l", ["8"] = "g",

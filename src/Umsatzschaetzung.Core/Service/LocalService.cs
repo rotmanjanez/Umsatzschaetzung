@@ -17,7 +17,6 @@ namespace Umsatzschaetzung.Service;
 public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion) : IService
 {
     const int AutoMapMinConfidence = 60;
-    const int ScanDpi = 300;
     const int PreviewDpi = 150;
 
     readonly Matcher matcher = new();
@@ -129,50 +128,14 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     public Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
     {
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
-        var pages = new List<ExtractPage>();
-        switch (InvoiceParser.Detect(data))
-        {
-            case Kind.Image:
-                pages.Add(await Recognize(data, ct));
-                break;
-            case Kind.Pdf:
-                foreach (var image in await RenderPdf(data, ScanDpi, ct) ?? throw NoPdfPages())
-                    pages.Add(await Recognize(image, ct));
-                break;
-            default:
-                throw new ServiceError(ErrorCode.Unsupported, $"\"{fileName}\" ist kein Scan");
-        }
-        if (pages.Count == 0) throw new ServiceError(ErrorCode.Unsupported, $"keine Seiten in \"{fileName}\" gefunden");
-        var (draft, output) = await Extractor.InvoiceAsync(tagger, pages, ct);
+        var pages = await Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
+        var draft = await Extractor.InvoiceAsync(tagger, pages, ct);
         draft.Id = NewId("re-");
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
         var (rs, _) = await MapLines(draft, Gewerbe(caseId), false, ct);
-        return new OcrResp(draft.Id, output, draft, Display.Invoice(draft, rs));
+        return new OcrResp(draft.Id, pages, draft, Display.Invoice(draft, rs));
     });
-
-    async Task<ExtractPage> Recognize(byte[] image, CancellationToken ct)
-    {
-        if (ocr is null) throw new ServiceError(ErrorCode.Unsupported, "Texterkennung nicht verfügbar");
-        ct.ThrowIfCancellationRequested();
-        var page = await ocr.Recognize(image, ct);
-        return new ExtractPage(page.Width, page.Height, page.Words, page.Image ?? image);
-    }
-
-    async Task<List<byte[]>?> RenderPdf(byte[] data, int dpi, CancellationToken ct)
-    {
-        if (pdf is null) return null;
-        try
-        {
-            return await pdf.Render(data, dpi, ct);
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            return null;
-        }
-    }
-
-    static ServiceError NoPdfPages() => new(ErrorCode.Unsupported, "PDF-Darstellung nicht verfügbar");
 
     public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(async () =>
     {
@@ -224,8 +187,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var pages = InvoiceParser.Detect(data) switch
         {
             Kind.Image => [new SourcePage(data, null)],
-            Kind.Pdf or Kind.Zugferd =>
-                (await RenderPdf(data, PreviewDpi, ct) ?? throw NoPdfPages()).Select(p => new SourcePage(p, null)).ToList(),
+            Kind.Pdf or Kind.Zugferd => (await Scan.Render(pdf, data, PreviewDpi, ct)).Select(p => new SourcePage(p, null)).ToList(),
             _ => [new SourcePage(null, Encoding.UTF8.GetString(data))],
         };
         return new InvoiceSourceResp(name, pages);
@@ -246,7 +208,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var images = InvoiceParser.Detect(data) switch
         {
             Kind.Image => [data],
-            Kind.Pdf => await RenderPdf(data, ScanDpi, ct) ?? [],
+            Kind.Pdf when pdf is not null => await pdf.Render(data, Scan.Dpi, ct),
             _ => new List<byte[]>(),
         };
         for (var i = 0; i < pages.Count && i < images.Count; i++) pages[i].Image = images[i];

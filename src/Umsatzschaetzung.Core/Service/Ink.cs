@@ -2,19 +2,15 @@ using SkiaSharp;
 
 namespace Umsatzschaetzung.Service;
 
-// How far below the paper a pixel sits, rather than how dark it is, so uneven lighting,
-// a grey sheet and a vignette all cancel. Shared by everything that has to separate
-// print from paper before the page is read.
+// Ink depth: how far below the local paper level a pixel sits, so uneven lighting, a grey
+// sheet and a vignette cancel.
 static class Ink
 {
-    // The background is the brightest value nearby: coarse enough to miss the print,
-    // fine enough to follow the lighting.
     const int Cells = 16;
 
     public static byte[] Grey(SKBitmap page, int w, int h)
     {
         var info = new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul);
-        // Always through a copy: the decoder hands back whatever layout the file had.
         using var small = (page.Width == w && page.Height == h
                 ? page.Copy(SKColorType.Bgra8888)
                 : page.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None)))
@@ -26,6 +22,7 @@ static class Ink
         return grey;
     }
 
+    // Paper is the brightest value per cell, interpolated between cells.
     public static byte[] Depth(byte[] grey, int w, int h)
     {
         int cw = Math.Max(w / Cells, 1), ch = Math.Max(h / Cells, 1);
@@ -76,14 +73,13 @@ static class Ink
         return 255;
     }
 
-    // Between-class variance maximiser over the values inside (above, upTo], so the same
-    // code splits paper from mark, mark from ink, and ink from whatever is darker still.
-    public static byte Otsu(byte[] values, int above = -1, int upTo = 255)
+    // Between-class variance maximiser over the values above the given level.
+    public static byte Otsu(byte[] values, int above = -1)
     {
         Span<long> hist = stackalloc long[256];
         long count = 0;
         foreach (var v in values)
-            if (v > above && v <= upTo) { hist[v]++; count++; }
+            if (v > above) { hist[v]++; count++; }
         if (count == 0) return 0;
 
         double all = 0;

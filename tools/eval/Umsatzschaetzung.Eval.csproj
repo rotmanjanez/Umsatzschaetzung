@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
+    <Compile Include="../ocr/Dump.cs" Link="Dump.cs" />
   </ItemGroup>
 </Project>

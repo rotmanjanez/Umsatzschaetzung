@@ -4,32 +4,29 @@ namespace Umsatzschaetzung.Extract;
 
 public static class Check
 {
+    // Every comparison is exact: across the real invoices all line nets, line sums and gross
+    // totals reproduce the document's own integer arithmetic to the cent.
     public static List<Flag> Invoice(Invoice inv)
     {
-        // Number, date and supplier are nice to have: only the positions and the totals
-        // decide whether an invoice adds up.
         var flags = new List<Flag>();
         var net = inv.StatedNet ?? inv.NetTotal;
         var gross = inv.StatedGross ?? inv.GrossTotal;
         long sum = 0;
-        long vat = 0;
-        var singleVat = inv.Lines.Count > 0;
+        var rates = new HashSet<long>();
         foreach (var l in inv.Lines)
         {
             sum += l.LineNet;
+            rates.Add(l.Vat);
             if (l.Quantity <= 0)
                 flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.Quantity, Message = $"Zeile {l.No}: Menge ist nicht positiv" });
             if (l.UnitPrice <= 0)
                 flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.UnitPrice, Message = $"Zeile {l.No}: Einzelpreis ist nicht positiv" });
             if (l.LineNet <= 0)
                 flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.LineNet, Message = $"Zeile {l.No}: Gesamtpreis ist nicht positiv" });
-            // A position always states what it is billed in; an empty one is a reading that
-            // lost it, and only the unit says how much of the ingredient was bought. Left
-            // alone it surfaces far later, as a missing factor in the calculation.
             if (l.UnitCode == "")
                 flags.Add(new Flag { Code = "no_unit", LineNo = l.No, Field = Field.Unit, Message = $"Zeile {l.No}: Einheit fehlt" });
-            var expected = ExpectedLineNet(l);
-            if (!Within(expected, l.LineNet))
+            var expected = InvoiceMath.LineNet(l.Quantity, l.UnitPrice, l.PriceBaseQty);
+            if (expected != l.LineNet)
                 flags.Add(new Flag
                 {
                     Code = "line_total",
@@ -37,24 +34,22 @@ public static class Check
                     Field = Field.LineNet,
                     Message = $"Zeile {l.No}: Menge × Einzelpreis ergibt {Format.Cents(expected)}, Gesamtpreis ist {Format.Cents(l.LineNet)}",
                 });
-            if (vat == 0) vat = l.Vat;
-            else if (l.Vat != vat) singleVat = false;
         }
         if (net <= 0)
             flags.Add(new Flag { Code = "nonpositive", Field = Field.NetTotal, Message = "Nettobetrag ist nicht positiv" });
         if (gross <= 0)
             flags.Add(new Flag { Code = "nonpositive", Field = Field.GrossTotal, Message = "Bruttobetrag ist nicht positiv" });
-        if (inv.Lines.Count > 0 && !Within(sum, net))
+        if (inv.Lines.Count > 0 && sum != net)
             flags.Add(new Flag
             {
                 Code = "sum_net",
                 Field = Field.NetTotal,
                 Message = $"Summe der Positionen {Format.Cents(sum)} weicht vom Nettobetrag {Format.Cents(net)} ab",
             });
-        if (singleVat && vat > 0)
+        if (rates.Count == 1 && rates.Single() is var vat and > 0)
         {
             var expected = InvoiceMath.RoundDiv(net * (Bp.Full + vat), Bp.Full);
-            if (!Within(expected, gross))
+            if (expected != gross)
                 flags.Add(new Flag
                 {
                     Code = "gross_check",
@@ -65,8 +60,8 @@ public static class Check
         return flags;
     }
 
-    // Taking an invoice over without a human means nobody ever looks at it: that needs a complete
-    // reading whose positions add up to the totals the document itself prints.
+    // Taken over without a human means nobody ever looks at it: that needs a complete reading
+    // whose positions add up to the totals the document itself prints.
     public static bool Complete(Invoice inv, List<Flag> flags) =>
         flags.Count == 0
         && inv.Lines.Count > 0
@@ -77,18 +72,7 @@ public static class Check
         && inv.StatedGross is > 0;
 
     // A mismatch against a printed total is the reader's word against the document, so it only
-    // stops the automatic route; totals that an invoice carries itself are binding.
+    // stops the automatic route; totals the invoice carries itself are binding.
     public static bool Blocks(Invoice inv, Flag flag) =>
         flag.Code == "line_total" || (flag.Code == "sum_net" && inv.StatedNet is null);
-
-    static long ExpectedLineNet(InvoiceLine l)
-    {
-        var b = l.PriceBaseQty <= 0 ? 1000 : l.PriceBaseQty;
-        return InvoiceMath.RoundDiv(l.Quantity * l.UnitPrice, b * 10000);
-    }
-
-    // Exactly. Every one of these is integer arithmetic the document itself did, so a
-    // reading that does not reproduce it to the cent is a reading, not a rounding: across
-    // the real invoices all 239 line nets, 41 line sums and 39 gross totals come back exact.
-    static bool Within(long expected, long actual) => expected == actual;
 }

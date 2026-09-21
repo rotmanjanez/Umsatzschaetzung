@@ -4,10 +4,9 @@ using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Extract;
 
-// The item table of one page, read from the model's structure heads and nothing else: cells
-// from the cell starts, columns from the cells' x-overlap, one meaning per column, one item per
-// line-item row. The model types nothing inside the table. Its column index only breaks ties:
-// it is off by one on wide tables while the cell boundaries are not (v13/REPORT.md §5).
+// The item table of one page, from the model's structure heads: cells from the cell starts,
+// columns from the cells' x-overlap, one meaning per column, one item per line-item row. The
+// model's column index only breaks ties; it is off by one on wide tables.
 public sealed class Table
 {
     sealed class Cell
@@ -39,12 +38,10 @@ public sealed class Table
     public List<Dictionary<Field, OcrWord>> Items { get; } = [];
     public bool HasColumns => columns.Count > 0;
 
-    // A page without a column-header row is a continuation and keeps the previous page's
-    // columns, ranges and meanings; the model also recognises a repeated header itself.
+    // A page without a column-header row continues the previous page's columns.
     public static Table Read(List<TaggedWord> page, Table? previous)
     {
-        var rows = page.GroupBy(w => w.Row).OrderBy(g => g.Key)
-            .Select(g => g.OrderBy(w => w.Word.Box.X).ToList()).ToList();
+        var rows = ByRow(page);
         var table = new Table();
         if (previous is not null && !rows.Any(r => r[0].Role == Role.ColumnHeader))
             foreach (var c in previous.columns)
@@ -62,6 +59,9 @@ public sealed class Table
         return table;
     }
 
+    static List<List<TaggedWord>> ByRow(List<TaggedWord> page) =>
+        [.. page.GroupBy(w => w.Row).OrderBy(g => g.Key).Select(g => g.OrderBy(w => w.Word.Box.X).ToList())];
+
     static List<Cell> Cells(List<TaggedWord> row)
     {
         var cells = new List<Cell>();
@@ -77,8 +77,8 @@ public sealed class Table
         return cells;
     }
 
-    // Header and line-item cells found no column: a wrap row's cell that fits nowhere hangs
-    // off the item as name text instead of opening a column of its own.
+    // Only header and line-item cells open columns; a wrap cell that fits nowhere hangs off
+    // the item as name text.
     void Place(List<Cell> row, bool extend)
     {
         foreach (var cell in row)
@@ -100,8 +100,7 @@ public sealed class Table
         }
     }
 
-    // The column overlapping the cell most; among near-equal overlaps the one the model's
-    // column index agrees with, then the narrower one.
+    // Most overlap; among near-equal overlaps the model's column index, then the narrower one.
     Column? Best(Cell cell)
     {
         var scored = columns.Select(c => (Column: c, Overlap: Overlap(c, cell))).Where(x => x.Overlap > 0).ToList();
@@ -117,9 +116,8 @@ public sealed class Table
     static int Overlap(Column c, Cell cell) =>
         Math.Min(c.X1, cell.Box.X + cell.Box.W) - Math.Max(c.X0, cell.Box.X);
 
-    // A left-aligned header over right-aligned amounts overlaps none of them, so header and
-    // body come out as two columns. A header-only column joins the body-only neighbour the
-    // model gives the same index, else its only body-only neighbour.
+    // A left-aligned header over right-aligned amounts overlaps none of them: a header-only
+    // column joins the body-only neighbour with the same model index, else its only one.
     void MergeHeaders()
     {
         for (var again = true; again;)
@@ -164,9 +162,8 @@ public sealed class Table
         [.. groups.SelectMany(g => g.Words.Split(' ').Select(w => (Norm(w), g.Meaning)))
             .OrderByDescending(k => k.Item1.Length)];
 
-    // Exact first, then a key that opens the text ("Menge/Stk"), then a key the scan
-    // misread by one character ("Eirheit", "Surme"). A short key such as ME or EP must
-    // match exactly: as a prefix it claims "Merge" for the unit and "Epos" for the price.
+    // Exact, then a key opening the text ("Menge/Stk"), then one character off ("Eirheit").
+    // A short key such as ME or EP only matches exactly: as a prefix it claims "Merge".
     static (bool Hit, Field? Meaning) Heading(string text)
     {
         var key = Norm(text);
@@ -200,6 +197,30 @@ public sealed class Table
     static readonly Regex Code = new(@"^(?=.*\d)[A-Za-z0-9][A-Za-z0-9.\-/]+$");
     static readonly Regex Integer = new(@"^\d{1,4}$");
 
+    enum Shape { Empty, Rate, Position, Unit, Amount, Count, Code, Words, Other }
+
+    static Shape ShapeOf(List<string> texts)
+    {
+        if (texts.Count == 0) return Shape.Empty;
+        if (Mostly(texts, t => t.Contains('%'))) return Shape.Rate;
+        if (Sequential(texts)) return Shape.Position;
+        if (Alphabetic(texts) && Mostly(texts, t => Model.Units.Lookup(t) is not null)) return Shape.Unit;
+        if (Mostly(texts, Amount.IsMatch)) return Shape.Amount;
+        if (Mostly(texts, Count.IsMatch)) return Shape.Count;
+        if (Mostly(texts, Code.IsMatch)) return Shape.Code;
+        if (Alphabetic(texts)) return Shape.Words;
+        return Shape.Other;
+    }
+
+    static bool Fits(Shape shape, Field meaning) => meaning switch
+    {
+        Field.Name => shape == Shape.Words,
+        Field.ArticleId => shape == Shape.Code,
+        Field.Unit => shape == Shape.Unit,
+        Field.Vat => shape == Shape.Rate,
+        _ => false,
+    };
+
     void Decide()
     {
         foreach (var c in columns)
@@ -218,17 +239,16 @@ public sealed class Table
         var codes = new List<Column>();
         var names = new List<Column>();
         foreach (var c in columns.Where(c => !c.Decided))
-        {
-            var texts = Texts(c);
-            if (texts.Count == 0) continue;
-            if (Mostly(texts, t => t.Contains('%'))) Fix(c, Field.Vat);
-            else if (Sequential(texts)) Fix(c, null);
-            else if (Alphabetic(texts) && Mostly(texts, t => Model.Units.Lookup(t) is not null)) Fix(c, Field.Unit);
-            else if (Mostly(texts, Amount.IsMatch)) amounts.Add(c);
-            else if (Mostly(texts, Count.IsMatch)) counts.Add(c);
-            else if (Mostly(texts, Code.IsMatch)) codes.Add(c);
-            else if (Alphabetic(texts)) names.Add(c);
-        }
+            switch (ShapeOf(Texts(c)))
+            {
+                case Shape.Rate: Fix(c, Field.Vat); break;
+                case Shape.Position: Fix(c, null); break;
+                case Shape.Unit: Fix(c, Field.Unit); break;
+                case Shape.Amount: amounts.Add(c); break;
+                case Shape.Count: counts.Add(c); break;
+                case Shape.Code: codes.Add(c); break;
+                case Shape.Words: names.Add(c); break;
+            }
         if (!columns.Any(c => c.Meaning == Field.Name) && names.Count > 0)
             Fix(names.MaxBy(c => c.Width)!, Field.Name);
         var name = columns.FirstOrDefault(c => c.Meaning == Field.Name);
@@ -242,29 +262,16 @@ public sealed class Table
     // article id, and of two columns claiming one meaning only the one whose body fits keeps it.
     void Unheader()
     {
-        foreach (var c in columns.Where(c => c.Meaning == Field.Name && c.Body.Any()))
-            if (Mostly(Texts(c), Code.IsMatch) && !Alphabetic(Texts(c))) c.Meaning = Field.ArticleId;
+        foreach (var c in columns.Where(c => c.Meaning == Field.Name && ShapeOf(Texts(c)) == Shape.Code))
+            c.Meaning = Field.ArticleId;
         foreach (var meaning in new[] { Field.Name, Field.ArticleId, Field.Unit, Field.Vat })
         {
             var claims = columns.Where(c => c.Meaning == meaning).ToList();
             if (claims.Count < 2) continue;
-            var fit = claims.Where(c => Fits(c, meaning)).ToList();
+            var fit = claims.Where(c => Fits(ShapeOf(Texts(c)), meaning)).ToList();
             var keep = fit.Count > 0 ? (meaning == Field.Name ? fit.MaxBy(c => c.Width) : fit[0]) : claims[0];
             foreach (var c in claims.Where(c => c != keep)) c.Meaning = null;
         }
-    }
-
-    bool Fits(Column c, Field meaning)
-    {
-        var texts = Texts(c);
-        if (texts.Count == 0) return false;
-        return meaning switch
-        {
-            Field.Name => Alphabetic(texts),
-            Field.ArticleId => Mostly(texts, Code.IsMatch),
-            Field.Unit => Alphabetic(texts) && Mostly(texts, t => Model.Units.Lookup(t) is not null),
-            _ => Mostly(texts, t => t.Contains('%')),
-        };
     }
 
     static List<string> Texts(Column c) => c.Body.Select(x => x.Text.Trim()).Where(t => t != "").ToList();
@@ -292,9 +299,8 @@ public sealed class Table
         return letters > 0 && letters >= 0.5 * all.Count(char.IsLetterOrDigit);
     }
 
-    // quantity × unit price = line net decides among the numeric columns nothing else named:
-    // the triple that holds on most rows wins, a column named by its header only competes for
-    // its own meaning. With no row adding up, the amounts read left to right as price then net.
+    // quantity × unit price = line net decides among the unnamed numeric columns: the triple
+    // that holds on most rows wins. With no row adding up, the amounts read as price then net.
     void Arithmetic(List<Column> counts, List<Column> amounts)
     {
         var q = Candidates(Field.Quantity, [.. counts, .. amounts]);
@@ -344,16 +350,14 @@ public sealed class Table
             var quantity = Parse.Number(At(q, row), Parse.ScaleMilli);
             var price = Parse.Number(At(p, row), Parse.ScaleMicro);
             var net = Parse.Number(At(n, row), Parse.ScaleCents);
-            if (quantity > 0 && price > 0 && net > 0
-                && InvoiceMath.RoundDiv(quantity * price, 1000 * 10000) == net) hits++;
+            if (quantity > 0 && price > 0 && net > 0 && InvoiceMath.LineNet(quantity, price, 1000) == net) hits++;
         }
         return hits;
     }
 
     static string At(Column c, int row) => c.Body.FirstOrDefault(x => x.Words[0].Row == row)?.Text ?? "";
 
-    // Name text ends where a key opens: the GTIN, the article number or the lot printed
-    // under or behind the name are not the name, and expected.json never carries them.
+    // Name text ends where a key opens: GTIN, article number or lot are not the name.
     static readonly Regex KeyWord = new(@"^(GTIN|EAN|Art(ikel)?[.\-]?(Nr|nummer|kennung)|Charge|Lot|MHD)\b", RegexOptions.IgnoreCase);
     static readonly char[] Bullets = ['•', '·', '-', '–', '*', '.', ','];
 
@@ -370,8 +374,7 @@ public sealed class Table
         return string.Join(" ", words);
     }
 
-    // One item per line-item row. A wrap row adds its name-column text to the name and fills
-    // a cell the item still lacks; anything else on it is a note the row does not need.
+    // One item per line-item row; a wrap row extends the name and fills a cell the item lacks.
     void Build(List<(Role Role, List<Cell> Cells)> rows)
     {
         Dictionary<Field, OcrWord>? current = null;
@@ -385,8 +388,7 @@ public sealed class Table
                     var meaning = cell.Column?.Meaning;
                     if (meaning is null && cell.Column is not null && cell.Column.Decided) continue;
                     var field = meaning ?? Field.Name;
-                    // A wrap row that carries a key anywhere is a note ("Schema der
-                    // Artikelkennung: 0160"), not the rest of the name.
+                    // A wrap row carrying a key is a note ("Schema der Artikelkennung: 0160").
                     if (field == Field.Name && cell.Words.Any(w => KeyWord.IsMatch(w.Word.Text))) continue;
                     var text = field == Field.Name ? NameText(cell) : cell.Text;
                     if (text == "") continue;
@@ -417,9 +419,8 @@ public sealed class Table
         }
     }
 
-    // "15 Stk" as one cell, in the quantity column when the row has no unit cell, or in the
-    // unit column when it has no quantity cell: number and unit are both in there.
-    static readonly Regex TrailingUnit = new(@"^\s*[-\d.,]+\s+(\S+)\s*$");
+    // "15 Stk" or "6Fl" as one cell, in whichever of the two columns it landed.
+    static readonly Regex TrailingUnit = new(@"^\s*[-\d.,]+\s*(\p{L}\S*)\s*$");
 
     static void Units(Dictionary<Field, OcrWord> cells)
     {
@@ -433,9 +434,7 @@ public sealed class Table
 
     public string DescribeRows(List<TaggedWord> page)
     {
-        var rows = page.GroupBy(w => w.Row).OrderBy(g => g.Key)
-            .Select(g => g.OrderBy(w => w.Word.Box.X).ToList())
-            .Where(r => r[0].Role is Role.ColumnHeader or Role.LineItem or Role.LineWrap or Role.Continuation);
+        var rows = ByRow(page).Where(r => r[0].Role is Role.ColumnHeader or Role.LineItem or Role.LineWrap or Role.Continuation);
         return string.Join("\n", rows.Select(r => $"  r{r[0].Row,-3} [{r[0].Role}] " + string.Join(" ", Cells(r).Select(c =>
             $"|{c.Text}:{(Best(c) is { } col ? columns.IndexOf(col) + ":" + (col.Meaning?.ToString() ?? "-") : "?")}"))));
     }

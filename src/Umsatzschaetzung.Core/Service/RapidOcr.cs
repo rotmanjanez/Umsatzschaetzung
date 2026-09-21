@@ -5,83 +5,59 @@ using Engine = RapidOcrNet.RapidOcr;
 
 namespace Umsatzschaetzung.Service;
 
-public sealed class RapidOcr : IOcr, IDisposable
+// The v6 detector with the v5 latin recogniser: v6 reads scripts these invoices never
+// carry and is slower for it. The two normalise differently, so the detector's mean and
+// deviation travel with its path. Threads is per instance: one page at a time wants every
+// core, a corpus run with a page per core wants one each.
+public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
 {
     public const string Name = "RapidOcrNet/PP-OCRv6-det-small+PP-OCRv5-latin-rec";
 
-    // The detector caps the long side at this before it runs. Boxes come back in
-    // source pixels regardless, but the cap is what limits how small a glyph may be
-    // on the page and still be read, so the corpus dumps record it.
+    // The detector's long-side cap; boxes come back in source pixels regardless.
     public const int MaxImageDimension = 4000;
 
     static readonly RapidOcrOptions Options =
         RapidOcrOptions.PPOCRv6 with { ReturnWordBox = true, MaxSideLen = MaxImageDimension };
 
-    // The v6 detector is paired with the v5 latin recogniser: v6 recognises far more
-    // scripts than these invoices need and is slower for it. The two halves normalise
-    // differently — v6 wants [-1, 1], v5 wants ImageNet statistics — so the detector's
-    // own mean and deviation have to travel with its path.
-    //
-    // The model paths in the package presets are relative, and the corpus tool is run
-    // from wherever the corpus lives.
     static readonly RapidOcrModelSet Models = RapidOcrModelSet.PPOCRv5Latin with
     {
-        DetModelPath = Beside("models/v6/PP-OCRv6_det_small.onnx"),
+        DetModelPath = AppFiles.Beside("models/v6/PP-OCRv6_det_small.onnx"),
         DetMean = RapidOcrModelSet.PPOCRv6Small.DetMean,
         DetStd = RapidOcrModelSet.PPOCRv6Small.DetStd,
-        ClsModelPath = Beside(RapidOcrModelSet.PPOCRv5Latin.ClsModelPath),
-        RecModelPath = Beside(RapidOcrModelSet.PPOCRv5Latin.RecModelPath),
-        KeysPath = Beside(RapidOcrModelSet.PPOCRv5Latin.KeysPath),
+        ClsModelPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.ClsModelPath),
+        RecModelPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.RecModelPath),
+        KeysPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.KeysPath),
     };
 
-    static string Beside(string path) => AppFiles.Beside(path);
-
-    readonly RapidOcrModelSet models;
-    readonly RapidOcrOptions options;
-    readonly int threads;
     Engine? engine;
-
-    // Threads is per instance, not per machine: one page at a time wants every core,
-    // but a corpus run with a page per core wants one core each.
-    public RapidOcr(int threads = 0) : this(Models, Options, threads) { }
-
-    internal RapidOcr(RapidOcrModelSet models, RapidOcrOptions options, int threads = 0)
-    {
-        this.models = models;
-        this.options = options;
-        this.threads = threads;
-    }
 
     public void Dispose() => engine?.Dispose();
 
-    public Task<OcrPageWords> Recognize(byte[] image, CancellationToken ct) => Task.Run(() =>
+    // Show-through goes first, on the original pixels, so it cannot vote on the lean; then
+    // the page is straightened and read. A sideways or upside-down page is turned and read
+    // again, since the boxes of the first pass sit in the turned frame.
+    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(() =>
     {
         using var decoded = Decode(image);
-        // The reverse of the sheet goes first, on the original pixels: it would otherwise
-        // survive a resample and vote on the lean it is not part of.
         using var cleaned = Deink.Apply(decoded);
-        // Straightened before the first read, so a leaning page costs no extra pass.
         using var straightened = Deskew.Apply(cleaned ?? decoded);
         var page = straightened ?? cleaned ?? decoded;
         var first = Read(page);
         var turn = Correction(first);
-        if (turn == 0)
-            return new OcrPageWords(page.Width, page.Height, Words(first),
-                                    ReferenceEquals(page, decoded) ? null : Encode(page));
-        // The boxes from the first pass sit in the rotated frame, and reading the page
-        // the right way up is a little better than reading it sideways, so the corrected
-        // page is read again rather than having its boxes turned. A quarter turn also
-        // makes the lean measurable for the first time, so it is taken out here.
+        if (turn == 0) return Page(page, first, ReferenceEquals(page, decoded) ? [] : Encode(page));
         using var turned = Rotate(page, turn);
         using var settled = Deskew.Apply(turned);
         var upright = settled ?? turned;
-        return new OcrPageWords(upright.Width, upright.Height, Words(Read(upright)), Encode(upright));
+        return Page(upright, Read(upright), Encode(upright));
     }, ct);
+
+    static OcrPage Page(SKBitmap page, OcrResult result, byte[] image) =>
+        new() { Width = page.Width, Height = page.Height, Words = Words(result), Image = image };
 
     OcrResult Read(SKBitmap page)
     {
         engine ??= Open();
-        return engine.Detect(page, options);
+        return engine.Detect(page, Options);
     }
 
     static List<OcrWord> Words(OcrResult result)
@@ -94,12 +70,9 @@ public sealed class RapidOcr : IOcr, IDisposable
         return words;
     }
 
-    // Degrees to turn the page by to stand it up. The recogniser reads a sideways or
-    // upside-down page perfectly well, so the text says nothing about which way up it
-    // is — but two things that fall out of the same pass do. Lines running down the
-    // page instead of across it mean a quarter turn is needed, and the direction
-    // classifier having flipped every crop means the page is upside down. Together
-    // they separate all four orientations; on a real page both votes are unanimous.
+    // Lines running down the page mean a quarter turn; the direction classifier having
+    // flipped every crop means upside down. Strict majorities only: turning an upright
+    // page costs far more than leaving a sideways one.
     static int Correction(OcrResult result)
     {
         int tall = 0, wide = 0, flipped = 0, upright = 0;
@@ -109,9 +82,6 @@ public sealed class RapidOcr : IOcr, IDisposable
             if (box.H > box.W) tall++; else wide++;
             if (block.AngleIndex == 1) flipped++; else upright++;
         }
-        // Strict majorities only. A blank page, or one the detector found too little on
-        // to be sure about, is left alone: turning an upright page costs far more than
-        // leaving a sideways one.
         return (tall > wide, flipped > upright) switch
         {
             (true, true) => 270,
@@ -124,7 +94,7 @@ public sealed class RapidOcr : IOcr, IDisposable
     Engine Open()
     {
         var engine = new Engine();
-        try { if (threads > 0) engine.InitModels(models, threads); else engine.InitModels(models); }
+        try { if (threads > 0) engine.InitModels(Models, threads); else engine.InitModels(Models); }
         catch (Exception e)
         {
             engine.Dispose();
@@ -148,8 +118,7 @@ public sealed class RapidOcr : IOcr, IDisposable
         return new Box(x0, y0, x1 - x0, y1 - y0);
     }
 
-    // The detector normalises straight off the pixel buffer and accepts only these two
-    // layouts, so everything below stays in one of them.
+    // The detector reads straight off the pixel buffer and accepts only this layout.
     static SKBitmap Decode(byte[] image)
     {
         var decoded = SKBitmap.Decode(image)

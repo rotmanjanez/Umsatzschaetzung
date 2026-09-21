@@ -1,28 +1,34 @@
 # Eval
 
-Tier 1 extraction metrics, in C#. Both models are scored by this same code, so
-their numbers are comparable, and assembly is `Core`'s `Extract.Assemble` — the
-one the app ships — so the number is not about a second implementation.
+Tier 1 extraction metrics, in C#, through `Core`'s own `Extract.Assemble`: the number is
+the app's number, not a second implementation's.
 
-    dotnet run --project tools/eval -- --rows tools/train/page.jsonl --split val
+    dotnet run -c Release --project tools/eval                       # the real scans
+    dotnet run -c Release --project tools/eval -- --full             # plus date and supplier
+    dotnet run -c Release --project tools/eval -- --rows pred.jsonl  # a Python dump
 
-    --rows      page.jsonl: labelled or predicted words, one page per line
-    --corpus    corpus root holding <invoice>/expected.json
-    --split     "" scores every split
-    --no-repair assemble without the OCR digit repair, for the A/B
+    --corpus    fixtures/dataset/2025 unless given; holds the expected.json files and,
+                without --rows, the <name>.ocr.json dumps to score
+    --rows      page.jsonl: labelled or predicted words, one page per line, scored as is
+    --split     with --rows; "" scores every split
+    --parity    with --rows: re-tag the dump's words in C# and report word-for-word agreement
+    --full      score date and supplier name too, not only what carries the estimate
     --out       the report
     --detail    per-variation TSV, for diffing two runs
-    --full      score every header field, not just the ones that carry the estimate
+    --show X    columns, cells and assembled-against-expected lines of invoices matching X
 
-A word is `{t, box, row, pred|field, role}`. `pred` wins over `field`, so the
-same code scores a prediction or verifies a ground truth end to end.
+Without `--rows` the eval reads every `*.ocr.json` under the corpus, groups the words into
+rows the way the app does, tags them through the app's ONNX path and assembles them with
+`Core`. The dumps are what `tools/ocr` writes off the app's own rendering, cleaning,
+straightening and OCR; they are gitignored, so refresh them with
+`dotnet run -c Release --project tools/ocr -- fixtures/dataset/2025 --force` whenever
+`Service/` changes. An invoice's `.pdf.scan` variation shares its `expected.json`; where the
+PDF and the e-invoice XML both carry one, the PDF's wins.
 
-**Run it on ground truth first.** With `field` and no `pred` the score must come
-out near perfect. Whatever it loses is assembly loss, not model error, and it is
-the ceiling for every model scored afterwards. A model can never beat it.
-
-Model B is scored by dumping its predictions in this shape and pointing `--rows`
-at the dump — see `tools/train/README.md`.
+A `--rows` word is `{t, box, row, pred|field, role, col, cell_start}`. `pred` wins over
+`field`, so the same reader scores a prediction or verifies a ground truth: **run it on
+ground truth first**, since whatever that loses is assembly loss and the ceiling for every
+model. `tools/train/README.md` has the dump step.
 
 ## Which run of a header field is the value
 
@@ -63,9 +69,40 @@ Two exceptions:
 `TotalsVat` retries on rows carrying a `vatLabel` when the totals block states more than
 one rate; two genuinely stated rates still yield nothing.
 
-The word head is 13 wide on a checkpoint predating the label classes and 19 with them, so
-on a v8 model no label is ever predicted and only the fallback path runs. `Tagger` reads
-the width off the ONNX graph.
+## The item table
+
+Nothing inside the table is typed by the model since v13; `Extract/Table.cs` reads it
+from the structure heads, deterministically and in this order:
+
+1. **Cells.** Per table row (`column-header`, `line-item`, `line-wrap`,
+   `continuation`), words sorted by x, a new cell at every `cell_start` word.
+2. **Columns.** Header and line-item cells cluster by x-overlap: a cell joins the
+   column overlapping it most, among near-equal overlaps the one whose model column
+   index matches, else the narrower one; no overlap opens a column. A header-only
+   column merges into the body-only neighbour with the same index (a left-aligned
+   header over right-aligned amounts). Wrap rows are placed afterwards without
+   widening anything. A page without a header row starts from the previous page's
+   columns.
+3. **Meaning.** The header text first, longest dictionary key wins on a prefix
+   (`Artikelnummer` before `Artikel`); then the body can contradict it — `Artikel`
+   over numeric codes is the article id, and of two columns claiming one meaning
+   only the one whose body fits keeps it. Undecided columns are typed by content:
+   `%` is the rate, a running 1, 2, 3 is the position, unit words are the unit,
+   two-decimal amounts and small counts stay candidates, the widest alphabetic
+   column is the name, a code column left of it the article id. Among the
+   candidates quantity × unit price = line net picks the triple that holds on most
+   rows; with no row adding up the amounts read left to right as price then net.
+4. **Rows.** One item per line-item row. Name text ends where a key opens (GTIN,
+   Artikelnummer, Charge ...). A wrap row appends its name-column text and fills a
+   cell the item lacks. A code-shaped first cell in the name column is the article
+   id. `15 Stk` as one cell yields quantity and unit whichever column it landed in.
+
+All 174 variations of the 100 invoices under `fixtures/dataset/2025` score 0.690 clean,
+cost 0.4, through the app path on 2026-09-21 (0.483 / 0.6 with `--full`); line precision
+and recall are both 1.000. What is left is the supplier name — the model tags a wordmark
+where the sender line prints the legal name, and tags an XRechnung viewer's form
+inconsistently — and one-cell OCR misreads on scans (`KI.` for `Kl.`, `Speisezwiebein`,
+`Bt)` for `Btl`).
 
 ## Scales, from Extract/Parse.cs
 
@@ -80,10 +117,9 @@ quantity 134000, unitPrice 340000, lineNet 4556.
 ## Metrics
 
 Header exact-match after normalisation on number, date, supplierName, netTotal,
-grossTotal, plus a fuzzy supplier variant that ignores legal-form suffixes. All of
-them are always measured and printed; by default only invoice number, netTotal,
-grossTotal and the line items count towards the clean rate and the correction cost,
-and the rest are marked `(not scored)`. `--full` counts date and supplier name too.
+grossTotal. All of them are always measured and printed; by default only invoice number,
+netTotal, grossTotal and the line items count towards the clean rate and the correction
+cost, and the rest are marked `(not scored)`. `--full` counts date and supplier name too.
 Lines are matched greedily on name similarity plus lineNet agreement, then precision,
 recall and per-field accuracy on matched lines. Invoice clean rate is the share
 with every cell right. Correction cost is wrong cells per invoice, mean and p90;
@@ -107,28 +143,40 @@ an approximation would silently move every match.
 
 ## Status of the two datasets
 
-**Synthetic val — runnable today.** 452 val variations, split by template.
+**Synthetic val** — `tools/train/page.jsonl`, split by template; a v13 dump of it
+needs the `col`/`cell_start` keys to assemble.
 
-**Real scans — blocked.** `fixtures/dataset/2025` has 117 `*.expected.json` and
-**zero `*.ocr.json`**. Step 1 of the plan in `docs/extraction-eval.md` ("OCR dump
-step, checked in") has not been done for the real scans, only for the synthetic
-corpus. Until it is, there is no real-scan number, and the synthetic val score on
-its own says nothing about the domain gap — which is the entire question.
+**Real scans** — 174 variations of the 100 invoices under `fixtures/dataset/2025`: the
+digital PDF and, for 65 of them, a `.pdf.scan.<png|jpeg|pdf>` of the printed sheet. The
+`*.ocr.json` dumps beside them are gitignored and come from `tools/ocr`; the eval reads
+them straight through the app's row grouping and tagger. An earlier
+`v13/real-v13.jsonl` covered only 109 of these — none of the 65 scans of cc, gemuese,
+kaffee, metzgerei, nonfood, wein — off dumps made before straightening and cleaning
+existed, and read a scanned PDF at 9920 x 14032 px; its 0.789 was not the app's number.
 
-The fix:
+### Preprocessing: show-through, then straightening
 
-    dotnet run --project tools/ocr -- fixtures/dataset/2025
+`RapidOcr` cleans the reverse of the sheet off the page (`Deink`), straightens it
+(`Deskew`) and does nothing else. The `AutoLevels` histogram stretch that `WindowsOcr`
+carried was measured against RapidOCR, came out slightly worse, and has been removed
+along with the `--raw` and `--no-levels` switches.
 
-The 108 files in 2025 are PDFs and `tools/ocr` still rasterises those through
-`Windows.Data.Pdf`, so that directory is Windows-bound until the dependency is
-replaced. `tools/rapidocr/run.py` is the Python path and may already sidestep it.
+`Deink` works on ink depth — how far below the local paper level a pixel sits — so a grey
+sheet, a shadow and a vignette cancel. Marks are split from paper by Otsu; a stroke is a
+connected run of marks, and it stands if any part of it reaches **half the ink level**,
+the median depth of what is clearly ink. Paper passes far less than half of what is
+printed on its other side, so show-through never gets there and falls out whole, while a
+word printed grey or in colour does and stays whole with its soft edges. The rule came
+from the fixtures' own depth maps: a rendered PDF has no stroke under 0.55 of its ink
+level, a double-sided scan piles up under 0.5. The earlier version split the marks a
+second time by their own histogram, which on a rendered PDF parts dark text from darker
+text — it threw away 30–55 % of the words on clean pages, among them every grey label
+that anchors a header field, and a 9-cell invoice came back with 9 wrong cells.
+Measured over the 65 scans and 6 clean PDFs (wrong cells, then clean invoices):
 
-### Preprocessing: straightening only
-
-`RapidOcr` straightens a page before it reads it (`Deskew`) and does nothing else.
-The `AutoLevels` histogram stretch that `WindowsOcr` carried was measured against
-RapidOCR, came out slightly worse, and has been removed along with the `--raw` and
-`--no-levels` switches.
+    second Otsu split (was)     70   30
+    no cleaning                190   22      metzgerei show-through invents lines
+    half the ink level (now)   71   34      and every clean PDF reads whole again
 
 The lean is the angle whose horizontal projection is most peaked: straight text piles
 into sharp bands and the profile spikes. The sweep runs coarse to fine over the bracket

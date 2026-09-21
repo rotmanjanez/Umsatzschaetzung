@@ -21,8 +21,7 @@ public sealed class Invoice
     public string Currency { get; set; } = "";
     public long NetTotal { get; set; }
     public long GrossTotal { get; set; }
-    // What the document itself prints, where a scan could read it: the totals above are the sum of
-    // the positions, so only these two can tell whether the reading missed anything.
+    // What the document prints; the totals above are the sum of the positions.
     public long? StatedNet { get; set; }
     public long? StatedGross { get; set; }
     public List<InvoiceLine> Lines { get; set; } = [];
@@ -65,8 +64,7 @@ public enum Field
     [JsonStringEnumMemberName("netTotal")] NetTotal,
     [JsonStringEnumMemberName("grossTotal")] GrossTotal,
 
-    // In the order of FIELDS in tools/train/schema.py; the value ids are unchanged so a 13-way
-    // checkpoint still decodes.
+    // In the order of FIELDS in tools/train/schema.py.
     [JsonStringEnumMemberName("numberLabel")] NumberLabel,
     [JsonStringEnumMemberName("dateLabel")] DateLabel,
     [JsonStringEnumMemberName("netLabel")] NetLabel,
@@ -74,8 +72,7 @@ public enum Field
     [JsonStringEnumMemberName("vatLabel")] VatLabel,
     [JsonStringEnumMemberName("otherLabel")] OtherLabel,
 
-    // v13: a word inside an item table. The model no longer types table cells; which of the
-    // line fields a cell holds is decided by its column, in Extract/Table.cs.
+    // A word inside the item table; its column decides the field, in Extract/Table.cs.
     [JsonStringEnumMemberName("cell")] Cell,
 }
 
@@ -132,6 +129,10 @@ public static class InvoiceMath
             gross += RoundDiv(b * rate, Bp.Full);
         return (net, gross);
     }
+
+    // Quantity in milli, unit price in micro per PriceBaseQty milli, net in cents.
+    public static long LineNet(long quantity, long unitPrice, long priceBaseQty) =>
+        RoundDiv(quantity * unitPrice, (priceBaseQty > 0 ? priceBaseQty : 1000) * 10000);
 
     public static long RoundDiv(long num, long den) =>
         num < 0 ? -((-num + den / 2) / den) : (num + den / 2) / den;

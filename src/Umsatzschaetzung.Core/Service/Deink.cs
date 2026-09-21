@@ -3,14 +3,14 @@ using SkiaSharp;
 
 namespace Umsatzschaetzung.Service;
 
-// Suppresses show-through: the reverse of a double-sided sheet, picked up through the
-// paper. It reads as text — mirrored, or upside down where the sheet was fed the other
-// way — and lands in the same rows as the front, so it invents line items, buries unit
-// codes and corrupts totals. Nothing here is tuned; every level comes from the page.
+// Removes show-through: the reverse of a double-sided sheet, which lands in the same rows
+// as the front and invents line items. A stroke is a connected run of marks, kept if any
+// part of it reaches half the ink level. Paper passes far less than half of what is printed
+// on its other side, while grey or coloured print on the front does reach it: measured on
+// the fixtures, a rendered PDF has no stroke under 0.55 of its ink level and double-sided
+// scans pile up under 0.5.
 public static class Deink
 {
-    // Beyond this the detector downscales anyway, so cleaning finer detail is wasted and
-    // the buffers would be enormous.
     const int Limit = RapidOcr.MaxImageDimension;
 
     public static SKBitmap? Apply(SKBitmap page)
@@ -19,23 +19,11 @@ public static class Deink
         int w = Math.Max((int)(page.Width * scale), 1), h = Math.Max((int)(page.Height * scale), 1);
         var grey = Ink.Grey(page, w, h);
         var depth = Ink.Depth(grey, w, h);
-
-        // Marks against paper, then the ink level: the median depth of what is clearly ink.
-        // A stroke is a run of marks, and it stands if any part of it reaches half the ink
-        // level. Paper passes far less than half of what is printed on its other side, so
-        // the reverse never gets there and falls out whole, while a word printed grey or in
-        // colour does and stays whole. Measured on the fixtures: rendered PDFs have no
-        // stroke under 0.55 of the ink level, scans with show-through pile up under 0.5.
-        // Splitting the marks a second time by their own histogram is not safe: on a
-        // rendered PDF it parts dark text from darker text and threw away half the words.
         var marked = Ink.Otsu(depth);
-        var core = Ink.Otsu(depth, marked);
-        var floor = (byte)(Ink.Median(depth, core) / 2);
+        var floor = (byte)(Ink.Median(depth, Ink.Otsu(depth, marked)) / 2);
 
         var keep = Strokes(depth, w, h, marked, floor);
-        var kept = 0;
-        foreach (var k in keep) if (k) kept++;
-        if (kept == 0) return null;
+        if (!keep.Contains(true)) return null;
 
         var buffer = new byte[w * h * 4];
         for (var i = 0; i < keep.Length; i++)

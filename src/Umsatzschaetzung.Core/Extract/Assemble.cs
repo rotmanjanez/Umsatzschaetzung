@@ -36,11 +36,8 @@ public static class Assemble
     const double Radius = 0.25;
     const double Gap = 1.5;
 
-    // units: the app resolves to Model/Units.cs, the eval to its expected.json vocabulary.
-    public static Invoice Invoice(IReadOnlyList<List<TaggedWord>> tagged, List<OcrPage> pages,
-        Func<string, string>? units = null)
+    public static Invoice Invoice(IReadOnlyList<List<TaggedWord>> tagged, List<OcrPage> pages)
     {
-        units ??= Parse.UnitCode;
         var inv = new Model.Invoice { Source = Source.Scan, Currency = "EUR" };
         Table? layout = null;
         for (var p = 0; p < tagged.Count; p++)
@@ -49,11 +46,10 @@ public static class Assemble
             if (table.HasColumns) layout = table;
             foreach (var cells in table.Items)
             {
-                // A position is billed: a row with a name and no number at all is a note or
-                // footer text the row role mistook, not an item.
+                // A position is billed: a row without any number is a note the row role mistook.
                 if (!cells.ContainsKey(Field.Name) && !cells.ContainsKey(Field.LineNet)) continue;
                 if (!cells.ContainsKey(Field.LineNet) && !cells.ContainsKey(Field.Quantity) && !cells.ContainsKey(Field.UnitPrice)) continue;
-                var unit = units(Text(cells, Field.Unit));
+                var unit = Parse.UnitCode(Text(cells, Field.Unit));
                 var quantity = Parse.Digits(Text(cells, Field.Quantity));
                 var line = new InvoiceLine
                 {
@@ -93,24 +89,19 @@ public static class Assemble
         return inv;
     }
 
-    // Only a trailing group of exactly three digits is ambiguous: "5,450 kg" is five and a
-    // half kilos, but German grouping writes thousands the same way, so Parse.Number reads
-    // 5450. A separator the scan lost altogether arrives as two words and is the same case.
-    // Nothing else may be regrouped — a quantity without that shape was not misread this
-    // way, and the row would otherwise absorb a wrong unit price instead.
+    // "5,450 kg" is five and a half kilos, but German grouping writes thousands the same way
+    // and Parse.Number reads 5450; only that shape is ambiguous, and the row decides.
     static readonly Regex Grouped = new(@"^\d{1,3}[.,\s]\d{3}$");
 
-    // The row decides: quantity times unit price is the line net.
     public static void Regroup(InvoiceLine line, string quantityText)
     {
         if (line.LineNet == 0 || line.UnitPrice == 0 || line.PriceBaseQty == 0) return;
         if (!Grouped.IsMatch(quantityText.Trim())) return;
-        if (Net(line, line.Quantity) == line.LineNet) return;
-        if (Net(line, line.Quantity / 1000) == line.LineNet) line.Quantity /= 1000;
+        if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, line.LineNet)) return;
+        if (Adds(line.Quantity / 1000, line.UnitPrice, line.PriceBaseQty, line.LineNet)) line.Quantity /= 1000;
     }
 
-    // Digits a worn scan swaps, because they share a shape. Symmetric: the pass has no
-    // idea which of the two was printed, only that the row disagrees with itself.
+    // Digits a worn scan swaps because they share a shape, in both directions.
     static readonly Dictionary<char, string> Confusable = Shapes(
         ["08", "06", "09", "17", "38", "56", "58", "68", "69", "27", "49", "39"]);
 
@@ -125,10 +116,8 @@ public static class Assemble
         return map;
     }
 
-    // One misread digit anywhere in the row, put back by the row itself: quantity times unit
-    // price is the line net, and that is a tight enough constraint that a wrong digit almost
-    // never satisfies it. Only where exactly one candidate does — several, and the row cannot
-    // say which, so it stays wrong and the check that follows reports it.
+    // One misread digit anywhere in the row, put back by the row: quantity times unit price is
+    // the line net. Only where exactly one candidate satisfies it; else the check reports it.
     public static void Repair(InvoiceLine line)
     {
         if (Restore(line)) return;
@@ -150,10 +139,8 @@ public static class Assemble
         else line.LineNet = value;
     }
 
-    // A cell the scan lost outright — a quantity read as a black square — comes back from the
-    // other two where the division is exact and the result is a plain number. Never the line
-    // net: quantity times price is its definition, not a check, so a missing net stays
-    // missing and is flagged.
+    // A cell the scan lost outright comes back from the other two where the division is
+    // exact. Never the line net: quantity times price is its definition, not a check.
     static bool Restore(InvoiceLine line)
     {
         if (line.LineNet <= 0) return false;
@@ -189,21 +176,14 @@ public static class Assemble
         return seen;
     }
 
-    // Exactly, in whole cents: measured across the real invoices every printed line net is
-    // the rounded product to the cent, so slack buys nothing and lets a wrong digit fit by
-    // coincidence — which on a row wrong in more than one place is how a guess gets in.
     static bool Adds(long quantity, long price, long baseQty, long net) =>
-        InvoiceMath.RoundDiv(quantity * price, (baseQty > 0 ? baseQty : 1000) * 10000) == net;
-
-    static long Net(InvoiceLine line, long quantity) =>
-        (long)Math.Round(quantity * (double)line.UnitPrice / (line.PriceBaseQty * 10000.0),
-            MidpointRounding.AwayFromZero);
+        InvoiceMath.LineNet(quantity, price, baseQty) == net;
 
     static long? Stated(Dictionary<Field, string> header, Field field) =>
         Parse.Number(Parse.Digits(header.GetValueOrDefault(field, "")), Parse.ScaleCents) is var v and > 0 ? v : null;
 
-    // Two rates cannot be attributed without a per-line marker, so that yields nothing. The
-    // vatLabel retry drops a rate read off some other totals row.
+    // Two stated rates cannot be attributed to lines; the vatLabel retry drops a rate read
+    // off some other totals row.
     static long? TotalsVat(IReadOnlyList<List<TaggedWord>> tagged)
     {
         var rates = Rates(tagged, labelledOnly: false);
@@ -251,9 +231,8 @@ public static class Assemble
         public double Conf;
     }
 
-    // Not the first run: on a real scan that is routinely a false positive, a customer number
-    // ahead of the invoice number. Labels claim first, then role and confidence; the first page
-    // with any run decides. tools/eval/README.md has the full order.
+    // Labels claim first, then role and confidence; the first page with any run decides.
+    // tools/eval/README.md has the full order.
     static (int Page, Run Run)? HeaderValue(IReadOnlyList<List<TaggedWord>> tagged, Field field)
     {
         var hasLabel = LabelOf.TryGetValue(field, out var label);
@@ -286,10 +265,8 @@ public static class Assemble
     static double Extent(List<TaggedWord> words) =>
         words.Count == 0 ? 1.0 : Math.Max(1.0, words.Max(w => w.Word.Box.X + w.Word.Box.W));
 
-    // A segment opening with a key of its own starts a new block: a stacked meta block prints
-    // "Kundennummer 48211" above "Rechnungsnummer RE250292/6" and those are two values. The
-    // key is the word directly before the segment, not any label on the printed line — a form
-    // sets "Adresszeile 1:" at the left margin of the line that carries the name's second half.
+    // A segment with a key directly before it starts a new block: "Kundennummer 48211" above
+    // "Rechnungsnummer RE250292/6" are two values.
     static List<Run> Runs(List<List<TaggedWord>> rows, Field field)
     {
         var all = new List<Run>();
@@ -361,8 +338,7 @@ public static class Assemble
     static bool IsDate(List<TaggedWord> seg) =>
         Parse.Date(string.Join(" ", seg.Select(w => w.Word.Text))) is not null;
 
-    // A wordmark over the sender line prints the name twice: 'Pucher OG' comes back as 'Pucher
-    // Pucher OG'. A name genuinely set over two lines has neither inside the other and joins.
+    // A wordmark over the sender line prints the name twice: 'Pucher Pucher OG'.
     static List<List<TaggedWord>> Undouble(List<List<TaggedWord>> lines)
     {
         var printings = lines.SelectMany(Printings).ToList();
@@ -400,7 +376,7 @@ public static class Assemble
         return best < 0 ? [line] : [line[..best], line[best..]];
     }
 
-    // Letters run together, not words compared: 'Trautm ann' is still 'Trautmann'.
+    // Letters run together: 'Trautm ann' is still 'Trautmann'.
     static bool Inside(List<string> a, List<string> b)
     {
         var text = string.Concat(b);
@@ -415,7 +391,6 @@ public static class Assemble
         return false;
     }
 
-    // casefold, not ToLowerInvariant: GROSSHANDEL is Großhandel.
     static string CaseFold(string s) => s.ToLowerInvariant().Replace("ß", "ss");
 
     static bool OverlapsX(Box a, Box b) => a.X < b.X + b.W && b.X < a.X + a.W;

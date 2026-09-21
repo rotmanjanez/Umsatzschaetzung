@@ -352,10 +352,11 @@ renderer — a silent box/label drift is the one failure this corpus cannot surv
 ## Real OCR
 
 The render-time boxes are not the model's input. The model sees what the OCR engine
-saw, errors and all, so every page is read back with the same `Windows.Media.Ocr` the
-app itself runs — `tools/ocr`, which writes the words it found next to the image:
+saw, errors and all, so every page is read back through the app's own page pipeline —
+`tools/ocr`, which renders, cleans, straightens and reads with RapidOCR exactly as
+`Service/` does and writes the words it found next to the image:
 
-    dotnet run --project ../ocr -- ../../fixtures/dataset/gen
+    dotnet run -c Release --project ../ocr -- ../../fixtures/dataset/gen --dpi 288
 
     inv-000042/
       v03-scan_worn-2ce4897604d1/
@@ -365,13 +366,11 @@ app itself runs — `tools/ocr`, which writes the words it found next to the ima
 
 `page-1.ocr.json` carries the page size and every OCR word with its box, in the same
 pixel coordinates as `truth.json` — PDF pages are rasterised back to exactly the size
-they were written at, so the two line up without a transform. Pages that already have
+they were written at (`--dpi` is 96 times `--scale`), so the two line up without a
+transform. Pages that already have
 a dump are skipped, so a run resumes where it stopped; `--force` redoes them.
 
-Windows-only, and it needs the German OCR language pack (the „Optische
-Zeichenerkennung“ feature under the Deutsch language options) — without it the tool
-exits and lists what is installed. The same tool dumps the real scans in
-`fixtures/dataset/2025`, which is what lets the eval run off Windows.
+The same tool dumps the real scans in `fixtures/dataset/2025`, which is what the eval scores.
 
 ## Von hier zu den Trainingszeilen
 
