@@ -167,6 +167,25 @@ Check(Repaired(0, 3000000, 1000).Quantity == 0, "restore: only where the divisio
 Check(Repaired(3000, 0, 1290).UnitPrice == 4300000, "restore: a lost unit price, in whole cents");
 Check(Repaired(3000, 0, 1145).UnitPrice == 0, "restore: a unit price that is not whole cents is not one");
 Check(Repaired(3000, 4300000, 0).LineNet == 0, "restore: the line net is never derived");
+// 46,92 over 58 kg is no price at all, over the 68 kg printed it is 0,69.
+var rescued = Repaired(58000, 0, 4692);
+Check(rescued.Quantity == 68000 && rescued.UnitPrice == 690000,
+    "restore: the surviving cell is read again where only one confusion of it divides out");
+// 12,00 over 7 reads nothing; over 1 it is 12,00 and over 2 it is 6,00.
+var unclear = Repaired(7000, 0, 1200);
+Check(unclear.Quantity == 7000 && unclear.UnitPrice == 0,
+    "restore: two confusions divide out equally well, so the row is left as read");
+
+Check(Table.Join(Field.Quantity, "4.", ",670") == "4,670",
+    "join: a number split across two cells keeps the separator the second cell brought");
+Check(Parse.Number(Table.Join(Field.Quantity, "4.", ",670"), Parse.ScaleMilli) == 4670,
+    "join: and reads as 4,670 kg, not as 4.670");
+Check(Table.Join(Field.Quantity, "6", ",150") == "6,150", "join: the first cell need not have kept anything");
+Check(Table.Join(Field.Quantity, "4.", "670") == "4. 670",
+    "join: a second cell without a separator says nothing about where the comma stood");
+Check(Table.Join(Field.Quantity, "Stk", ",150") == "Stk ,150", "join: only a number continues a number");
+Check(Table.Join(Field.Name, "Bratwurst grob", ",120 g") == "Bratwurst grob ,120 g",
+    "join: a name is not arithmetic and keeps its space");
 
 static SkiaSharp.SKBitmap Ruled(double lean)
 {

@@ -411,12 +411,31 @@ public sealed class Table
                     && cells.Count(c => c.Column == cell.Column) > 1 && Code.IsMatch(text.TrimEnd(Bullets).Trim()))
                     field = Field.ArticleId;
                 current[field] = current.TryGetValue(field, out var had)
-                    ? new OcrWord { Text = had.Text + " " + text, Box = Rows.Union(had.Box, cell.Box) }
+                    ? new OcrWord { Text = Join(field, had.Text, text), Box = Rows.Union(had.Box, cell.Box) }
                     : new OcrWord { Text = text, Box = cell.Box };
             }
             Units(current);
             Items.Add(current);
         }
+    }
+
+    static readonly Regex Continues = new(@"^[.,;:]\d");
+
+    static readonly char[] Separators = ['.', ',', ';', ':', ' '];
+
+    static bool Counted(Field f) => f is Field.Quantity or Field.UnitPrice or Field.LineNet or Field.Vat;
+
+    // One printed number the scan broke into two cells: "4,670" kg comes back as "4." and
+    // ",670", "6,150" kg as "6" and ",150". The piece that opens with a separator brings the
+    // printed one with it, so it glues straight on and whatever the piece before it kept of
+    // the same mark goes: the comma is read once, and 4,670 kg never becomes 4670.
+    // A piece that arrives without a separator says nothing about where the comma stood and
+    // stays a word of its own.
+    public static string Join(Field field, string had, string text)
+    {
+        if (!Counted(field) || !Continues.IsMatch(text)) return had + " " + text;
+        var left = had.TrimEnd(Separators);
+        return left.Length > 0 && char.IsAsciiDigit(left[^1]) ? left + text : had + " " + text;
     }
 
     // "15 Stk" or "6Fl" as one cell, in whichever of the two columns it landed.

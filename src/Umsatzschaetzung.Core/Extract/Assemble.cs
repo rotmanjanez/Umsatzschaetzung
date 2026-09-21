@@ -147,20 +147,42 @@ public static class Assemble
         var baseQty = line.PriceBaseQty > 0 ? line.PriceBaseQty : 1000;
         if (line.Quantity <= 0 && line.UnitPrice > 0)
         {
-            var q = InvoiceMath.RoundDiv(line.LineNet * baseQty * 10000, line.UnitPrice);
-            if (q <= 0 || q % 10 != 0 || !Adds(q, line.UnitPrice, baseQty, line.LineNet)) return false;
+            if (QuantityFrom(line.LineNet, baseQty, line.UnitPrice) is not { } q) return false;
             line.Quantity = q;
             return true;
         }
         if (line.UnitPrice <= 0 && line.Quantity > 0)
         {
-            var p = InvoiceMath.RoundDiv(line.LineNet * baseQty * 10000, line.Quantity);
-            if (p <= 0 || p % 10000 != 0 || !Adds(line.Quantity, p, baseQty, line.LineNet)) return false;
-            line.UnitPrice = p;
+            if (PriceFrom(line.LineNet, baseQty, line.Quantity) is { } p)
+            {
+                line.UnitPrice = p;
+                return true;
+            }
+            // The quantity may itself be misread; a price only comes of the one confusion of
+            // it that divides out. Asked of a lost quantity the same question answers too
+            // often to be evidence: a price has to land on a whole cent, one chance in a
+            // hundred per candidate, a quantity only on a whole hundredth of its unit.
+            var found = new List<(long Quantity, long Price)>();
+            foreach (var q in Confusions(line.Quantity))
+                if (PriceFrom(line.LineNet, baseQty, q) is { } price) found.Add((q, price));
+            if (found.Count != 1) return false;
+            (line.Quantity, line.UnitPrice) = found[0];
             return true;
         }
         return false;
     }
+
+    // Quantities are printed to the thousandth and prices to the cent, so a division that
+    // lands anywhere else did not undo a multiplication.
+    static long? QuantityFrom(long net, long baseQty, long price) =>
+        Whole(InvoiceMath.RoundDiv(net * baseQty * 10000, price), 10) is { } q
+            && Adds(q, price, baseQty, net) ? q : null;
+
+    static long? PriceFrom(long net, long baseQty, long quantity) =>
+        Whole(InvoiceMath.RoundDiv(net * baseQty * 10000, quantity), 10000) is { } p
+            && Adds(quantity, p, baseQty, net) ? p : null;
+
+    static long? Whole(long value, long step) => value > 0 && value % step == 0 ? value : null;
 
     static HashSet<long> Confusions(long value)
     {

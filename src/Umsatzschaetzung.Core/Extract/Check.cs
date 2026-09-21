@@ -4,8 +4,9 @@ namespace Umsatzschaetzung.Extract;
 
 public static class Check
 {
-    // Every comparison is exact: across the real invoices all line nets, line sums and gross
-    // totals reproduce the document's own integer arithmetic to the cent.
+    // Line nets and line sums reproduce the document's own integer arithmetic to the cent. The
+    // gross total does not: suppliers either apply the rate once to the net total or round the
+    // tax per position and add those up, which differ by a cent on half-way lines. Both count.
     public static List<Flag> Invoice(Invoice inv)
     {
         var flags = new List<Flag>();
@@ -49,7 +50,10 @@ public static class Check
         if (rates.Count == 1 && rates.Single() is var vat and > 0)
         {
             var expected = InvoiceMath.RoundDiv(net * (Bp.Full + vat), Bp.Full);
-            if (expected != gross)
+            long perLine = net;
+            foreach (var l in inv.Lines)
+                perLine += InvoiceMath.RoundDiv(l.LineNet * vat, Bp.Full);
+            if (expected != gross && perLine != gross)
                 flags.Add(new Flag
                 {
                     Code = "gross_check",
