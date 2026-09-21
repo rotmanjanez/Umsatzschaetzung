@@ -164,13 +164,35 @@ public sealed class Table
         [.. groups.SelectMany(g => g.Words.Split(' ').Select(w => (Norm(w), g.Meaning)))
             .OrderByDescending(k => k.Item1.Length)];
 
+    // Exact first, then a key that opens the text ("Menge/Stk"), then a key the scan
+    // misread by one character ("Eirheit", "Surme"). A short key such as ME or EP must
+    // match exactly: as a prefix it claims "Merge" for the unit and "Epos" for the price.
     static (bool Hit, Field? Meaning) Heading(string text)
     {
         var key = Norm(text);
         if (key == "") return (false, null);
         foreach (var (k, meaning) in Headings)
-            if (key.StartsWith(k, StringComparison.Ordinal)) return (true, meaning);
+            if (key == k) return (true, meaning);
+        foreach (var (k, meaning) in Headings)
+            if (k.Length >= 4 && key.StartsWith(k, StringComparison.Ordinal)) return (true, meaning);
+        foreach (var (k, meaning) in Headings)
+            if (k.Length >= 5 && OneEdit(key, k)) return (true, meaning);
         return (false, null);
+    }
+
+    static bool OneEdit(string a, string b)
+    {
+        if (Math.Abs(a.Length - b.Length) > 1) return false;
+        int i = 0, j = 0, edits = 0;
+        while (i < a.Length && j < b.Length)
+        {
+            if (a[i] == b[j]) { i++; j++; continue; }
+            if (++edits > 1) return false;
+            if (a.Length > b.Length) i++;
+            else if (a.Length < b.Length) j++;
+            else { i++; j++; }
+        }
+        return edits + (a.Length - i) + (b.Length - j) <= 1;
     }
 
     static readonly Regex Amount = new(@"^[-€]?\s*\d{1,3}(?:[.\s]\d{3})*[,.]\d{2}\s*(?:€|EUR)?-?$");
@@ -201,7 +223,7 @@ public sealed class Table
             if (texts.Count == 0) continue;
             if (Mostly(texts, t => t.Contains('%'))) Fix(c, Field.Vat);
             else if (Sequential(texts)) Fix(c, null);
-            else if (Mostly(texts, t => Model.Units.Lookup(t) is not null)) Fix(c, Field.Unit);
+            else if (Alphabetic(texts) && Mostly(texts, t => Model.Units.Lookup(t) is not null)) Fix(c, Field.Unit);
             else if (Mostly(texts, Amount.IsMatch)) amounts.Add(c);
             else if (Mostly(texts, Count.IsMatch)) counts.Add(c);
             else if (Mostly(texts, Code.IsMatch)) codes.Add(c);
@@ -240,7 +262,7 @@ public sealed class Table
         {
             Field.Name => Alphabetic(texts),
             Field.ArticleId => Mostly(texts, Code.IsMatch),
-            Field.Unit => Mostly(texts, t => Model.Units.Lookup(t) is not null),
+            Field.Unit => Alphabetic(texts) && Mostly(texts, t => Model.Units.Lookup(t) is not null),
             _ => Mostly(texts, t => t.Contains('%')),
         };
     }
@@ -333,7 +355,7 @@ public sealed class Table
     // Name text ends where a key opens: the GTIN, the article number or the lot printed
     // under or behind the name are not the name, and expected.json never carries them.
     static readonly Regex KeyWord = new(@"^(GTIN|EAN|Art(ikel)?[.\-]?(Nr|nummer|kennung)|Charge|Lot|MHD)\b", RegexOptions.IgnoreCase);
-    static readonly char[] Bullets = ['•', '·', '-', '–', '*'];
+    static readonly char[] Bullets = ['•', '·', '-', '–', '*', '.', ','];
 
     static string NameText(Cell cell)
     {
@@ -363,6 +385,9 @@ public sealed class Table
                     var meaning = cell.Column?.Meaning;
                     if (meaning is null && cell.Column is not null && cell.Column.Decided) continue;
                     var field = meaning ?? Field.Name;
+                    // A wrap row that carries a key anywhere is a note ("Schema der
+                    // Artikelkennung: 0160"), not the rest of the name.
+                    if (field == Field.Name && cell.Words.Any(w => KeyWord.IsMatch(w.Word.Text))) continue;
                     var text = field == Field.Name ? NameText(cell) : cell.Text;
                     if (text == "") continue;
                     if (field == Field.Name && current.TryGetValue(field, out var name))

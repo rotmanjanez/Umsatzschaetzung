@@ -49,7 +49,10 @@ public static class Assemble
             if (table.HasColumns) layout = table;
             foreach (var cells in table.Items)
             {
+                // A position is billed: a row with a name and no number at all is a note or
+                // footer text the row role mistook, not an item.
                 if (!cells.ContainsKey(Field.Name) && !cells.ContainsKey(Field.LineNet)) continue;
+                if (!cells.ContainsKey(Field.LineNet) && !cells.ContainsKey(Field.Quantity) && !cells.ContainsKey(Field.UnitPrice)) continue;
                 var unit = units(Text(cells, Field.Unit));
                 var quantity = Parse.Digits(Text(cells, Field.Quantity));
                 var line = new InvoiceLine

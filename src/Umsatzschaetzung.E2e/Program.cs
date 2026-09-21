@@ -106,7 +106,12 @@ Check(Parse.UnitCode("F1") == "XBO", "unit: a bottle read with a one comes back"
 Check(Parse.UnitCode("17F1") == "XBO", "unit: the quantity column bleeding in is stripped");
 Check(Parse.UnitCode("1") == "1" && Parse.UnitCode("0") == "0", "unit: a lone digit is a stray, not a litre");
 Check(Parse.UnitCode("Zi") == "Zi", "unit: an unknown short code still passes through");
+Check(Parse.UnitCode("EI") == "XBO", "unit: a bottle whose F lost its bar comes back");
 Check(Units.NoFoldCollisions, "unit: no two aliases in units.json fold together");
+
+Check(Parse.Digits("1O,5O €") == "10,50 €", "digits: letters in a numeric cell read as the digits they look like");
+Check(Parse.Digits("12 Stk") == "12 Stk" && Parse.Digits("Summe") == "Summe", "digits: a word stays a word");
+Check(Parse.Digits("l") == "1", "digits: a lone l in a quantity cell is a one");
 
 Check(Parse.PackUnit("Frittieröl 10 1") == "Frittieröl 10 l", "pack unit: a litre read as a one");
 Check(Parse.PackUnit("Bratwurst grob, fränkisch, 120 8") == "Bratwurst grob, fränkisch, 120 g",
@@ -157,7 +162,11 @@ Check(Checked("KGM").Count == 0, "check: a line that states its unit and adds up
 Check(Checked("").Any(f => f.Code == "no_unit"), "check: a line without a unit is reported");
 Check(!Umsatzschaetzung.Extract.Check.Complete(new Invoice(), Checked("")), "check: and such an invoice is not complete");
 Check(Repaired(5000, 1234567, 9999).Quantity == 5000, "repair: no single digit explains the row");
-Check(Repaired(0, 900000, 810).Quantity == 0, "repair: an unread cell is not guessed at");
+Check(Repaired(0, 900000, 810).Quantity == 9000, "restore: a quantity the scan lost comes back from price and net");
+Check(Repaired(0, 3000000, 1000).Quantity == 0, "restore: only where the division comes out clean");
+Check(Repaired(3000, 0, 1290).UnitPrice == 4300000, "restore: a lost unit price, in whole cents");
+Check(Repaired(3000, 0, 1145).UnitPrice == 0, "restore: a unit price that is not whole cents is not one");
+Check(Repaired(3000, 4300000, 0).LineNet == 0, "restore: the line net is never derived");
 
 static SkiaSharp.SKBitmap Ruled(double lean)
 {

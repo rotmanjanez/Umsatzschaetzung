@@ -24,7 +24,7 @@
     { "code": "XCA", "name": "Dose",      "base": "piece", "factor": 1, "container": true, "aliases": ["dose", "ds"] },
     { "code": "XRO", "name": "Rolle",     "base": "piece", "factor": 1, "container": true, "aliases": ["rolle", "rollen", "ro"] },
     { "code": "XBH", "name": "Bund",      "base": "piece", "factor": 1, "container": true, "aliases": ["bund", "bd"] },
-    { "code": "XBJ", "name": "Eimer",     "base": "piece", "factor": 1, "container": true, "aliases": ["eimer", "ei"] },
+    { "code": "XBJ", "name": "Eimer",     "base": "piece", "factor": 1, "container": true, "aliases": ["eimer"] },
     { "code": "XPF", "name": "Palette",   "base": "piece", "factor": 1, "container": true, "aliases": ["palette", "pal"] }
   ]
 }

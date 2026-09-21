@@ -20,15 +20,19 @@ public static class Deink
         var grey = Ink.Grey(page, w, h);
         var depth = Ink.Depth(grey, w, h);
 
+        // Marks against paper, then the ink level: the median depth of what is clearly ink.
+        // A stroke is a run of marks, and it stands if any part of it reaches half the ink
+        // level. Paper passes far less than half of what is printed on its other side, so
+        // the reverse never gets there and falls out whole, while a word printed grey or in
+        // colour does and stays whole. Measured on the fixtures: rendered PDFs have no
+        // stroke under 0.55 of the ink level, scans with show-through pile up under 0.5.
+        // Splitting the marks a second time by their own histogram is not safe: on a
+        // rendered PDF it parts dark text from darker text and threw away half the words.
         var marked = Ink.Otsu(depth);
-        // The marked pixels split again by their own histogram: what the reverse of the
-        // sheet leaves is shallower than what the front prints. Where they do not split
-        // — a single-sided page, or one whose show-through the first level already put
-        // back with the paper — every mark is front ink and stands.
         var core = Ink.Otsu(depth, marked);
-        if (core <= marked) core = (byte)Math.Min(marked + 1, 255);
+        var floor = (byte)(Ink.Median(depth, core) / 2);
 
-        var keep = Strokes(depth, w, h, marked, core);
+        var keep = Strokes(depth, w, h, marked, floor);
         var kept = 0;
         foreach (var k in keep) if (k) kept++;
         if (kept == 0) return null;
@@ -47,11 +51,7 @@ public static class Deink
         return clean;
     }
 
-    // A stroke is kept whole if any part of it reaches the front-ink level: faint edge
-    // pixels belong to the glyph they touch, and cutting per pixel eats thin strokes —
-    // measured, it turned Schweineschnitzel into Schyeineschnitzel. Show-through has no
-    // core to be reached from and falls out entire.
-    static bool[] Strokes(byte[] depth, int w, int h, byte marked, byte core)
+    static bool[] Strokes(byte[] depth, int w, int h, byte marked, byte floor)
     {
         var keep = new bool[depth.Length];
         var seen = new bool[depth.Length];
@@ -68,7 +68,7 @@ public static class Deink
             {
                 var at = stack.Pop();
                 stroke.Add(at);
-                if (depth[at] >= core) reaches = true;
+                if (depth[at] >= floor) reaches = true;
                 int x = at % w, y = at / w;
                 for (var dy = -1; dy <= 1; dy++)
                     for (var dx = -1; dx <= 1; dx++)

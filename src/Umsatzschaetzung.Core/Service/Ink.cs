@@ -60,17 +60,30 @@ static class Ink
         return depth;
     }
 
-    // Between-class variance maximiser over whichever values are offered, so the same
-    // code splits paper from mark and then mark from ink.
-    // `above` restricts the split to the values already known to be marks, which is how
-    // the same code splits paper from mark and then, a second time, mark from ink. The
-    // default keeps every value, paper included.
-    public static byte Otsu(byte[] values, int above = -1)
+    public static byte Median(byte[] values, int above)
     {
         Span<long> hist = stackalloc long[256];
         long count = 0;
         foreach (var v in values)
             if (v > above) { hist[v]++; count++; }
+        if (count == 0) return 255;
+        long seen = 0;
+        for (var i = 0; i < 256; i++)
+        {
+            seen += hist[i];
+            if (seen * 2 >= count) return (byte)i;
+        }
+        return 255;
+    }
+
+    // Between-class variance maximiser over the values inside (above, upTo], so the same
+    // code splits paper from mark, mark from ink, and ink from whatever is darker still.
+    public static byte Otsu(byte[] values, int above = -1, int upTo = 255)
+    {
+        Span<long> hist = stackalloc long[256];
+        long count = 0;
+        foreach (var v in values)
+            if (v > above && v <= upTo) { hist[v]++; count++; }
         if (count == 0) return 0;
 
         double all = 0;
