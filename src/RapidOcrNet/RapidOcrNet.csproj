@@ -9,4 +9,7 @@
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />
+  </ItemGroup>
 </Project>

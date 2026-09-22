@@ -115,11 +115,13 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         }
     }
 
+    // A crop the classifier called upside down was read that way round; its words are no
+    // reading, only its verdict counts.
     static List<OcrWord> Words(OcrResult result)
     {
         var words = new List<OcrWord>();
         foreach (var block in result.TextBlocks)
-            foreach (var word in block.WordResults ?? [])
+            foreach (var word in block.AngleIndex == 1 ? [] : block.WordResults ?? [])
                 if (!string.IsNullOrWhiteSpace(word.Text))
                     words.Add(new OcrWord { Text = word.Text, Box = Bounds(word.BoxPoints), Confidence = word.Score });
         return words;

@@ -397,6 +397,14 @@ public sealed class RapidOcr : IDisposable
         var filteredBlocks = new List<TextBlock>(textBlocks.Length);
         foreach (var block in textBlocks)
         {
+            // A crop left upside down for the caller to turn reads as garbage or as nothing, but
+            // its verdict is what the caller turns the page by, so it is kept whatever it reads.
+            if (!clsRotate && block.AngleIndex == 1)
+            {
+                filteredBlocks.Add(block);
+                continue;
+            }
+
             if (block.Chars is null || block.Chars.Length == 0)
             {
                 continue;

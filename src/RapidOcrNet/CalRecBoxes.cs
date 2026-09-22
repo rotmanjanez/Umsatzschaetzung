@@ -88,11 +88,13 @@ internal static class CalRecBoxes
         // Build cells in recognized-image coords.
         // Each cell is a rect [x0,0,x1,recImgHeight] expanded to 4 corners (TL, TR, BR, BL).
         var cellsWithText = new List<(string text, float score, SKPoint[] cell)>();
-        int charIdx = 0;
         for (int wIdx = 0; wIdx < info.Words.Count; wIdx++)
         {
             List<string> word = info.Words[wIdx];
             List<int> wordCols = info.WordCols[wIdx];
+
+            // Whitespace is dropped from the words but not from the scores.
+            int charIdx = Array.IndexOf(line.CharCols!, wordCols[0]);
 
             if (perWord)
             {
@@ -148,8 +150,6 @@ internal static class CalRecBoxes
                     cellsWithText.Add((word[c], line.CharScores![charIdx + c], perCharCells[c]));
                 }
             }
-
-            charIdx += word.Count;
         }
 
         if (cellsWithText.Count == 0)

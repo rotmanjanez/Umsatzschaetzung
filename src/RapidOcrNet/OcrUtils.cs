@@ -428,9 +428,10 @@ internal static class OcrUtils
         if (start is { } last && h - last >= MinBand) bands.Add((last, h - last));
         if (bands.Count < 2) return null;
 
-        // What the unclip pulled in from the row above or below is a fragment, not a line.
+        // What the unclip pulled in from the row above or below is a fragment, not a line:
+        // too short to be one, or cut off by the edge of the box.
         var tallest = bands.Max(b => b.Height);
-        bands.RemoveAll(b => b.Height * 2 < tallest);
+        bands.RemoveAll(b => b.Height * 2 < tallest || (b.Height < tallest && (b.Top == 0 || b.Top + b.Height == h)));
         if (bands.Count < 2) return null;
 
         return [.. bands.Select(b => new TextBox
