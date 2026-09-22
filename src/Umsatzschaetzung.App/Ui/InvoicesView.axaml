@@ -80,7 +80,9 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:InvoiceRow">
                                     <StackPanel Orientation="Horizontal">
-                                        <Button Content="Öffnen" Theme="{StaticResource LinkButton}" Click="Open"/>
+                                        <Button Theme="{StaticResource IconButton}" ToolTip.Tip="Öffnen" Click="Open">
+                                            <PathIcon Data="{StaticResource OpenIcon}" Width="14" Height="14"/>
+                                        </Button>
                                         <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
                                             <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                         </Button>
