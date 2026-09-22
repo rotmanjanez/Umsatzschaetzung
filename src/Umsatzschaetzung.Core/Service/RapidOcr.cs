@@ -188,7 +188,9 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // The detector reads straight off the pixel buffer and accepts only this layout.
     static SKBitmap Decode(byte[] image)
     {
-        var decoded = SKBitmap.Decode(image)
+        using var data = SKData.CreateCopy(image);
+        using var codec = SKCodec.Create(data);
+        var decoded = (codec is null ? null : SKBitmap.Decode(codec))
             ?? throw new InvalidOperationException("Das Seitenbild konnte nicht gelesen werden.");
         if (decoded.ColorType == SKColorType.Bgra8888) return decoded;
         using (decoded)

@@ -48,12 +48,13 @@ public static class Deskew
             {
                 var angle = lo + step * i;
                 var score = Peakedness(ink, w, h, angle);
-                if (score <= top) continue;
+                // A page without bands scores the same at every angle and stays as it is.
+                if (score < top || score == top && Math.Abs(angle) >= Math.Abs(best)) continue;
                 top = score;
                 best = angle;
             }
-            lo = best - step;
-            hi = best + step;
+            lo = Math.Max(best - step, -Limit);
+            hi = Math.Min(best + step, Limit);
         }
         return best;
     }
