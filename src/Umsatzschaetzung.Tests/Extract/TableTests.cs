@@ -55,6 +55,27 @@ public class TableTests
     }
 
     [Fact]
+    public void WithoutAHeaderAQuantityCountingOneTwoThreeIsNotThePosition()
+    {
+        var items = Items(new Sheet()
+            .Cells(Role.LineItem, (100, "1"), (300, "Tomaten"), (700, "3,50"), (900, "3,50"))
+            .Cells(Role.LineItem, (100, "2"), (300, "Semmel"), (700, "0,40"), (900, "0,80"))
+            .Cells(Role.LineItem, (100, "3"), (300, "Gurke"), (700, "0,90"), (900, "2,70")));
+        Row(items[0], "1", null, "Tomaten", "3,50", "3,50");
+        Row(items[2], "3", null, "Gurke", "0,90", "2,70");
+    }
+
+    [Fact]
+    public void WithoutAHeaderARunningNumberBesideTheQuantityIsThePosition()
+    {
+        var items = Items(new Sheet()
+            .Cells(Role.LineItem, (50, "1"), (100, "2"), (300, "Tomaten"), (700, "3,50"), (900, "7,00"))
+            .Cells(Role.LineItem, (50, "2"), (100, "4"), (300, "Semmel"), (700, "0,40"), (900, "1,60")));
+        Row(items[0], "2", null, "Tomaten", "3,50", "7,00");
+        Row(items[1], "4", null, "Semmel", "0,40", "1,60");
+    }
+
+    [Fact]
     public void WithNoRowAddingUpTheAmountsReadAsPriceThenNet()
     {
         var items = Items(new Sheet().Cells(Role.LineItem, (100, "2"), (300, "Tomaten"), (700, "3,00"), (900, "9,99")));

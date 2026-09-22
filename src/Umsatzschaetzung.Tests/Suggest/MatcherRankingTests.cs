@@ -132,6 +132,19 @@ public class MatcherRankingTests
     }
 
     [Fact]
+    public void AnIngredientIsOfferedOnTheDatesItWasValid()
+    {
+        var old = Ing("ing.alt", "Alt");
+        old.Meta.ValidTo = new DateOnly(2020, 1, 1);
+        var rs = Rules(old, Ing("ing.b", "B"));
+        using var m = new Matcher(new FixedCache().At("Alt", 0.9).At("B", 0.5).Query(Line));
+        var line = new InvoiceLine { Name = Line };
+
+        Assert.Equal(["ing.alt", "ing.b"], Ids(m.Suggest(rs, "", null, line, new DateOnly(2019, 6, 1))));
+        Assert.Equal(["ing.b"], Ids(m.Suggest(rs, "", null, line, new DateOnly(2021, 6, 1))));
+    }
+
+    [Fact]
     public void AConfirmedMappingTeachesItsWordingAndAGuessDoesNot()
     {
         var rs = Rules(

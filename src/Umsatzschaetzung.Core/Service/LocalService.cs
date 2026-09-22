@@ -14,12 +14,14 @@ using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Service;
 
-public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion) : IService
+public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion) : IService, IDisposable
 {
     const int AutoMapMinConfidence = 80;
     const int PreviewDpi = 150;
 
     readonly Matcher matcher = new(new EmbeddingStore(rules.Dir));
+
+    public void Dispose() => matcher.Dispose();
 
     public Task<StatusResp> Status(CancellationToken ct) => Guard(ct, () =>
     {
@@ -173,8 +175,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var i = c.Invoices.FindIndex(x => x.Id == invoiceId);
         if (i < 0) throw new ServiceError(ErrorCode.NotFound, $"Rechnung \"{invoiceId}\" nicht im Fall \"{caseId}\"");
         c.Invoices.RemoveAt(i);
-        cases.DeleteFile(caseId, invoiceId);
         SaveCase(c);
+        cases.DeleteFile(caseId, invoiceId);
         return c;
     });
 
@@ -221,9 +223,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceReadingResp(pages);
     });
 
+    // A line asked about on its own carries no invoice date; the end of the audit period stands in.
     public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () => Task.Run(() =>
-        matcher.Suggest(rules.Load(), Gewerbe(caseId), supplier, line)
-            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList(), ct));
+    {
+        var c = Find(caseId);
+        return matcher.Suggest(rules.Load(), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today())
+            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList();
+    }, ct));
 
     // Lines imported before a rule or the model existed, and lines an edit set free,
     // get their turn here: what the matcher is sure about is mapped, the rest stays open.
@@ -292,33 +298,32 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return cases.Load(id);
     }
 
-    void SaveCase(Case c)
+    void SaveCase(Case c, Attachment? add = null)
     {
         var t = Clock.Now();
         if (c.Id == "") c.Id = NewId("fall-");
         if (c.CreatedAt == default) c.CreatedAt = t;
         c.UpdatedAt = t;
-        cases.Save(c);
+        cases.Save(c, add);
     }
 
     Case Attach(string caseId, Invoice inv, string fileName, byte[] data, List<OcrPage>? reading = null)
     {
         var c = LoadCase(caseId);
-        // The document first: storing it clears whatever else the invoice kept.
-        if (data.Length > 0) cases.SaveFile(caseId, inv.Id, fileName, data);
-        if (reading is { Count: > 0 }) cases.SaveReading(caseId, inv.Id, reading);
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
-        SaveCase(c);
+        SaveCase(c, new Attachment(inv.Id, fileName, data, reading));
         return c;
     }
 
-    string Gewerbe(string caseId)
+    string Gewerbe(string caseId) => Find(caseId)?.Taxpayer.Gewerbe ?? "";
+
+    Case? Find(string caseId)
     {
-        if (caseId == "") return "";
-        try { return cases.Load(caseId).Taxpayer.Gewerbe; }
-        catch (CaseNotFoundException) { return ""; }
+        if (caseId == "") return null;
+        try { return cases.Load(caseId); }
+        catch (CaseNotFoundException) { return null; }
     }
 
     async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, string gewerbe, bool ask, CancellationToken ct)
@@ -344,7 +349,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             return rs;
         }
         if (!ask) return rs;
-        var sugs = await Task.Run(() => matcher.Suggest(rs, gewerbe, inv.SupplierName, l), ct);
+        var sugs = await Task.Run(() => matcher.Suggest(rs, gewerbe, inv.SupplierName, l, inv.Date ?? Today()), ct);
         if (sugs.Count == 0) return rs;
         var sg = sugs[0];
         if (sg.Kind == OriginKind.Exact)

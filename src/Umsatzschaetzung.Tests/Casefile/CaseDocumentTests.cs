@@ -69,6 +69,30 @@ public class CaseDocumentTests
     }
 
     [Fact]
+    public void ACaseSavedWithAnAttachmentHoldsItsDocumentAndReading()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        store.Save(Cases.Full("fall-1"), new Attachment("re-1", "a.pdf", [1, 2], [Page()]));
+
+        Cases.HoldsFile(store, "fall-1", "re-1", "a.pdf", [1, 2]);
+        Assert.Single(store.LoadReading("fall-1", "re-1")!);
+    }
+
+    [Fact]
+    public void ACaseThatFailsToSaveLeavesNoDocumentBehind()
+    {
+        using var tmp = new TempDir();
+        var store = Store(tmp);
+        var c = Cases.Full("fall-1");
+        c.Label = "";
+
+        Assert.Throws<CaseInvalidException>(() => store.Save(c, new Attachment("re-9", "a.pdf", [1], [Page()])));
+        Assert.Throws<CaseNotFoundException>(() => store.LoadFile("fall-1", "re-9"));
+        Assert.Null(store.LoadReading("fall-1", "re-9"));
+    }
+
+    [Fact]
     public void DeletingTheDocumentDropsItAndItsReadingButNotTheOthers()
     {
         using var tmp = new TempDir();
@@ -132,6 +156,9 @@ public class CaseDocumentTests
         Assert.Throws<CaseInvalidException>(() => store.LoadFile("fall-1", invoiceId));
         Assert.Throws<CaseInvalidException>(() => store.DeleteFile("fall-1", invoiceId));
         Assert.Throws<CaseInvalidException>(() => store.LoadReading("fall-1", invoiceId));
+        var c = Cases.Full("fall-1");
+        c.Invoices[0].Id = invoiceId;
+        Assert.Throws<CaseInvalidException>(() => store.Save(c));
     }
 
     [Fact]

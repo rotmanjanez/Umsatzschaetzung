@@ -22,29 +22,33 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
 
     // Load() hands out a fresh RuleSet every call, so the version is the key: one
     // Matcher belongs to one rule store and reindexes only once a save bumps it or a
-    // case from another Gewerbe asks.
+    // case from another Gewerbe asks. Validity is a question of the invoice's date and
+    // is asked per query, not baked into the index.
     long indexed = -1;
     string indexedGewerbe = "";
     string[] owner = [];
+    Meta[] ware = [];
+    Meta?[] rule = [];
     float[] vectors = [];
 
     public void Dispose() => encoder.Dispose();
 
     // An exact hit leads, and the encoder's alternatives follow it: revising a mapped
     // line needs them as much as an open line does.
-    public List<Suggestion> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line)
+    public List<Suggestion> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line, DateOnly? date = null)
     {
-        lock (gate) return Rank(rs, gewerbe, supplier, line);
+        lock (gate) return Rank(rs, gewerbe, supplier, line, date ?? DateOnly.FromDateTime(DateTime.Now));
     }
 
-    List<Suggestion> Rank(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line)
+    List<Suggestion> Rank(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line, DateOnly date)
     {
-        var hit = Match.Mapping(rs, supplier, DateOnly.FromDateTime(DateTime.Now), line);
+        var hit = Match.Mapping(rs, supplier, date, line);
         Index(rs, gewerbe);
         var query = Embed([Normal(line.Name)])[0];
         var best = new Dictionary<string, double>(StringComparer.Ordinal);
         for (var i = 0; i < owner.Length; i++)
         {
+            if (!ware[i].ValidOn(date) || rule[i]?.ValidOn(date) == false) continue;
             var cos = Dot(query, i);
             if (!best.TryGetValue(owner[i], out var b) || cos > b) best[owner[i]] = cos;
         }
@@ -80,41 +84,47 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
     void Index(RuleSet rs, string gewerbe)
     {
         if (indexed == rs.Version && indexedGewerbe == gewerbe) return;
-        var today = DateOnly.FromDateTime(DateTime.Now);
-        var active = rs.Ingredients.Values
-            .Where(i => i.Meta.ValidOn(today) && (!rs.Categories.TryGetValue(i.CategoryId, out var c) || c.Covers(gewerbe)))
-            .OrderBy(i => i.Id, StringComparer.Ordinal).ToList();
-        var ids = active.Select(i => i.Id).ToHashSet(StringComparer.Ordinal);
+        var covered = rs.Ingredients.Values
+            .Where(i => !rs.Categories.TryGetValue(i.CategoryId, out var c) || c.Covers(gewerbe))
+            .OrderBy(i => i.Id, StringComparer.Ordinal)
+            .ToDictionary(i => i.Id, StringComparer.Ordinal);
 
         var texts = new List<string>();
         var owners = new List<string>();
-        var seen = new HashSet<(string, string)>();
-        void Add(string id, string? text)
+        var wares = new List<Meta>();
+        var rules = new List<Meta?>();
+        var seen = new HashSet<(string, string, Meta?)>();
+        void Add(Ingredient ing, Meta? by, string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
             text = Normal(text);
-            if (!seen.Add((id, text))) return;
-            owners.Add(id);
+            if (by is not null && seen.Contains((ing.Id, text, null))) return;
+            if (!seen.Add((ing.Id, text, by))) return;
+            owners.Add(ing.Id);
+            wares.Add(ing.Meta);
+            rules.Add(by);
             texts.Add(text);
         }
 
-        foreach (var ing in active)
+        foreach (var ing in covered.Values)
         {
-            Add(ing.Id, ing.Name);
-            foreach (var alias in ing.Aliases) Add(ing.Id, alias);
+            Add(ing, null, ing.Name);
+            foreach (var alias in ing.Aliases) Add(ing, null, alias);
         }
         // A confirmed mapping is a wording a human tied to a ware; the next line that
         // reads like it lands on the same ware without asking again.
         foreach (var id in rs.Mappings.Keys.Order(StringComparer.Ordinal))
         {
             var m = rs.Mappings[id];
-            if (m.Confirmed && m.Meta.ValidOn(today) && ids.Contains(m.IngredientId)) Add(m.IngredientId, Wording(m));
+            if (m.Confirmed && covered.TryGetValue(m.IngredientId, out var ing)) Add(ing, m.Meta, Wording(m));
         }
 
         var embedded = Embed(texts);
         vectors = new float[texts.Count * Encoder.Width];
         for (var i = 0; i < embedded.Length; i++) embedded[i].CopyTo(vectors, i * Encoder.Width);
         owner = [.. owners];
+        ware = [.. wares];
+        rule = [.. rules];
         indexed = rs.Version;
         indexedGewerbe = gewerbe;
     }

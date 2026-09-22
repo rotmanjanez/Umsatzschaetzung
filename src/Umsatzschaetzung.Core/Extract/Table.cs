@@ -238,11 +238,12 @@ public sealed class Table
         var counts = new List<Column>();
         var codes = new List<Column>();
         var names = new List<Column>();
+        var positions = new List<Column>();
         foreach (var c in columns.Where(c => !c.Decided))
             switch (ShapeOf(Texts(c)))
             {
                 case Shape.Rate: Fix(c, Field.Vat); break;
-                case Shape.Position: Fix(c, null); break;
+                case Shape.Position: positions.Add(c); break;
                 case Shape.Unit: Fix(c, Field.Unit); break;
                 case Shape.Amount: amounts.Add(c); break;
                 case Shape.Count: counts.Add(c); break;
@@ -255,7 +256,8 @@ public sealed class Table
         if (!columns.Any(c => c.Meaning == Field.ArticleId) && name is not null)
             foreach (var c in codes.Where(c => c.X1 <= name.X0).Take(1)) Fix(c, Field.ArticleId);
 
-        Arithmetic(counts, amounts);
+        Arithmetic(counts, positions, amounts);
+        foreach (var c in positions.Where(c => !c.Decided)) Fix(c, null);
     }
 
     // A header is a claim the body can contradict: "Artikel" over numeric codes is the
@@ -300,10 +302,11 @@ public sealed class Table
     }
 
     // quantity × unit price = line net decides among the unnamed numeric columns: the triple
-    // that holds on most rows wins. With no row adding up, the amounts read as price then net.
-    void Arithmetic(List<Column> counts, List<Column> amounts)
+    // that holds on most rows wins. A column counting 1, 2, 3 is the position unless it is
+    // the quantity that adds up. With no row adding up, the amounts read as price then net.
+    void Arithmetic(List<Column> counts, List<Column> positions, List<Column> amounts)
     {
-        var q = Candidates(Field.Quantity, [.. counts, .. amounts]);
+        var q = Candidates(Field.Quantity, [.. counts, .. positions, .. amounts]);
         var p = Candidates(Field.UnitPrice, amounts);
         var n = Candidates(Field.LineNet, amounts);
         var best = (Hits: 0, Q: (Column?)null, P: (Column?)null, N: (Column?)null);

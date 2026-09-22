@@ -14,6 +14,8 @@ public sealed class CaseExistsException(string message, string label) : Exceptio
     public string Label { get; } = label;
 }
 
+public sealed record Attachment(string InvoiceId, string FileName, byte[] Data, List<OcrPage>? Reading);
+
 // Ein Fall ist eine Datei: <id>.db trägt den Fall, jeden Beleg und das, was der Scan
 // gelesen hat, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen.
 public sealed partial class CaseStore(string dir)
@@ -135,14 +137,22 @@ public sealed partial class CaseStore(string dir)
         return c;
     });
 
-    public void Save(Case c) => Guarded(() =>
+    public void Save(Case c, Attachment? add = null) => Guarded(() =>
     {
         Defaults(c);
         Validate(c);
+        var key = add is null ? "" : InvoiceKey(c.Id, add.InvoiceId);
+        var name = add is { Data.Length: > 0 } ? DocumentName(add.FileName) : "";
         using var db = Writer(c.Id);
         using var tx = db.BeginTransaction(deferred: false);
         foreach (var t in CaseTables) Exec(db, tx, "DELETE FROM " + t);
         Write(db, tx, c);
+        if (add is { Data.Length: > 0 }) PutDocument(db, tx, key, name, add.Data);
+        if (add?.Reading is { Count: > 0 } pages)
+        {
+            DropReading(db, tx, key);
+            WriteReading(db, tx, key, pages);
+        }
         tx.Commit();
         return 0;
     });
@@ -199,15 +209,24 @@ public sealed partial class CaseStore(string dir)
     public void SaveFile(string caseId, string invoiceId, string name, byte[] data) => Guarded(() =>
     {
         var key = InvoiceKey(caseId, invoiceId);
-        name = Path.GetFileName(name);
-        if (name == "" || name.StartsWith('.')) throw new CaseInvalidException($"ungültiger Dateiname \"{name}\"");
+        name = DocumentName(name);
         using var db = Attached(caseId);
-        // Ein Beleg trägt ein Dokument, das alte geht; die Lesung daneben bleibt.
-        Exec(db, null, "INSERT INTO document(invoice_id, name, data) VALUES(@id, @name, @data) "
-            + "ON CONFLICT(invoice_id) DO UPDATE SET name = excluded.name, data = excluded.data",
-            ("@id", key), ("@name", name), ("@data", data));
+        PutDocument(db, null, key, name, data);
         return 0;
     });
+
+    static string DocumentName(string name)
+    {
+        name = Path.GetFileName(name);
+        if (name == "" || name.StartsWith('.')) throw new CaseInvalidException($"ungültiger Dateiname \"{name}\"");
+        return name;
+    }
+
+    // Ein Beleg trägt ein Dokument, das alte geht; die Lesung daneben bleibt.
+    static void PutDocument(SqliteConnection db, SqliteTransaction? tx, string key, string name, byte[] data) =>
+        Exec(db, tx, "INSERT INTO document(invoice_id, name, data) VALUES(@id, @name, @data) "
+            + "ON CONFLICT(invoice_id) DO UPDATE SET name = excluded.name, data = excluded.data",
+            ("@id", key), ("@name", name), ("@data", data));
 
     public void DeleteFile(string caseId, string invoiceId) => Guarded(() =>
     {
@@ -660,6 +679,7 @@ public sealed partial class CaseStore(string dir)
         foreach (var inv in c.Invoices)
         {
             if (string.IsNullOrEmpty(inv.Id)) throw new CaseInvalidException("Beleg ohne ID");
+            if (!ValidId(inv.Id)) throw new CaseInvalidException($"ungültige Beleg-ID \"{inv.Id}\"");
             if (!invoices.Add(inv.Id)) throw new CaseInvalidException($"Beleg \"{inv.Id}\" mehrfach angegeben");
         }
         foreach (var y in c.Yields)

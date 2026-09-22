@@ -138,6 +138,8 @@ public partial class App : Application
         var pdf = new PdfiumPages();
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
-        return new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, Release.Version);
+        var service = new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, Release.Version);
+        owned.Add(service);
+        return service;
     }
 }
