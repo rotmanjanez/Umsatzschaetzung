@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.VisualTree;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -17,14 +16,23 @@ public static class Grids
     static readonly AttachedProperty<double> AppliedProperty =
         AvaloniaProperty.RegisterAttached<DataGrid, double>("Applied", typeof(Grids), double.NaN);
 
+    static readonly AttachedProperty<ScrollBar?> ScrollbarProperty =
+        AvaloniaProperty.RegisterAttached<DataGrid, ScrollBar?>("Scrollbar", typeof(Grids));
+
     public static void SetFlex(DataGrid grid, int value) => grid.SetValue(FlexProperty, value);
     public static int GetFlex(DataGrid grid) => grid.GetValue(FlexProperty);
 
+    // LayoutUpdated fires after every layout pass, each scrolled frame included, so Stretch must stay cheap.
     static Grids() => FlexProperty.Changed.AddClassHandler<DataGrid>((grid, _) =>
     {
+        grid.TemplateApplied -= Capture;
+        grid.TemplateApplied += Capture;
         grid.LayoutUpdated -= Stretch;
         grid.LayoutUpdated += Stretch;
     });
+
+    static void Capture(object? sender, TemplateAppliedEventArgs e) =>
+        ((DataGrid)sender!).SetValue(ScrollbarProperty, e.NameScope.Find<ScrollBar>("PART_VerticalScrollbar"));
 
     static void Stretch(object? sender, EventArgs e)
     {
@@ -46,7 +54,8 @@ public static class Grids
             if (column != flex && column.IsVisible)
                 used += column.ActualWidth;
 
-        var room = grid.Bounds.Width - used - ScrollbarWidth(grid) - Slack;
+        var bar = grid.GetValue(ScrollbarProperty);
+        var room = grid.Bounds.Width - used - (bar is { IsVisible: true } ? bar.Bounds.Width : 0) - Slack;
         if (room < Math.Max(flex.MinWidth, grid.MinColumnWidth) || Math.Abs(room - flex.ActualWidth) < 1)
         {
             grid.SetValue(AppliedProperty, flex.ActualWidth);
@@ -55,13 +64,5 @@ public static class Grids
 
         flex.Width = new DataGridLength(room);
         grid.SetValue(AppliedProperty, flex.ActualWidth);
-    }
-
-    static double ScrollbarWidth(DataGrid grid)
-    {
-        foreach (var bar in grid.GetVisualDescendants().OfType<ScrollBar>())
-            if (bar.Name == "PART_VerticalScrollbar" && bar.IsVisible)
-                return bar.Bounds.Width;
-        return 0;
     }
 }
