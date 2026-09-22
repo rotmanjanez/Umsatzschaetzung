@@ -4,8 +4,9 @@ public sealed record Sammlung(int Year, List<Klasse> Klassen, List<Synonym> Syno
 
 public sealed record Klasse(string Name, string? Zusatz, List<string> Kennzahlen, List<Staffel> Staffeln, string? Bemerkung, int Seite);
 
-// Von and Bis are wirtschaftlicher Umsatz in Cent, open at a null end. A Klasse that
-// the Sammlung does not staffel carries one Staffel with no Stufe and no bounds.
+// Von and Bis are wirtschaftlicher Umsatz in Cent, open at a null end. The Sammlung prints
+// them as "über Von" and "bis Bis": Von is exclusive, Bis inclusive. A Klasse that the
+// Sammlung does not staffel carries one Staffel with no Stufe and no bounds.
 public sealed record Staffel(string? Stufe, long? Von, long? Bis, Sätze Sätze);
 
 public sealed record Sätze(Satz? Aufschlag, Satz? RohgewinnI, Satz? RohgewinnII, Satz? Halbreingewinn, Satz? Reingewinn);

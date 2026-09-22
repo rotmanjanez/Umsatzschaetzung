@@ -51,7 +51,7 @@ static class Grid
         var lines = new List<List<Word>>();
         foreach (var word in words.OrderBy(w => w.Baseline).ThenBy(w => w.X0))
         {
-            if (lines.Count > 0 && word.Baseline - lines[^1][0].Baseline <= 1.5) lines[^1].Add(word);
+            if (lines.Count > 0 && word.Baseline - lines[^1][0].Baseline <= 2.0) lines[^1].Add(word);
             else lines.Add([word]);
         }
         // Words of one line can differ slightly in baseline, so the reading order within it

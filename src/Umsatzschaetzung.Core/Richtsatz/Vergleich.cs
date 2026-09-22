@@ -40,8 +40,8 @@ public static class Vergleich
         if (hit is null) return null;
         foreach (var st in hit.Staffeln)
         {
-            if (st.Von is { } von && umsatz < von) continue;
-            if (st.Bis is { } bis && umsatz >= bis) continue;
+            if (st.Von is { } von && umsatz <= von) continue;
+            if (st.Bis is { } bis && umsatz > bis) continue;
             if (st.Sätze.Aufschlag is { } satz) return new Rahmen(s.Year, hit.Name, st.Stufe, satz);
         }
         return null;

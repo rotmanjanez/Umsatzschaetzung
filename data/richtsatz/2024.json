@@ -3152,6 +3152,7 @@
         {
           "stufe": "B",
           "von": 15000000,
+          "bis": 30000000,
           "sätze": {
             "rohgewinnI": {
               "mittel": 64
