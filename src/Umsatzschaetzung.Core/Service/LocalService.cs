@@ -21,23 +21,24 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     readonly Matcher matcher = new(new EmbeddingStore(rules.Dir));
 
-    public Task<StatusResp> Status(CancellationToken ct) => Guard(() =>
+    public Task<StatusResp> Status(CancellationToken ct) => Guard(ct, () =>
     {
         var rs = rules.Load();
         return new StatusResp(rs.Version, RulesDate(rs), appVersion, rules.Notice);
     });
 
     static DateTimeOffset RulesDate(RuleSet rs) =>
-        rs.Ingredients.Values.Select(e => e.Meta.ChangedAt)
+        rs.Categories.Values.Select(e => e.Meta.ChangedAt)
+            .Concat(rs.Ingredients.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.Mappings.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.Products.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.YieldRules.Values.Select(e => e.Meta.ChangedAt))
             .DefaultIfEmpty(default)
             .Max();
 
-    public Task<RuleSet> Rules(CancellationToken ct) => Guard(rules.Load);
+    public Task<RuleSet> Rules(CancellationToken ct) => Guard(ct, rules.Load);
 
-    public Task<RuleSet> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(() =>
+    public Task<RuleSet> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(ct, () =>
     {
         var rs = rules.Load();
         rs.Put(rule);
@@ -45,7 +46,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return rules.Save(rule);
     });
 
-    public Task<RuleSet> DeleteRule(Entity kind, string id, CancellationToken ct) => Guard(() =>
+    public Task<RuleSet> DeleteRule(Entity kind, string id, CancellationToken ct) => Guard(ct, () =>
     {
         var rs = rules.Load();
         if (rs.Find(kind, id) is null) throw new ServiceError(ErrorCode.NotFound, $"{Format.EntityName(kind)} \u201e{id}\u201c");
@@ -54,38 +55,38 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return rules.Delete(kind, id);
     });
 
-    public Task<List<SammlungInfo>> Sammlungen(CancellationToken ct) => Guard(rules.Sammlungen);
+    public Task<List<SammlungInfo>> Sammlungen(CancellationToken ct) => Guard(ct, rules.Sammlungen);
 
-    public Task<List<SammlungInfo>> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct) => Guard(() =>
+    public Task<List<SammlungInfo>> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct) => Guard(ct, () =>
     {
         if (pdf.Length == 0) throw new ServiceError(ErrorCode.Invalid, "Leere Datei");
         return rules.ImportSammlung(Richtsätze.Read(pdf), fileName);
     });
 
-    public Task<List<SammlungInfo>> DeleteSammlung(int year, CancellationToken ct) => Guard(() =>
+    public Task<List<SammlungInfo>> DeleteSammlung(int year, CancellationToken ct) => Guard(ct, () =>
     {
         if (!rules.Sammlungen().Exists(s => s.Year == year)) throw new ServiceError(ErrorCode.NotFound, $"Richtsatzsammlung {year}");
         return rules.DeleteSammlung(year);
     });
 
-    public Task<List<Case>> ListCases(CancellationToken ct) => Guard(cases.List);
+    public Task<List<Case>> ListCases(CancellationToken ct) => Guard(ct, cases.List);
 
-    public Task<Case> GetCase(string caseId, CancellationToken ct) => Guard(() => LoadCase(caseId));
+    public Task<Case> GetCase(string caseId, CancellationToken ct) => Guard(ct, () => LoadCase(caseId));
 
-    public Task<Case> PutCase(Case kase, CancellationToken ct) => Guard(() =>
+    public Task<Case> PutCase(Case kase, CancellationToken ct) => Guard(ct, () =>
     {
         SaveCase(kase);
         return kase;
     });
 
-    public Task DeleteCase(string caseId, CancellationToken ct) => Guard(() =>
+    public Task DeleteCase(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
         if (caseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
         cases.Delete(caseId);
         return Task.FromResult(0);
     });
 
-    public Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) => Guard(() =>
+    public Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) => Guard(ct, () =>
     {
         try
         {
@@ -97,13 +98,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         }
     });
 
-    public Task<ExportResp> ExportCase(string caseId, CancellationToken ct) => Guard(() =>
+    public Task<ExportResp> ExportCase(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
         var c = LoadCase(caseId);
         return new ExportResp(cases.Export(caseId), FileName(c.Label, "db"));
     });
 
-    public Task<ExportResp> ExportInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(() =>
+    public Task<ExportResp> ExportInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, () =>
     {
         var c = LoadCase(caseId);
         var inv = c.Invoices.Find(i => i.Id == invoiceId)
@@ -112,7 +113,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new ExportResp(Csv.Invoice(c, inv, rules.Load()), FileName(c.Label + " " + label, "csv"));
     });
 
-    public Task<ParseResp> ParseInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
+    public Task<ParseResp> ParseInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(ct, async () =>
     {
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
         switch (InvoiceParser.Detect(data))
@@ -122,14 +123,15 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             case Kind.Unknown:
                 throw new ServiceError(ErrorCode.Unsupported, $"Dateiformat von \"{fileName}\" nicht erkannt");
         }
+        var gewerbe = caseId == "" ? "" : LoadCase(caseId).Taxpayer.Gewerbe;
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = NewId("re-");
-        var (_, unmapped) = await MapLines(inv, Gewerbe(caseId), true, ct);
+        var (_, unmapped) = await MapLines(inv, gewerbe, true, ct);
         var c = caseId == "" ? null : Attach(caseId, inv, fileName, data);
         return new ParseResp(inv, unmapped, false, c);
     });
 
-    public Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
+    public Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(ct, async () =>
     {
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
         var pages = await Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
@@ -141,7 +143,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new OcrResp(draft.Id, pages, draft);
     });
 
-    public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(async () =>
+    public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(ct, async () =>
     {
         var inv = req.Invoice;
         if (inv.Id == "") inv.Id = NewId("re-");
@@ -156,16 +158,16 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             _ => false,
         };
         var store = confirm || req.Intent is Intent.Store or Intent.Auto;
-        if (store && req.CaseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
-        await MapLines(inv, Gewerbe(req.CaseId), confirm, ct);
+        var gewerbe = store ? LoadCase(req.CaseId).Taxpayer.Gewerbe : Gewerbe(req.CaseId);
+        await MapLines(inv, gewerbe, confirm, ct);
         var resp = new VerifyResp(inv, flags, blocked, false, null);
         if (!store) return resp;
-        if (confirm) inv.Verification = new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto };
+        inv.Verification = confirm ? new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto } : null;
         var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], req.Reading);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
-    public Task<Case> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(() =>
+    public Task<Case> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, () =>
     {
         var c = LoadCase(caseId);
         var i = c.Invoices.FindIndex(x => x.Id == invoiceId);
@@ -176,7 +178,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return c;
     });
 
-    public Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct) => Guard(async () =>
+    public Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, async () =>
     {
         string name;
         byte[] data;
@@ -197,7 +199,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceSourceResp(name, pages);
     });
 
-    public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(async () =>
+    public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, async () =>
     {
         if (cases.LoadReading(caseId, invoiceId) is not { } pages) return new InvoiceReadingResp([]);
         byte[] data;
@@ -219,13 +221,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceReadingResp(pages);
     });
 
-    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() => Task.Run(() =>
+    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () => Task.Run(() =>
         matcher.Suggest(rules.Load(), Gewerbe(caseId), supplier, line)
             .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList(), ct));
 
     // Lines imported before a rule or the model existed, and lines an edit set free,
     // get their turn here: what the matcher is sure about is mapped, the rest stays open.
-    public Task<Case> MapCase(string caseId, CancellationToken ct) => Guard(() => Task.Run(async () =>
+    public Task<Case> MapCase(string caseId, CancellationToken ct) => Guard(ct, () => Task.Run(async () =>
     {
         var c = LoadCase(caseId);
         var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
@@ -234,13 +236,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return c;
     }, ct));
 
-    public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(() =>
+    public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
         var (rep, _, rahmen) = Compute(LoadCase(caseId));
         return new CalcResp(rep, rahmen);
     });
 
-    public Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct) => Guard(async () =>
+    public Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct) => Guard(ct, async () =>
     {
         var c = LoadCase(caseId);
         var (rep, rs, rahmen) = Compute(c);
@@ -395,10 +397,11 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     static string NewId(string prefix) =>
         prefix + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(4));
 
-    static Task<T> Guard<T>(Func<T> body) => Guard(() => Task.FromResult(body()));
+    static Task<T> Guard<T>(CancellationToken ct, Func<T> body) => Guard(ct, () => Task.FromResult(body()));
 
-    static async Task<T> Guard<T>(Func<Task<T>> body)
+    static async Task<T> Guard<T>(CancellationToken ct, Func<Task<T>> body)
     {
+        ct.ThrowIfCancellationRequested();
         try
         {
             return await body();
