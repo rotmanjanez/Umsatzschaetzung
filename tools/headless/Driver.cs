@@ -58,7 +58,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
 
     static Visual Find(Visual root, Target target)
     {
-        var hits = root.GetVisualDescendants();
+        var hits = root.GetVisualDescendants().Where(v => v.IsEffectivelyVisible);
         if (target.Name is { } name) hits = hits.Where(v => (v as StyledElement)?.Name == name);
         if (target.Text is { } text) hits = hits.Where(v => Label(v) == text);
         if (target.Type is { } type) hits = hits.Where(v => v.GetType().Name == type);

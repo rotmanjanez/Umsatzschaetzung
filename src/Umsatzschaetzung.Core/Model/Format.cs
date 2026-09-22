@@ -43,6 +43,7 @@ public static class Format
     {
         Model.Sparte.Getränke => "Getränke",
         Model.Sparte.Speisen => "Speisen",
+        Model.Sparte.Handelsware => "Handelsware",
         _ => "Übrige",
     };
 

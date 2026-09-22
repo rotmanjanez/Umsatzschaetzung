@@ -61,12 +61,14 @@ internal static class Revenue
         {
             Code = "sparte-missing",
             Message = $"{Format.Cents(m.RevenueNet)} Umsatz entfallen auf Produkte ohne Sparte; "
-                + "ihr Aufschlagsatz steht weder bei den Getränken noch bei den Speisen",
+                + "ihr Aufschlagsatz steht in keiner Sparte",
         }];
     }
 
-    static List<MarkupRow> Markups(List<ProductRow> rows)
+    // Nur die Gastronomie trennt nach Sparten; sonst ist der Satz des Betriebs der einzige.
+    static List<MarkupRow> Markups(List<ProductRow> rows, string? kennzahl)
     {
+        if (!Gewerbe.Gastronomie(kennzahl)) return [];
         var bySparte = new SortedDictionary<Sparte, MarkupRow>();
         foreach (var row in rows)
         {
@@ -76,7 +78,7 @@ internal static class Revenue
             m.CostOfGoods += row.CostOfGoods;
             m.RevenueNet += row.RevenueNet;
         }
-        // Getränke und Speisen zuerst, die Produkte ohne Sparte zuletzt.
+        // Getränke, Speisen und Handelsware zuerst, die Produkte ohne Sparte zuletzt.
         return [.. bySparte.Values.OrderBy(m => m.Sparte == Sparte.Unbestimmt ? 1 : 0)];
     }
 
@@ -130,7 +132,7 @@ internal static class Revenue
             }
             rows.Add(row);
         }
-        var markups = Markups(rows);
+        var markups = Markups(rows, c.Taxpayer.Gewerbe);
 
         long cost = 0, stock = 0, sellable = 0;
         foreach (var u in uses.Values)

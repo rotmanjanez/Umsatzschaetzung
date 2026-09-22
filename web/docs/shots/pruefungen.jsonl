@@ -1,6 +1,6 @@
 // The case list: the toolbar, three created cases, the confirmation before deleting.
 
-{ "do": "click", "at": { "text": "Neue Prüfung" } }
+{ "do": "click", "at": { "name": "NewCase" } }
 { "do": "type", "at": { "name": "NewLabel" }, "text": "Gasthaus Zur Linde, Bp 2025" }
 { "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2025" }
 { "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2025" }
@@ -11,7 +11,7 @@
 { "do": "click", "at": { "text": "Anlegen" } }
 { "do": "click", "at": { "name": "BackButton" } }
 
-{ "do": "click", "at": { "text": "Neue Prüfung" } }
+{ "do": "click", "at": { "name": "NewCase" } }
 { "do": "type", "at": { "name": "NewLabel" }, "text": "Pizzeria Da Vinci, Bp 2024" }
 { "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2024" }
 { "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2024" }
@@ -21,7 +21,7 @@
 { "do": "click", "at": { "text": "Anlegen" } }
 { "do": "click", "at": { "name": "BackButton" } }
 
-{ "do": "click", "at": { "text": "Neue Prüfung" } }
+{ "do": "click", "at": { "name": "NewCase" } }
 { "do": "type", "at": { "name": "NewLabel" }, "text": "Bäckerei Sommer, Bp 2023-2024" }
 { "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2023" }
 { "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2024" }

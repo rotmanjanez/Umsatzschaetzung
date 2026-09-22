@@ -12,13 +12,14 @@ public enum Entity
     [JsonStringEnumMemberName("yield_rule")] YieldRule,
 }
 
-// Die Sparte trennt den Rohgewinnaufschlag, wie ihn die Prüfung erwartet: Getränke tragen
-// einen anderen Satz als Speisen. Kategorien außerhalb der Gastronomie bleiben unbestimmt.
+// Die Sparte trennt den Rohgewinnaufschlag einer Gaststätte, wie ihn die Prüfung erwartet:
+// Getränke tragen einen anderen Satz als Speisen, Handelsware wie Tabak einen dritten.
 public enum Sparte
 {
     [JsonStringEnumMemberName("unbestimmt")] Unbestimmt,
     [JsonStringEnumMemberName("getraenke")] Getränke,
     [JsonStringEnumMemberName("speisen")] Speisen,
+    [JsonStringEnumMemberName("handelsware")] Handelsware,
 }
 
 public static class Clock

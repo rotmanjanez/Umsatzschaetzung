@@ -130,7 +130,7 @@ public static class Template
         ["css"] = (n, _) => CssString(Print(n)),
         ["date"] = (n, _) => Format.Date(DateOnly.Parse(Print(n))),
         ["day"] = (n, _) => Format.Day(DateTimeOffset.Parse(Print(n))),
-        ["sparte"] = (n, _) => Print(n) switch { "getraenke" => "Getränke", "speisen" => "Speisen", _ => "Übrige" },
+        ["sparte"] = (n, _) => Print(n) switch { "getraenke" => "Getränke", "speisen" => "Speisen", "handelsware" => "Handelsware", _ => "Übrige" },
         ["cents"] = (n, _) => Format.Cents(Number(n)),
         ["bp"] = (n, _) => Format.Bp(Number(n)),
         ["portions"] = (n, _) => Format.Portions(Number(n)),

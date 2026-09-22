@@ -71,6 +71,14 @@ public sealed class RuleStore
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
         """,
         "ALTER TABLE ingredient ADD COLUMN aliases TEXT",
+        """
+        UPDATE category SET sparte = 'handelsware' WHERE sparte IS NULL AND id IN (
+            'cat.bau.und.installationsmaterial', 'cat.bestattung', 'cat.druck.und.fotografie', 'cat.einzelhandel.technik.und.haushalt',
+            'cat.einzelhandel.textilien', 'cat.fahrradwerkstatt', 'cat.fitness.und.sport', 'cat.floristik.und.garten',
+            'cat.friseur.und.kosmetik', 'cat.handwerk.und.reparatur', 'cat.kfz.werkstatt', 'cat.kino.und.freizeit',
+            'cat.kraftstoffe.und.brennstoffe', 'cat.manufaktur.und.kreativbetrieb', 'cat.optik.und.schmuck', 'cat.reinigung.und.fahrzeugpflege',
+            'cat.shisha.bar', 'cat.tabakwaren.und.e.zigaretten', 'cat.tattoo.und.piercing', 'cat.tierbedarf.und.tierpflege')
+        """,
     ];
 
     static readonly string[] SammlungTables =
@@ -374,6 +382,7 @@ public sealed class RuleStore
     {
         Sparte.Getränke => "getraenke",
         Sparte.Speisen => "speisen",
+        Sparte.Handelsware => "handelsware",
         _ => null,
     };
 
@@ -381,6 +390,7 @@ public sealed class RuleStore
     {
         "getraenke" => Sparte.Getränke,
         "speisen" => Sparte.Speisen,
+        "handelsware" => Sparte.Handelsware,
         _ => Sparte.Unbestimmt,
     };
 

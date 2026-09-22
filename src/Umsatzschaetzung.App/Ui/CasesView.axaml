@@ -22,7 +22,7 @@
                 <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Importieren" Click="Import">
                     <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
                 </Button>
-                <Button Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Neue Prüfung" Click="StartNew">
+                <Button x:Name="NewCase" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Neue Prüfung" Click="StartNew">
                     <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
                 </Button>
                 <Button Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
