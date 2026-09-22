@@ -50,7 +50,7 @@ public class TemplateTests
     [Fact]
     public void CssWritesAQuotedCssString()
     {
-        Assert.Equal("\"Bier & <Brot>\"", Render("{{ titel | css }}"));
+        Assert.Equal("\"Bier & \\3c Brot\\3e \"", Render("{{ titel | css }}"));
         Assert.Equal("\"er sagte \\\"ja\\\"\\A und 'nein'\\\\\"", Render("{{ zitat | css }}"));
     }
 
@@ -193,16 +193,16 @@ public class TemplateTests
     [Fact]
     public void TextBeforeATagOnTheSameLineIsKept() => Assert.Equal("a: ja", Render("a: {% if wahr %}ja{% endif %}"));
 
-    [Fact(Skip = "Template.cs:65 Trim takes the space after a value for indentation")]
+    [Fact]
     public void TheSpaceBetweenAValueAndATagIsKept() => Assert.Equal("7.335,95 € ja", Render("{{ betrag | cents }} {% if wahr %}ja{% endif %}"));
 
-    [Fact(Skip = "Template.cs:66 drops the newline after any block tag, not only one on its own line")]
+    [Fact]
     public void AnInlineTagKeepsTheLineBreakAfterIt() => Assert.Equal("a ja\nb", Render("a {% if wahr %}ja{% endif %}\nb"));
 
-    [Fact(Skip = "Template.cs:191 writes a filter's result unescaped, so an invoice's unit code reaches the report as markup")]
+    [Fact]
     public void AFilteredValueIsEscaped() => Assert.Equal("5 &lt;b&gt;", Render("{{ basis | quantity:roh }}"));
 
-    [Fact(Skip = "Template.cs:150 CssString leaves '<' as it is, so a label with </style> ends the report's style sheet")]
+    [Fact]
     public void ACssStringCannotCloseTheStyleSheet()
     {
         var data = new JsonObject { ["label"] = "</style><script>" };

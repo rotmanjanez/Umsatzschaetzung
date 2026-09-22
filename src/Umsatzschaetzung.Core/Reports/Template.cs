@@ -62,8 +62,11 @@ public static class Template
 
             // Ein Blocktag auf eigener Zeile nimmt seine Zeile mit, damit die Einrückung
             // der Vorlage nicht im Bericht landet.
-            Trim(text);
-            if (i < s.Length && s[i] == '\n') i++;
+            if (OwnLine(s, open))
+            {
+                Trim(text);
+                if (i < s.Length && s[i] == '\n') i++;
+            }
 
             var word = tag.Split(' ', 2)[0];
             if (Array.IndexOf(until, word) >= 0)
@@ -157,6 +160,8 @@ public static class Template
                 case '"': b.Append("\\\""); break;
                 case '\\': b.Append("\\\\"); break;
                 case '\n' or '\r': b.Append("\\A "); break;
+                case '<': b.Append("\\3c "); break;
+                case '>': b.Append("\\3e "); break;
                 default: b.Append(ch); break;
             }
         }
@@ -169,11 +174,21 @@ public static class Template
         text.Clear();
     }
 
+    static bool OwnLine(string s, int open)
+    {
+        for (var j = open - 1; j >= 0; j--)
+        {
+            if (s[j] == '\n') return true;
+            if (s[j] != ' ' && s[j] != '\t') return false;
+        }
+        return true;
+    }
+
     static void Trim(StringBuilder text)
     {
         var n = text.Length;
         while (n > 0 && (text[n - 1] == ' ' || text[n - 1] == '\t')) n--;
-        if (n == 0 || text[n - 1] == '\n') text.Length = n;
+        text.Length = n;
     }
 
     static void Write(StringBuilder b, List<Node> nodes, JsonObject root, List<(string Name, JsonNode? Value)> scope)
@@ -188,7 +203,7 @@ public static class Template
                     var value = Resolve(v.Path, root, scope);
                     foreach (var (name, args) in v.Filters)
                         value = JsonValue.Create(Filters[name](value, [.. args.Select(a => Resolve(a, root, scope))]));
-                    b.Append(v.Filters.Count == 0 ? Esc(Print(value)) : Print(value));
+                    b.Append(v.Filters.Count > 0 && v.Filters[^1].Name == "css" ? Print(value) : Esc(Print(value)));
                     break;
                 case For f:
                     var items = Resolve(f.Path, root, scope) switch
