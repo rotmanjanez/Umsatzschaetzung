@@ -146,6 +146,7 @@ public class RuleCheckTests
     [Theory]
     [InlineData(null, null, null)]
     [InlineData("", "", "")]
+    [InlineData(" ", " ", " - ")]
     public void AMappingNeedsAKey(string? article, string? gtin, string? name)
     {
         var rs = Valid();

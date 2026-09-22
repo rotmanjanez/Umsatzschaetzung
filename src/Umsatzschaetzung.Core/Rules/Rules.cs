@@ -61,7 +61,7 @@ public static class RuleCheck
 
     static void ValidateMapping(RuleSet rs, ArticleMapping e)
     {
-        if (string.IsNullOrEmpty(e.SupplierArticleId) && string.IsNullOrEmpty(e.Gtin) && string.IsNullOrEmpty(e.Name))
+        if (string.IsNullOrWhiteSpace(e.SupplierArticleId) && string.IsNullOrWhiteSpace(e.Gtin) && ArticleName.Canonical(e.Name) == "")
             throw new RulesException("Zuordnung: Artikelnummer, GTIN oder Namensmuster erforderlich");
         if (e.Factor is <= 0) throw new RulesException("Zuordnung: Faktor muss größer als 0 sein");
         if (!rs.Ingredients.ContainsKey(e.IngredientId))
