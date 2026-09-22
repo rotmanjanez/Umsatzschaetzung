@@ -358,7 +358,7 @@ public sealed class Table
     static string At(Column c, int row) => c.Body.FirstOrDefault(x => x.Words[0].Row == row)?.Text ?? "";
 
     // Name text ends where a key opens: GTIN, article number or lot are not the name.
-    static readonly Regex KeyWord = new(@"^(GTIN|EAN|Art(ikel)?[.\-]?(Nr|nummer|kennung)|Charge|Lot|MHD)\b", RegexOptions.IgnoreCase);
+    static readonly Regex KeyWord = new(@"^(GTIN|EAN|Art(ikel)?[.\-]*(Nr|nummer|kennung)|Charge|Lot|MHD)\b", RegexOptions.IgnoreCase);
     static readonly char[] Bullets = ['•', '·', '-', '–', '*', '.', ','];
 
     static string NameText(Cell cell)

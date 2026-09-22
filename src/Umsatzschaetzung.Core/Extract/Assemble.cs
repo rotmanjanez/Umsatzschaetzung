@@ -96,7 +96,7 @@ public static class Assemble
     public static void Regroup(InvoiceLine line, string quantityText)
     {
         if (line.LineNet == 0 || line.UnitPrice == 0 || line.PriceBaseQty == 0) return;
-        if (!Grouped.IsMatch(quantityText.Trim())) return;
+        if (line.Quantity % 1000 != 0 || !Grouped.IsMatch(quantityText.Trim())) return;
         if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, line.LineNet)) return;
         if (Adds(line.Quantity / 1000, line.UnitPrice, line.PriceBaseQty, line.LineNet)) line.Quantity /= 1000;
     }
@@ -145,13 +145,13 @@ public static class Assemble
     {
         if (line.LineNet <= 0) return false;
         var baseQty = line.PriceBaseQty > 0 ? line.PriceBaseQty : 1000;
-        if (line.Quantity <= 0 && line.UnitPrice > 0)
+        if (line.Quantity == 0 && line.UnitPrice > 0)
         {
             if (QuantityFrom(line.LineNet, baseQty, line.UnitPrice) is not { } q) return false;
             line.Quantity = q;
             return true;
         }
-        if (line.UnitPrice <= 0 && line.Quantity > 0)
+        if (line.UnitPrice == 0 && line.Quantity > 0)
         {
             if (PriceFrom(line.LineNet, baseQty, line.Quantity) is { } p)
             {

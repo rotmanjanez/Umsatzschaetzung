@@ -14,7 +14,7 @@ public static class Parse
 
     // `;` and `:` are what a worn scan turns a comma into.
     static readonly Regex NumberRx =
-        new(@"-?\d{1,3}(?:[.\s;:]\d{3})+(?:[.,;:]\d+)?|-?\d+(?:[.,;:]\d+)?");
+        new(@"-?\d{1,3}(?:[.\s;:]\d{3})+(?!\d)(?:[.,;:]\d+)?|-?\d+(?:[.,;:]\d+)?");
 
     static readonly Regex Separator = new(@"[.,;:\s]");
 
@@ -70,7 +70,7 @@ public static class Parse
         ['G'] = '6', ['b'] = '6', ['g'] = '9', ['q'] = '9', ['A'] = '4',
     };
 
-    static readonly Regex Numeric = new(@"^[-+]?[€$]?\s*\d[\d.,\s]*\s*[%€]?-?$");
+    static readonly Regex Numeric = new(@"^[-+]?(?:[€$]|EUR|Eur)?\s*\d[\d.,\s]*\s*(?:[%€]|EUR|Eur)?-?$");
 
     public static string Digits(string text)
     {
