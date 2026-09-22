@@ -20,6 +20,7 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
         Headers.Register();
+        Blur.Register();
     }
 
     public override void OnFrameworkInitializationCompleted()
