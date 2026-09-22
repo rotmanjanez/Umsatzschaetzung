@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Reports;
 using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -28,14 +30,18 @@ public sealed class ReportModel : Observable
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }
     public bool ShowNote => note != "";
 
-    public void SetExcluded(ExcludedDisplay d)
+    public void SetExcluded(Case c, Report r, RuleSet rs)
     {
-        Purchases = d.Purchases;
-        Included = d.Included;
-        Excluded = d.Excluded + " (" + d.Share + ")";
+        var s = r.Totals;
+        Purchases = Format.Cents(s.Purchases);
+        Included = Format.Cents(s.CostOfGoods + s.StockChange);
+        Excluded = Format.Cents(s.UnmappedCost + s.UnusedCost) + " (" + Format.Bp(s.ExcludedShare) + ")";
         Rows.Clear();
-        foreach (var r in d.Unmapped) Rows.Add(new ExcludedLineRow(r.Invoice, r.LineNo, r.Name, "ohne Zuordnung", r.LineNet));
-        foreach (var r in d.Unused) Rows.Add(new ExcludedLineRow(r.Invoice, r.LineNo, r.Name, "in keiner Rezeptur: " + r.Ingredient, r.LineNet));
+        foreach (var l in r.Unmapped)
+            Rows.Add(new ExcludedLineRow(Names.Invoice(c, l.InvoiceId), l.LineNo, l.Name, "ohne Zuordnung", Format.Cents(l.LineNet)));
+        foreach (var l in r.Unused)
+            Rows.Add(new ExcludedLineRow(Names.Invoice(c, l.InvoiceId), l.LineNo, l.Name,
+                "in keiner Rezeptur: " + Names.Ingredient(rs, l.IngredientId), Format.Cents(l.LineNet)));
         HasExcluded = Rows.Count > 0;
     }
 }
@@ -57,14 +63,15 @@ public partial class ReportView : Screen
     protected override async void OnEnter()
     {
         if (Session.Case is null) return;
-        var caseId = Session.Case.Id;
         model.Ready = false;
         model.Note = "Vorschau wird erstellt …";
+        await Session.LoadRules(Ct);
+        if (Session.Case is not { } kase || Session.Rules is not { } rs || !IsActive) return;
         await Session.Run(async () =>
         {
-            var calc = await Session.Service.Calculate(caseId, Ct);
-            var report = await Session.Service.RenderReport(caseId, false, Ct);
-            model.SetExcluded(calc.Excluded);
+            var calc = await Session.Service.Calculate(kase.Id, Ct);
+            var report = await Session.Service.RenderReport(kase.Id, false, Ct);
+            model.SetExcluded(kase, calc.Report, rs);
             await ShowHtml(report.Html);
             model.Ready = true;
         });

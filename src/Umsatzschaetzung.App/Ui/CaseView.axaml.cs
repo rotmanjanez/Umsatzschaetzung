@@ -75,21 +75,23 @@ public sealed class CaseModel : Observable
     public ObservableCollection<StockRow> Stock { get; } = [];
     public ObservableCollection<YieldKindGroup> Yields { get; } = [];
 
+    static string Declared(Case k, long vat) =>
+        k.Declared.FindLast(d => d.Vat == vat) is { } d ? Format.Cents(d.Net) : "";
+
     public void Load(Session session)
     {
         var k = session.Case!;
-        var d = session.Display!;
         Label = k.Label;
-        From = d.PeriodFrom;
-        To = d.PeriodTo;
+        From = Format.Date(k.PeriodFrom);
+        To = Format.Date(k.PeriodTo);
         Name = k.Taxpayer.Name;
         TaxNumber = k.Taxpayer.TaxNumber;
         Pab = k.Taxpayer.PabNumber;
         Gewerbe = k.Taxpayer.Gewerbe;
         NoInvoices = k.Invoices.Count == 0;
-        Declared19 = Input.Edit(d.Declared.GetValueOrDefault(1900, ""));
-        Declared7 = Input.Edit(d.Declared.GetValueOrDefault(700, ""));
-        Declared0 = Input.Edit(d.Declared.GetValueOrDefault(0, ""));
+        Declared19 = Input.Edit(Declared(k, 1900));
+        Declared7 = Input.Edit(Declared(k, 700));
+        Declared0 = Input.Edit(Declared(k, 0));
         var ingredients = session.Ingredients();
         Stock.Clear();
         foreach (var e in k.Inventory)
@@ -160,7 +162,7 @@ public sealed class CaseModel : Observable
     static List<YieldKindGroup> YieldGroups(Session session, List<Ingredient> ingredients)
     {
         if (session.Rules is null || session.Case is null) return [];
-        var rs = session.Rules.RuleSet;
+        var rs = session.Rules;
         var used = InCase(session.Case, rs);
         var rules = rs.YieldRules.Values.OrderBy(r => r.Name, StringComparer.Ordinal).ToList();
         List<YieldGroupRow> byCategory = [], byIngredient = [];

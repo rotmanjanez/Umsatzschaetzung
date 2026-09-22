@@ -39,16 +39,34 @@ public static class Format
 
     public static string Portions(long v) => Group(v) + (Math.Abs(v) == 1 ? " Portion" : " Portionen");
 
-    public static string Value(long v, ValueUnit u) => u switch
+    public static string Sparte(Sparte s) => s switch
     {
-        ValueUnit.Eur => Cents(v),
-        ValueUnit.Ml => Qty(v, Unit.Ml),
-        ValueUnit.G => Qty(v, Unit.G),
-        ValueUnit.Piece => Qty(v, Unit.Piece),
-        ValueUnit.Bp => Bp(v),
-        ValueUnit.Portion => Portions(v),
-        _ => Group(v),
+        Model.Sparte.Getränke => "Getränke",
+        Model.Sparte.Speisen => "Speisen",
+        _ => "Übrige",
     };
+
+    public static string Source(Source s) => s switch
+    {
+        Model.Source.Ubl => "XRechnung (UBL)",
+        Model.Source.Cii => "XRechnung (CII)",
+        Model.Source.Zugferd => "ZUGFeRD",
+        Model.Source.Scan => "Scan",
+        _ => s.ToString(),
+    };
+
+    public static string Markup(long cost, long markup, long revenue) =>
+        $"{Cents(cost)} × (100 % + {Bp(markup)}) {(cost + cost * markup / Model.Bp.Full == revenue ? "=" : "≈")} {Cents(revenue)}";
+
+    public static string Period(DateOnly from, DateOnly to) => Date(from) + " bis " + Date(to);
+
+    public static string Quantity(long qty, string unitCode) => (Milli(qty) + " " + Units.Label(unitCode)).Trim();
+
+    public static string UnitPrice(long price, long baseQty, string unitCode) =>
+        Micro(price) + " €" + (baseQty > 0 && baseQty != 1000 ? " je " + Milli(baseQty) + " " + Units.Label(unitCode) : "");
+
+    public static string Verified(DateTimeOffset at, bool auto) =>
+        (auto ? "automatisch geprüft am " : "geprüft am ") + Timestamp(at);
 
     public static string Timestamp(DateTimeOffset t) =>
         t == default ? "" : t.ToLocalTime().ToString("dd.MM.yyyy HH:mm");

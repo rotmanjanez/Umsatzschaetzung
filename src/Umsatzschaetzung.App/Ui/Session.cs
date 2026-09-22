@@ -37,8 +37,7 @@ public sealed class Session : Observable
     public IService Service { get; }
     public Imports Imports { get; }
     public Case? Case { get; private set; }
-    public CaseDisplay? Display { get; private set; }
-    public RuleSetResp? Rules { get; private set; }
+    public RuleSet? Rules { get; private set; }
     public StatusResp? Status { get; private set; }
     // What a scan was read as, freshly from an import or fetched back from the case it was stored with.
     public Dictionary<string, OcrResp> Readings { get; } = [];
@@ -49,7 +48,7 @@ public sealed class Session : Observable
     public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed, RulesRequested;
 
     public void ShowRules() => RulesRequested?.Invoke();
-    public event Action<CaseResp>? CaseOpened;
+    public event Action<Case>? CaseOpened;
     public event Action<Tab>? TabRequested;
 
     public void Go(Tab tab) => TabRequested?.Invoke(tab);
@@ -100,25 +99,25 @@ public sealed class Session : Observable
         RulesChanged?.Invoke();
     });
 
-    public void Open(CaseResp resp)
+    public void Open(Case kase)
     {
-        SetCase(resp);
-        CaseOpened?.Invoke(resp);
+        SetCase(kase);
+        CaseOpened?.Invoke(kase);
     }
 
-    public void SetCase(CaseResp resp)
+    public void SetCase(Case kase)
     {
-        Case = resp.Case;
-        Display = resp.Display;
+        Case = kase;
         CaseChanged?.Invoke();
     }
 
     public void CloseCase()
     {
         Case = null;
-        Display = null;
         CaseClosed?.Invoke();
     }
+
+    public string Period => Case is null ? "" : Format.Period(Case.PeriodFrom, Case.PeriodTo);
 
     public Task<bool> SaveCase(CancellationToken ct)
     {
@@ -126,8 +125,8 @@ public sealed class Session : Observable
         if (kase is null) return Task.FromResult(false);
         return Run(async () =>
         {
-            var resp = await Service.PutCase(kase, ct);
-            if (Case == kase) SetCase(resp);
+            var saved = await Service.PutCase(kase, ct);
+            if (Case == kase) SetCase(saved);
         });
     }
 
@@ -164,21 +163,22 @@ public sealed class Session : Observable
     public static string NewId(string prefix) => prefix + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(6));
 
     public List<Category> Categories() =>
-        Rules is null ? [] : Rules.RuleSet.Categories.Values.OrderBy(c => c.Name, StringComparer.Ordinal).ToList();
+        Rules is null ? [] : Rules.Categories.Values.OrderBy(c => c.Name, StringComparer.Ordinal).ToList();
 
-    public IReadOnlyDictionary<string, string> CategoryNames => Rules?.Display.Categories ?? NoCategories;
+    public IReadOnlyDictionary<string, string> CategoryNames =>
+        Rules?.Categories.ToDictionary(kv => kv.Key, kv => kv.Value.Name) ?? NoCategories;
 
     public string CategoryName(string? id) =>
-        string.IsNullOrEmpty(id) ? "" : CategoryNames.GetValueOrDefault(id, "");
+        Rules is not null && !string.IsNullOrEmpty(id) && Rules.Categories.TryGetValue(id, out var c) ? c.Name : "";
 
     public List<Ingredient> Ingredients() =>
-        Rules is null ? [] : Rules.RuleSet.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
+        Rules is null ? [] : Rules.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
 
     public List<Product> Products() =>
-        Rules is null ? [] : Rules.RuleSet.Products.Values.OrderBy(p => p.Name, StringComparer.Ordinal).ToList();
+        Rules is null ? [] : Rules.Products.Values.OrderBy(p => p.Name, StringComparer.Ordinal).ToList();
 
     public string IngredientName(string id) =>
-        Rules is not null && Rules.RuleSet.Ingredients.TryGetValue(id, out var i) ? i.Name : "";
+        Rules is not null && Rules.Ingredients.TryGetValue(id, out var i) ? i.Name : "";
 
     public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi)
     {

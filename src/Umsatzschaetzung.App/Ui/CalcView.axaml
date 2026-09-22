@@ -2,23 +2,17 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-           xmlns:svc="clr-namespace:Umsatzschaetzung.Service;assembly=Umsatzschaetzung.Core"
            xmlns:m="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:CalcModel"
            Margin="0,12,0,0">
-    <ui:Screen.DataTemplates>
-        <TreeDataTemplate DataType="svc:NodeDisplay" x:DataType="svc:NodeDisplay" ItemsSource="{Binding Inputs}">
-            <Grid Margin="0,2" ColumnDefinitions="*,Auto">
-                <TextBlock Text="{Binding Label}" Margin="0,0,16,0"/>
-                <TextBlock Grid.Column="1" Text="{Binding Value}" Theme="{StaticResource Number}"/>
-            </Grid>
-        </TreeDataTemplate>
-    </ui:Screen.DataTemplates>
     <ui:Screen.Styles>
         <Style Selector="DataGrid#ProductGrid DataGridRow" x:DataType="ui:ProductRowModel">
             <Setter Property="Opacity" Value="{Binding Fade}"/>
         </Style>
         <Style Selector="DataGrid#RevenueGrid DataGridRow">
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+        <Style Selector="DataGrid#MarkupGrid DataGridRow">
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
         <Style Selector="TextBlock.total">
@@ -55,6 +49,13 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Einsatz je Portion" Width="150" SortMemberPath="Cost">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:ProductRowModel">
+                                            <TextBlock Text="{Binding Cost}" Theme="{StaticResource Number}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Bruttopreis" Width="130">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ProductRowModel">
@@ -73,6 +74,13 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ProductRowModel">
                                             <TextBlock Text="{Binding Revenue}" Theme="{StaticResource Number}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Aufschlagsatz" Width="140" SortMemberPath="Markup">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:ProductRowModel">
+                                            <TextBlock Text="{Binding Markup}" Theme="{StaticResource Number}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -125,28 +133,28 @@
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Steuersatz" Width="220" MinWidth="120" SortMemberPath="Vat">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="svc:RevenueRow">
+                                    <DataTemplate x:DataType="ui:RevenueRow">
                                         <TextBlock Text="{Binding Vat}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Umsatz vor BP" Width="170" SortMemberPath="Declared">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="svc:RevenueRow">
+                                    <DataTemplate x:DataType="ui:RevenueRow">
                                         <TextBlock Text="{Binding Declared}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Umsatz nach BP" Width="170" SortMemberPath="Calculated">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="svc:RevenueRow">
+                                    <DataTemplate x:DataType="ui:RevenueRow">
                                         <TextBlock Text="{Binding Calculated}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Differenz" Width="170" SortMemberPath="Difference">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="svc:RevenueRow">
+                                    <DataTemplate x:DataType="ui:RevenueRow">
                                         <TextBlock Text="{Binding Difference}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -154,10 +162,52 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
+                    <TextBlock Text="Rohgewinnaufschlag" Theme="{StaticResource SectionHeader}"/>
+                    <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Sparte" Width="220" MinWidth="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:MarkupRow">
+                                        <TextBlock Text="{Binding Sparte}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Einsatz der Portionen" Width="180">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:MarkupRow">
+                                        <TextBlock Text="{Binding CostOfGoods}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Umsatz (netto)" Width="170">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:MarkupRow">
+                                        <TextBlock Text="{Binding RevenueNet}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Rohgewinn" Width="170">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:MarkupRow">
+                                        <TextBlock Text="{Binding GrossProfit}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Aufschlagsatz" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:MarkupRow">
+                                        <TextBlock Text="{Binding Markup}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Text="{Binding MarkupNote}" Theme="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,24"/>
+
                     <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
                     <ItemsControl Margin="0,0,0,16" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="svc:KV">
+                            <DataTemplate x:DataType="ui:KV">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Key"/>
@@ -171,33 +221,98 @@
                     </ItemsControl>
 
                     <Expander Header="Rechenweg" Margin="0,0,0,16">
-                        <Grid Height="440" Margin="0,8,0,0" ColumnDefinitions="3*,6,2*">
-                            <Border Theme="{StaticResource Panel}">
-                                <TreeView x:Name="Tree" ItemsSource="{Binding Roots}" SelectionChanged="NodeSelected" BorderThickness="0" Background="Transparent"/>
-                            </Border>
-                            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                            <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
-                                <Grid>
-                                    <TextBlock Text="Kein Rechenschritt gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoNode}"/>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasNode}">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Node.Label}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                                            <TextBlock Text="{Binding Node.Value}" Theme="{StaticResource Number}" HorizontalAlignment="Left" FontSize="20" Margin="0,0,0,12"/>
-                                            <TextBlock Text="Formel" Theme="{StaticResource FieldLabel}"/>
-                                            <TextBlock Text="{Binding Node.Formula}" FontFamily="{StaticResource MonoFont}" TextWrapping="Wrap"/>
-                                            <TextBlock Text="Quellen" Theme="{StaticResource FieldLabel}"/>
-                                            <ItemsControl ItemsSource="{Binding Node.Sources}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate x:DataType="x:String">
-                                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                    </ScrollViewer>
-                                </Grid>
-                            </Border>
-                        </Grid>
+                        <Border Theme="{StaticResource Panel}" Margin="0,8,0,0" Padding="16">
+                            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Zutaten" Theme="{StaticResource FieldLabel}"/>
+                                    <ItemsControl ItemsSource="{Binding Ingredients}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="m:IngredientRow">
+                                                <StackPanel Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Name, StringFormat='{}{0}: verkaufsfähige Menge'}" TextWrapping="Wrap"/>
+                                                            <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.SellableNote}}" Theme="{StaticResource Muted}" TextWrapping="Wrap"
+                                                                       IsVisible="{Binding ., Converter={x:Static ui:Fmt.HasYield}}"/>
+                                                        </StackPanel>
+                                                        <TextBlock Grid.Column="1" Text="{Binding ., Converter={x:Static ui:Fmt.Sellable}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                    </Grid>
+                                                    <StackPanel Margin="18,0,0,0">
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <StackPanel>
+                                                                <TextBlock Text="Verbrauch"/>
+                                                                <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.UsedNote}}" Theme="{StaticResource Muted}" TextWrapping="Wrap"
+                                                                           IsVisible="{Binding ., Converter={x:Static ui:Fmt.HasStock}}"/>
+                                                            </StackPanel>
+                                                            <TextBlock Grid.Column="1" Text="{Binding ., Converter={x:Static ui:Fmt.Used}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                        </Grid>
+                                                        <StackPanel Margin="18,0,0,0">
+                                                            <Grid ColumnDefinitions="*,Auto">
+                                                                <StackPanel>
+                                                                    <TextBlock Text="Einkauf"/>
+                                                                    <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.BoughtNote}}" Theme="{StaticResource Muted}"/>
+                                                                </StackPanel>
+                                                                <TextBlock Grid.Column="1" Text="{Binding ., Converter={x:Static ui:Fmt.Bought}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                            </Grid>
+                                                            <ItemsControl ItemsSource="{Binding Purchases}" Margin="18,0,0,0">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate x:DataType="m:Purchase">
+                                                                        <Grid ColumnDefinitions="*,Auto">
+                                                                            <StackPanel>
+                                                                                <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.Line}}" TextWrapping="Wrap"/>
+                                                                                <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.QtyNote}}" Theme="{StaticResource Muted}" TextWrapping="Wrap"/>
+                                                                            </StackPanel>
+                                                                            <TextBlock Grid.Column="1" Text="{Binding ., Converter={x:Static ui:Fmt.Qty}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <TextBlock Text="Umsatz" Theme="{StaticResource FieldLabel}"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="Kalkulierter Umsatz (netto)"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding RevenueNet, Converter={x:Static ui:Fmt.Cents}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Sold}" Margin="18,0,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="m:ProductRow">
+                                                <StackPanel Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.Sold}}" TextWrapping="Wrap"/>
+                                                            <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.SoldNote}}" Theme="{StaticResource Muted}" TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                        <TextBlock Grid.Column="1" Text="{Binding RevenueNet, Converter={x:Static ui:Fmt.Cents}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                    </Grid>
+                                                    <StackPanel Margin="18,0,0,0">
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <StackPanel>
+                                                                <TextBlock Text="Portionen"/>
+                                                                <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.PortionsNote}}" Theme="{StaticResource Muted}" TextWrapping="Wrap"/>
+                                                            </StackPanel>
+                                                            <TextBlock Grid.Column="1" Text="{Binding Portions, Converter={x:Static ui:Fmt.Portions}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                        </Grid>
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <StackPanel>
+                                                                <TextBlock Text="Preis (brutto)"/>
+                                                                <TextBlock Text="{Binding ., Converter={x:Static ui:Fmt.PriceNote}}" Theme="{StaticResource Muted}"/>
+                                                            </StackPanel>
+                                                            <TextBlock Grid.Column="1" Text="{Binding GrossPrice, Converter={x:Static ui:Fmt.Cents}}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
                     </Expander>
                 </StackPanel>
             </ScrollViewer>

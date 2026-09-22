@@ -3,10 +3,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
-using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Rulestore;
+using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.Service;
 using Umsatzschaetzung.Tagging;
 
@@ -88,6 +88,8 @@ public partial class App : Application
             return;
         }
         desktop.ShutdownRequested += (_, _) => { foreach (var d in owned) d.Dispose(); };
+        var printer = new WebViewPdfPrinter();
+        owned.Add(printer);
         var shell = new Shell(service);
         desktop.MainWindow = shell;
         if (show) shell.Show();

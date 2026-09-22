@@ -20,19 +20,20 @@ public static class Csv
 
         Row("Prüfung", c.Label);
         Row("Datei", inv.FileName);
-        Row("Quelle", Display.SourceName(inv.Source));
+        Row("Quelle", Format.Source(inv.Source));
         Row("Lieferant", inv.SupplierName);
         Row("Rechnungsnummer", inv.Number);
         Row("Datum", Format.Date(inv.Date));
         Row("Netto", Format.Cents(inv.NetTotal));
         Row("Brutto", Format.Cents(inv.GrossTotal));
-        Row("Geprüft", Display.Verified(inv.Verification));
+        Row("Geprüft", inv.Verification is { } v ? Format.Verified(v.At, v.Auto) : "");
         Row("");
 
         Row("Zeile", "Position", "Artikelnummer", "GTIN", "Menge", "Einzelpreis", "Netto", "USt", "Zuordnung");
         foreach (var l in inv.Lines)
-            Row(l.No.ToString(), l.Name, l.SellerArticleId ?? "", l.Gtin ?? "", Display.LineQuantity(l),
-                Display.LineUnitPrice(l), Format.Cents(l.LineNet), Format.Bp(l.Vat), Display.MappingLabel(rs, l.MappingId));
+            Row(l.No.ToString(), l.Name, l.SellerArticleId ?? "", l.Gtin ?? "", Format.Quantity(l.Quantity, l.UnitCode),
+                Format.UnitPrice(l.UnitPrice, l.PriceBaseQty, l.UnitCode), Format.Cents(l.LineNet), Format.Bp(l.Vat),
+                Names.Mapping(rs, l.MappingId));
 
         return Encoding.UTF8.GetBytes(b.ToString());
     }

@@ -66,52 +66,29 @@ public static class Normalize
                 var u = Use(ing.Id);
                 u.Bought += conv.Qty;
                 u.Cost += line.LineNet;
-                var node = new Node
+                u.Purchases.Add(new Purchase
                 {
-                    Label = $"Rechnung {inv.Number} Pos. {line.No}: {line.Name}",
-                    Value = conv.Qty,
-                    Unit = Units.Value(unit),
-                    Formula = $"{conv.Step} = {Format.Qty(conv.Qty, unit)} (netto {Format.Cents(line.LineNet)})",
-                    Sources =
-                    [
-                        new SourceRef { Kind = SourceKind.InvoiceLine, InvoiceId = inv.Id, LineNo = line.No },
-                        new SourceRef { Kind = SourceKind.Rule, Entity = Entity.Mapping, EntityId = m.Id },
-                    ],
-                };
-                u.Node ??= new Node { Label = ing.Name + ": Einkauf", Unit = Units.Value(unit) };
-                u.Node.Inputs.Add(node);
+                    InvoiceId = inv.Id,
+                    Invoice = Names.Invoice(inv),
+                    LineNo = line.No,
+                    Name = line.Name,
+                    Quantity = line.Quantity,
+                    UnitCode = line.UnitCode,
+                    Unit = unit,
+                    Factor = conv.Factor,
+                    Qty = conv.Qty,
+                    Net = line.LineNet,
+                });
             }
-        foreach (var id in uses.Keys)
-        {
-            var u = uses[id];
-            var unit = Scale.Of(rs, id) ?? Unit.Piece;
-            u.Node!.Value = u.Bought;
-            u.Node.Formula = $"Summe aus {u.Node.Inputs.Count} Rechnungspositionen = {Format.Qty(u.Bought, unit)} (netto {Format.Cents(u.Cost)})";
-            u.Used = u.Bought;
-        }
+        foreach (var u in uses.Values) u.Used = u.Bought;
         foreach (var e in c.Inventory)
         {
-            if (!rs.Ingredients.TryGetValue(e.IngredientId, out var ing) || !inRecipe.Contains(e.IngredientId)) continue;
-            if (Scale.Of(rs, e.IngredientId) is not { } unit) continue;
-            var opening = Scale.ToBase(e.Opening, e.Unit);
-            var closing = Scale.ToBase(e.Closing, e.Unit);
+            if (!rs.Ingredients.ContainsKey(e.IngredientId) || !inRecipe.Contains(e.IngredientId)) continue;
+            if (Scale.Of(rs, e.IngredientId) is null) continue;
             var u = Use(e.IngredientId);
-            u.Node ??= new Node
-            {
-                Label = ing.Name + ": Einkauf",
-                Unit = Units.Value(unit),
-                Formula = "keine Rechnungsposition = " + Format.Qty(0, unit),
-            };
-            u.Used = opening + u.Bought - closing;
-            u.Node = new Node
-            {
-                Label = ing.Name + ": Verbrauch",
-                Value = u.Used,
-                Unit = Units.Value(unit),
-                Formula = $"Anfangsbestand {Format.Qty(opening, unit)} + Einkauf {Format.Qty(u.Bought, unit)} − Endbestand {Format.Qty(closing, unit)} = {Format.Qty(u.Used, unit)}",
-                Inputs = [u.Node],
-                Sources = [new SourceRef { Kind = SourceKind.Inventory, Entity = Entity.Ingredient, EntityId = e.IngredientId }],
-            };
+            u.Opening = Scale.ToBase(e.Opening, e.Unit);
+            u.Closing = Scale.ToBase(e.Closing, e.Unit);
+            u.Used = u.Opening + u.Bought - u.Closing;
         }
         foreach (var u in uses.Values)
         {
@@ -124,14 +101,11 @@ public static class Normalize
     // Eine Rechnungsposition in der Rezepteinheit. Bei Gebinden und über Dimensionsgrenzen
     // hinweg sagt nur der Faktor der Zuordnung, wie viel drin ist; sonst rechnet die
     // Einheitentabelle -- 2 kg sind 2.000 g, ohne dass jemand etwas pflegen muss.
-    static (long Qty, string Step)? Convert(InvoiceLine line, ArticleMapping m, Unit unit)
+    static (long Qty, long Factor)? Convert(InvoiceLine line, ArticleMapping m, Unit unit)
     {
-        var billed = Units.Lookup(line.UnitCode);
-        var qty = Format.Milli(line.Quantity);
-        if (billed is { Container: false } u && u.Base == unit)
-            return (line.Quantity * u.Factor / 1000, $"{qty} {u.Name}");
+        if (Units.Lookup(line.UnitCode) is { Container: false } u && u.Base == unit)
+            return (line.Quantity * u.Factor / 1000, 0);
         if (m.Factor is not { } factor) return null;
-        var label = billed?.Name ?? line.UnitCode;
-        return (line.Quantity * factor / 1000, $"{qty} {label} × {Format.Qty(factor, unit)}");
+        return (line.Quantity * factor / 1000, factor);
     }
 }

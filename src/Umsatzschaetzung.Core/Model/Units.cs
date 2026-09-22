@@ -10,16 +10,6 @@ public enum Unit
     [JsonStringEnumMemberName("piece")] Piece,
 }
 
-public enum ValueUnit
-{
-    [JsonStringEnumMemberName("EUR")] Eur,
-    [JsonStringEnumMemberName("ml")] Ml,
-    [JsonStringEnumMemberName("g")] G,
-    [JsonStringEnumMemberName("piece")] Piece,
-    [JsonStringEnumMemberName("bp")] Bp,
-    [JsonStringEnumMemberName("portion")] Portion,
-}
-
 public static class Bp
 {
     public const long Full = 10000;
@@ -52,13 +42,6 @@ public static class Units
             u.TryGetProperty("container", out var c) && c.GetBoolean(),
             [.. u.GetProperty("aliases").EnumerateArray().Select(a => a.GetString()!)]))];
     }
-
-    public static ValueUnit Value(Unit u) => u switch
-    {
-        Unit.Ml => ValueUnit.Ml,
-        Unit.G => ValueUnit.G,
-        _ => ValueUnit.Piece,
-    };
 
     public static string Code(Unit u) => u switch
     {

@@ -19,7 +19,7 @@ public sealed class RuleStore
         INSERT INTO meta VALUES('version', 0);
 
         CREATE TABLE category(
-            id TEXT PRIMARY KEY, name TEXT NOT NULL,
+            id TEXT PRIMARY KEY, name TEXT NOT NULL, sparte TEXT,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
         CREATE TABLE category_gewerbe(category_id TEXT NOT NULL, ord INTEGER NOT NULL, kennzahl TEXT NOT NULL,
@@ -195,11 +195,12 @@ public sealed class RuleStore
         switch (e)
         {
             case Category x:
-                Exec(db, tx, "INSERT INTO category(id, name, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @from, @to, @changed, @rev) "
-                    + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, valid_from = excluded.valid_from, "
+                Exec(db, tx, "INSERT INTO category(id, name, sparte, valid_from, valid_to, changed_at, rev) "
+                    + "VALUES(@id, @name, @sparte, @from, @to, @changed, @rev) "
+                    + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, sparte = excluded.sparte, "
+                    + "valid_from = excluded.valid_from, "
                     + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, rev = excluded.rev, deleted_at = NULL",
-                    Meta(x, ("@name", x.Name)));
+                    Meta(x, ("@name", x.Name), ("@sparte", SparteName(x.Sparte))));
                 Exec(db, tx, "DELETE FROM category_gewerbe WHERE category_id = @id", ("@id", x.Id));
                 for (var i = 0; i < x.Gewerbe.Count; i++)
                     Exec(db, tx, "INSERT INTO category_gewerbe(category_id, ord, kennzahl) VALUES(@id, @ord, @kennzahl)",
@@ -294,11 +295,12 @@ public sealed class RuleStore
             if (!gewerbe.TryGetValue(r.GetString(0), out var list)) gewerbe[r.GetString(0)] = list = [];
             list.Add(r.GetString(1));
         });
-        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, rev FROM category WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, rev, sparte FROM category WHERE deleted_at IS NULL",
             r => rs.Put(new Category
             {
                 Id = r.GetString(0), Name = r.GetString(1), Meta = ReadMeta(r, 2),
                 Gewerbe = gewerbe.GetValueOrDefault(r.GetString(0), []),
+                Sparte = ReadSparte(r, 6),
             }));
 
         Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, rev FROM ingredient WHERE deleted_at IS NULL",
@@ -341,12 +343,25 @@ public sealed class RuleStore
         return rs;
     }
 
+    static string? SparteName(Sparte s) => s switch
+    {
+        Sparte.Getränke => "getraenke",
+        Sparte.Speisen => "speisen",
+        _ => null,
+    };
+
+    static Sparte ReadSparte(SqliteDataReader r, int i) => r.IsDBNull(i) ? Sparte.Unbestimmt : r.GetString(i) switch
+    {
+        "getraenke" => Sparte.Getränke,
+        "speisen" => Sparte.Speisen,
+        _ => Sparte.Unbestimmt,
+    };
+
     static void SeedRules(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
         foreach (var e in Entities(seed))
         {
-            var kind = Kind(e);
-            if (Scalar(db, tx, $"SELECT 1 FROM {Table(kind)} WHERE id = @id", ("@id", e.Id)) is not null) continue;
+            if (Scalar(db, tx, $"SELECT 1 FROM {Table(Kind(e))} WHERE id = @id", ("@id", e.Id)) is not null) continue;
             Put(db, tx, e);
         }
     }

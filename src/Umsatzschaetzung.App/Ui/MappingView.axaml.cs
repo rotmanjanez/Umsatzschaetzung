@@ -17,12 +17,12 @@ public sealed class LineGroup
     public int Count => Lines.Count;
 }
 
-public sealed class CandidateRow(MappingCandidate candidate) : Observable
+public sealed class CandidateRow(MappingCandidate candidate, string label) : Observable
 {
     bool selected;
 
     public MappingCandidate Candidate { get; } = candidate;
-    public string Display => Candidate.Display;
+    public string Display { get; } = label;
     public bool IsExact => Candidate.Kind == OriginKind.Exact;
     public bool IsLexical => Candidate.Kind == OriginKind.Lexical;
     public bool IsManual => Candidate.Kind == OriginKind.Manual;
@@ -72,13 +72,12 @@ public sealed class MappingModel : Observable
     public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
     public List<Ingredient> Ingredients { get => ingredients; set => Set(ref ingredients, value); }
 
-    public void SetCandidates(List<MappingCandidate> candidates)
+    public void SetCandidates(List<CandidateRow> candidates)
     {
         foreach (var c in Candidates) c.Changed -= CandidateChanged;
         Candidates.Clear();
-        foreach (var c in candidates)
+        foreach (var row in candidates)
         {
-            var row = new CandidateRow(c);
             row.Changed += CandidateChanged;
             Candidates.Add(row);
         }
@@ -164,13 +163,18 @@ public partial class MappingView : Screen
         var lineItem = Session.Case.Invoices[inv].Lines[line];
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.SuggestMapping(Session.Case.Id, lineItem, g.Supplier, Ct);
+            var candidates = await Session.Service.SuggestMapping(Session.Case.Id, lineItem, g.Supplier, Ct);
             if (seq != suggestSeq) return;
             model.Loading = false;
-            model.SetCandidates(resp.Candidates);
+            model.SetCandidates(Rows(candidates));
         });
         if (seq == suggestSeq) model.Loading = false;
     }
+
+    List<CandidateRow> Rows(List<MappingCandidate> candidates) =>
+        Session.Rules is { } rs
+            ? candidates.Select(c => new CandidateRow(c, Names.Candidate(rs, c.Mapping))).ToList()
+            : [];
 
     void ToggleManual(object? sender, RoutedEventArgs e) => model.Manual = !model.Manual;
 
@@ -189,7 +193,7 @@ public partial class MappingView : Screen
                 suggested.Confirmed = true;
                 if (!await Session.Put(suggested, Ct)) return;
             }
-            await AssignId(g, suggested.Id, chosen.Candidate.Display);
+            await AssignId(g, suggested.Id, chosen.Display);
             return;
         }
         if (model.Ingredient is null)
@@ -197,7 +201,7 @@ public partial class MappingView : Screen
             Session.Fail("Bitte eine Zutat wählen.");
             return;
         }
-        var unit = Scale.Of(Session.Rules!.RuleSet, model.Ingredient.Id);
+        var unit = Scale.Of(Session.Rules!, model.Ingredient.Id);
         var needsFactor = Units.Lookup(g.Unit) is not { Container: false } u || u.Base != unit;
         var factor = model.Factor.Trim() == "" ? null : Input.Int(model.Factor);
         if (needsFactor && factor is null)

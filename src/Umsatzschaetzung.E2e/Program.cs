@@ -7,6 +7,8 @@ using Umsatzschaetzung.Service;
 using Umsatzschaetzung.E2e;
 using Umsatzschaetzung.Extract;
 using Umsatzschaetzung.Suggest;
+using Umsatzschaetzung.Reports;
+using Umsatzschaetzung.Richtsatz;
 using Umsatzschaetzung.Tagging;
 
 if (args is ["tokenizer", var tokenizerDir, ..])
@@ -17,7 +19,8 @@ var work = Directory.CreateTempSubdirectory("umsatzschätzung-e2e-");
 var store = Path.Combine(work.FullName, "store");
 var seed = Json.Deserialize<RuleSet>(File.ReadAllBytes(Path.Combine(data, "ruleset.json")));
 var cases = new CaseStore(Path.Combine(work.FullName, "cases"));
-IService svc = new LocalService(new RuleStore(store, seed), cases, null, new Tagger(), null, null, "e2e");
+var ruleStore = new RuleStore(store, seed);
+IService svc = new LocalService(ruleStore, cases, null, new Tagger(), null, null, "e2e");
 var ct = CancellationToken.None;
 var checks = 0;
 
@@ -59,7 +62,7 @@ var status = await svc.Status(ct);
 Check(status.RulesVersion == 0 && status.Problem is null, "status reads the seeded rule set");
 
 var kase = await svc.PutCase(Fixture(Path.Combine(data, "case.sql"), "case.bar.2024"), ct);
-Check(kase.Case.Id == "case.bar.2024" && kase.Case.Invoices.Count == 1, "case stored");
+Check(kase.Id == "case.bar.2024" && kase.Invoices.Count == 1, "case stored");
 
 var neu = await svc.PutCase(new Case
 {
@@ -68,23 +71,80 @@ var neu = await svc.PutCase(new Case
     PeriodTo = new DateOnly(2024, 12, 31),
     Taxpayer = new Taxpayer { Name = "Muster", TaxNumber = "123/4567", PabNumber = "89" },
 }, ct);
-Check(neu.Case.Id.StartsWith("fall-") && (await svc.ListCases(ct)).Cases.Any(c => c.Case.Id == neu.Case.Id),
+Check(neu.Id.StartsWith("fall-") && (await svc.ListCases(ct)).Any(c => c.Id == neu.Id),
     "a case without an id gets one and is stored");
 
-var calc = await svc.Calculate(kase.Case.Id, ct);
-var summary = calc.Summary.ToDictionary(kv => kv.Key, kv => kv.Value);
-Check(summary["purchases"] == "1.690,00 €", "purchases " + summary["purchases"]);
-Check(summary["costOfGoods"] == "1.513,10 €", "cost of goods " + summary["costOfGoods"]);
-Check(summary["stockChange"] == "176,90 €", "stock change " + summary["stockChange"]);
-Check(summary["calculatedRevenueNet"] == "7.335,95 €", "revenue " + summary["calculatedRevenueNet"]);
-Check(summary["markup"] == "384,82 %", "markup " + summary["markup"]);
-Check(summary["portions"] == "2.946 Portionen", "portions " + summary["portions"]);
-Check(calc.Excluded.Unmapped.Count == 0 && calc.Excluded.Unused.Count == 0, "nothing excluded");
+var rules = await svc.Rules(ct);
+var calc = await svc.Calculate(kase.Id, ct);
+// Der Dienst rechnet in Cent und Basispunkten; geschrieben wird erst hier.
+var totals = calc.Report.Totals;
+Check(Format.Cents(totals.Purchases) == "1.690,00 €", "purchases " + Format.Cents(totals.Purchases));
+Check(Format.Cents(totals.CostOfGoods) == "1.513,10 €", "cost of goods " + Format.Cents(totals.CostOfGoods));
+Check(Format.Cents(totals.StockChange) == "176,90 €", "stock change " + Format.Cents(totals.StockChange));
+Check(Format.Cents(totals.CalculatedRevenueNet) == "7.335,95 €", "revenue " + Format.Cents(totals.CalculatedRevenueNet));
+Check(Format.Bp(totals.Markup) == "404,56 %", "markup " + Format.Bp(totals.Markup));
+Check(Format.Cents(totals.ShrinkageCost) == "59,15 €" && Format.Cents(totals.UnallocatedCost) == "0,04 €"
+    && Format.Cents(totals.AllocatedCost) == "1.453,91 €",
+    "the cost of goods reaches the portions through the yield rules and the allocation " + Format.Cents(totals.AllocatedCost));
+Check(Format.Portions(totals.Portions) == "2.946 Portionen", "portions " + Format.Portions(totals.Portions));
+Check(calc.Report.Unmapped.Count == 0 && calc.Report.Unused.Count == 0, "nothing excluded");
 
-var report = await svc.RenderReport(kase.Case.Id, false, ct);
+var drinks = calc.Report.Markups.Find(m => m.Sparte == Sparte.Getränke)!;
+Check(Format.Cents(drinks.CostOfGoods) == "1.453,91 €" && Format.Cents(drinks.RevenueNet) == "7.335,95 €"
+    && Format.Bp(drinks.Markup) == "404,56 %", "markup of the drinks division " + Format.Bp(drinks.Markup));
+var beer = calc.Report.Products.Find(p => Names.Product(rules, p.ProductId) == "Pils 0,3 l vom Fass")!;
+Check(beer is { Sparte: Sparte.Getränke } && Format.Cents(beer.CostPerPortion) == "0,55 €" && Format.Bp(beer.Markup) == "382,88 %",
+    "each recipe carries its own markup, measured against what its ingredients cost");
+
+var pils = calc.Report.Ingredients.Find(i => i.Name == "Fassbier Pils")!;
+Check(pils.Purchases.Count > 0 && pils.Purchases.TrueForAll(p => p.Invoice == Names.Invoice(kase, p.InvoiceId) && p.Qty > 0)
+    && pils.Bought == pils.Purchases.Sum(p => p.Qty) && pils.Cost == pils.Purchases.Sum(p => p.Net),
+    "every ingredient carries the invoice lines it was bought with");
+Check(pils.Yield is { Name.Length: > 0 } && pils.YieldRate < Bp.Full && pils.Sellable == pils.Used * pils.YieldRate / Bp.Full
+    && Format.Qty(pils.Used, pils.Unit) == Format.Qty(pils.Opening + pils.Bought - pils.Closing, pils.Unit),
+    "every ingredient carries the yield rule that was applied and the stock it was moved by");
+
+var rahmen = Vergleich.Aufschlag(ruleStore.Sammlung(2023), "56101.0", 12_000_000);
+Check(rahmen is { Von: 178, Bis: 400 } && rahmen.Klasse.StartsWith("Gast-"), "the Gewerbekennzahl finds its Rahmensatz");
+Check(rahmen!.Lage(25700) == Rahmenlage.Im && rahmen.Lage(45000) == Rahmenlage.Über && rahmen.Lage(10000) == Rahmenlage.Unter, "a markup is read against the Rahmensatz");
+Check(Vergleich.Aufschlag(ruleStore.Sammlung(2023), "561", 12_000_000) is null, "a Kennzahl that fits several Gewerbeklassen has no Rahmensatz");
+
+Check(Html.Render(kase, rules, calc.Report, rahmen).Contains(
+    "Richtsatzsammlung 2023, „Gast-, Speise- und Schankwirtschaften“: Rohaufschlag 178 bis 400 % (Mittel 257 %), kalkuliert über dem Rahmen."),
+    "the report measures the calculated markup against the Rahmensatz");
+
+var report = await svc.RenderReport(kase.Id, false, ct);
 Check(report.Html.Contains("7.335,95 €") && report.Html.Contains("Anhang E"), "html report");
+var tpl = new System.Text.Json.Nodes.JsonObject
+{
+    ["titel"] = "Bier & <Brot>",
+    ["zeilen"] = new System.Text.Json.Nodes.JsonArray("a", "b"),
+    ["leer"] = new System.Text.Json.Nodes.JsonArray(),
+    ["betrag"] = 733595L,
+    ["satz"] = 40456L,
+    ["menge"] = 20000L,
+    ["basis"] = 5000L,
+    ["code"] = "LTR",
+    ["lage"] = "über",
+};
+Check(Template.Render("<h1>{{ titel }}</h1>", tpl) == "<h1>Bier &amp; &lt;Brot&gt;</h1>", "template escapes what it writes");
+Check(Template.Render("{{ titel | css }}", tpl) == "\"Bier & <Brot>\"", "template writes a CSS string where the template says so");
+Check(Template.Render("{{ betrag | cents }} · {{ satz | bp }}", tpl) == "7.335,95 € · 404,56 %", "template formats raw values");
+Check(Template.Render("{{ betrag | price:basis:code }}", tpl) == "0,733595 € je 5 Liter", "a filter takes several arguments");
+Check(Template.Render("{{ menge | quantity:code }}", tpl) == "20 Liter", "a filter reads its argument from the data");
+try { Template.Render("{{ betrag | kilo }}", tpl); Check(false, "unknown filter"); }
+catch (TemplateError) { Check(true, "an unknown filter is an error, not an empty cell"); }
+Check(Template.Render("{% for z in zeilen %}<li>{{ z }}</li>\n{% endfor %}", tpl) == "<li>a</li>\n<li>b</li>\n", "template repeats a list");
+Check(Template.Render("{% if leer %}da{% else %}nichts{% endif %}", tpl) == "nichts", "an empty list is false");
+Check(Template.Render("{% if lage == \"über\" %}ja{% else %}nein{% endif %}", tpl) == "ja"
+    && Template.Render("{% if lage == \"unter\" %}ja{% else %}nein{% endif %}", tpl) == "nein", "a condition compares against a literal");
+try { Template.Render("{{ fehlt }}", tpl); Check(false, "unknown path"); }
+catch (TemplateError) { Check(true, "an unknown path is an error, not an empty cell"); }
+Check(report.Html.Contains("<h1>3 Rohgewinnaufschlag</h1>") && report.Html.Contains("404,56 %"), "the report carries the markup section");
+Check(report.Html.Contains("1.453,91 € × (100 % + 404,56 %) ≈ 7.335,95 €"),
+    "the markup carries the calculated revenue back out of the cost of goods");
 
-var csv = Encoding.UTF8.GetString((await svc.ExportInvoice(kase.Case.Id, "inv.bar.1", ct)).Data);
+var csv = Encoding.UTF8.GetString((await svc.ExportInvoice(kase.Id, "inv.bar.1", ct)).Data);
 Check(csv.Contains("Rechnungsnummer;2024-04711") && csv.Contains("Netto;1.690,00 €"), "invoice csv carries the header");
 Check(csv.Contains("1;Pils Fass 50 l;31090;;12 Keg;92,50 €;1.110,00 €;19 %;Fassbier Pils × 50 l"), "invoice csv carries the lines with their mapping");
 
@@ -271,7 +331,7 @@ using (var cleaned = Deink.Apply(flat))
 }
 
 async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
-    (await svc.SuggestMapping("", new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct)).Candidates;
+    (await svc.SuggestMapping("", new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct));
 
 var keg = await Suggest("Fassbier Pils, Keg 50 l", "XKG");
 Check(keg.Count > 0 && keg[0].Mapping.IngredientId == "ing.bier.fass" && keg[0].Mapping.Factor == 50000,
@@ -294,15 +354,15 @@ var friseur = await svc.PutCase(new Case
     Taxpayer = new Taxpayer { Name = "Schnitt", TaxNumber = "1/2", PabNumber = "3", Gewerbe = "96021.0" },
 }, ct);
 var line = new InvoiceLine { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", UnitCode = "XBO" };
-Check((await svc.SuggestMapping(friseur.Case.Id, line, null, ct)).Candidates.Count == 0, "suggest: a Friseur is never offered Korn");
-Check((await svc.SuggestMapping(neu.Case.Id, line, null, ct)).Candidates[0].Mapping.IngredientId == "ing.korn", "suggest: a case without Gewerbe sees everything");
+Check((await svc.SuggestMapping(friseur.Id, line, null, ct)).Count == 0, "suggest: a Friseur is never offered Korn");
+Check((await svc.SuggestMapping(neu.Id, line, null, ct))[0].Mapping.IngredientId == "ing.korn", "suggest: a case without Gewerbe sees everything");
 
-var parsed = await svc.ParseInvoice(kase.Case.Id, "zugferd.pdf", File.ReadAllBytes(Path.Combine(data, "zugferd.pdf")), ct);
+var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", File.ReadAllBytes(Path.Combine(data, "zugferd.pdf")), ct);
 Check(!parsed.NeedsOcr && parsed.Invoice.Number == "RE-20201121/508" && parsed.Invoice.Lines.Count == 3, "zugferd parse");
-Check(parsed.Case is { Case.Invoices.Count: 2 } && parsed.UnmappedLines.Count == 3, "zugferd attached, lines unmapped");
+Check(parsed.Case is { Invoices.Count: 2 } && parsed.UnmappedLines.Count == 3, "zugferd attached, lines unmapped");
 try
 {
-    await svc.InvoiceSource(kase.Case.Id, parsed.Invoice.Id, ct);
+    await svc.InvoiceSource(kase.Id, parsed.Invoice.Id, ct);
     Check(false, "pdf preview needs a renderer");
 }
 catch (ServiceError e)
@@ -310,11 +370,21 @@ catch (ServiceError e)
     Check(e.Code == ErrorCode.Unsupported, "pdf preview without renderer is Unsupported, got " + e.Code);
 }
 
-var dump = await svc.ExportCase(kase.Case.Id, ct);
-var back = await svc.ImportCase(dump.FileName, dump.Data, ct);
-Check(dump.FileName.EndsWith(".db") && back.Case.Id == kase.Case.Id && back.Case.Invoices.Count == 2,
+var dump = await svc.ExportCase(kase.Id, ct);
+try
+{
+    await svc.ImportCase(dump.FileName, dump.Data, false, ct);
+    Check(false, "an existing case must not be replaced unasked");
+}
+catch (ServiceError e)
+{
+    Check(e.Code == ErrorCode.Conflict && (string?)e.Details == kase.Label,
+        "re-import refused with Conflict and the existing label, got " + e.Code);
+}
+var back = await svc.ImportCase(dump.FileName, dump.Data, true, ct);
+Check(dump.FileName.EndsWith(".db") && back.Id == kase.Id && back.Invoices.Count == 2,
     "a case exports and imports as one file");
-Check(cases.LoadFile(kase.Case.Id, parsed.Invoice.Id).Name == "zugferd.pdf", "the document travels inside it");
+Check(cases.LoadFile(kase.Id, parsed.Invoice.Id).Name == "zugferd.pdf", "the document travels inside it");
 try
 {
     await svc.ImportCase("kaputt.db", [1, 2, 3], false, ct);
@@ -325,14 +395,14 @@ catch (ServiceError e)
     Check(e.Code == ErrorCode.Invalid, "broken case file refused with Invalid, got " + e.Code);
 }
 
-var korn = (await svc.Rules(ct)).RuleSet.Products["prod.korn.4cl"];
+var korn = (await svc.Rules(ct)).Products["prod.korn.4cl"];
 korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
 var saved = await svc.SaveRule(korn, ct);
-Check(saved.RuleSet.Version == 1 && saved.RuleSet.Products["prod.korn.4cl"].Meta.Rev == 1, "save bumps version and stamps the entity");
+Check(saved.Version == 1 && saved.Products["prod.korn.4cl"].Meta.Rev == 1, "save bumps version and stamps the entity");
 var alkoholfrei = new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" };
-Check((await svc.SaveRule(alkoholfrei, ct)).RuleSet.Categories.ContainsKey("cat.alkoholfrei"), "a category is a rule entity of its own");
+Check((await svc.SaveRule(alkoholfrei, ct)).Categories.ContainsKey("cat.alkoholfrei"), "a category is a rule entity of its own");
 var water = new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", CategoryId = "cat.alkoholfrei" };
-var merged = (await svc.SaveRule(water, ct)).RuleSet;
+var merged = await svc.SaveRule(water, ct);
 Check(merged.Version == 3 && merged.Ingredients.ContainsKey("ing.wasser") && merged.Products["prod.korn.4cl"].Meta.ValidTo is not null, "saves accumulate per entity");
 try
 {
@@ -361,11 +431,11 @@ catch (ServiceError e)
 {
     Check(e.Code == ErrorCode.Conflict, "referenced ingredient rejected with Conflict, got " + e.Code);
 }
-var pruned = (await svc.DeleteRule(Entity.Product, "prod.korn.2cl", ct)).RuleSet;
+var pruned = await svc.DeleteRule(Entity.Product, "prod.korn.2cl", ct);
 Check(pruned.Version == 4 && !pruned.Products.ContainsKey("prod.korn.2cl"), "delete drops the entity and bumps the version");
 
-var recalced = await svc.Calculate(kase.Case.Id, ct);
-Check(recalced.Products.All(p => p.ProductId != "prod.korn.4cl"), "retired product leaves the calculation");
+var recalced = await svc.Calculate(kase.Id, ct);
+Check(recalced.Report.Products.All(p => p.ProductId != "prod.korn.4cl"), "retired product leaves the calculation");
 
 RuleStore Reopen() => new(store, seed);
 Check(!Reopen().Load().Products.ContainsKey("prod.korn.2cl"), "the seed does not resurrect a deleted entity");
@@ -394,12 +464,12 @@ Check(learned.Count > 0 && learned[0].Mapping.IngredientId == "ing.bier.fass" &&
 Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: what was learnt does not drag the deposit line along");
 
 var sammlungen = await svc.Sammlungen(ct);
-Check(sammlungen.Sammlungen.Count > 0 && sammlungen.Sammlungen.TrueForAll(s => s.Mitgeliefert),
+Check(sammlungen.Count > 0 && sammlungen.TrueForAll(s => s.Mitgeliefert),
     "richtsatz: the shipped Sammlungen seed themselves");
-Check(sammlungen.Sammlungen[0].Year > sammlungen.Sammlungen[^1].Year, "richtsatz: newest year first");
-var jüngste = sammlungen.Sammlungen[0].Year;
+Check(sammlungen[0].Year > sammlungen[^1].Year, "richtsatz: newest year first");
+var jüngste = sammlungen[0].Year;
 var nach = await svc.DeleteSammlung(jüngste, ct);
-Check(nach.Sammlungen.Count == sammlungen.Sammlungen.Count - 1, "richtsatz: a Sammlung can be dropped");
+Check(nach.Count == sammlungen.Count - 1, "richtsatz: a Sammlung can be dropped");
 try
 {
     await svc.ImportSammlung("kaputt.pdf", [1, 2, 3], ct);
@@ -413,10 +483,10 @@ var pdfPfad = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..
 if (File.Exists(pdfPfad))
 {
     var importiert = await svc.ImportSammlung(Path.GetFileName(pdfPfad), File.ReadAllBytes(pdfPfad), ct);
-    var wieder = importiert.Sammlungen.Find(s => s.Year == jüngste);
+    var wieder = importiert.Find(s => s.Year == jüngste);
     Check(wieder is { Mitgeliefert: false, Klassen: > 0 } && wieder.Quelle == Path.GetFileName(pdfPfad),
         "richtsatz: an imported PDF takes the place of its year");
-    Check((await svc.DeleteSammlung(jüngste, ct)).Sammlungen.TrueForAll(s => s.Year != jüngste), "richtsatz: the import can be dropped again");
+    Check((await svc.DeleteSammlung(jüngste, ct)).TrueForAll(s => s.Year != jüngste), "richtsatz: the import can be dropped again");
 }
 Check(new RuleStore(store, seed).Sammlungen().Exists(s => s.Year == jüngste && s.Mitgeliefert),
     "richtsatz: a dropped Sammlung is seeded again on the next start");

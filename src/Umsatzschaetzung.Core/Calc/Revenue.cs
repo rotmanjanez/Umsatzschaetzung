@@ -4,61 +4,80 @@ namespace Umsatzschaetzung.Calc;
 
 readonly record struct ProductAllocation(long Portions, bool Pinned, int Component, List<string> Binding);
 
+
+readonly record struct UnitCost(long Micro)
+{
+    public const long Scale = 1_000_000;
+
+    public static UnitCost Of(IngredientUse u) => new(u.Used > 0 ? u.UsedCost * Scale / u.Used : 0);
+}
+
 internal static class Revenue
 {
     static bool PriceMissing(CaseProduct cp) => cp.GrossPrice <= 0;
 
-    static (long Net, string Formula) ProductNet(CaseProduct cp, long portions)
+    // Der Nettopreis einer Portion: der Bruttopreis der Karte ohne die Umsatzsteuer.
+    static long UnitNet(CaseProduct cp) =>
+        PriceMissing(cp) ? 0 : cp.GrossPrice * Bp.Full / (Bp.Full + cp.Vat);
+
+    // Die Zutaten der Rezeptur, die diese Portionszahl begrenzt haben.
+    static List<string> Binding(RuleSet rs, Product p, List<string> binding)
     {
-        if (PriceMissing(cp))
-            return (0, $"{Format.Portions(portions)} × Preis fehlt = {Format.Cents(0)}");
-        var unitNet = cp.GrossPrice * Bp.Full / (Bp.Full + cp.Vat);
-        var net = portions * unitNet;
-        return (net, $"{Format.Cents(cp.GrossPrice)} brutto ÷ (100 % + {Format.Bp(cp.Vat)} USt) = {Format.Cents(unitNet)} netto je Portion; {Format.Portions(portions)} × {Format.Cents(unitNet)} = {Format.Cents(net)}");
+        List<string> output = [];
+        foreach (var r in p.Recipe)
+            foreach (var b in binding)
+                if (b == r.IngredientId) output.Add(rs.Ingredients.TryGetValue(b, out var ing) ? ing.Name : "");
+        return output;
     }
 
-    static Node ProductNode(Case c, RuleSet rs, Product p, CaseProduct cp, ProductAllocation pa, SortedDictionary<string, IngredientUse> uses, string pinReason)
+    static long PerPortion(Product p, Dictionary<string, UnitCost> cost)
     {
-        var (net, formula) = ProductNet(cp, pa.Portions);
-        var portionNode = new Node
-        {
-            Label = p.Name + ": Portionen",
-            Value = pa.Portions,
-            Unit = ValueUnit.Portion,
-            Sources = [new SourceRef { Kind = SourceKind.Allocation, Entity = Entity.Product, EntityId = p.Id, Reason = $"Komponente {pa.Component + 1}" }],
-        };
-        List<string> binding = [];
+        long micro = 0;
+        foreach (var r in p.Recipe)
+            micro += Scale.ToBase(r.Amount, r.Unit) * cost.GetValueOrDefault(r.IngredientId).Micro;
+        return micro;
+    }
+
+    static Sparte Division(RuleSet rs, Product p, Dictionary<string, UnitCost> cost)
+    {
+        long best = 0;
+        var sparte = Sparte.Unbestimmt;
         foreach (var r in p.Recipe)
         {
-            if (uses.TryGetValue(r.IngredientId, out var u)) portionNode.Inputs.Add(u.Node!);
-            foreach (var b in pa.Binding)
-                if (b == r.IngredientId) binding.Add(rs.Ingredients.TryGetValue(b, out var ing) ? ing.Name : "");
+            var share = Scale.ToBase(r.Amount, r.Unit) * cost.GetValueOrDefault(r.IngredientId).Micro;
+            if (share <= best) continue;
+            best = share;
+            sparte = rs.Ingredients.TryGetValue(r.IngredientId, out var ing)
+                && rs.Categories.TryGetValue(ing.CategoryId, out var cat) ? cat.Sparte : Sparte.Unbestimmt;
         }
-        if (pa.Pinned)
+        return sparte;
+    }
+
+    static List<Flag> Undivided(List<MarkupRow> markups)
+    {
+        var m = markups.Find(m => m.Sparte == Sparte.Unbestimmt);
+        if (m is null || m.RevenueNet == 0) return [];
+        return [new Flag
         {
-            portionNode.Formula = $"vorgegeben: {Format.Portions(pa.Portions)}";
-            portionNode.Sources.Add(new SourceRef { Kind = SourceKind.Pinned, Entity = Entity.Product, EntityId = p.Id, Reason = pinReason });
+            Code = "sparte-missing",
+            Message = $"{Format.Cents(m.RevenueNet)} Umsatz entfallen auf Produkte ohne Sparte; "
+                + "ihr Aufschlagsatz steht weder bei den Getränken noch bei den Speisen",
+        }];
+    }
+
+    static List<MarkupRow> Markups(List<ProductRow> rows)
+    {
+        var bySparte = new SortedDictionary<Sparte, MarkupRow>();
+        foreach (var row in rows)
+        {
+            if (row.Portions == 0) continue;
+            if (!bySparte.TryGetValue(row.Sparte, out var m)) bySparte[row.Sparte] = m = new MarkupRow { Sparte = row.Sparte };
+            m.Portions += row.Portions;
+            m.CostOfGoods += row.CostOfGoods;
+            m.RevenueNet += row.RevenueNet;
         }
-        else if (binding.Count > 0)
-            portionNode.Formula = $"Zuteilung, begrenzt durch {string.Join(", ", binding)} = {Format.Portions(pa.Portions)}";
-        else
-            portionNode.Formula = "Zuteilung = " + Format.Portions(pa.Portions);
-        var priceNode = new Node
-        {
-            Label = p.Name + ": Preis (brutto)",
-            Value = cp.GrossPrice,
-            Unit = ValueUnit.Eur,
-            Formula = PriceMissing(cp) ? "Preis fehlt" : $"{Format.Cents(cp.GrossPrice)} brutto, {Format.Bp(cp.Vat)} USt",
-            Sources = [new SourceRef { Kind = SourceKind.Case, EntityId = c.Id, Reason = "Preis der Prüfung" }],
-        };
-        return new Node
-        {
-            Label = p.Name + ": Umsatz (netto)",
-            Value = net,
-            Unit = ValueUnit.Eur,
-            Formula = formula,
-            Inputs = [portionNode, priceNode],
-        };
+        // Getränke und Speisen zuerst, die Produkte ohne Sparte zuletzt.
+        return [.. bySparte.Values.OrderBy(m => m.Sparte == Sparte.Unbestimmt ? 1 : 0)];
     }
 
     internal static Report Run(Case c, RuleSet rs, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses)
@@ -70,13 +89,9 @@ internal static class Revenue
         var pinReasons = new Dictionary<string, string>();
         foreach (var p in c.Pinned) pinReasons[p.ProductId] = p.Reason;
         var settings = Calculation.CaseProducts(c);
-        var root = new Node
-        {
-            Label = "Kalkulierter Umsatz (netto)",
-            Unit = ValueUnit.Eur,
-            Sources = [new SourceRef { Kind = SourceKind.Case, EntityId = c.Id, Reason = "Nettopreis je Portion abgerundet" }],
-        };
-        long total = 0, portions = 0;
+        var unitCost = new Dictionary<string, UnitCost>(uses.Count);
+        foreach (var (id, u) in uses) unitCost[id] = UnitCost.Of(u);
+        long total = 0, portions = 0, allocated = 0;
         List<ProductRow> rows = [];
         List<Flag> flags = [];
         foreach (var pid in rs.Products.Keys.Order(StringComparer.Ordinal))
@@ -84,49 +99,64 @@ internal static class Revenue
             var p = rs.Products[pid];
             if (!p.Meta.ValidOn(c.PeriodTo)) continue;
             var known = settings.TryGetValue(pid, out var s);
-            var allocated = byProduct.TryGetValue(pid, out var pa);
-            if (!allocated && !known && !pinReasons.ContainsKey(pid)) continue;
+            var hasPortions = byProduct.TryGetValue(pid, out var pa);
+            if (!hasPortions && !known && !pinReasons.ContainsKey(pid)) continue;
             var cp = known ? s! : new CaseProduct();
-            var row = new ProductRow { ProductId = pid, GrossPrice = cp.GrossPrice, Vat = cp.Vat, Disabled = cp.Disabled, PriceMissing = PriceMissing(cp) };
-            if (allocated)
+            var perPortion = PerPortion(p, unitCost);
+            var row = new ProductRow
             {
-                var n = ProductNode(c, rs, p, cp, pa, uses, pinReasons.GetValueOrDefault(pid, ""));
-                root.Inputs.Add(n);
-                total += n.Value;
+                ProductId = pid,
+                Name = p.Name,
+                UnitNet = UnitNet(cp),
+                PinReason = pinReasons.GetValueOrDefault(pid, ""),
+                Sparte = Division(rs, p, unitCost),
+                CostPerPortion = perPortion / UnitCost.Scale,
+                GrossPrice = cp.GrossPrice,
+                Vat = cp.Vat,
+                Disabled = cp.Disabled,
+                PriceMissing = PriceMissing(cp),
+            };
+            if (hasPortions)
+            {
+                var net = pa.Portions * UnitNet(cp);
+                total += net;
                 portions += pa.Portions;
-                (row.Portions, row.Pinned, row.RevenueNet) = (pa.Portions, pa.Pinned, n.Value);
+                row.Binding = Binding(rs, p, pa.Binding);
+                (row.Portions, row.Pinned, row.RevenueNet) = (pa.Portions, pa.Pinned, net);
+                row.CostOfGoods = pa.Portions * perPortion / UnitCost.Scale;
+                allocated += row.CostOfGoods;
                 if (row.PriceMissing)
                     flags.Add(new Flag { Code = "price_missing", Message = $"Preis fehlt für „{p.Name}“ ({Format.Portions(pa.Portions)} ohne Umsatz)" });
             }
             rows.Add(row);
         }
-        root.Value = total;
-        root.Formula = $"Summe über {root.Inputs.Count} Produkte = {Format.Cents(total)}";
+        var markups = Markups(rows);
 
-        long cost = 0, stock = 0;
+        long cost = 0, stock = 0, sellable = 0;
         foreach (var u in uses.Values)
         {
             cost += u.UsedCost;
             stock += u.Cost - u.UsedCost;
+            sellable += u.Used > 0 ? u.UsedCost * u.Sellable / u.Used : 0;
         }
         var summary = new Totals
         {
             CalculatedRevenueNet = total,
             CostOfGoods = cost,
             StockChange = stock,
-            GrossProfit = total - cost,
+            SellableCost = sellable,
+            AllocatedCost = allocated,
             Portions = portions,
         };
-        if (cost != 0) summary.Markup = summary.GrossProfit * Bp.Full / cost;
         return new Report
         {
             CaseId = c.Id,
             ComputedAt = DateTimeOffset.UtcNow,
             Totals = summary,
-            Root = root,
             Products = rows,
+            Markups = markups,
             Allocations = allocs,
-            Warnings = [.. Warnings(c, rs, uses, allocs), .. flags],
+            Warnings = [.. Warnings(c, rs, uses, allocs), .. flags, .. Undivided(markups)],
         };
     }
 

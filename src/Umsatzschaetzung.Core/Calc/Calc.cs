@@ -10,7 +10,12 @@ internal sealed class IngredientUse
     public long Used { get; set; }
     public long UsedCost { get; set; }
     public long Sellable { get; set; }
-    public Node? Node { get; set; }
+    public long Opening { get; set; }
+    public long Closing { get; set; }
+    public List<Purchase> Purchases { get; } = [];
+    public YieldRule? Yield { get; set; }
+    public bool YieldChosen { get; set; }
+    public long YieldRate { get; set; }
 }
 
 public static class Calculation
@@ -25,7 +30,7 @@ public static class Calculation
         rep.Unused = ex.Unused;
         rep.Warnings.AddRange(flags);
         rep.Warnings.AddRange(Scale.Conflicts(rs, ex.Unused.Select(l => l.IngredientId)));
-        rep.Ingredients = IngredientRows(uses, allocs);
+        rep.Ingredients = IngredientRows(rs, uses, allocs);
         var s = rep.Totals;
         s.Purchases = c.Invoices.Sum(inv => inv.Lines.Sum(l => l.LineNet));
         s.UnmappedCost = ex.Unmapped.Sum(l => l.LineNet);
@@ -34,12 +39,16 @@ public static class Calculation
         return rep;
     }
 
-    static List<IngredientRow> IngredientRows(SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
+    static List<IngredientRow> IngredientRows(RuleSet rs, SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
     {
         var leftover = new Dictionary<string, long>();
+        HashSet<string> binding = [];
         foreach (var a in allocs)
+        {
             foreach (var l in a.Leftover)
                 leftover[l.IngredientId] = leftover.GetValueOrDefault(l.IngredientId) + l.Qty;
+            binding.UnionWith(a.Binding);
+        }
         var rows = new List<IngredientRow>(uses.Count);
         foreach (var id in uses.Keys)
         {
@@ -47,12 +56,21 @@ public static class Calculation
             rows.Add(new IngredientRow
             {
                 IngredientId = id,
+                Name = Names.Ingredient(rs, id),
+                Unit = Scale.Of(rs, id) ?? Unit.Piece,
+                Purchases = u.Purchases,
+                Opening = u.Opening,
+                Closing = u.Closing,
                 Bought = u.Bought,
                 Cost = u.Cost,
                 Used = u.Used,
                 UsedCost = u.UsedCost,
+                Yield = u.Yield,
+                YieldChosen = u.YieldChosen,
+                YieldRate = u.YieldRate,
                 Sellable = u.Sellable,
                 Leftover = leftover.GetValueOrDefault(id),
+                Binding = binding.Contains(id),
             });
         }
         return rows;

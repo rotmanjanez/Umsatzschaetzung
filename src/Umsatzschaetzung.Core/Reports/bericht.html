@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <title>Umsatzschätzung {{ case.label }}</title>
+  <style>
+:root { --ink: #141414; --muted: #646464; --hairline: #bebebe; }
+html { color-scheme: light; }
+body { margin: 0; background: #f2f2f0; color: var(--ink); font-family: "Libertinus Serif", "Linux Libertine", Georgia, "Times New Roman", serif; font-size: 9.5pt; line-height: 1.45; }
+main { max-width: 165mm; margin: 0 auto; padding: 20mm 20mm 24mm 25mm; background: #fff; }
+p { margin: 0 0 0.6em; text-align: justify; hyphens: auto; }
+h1 { font-size: 10.5pt; font-weight: bold; margin: 1.8em 0 0.7em; }
+h2 { font-size: 9.5pt; font-weight: bold; margin: 1.2em 0 0.5em; }
+hr.light { border: 0; border-top: 0.3pt solid var(--hairline); margin: 0.2em 0 0.4em; width: 85mm; }
+.note { font-size: 8pt; color: var(--muted); }
+.empty { color: var(--muted); font-style: italic; }
+.title { font-size: 11pt; font-weight: bold; }
+.cover { display: flex; gap: 8mm; min-height: 78.5mm; padding-top: 25mm; box-sizing: border-box; }
+.cover-left { width: 100mm; }
+.cover-right { display: grid; grid-template-columns: auto 1fr; column-gap: 0.8em; row-gap: 0.5em; margin: 0; font-size: 9pt; align-content: start; }
+.cover-right dt { font-size: 8pt; color: var(--muted); }
+.cover-right dd { margin: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 9pt; font-variant-numeric: tabular-nums; margin: 0.4em 0 0.6em; }
+th, td { padding: 3pt 5pt; text-align: left; vertical-align: top; border-bottom: 0.3pt solid var(--hairline); }
+th { font-size: 8pt; font-weight: bold; border-bottom: 0.7pt solid var(--ink); }
+th.wide { width: 40%; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tr.total td { font-weight: bold; border-top: 0.7pt solid var(--ink); }
+table.ledger { width: auto; min-width: 70mm; }
+table.ledger td:first-child { padding-right: 4em; }
+ul.steps, ul.steps ul { list-style: none; margin: 0; padding: 0; }
+ul.steps ul { padding-left: 1.4em; }
+ul.steps .row { border-bottom: 0.3pt solid var(--hairline); padding: 3pt 0; }
+ul.steps .step { display: flex; justify-content: space-between; gap: 1.5em; }
+ul.steps .step .num { white-space: nowrap; }
+ul.steps > li > .row .step, ul.steps > li > ul > li > .row .step { font-weight: bold; }
+.list span + span::before { content: ", "; }
+.prose pre { font-family: "Libertinus Mono", "DejaVu Sans Mono", Consolas, monospace; font-size: 8.5pt; margin: 0.4em 0 0.8em 2em; white-space: pre-wrap; }
+.prose code { font-family: "Libertinus Mono", "DejaVu Sans Mono", Consolas, monospace; font-size: 8.5pt; }
+.prose ul { padding-left: 1.5em; margin: 0 0 0.6em; }
+.prose li { margin-bottom: 0.3em; }
+ol.warnings { padding-left: 2em; }
+ol.warnings li { margin-bottom: 0.3em; }
+.stamp { display: flex; gap: 2.2em; margin-top: 3em; padding-top: 0.4em; border-top: 0.3pt solid var(--hairline); font-size: 8pt; }
+@page {
+  size: A4;
+  margin: 20mm 20mm 24mm 25mm;
+  @top-left { content: "Umsatzschätzung · " {{ case.label | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
+  @top-right { content: {{ case.periodFrom | date | css }} " bis " {{ case.periodTo | date | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
+  @bottom-left { content: "Steuernummer " {{ case.taxpayer.taxNumber | css }} "   ·   Name des Steuerpflichtigen " {{ case.taxpayer.name | css }} "   ·   PaB-Nr. " {{ case.taxpayer.pabNumber | css }} "   ·   Datum " {{ report.computedAt | day | css }}; font-size: 8pt; white-space: pre; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
+  @bottom-right { content: "Seite " counter(page) " von " counter(pages); font-size: 8pt; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
+}
+@page :first {
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+@media print {
+  body { background: #fff; }
+  main { max-width: none; margin: 0; padding: 0; }
+  section { break-before: page; }
+  section.first { break-before: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  h1, h2 { break-after: avoid; }
+  .stamp { display: none; }
+}
+</style>
+</head>
+
+<body>
+  <main>
+
+    <header class="cover">
+      <div class="cover-left">
+        <div class="note">Umsatzschätzung</div>
+        <hr class="light">
+        <div class="title">{{ case.label }}</div>
+        <div>{{ case.taxpayer.name }}</div>
+        <div>Zeitraum {{ case.periodFrom | date }} bis {{ case.periodTo | date }}</div>
+      </div>
+      <dl class="cover-right">
+        <dt>Steuernummer</dt>
+        <dd>{{ case.taxpayer.taxNumber }}</dd>
+        <dt>PaB-Nr.</dt>
+        <dd>{{ case.taxpayer.pabNumber }}</dd>
+        <dt>Datum</dt>
+        <dd>{{ report.computedAt | day }}</dd>
+        <dt>Rechnungen</dt>
+        <dd>{{ invoiceCount }}</dd>
+      </dl>
+    </header>
+
+    <section class="first">
+      <h1>1 Eingangspositionen</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Rechnungsnr.</th>
+            <th>Datum</th>
+            <th class="wide">Position</th>
+            <th class="num">Menge</th>
+            <th class="num">Einzelpreis</th>
+            <th class="num">Netto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in included %}
+          {% for l in inv.lines %}
+          <tr>
+            <td>{% if inv.number %}{{ inv.number }}{% else %}{{ inv.fileName }}{% endif %}</td>
+            <td>{{ inv.date | date }}</td>
+            <td>{{ l.name }}</td>
+            <td class="num">{{ l.quantity | quantity:l.unitCode }}</td>
+            <td class="num">{{ l.unitPrice | price:l.priceBaseQty:l.unitCode }}</td>
+            <td class="num">{{ l.lineNet | cents }}</td>
+          </tr>
+          {% endfor %}
+          {% endfor %}
+          <tr class="total">
+            <td>Summe</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ includedNet | cents }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h1>2 Umsätze vor und nach Betriebsprüfung</h1>
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Steuersatz</th>
+            <th class="num">Umsatz vor BP</th>
+            <th class="num">Umsatz nach BP</th>
+            <th class="num">Differenz</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in revenue %}
+          <tr{% if v.total %} class="total"{% endif %}>
+            <td>{% if v.total %}Summe{% else %}{{ v.vat | bp }}{% endif %}</td>
+            <td class="num">{{ v.declared | cents }}</td>
+            <td class="num">{{ v.calculated | cents }}</td>
+            <td class="num">{{ v.difference | cents }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="note">Alle Beträge netto.</p>
+    </section>
+
+    <section>
+      <h1>3 Rohgewinnaufschlag</h1>
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Sparte</th>
+            <th class="num">Portionen</th>
+            <th class="num">Einsatz der Portionen</th>
+            <th class="num">Umsatz netto</th>
+            <th class="num">Rohgewinn</th>
+            <th class="num">Aufschlagsatz</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in report.markups %}
+          <tr>
+            <td>{{ m.sparte | sparte }}</td>
+            <td class="num">{{ m.portions | portions }}</td>
+            <td class="num">{{ m.costOfGoods | cents }}</td>
+            <td class="num">{{ m.revenueNet | cents }}</td>
+            <td class="num">{{ m.grossProfit | cents }}</td>
+            <td class="num">{{ m.markup | bp }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="total">
+            <td>Gesamt</td>
+            <td class="num">{{ report.totals.portions | portions }}</td>
+            <td class="num">{{ report.totals.allocatedCost | cents }}</td>
+            <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
+            <td class="num">{{ report.totals.grossProfit | cents }}</td>
+            <td class="num">{{ report.totals.markup | bp }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">{{ report.totals.allocatedCost | markup:report.totals.markup:report.totals.calculatedRevenueNet }}</p>
+      {% if rahmen %}
+      <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohaufschlag {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h1>Anhang A: Rezepturen und Produkte</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Produkt</th>
+            <th class="wide">Rezeptur</th>
+            <th>Sparte</th>
+            <th class="num">Portionen</th>
+            <th class="num">Einsatz je Portion</th>
+            <th class="num">Bruttopreis</th>
+            <th class="num">USt</th>
+            <th class="num">Umsatz netto</th>
+            <th class="num">Aufschlagsatz</th>
+            <th>Bemerkung</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in report.products %}
+          <tr>
+            <td>{{ p.name }}</td>
+            <td class="list">{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</td>
+            <td>{{ p.sparte | sparte }}</td>
+            <td class="num">{{ p.portions | group }}</td>
+            <td class="num">{{ p.costPerPortion | cents }}</td>
+            <td class="num">{% if not p.priceMissing %}{{ p.grossPrice | cents }}{% endif %}</td>
+            <td class="num">{{ p.vat | bp }}</td>
+            <td class="num">{{ p.revenueNet | cents }}</td>
+            <td class="num">{% if p.costOfGoods %}{% if not p.priceMissing %}{{ p.markup | bp }}{% endif %}{% endif %}</td>
+            <td>{% if p.disabled %}deaktiviert{% else %}{% if p.priceMissing %}Preis fehlt{% else %}{% if p.pinned %}vorgegeben{% endif %}{% endif %}{% endif %}</td>
+          </tr>
+          {% endfor %}
+          <tr class="total">
+            <td>Summe</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ report.totals.portions | group }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h1>Anhang B: Warenfluss und Ausbeute</h1>
+      {% if report.ingredients %}
+      {% if case.inventory %}
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Zutat</th>
+            <th class="num">Anfangsbestand</th>
+            <th class="num">Einkauf</th>
+            <th class="num">Endbestand</th>
+            <th class="num">Verbrauch</th>
+            <th class="num">Wareneinsatz</th>
+            <th class="num">Ausbeute</th>
+            <th class="num">Verkaufsfähig</th>
+            <th class="num">Rest</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in report.ingredients %}
+          <tr>
+            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}</td>
+            <td class="num">{{ i.opening | qty:i.unit }}</td>
+            <td class="num">{{ i.bought | qty:i.unit }}</td>
+            <td class="num">{{ i.closing | qty:i.unit }}</td>
+            <td class="num">{{ i.used | qty:i.unit }}</td>
+            <td class="num">{{ i.usedCost | cents }}</td>
+            <td class="num">{{ i.yieldRate | bp }}</td>
+            <td class="num">{{ i.sellable | qty:i.unit }}</td>
+            <td class="num">{{ i.leftover | qty:i.unit }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Zutat</th>
+            <th class="num">Einkauf</th>
+            <th class="num">Wareneinsatz</th>
+            <th class="num">Ausbeute</th>
+            <th class="num">Verkaufsfähig</th>
+            <th class="num">Rest</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in report.ingredients %}
+          <tr>
+            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}</td>
+            <td class="num">{{ i.bought | qty:i.unit }}</td>
+            <td class="num">{{ i.usedCost | cents }}</td>
+            <td class="num">{{ i.yieldRate | bp }}</td>
+            <td class="num">{{ i.sellable | qty:i.unit }}</td>
+            <td class="num">{{ i.leftover | qty:i.unit }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+      {% else %}
+      <p class="empty">Keine Zutaten im Regelwerk.</p>
+      {% endif %}
+      {% if anyBinding %}
+      <p class="note">* Diese Zutat ist vollständig verbraucht und begrenzt die Portionszahl.</p>
+      {% endif %}
+      {% if anyApproximate %}
+      <p class="note">Die Zuteilung wurde für einen Teil der Zutaten näherungsweise bestimmt.</p>
+      {% endif %}
+
+      <h2>Ertragssätze</h2>
+      {% if anyYields %}
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Zutat</th>
+            <th class="num">Schwund</th>
+            <th class="num">Eigenverbrauch</th>
+            <th class="num">Personal</th>
+            <th class="num">Freiabgabe</th>
+            <th class="num">Ausbeute</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in report.ingredients %}
+          {% if i.yield %}
+          <tr>
+            <td>{{ i.name }}{% if i.yieldChosen %}<br><span class="note">In der Prüfung gewählt.</span>{% endif %}</td>
+            <td class="num">{{ i.yield.shrinkage | bp }}</td>
+            <td class="num">{{ i.yield.ownUse | bp }}</td>
+            <td class="num">{{ i.yield.staff | bp }}</td>
+            <td class="num">{{ i.yield.free | bp }}</td>
+            <td class="num">{{ i.yieldRate | bp }}</td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">Keine Ertragssätze hinterlegt.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h1>Anhang C: Kennzahlen</h1>
+      <table class="ledger">
+        <tbody>
+          <tr>
+            <td>Kalkulierter Umsatz (netto)</td>
+            <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
+          </tr>
+          <tr>
+            <td>abzüglich Einsatz der verkauften Portionen</td>
+            <td class="num">{{ report.totals.allocatedCost | cents }}</td>
+          </tr>
+          <tr class="total">
+            <td>Rohgewinn</td>
+            <td class="num">{{ report.totals.grossProfit | cents }}</td>
+          </tr>
+          <tr>
+            <td>Rohgewinnaufschlagsatz</td>
+            <td class="num">{{ report.totals.markup | bp }}</td>
+          </tr>
+          <tr>
+            <td>Wareneinsatz gesamt</td>
+            <td class="num">{{ report.totals.costOfGoods | cents }}</td>
+          </tr>
+          <tr>
+            <td>davon Schwund und Abzüge</td>
+            <td class="num">{{ report.totals.shrinkageCost | cents }}</td>
+          </tr>
+          <tr>
+            <td>davon nicht zugeteilte Ware</td>
+            <td class="num">{{ report.totals.unallocatedCost | cents }}</td>
+          </tr>
+          <tr>
+            <td>Portionen gesamt</td>
+            <td class="num">{{ report.totals.portions | portions }}</td>
+          </tr>
+          <tr>
+            <td>Erfasste Einkäufe (netto)</td>
+            <td class="num">{{ report.totals.purchases | cents }}</td>
+          </tr>
+          {% if case.inventory %}
+          <tr>
+            <td>Bestandsveränderung</td>
+            <td class="num">{{ report.totals.stockChange | cents }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td>Nicht berücksichtigt</td>
+            <td class="num">{{ excluded | cents }} ({{ report.totals.excludedShare | bp }})</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="prose">
+      <h1>Anhang D: Rechenweg</h1>
+      <h2>Der Rechenweg der Umsatzschätzung</h2>
+      <p>Diese Darstellung richtet sich an Prüferinnen und Prüfer sowie an den Steuerpflichtigen und seinen Berater. Sie beschreibt, wie das Programm aus den Eingangsrechnungen eines Betriebs einen kalkulierten Umsatz ableitet, und in welcher Reihenfolge die einzelnen Schritte aufeinander aufbauen. Jede Zahl im Bericht lässt sich über die hier genannten Schritte zurückverfolgen.</p>
+
+      <h3>1. Wareneinsatz</h3>
+      <p>Ausgangspunkt sind die Eingangsrechnungen des Prüfungszeitraums, entweder als E-Rechnung (XRechnung im UBL- oder CII-Format, ZUGFeRD/Factur-X) oder als Scan. Aus jeder Rechnungszeile werden Bezeichnung, Artikelnummer bzw. GTIN, Menge, Mengeneinheit, Einzelpreis und Zeilennettobetrag übernommen. Ein Scan wird nur dann ohne Durchsicht übernommen, wenn die Lesung vollständig ist und in sich aufgeht: Lieferant, Rechnungsnummer und Datum sind gelesen, jede Zeile ergibt Menge × Einzelpreis, und die Summe der Positionen stimmt mit dem auf dem Beleg ausgewiesenen Nettobetrag überein, der zuzüglich Umsatzsteuer den ebenfalls ausgewiesenen Bruttobetrag ergibt. Jeder andere Scan ist vor der Verwendung zu bestätigen. Der Bericht vermerkt, wann eine Rechnung geprüft wurde und ob das Programm oder ein Mensch sie bestätigt hat.</p>
+      <p>Worin eine Zutat gemessen wird, legt die Rezeptur fest; die Zutat selbst trägt keine Einheit. Zwei Rezepte dürfen dieselbe Zutat deshalb nicht verschieden messen — Pommes in Stück und Pommes in Gramm sind zwei Zutaten, keine.</p>
+      <p>Die Zutaten sind bewusst grob gefasst — Hähnchenfleisch, nicht Schenkel, Flügel und ganzes Tier —, denn die Rechnung nennt die Ware so, wie der Lieferant sie führt, und die Rezeptur trägt den Unterschied in der Menge. Jede Warengruppe trägt ihre Sparte — Getränke oder Speisen —, nach der Abschnitt 6 den Rohgewinnaufschlag trennt, und ist den Gewerbeklassen der Richtsatzsammlung zugeordnet; trägt die Prüfung die Gewerbekennzahl des Betriebs, schlägt das Programm für unbekannte Zeilen nur Zutaten dieser Gewerbeklassen vor. Einer Gaststätte wird so nie ein Friseurbedarf angeboten, und die Wörter, die ihre eigenen Waren voneinander trennen, wiegen entsprechend mehr.</p>
+      <p>Über die Artikelzuordnung wird jede Rechnungszeile in diese Einheit umgerechnet. Bei Kilogramm, Litern und Stück genügt dafür die Einheitentabelle: 2 kg sind 2.000 g, ohne dass jemand etwas pflegen muss. Nur bei Gebinden steht der Inhalt nicht in der Tabelle — dort gibt der Faktor der Zuordnung an, wie viel in einer verrechneten Einheit steckt: eine Kiste mit 20 Flaschen zu 0,5 l sind 10.000 ml, ein Fass 50.000 ml. Fehlt dieser Faktor, bleibt die Zeile ungeklärt und der Bericht weist sie gesondert aus. Zuordnungen, die das Programm selbst vorgeschlagen hat und die noch niemand bestätigt hat, gehen in die Rechnung ein, werden im Bericht aber als unbestätigt ausgewiesen.</p>
+      <p>In die Kalkulation gehen nur Zeilen ein, deren Zutat in der Rezeptur eines aktiven Produkts vorkommt. Zeilen ohne Zuordnung bleiben <strong>ungeklärt</strong>, Zeilen mit Zuordnung zu einer Zutat ohne Rezeptur bleiben <strong>unberücksichtigt</strong>. Beide zählen weder zum Wareneinsatz noch zur Ausbeute und erscheinen nicht im Bericht. Das Programm weist sie stattdessen in der Prüfung gesondert aus, mit ihrem Anteil an allen erfassten Einkäufen: Dieser Anteil zeigt, wie viel Umsatz die Kalkulation nicht erklären kann. Verpackung, Pfand, Frachtkosten oder Reinigungsmittel gehören dauerhaft dorthin; ein nicht erkanntes Lebensmittel oder eine teure Zutat ohne Rezeptur dagegen ist vor der Auswertung zuzuordnen bzw. mit einer Rezeptur zu versehen.</p>
+      <p>Ist ein <strong>Bestand</strong> erfasst, also gelagerte Ware zu Beginn und Ende des Zeitraums, gilt</p>
+      <pre>verbraucht    = Anfangsbestand + Einkauf − Endbestand,
+Wareneinsatz  = Einkaufskosten × verbraucht / Einkauf.</pre>
+      <p>Der Verbrauch wird mit dem durchschnittlichen Einkaufspreis des Zeitraums bewertet; die Differenz zu den Einkaufskosten ist die Bestandsveränderung. Ohne Bestandsangaben wird der Einkauf des Zeitraums als Verbrauch angesetzt. Das ist bei annähernd gleichbleibenden Beständen sachgerecht und im Bericht ausdrücklich vermerkt.</p>
+
+      <h3>2. Abzüge bis zur verkaufsfähigen Menge</h3>
+      <p>Nicht die gesamte eingekaufte Ware wird verkauft. Abgezogen werden</p>
+      <ul>
+        <li><strong>Schankverlust bzw. Zubereitungsverlust</strong> — Überschäumen und Anstichverluste beim Fassbier, Zuschnitt-, Auftau- und Bratverluste bei Fleisch, Garverluste bei Beilagen,</li>
+        <li><strong>Eigenverbrauch</strong> des Betriebsinhabers und seiner Familie,</li>
+        <li><strong>Personalverpflegung</strong>,</li>
+        <li><strong>Freirunden und Bruch</strong>, also unentgeltliche Abgaben und Verderb.</li>
+      </ul>
+      <p>Jeder Abzug ist ein Satz in Basispunkten. Die Sätze stehen in <strong>Ertragsregeln</strong>, die wie Rezepturen zum gemeinsamen, standardisierten Regelwerk gehören. Eine Ertragsregel hat einen Namen und gilt für eine Warengruppe oder eine einzelne Zutat. Für dieselbe Warengruppe können mehrere Regeln bestehen, etwa „Fassbier Standard“ und „Fassbier Altanlage“; eine davon ist als Standard gekennzeichnet. Die Sätze werden addiert und in einem Schritt angewandt:</p>
+      <pre>verkaufsfähig = verbraucht × (10000 − Schwund − Eigenverbrauch
+                              − Personal − Freirunden) / 10000.</pre>
+      <p>Als übliche Quelle für die Höhe dieser Sätze dient die <strong>Richtsatzsammlung des Bundesministeriums der Finanzen</strong> in der für das Prüfungsjahr maßgebenden Fassung, jeweils für die einschlägige Gewerbeklasse. Das Programm gibt keine Werte vor; die hinterlegten Regeln sind gepflegte Erfahrungswerte.</p>
+      <p>In der Prüfung werden keine freien Prozentsätze eingetragen. Die Prüferin <strong>wählt</strong> je Zutat oder Warengruppe, welche der vorhandenen Regeln gilt; ohne Wahl gilt die Standardregel der Zutat, sonst die ihrer Warengruppe, und fehlt auch eine Kennzeichnung als Standard, die Regel mit der niedrigsten Kennung. Weicht der Betrieb belegbar von den Erfahrungswerten ab, ist dafür eine eigene, benannte Regel im Regelwerk anzulegen und in der Prüfung zu wählen. Der Bericht nennt zu jeder Zutat die angewandte Regel mit Namen und Änderungsnummer und kennzeichnet, ob sie in der Prüfung gewählt wurde.</p>
+
+      <h3>3. Rezepturen</h3>
+      <p>Jedes verkaufte Produkt hat eine Rezeptur: eine Liste von Zutaten mit der Menge je Portion. Getränke haben in der Regel eine einzeilige Rezeptur (&quot;Pils 0,5 l&quot; = 500 ml Fassbier), Speisen mehrere Zeilen (&quot;Cordon Bleu&quot; = 200 g Schweinefleisch, 30 g Schinken, 30 g Käse, 200 g Pommes). Rezepturen gehören zum gemeinsamen Regelwerk; Preise gehören nicht dazu (siehe Abschnitt 5).</p>
+
+      <h3>4. Allokation</h3>
+      <p>Dieselbe Ware kann in verschiedene Produkte fließen: Fassbier in Gläser zu 0,3 l und 0,5 l, Schweinefleisch in Schnitzel und Cordon Bleu. Wie sich der Einkauf auf die Produkte verteilt, ist zunächst unbekannt. Das Programm setzt hier keine Quote, sondern rechnet die Verteilung aus.</p>
+      <p>Gesucht werden ganze Portionszahlen je Produkt, deren Zutatenbedarf die verkaufsfähigen Mengen nicht überschreitet. Das ist ein <strong>mehrdimensionales Rucksackproblem</strong> und wird exakt gelöst. Die Rechnung beantwortet eine prüfungsnahe Frage: Welche Verteilung erklärt den Einkauf am vollständigsten? Gewählt wird stets die <strong>vollständigste Ausnutzung der eingekauften Waren</strong> — diejenige Verteilung, die möglichst wenig unverkaufte Ware übrig lässt. Der Rest wird dabei mit dem Einkaufspreis bewertet, damit ein übrig gebliebenes Gramm Schinken schwerer wiegt als ein Gramm Pommes. Die Verkaufspreise spielen für die Verteilung keine Rolle; sie kommen erst im nächsten Schritt hinzu.</p>
+      <p>An der Verteilung nehmen nur die Produkte teil, die in der Prüfung <strong>aktiv</strong> sind. Ein Produkt, das der Betrieb nachweislich nicht führt, wird in der Prüfung deaktiviert und erhält keine Portionen; das ist eine Feststellung der Prüferin und erscheint als solche im Bericht.</p>
+      <p>In die Rechnung gehen zusätzlich die Vorgaben der Prüferin ein: festgesetzte Portionszahlen, etwa aus dem Kassenbericht oder einer Zählung. Ihr Verbrauch wird vor der Zuteilung von den verfügbaren Mengen abgezogen; eine Zutat, die dabei ins Minus geriete, gilt als aufgebraucht, und der Bericht meldet die Überschreitung.</p>
+      <p>Zu jeder Teilrechnung nennt der Bericht die <strong>bindende Zutat</strong> — diejenige, die zuerst aufgebraucht ist und die Portionszahl begrenzt — sowie den Rest je Zutat. Lassen mehrere Verteilungen denselben Rest, wird nach einer festen Reihenfolge entschieden, damit dasselbe Ergebnis reproduzierbar bleibt. Ist ein Fall so groß, dass die exakte Rechnung unwirtschaftlich wird, rechnet das Programm auf einem gröberen Mengenraster oder näherungsweise und kennzeichnet das Ergebnis ausdrücklich als Näherung.</p>
+
+      <h3>5. Preise und Umsatz</h3>
+      <p>Die Verkaufspreise sind <strong>Eingaben der Prüfung</strong>, nicht Teil des gemeinsamen Regelwerks: Jede Prüfung trägt zu jedem Produkt den Bruttopreis der Speisekarte und den Umsatzsteuersatz ein, wie sie im Prüfungszeitraum galten. Sie können in der Prüfung jederzeit geändert werden; die Kalkulation wird dann neu gerechnet. Aus den Portionszahlen und diesen Preisen ergibt sich der Umsatz:</p>
+      <pre>Bruttoumsatz je Produkt = Portionen × Bruttopreis
+Nettoumsatz je Produkt  = Bruttoumsatz × 10000 / (10000 + Umsatzsteuersatz)</pre>
+      <p>Ein Produkt, dem noch kein Preis zugeordnet ist, behält seine Portionen im Rechenbaum, trägt aber nichts zum Umsatz bei; der Bericht weist es mit dem Hinweis „Preis fehlt“ aus, damit die Lücke nicht als Ergebnis gelesen wird.</p>
+      <p>Der Umsatzsteuersatz folgt dem Produkt, nicht der Einkaufsrechnung: 7 % für die Abgabe von Speisen zum Mitnehmen, 19 % für Getränke und für den Verzehr an Ort und Stelle nach Maßgabe des jeweils geltenden Rechts. Der Einkauf kann also mit 7 % belastet sein, während der kalkulierte Umsatz 19 % trägt; beides wird getrennt ausgewiesen. Sämtliche Beträge werden ganzzahlig in Cent geführt, Mengen in Milliliter, Gramm oder Stück. Gerundet wird erst bei der Ausgabe, und jede Stelle, an der ganzzahlig geteilt wird, steht als Formel im Bericht.</p>
+
+      <h3>6. Rohgewinnaufschlag</h3>
+      <p>Der Rohgewinnaufschlagsatz ist die Kennzahl, die sich mit der Richtsatzsammlung vergleichen lässt. Das Programm rechnet ihn nicht erst aus den Endsummen, sondern von unten herauf: jede Rezeptur trägt ihren eigenen Satz, und die Sätze der Sparten sind daraus gewichtet.</p>
+      <p>Der Satz einer Rezeptur misst allein, um wie viel teurer die Portion verkauft wird, als ihre Zutaten eingekauft wurden. Bewertet wird mit dem durchschnittlichen Einkaufspreis des Zeitraums; die Abzüge des Abschnitts 2 stehen nicht darin.</p>
+      <pre>Einsatz je Zutat   = Rezeptmenge × Wareneinsatz / Verbrauch
+Einsatz je Portion = Σ Einsatz je Zutat
+Aufschlagsatz      = (Nettopreis − Einsatz je Portion) / Einsatz je Portion</pre>
+      <p>Der Bericht weist diesen Satz zu jedem Produkt aus, neben dem Einsatz je Portion. Ein Produkt ohne Preis hat keinen Satz.</p>
+      <p>Zusammengefasst wird nach <strong>Sparte</strong> — Getränke und Speisen —, denn beide tragen erfahrungsgemäß sehr verschiedene Aufschläge, und erst getrennt sind sie zu beurteilen. Die Sparte hängt an der Warengruppe; ein Produkt gehört in die Sparte derjenigen Zutat, die den größten Teil seines Einsatzes trägt. Warengruppen ohne Sparte erscheinen als „Übrige“.</p>
+      <pre>Sparte: Einsatz       = Σ Portionen × Einsatz je Portion
+Sparte: Aufschlagsatz = (Σ Nettoumsatz − Einsatz) / Einsatz</pre>
+      <p>Die Gewichtung ist damit der Einkaufswert der verkauften Portionen; die Menge geht über ihn in den Satz ein. Das ist die einzige Gewichtung, bei der die Rechnung umkehrbar bleibt: der Satz einer Sparte, auf ihren Einsatz angewandt, ergibt wieder genau den Umsatz, den die Zuteilung aus den Zutaten errechnet hat. Ein Mittelwert der Produktsätze, nach Portionen gewichtet, leistet das nicht und wird deshalb nicht gebildet. Da der Satz in ganzen Basispunkten ausgewiesen wird, trifft die Probe den Cent nicht immer; der Bericht schreibt dann „≈“.</p>
+      <p>Der Schwund steht also nicht im Satz, sondern in der Menge, auf die er angewandt wird. Der Wareneinsatz erreicht die verkauften Portionen über die beiden Abzüge der Abschnitte 2 und 4, und der Bericht führt sie einzeln auf:</p>
+      <pre>Wareneinsatz
+− Schwund, Eigenverbrauch, Personalverzehr, Freiabgabe   (Abschnitt 2)
+− nicht zugeteilte Ware                                  (Abschnitt 4)
+= Einsatz der verkauften Portionen
+× (100 % + Aufschlagsatz)
+= kalkulierter Umsatz netto</pre>
+      <p>Dabei ist zu beachten, dass der Wareneinsatz nur die berücksichtigten Zutaten umfasst und Produkte ohne Preis Portionen ohne Umsatz liefern. Ein hoher Anteil nicht berücksichtigter Einkäufe bedeutet, dass ein entsprechender Teil des Umsatzes gar nicht kalkuliert wurde. Beides ist vor einem Vergleich mit der Richtsatzsammlung zu klären.</p>
+      <p>Diesen Vergleich stellt der Bericht her: Trägt die Prüfung eine Gewerbekennzahl und liegt die Richtsatzsammlung des Prüfungsjahres vor, nennt er den Rahmensatz des Rohaufschlags für die Gewerbeklasse in der Staffel des kalkulierten Umsatzes und sagt, ob der kalkulierte Satz darin liegt. Verglichen wird der Satz des Betriebs, nicht der einer Sparte — die Sammlung staffelt den Aufschlag nach Gewerbeklasse, nicht nach Getränken und Speisen. Trifft die Kennzahl mehrere Gewerbeklassen, unterbleibt der Vergleich. Der Rahmensatz der Sammlung bezieht den Rohgewinn auf den gesamten Wareneinsatz; je größer der Schwund und die nicht zugeteilte Ware, desto weiter liegt der hier ausgewiesene Satz darüber.</p>
+      <p>Der kalkulierte Umsatz ist das Ergebnis der Verprobung, nicht bereits die Hinzuschätzung: er ist mit dem Steuerpflichtigen zu erörtern, und die vorgetragenen Einwände gehören als gewählte Ertragsregeln, Preise, Vorgaben oder deaktivierte Produkte in die Prüfung, wo sie die Rechnung sichtbar verändern.</p>
+
+      <h3>7. Nachvollziehbarkeit</h3>
+      <p>Jede Zahl des Berichts hängt an einem Knoten mit Bezeichnung, Wert, Einheit und Formel; die Knoten bilden einen Baum von der Endsumme bis zur einzelnen Rechnungszeile. An jedem Knoten stehen seine Quellen: die Rechnung samt Zeilennummer, die verwendete Regel mit ihrer Änderungsnummer, eine Angabe der Prüfung (gewählte Ertragsregel, Preis), eine gesetzte Portionszahl oder eine Allokationsentscheidung. Der Bericht trägt außerdem die Version und den Prüfwert (Hash) des verwendeten Regelsatzes, sodass eine Kalkulation Jahre später mit denselben Stammdaten wiederholt werden kann. Die Rechnung selbst ist deterministisch: gleiche Eingaben ergeben stets dasselbe Ergebnis, Gleichstände werden nach einer festen Reihenfolge aufgelöst.</p>
+
+      <h3>8. Grenzen der Methode</h3>
+      <p>Die Kalkulation ist eine Schätzung und ersetzt keine Buchführung. Ihre Grenzen sind:</p>
+      <ul>
+        <li><strong>Unvollständiger Wareneinsatz.</strong> Nicht verbuchte Einkäufe erscheinen nicht in den Rechnungen; die Kalkulation erfasst nur, was vorgelegt wurde.</li>
+        <li><strong>Bestände.</strong> Ohne Inventurwerte wird der Einkauf als Verbrauch angesetzt. Bei Bestandsaufbau oder -abbau verschiebt das das Ergebnis.</li>
+        <li><strong>Rezepturen und Portionsgrößen.</strong> Sie sind Durchschnittswerte. Großzügiges Einschenken oder abweichende Portionierung schlagen unmittelbar durch; hier helfen nur Feststellungen vor Ort.</li>
+        <li><strong>Preise.</strong> Sonderpreise, Aktionen, Happy Hour, Mitarbeiterrabatte und Preisänderungen im Zeitraum sind in einem Preis je Produkt nur als Mischpreis abbildbar, sonst wird der Umsatz überzeichnet.</li>
+        <li><strong>Schwundsätze.</strong> Erfahrungswerte der Richtsatzsammlung sind Bandbreiten, keine betriebsindividuellen Größen. Belegte Abweichungen sind als eigene Ertragsregel aufzunehmen und zu wählen.</li>
+        <li><strong>Die Allokation ist eine Rechnung, keine Feststellung.</strong> Dass die Ware am vollständigsten in eine bestimmte Verteilung passt, heißt nicht, dass so verkauft wurde. Vorgaben aus Kassenbericht oder Zählung und deaktivierte Produkte bringen die Feststellungen der Prüfung in die Rechnung ein.</li>
+        <li><strong>Verderb, Diebstahl, außergewöhnliche Ereignisse.</strong> Sie sind in den pauschalen Sätzen nur durchschnittlich enthalten; einzelne belegte Vorfälle gehören als eigene, belegte Ertragsregel in die Prüfung.</li>
+      </ul>
+      <p>Die Kalkulation liefert damit ein begründetes, prüfbares Ergebnis. Sie ist Anlass für die Erörterung mit dem Steuerpflichtigen und Grundlage einer Schätzung, wenn die Buchführung nicht ordnungsgemäß ist — nicht deren Ersatz.</p>
+    </section>
+
+    <section>
+      <h1>Anhang E: Herleitung der Werte</h1>
+      <h2>Zutaten</h2>
+      <ul class="steps">
+        {% for i in report.ingredients %}
+        <li>
+          <div class="row">
+            <div class="step"><span>{{ i.name }}: verkaufsfähige Menge</span><span class="num">{{ i.sellable | qty:i.unit }}</span></div>
+            {% if i.yield %}
+            <div class="note">{{ i.used | qty:i.unit }} × (100 %{% if i.yield.shrinkage %} − {{ i.yield.shrinkage | bp }}{% if i.unit == "ml" %} Schankverlust{% else %} Schwund{% endif %}{% endif %}{% if i.yield.ownUse %} − {{ i.yield.ownUse | bp }} Eigenverbrauch{% endif %}{% if i.yield.staff %} − {{ i.yield.staff | bp }} Personalverzehr{% endif %}{% if i.yield.free %} − {{ i.yield.free | bp }} Freiabgabe{% endif %}) = {{ i.sellable | qty:i.unit }} · Ertragsregel „{{ i.yield.name }}“{% if i.yieldChosen %}, in der Prüfung gewählt{% endif %}</div>
+            {% endif %}
+          </div>
+          <ul>
+            <li>
+              <div class="row">
+                <div class="step"><span>Verbrauch</span><span class="num">{{ i.used | qty:i.unit }}</span></div>
+                {% if i.opening %}
+                <div class="note">Anfangsbestand {{ i.opening | qty:i.unit }} + Einkauf {{ i.bought | qty:i.unit }} − Endbestand {{ i.closing | qty:i.unit }} = {{ i.used | qty:i.unit }}</div>
+                {% else %}
+                {% if i.closing %}
+                <div class="note">Einkauf {{ i.bought | qty:i.unit }} − Endbestand {{ i.closing | qty:i.unit }} = {{ i.used | qty:i.unit }}</div>
+                {% endif %}
+                {% endif %}
+              </div>
+              <ul>
+                <li>
+                  <div class="row">
+                    <div class="step"><span>Einkauf</span><span class="num">{{ i.bought | qty:i.unit }}</span></div>
+                    <div class="note">netto {{ i.cost | cents }}</div>
+                  </div>
+                  <ul>
+                    {% for p in i.purchases %}
+                    <li>
+                      <div class="row">
+                        <div class="step"><span>Rechnung {{ p.invoice }} Pos. {{ p.lineNo }}: {{ p.name }}</span><span class="num">{{ p.qty | qty:p.unit }}</span></div>
+                        <div class="note">{{ p.quantity | quantity:p.unitCode }}{% if p.factor %} × {{ p.factor | qty:p.unit }}{% endif %} = {{ p.qty | qty:p.unit }} (netto {{ p.net | cents }})</div>
+                      </div>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <h2>Umsatz</h2>
+      <ul class="steps">
+        <li>
+          <div class="row">
+            <div class="step"><span>Kalkulierter Umsatz (netto)</span><span class="num">{{ report.totals.calculatedRevenueNet | cents }}</span></div>
+            <div class="note">Summe über die Produkte mit Portionen; Nettopreis je Portion abgerundet</div>
+          </div>
+          <ul>
+            {% for p in report.products %}
+            {% if p.portions %}
+            <li>
+              <div class="row">
+                <div class="step"><span>{{ p.name }}: Umsatz (netto)</span><span class="num">{{ p.revenueNet | cents }}</span></div>
+                {% if p.priceMissing %}
+                <div class="note">{{ p.portions | portions }} × Preis fehlt</div>
+                {% else %}
+                <div class="note">{{ p.grossPrice | cents }} brutto ÷ (100 % + {{ p.vat | bp }} USt) = {{ p.unitNet | cents }} netto je Portion; {{ p.portions | portions }} × {{ p.unitNet | cents }} = {{ p.revenueNet | cents }}</div>
+                {% endif %}
+              </div>
+              <ul>
+                <li>
+                  <div class="row">
+                    <div class="step"><span>Portionen</span><span class="num">{{ p.portions | portions }}</span></div>
+                    <div class="note">{% if p.pinned %}vorgegeben{% if p.pinReason %}: {{ p.pinReason }}{% endif %}{% else %}Zuteilung{% if p.binding %}, begrenzt durch <span class="list">{% for b in p.binding %}<span>{{ b }}</span>{% endfor %}</span>{% endif %}{% endif %}</div>
+                  </div>
+                </li>
+                <li>
+                  <div class="row">
+                    <div class="step"><span>Preis (brutto)</span><span class="num">{{ p.grossPrice | cents }}</span></div>
+                    <div class="note">{% if p.priceMissing %}Preis fehlt{% else %}{{ p.grossPrice | cents }} brutto, {{ p.vat | bp }} USt{% endif %}</div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    {% if report.warnings %}
+    <section>
+      <h1>Anhang F: Hinweise</h1>
+      <ol class="warnings">
+        {% for w in report.warnings %}
+        <li>{{ w.message }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+    {% endif %}
+
+    <footer class="stamp">
+      <div><span class="note">Steuernummer</span><br>{{ case.taxpayer.taxNumber }}</div>
+      <div><span class="note">Name des Steuerpflichtigen</span><br>{{ case.taxpayer.name }}</div>
+      <div><span class="note">PaB-Nr.</span><br>{{ case.taxpayer.pabNumber }}</div>
+      <div><span class="note">Datum</span><br>{{ report.computedAt | day }}</div>
+    </footer>
+  </main>
+</body>
+
+</html>

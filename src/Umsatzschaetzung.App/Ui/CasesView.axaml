@@ -2,7 +2,6 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-           xmlns:svc="clr-namespace:Umsatzschaetzung.Service;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:CasesModel"
            Margin="24">
     <ui:Screen.Styles>
@@ -62,22 +61,22 @@
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Bezeichnung" Width="320" MinWidth="160">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="svc:CaseRow">
+                            <DataTemplate x:DataType="ui:CaseRow">
                                 <TextBlock Text="{Binding Case.Label}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Zeitraum" Binding="{Binding Period, DataType=svc:CaseRow}" Width="240"/>
+                    <DataGridTextColumn Header="Zeitraum" Binding="{Binding Period, DataType=ui:CaseRow}" Width="240"/>
                     <DataGridTemplateColumn Header="Zuletzt geändert" Width="160">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="svc:CaseRow">
+                            <DataTemplate x:DataType="ui:CaseRow">
                                 <TextBlock Text="{Binding UpdatedAt}" Theme="{StaticResource Muted}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="svc:CaseRow">
+                            <DataTemplate x:DataType="ui:CaseRow">
                                 <StackPanel Orientation="Horizontal">
                                     <Button x:Name="ExportCase" Theme="{StaticResource IconButton}" ToolTip.Tip="Exportieren" Click="Export">
                                         <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>

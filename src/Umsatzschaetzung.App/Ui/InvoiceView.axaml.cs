@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Reports;
 using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -31,17 +32,17 @@ public sealed class LineRow : Observable
     string quantity, unit, name, unitPrice, lineNet, vat;
     string? rowFlag, quantityFlag, unitFlag, nameFlag, unitPriceFlag, lineNetFlag, vatFlag;
 
-    public LineRow(InvoiceLine line, LineDisplay display, int page, Dictionary<Field, OcrWord> cells)
+    public LineRow(InvoiceLine line, int page, Dictionary<Field, OcrWord> cells)
     {
         Line = line;
         Page = page;
         Cells = cells;
-        quantity = display.Quantity;
+        quantity = Format.Milli(line.Quantity);
         unit = line.UnitCode;
         name = line.Name;
-        unitPrice = display.UnitPrice;
-        lineNet = display.LineNet;
-        vat = display.Vat;
+        unitPrice = Format.UnitPrice(line.UnitPrice, line.PriceBaseQty, line.UnitCode);
+        lineNet = Format.Cents(line.LineNet);
+        vat = Format.Bp(line.Vat);
     }
 
     public InvoiceLine Line { get; }
@@ -186,22 +187,20 @@ public partial class InvoiceView : Screen
 
     readonly InvoiceModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
-    readonly Action<CaseResp> onSaved;
+    readonly Action<Case> onSaved;
     List<OcrPage> pages;
     Invoice invoice;
-    InvoiceDisplay display;
     List<Flag> flags = [];
     int currentPage = -1;
     int previewSeq;
     bool applying, sourceLoaded, checkedOnce, sideBySide;
 
 
-    public InvoiceView(Session session, Invoice stored, InvoiceDisplay storedDisplay, OcrResp? ocr, Action<CaseResp> onSaved) : base(session)
+    public InvoiceView(Session session, Invoice stored, OcrResp? ocr, Action<Case> onSaved) : base(session)
     {
         InitializeComponent();
         this.onSaved = onSaved;
         invoice = Copy(stored);
-        display = storedDisplay;
         pages = ocr?.Pages ?? [];
         DataContext = model;
         model.PropertyChanged += HeaderEdited;
@@ -310,7 +309,7 @@ public partial class InvoiceView : Screen
         var read = new List<OcrPage>();
         await Session.Run(async () => read = (await Session.Service.InvoiceReading(caseId, invoice.Id, Ct)).Pages);
         if (read.Count == 0 || !IsActive) return false;
-        Session.Readings[invoice.Id] = new OcrResp(invoice.Id, read, invoice, display);
+        Session.Readings[invoice.Id] = new OcrResp(invoice.Id, read, invoice);
         pages = read;
         Load();
         Show();
@@ -326,9 +325,9 @@ public partial class InvoiceView : Screen
         applying = true;
         model.Supplier = invoice.SupplierName;
         model.Number = invoice.Number;
-        model.Date = display.Date;
-        model.NetTotal = display.NetTotal;
-        model.GrossTotal = display.GrossTotal;
+        model.Date = Format.Date(invoice.Date);
+        model.NetTotal = Format.Cents(invoice.NetTotal);
+        model.GrossTotal = Format.Cents(invoice.GrossTotal);
         model.FileName = invoice.FileName;
         model.State = Checks.Of(invoice);
         model.StateText = Checks.Text(invoice);
@@ -338,9 +337,8 @@ public partial class InvoiceView : Screen
         var refs = pages.SelectMany((p, i) => p.Lines.Select(l => (Page: i, Line: (OcrLine?)l))).ToList();
         for (var i = 0; i < invoice.Lines.Count; i++)
         {
-            var d = i < display.Lines.Count ? display.Lines[i] : new LineDisplay("", "", "", "", "");
             var r = i < refs.Count ? refs[i] : (Page: Math.Max(currentPage, 0), Line: null);
-            var row = new LineRow(invoice.Lines[i], d, r.Page, r.Line?.Cells ?? []);
+            var row = new LineRow(invoice.Lines[i], r.Page, r.Line?.Cells ?? []);
             row.Changed += LineEdited;
             model.Lines.Add(row);
         }
@@ -350,7 +348,7 @@ public partial class InvoiceView : Screen
     void ShowPeriod()
     {
         model.OutsidePeriod = Session.Case is { } k && invoice.Date is { } d && (d < k.PeriodFrom || d > k.PeriodTo);
-        model.PeriodHint = "Prüfungszeitraum " + (Session.Display?.Period ?? "");
+        model.PeriodHint = "Prüfungszeitraum " + Session.Period;
     }
 
     void HeaderEdited(object? sender, PropertyChangedEventArgs e)
@@ -397,10 +395,9 @@ public partial class InvoiceView : Screen
     {
         invoice.NetTotal = v.Invoice.NetTotal;
         invoice.GrossTotal = v.Invoice.GrossTotal;
-        display = display with { NetTotal = v.Display.NetTotal, GrossTotal = v.Display.GrossTotal };
         applying = true;
-        model.NetTotal = display.NetTotal;
-        model.GrossTotal = display.GrossTotal;
+        model.NetTotal = Format.Cents(invoice.NetTotal);
+        model.GrossTotal = Format.Cents(invoice.GrossTotal);
         applying = false;
         ApplyFlags(v.Flags, v.Blocked);
     }
@@ -408,7 +405,6 @@ public partial class InvoiceView : Screen
     void Apply(VerifyResp v)
     {
         invoice = Copy(v.Invoice);
-        display = v.Display;
         Load();
         ApplyFlags(v.Flags, v.Blocked);
     }
@@ -459,7 +455,7 @@ public partial class InvoiceView : Screen
     void AddLine(object? sender, RoutedEventArgs e)
     {
         var no = model.Lines.Count == 0 ? 0 : model.Lines.Max(r => r.Line.No);
-        var row = new LineRow(new InvoiceLine { No = no + 1, PriceBaseQty = 1000 }, new LineDisplay("", "", "", "", ""), Math.Max(currentPage, 0), []);
+        var row = new LineRow(new InvoiceLine { No = no + 1, PriceBaseQty = 1000 }, Math.Max(currentPage, 0), []);
         row.Changed += LineEdited;
         model.Lines.Add(row);
         Schedule();

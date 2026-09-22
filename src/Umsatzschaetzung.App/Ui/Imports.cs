@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -161,9 +162,9 @@ public sealed class Imports
         job.FirstDraft ??= v.Invoice.Id;
     }
 
-    void Adopt(ImportJob job, CaseResp? resp)
+    void Adopt(ImportJob job, Case? kase)
     {
-        if (resp is not null && session.Case?.Id == job.CaseId) session.SetCase(resp);
+        if (kase is not null && session.Case?.Id == job.CaseId) session.SetCase(kase);
     }
 
     void Finish(ImportJob job)

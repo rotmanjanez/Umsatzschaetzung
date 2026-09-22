@@ -4,6 +4,7 @@
     "cat.bier.flasche": {
       "id": "cat.bier.flasche",
       "name": "Bier Flasche",
+      "sparte": "getraenke",
       "meta": {
         "changedAt": "2026-09-16T00:00:00+00:00"
       }
@@ -11,6 +12,7 @@
     "cat.bier.vom.fass": {
       "id": "cat.bier.vom.fass",
       "name": "Bier vom Fass",
+      "sparte": "getraenke",
       "meta": {
         "changedAt": "2026-09-16T00:00:00+00:00"
       }
@@ -19,6 +21,7 @@
       "id": "cat.spirituosen",
       "name": "Spirituosen",
       "gewerbe": ["561", "47250.0"],
+      "sparte": "getraenke",
       "meta": {
         "changedAt": "2026-09-16T00:00:00+00:00"
       }

@@ -232,7 +232,7 @@ public partial class RulesView : Screen
     void Rebuild()
     {
         if (saving || !IsActive || Session.Rules is null) return;
-        var rs = Session.Rules.RuleSet;
+        var rs = Session.Rules;
         loading = true;
         var ingredients = Session.Ingredients();
 
@@ -244,7 +244,7 @@ public partial class RulesView : Screen
 
         model.Products.Items.Clear();
         foreach (var p in Session.Products())
-            model.Products.Items.Add(new ProductItem(p, Session.Rules.Display.Products.GetValueOrDefault(p.Id)?.Recipe ?? ""));
+            model.Products.Items.Add(new ProductItem(p, Names.Recipe(rs, p)));
         ProductGrid.SelectedItem = model.Products.Items.FirstOrDefault(p => p.Product.Id == model.Products.CurrentId);
 
         model.Yields.IngredientOptions = [YieldForm.None, .. ingredients];

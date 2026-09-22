@@ -24,7 +24,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     public Task<StatusResp> Status(CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
-        return new StatusResp(rs.Version, Format.Day(RulesDate(rs)), appVersion, rules.Notice);
+        return new StatusResp(rs.Version, RulesDate(rs), appVersion, rules.Notice);
     });
 
     static DateTimeOffset RulesDate(RuleSet rs) =>
@@ -35,52 +35,47 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             .DefaultIfEmpty(default)
             .Max();
 
-    public Task<RuleSetResp> Rules(CancellationToken ct) => Guard(() => RulesResp(rules.Load()));
+    public Task<RuleSet> Rules(CancellationToken ct) => Guard(rules.Load);
 
-    public Task<RuleSetResp> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(() =>
+    public Task<RuleSet> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
         rs.Put(rule);
         RuleCheck.Validate(rs);
-        return RulesResp(rules.Save(rule));
+        return rules.Save(rule);
     });
 
-    public Task<RuleSetResp> DeleteRule(Entity kind, string id, CancellationToken ct) => Guard(() =>
+    public Task<RuleSet> DeleteRule(Entity kind, string id, CancellationToken ct) => Guard(() =>
     {
         var rs = rules.Load();
         if (rs.Find(kind, id) is null) throw new ServiceError(ErrorCode.NotFound, $"{Format.EntityName(kind)} \u201e{id}\u201c");
         if (RuleCheck.Users(rs, kind, id) is { Count: > 0 } users)
             throw new ServiceError(ErrorCode.Conflict, $"{Format.EntityName(kind)} wird noch verwendet von: {string.Join(", ", users)}");
-        return RulesResp(rules.Delete(kind, id));
+        return rules.Delete(kind, id);
     });
 
-    static RuleSetResp RulesResp(RuleSet rs) => new(rs, Display.Rules(rs));
+    public Task<List<SammlungInfo>> Sammlungen(CancellationToken ct) => Guard(rules.Sammlungen);
 
-    public Task<SammlungenResp> Sammlungen(CancellationToken ct) => Guard(() => SammlungenResp(rules.Sammlungen()));
-
-    public Task<SammlungenResp> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct) => Guard(() =>
+    public Task<List<SammlungInfo>> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct) => Guard(() =>
     {
         if (pdf.Length == 0) throw new ServiceError(ErrorCode.Invalid, "Leere Datei");
-        return SammlungenResp(rules.ImportSammlung(Richtsätze.Read(pdf), fileName));
+        return rules.ImportSammlung(Richtsätze.Read(pdf), fileName);
     });
 
-    public Task<SammlungenResp> DeleteSammlung(int year, CancellationToken ct) => Guard(() =>
+    public Task<List<SammlungInfo>> DeleteSammlung(int year, CancellationToken ct) => Guard(() =>
     {
         if (!rules.Sammlungen().Exists(s => s.Year == year)) throw new ServiceError(ErrorCode.NotFound, $"Richtsatzsammlung {year}");
-        return SammlungenResp(rules.DeleteSammlung(year));
+        return rules.DeleteSammlung(year);
     });
 
-    static SammlungenResp SammlungenResp(List<SammlungInfo> infos) => new(infos, Display.Sammlungen(infos));
+    public Task<List<Case>> ListCases(CancellationToken ct) => Guard(cases.List);
 
-    public Task<ListCasesResp> ListCases(CancellationToken ct) => Guard(() => Task.FromResult(new ListCasesResp(
-        cases.List().Select(c => new CaseRow(c, Display.Period(c.PeriodFrom, c.PeriodTo), Format.Day(c.UpdatedAt), c.Invoices.Count)).ToList())));
+    public Task<Case> GetCase(string caseId, CancellationToken ct) => Guard(() => LoadCase(caseId));
 
-    public Task<CaseResp> GetCase(string caseId, CancellationToken ct) => Guard(() => Resp(LoadCase(caseId)));
-
-    public Task<CaseResp> PutCase(Case kase, CancellationToken ct) => Guard(() =>
+    public Task<Case> PutCase(Case kase, CancellationToken ct) => Guard(() =>
     {
         SaveCase(kase);
-        return Resp(kase);
+        return kase;
     });
 
     public Task DeleteCase(string caseId, CancellationToken ct) => Guard(() =>
@@ -90,11 +85,11 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return Task.FromResult(0);
     });
 
-    public Task<CaseResp> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) => Guard(() =>
+    public Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) => Guard(() =>
     {
         try
         {
-            return Resp(cases.Import(data, overwrite));
+            return cases.Import(data, overwrite);
         }
         catch (CaseExistsException e)
         {
@@ -123,16 +118,15 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         switch (InvoiceParser.Detect(data))
         {
             case Kind.Pdf or Kind.Image:
-                var empty = new Invoice();
-                return new ParseResp(empty, [], Display.Invoice(empty, rules.Load()), true, null);
+                return new ParseResp(new Invoice(), [], true, null);
             case Kind.Unknown:
                 throw new ServiceError(ErrorCode.Unsupported, $"Dateiformat von \"{fileName}\" nicht erkannt");
         }
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = NewId("re-");
-        var (rs, unmapped) = await MapLines(inv, Gewerbe(caseId), true, ct);
+        var (_, unmapped) = await MapLines(inv, Gewerbe(caseId), true, ct);
         var c = caseId == "" ? null : Attach(caseId, inv, fileName, data);
-        return new ParseResp(inv, unmapped, Display.Invoice(inv, rs), false, c);
+        return new ParseResp(inv, unmapped, false, c);
     });
 
     public Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(async () =>
@@ -143,8 +137,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         draft.Id = NewId("re-");
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
-        var (rs, _) = await MapLines(draft, Gewerbe(caseId), false, ct);
-        return new OcrResp(draft.Id, pages, draft, Display.Invoice(draft, rs));
+        await MapLines(draft, Gewerbe(caseId), false, ct);
+        return new OcrResp(draft.Id, pages, draft);
     });
 
     public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(async () =>
@@ -163,15 +157,15 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         };
         var store = confirm || req.Intent is Intent.Store or Intent.Auto;
         if (store && req.CaseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
-        var (rs, _) = await MapLines(inv, Gewerbe(req.CaseId), confirm, ct);
-        var resp = new VerifyResp(inv, flags, blocked, Display.Invoice(inv, rs), false, null);
+        await MapLines(inv, Gewerbe(req.CaseId), confirm, ct);
+        var resp = new VerifyResp(inv, flags, blocked, false, null);
         if (!store) return resp;
         if (confirm) inv.Verification = new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto };
         var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], req.Reading);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
-    public Task<CaseResp> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(() =>
+    public Task<Case> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct) => Guard(() =>
     {
         var c = LoadCase(caseId);
         var i = c.Invoices.FindIndex(x => x.Id == invoiceId);
@@ -179,7 +173,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         c.Invoices.RemoveAt(i);
         cases.DeleteFile(caseId, invoiceId);
         SaveCase(c);
-        return Resp(c);
+        return c;
     });
 
     public Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct) => Guard(async () =>
@@ -225,43 +219,58 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceReadingResp(pages);
     });
 
-    public Task<MappingSuggestResp> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
-    {
-        var rs = rules.Load();
-        var sugs = matcher.Suggest(rs, Gewerbe(caseId), supplier, line);
-        return new MappingSuggestResp(sugs
-            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind, Display.CandidateLabel(rs, sg.Mapping)))
-            .ToList());
-    });
+    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
+        matcher.Suggest(rules.Load(), Gewerbe(caseId), supplier, line)
+            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList());
 
-    public Task<ReportDisplay> Calculate(string caseId, CancellationToken ct) => Guard(() =>
+    public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(() =>
     {
-        var c = LoadCase(caseId);
-        var (rep, rs) = Compute(c);
-        return Display.Report(c, rep, rs);
+        var (rep, _, rahmen) = Compute(LoadCase(caseId));
+        return new CalcResp(rep, rahmen);
     });
 
     public Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct) => Guard(async () =>
     {
         var c = LoadCase(caseId);
-        var (rep, rs) = Compute(c);
-        var html = Html.Render(c, rs, rep);
+        var (rep, rs, rahmen) = Compute(c);
+        var html = Html.Render(c, rs, rep, rahmen);
         if (!pdf) return new ReportResp(html, null, FileName(c.Label, "html"));
         if (printer is null) throw new ServiceError(ErrorCode.Unsupported, "PDF-Ausgabe nicht verfügbar");
         return new ReportResp(html, await printer.Print(html, ct), FileName(c.Label, "pdf"));
     });
 
-    (Model.Report Report, RuleSet Rules) Compute(Case c)
+    (Model.Report Report, RuleSet Rules, Rahmen? Rahmen) Compute(Case c)
     {
         var rs = rules.Load();
+        Model.Report rep;
         try
         {
-            return (Calculation.Run(c, rs), rs);
+            rep = Calculation.Run(c, rs);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
             throw new ServiceError(ErrorCode.Invalid, "Kalkulation: " + e.Message, inner: e);
         }
+        var rahmen = Vergleich.Aufschlag(Sammlung(c.PeriodTo.Year), c.Taxpayer.Gewerbe, rep.Totals.CalculatedRevenueNet);
+        // Verglichen wird der Satz des Betriebs, nicht der einer Sparte: die Sammlung staffelt
+        // den Aufschlag nach Gewerbeklasse, nicht nach Getränken und Speisen.
+        if (rahmen is not null && rahmen.Lage(rep.Totals.Markup) is var lage && lage != Rahmenlage.Im)
+            rep.Warnings.Add(new Flag
+            {
+                Code = "markup-out-of-range",
+                Message = $"Rohgewinnaufschlag {Format.Bp(rep.Totals.Markup)} liegt {(lage == Rahmenlage.Unter ? "unter" : "über")} dem Rahmensatz "
+                    + $"{rahmen.Von} bis {rahmen.Bis} v.H. der Richtsatzsammlung {rahmen.Jahr} für „{rahmen.Klasse}“",
+            });
+        return (rep, rs, rahmen);
+    }
+
+    // Die Sammlung des Prüfungsjahres, sonst die jüngste davor.
+    Sammlung? Sammlung(int year)
+    {
+        var found = -1;
+        foreach (var i in rules.Sammlungen())
+            if (i.Year <= year && i.Year > found) found = i.Year;
+        return found < 0 ? null : rules.Sammlung(found);
     }
 
     Case LoadCase(string id)
@@ -279,9 +288,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         cases.Save(c);
     }
 
-    CaseResp Resp(Case c) => new(c, Display.Case(c, rules.Load()));
-
-    CaseResp Attach(string caseId, Invoice inv, string fileName, byte[] data, List<OcrPage>? reading = null)
+    Case Attach(string caseId, Invoice inv, string fileName, byte[] data, List<OcrPage>? reading = null)
     {
         var c = LoadCase(caseId);
         // The document first: storing it clears whatever else the invoice kept.
@@ -291,7 +298,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
         SaveCase(c);
-        return Resp(c);
+        return c;
     }
 
     string Gewerbe(string caseId)

@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -111,7 +112,7 @@ public partial class Shell : Window
         if (e.Source == Tabs && Tabs.SelectedIndex >= 0 && CaseUi.IsVisible) Show(screens[Tabs.SelectedIndex]);
     }
 
-    void OpenCase(CaseResp resp)
+    void OpenCase(Case resp)
     {
         RefreshContext();
         CasesHost.IsVisible = false;
@@ -135,7 +136,7 @@ public partial class Shell : Window
     {
         if (session.Case is null) return;
         CaseLabel.Text = session.Case.Label;
-        CasePeriod.Text = session.Display?.Period ?? "";
+        CasePeriod.Text = session.Period;
         Title = "Umsatzschätzung: " + session.Case.Label;
     }
 

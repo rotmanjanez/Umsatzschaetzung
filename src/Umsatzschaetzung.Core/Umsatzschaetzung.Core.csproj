@@ -24,7 +24,6 @@
     <InternalsVisibleTo Include="richtsatz" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="../../docs/rechenweg.md" LogicalName="rechenweg.md" />
     <EmbeddedResource Include="Reports/bericht.html" LogicalName="bericht.html" />
     <EmbeddedResource Include="Rulestore/seed.json" LogicalName="seed.json" />
     <EmbeddedResource Include="../../data/units.json" LogicalName="units.json" />

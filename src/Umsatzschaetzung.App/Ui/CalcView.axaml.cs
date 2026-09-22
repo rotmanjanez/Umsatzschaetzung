@@ -3,15 +3,23 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Richtsatz;
 using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
+
+public sealed record KV(string Label, string Value);
+
+public sealed record RevenueRow(string Vat, string Declared, string Calculated, string Difference, bool Total);
+
+public sealed record MarkupRow(string Sparte, string CostOfGoods, string RevenueNet, string GrossProfit,
+    string Markup, bool Total);
 
 public sealed class ProductRowModel : Observable
 {
     public static readonly string[] VatNamesList = ["19 %", "7 %", "0 %"];
 
-    string name = "", portions = "", price = "", revenue = "";
+    string name = "", portions = "", price = "", revenue = "", cost = "", markup = "";
     int vatIndex;
     bool active = true, priceMissing, disabled;
 
@@ -24,6 +32,8 @@ public sealed class ProductRowModel : Observable
     public string Price { get => price; set => Set(ref price, value); }
     public int VatIndex { get => vatIndex; set => Set(ref vatIndex, value); }
     public string Revenue { get => revenue; set => Set(ref revenue, value); }
+    public string Cost { get => cost; set => Set(ref cost, value); }
+    public string Markup { get => markup; set => Set(ref markup, value); }
     public bool Active { get => active; set => Set(ref active, value); }
     public bool PriceMissing { get => priceMissing; set => Set(ref priceMissing, value); }
     public bool Disabled { get => disabled; set { if (Set(ref disabled, value)) Raise(nameof(Fade)); } }
@@ -44,29 +54,22 @@ public sealed class PinnedRow(List<Product> options) : Observable
 public sealed class CalcModel : Observable
 {
     bool busy, hasResult, noInvoices;
-    NodeDisplay? node;
+    long revenueNet;
+    string markupNote = "";
 
     public ObservableCollection<ProductRowModel> Products { get; } = [];
     public ObservableCollection<PinnedRow> Pinned { get; } = [];
     public ObservableCollection<RevenueRow> Revenue { get; } = [];
-    public ObservableCollection<NodeDisplay> Roots { get; } = [];
+    public ObservableCollection<MarkupRow> Markups { get; } = [];
+    public ObservableCollection<IngredientRow> Ingredients { get; } = [];
+    public ObservableCollection<ProductRow> Sold { get; } = [];
+    public long RevenueNet { get => revenueNet; set => Set(ref revenueNet, value); }
     public ObservableCollection<KV> Summary { get; } = [];
     public bool Busy { get => busy; set => Set(ref busy, value); }
+    public string MarkupNote { get => markupNote; set => Set(ref markupNote, value); }
     public bool HasResult { get => hasResult; set { if (Set(ref hasResult, value)) Raise(nameof(Calculating)); } }
     public bool NoInvoices { get => noInvoices; set { if (Set(ref noInvoices, value)) Raise(nameof(Calculating)); } }
     public bool Calculating => !hasResult && !noInvoices;
-    public NodeDisplay? Node
-    {
-        get => node;
-        set
-        {
-            if (!Set(ref node, value)) return;
-            Raise(nameof(HasNode));
-            Raise(nameof(NoNode));
-        }
-    }
-    public bool HasNode => node is not null;
-    public bool NoNode => node is null;
 }
 
 public partial class CalcView : Screen
@@ -163,46 +166,102 @@ public partial class CalcView : Screen
         if (g == generation) model.Busy = false;
     }
 
-    void ShowResult(ReportDisplay d)
+    void ShowResult(CalcResp calc)
     {
+        var kase = Session.Case!;
+        var rs = Session.Rules!;
+        var r = calc.Report;
         loading = true;
-        var same = d.Products.Count == model.Products.Count && d.Products.Select(p => p.ProductId).SequenceEqual(model.Products.Select(p => p.ProductId));
+        var same = r.Products.Count == model.Products.Count
+            && r.Products.Select(p => p.ProductId).SequenceEqual(model.Products.Select(p => p.ProductId));
         if (!same)
         {
             model.Products.Clear();
-            foreach (var p in d.Products)
+            foreach (var p in r.Products)
             {
                 var row = new ProductRowModel(p.ProductId);
                 row.PropertyChanged += (_, e) => ProductEdited(row, e.PropertyName);
                 model.Products.Add(row);
             }
         }
-        for (var i = 0; i < d.Products.Count; i++)
+        for (var i = 0; i < r.Products.Count; i++)
         {
-            var p = d.Products[i];
+            var p = r.Products[i];
             var row = model.Products[i];
-            row.Name = p.Name;
-            row.Portions = p.Portions;
-            row.Revenue = p.Revenue;
+            row.Name = Names.Product(rs, p.ProductId);
+            row.Portions = Format.Portions(p.Portions);
+            row.Revenue = Format.Cents(p.RevenueNet);
+            row.Cost = Format.Cents(p.CostPerPortion);
+            row.Markup = p.CostOfGoods > 0 && !p.PriceMissing ? Format.Bp(p.Markup) : "";
             row.Disabled = p.Disabled;
             row.PriceMissing = p.PriceMissing && !p.Disabled;
             if (!same)
             {
-                row.Price = Input.Edit(p.GrossPrice);
-                row.VatIndex = Math.Max(0, Array.IndexOf(ProductRowModel.VatNamesList, p.Vat));
+                row.Price = Input.Edit(p.PriceMissing ? "" : Format.Cents(p.GrossPrice));
+                row.VatIndex = Math.Max(0, Array.IndexOf(ProductRowModel.VatNamesList, Format.Bp(p.Vat)));
                 row.Active = !p.Disabled;
             }
         }
         model.Revenue.Clear();
-        foreach (var r in d.Revenue) model.Revenue.Add(r);
+        foreach (var v in Revenue(kase, r)) model.Revenue.Add(v);
+        model.Markups.Clear();
+        foreach (var m in Markups(r)) model.Markups.Add(m);
+        model.MarkupNote = MarkupNote(r.Totals, calc.Rahmen);
         model.Summary.Clear();
-        foreach (var kv in d.Summary)
-            if (kv.Key != "calculatedRevenueNet") model.Summary.Add(kv);
-        model.Roots.Clear();
-        model.Roots.Add(d.Root);
-        model.Node = null;
+        foreach (var kv in Summary(r)) model.Summary.Add(kv);
+        model.Ingredients.Clear();
+        foreach (var i in r.Ingredients) model.Ingredients.Add(i);
+        model.Sold.Clear();
+        foreach (var p in r.Products)
+            if (p.Portions > 0) model.Sold.Add(p);
+        model.RevenueNet = r.Totals.CalculatedRevenueNet;
         model.HasResult = true;
         loading = false;
+    }
+
+    static List<KV> Summary(Report r)
+    {
+        var s = r.Totals;
+        return
+        [
+            new("Wareneinsatz", Format.Cents(s.CostOfGoods)),
+            new("davon Schwund und Abzüge", Format.Cents(s.ShrinkageCost)),
+            new("davon nicht zugeteilte Ware", Format.Cents(s.UnallocatedCost)),
+            new("Einsatz der verkauften Portionen", Format.Cents(s.AllocatedCost)),
+            new("Rohgewinn", Format.Cents(s.GrossProfit)),
+            new("Rohgewinnaufschlagsatz", Format.Bp(s.Markup)),
+            new("Portionen gesamt", Format.Portions(s.Portions)),
+            new("Erfasste Einkäufe (netto)", Format.Cents(s.Purchases)),
+            new("Bestandsveränderung", Format.Cents(s.StockChange)),
+            new("Nicht berücksichtigt", $"{Format.Cents(s.UnmappedCost + s.UnusedCost)} ({Format.Bp(s.ExcludedShare)})"),
+        ];
+    }
+
+    static List<RevenueRow> Revenue(Case c, Report r) =>
+        [.. VatRow.Of(c, r).Select(v => new RevenueRow(v.Total ? "Summe" : Format.Bp(v.Vat),
+            Format.Cents(v.Declared), Format.Cents(v.Calculated), Format.Cents(v.Difference), v.Total))];
+
+    static List<MarkupRow> Markups(Report r) =>
+    [
+        .. r.Markups.Select(m => new MarkupRow(Format.Sparte(m.Sparte), Format.Cents(m.CostOfGoods),
+            Format.Cents(m.RevenueNet), Format.Cents(m.GrossProfit), Format.Bp(m.Markup), false)),
+        new("Gesamt", Format.Cents(r.Totals.AllocatedCost), Format.Cents(r.Totals.CalculatedRevenueNet),
+            Format.Cents(r.Totals.GrossProfit), Format.Bp(r.Totals.Markup), true),
+    ];
+
+    // Der Rahmensatz gilt dem Betrieb, nicht einer seiner Sparten: er steht deshalb unter der
+    // Tabelle, nicht in einer ihrer Zeilen.
+    static string MarkupNote(Totals s, Rahmen? rahmen)
+    {
+        var formula = Format.Markup(s.AllocatedCost, s.Markup, s.CalculatedRevenueNet);
+        if (rahmen is null) return formula;
+        return $"{formula} · Richtsatzsammlung {rahmen.Von} bis {rahmen.Bis} % (Mittel {rahmen.Aufschlag.Mittel} %) — "
+            + rahmen.Lage(s.Markup) switch
+            {
+                Rahmenlage.Unter => "unter dem Rahmen",
+                Rahmenlage.Über => "über dem Rahmen",
+                _ => "im Rahmen",
+            };
     }
 
     void ProductEdited(ProductRowModel row, string? property)
@@ -248,6 +307,4 @@ public partial class CalcView : Screen
     {
         if ((sender as Control)?.DataContext is PinnedRow row) model.Pinned.Remove(row);
     }
-
-    void NodeSelected(object? sender, SelectionChangedEventArgs e) => model.Node = Tree.SelectedItem as NodeDisplay;
 }

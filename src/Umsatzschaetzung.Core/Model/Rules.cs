@@ -12,6 +12,15 @@ public enum Entity
     [JsonStringEnumMemberName("yield_rule")] YieldRule,
 }
 
+// Die Sparte trennt den Rohgewinnaufschlag, wie ihn die Prüfung erwartet: Getränke tragen
+// einen anderen Satz als Speisen. Kategorien außerhalb der Gastronomie bleiben unbestimmt.
+public enum Sparte
+{
+    [JsonStringEnumMemberName("unbestimmt")] Unbestimmt,
+    [JsonStringEnumMemberName("getraenke")] Getränke,
+    [JsonStringEnumMemberName("speisen")] Speisen,
+}
+
 public static class Clock
 {
     public static DateTimeOffset Now() => DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
@@ -46,6 +55,8 @@ public sealed class Category : IRuleEntity
     // Gewerbekennzahlen der Richtsatzsammlung, auch als Präfix ("561" für alle Gastronomie).
     // Leer heißt: in jedem Gewerbe.
     public List<string> Gewerbe { get; set; } = [];
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public Sparte Sparte { get; set; }
     public Meta Meta { get; set; } = new();
 
     public bool Covers(string? kennzahl) =>

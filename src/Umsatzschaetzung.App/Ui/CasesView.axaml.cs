@@ -9,6 +9,8 @@ using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
 
+public sealed record CaseRow(Case Case, string Period, string UpdatedAt, int Invoices);
+
 public sealed class CasesModel : Observable
 {
     bool empty = true, creating;
@@ -51,8 +53,8 @@ public partial class CasesView : Screen
 
     Task Reload() => Session.Run(async () =>
     {
-        var resp = await Session.Service.ListCases(Ct);
-        model.Set(resp.Cases);
+        var cases = await Session.Service.ListCases(Ct);
+        model.Set(cases.Select(c => new CaseRow(c, Format.Period(c.PeriodFrom, c.PeriodTo), Format.Day(c.UpdatedAt), c.Invoices.Count)).ToList());
     });
 
     void StartNew(object? sender, RoutedEventArgs e)
@@ -136,8 +138,7 @@ public partial class CasesView : Screen
         if (row is null) return;
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.GetCase(row.Case.Id, Ct);
-            Session.Open(resp);
+            Session.Open(await Session.Service.GetCase(row.Case.Id, Ct));
         });
     }
 

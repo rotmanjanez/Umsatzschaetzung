@@ -11,15 +11,14 @@ using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed class InvoiceRow(Invoice invoice, InvoiceDisplay display)
+public sealed class InvoiceRow(Invoice invoice)
 {
     public Invoice Invoice { get; } = invoice;
-    public InvoiceDisplay Display { get; } = display;
     public string Id => Invoice.Id;
     public string Supplier => Invoice.SupplierName;
     public string Number => Invoice.Number;
-    public string Date => Display.Date;
-    public string NetTotal => Display.NetTotal;
+    public string Date => Format.Date(Invoice.Date);
+    public string NetTotal => Format.Cents(Invoice.NetTotal);
     public string FileName => Invoice.FileName;
     public Checked State => Checks.Of(Invoice);
     public bool IsAutomatic => State == Checked.Automatic;
@@ -118,9 +117,8 @@ public partial class InvoicesView : Screen
         refreshing = true;
         var selected = (List.SelectedItem as InvoiceRow)?.Id;
         model.Invoices.Clear();
-        if (Session.Case is { } k && Session.Display is { } d)
-            foreach (var inv in k.Invoices)
-                model.Invoices.Add(new InvoiceRow(inv, d.Invoices.GetValueOrDefault(inv.Id) ?? new InvoiceDisplay("", "", "", [])));
+        if (Session.Case is { } k)
+            foreach (var inv in k.Invoices) model.Invoices.Add(new InvoiceRow(inv));
         model.Counted();
         List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == selected);
         refreshing = false;
@@ -175,7 +173,7 @@ public partial class InvoicesView : Screen
     InvoiceView EditorFor(InvoiceRow row)
     {
         if (editors.TryGetValue(row.Id, out var existing)) return existing;
-        var view = new InvoiceView(Session, row.Invoice, row.Display, Session.Readings.GetValueOrDefault(row.Id), Session.SetCase);
+        var view = new InvoiceView(Session, row.Invoice, Session.Readings.GetValueOrDefault(row.Id), Session.SetCase);
         editors[row.Id] = view;
         return view;
     }

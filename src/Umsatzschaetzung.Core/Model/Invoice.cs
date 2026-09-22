@@ -43,6 +43,25 @@ public sealed class InvoiceLine
     public string? MappingId { get; set; }
 }
 
+// Die Rechnungszeilen, die in die Kalkulation eingegangen sind: ohne die Zeilen ohne
+// Zuordnung und die, deren Zutat in keiner Rezeptur vorkommt.
+public sealed record Included(string Number, string FileName, DateOnly? Date, List<InvoiceLine> Lines)
+{
+    public static List<Included> Of(Case c, Report r)
+    {
+        HashSet<(string, long)> excluded = [];
+        foreach (var l in r.Unmapped) excluded.Add((l.InvoiceId, l.LineNo));
+        foreach (var l in r.Unused) excluded.Add((l.InvoiceId, l.LineNo));
+        List<Included> output = [];
+        foreach (var inv in c.Invoices.OrderBy(i => i.Date).ThenBy(i => i.Number, StringComparer.Ordinal))
+        {
+            var lines = inv.Lines.FindAll(l => !excluded.Contains((inv.Id, l.No)));
+            if (lines.Count > 0) output.Add(new Included(inv.Number, inv.FileName, inv.Date, lines));
+        }
+        return output;
+    }
+}
+
 public sealed class Verification
 {
     public DateTimeOffset At { get; set; }
