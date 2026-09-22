@@ -30,8 +30,8 @@ public sealed class TextDetector : IDisposable
     private float[] _meanValues = DefaultMeanValues;
     private float[] _normValues = DefaultNormValues;
 
-    private InferenceSession _dbNet;
-    private string _inputName;
+    private InferenceSession _dbNet = null!;
+    private string _inputName = null!;
 
     /// <summary>
     /// Serializes inference across detectors that share one accelerator, which does not

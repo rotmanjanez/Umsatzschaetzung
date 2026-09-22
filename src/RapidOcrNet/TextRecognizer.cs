@@ -18,9 +18,9 @@ public sealed class TextRecognizer : IDisposable
     //private const int CrnnDefaultWidth = 320; // matches PP-OCR rec_img_shape [3, 48, 320]
     //private const int RecBatchNum = 6;
 
-    private InferenceSession _crnnNet;
-    private string[] _keys;
-    private string _inputName;
+    private InferenceSession _crnnNet = null!;
+    private string[] _keys = null!;
+    private string _inputName = null!;
 
     public void InitModel(string path, string keysPath, SessionOptions op)
     {

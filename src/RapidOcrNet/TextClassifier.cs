@@ -25,8 +25,8 @@ public sealed class TextClassifier : IDisposable
     private int _angleDstWidth = DefaultAngleDstWidth;
     private int _angleDstHeight = DefaultAngleDstHeight;
 
-    private InferenceSession _angleNet;
-    private string _inputName;
+    private InferenceSession _angleNet = null!;
+    private string _inputName = null!;
 
     public void InitModel(string path, SessionOptions op)
     {
