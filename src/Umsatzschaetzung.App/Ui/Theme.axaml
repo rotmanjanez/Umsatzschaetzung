@@ -52,6 +52,10 @@
 
     <StreamGeometry x:Key="RulesIcon">F1 M1,3.3 H15 V4.7 H1 Z M4.1,1.5 H6.1 V6.5 H4.1 Z M1,11.3 H15 V12.7 H1 Z M9.9,9.5 H11.9 V14.5 H9.9 Z</StreamGeometry>
 
+    <StreamGeometry x:Key="SaveIcon">F0 M2,2 H11 L14,5 V14 H2 Z M5.5,3 H9.5 V6 H5.5 Z M5,9.5 H11 V14 H5 Z</StreamGeometry>
+
+    <StreamGeometry x:Key="NewIcon">M7,3 H9 V7 H13 V9 H9 V13 H7 V9 H3 V7 H7 Z</StreamGeometry>
+
     <StreamGeometry x:Key="DocumentIcon">M3,1 H9.5 L13,4.5 V15 H3 Z</StreamGeometry>
 
     <ControlTheme x:Key="PageTitle" TargetType="TextBlock">

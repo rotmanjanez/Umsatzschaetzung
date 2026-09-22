@@ -18,7 +18,9 @@
                     <Border Theme="{StaticResource Panel}">
                         <DockPanel>
                             <DockPanel DockPanel.Dock="Top" Margin="8">
-                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewIngredient"/>
+                                <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" ToolTip.Tip="Neu" Click="NewIngredient">
+                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                </Button>
                                 <ui:SearchBox x:Name="IngredientSearch" Width="NaN"/>
                             </DockPanel>
                             <Grid>
@@ -51,8 +53,12 @@
                                              IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveIngredient" Margin="0,0,8,0"/>
-                                    <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteIngredient" IsVisible="{Binding Existing}"/>
+                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveIngredient">
+                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteIngredient" IsVisible="{Binding Existing}">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
@@ -70,7 +76,9 @@
                     <Border Theme="{StaticResource Panel}">
                         <DockPanel>
                             <DockPanel DockPanel.Dock="Top" Margin="8">
-                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewProduct"/>
+                                <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" ToolTip.Tip="Neu" Click="NewProduct">
+                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                </Button>
                                 <ui:SearchBox x:Name="ProductSearch" Width="NaN"/>
                             </DockPanel>
                             <Grid>
@@ -131,8 +139,12 @@
                                 </ItemsControl>
                                 <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveProduct" Margin="0,0,8,0"/>
-                                    <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteProduct" IsVisible="{Binding Existing}"/>
+                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveProduct">
+                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteProduct" IsVisible="{Binding Existing}">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
@@ -171,7 +183,9 @@
                     <Border Grid.Column="2" Theme="{StaticResource Panel}" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
                         <DockPanel>
                             <DockPanel DockPanel.Dock="Top" Margin="8">
-                                <Button DockPanel.Dock="Right" Content="Neu" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="NewYield"/>
+                                <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" ToolTip.Tip="Neu" Click="NewYield">
+                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                </Button>
                                 <TextBlock Text="{Binding ScopeTitle}" Theme="{StaticResource FieldLabel}" VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis" Margin="2,0,0,0"/>
                             </DockPanel>
@@ -233,48 +247,27 @@
                                                           IsVisible="{Binding ScopeIsIngredient}" Classes.invalid="{Binding ScopeInvalid}" HorizontalAlignment="Stretch"/>
                                     </StackPanel>
                                 </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Schwund *" Theme="{StaticResource FieldLabel}"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding Shrinkage, Mode=TwoWay}" Classes.invalid="{Binding ShrinkageInvalid}"/>
-                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Eigenverbrauch *" Theme="{StaticResource FieldLabel}"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding OwnUse, Mode=TwoWay}" Classes.invalid="{Binding OwnUseInvalid}"/>
-                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="4">
-                                        <TextBlock Text="Personal *" Theme="{StaticResource FieldLabel}"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding Staff, Mode=TwoWay}" Classes.invalid="{Binding StaffInvalid}"/>
-                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="6">
-                                        <TextBlock Text="Freigetränke *" Theme="{StaticResource FieldLabel}"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox Theme="{StaticResource NumberBox}" Width="72" Text="{Binding Free, Mode=TwoWay}" Classes.invalid="{Binding FreeInvalid}"/>
-                                            <TextBlock Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
+                                <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,14,0,0" HorizontalAlignment="Left">
+                                    <TextBlock Text="Schwund *" Theme="{StaticResource KeyLabel}"/>
+                                    <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding Shrinkage, Mode=TwoWay}" Classes.invalid="{Binding ShrinkageInvalid}"/>
+                                    <TextBlock Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Text="Eigenverbrauch *" Theme="{StaticResource KeyLabel}"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding OwnUse, Mode=TwoWay}" Classes.invalid="{Binding OwnUseInvalid}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="2" Text="Personal *" Theme="{StaticResource KeyLabel}"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding Staff, Mode=TwoWay}" Classes.invalid="{Binding StaffInvalid}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Text="Freigetränke *" Theme="{StaticResource KeyLabel}"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding Free, Mode=TwoWay}" Classes.invalid="{Binding FreeInvalid}"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Content="Speichern" Theme="{StaticResource PrimaryButton}" Click="SaveYield" Margin="0,0,8,0"/>
-                                    <Button Content="Löschen" Theme="{StaticResource DangerLink}" Click="DeleteYield" IsVisible="{Binding Existing}"/>
+                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveYield">
+                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteYield" IsVisible="{Binding Existing}">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
