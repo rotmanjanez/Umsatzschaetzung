@@ -10,7 +10,15 @@ public sealed class IngredientItem(Ingredient ingredient, string category)
     public Ingredient Ingredient { get; } = ingredient;
     public string Name => Ingredient.Name;
     public string Category { get; } = category;
-    public string Tip => Category == "" ? Name : Name + " · " + Category;
+    public string Aliases => string.Join(", ", Ingredient.Aliases);
+    public string AliasCount => Ingredient.Aliases.Count switch
+    {
+        0 => "",
+        1 => "1 Warenart",
+        var n => n + " Warenarten",
+    };
+    public string Search => Name + " " + Category + " " + Aliases;
+    public string Tip => string.Join("\n", new[] { Category == "" ? Name : Name + " · " + Category, Aliases }.Where(t => t != ""));
 }
 
 public sealed class CategoryOption(string? id, string name)
@@ -120,10 +128,11 @@ public abstract class EntityForm<T> : EntityForm
 
 public sealed class IngredientForm : EntityForm<IngredientItem>
 {
-    string name = "";
+    string name = "", aliases = "";
     bool nameInvalid;
 
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
+    public string Aliases { get => aliases; set => Set(ref aliases, value); }
     public CategoryPicker Category { get; } = new();
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
 }
@@ -213,7 +222,7 @@ public partial class RulesView : Screen
     {
         InitializeComponent();
         DataContext = model;
-        IngredientSearch.Attach(model.Ingredients.Items, i => i.Name + " " + i.Category);
+        IngredientSearch.Attach(model.Ingredients.Items, i => i.Search);
         ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
         YieldSearch.Attach(model.Yields.Items, s => s.Search);
         IngredientGrid.ItemsSource = IngredientSearch.View;
@@ -286,6 +295,7 @@ public partial class RulesView : Screen
         f.Existing = f.Active = true;
         f.Title = i.Name;
         f.Name = i.Name;
+        f.Aliases = string.Join(Environment.NewLine, i.Aliases);
         f.Category.Load(Session.Categories(), i.CategoryId);
     }
 
@@ -297,7 +307,7 @@ public partial class RulesView : Screen
         f.Existing = false;
         f.Active = true;
         f.Title = "Neue Zutat";
-        f.Name = "";
+        f.Name = f.Aliases = "";
         f.Category.Load(Session.Categories(), null);
     }
 
@@ -311,7 +321,7 @@ public partial class RulesView : Screen
             return;
         }
         var id = f.CurrentId ?? Session.NewId("ingredient");
-        var data = new Ingredient { Id = id, Name = f.Name.Trim() };
+        var data = new Ingredient { Id = id, Name = f.Name.Trim(), Aliases = AliasLines(f.Aliases) };
         await Compose(async () =>
         {
             if (await CategoryId(f.Category) is not { } categoryId) return;
@@ -320,6 +330,9 @@ public partial class RulesView : Screen
             await Session.Put(data, Ct);
         });
     }
+
+    static List<string> AliasLines(string text) =>
+        [.. text.Split('\n').Select(a => a.Trim()).Where(a => a != "")];
 
     async void DeleteIngredient(object? sender, RoutedEventArgs e) => await Delete(model.Ingredients, Entity.Ingredient);
 

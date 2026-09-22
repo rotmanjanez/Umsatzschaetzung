@@ -16,10 +16,10 @@ namespace Umsatzschaetzung.Service;
 
 public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion) : IService
 {
-    const int AutoMapMinConfidence = 60;
+    const int AutoMapMinConfidence = 80;
     const int PreviewDpi = 150;
 
-    readonly Matcher matcher = new();
+    readonly Matcher matcher = new(new EmbeddingStore(rules.Dir));
 
     public Task<StatusResp> Status(CancellationToken ct) => Guard(() =>
     {
@@ -219,9 +219,20 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new InvoiceReadingResp(pages);
     });
 
-    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() =>
+    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(() => Task.Run(() =>
         matcher.Suggest(rules.Load(), Gewerbe(caseId), supplier, line)
-            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList());
+            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList(), ct));
+
+    // Lines imported before a rule or the model existed, and lines an edit set free,
+    // get their turn here: what the matcher is sure about is mapped, the rest stays open.
+    public Task<Case> MapCase(string caseId, CancellationToken ct) => Guard(() => Task.Run(async () =>
+    {
+        var c = LoadCase(caseId);
+        var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
+        foreach (var inv in c.Invoices) await MapLines(inv, c.Taxpayer.Gewerbe, true, ct);
+        if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) SaveCase(c);
+        return c;
+    }, ct));
 
     public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(() =>
     {
@@ -314,6 +325,9 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var unmapped = new List<int>();
         foreach (var l in inv.Lines)
         {
+            if (!string.IsNullOrEmpty(l.MappingId)
+                && !(rs.Mappings.TryGetValue(l.MappingId, out var m) && Match.Fits(m, inv.SupplierName, inv.Date ?? Today(), l)))
+                l.MappingId = null;
             if (string.IsNullOrEmpty(l.MappingId)) rs = await MapLine(rs, gewerbe, inv, l, ask, ct);
             if (string.IsNullOrEmpty(l.MappingId)) unmapped.Add((int)l.No);
         }
@@ -328,7 +342,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             return rs;
         }
         if (!ask) return rs;
-        var sugs = matcher.Suggest(rs, gewerbe, inv.SupplierName, l);
+        var sugs = await Task.Run(() => matcher.Suggest(rs, gewerbe, inv.SupplierName, l), ct);
         if (sugs.Count == 0) return rs;
         var sg = sugs[0];
         if (sg.Kind == OriginKind.Exact)
@@ -339,7 +353,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         if (sg.Confidence < AutoMapMinConfidence) return rs;
         var m = sg.Mapping;
         m.Id = NewId("map-");
-        m.Meta = new Meta { ValidFrom = Today(), ChangedAt = Clock.Now() };
+        m.Meta = new Meta { ChangedAt = Clock.Now() };
         rs.Mappings[m.Id] = m;
         try
         {

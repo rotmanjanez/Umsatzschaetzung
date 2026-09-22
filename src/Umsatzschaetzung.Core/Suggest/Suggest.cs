@@ -4,83 +4,154 @@ namespace Umsatzschaetzung.Suggest;
 
 public sealed record Suggestion(ArticleMapping Mapping, int Confidence, OriginKind Kind);
 
-public sealed class Matcher
+// Embedding a text costs a model run. The ingredient list changes rarely and suppliers
+// repeat their wordings, so what was embedded once is kept.
+public interface IEmbeddingCache
+{
+    Dictionary<string, float[]> Read(string model, IReadOnlyCollection<string> texts);
+    void Write(string model, IReadOnlyList<(string Text, float[] Vec)> rows);
+}
+
+public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
 {
     const int Candidates = 5;
-    const double MinScore = 0.4;
+    const int Floor = 20;
+
+    readonly Encoder encoder = new();
+    readonly Lock gate = new();
 
     // Load() hands out a fresh RuleSet every call, so the version is the key: one
     // Matcher belongs to one rule store and reindexes only once a save bumps it or a
     // case from another Gewerbe asks.
     long indexed = -1;
     string indexedGewerbe = "";
-    Lexicon? lexicon;
-    Evidence? evidence;
+    string[] owner = [];
+    float[] vectors = [];
 
+    public void Dispose() => encoder.Dispose();
+
+    // An exact hit leads, and the encoder's alternatives follow it: revising a mapped
+    // line needs them as much as an open line does.
     public List<Suggestion> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line)
     {
-        if (Match.Mapping(rs, supplier, DateOnly.FromDateTime(DateTime.Now), line) is { } hit)
-            return [new Suggestion(hit, 100, OriginKind.Exact)];
-
-        Index(rs, gewerbe);
-        var scores = lexicon!.Score(line.Name);
-        foreach (var (id, learned) in evidence!.Score(line.Name, supplier))
-            scores[id] = Fuse(scores.GetValueOrDefault(id), learned);
-
-        var pack = PackSize.Read(line.Name);
-        return scores
-            .Where(s => s.Value >= MinScore && rs.Ingredients.ContainsKey(s.Key))
-            .OrderByDescending(s => s.Value)
-            .ThenBy(s => s.Key, StringComparer.Ordinal)
-            .Select(s => (Score: s.Value, Ingredient: rs.Ingredients[s.Key]))
-            .Take(Candidates)
-            .Select(c => new Suggestion(
-                Mapping(supplier, line, c.Ingredient.Id, Factor(pack, line.UnitCode, Scale.Of(rs, c.Ingredient.Id))),
-                Confidence(c.Score),
-                OriginKind.Lexical))
-            .ToList();
+        lock (gate) return Rank(rs, gewerbe, supplier, line);
     }
 
-    // Either signal on its own can carry a candidate, and two weak ones that agree
-    // beat one. Nothing to weight by hand: with no history the evidence term is 0
-    // and the name match decides, as it did before there was anything to learn from.
-    static double Fuse(double name, double learned) => 1 - (1 - name) * (1 - learned);
+    List<Suggestion> Rank(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line)
+    {
+        var hit = Match.Mapping(rs, supplier, DateOnly.FromDateTime(DateTime.Now), line);
+        Index(rs, gewerbe);
+        var query = Embed([Normal(line.Name)])[0];
+        var best = new Dictionary<string, double>(StringComparer.Ordinal);
+        for (var i = 0; i < owner.Length; i++)
+        {
+            var cos = Dot(query, i);
+            if (!best.TryGetValue(owner[i], out var b) || cos > b) best[owner[i]] = cos;
+        }
+
+        var pack = PackSize.Read(line.Name);
+        var sugs = best
+            .Where(s => s.Key != hit?.IngredientId)
+            .OrderByDescending(s => s.Value)
+            .ThenBy(s => s.Key, StringComparer.Ordinal)
+            .Take(Candidates)
+            .Select(s => (Confidence: encoder.Confidence(s.Value), Ingredient: rs.Ingredients[s.Key]))
+            .Where(c => c.Confidence >= Floor)
+            .Select(c => new Suggestion(
+                Mapping(supplier, line, c.Ingredient.Id, Factor(pack, line.UnitCode, Scale.Of(rs, c.Ingredient.Id))),
+                c.Confidence,
+                OriginKind.Encoder))
+            .ToList();
+        if (hit is not null) sugs.Insert(0, new Suggestion(hit, 100, OriginKind.Exact));
+        return sugs;
+    }
+
+    double Dot(float[] query, int entry)
+    {
+        var at = entry * Encoder.Width;
+        var sum = 0.0;
+        for (var i = 0; i < Encoder.Width; i++) sum += query[i] * vectors[at + i];
+        return sum;
+    }
 
     // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never
-    // offered Blondierpulver, and the words that tell its own goods apart weigh more.
+    // offered Blondierpulver. Every name a ware is known under is its own entry — the
+    // ingredient is whichever of its wordings comes closest, not their average.
     void Index(RuleSet rs, string gewerbe)
     {
-        if (indexed == rs.Version && indexedGewerbe == gewerbe && lexicon is not null && evidence is not null) return;
+        if (indexed == rs.Version && indexedGewerbe == gewerbe) return;
         var today = DateOnly.FromDateTime(DateTime.Now);
         var active = rs.Ingredients.Values
             .Where(i => i.Meta.ValidOn(today) && (!rs.Categories.TryGetValue(i.CategoryId, out var c) || c.Covers(gewerbe)))
             .OrderBy(i => i.Id, StringComparer.Ordinal).ToList();
         var ids = active.Select(i => i.Id).ToHashSet(StringComparer.Ordinal);
-        var log = rs.Mappings.Keys.Order(StringComparer.Ordinal)
-            .Select(id => rs.Mappings[id])
-            .Where(m => m.Meta.ValidOn(today))
-            .ToList();
-        lexicon = new Lexicon(Names(active, ids, log));
-        evidence = new Evidence(log, ids);
+
+        var texts = new List<string>();
+        var owners = new List<string>();
+        var seen = new HashSet<(string, string)>();
+        void Add(string id, string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+            text = Normal(text);
+            if (!seen.Add((id, text))) return;
+            owners.Add(id);
+            texts.Add(text);
+        }
+
+        foreach (var ing in active)
+        {
+            Add(ing.Id, ing.Name);
+            foreach (var alias in ing.Aliases) Add(ing.Id, alias);
+        }
+        // A confirmed mapping is a wording a human tied to a ware; the next line that
+        // reads like it lands on the same ware without asking again.
+        foreach (var id in rs.Mappings.Keys.Order(StringComparer.Ordinal))
+        {
+            var m = rs.Mappings[id];
+            if (m.Confirmed && m.Meta.ValidOn(today) && ids.Contains(m.IngredientId)) Add(m.IngredientId, Wording(m));
+        }
+
+        var embedded = Embed(texts);
+        vectors = new float[texts.Count * Encoder.Width];
+        for (var i = 0; i < embedded.Length; i++) embedded[i].CopyTo(vectors, i * Encoder.Width);
+        owner = [.. owners];
         indexed = rs.Version;
         indexedGewerbe = gewerbe;
     }
 
-    // Character matching sees the ingredient's own name and the wording of mappings
-    // somebody checked. Unreviewed wording is left to Evidence, which discounts it.
-    static IEnumerable<(Ingredient, string)> Names(List<Ingredient> active, HashSet<string> ids, List<ArticleMapping> log)
+    float[][] Embed(IReadOnlyList<string> texts)
     {
-        var byId = active.ToDictionary(i => i.Id, StringComparer.Ordinal);
-        foreach (var ing in active) yield return (ing, ing.Name);
-        foreach (var m in log)
-            if (m.Confirmed && Wording(m) is { } text && ids.Contains(m.IngredientId))
-                yield return (byId[m.IngredientId], text);
+        var want = texts.Distinct(StringComparer.Ordinal).ToList();
+        var known = cache?.Read(Encoder.Name, want) ?? [];
+        var missing = want.FindAll(t => !known.ContainsKey(t));
+        if (missing.Count > 0)
+        {
+            var fresh = encoder.Embed(missing);
+            for (var i = 0; i < missing.Count; i++) known[missing[i]] = fresh[i];
+            cache?.Write(Encoder.Name, [.. missing.Select((t, i) => (t, fresh[i]))]);
+        }
+        return [.. texts.Select(t => known[t])];
+    }
+
+    // Invoices shout, catalogues do not, and the encoder learnt from catalogues: a
+    // wording without a lower-case letter is read as if it were written in title case.
+    // Measured on 600 labelled rows, upper case keeps 9 % of the auto-mappings, title
+    // case 39 % of the 41 % the original spelling gets.
+    public static string Normal(string text)
+    {
+        if (text.Any(char.IsLower)) return text;
+        var b = new System.Text.StringBuilder(text.Length);
+        var start = true;
+        foreach (var c in text)
+        {
+            b.Append(start ? c : char.ToLowerInvariant(c));
+            start = !char.IsLetter(c);
+        }
+        return b.ToString();
     }
 
     public static string? Wording(ArticleMapping m) =>
         !string.IsNullOrEmpty(m.Observed) ? m.Observed : !string.IsNullOrEmpty(m.Name) ? m.Name : null;
-
-    static int Confidence(double score) => Math.Clamp((int)Math.Round(score * 100), 1, 99);
 
     static ArticleMapping Mapping(string? supplier, InvoiceLine line, string ingredientId, long? factor)
     {

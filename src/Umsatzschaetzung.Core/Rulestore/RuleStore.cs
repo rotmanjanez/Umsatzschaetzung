@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Richtsatz;
@@ -69,6 +70,7 @@ public sealed class RuleStore
         CREATE INDEX synonym_begriff ON synonym(begriff);
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
         """,
+        "ALTER TABLE ingredient ADD COLUMN aliases TEXT",
     ];
 
     static readonly string[] SammlungTables =
@@ -80,10 +82,12 @@ public sealed class RuleStore
     readonly string snapshotDir;
     readonly string connectionString;
 
+    public string Dir { get; }
     public string? Notice { get; private set; }
 
     public RuleStore(string dir, RuleSet seed)
     {
+        Dir = dir;
         file = Path.Combine(dir, "rules.db");
         snapshotDir = Path.Combine(dir, "snapshots");
         connectionString = new SqliteConnectionStringBuilder { DataSource = file, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = false, DefaultTimeout = 10 }.ToString();
@@ -104,12 +108,32 @@ public sealed class RuleStore
         });
     }
 
+    // The seed names an entity by its key alone and dates the whole file once; what the
+    // store keeps per row is filled in here.
     public static RuleSet Seed()
     {
         using var s = typeof(RuleStore).Assembly.GetManifestResourceStream("seed.json")!;
         using var m = new MemoryStream();
         s.CopyTo(m);
-        return Json.Deserialize<RuleSet>(m.ToArray());
+        var bytes = m.ToArray();
+        var rs = Json.Deserialize<RuleSet>(bytes);
+        using var doc = JsonDocument.Parse(bytes);
+        var stamp = doc.RootElement.TryGetProperty("changedAt", out var c) ? c.GetDateTimeOffset() : default;
+        Complete(rs.Categories, stamp);
+        Complete(rs.Ingredients, stamp);
+        Complete(rs.Mappings, stamp);
+        Complete(rs.Products, stamp);
+        Complete(rs.YieldRules, stamp);
+        return rs;
+    }
+
+    static void Complete<T>(Dictionary<string, T> entities, DateTimeOffset stamp) where T : IRuleEntity
+    {
+        foreach (var (id, e) in entities)
+        {
+            if (e.Id == "") e.Id = id;
+            if (e.Meta.ChangedAt == default) e.Meta.ChangedAt = stamp;
+        }
     }
 
     public RuleSet Load() => Guarded(() =>
@@ -208,12 +232,14 @@ public sealed class RuleStore
                 break;
 
             case Ingredient x:
-                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @category, @from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, aliases, valid_from, valid_to, changed_at, rev) "
+                    + "VALUES(@id, @name, @category, @aliases, @from, @to, @changed, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
+                    + "aliases = excluded.aliases, "
                     + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
                     + "rev = excluded.rev, deleted_at = NULL",
-                    Meta(x, ("@name", x.Name), ("@category", x.CategoryId)));
+                    Meta(x, ("@name", x.Name), ("@category", x.CategoryId),
+                        ("@aliases", x.Aliases.Count == 0 ? null : string.Join("\n", x.Aliases))));
                 break;
 
             case ArticleMapping x:
@@ -303,10 +329,11 @@ public sealed class RuleStore
                 Sparte = ReadSparte(r, 6),
             }));
 
-        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, rev FROM ingredient WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, rev, aliases FROM ingredient WHERE deleted_at IS NULL",
             r => rs.Put(new Ingredient
             {
                 Id = r.GetString(0), Name = r.GetString(1), CategoryId = r.GetString(2), Meta = ReadMeta(r, 3),
+                Aliases = [.. (Str(r, 7) ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries)],
             }));
 
         Rows(db, tx, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, "

@@ -68,6 +68,9 @@ public sealed class Ingredient : IRuleEntity
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public string CategoryId { get; set; } = "";
+    // Warenarten, die unter dieser Zutat gebucht werden: "Gouda" bei Schnittkäse. Der
+    // Zuordner sucht in Name und Aliassen; sie sind, was ein Prüfer statt Namensmustern pflegt.
+    public List<string> Aliases { get; set; } = [];
     public Meta Meta { get; set; } = new();
 }
 
@@ -109,7 +112,7 @@ public static class ArticleName
     }
 }
 
-public enum OriginKind { Exact, Lexical, Manual }
+public enum OriginKind { Exact, Encoder, Manual }
 
 public static class Match
 {
@@ -122,28 +125,41 @@ public static class Match
         ids.Sort(StringComparer.Ordinal);
         var candidates = new List<ArticleMapping>(ids.Count);
         foreach (var id in ids)
-        {
-            var m = rs.Mappings[id];
-            if (!m.Meta.ValidOn(date)) continue;
-            if (!string.IsNullOrEmpty(m.UnitCode) && !string.IsNullOrEmpty(line.UnitCode)
-                && !string.Equals(m.UnitCode, line.UnitCode, StringComparison.OrdinalIgnoreCase)) continue;
-            candidates.Add(m);
-        }
+            if (Usable(rs.Mappings[id], date, line)) candidates.Add(rs.Mappings[id]);
 
-        if (!string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(line.SellerArticleId))
-            foreach (var m in candidates)
-                if (m.SupplierName == supplier && m.SupplierArticleId == line.SellerArticleId) return m;
-
-        if (!string.IsNullOrEmpty(line.Gtin))
-            foreach (var m in candidates)
-                if (m.Gtin == line.Gtin) return m;
-
-        var name = ArticleName.Canonical(line.Name);
-        if (name != "")
-            foreach (var m in candidates)
-                if (ArticleName.Canonical(m.Name) == name) return m;
-
+        foreach (var m in candidates)
+            if (ByArticle(m, supplier, line)) return m;
+        foreach (var m in candidates)
+            if (ByGtin(m, line)) return m;
+        foreach (var m in candidates)
+            if (ByName(m, line)) return m;
         return null;
+    }
+
+    // Whether a line still belongs to the mapping it carries: an edited article number
+    // or unit leaves the rule behind, and a machine's guess only ever fit its own wording.
+    public static bool Fits(ArticleMapping m, string? supplier, DateOnly? date, InvoiceLine line) =>
+        Usable(m, date, line) && (ByArticle(m, supplier, line) || ByGtin(m, line) || ByName(m, line));
+
+    static bool Usable(ArticleMapping m, DateOnly? date, InvoiceLine line)
+    {
+        if (!m.Meta.ValidOn(date)) return false;
+        if (!string.IsNullOrEmpty(m.UnitCode) && !string.IsNullOrEmpty(line.UnitCode)
+            && !string.Equals(m.UnitCode, line.UnitCode, StringComparison.OrdinalIgnoreCase)) return false;
+        return m.Confirmed || ArticleName.Canonical(m.Observed) == ArticleName.Canonical(line.Name);
+    }
+
+    static bool ByArticle(ArticleMapping m, string? supplier, InvoiceLine line) =>
+        !string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(line.SellerArticleId)
+        && m.SupplierName == supplier && m.SupplierArticleId == line.SellerArticleId;
+
+    static bool ByGtin(ArticleMapping m, InvoiceLine line) =>
+        !string.IsNullOrEmpty(line.Gtin) && m.Gtin == line.Gtin;
+
+    static bool ByName(ArticleMapping m, InvoiceLine line)
+    {
+        var name = ArticleName.Canonical(line.Name);
+        return name != "" && ArticleName.Canonical(m.Name) == name;
     }
 
     public static (YieldRule Rule, bool Chosen)? YieldRule(Case c, RuleSet rs, Ingredient ing)

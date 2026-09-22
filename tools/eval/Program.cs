@@ -12,11 +12,13 @@ var detail = "";
 var full = false;
 var parity = false;
 var show = "";
+var labels = "";
 
 for (var i = 0; i < args.Length; i++)
 {
     switch (args[i])
     {
+        case "--labels": labels = args[++i]; break;
         case "--corpus": corpus = args[++i]; break;
         case "--rows": rows = args[++i]; break;
         case "--split": split = args[++i]; break;
@@ -27,12 +29,15 @@ for (var i = 0; i < args.Length; i++)
         case "--show": show = args[++i]; break;
         case "-h" or "--help":
             Console.WriteLine("eval [--corpus fixtures/dataset/2025] [--rows page.jsonl [--split val] [--parity]] [--full] [--out datei] [--detail datei] [--show teilname]");
+            Console.WriteLine("eval --labels <labels.jsonl> [--detail datei] [--show teilname]   the article matcher");
             return 0;
         default:
             Console.Error.WriteLine($"unbekannte Option: {args[i]}");
             return 2;
     }
 }
+
+if (labels != "") return Matching.Run(labels, detail, show);
 
 using var tagger = rows == "" || parity ? new Tagger() : null;
 var agree = new Agreement();

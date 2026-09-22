@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Model;
@@ -330,20 +331,56 @@ using (var cleaned = Deink.Apply(flat))
     Check(kept.Front >= Survivors(flat).Front * 0.95, "deink: a single-sided page keeps its ink");
 }
 
+// The encoder must reproduce the vectors the weights were exported with: a drift in
+// the tokenizer or the graph costs accuracy without ever crashing. Each line is
+// embedded alone, as the fixture was: the int8 graph takes its activation scales per
+// tensor, so the same text inside a padded batch comes out about 0.988 away. The
+// fixture was measured on Apple silicon; int8 kernels are not bit-portable, so on x86
+// this gate has to come down to about 0.98.
+const double ParityCosine = 0.999;
+using (var encoder = new Umsatzschaetzung.Suggest.Encoder())
+{
+    var worst = 1.0;
+    var lines = 0;
+    foreach (var l in File.ReadLines(Path.Combine(data, "parity.jsonl")))
+    {
+        if (l.Trim() == "") continue;
+        using var doc = JsonDocument.Parse(l);
+        var got = encoder.Embed([doc.RootElement.GetProperty("text").GetString()!])[0];
+        var cos = 0.0;
+        var k = 0;
+        foreach (var v in doc.RootElement.GetProperty("embedding").EnumerateArray()) cos += v.GetSingle() * got[k++];
+        worst = Math.Min(worst, cos);
+        lines++;
+    }
+    Check(lines > 0 && worst >= ParityCosine, $"encoder parity: worst cosine {worst:F5} over {lines} texts");
+}
+
 async Task<List<MappingCandidate>> Suggest(string name, string unitCode) =>
     (await svc.SuggestMapping("", new InvoiceLine { Name = name, UnitCode = unitCode }, "Rheinland Getränke Fachgroßhandel GmbH", ct));
+
+// Nothing outside the shipped ruleset is goods, so a line that is no ware may only be
+// offered the kein-Wareneinsatz ingredients, of which this fixture has none.
+async Task<bool> NoWare(List<MappingCandidate> sugs)
+{
+    var rs = await svc.Rules(ct);
+    return sugs.TrueForAll(s => rs.Ingredients[s.Mapping.IngredientId].CategoryId == "cat.kein.wareneinsatz");
+}
 
 var keg = await Suggest("Fassbier Pils, Keg 50 l", "XKG");
 Check(keg.Count > 0 && keg[0].Mapping.IngredientId == "ing.bier.fass" && keg[0].Mapping.Factor == 50000,
     "suggest: keg maps to the draught beer");
-Check(keg[0].Kind == OriginKind.Lexical && keg[0].Confidence is > 0 and < 100, "suggest: candidate is lexical and not certain");
-Check(keg[0].Mapping.Id == "", "suggest: a lexical candidate is a proposal, not a stored mapping");
+Check(keg[0].Kind == OriginKind.Encoder && keg[0].Confidence is > 0 and < 100, "suggest: candidate comes from the encoder and is not certain");
+Check(keg[0].Mapping.Id == "", "suggest: a candidate is a proposal, not a stored mapping");
 
 var schnaps = await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO");
 Check(schnaps.Count > 0 && schnaps[0].Mapping.IngredientId == "ing.korn" && schnaps[0].Mapping.Factor == 700,
     "suggest: bottle size beats the alcohol strength");
 
-Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: deposit has no ingredient");
+Check(await NoWare(await Suggest("Pfand Leergut Kiste", "XCS")), "suggest: deposit has no ingredient");
+var shouted = await Suggest("FASSBIER PILS, KEG 50 L", "XKG");
+Check(shouted.Count > 0 && shouted[0].Mapping.IngredientId == "ing.bier.fass" && shouted[0].Confidence >= keg[0].Confidence - 5,
+    $"suggest: an upper-case wording reads like the catalogue's, {keg[0].Confidence} -> {(shouted.Count > 0 ? shouted[0].Confidence : 0)}");
 Check((await Suggest("Fassbier Pils, Keg 50 l", "XKG"))[0].Mapping.Factor == 50000, "suggest: index is reused");
 
 var friseur = await svc.PutCase(new Case
@@ -354,7 +391,8 @@ var friseur = await svc.PutCase(new Case
     Taxpayer = new Taxpayer { Name = "Schnitt", TaxNumber = "1/2", PabNumber = "3", Gewerbe = "96021.0" },
 }, ct);
 var line = new InvoiceLine { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", UnitCode = "XBO" };
-Check((await svc.SuggestMapping(friseur.Id, line, null, ct)).Count == 0, "suggest: a Friseur is never offered Korn");
+Check((await svc.SuggestMapping(friseur.Id, line, null, ct)).TrueForAll(s => s.Mapping.IngredientId != "ing.korn"),
+    "suggest: a Friseur is never offered Korn");
 Check((await svc.SuggestMapping(neu.Id, line, null, ct))[0].Mapping.IngredientId == "ing.korn", "suggest: a case without Gewerbe sees everything");
 
 var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", File.ReadAllBytes(Path.Combine(data, "zugferd.pdf")), ct);
@@ -447,7 +485,8 @@ Check(Directory.GetFiles(store, "rules.db.defekt-*").Length == 1, "corrupt file 
 
 // Dynamic ranking: a confirmed mapping teaches the wording, and the wording carries
 // to a line nobody has seen, with its own pack size.
-Check((await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG")).Count == 0, "suggest: unknown wording maps to nothing");
+var naive = await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG");
+var naiveFass = naive.Find(s => s.Mapping.IngredientId == "ing.bier.fass")?.Confidence ?? 0;
 await svc.SaveRule(new ArticleMapping
 {
     Id = "map.zwickl",
@@ -461,7 +500,59 @@ await svc.SaveRule(new ArticleMapping
 var learned = await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG");
 Check(learned.Count > 0 && learned[0].Mapping.IngredientId == "ing.bier.fass" && learned[0].Mapping.Factor == 50000,
     "suggest: one confirmation teaches the wording and the new pack size still decides the factor");
-Check((await Suggest("Pfand Leergut Kiste", "XCS")).Count == 0, "suggest: what was learnt does not drag the deposit line along");
+Check(learned[0].Confidence >= naiveFass && learned[0].Confidence >= 80,
+    $"suggest: the confirmed wording carries, {naiveFass} -> {learned[0].Confidence}");
+Check(await NoWare(await Suggest("Pfand Leergut Kiste", "XCS")), "suggest: what was learnt does not drag the deposit line along");
+
+// Revising a mapped line: the rule it carries leads, and the encoder's alternatives
+// follow — here the article number says keg, the wording says Korn.
+var revising = await svc.SuggestMapping("", new InvoiceLine { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", SellerArticleId = "Z-1", UnitCode = "XBO" },
+    "Rheinland Getränke Fachgroßhandel GmbH", ct);
+Check(revising.Count > 1 && revising[0].Kind == OriginKind.Exact && revising[0].Mapping.Id == "map.zwickl"
+    && revising[1].Kind == OriginKind.Encoder && revising[1].Mapping.IngredientId == "ing.korn"
+    && revising.Skip(1).All(s => s.Mapping.IngredientId != "ing.bier.fass"),
+    "suggest: an exact hit leads and the encoder's alternatives follow");
+
+// An edited line leaves a rule that no longer fits it behind.
+var rheinland = new Invoice
+{
+    Source = Source.Ubl, SupplierName = "Rheinland Getränke Fachgroßhandel GmbH", Number = "R-Z", Date = new DateOnly(2024, 3, 1),
+    Lines = [new InvoiceLine { No = 1, Name = "Zwickl naturtrueb, Keg 50 l", SellerArticleId = "Z-1", UnitCode = "XKG", Quantity = 1000, MappingId = "map.zwickl" }],
+};
+var stillFits = await svc.VerifyInvoice(new VerifyReq("", rheinland, Intent.Check, null, null), ct);
+Check(stillFits.Invoice.Lines[0].MappingId == "map.zwickl", "verify: a line keeps the rule that still fits it");
+rheinland.Lines[0].SellerArticleId = "Z-9";
+var left = await svc.VerifyInvoice(new VerifyReq("", rheinland, Intent.Check, null, null), ct);
+Check(string.IsNullOrEmpty(left.Invoice.Lines[0].MappingId), "verify: an edited article number leaves the rule behind");
+
+// A case whose lines were imported before the rule existed catches up on request.
+var late = await svc.PutCase(new Case
+{
+    Label = "Nachzügler", PeriodFrom = new DateOnly(2024, 1, 1), PeriodTo = new DateOnly(2024, 12, 31),
+    Taxpayer = new Taxpayer { Name = "Späth", TaxNumber = "1/3", PabNumber = "4", Gewerbe = "56101.0" },
+    Invoices = [new Invoice
+    {
+        Id = "re-late", Source = Source.Ubl, SupplierName = "Rheinland Getränke Fachgroßhandel GmbH", Number = "R-L", Date = new DateOnly(2024, 4, 1),
+        Lines = [new InvoiceLine { No = 1, Name = "Zwickl naturtrueb, Keg 50 l", SellerArticleId = "Z-1", UnitCode = "XKG", Quantity = 1000 },
+                 new InvoiceLine { No = 2, Name = "Fassbier Pils, Keg 50 l", UnitCode = "XKG", Quantity = 2000 }],
+    }],
+}, ct);
+var caughtUp = await svc.MapCase(late.Id, ct);
+Check(caughtUp.Invoices[0].Lines[0].MappingId == "map.zwickl", "map case: the rule takes the line it fits");
+Check(caughtUp.Invoices[0].Lines[1].MappingId is { } lateId && (await svc.Rules(ct)).Mappings[lateId] is { Confirmed: false, IngredientId: "ing.bier.fass" },
+    "map case: a sure guess maps the open line with an unconfirmed rule");
+Check((await svc.GetCase(late.Id, ct)).Invoices[0].Lines[1].MappingId is not null, "map case: the catch-up is saved");
+
+// A machine's guess is tied to the wording it was made from.
+await svc.SaveRule(new ArticleMapping
+{
+    Id = "map.guess", SupplierName = "Rheinland Getränke Fachgroßhandel GmbH", SupplierArticleId = "G-1",
+    Observed = "Pils Kiste 20 x 0,5 l", IngredientId = "ing.bier.fass", Confirmed = false,
+}, ct);
+var sameWording = await svc.SuggestMapping("", new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", SellerArticleId = "G-1" }, "Rheinland Getränke Fachgroßhandel GmbH", ct);
+var otherWording = await svc.SuggestMapping("", new InvoiceLine { Name = "Weizen Kiste 20 x 0,5 l", SellerArticleId = "G-1" }, "Rheinland Getränke Fachgroßhandel GmbH", ct);
+Check(sameWording.Count > 0 && sameWording[0].Mapping.Id == "map.guess", "match: an unconfirmed mapping fits its own wording");
+Check(otherWording.TrueForAll(s => s.Mapping.Id != "map.guess"), "match: an unconfirmed mapping does not fit another wording");
 
 var sammlungen = await svc.Sammlungen(ct);
 Check(sammlungen.Count > 0 && sammlungen.TrueForAll(s => s.Mitgeliefert),

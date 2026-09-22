@@ -4,36 +4,72 @@
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
            x:DataType="ui:MappingModel"
            Margin="0,12,0,0">
+    <ui:Screen.Styles>
+        <Style Selector="Border.state.auto">
+            <Setter Property="Background" Value="{DynamicResource InfoSoftBrush}"/>
+        </Style>
+        <Style Selector="Border.state.manual">
+            <Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}"/>
+        </Style>
+        <Style Selector="Border.state.pending">
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
+        </Style>
+        <Style Selector="DataGridRow TextBlock.cell">
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+    </ui:Screen.Styles>
     <DockPanel>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="42*" MinWidth="280"/>
+                <ColumnDefinition Width="48*" MinWidth="320"/>
                 <ColumnDefinition Width="6"/>
-                <ColumnDefinition Width="58*" MinWidth="360"/>
+                <ColumnDefinition Width="52*" MinWidth="360"/>
             </Grid.ColumnDefinitions>
-            <Border Theme="{StaticResource Panel}">
+            <Border Theme="{StaticResource Panel}" ClipToBounds="True">
                 <DockPanel>
-                    <ui:SearchBox x:Name="Search" DockPanel.Dock="Top" Margin="8"/>
+                    <DockPanel DockPanel.Dock="Top" Margin="8">
+                        <ui:SearchBox x:Name="Search" DockPanel.Dock="Right"/>
+                        <TextBlock DockPanel.Dock="Right" Text="Wird zugeordnet …" Theme="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,12,0" IsVisible="{Binding Mapping}"/>
+                        <PathIcon DockPanel.Dock="Right" Theme="{StaticResource Spinner}" Margin="0,0,6,0" IsVisible="{Binding Mapping}"/>
+                        <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" Margin="4,0,12,0" TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
                     <Grid>
-                    <ListBox x:Name="Groups" SelectionChanged="GroupSelected" BorderThickness="0" Background="Transparent"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="ui:LineGroup">
-                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="4,6"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <DataGrid x:Name="Groups" ui:Blur.Detail="{Binding #Detail}" ui:Grids.Flex="1" Theme="{StaticResource Grid}" IsReadOnly="True"
+                              SelectionChanged="GroupSelected" IsVisible="{Binding !NoInvoices}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Status" Width="120" SortMemberPath="Rank">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:LineGroup">
+                                        <Border Theme="{StaticResource Badge}" Classes="state" Margin="8,0"
+                                                Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">
+                                            <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:LineGroup">
+                                        <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Lieferant" Width="150" SortMemberPath="Supplier">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:LineGroup">
+                                        <TextBlock Classes="cell" Text="{Binding Supplier}" Theme="{StaticResource Muted}" ToolTip.Tip="{Binding Supplier}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                     <StackPanel MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16" IsVisible="{Binding NoInvoices}">
                         <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
                         <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
                                    Text="Zugeordnet werden Rechnungspositionen zu Zutaten. Fügen Sie zuerst Rechnungen hinzu."/>
                         <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
-                    </StackPanel>
-                    <StackPanel MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16" IsVisible="{Binding AllMapped}">
-                        <TextBlock Text="Alles zugeordnet" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
-                        <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
-                                   Text="Jede Rechnungsposition ist einer Zutat zugeordnet."/>
-                        <Button Content="Zur Kalkulation" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoCalc"/>
                     </StackPanel>
                     <ui:NoResults Search="{Binding #Search}"/>
                     </Grid>
@@ -48,20 +84,22 @@
                     </Border>
                     <Grid>
                     <TextBlock Text="Keine Position gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoSelection}"/>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelection}">
+                    <ScrollViewer x:Name="Detail" VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelection}">
                         <StackPanel>
                             <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
+                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
                                 <TextBlock Text="Artikelnummer" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasArticle}"/>
                                 <TextBlock Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasArticle}"/>
                                 <TextBlock Grid.Row="1" Text="Einheit" Theme="{StaticResource KeyLabel}"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Unit}" Theme="{StaticResource KeyValue}"/>
                                 <TextBlock Grid.Row="2" Text="Menge" Theme="{StaticResource KeyLabel}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Quantity}" Theme="{StaticResource KeyValue}"/>
+                                <TextBlock Grid.Row="3" Text="Zugeordnet" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasCurrent}"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Current}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasCurrent}"/>
                             </Grid>
                             <StackPanel IsVisible="{Binding ShowCandidates}">
                                 <TextBlock Text="Vorschläge werden ermittelt …" Theme="{StaticResource Muted}" IsVisible="{Binding Loading}"/>
-                                <TextBlock Text="Keine Vorschläge" Theme="{StaticResource Muted}" IsVisible="{Binding NoCandidates}"/>
+                                <TextBlock Text="Keine Vorschläge — bitte manuell zuordnen." Theme="{StaticResource Muted}" IsVisible="{Binding NoCandidates}"/>
                                 <ItemsControl ItemsSource="{Binding Candidates}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="ui:CandidateRow">
@@ -70,13 +108,10 @@
                                                     <TextBlock Text="{Binding Display}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                                         <Border Theme="{StaticResource BadgeSuccess}" IsVisible="{Binding IsExact}">
-                                                            <TextBlock Text="Exakter Treffer" Theme="{StaticResource BadgeText}"/>
+                                                            <TextBlock Text="{Binding ExactText}" Theme="{StaticResource BadgeText}"/>
                                                         </Border>
-                                                        <Border Theme="{StaticResource BadgeInfo}" IsVisible="{Binding IsLexical}">
-                                                            <TextBlock Text="Namensvorschlag" Theme="{StaticResource BadgeText}"/>
-                                                        </Border>
-                                                        <Border Theme="{StaticResource Badge}" IsVisible="{Binding IsManual}">
-                                                            <TextBlock Text="Manuell" Theme="{StaticResource BadgeText}"/>
+                                                        <Border Theme="{StaticResource BadgeInfo}" IsVisible="{Binding IsSuggested}">
+                                                            <TextBlock Text="Vorschlag" Theme="{StaticResource BadgeText}"/>
                                                         </Border>
                                                         <TextBlock Text="{Binding Confidence}" Theme="{StaticResource Muted}" FontSize="12" Margin="8,0,0,0" VerticalAlignment="Center"/>
                                                     </StackPanel>
@@ -99,7 +134,7 @@
                                 </StackPanel>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <Button Content="Zuordnen" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"/>
+                                <Button Content="{Binding AssignLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"/>
                                 <Button Content="{Binding ManualLabel}" Theme="{StaticResource SecondaryButton}" Click="ToggleManual"/>
                             </StackPanel>
                         </StackPanel>

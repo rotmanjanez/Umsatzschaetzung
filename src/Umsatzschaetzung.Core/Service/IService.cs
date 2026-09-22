@@ -29,6 +29,7 @@ public interface IService
     Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct);                           // GET  /cases/{id}/invoices/{inv}/source
     Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct);                         // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading, images rendered again
     Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct);   // POST /cases/{id}/mappings/suggest   caseId "" suggests without a Gewerbe filter
+    Task<Case> MapCase(string caseId, CancellationToken ct);                                                                // POST /cases/{id}/mappings/run       maps every open line the matcher is sure about
 
     Task<CalcResp> Calculate(string caseId, CancellationToken ct);                                                          // POST /cases/{id}/calc
     Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct);                                           // POST /cases/{id}/report

@@ -28,7 +28,11 @@
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="ui:IngredientItem">
-                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}" Margin="4,6"/>
+                                            <Grid ColumnDefinitions="*,Auto" Margin="4,6" ToolTip.Tip="{Binding Tip}">
+                                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding AliasCount}" Theme="{StaticResource Muted}" FontSize="12"
+                                                           VerticalAlignment="Center" Margin="8,0,0,0"/>
+                                            </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -45,6 +49,14 @@
                                 <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
                                 <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
                                 <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
+                                <StackPanel>
+                                    <TextBlock Text="Warenarten" Theme="{StaticResource FieldLabel}"
+                                               ToolTip.Tip="Warenarten, die unter dieser Zutat gebucht werden — eine je Zeile."/>
+                                    <TextBox Text="{Binding Aliases, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap"
+                                             Height="110" PlaceholderText="eine Warenart je Zeile"/>
+                                    <TextBlock Text="Je Zeile eine Warenart, etwa „Gouda“ oder „Emmentaler“ bei Schnittkäse."
+                                               Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
                                 <StackPanel>
                                     <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
                                     <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
