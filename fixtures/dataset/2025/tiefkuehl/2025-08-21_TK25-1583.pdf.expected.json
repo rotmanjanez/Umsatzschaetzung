@@ -1,0 +1,137 @@
+{
+  "source": "scan",
+  "fileName": "2025-08-21_TK25-1583.pdf",
+  "supplierName": "Frostwerk Tiefkühl-Service GmbH",
+  "supplierVatId": "DE258017744",
+  "number": "TK25-1583",
+  "date": "2025-08-21",
+  "currency": "EUR",
+  "netTotal": 84280,
+  "grossTotal": 91212,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 75680,
+      "tax": 5298
+    },
+    {
+      "vat": 1900,
+      "net": 8600,
+      "tax": 1634
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Pommes frites 7/7 blanchiert, 4 x 2,5 kg",
+      "sellerArticleId": "TK-3011",
+      "quantity": 10000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 18900000,
+      "priceBaseQty": 1000,
+      "lineNet": 18900,
+      "vat": 700,
+      "expectedIngredientId": "ing.pommes.frites",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "Blattspinat portioniert, 10 kg",
+      "sellerArticleId": "TK-3140",
+      "quantity": 2000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 23400000,
+      "priceBaseQty": 1000,
+      "lineNet": 4680,
+      "vat": 700,
+      "expectedIngredientId": "ing.tiefkuehlgemuese",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 3,
+      "name": "Buttergemüse 7 Sorten, 10 kg",
+      "sellerArticleId": "TK-3165",
+      "quantity": 3000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 25800000,
+      "priceBaseQty": 1000,
+      "lineNet": 7740,
+      "vat": 700,
+      "expectedIngredientId": "ing.tiefkuehlgemuese",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 4,
+      "name": "Alaska-Seelachsfilet paniert, 125 g",
+      "sellerArticleId": "TK-4210",
+      "quantity": 160000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1240000,
+      "priceBaseQty": 1000,
+      "lineNet": 19840,
+      "vat": 700,
+      "expectedIngredientId": "ing.backfischportion",
+      "expectedFactor": 1
+    },
+    {
+      "no": 5,
+      "name": "Seelachsfilet ohne Haut, 5 kg Block",
+      "sellerArticleId": "TK-4310",
+      "quantity": 4000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 41500000,
+      "priceBaseQty": 1000,
+      "lineNet": 16600,
+      "vat": 700,
+      "expectedIngredientId": "ing.seefischfilet",
+      "expectedFactor": 5000
+    },
+    {
+      "no": 6,
+      "name": "Beerenmischung 4-Frucht, 4 x 1 kg",
+      "sellerArticleId": "TK-5020",
+      "quantity": 3000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 26400000,
+      "priceBaseQty": 1000,
+      "lineNet": 7920,
+      "vat": 700,
+      "expectedIngredientId": "ing.tiefkuehlobst",
+      "expectedFactor": 4000
+    },
+    {
+      "no": 7,
+      "name": "Trockeneis Pellets, 10 kg Gebinde",
+      "sellerArticleId": "TK-9001",
+      "quantity": 2000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 32500000,
+      "priceBaseQty": 1000,
+      "lineNet": 6500,
+      "vat": 1900,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    },
+    {
+      "no": 8,
+      "name": "Thermobox Leihgebühr je Woche",
+      "sellerArticleId": "TK-9010",
+      "quantity": 6000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 3500000,
+      "priceBaseQty": 1000,
+      "lineNet": 2100,
+      "vat": 1900,
+      "expectedIngredientId": "none",
+      "expectedFactor": 0
+    }
+  ]
+}

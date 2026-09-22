@@ -274,6 +274,33 @@
    "format": "pdf-node",
    "tool": "Node.js pdfmake",
    "docTitle": "Rechnung"
+  },
+  "tiefkuehl": {
+   "name": "Frostwerk Tiefkühl-Service GmbH",
+   "street": "Industriestraße 44",
+   "zip": "90765",
+   "city": "Fürth",
+   "vatId": "DE258017744",
+   "taxNo": "216/119/40882",
+   "phone": "0911 7605-0",
+   "email": "buchhaltung@frostwerk-tk.de",
+   "web": "www.frostwerk-tk.de",
+   "iban": "DE71 7625 0000 0033 1180 45",
+   "bic": "BYLADEM1SFU",
+   "bank": "Sparkasse Fürth",
+   "register": "HRB 12876 Amtsgericht Fürth",
+   "ceo": "Annegret Zeitler",
+   "customerNo": "KD 7731",
+   "numberFormat": "TK25-{seq:04d}",
+   "seqStart": 1147,
+   "seqStep": [
+    400,
+    460
+   ],
+   "paymentTerms": "Zahlbar innerhalb 20 Tagen ohne Abzug, bei Zahlung binnen 8 Tagen 2 % Skonto.",
+   "format": "pdf-html",
+   "tool": "HTML/CSS → Chromium headless (print-to-pdf), rahmenloses Raster",
+   "docTitle": "Rechnung"
   }
  },
  "invoices": [
@@ -2049,6 +2076,130 @@
      "gtin": "4260123450029",
      "expectedIngredientId": "ing.kaffee.geroestet",
      "expectedFactor": 500
+    }
+   ]
+  },
+  {
+   "id": "tiefkuehl-01",
+   "supplierId": "tiefkuehl",
+   "supplierName": "Frostwerk Tiefkühl-Service GmbH",
+   "supplierVatId": "DE258017744",
+   "format": "pdf-html",
+   "number": "TK25-1147",
+   "date": "2025-02-06",
+   "deliveryDate": "2025-02-05",
+   "dueDate": "2025-02-26",
+   "isoWeek": 6,
+   "variant": "Wasserzeichen KOPIE 45°, Randtext 90°, rahmenlose Positionsliste",
+   "currency": "EUR",
+   "netTotal": 67860,
+   "grossTotal": 72610,
+   "vatBreakdown": [
+    {
+     "vat": 700,
+     "net": 67860,
+     "tax": 4750
+    }
+   ],
+   "taxRounding": "total",
+   "lines": [
+    {
+     "no": 1,
+     "name": "Pommes frites 7/7 blanchiert, 4 x 2,5 kg",
+     "sellerArticleId": "TK-3011",
+     "quantity": 8000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 18900000,
+     "priceBaseQty": 1000,
+     "lineNet": 15120,
+     "vat": 700,
+     "expectedIngredientId": "ing.pommes.frites",
+     "expectedFactor": 10000
+    },
+    {
+     "no": 2,
+     "name": "Rahmspinat portioniert, 10 kg",
+     "sellerArticleId": "TK-3105",
+     "quantity": 3000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 24600000,
+     "priceBaseQty": 1000,
+     "lineNet": 7380,
+     "vat": 700,
+     "expectedIngredientId": "ing.tiefkuehlgemuese",
+     "expectedFactor": 10000
+    },
+    {
+     "no": 3,
+     "name": "Erbsen mit Möhren fein, 10 kg",
+     "sellerArticleId": "TK-3127",
+     "quantity": 2000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 21900000,
+     "priceBaseQty": 1000,
+     "lineNet": 4380,
+     "vat": 700,
+     "expectedIngredientId": "ing.tiefkuehlgemuese",
+     "expectedFactor": 10000
+    },
+    {
+     "no": 4,
+     "name": "Alaska-Seelachsfilet paniert, 125 g",
+     "sellerArticleId": "TK-4210",
+     "quantity": 120000,
+     "unitText": "Stk",
+     "unitCode": "H87",
+     "unitPrice": 1240000,
+     "priceBaseQty": 1000,
+     "lineNet": 14880,
+     "vat": 700,
+     "expectedIngredientId": "ing.backfischportion",
+     "expectedFactor": 1
+    },
+    {
+     "no": 5,
+     "name": "Schweineschnitzel paniert, 150 g",
+     "sellerArticleId": "TK-4455",
+     "quantity": 90000,
+     "unitText": "Stk",
+     "unitCode": "H87",
+     "unitPrice": 1680000,
+     "priceBaseQty": 1000,
+     "lineNet": 15120,
+     "vat": 700,
+     "expectedIngredientId": "ing.schnitzel.paniert",
+     "expectedFactor": 1
+    },
+    {
+     "no": 6,
+     "name": "Beerenmischung 4-Frucht, 4 x 1 kg",
+     "sellerArticleId": "TK-5020",
+     "quantity": 2000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 26400000,
+     "priceBaseQty": 1000,
+     "lineNet": 5280,
+     "vat": 700,
+     "expectedIngredientId": "ing.tiefkuehlobst",
+     "expectedFactor": 4000
+    },
+    {
+     "no": 7,
+     "name": "Reibekuchen vorgebacken, 60 g",
+     "sellerArticleId": "TK-5310",
+     "quantity": 150000,
+     "unitText": "Stk",
+     "unitCode": "H87",
+     "unitPrice": 380000,
+     "priceBaseQty": 1000,
+     "lineNet": 5700,
+     "vat": 700,
+     "expectedIngredientId": "ing.reibekuchen",
+     "expectedFactor": 1
     }
    ]
   },
@@ -11400,6 +11551,149 @@
      "gtin": "4260123450500",
      "expectedIngredientId": "ing.zucker",
      "expectedFactor": 4000
+    }
+   ]
+  },
+  {
+   "id": "tiefkuehl-02",
+   "supplierId": "tiefkuehl",
+   "supplierName": "Frostwerk Tiefkühl-Service GmbH",
+   "supplierVatId": "DE258017744",
+   "format": "pdf-html",
+   "number": "TK25-1583",
+   "date": "2025-08-21",
+   "deliveryDate": "2025-08-20",
+   "dueDate": "2025-09-10",
+   "isoWeek": 34,
+   "variant": "Wasserzeichen ZWEITSCHRIFT 45°, Randtext 90°, zwei Steuersätze",
+   "currency": "EUR",
+   "netTotal": 84280,
+   "grossTotal": 91212,
+   "vatBreakdown": [
+    {
+     "vat": 700,
+     "net": 75680,
+     "tax": 5298
+    },
+    {
+     "vat": 1900,
+     "net": 8600,
+     "tax": 1634
+    }
+   ],
+   "taxRounding": "total",
+   "lines": [
+    {
+     "no": 1,
+     "name": "Pommes frites 7/7 blanchiert, 4 x 2,5 kg",
+     "sellerArticleId": "TK-3011",
+     "quantity": 10000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 18900000,
+     "priceBaseQty": 1000,
+     "lineNet": 18900,
+     "vat": 700,
+     "expectedIngredientId": "ing.pommes.frites",
+     "expectedFactor": 10000
+    },
+    {
+     "no": 2,
+     "name": "Blattspinat portioniert, 10 kg",
+     "sellerArticleId": "TK-3140",
+     "quantity": 2000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 23400000,
+     "priceBaseQty": 1000,
+     "lineNet": 4680,
+     "vat": 700,
+     "expectedIngredientId": "ing.tiefkuehlgemuese",
+     "expectedFactor": 10000
+    },
+    {
+     "no": 3,
+     "name": "Buttergemüse 7 Sorten, 10 kg",
+     "sellerArticleId": "TK-3165",
+     "quantity": 3000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 25800000,
+     "priceBaseQty": 1000,
+     "lineNet": 7740,
+     "vat": 700,
+     "expectedIngredientId": "ing.tiefkuehlgemuese",
+     "expectedFactor": 10000
+    },
+    {
+     "no": 4,
+     "name": "Alaska-Seelachsfilet paniert, 125 g",
+     "sellerArticleId": "TK-4210",
+     "quantity": 160000,
+     "unitText": "Stk",
+     "unitCode": "H87",
+     "unitPrice": 1240000,
+     "priceBaseQty": 1000,
+     "lineNet": 19840,
+     "vat": 700,
+     "expectedIngredientId": "ing.backfischportion",
+     "expectedFactor": 1
+    },
+    {
+     "no": 5,
+     "name": "Seelachsfilet ohne Haut, 5 kg Block",
+     "sellerArticleId": "TK-4310",
+     "quantity": 4000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 41500000,
+     "priceBaseQty": 1000,
+     "lineNet": 16600,
+     "vat": 700,
+     "expectedIngredientId": "ing.seefischfilet",
+     "expectedFactor": 5000
+    },
+    {
+     "no": 6,
+     "name": "Beerenmischung 4-Frucht, 4 x 1 kg",
+     "sellerArticleId": "TK-5020",
+     "quantity": 3000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 26400000,
+     "priceBaseQty": 1000,
+     "lineNet": 7920,
+     "vat": 700,
+     "expectedIngredientId": "ing.tiefkuehlobst",
+     "expectedFactor": 4000
+    },
+    {
+     "no": 7,
+     "name": "Trockeneis Pellets, 10 kg Gebinde",
+     "sellerArticleId": "TK-9001",
+     "quantity": 2000,
+     "unitText": "Karton",
+     "unitCode": "XCT",
+     "unitPrice": 32500000,
+     "priceBaseQty": 1000,
+     "lineNet": 6500,
+     "vat": 1900,
+     "expectedIngredientId": "none",
+     "expectedFactor": 0
+    },
+    {
+     "no": 8,
+     "name": "Thermobox Leihgebühr je Woche",
+     "sellerArticleId": "TK-9010",
+     "quantity": 6000,
+     "unitText": "Stk",
+     "unitCode": "H87",
+     "unitPrice": 3500000,
+     "priceBaseQty": 1000,
+     "lineNet": 2100,
+     "vat": 1900,
+     "expectedIngredientId": "none",
+     "expectedFactor": 0
     }
    ]
   },

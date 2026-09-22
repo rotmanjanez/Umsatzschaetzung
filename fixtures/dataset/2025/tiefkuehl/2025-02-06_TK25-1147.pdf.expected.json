@@ -1,0 +1,118 @@
+{
+  "source": "scan",
+  "fileName": "2025-02-06_TK25-1147.pdf",
+  "supplierName": "Frostwerk Tiefkühl-Service GmbH",
+  "supplierVatId": "DE258017744",
+  "number": "TK25-1147",
+  "date": "2025-02-06",
+  "currency": "EUR",
+  "netTotal": 67860,
+  "grossTotal": 72610,
+  "vatBreakdown": [
+    {
+      "vat": 700,
+      "net": 67860,
+      "tax": 4750
+    }
+  ],
+  "lines": [
+    {
+      "no": 1,
+      "name": "Pommes frites 7/7 blanchiert, 4 x 2,5 kg",
+      "sellerArticleId": "TK-3011",
+      "quantity": 8000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 18900000,
+      "priceBaseQty": 1000,
+      "lineNet": 15120,
+      "vat": 700,
+      "expectedIngredientId": "ing.pommes.frites",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 2,
+      "name": "Rahmspinat portioniert, 10 kg",
+      "sellerArticleId": "TK-3105",
+      "quantity": 3000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 24600000,
+      "priceBaseQty": 1000,
+      "lineNet": 7380,
+      "vat": 700,
+      "expectedIngredientId": "ing.tiefkuehlgemuese",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 3,
+      "name": "Erbsen mit Möhren fein, 10 kg",
+      "sellerArticleId": "TK-3127",
+      "quantity": 2000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 21900000,
+      "priceBaseQty": 1000,
+      "lineNet": 4380,
+      "vat": 700,
+      "expectedIngredientId": "ing.tiefkuehlgemuese",
+      "expectedFactor": 10000
+    },
+    {
+      "no": 4,
+      "name": "Alaska-Seelachsfilet paniert, 125 g",
+      "sellerArticleId": "TK-4210",
+      "quantity": 120000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1240000,
+      "priceBaseQty": 1000,
+      "lineNet": 14880,
+      "vat": 700,
+      "expectedIngredientId": "ing.backfischportion",
+      "expectedFactor": 1
+    },
+    {
+      "no": 5,
+      "name": "Schweineschnitzel paniert, 150 g",
+      "sellerArticleId": "TK-4455",
+      "quantity": 90000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 1680000,
+      "priceBaseQty": 1000,
+      "lineNet": 15120,
+      "vat": 700,
+      "expectedIngredientId": "ing.schnitzel.paniert",
+      "expectedFactor": 1
+    },
+    {
+      "no": 6,
+      "name": "Beerenmischung 4-Frucht, 4 x 1 kg",
+      "sellerArticleId": "TK-5020",
+      "quantity": 2000,
+      "unitText": "Karton",
+      "unitCode": "XCT",
+      "unitPrice": 26400000,
+      "priceBaseQty": 1000,
+      "lineNet": 5280,
+      "vat": 700,
+      "expectedIngredientId": "ing.tiefkuehlobst",
+      "expectedFactor": 4000
+    },
+    {
+      "no": 7,
+      "name": "Reibekuchen vorgebacken, 60 g",
+      "sellerArticleId": "TK-5310",
+      "quantity": 150000,
+      "unitText": "Stk",
+      "unitCode": "H87",
+      "unitPrice": 380000,
+      "priceBaseQty": 1000,
+      "lineNet": 5700,
+      "vat": 700,
+      "expectedIngredientId": "ing.reibekuchen",
+      "expectedFactor": 1
+    }
+  ]
+}
