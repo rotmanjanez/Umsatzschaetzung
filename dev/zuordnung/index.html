@@ -8,13 +8,9 @@
       
       
       
-        <link rel="canonical" href="https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/">
+        <link rel="canonical" href="https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/">
       
       
-        <link rel="prev" href="..">
-      
-      
-        <link rel="next" href="../import-export/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +18,7 @@
     
     
       
-        <title>Prüfungen - Umsatzschätzung</title>
+        <title>Zuordnung - Umsatzschätzung</title>
       
     
     
@@ -70,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#prufungen" class="md-skip">
+        <a href="#zuordnung" class="md-skip">
           Zum Inhalt
         </a>
       
@@ -122,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Prüfungen
+              Zuordnung
             
           </span>
         </div>
@@ -263,32 +259,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Prüfungen
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../pruefungen/" class="md-nav__link">
         
   
   
@@ -299,62 +273,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Inhaltsverzeichnis
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#suchen" class="md-nav__link">
-    <span class="md-ellipsis">
-      Suchen
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#wo-ist-eine-prufung-gespeicher" class="md-nav__link">
-    <span class="md-ellipsis">
-      Wo ist eine Prüfung gespeicher?
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#importieren-und-exportieren" class="md-nav__link">
-    <span class="md-ellipsis">
-      Importieren und Exportieren
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#loschen" class="md-nav__link">
-    <span class="md-ellipsis">
-      Löschen
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -408,36 +326,63 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#suchen" class="md-nav__link">
+  <a href="#was-beim-import-geschieht" class="md-nav__link">
     <span class="md-ellipsis">
-      Suchen
+      Was beim Import geschieht
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#wo-ist-eine-prufung-gespeicher" class="md-nav__link">
+  <a href="#woher-die-vorschlage-kommen" class="md-nav__link">
     <span class="md-ellipsis">
-      Wo ist eine Prüfung gespeicher?
+      Woher die Vorschläge kommen
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#importieren-und-exportieren" class="md-nav__link">
+  <a href="#sicherheit" class="md-nav__link">
     <span class="md-ellipsis">
-      Importieren und Exportieren
+      Die Sicherheit
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#loschen" class="md-nav__link">
+  <a href="#eine-position-zuordnen" class="md-nav__link">
     <span class="md-ellipsis">
-      Löschen
+      Eine Position zuordnen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eine-zuordnung-korrigieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      Eine Zuordnung korrigieren
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#warenarten" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warenarten pflegen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kein-wareneinsatz" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kein Wareneinsatz
     </span>
   </a>
   
@@ -459,34 +404,91 @@
 
 
 
-<h1 id="prufungen">Prüfungen</h1>
-<p>Die Startseite listet alle Prüfungen aud die das Program zugriff hat. Ein Klick auf eine Zeile
-öffnet sie. Über <code>Neue Prüfung</code> kann eine neue Prüfung in der Datenbank angelegt werden.</p>
-<p><img alt="Filtern, Regeln, Importieren und Neue Prüfung über der Liste" src="../img/pruefungen-leiste.png" /></p>
-<p>In der Prüfung liegen ihre Rechnungen und Belege und die Entscheidungen zu
-diesem Betrieb: Zuordnung der Rechnungszeilen, Verkaufspreise, gewählte
-Ertragsregeln, Bestand, erklärte Umsätze.</p>
-<p><img alt="Die Liste mit drei angelegten Prüfungen" src="../img/pruefungen-liste.png" /></p>
-<h2 id="suchen">Suchen</h2>
-<p>Das Suchfeld filtert nach Bezeichnung, Zeitraum und Namen des
-Steuerpflichtigen.</p>
-<h2 id="wo-ist-eine-prufung-gespeicher">Wo ist eine Prüfung gespeicher?</h2>
-<p>Jede Prüfung ist eine einzelne Datei im Ordner <strong>Dokumente</strong> unter
-<code>Umsatzschätzung</code>, etwa <code>fall-20250502-080000-a1b2c3d4.db</code>. Alle informationen zu diesem Fall, darunter auch die Belege und Scan, Sind darin gespeicher.</p>
-<div class="admonition note">
-<p class="admonition-title">Verwaltete Installationen</p>
-<p>Unter Windows kann der Ordner per Gruppenrichtlinie umgelegt sein, etwa auf
-ein Netzlaufwerk.</p>
-</div>
-<h2 id="importieren-und-exportieren">Importieren und Exportieren</h2>
-<p><strong>Importieren</strong> übernimmt eine Falldatei in das Programm und öffnet sie. Sie
-liegt danach im selben Ordner wie die übrigen Prüfungen.</p>
-<p>Das Pfeilsymbol in der Zeile legt umgekehrt eine Kopie der Prüfung ab, wo Sie
-wollen. Genaueres unter <a href="../import-export/">Import und Export</a>.</p>
-<h2 id="loschen">Löschen</h2>
-<p>Das Papierkorbsymbol am Ende der Zeile löscht eine Prüfung mitsamt Rechnungen und Belegen.
-Löschen kann i.d.R. nicht rückgängig gemacht werden.</p>
-<p><img alt="Die Rückfrage vor dem Löschen" src="../img/pruefungen-loeschen.png" /></p>
+<h1 id="zuordnung">Zuordnung</h1>
+<p>Eine Rechnung nennt Waren so, wie der Lieferant sie nennt: „GOUDA JUNG 48% BLOCK
+ca 3kg“. Die Kalkulation rechnet mit Zutaten: Schnittkäse. Die Zuordnung ist die
+Verbindung dazwischen. Sie gilt ab dann für jede weitere Rechnung desselben
+Artikels, auch in späteren Prüfungen.</p>
+<p>Zugeordnet wird je Artikel, nicht je Rechnungszeile. Steht derselbe Gouda auf
+zwölf Lieferscheinen, ist er einmal zuzuordnen.</p>
+<h2 id="was-beim-import-geschieht">Was beim Import geschieht</h2>
+<p>Nach dem Import sind die meisten Positionen bereits zugeordnet. Offen bleibt,
+was das Programm nicht sicher genug einschätzt. Unter <strong>Zuordnung</strong> stehen alle
+Artikel der Prüfung in der Liste links, mit ihrem Stand in der ersten Spalte:</p>
+<ul>
+<li><strong>Offen</strong> — noch keine Zutat, die Position wartet auf eine Entscheidung.</li>
+<li><strong>Automatisch</strong> — das Programm hat zugeordnet, niemand hat es bestätigt.</li>
+<li><strong>Manuell</strong> — ein Mensch hat die Zuordnung gewählt oder bestätigt.</li>
+</ul>
+<p>Die offenen Positionen stehen oben, die automatischen darunter.</p>
+<p>Wird eine Rechnung nachträglich geändert, prüft das Programm die Zuordnung ihrer
+Positionen neu: Eine Position, deren Artikelnummer oder Einheit nicht mehr zur
+Regel passt, wird erneut zugeordnet; eine automatische Zuordnung gilt nur für
+den Wortlaut, aus dem sie entstanden ist, und fällt bei geändertem Text ebenfalls
+zurück in die Durchsicht.</p>
+<p>Solange eine Position offen ist, zählt sie nicht zum Wareneinsatz. Die
+Kalkulation weist die offenen Positionen aus, damit kein Einkauf unbemerkt
+unter den Tisch fällt.</p>
+<h2 id="woher-die-vorschlage-kommen">Woher die Vorschläge kommen</h2>
+<p>Das Programm vergleicht den Text der Rechnungsposition mit dem, was über die
+Zutaten bekannt ist:</p>
+<ul>
+<li>dem <strong>Namen</strong> der Zutat,</li>
+<li>ihren <strong>Warenarten</strong>, also dem, was unter ihr gebucht wird,</li>
+<li>und <strong>jeder Zuordnung, die schon bestätigt wurde</strong>.</li>
+</ul>
+<p>Der dritte Punkt ist der wichtigste. Jede bestätigte Zuordnung ist ein Beispiel,
+an dem das Programm die Sprache der Lieferanten lernt — Abkürzungen,
+Gebindeangaben, Schreibweisen. Wer die ersten zwanzig Positionen eines neuen
+Lieferanten von Hand zuordnet, bekommt den Rest weitgehend geschenkt.</p>
+<h2 id="sicherheit">Die Sicherheit</h2>
+<p>Zu jedem Vorschlag steht eine Sicherheit in Prozent. Sie ist als Häufigkeit zu
+lesen: Von hundert Vorschlägen mit 90 % treffen etwa neunzig zu. Sie ist kein
+Maß dafür, wie ähnlich zwei Texte aussehen.</p>
+<p>Liegt der beste Vorschlag über der Schwelle, ordnet das Programm die Position
+schon beim Import zu. Darunter legt es sie zur Durchsicht vor. Ein <strong>exakter
+Treffer</strong> — gleiche Artikelnummer beim gleichen Lieferanten, gleiche GTIN oder
+ein bereits zugeordneter Name — braucht keine Sicherheit; er ist keine
+Schätzung.</p>
+<h2 id="eine-position-zuordnen">Eine Position zuordnen</h2>
+<p>Position links auswählen. Rechts stehen der Rechnungstext, Artikelnummer,
+Einheit und Menge, darunter die Vorschläge. Den richtigen wählen und
+<strong>Zuordnen</strong>.</p>
+<p>Passt keiner, <strong>Manuell zuordnen</strong> und die Zutat selbst wählen. Bei Gebinden ist
+zusätzlich der <strong>Faktor</strong> anzugeben: der Inhalt eines Gebindes in der Einheit des
+Rezepts, etwa 3000 bei einem 3-kg-Block zu einem Rezept in Gramm. Bei kg, l und
+Stück rechnet das Programm selbst um.</p>
+<h2 id="eine-zuordnung-korrigieren">Eine Zuordnung korrigieren</h2>
+<p>Auch eine automatisch zugeordnete Position lässt sich auswählen. Rechts steht
+dann die aktuelle Zuordnung an erster Stelle, darunter die Alternativen.
+<strong>Bestätigen</strong> macht aus der automatischen eine manuelle Zuordnung; ein anderer
+Vorschlag oder <strong>Manuell zuordnen</strong> ersetzt sie. Die Regel für den Artikel wird
+dabei korrigiert, nicht verdoppelt: Jede weitere Rechnung mit diesem Artikel
+folgt der Korrektur.</p>
+<p>Wer stichprobenartig prüfen will, beginnt bei den größten Beträgen — die
+Kalkulation zeigt, welche Beträge auf welche Zutat entfallen, und dort fällt ein
+Fehler am meisten ins Gewicht.</p>
+<h2 id="warenarten">Warenarten pflegen</h2>
+<p>Warenarten stehen bei der Zutat unter <strong>Regeln → Zutaten</strong>, eine je Zeile.
+Bei Schnittkäse etwa Gouda, Emmentaler, Edamer, Tilsiter.</p>
+<p>Eine gute Warenart ist die Ware, nicht der Artikeltext des Lieferanten. „Gouda“
+gehört dazu, „GOUDA JUNG 48% BLOCK ca 3kg“ nicht — diesen Fall deckt die
+Zuordnung selbst ab, sobald sie einmal bestätigt ist. Es lohnt sich, Warenarten
+dann zu ergänzen, wenn eine Warenart immer wieder zur Durchsicht vorgelegt wird,
+obwohl sie eindeutig zu einer Zutat gehört.</p>
+<p>Warenarten gelten betriebsübergreifend, weil sie zu den Regeln gehören und nicht zu
+einer einzelnen Prüfung.</p>
+<h2 id="kein-wareneinsatz">Kein Wareneinsatz</h2>
+<p>Nicht alles auf einer Eingangsrechnung ist Wareneinsatz. Pfand, Fracht,
+Verpackung, Reinigungsmittel, Büromaterial: Diese Positionen sind Zutaten in der
+Kategorie <strong>Kein Wareneinsatz</strong> zuzuordnen.</p>
+<p>Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen,
+gehen aber in keine Kalkulation ein. Im Bericht erscheinen sie als
+<strong>unberücksichtigt</strong> — mit Betrag, damit erkennbar bleibt, was bewusst außen vor
+geblieben ist, und nicht bloß vergessen wurde.</p>
+<p>Pfand ist der häufigste Fall. Es steht als eigene Position auf fast jeder
+Getränkerechnung, wird zurückgezahlt und hat mit dem Einkauf von Ware nichts zu
+tun.</p>
 
 
 

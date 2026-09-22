@@ -8,13 +8,11 @@
       
       
       
-        <link rel="canonical" href="https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/">
+        <link rel="canonical" href="https://docs.umsatzschaetzung.amtstools.de/dev/import-export/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../pruefungen/">
       
-      
-        <link rel="next" href="../import-export/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +20,7 @@
     
     
       
-        <title>Prüfungen - Umsatzschätzung</title>
+        <title>Import und Export - Umsatzschätzung</title>
       
     
     
@@ -70,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#prufungen" class="md-skip">
+        <a href="#import-und-export" class="md-skip">
           Zum Inhalt
         </a>
       
@@ -122,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Prüfungen
+              Import und Export
             
           </span>
         </div>
@@ -263,6 +261,28 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../pruefungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prüfungen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -280,7 +300,7 @@
   
   
   <span class="md-ellipsis">
-    Prüfungen
+    Import und Export
     
   </span>
   
@@ -293,7 +313,7 @@
   
   
   <span class="md-ellipsis">
-    Prüfungen
+    Import und Export
     
   </span>
   
@@ -316,36 +336,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#suchen" class="md-nav__link">
+  <a href="#prufung-weitergeben" class="md-nav__link">
     <span class="md-ellipsis">
-      Suchen
+      Prüfung weitergeben
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#wo-ist-eine-prufung-gespeicher" class="md-nav__link">
+  <a href="#regeln-gehen-nicht-mit" class="md-nav__link">
     <span class="md-ellipsis">
-      Wo ist eine Prüfung gespeicher?
+      Regeln gehen nicht mit
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#importieren-und-exportieren" class="md-nav__link">
+  <a href="#bericht-und-einzelne-rechnung" class="md-nav__link">
     <span class="md-ellipsis">
-      Importieren und Exportieren
+      Bericht und einzelne Rechnung
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#loschen" class="md-nav__link">
+  <a href="#rechnungen" class="md-nav__link">
     <span class="md-ellipsis">
-      Löschen
+      Rechnungen
     </span>
   </a>
   
@@ -355,28 +375,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../import-export/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Import und Export
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -408,36 +406,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#suchen" class="md-nav__link">
+  <a href="#prufung-weitergeben" class="md-nav__link">
     <span class="md-ellipsis">
-      Suchen
+      Prüfung weitergeben
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#wo-ist-eine-prufung-gespeicher" class="md-nav__link">
+  <a href="#regeln-gehen-nicht-mit" class="md-nav__link">
     <span class="md-ellipsis">
-      Wo ist eine Prüfung gespeicher?
+      Regeln gehen nicht mit
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#importieren-und-exportieren" class="md-nav__link">
+  <a href="#bericht-und-einzelne-rechnung" class="md-nav__link">
     <span class="md-ellipsis">
-      Importieren und Exportieren
+      Bericht und einzelne Rechnung
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#loschen" class="md-nav__link">
+  <a href="#rechnungen" class="md-nav__link">
     <span class="md-ellipsis">
-      Löschen
+      Rechnungen
     </span>
   </a>
   
@@ -459,34 +457,36 @@
 
 
 
-<h1 id="prufungen">Prüfungen</h1>
-<p>Die Startseite listet alle Prüfungen aud die das Program zugriff hat. Ein Klick auf eine Zeile
-öffnet sie. Über <code>Neue Prüfung</code> kann eine neue Prüfung in der Datenbank angelegt werden.</p>
-<p><img alt="Filtern, Regeln, Importieren und Neue Prüfung über der Liste" src="../img/pruefungen-leiste.png" /></p>
-<p>In der Prüfung liegen ihre Rechnungen und Belege und die Entscheidungen zu
-diesem Betrieb: Zuordnung der Rechnungszeilen, Verkaufspreise, gewählte
-Ertragsregeln, Bestand, erklärte Umsätze.</p>
-<p><img alt="Die Liste mit drei angelegten Prüfungen" src="../img/pruefungen-liste.png" /></p>
-<h2 id="suchen">Suchen</h2>
-<p>Das Suchfeld filtert nach Bezeichnung, Zeitraum und Namen des
-Steuerpflichtigen.</p>
-<h2 id="wo-ist-eine-prufung-gespeicher">Wo ist eine Prüfung gespeicher?</h2>
-<p>Jede Prüfung ist eine einzelne Datei im Ordner <strong>Dokumente</strong> unter
-<code>Umsatzschätzung</code>, etwa <code>fall-20250502-080000-a1b2c3d4.db</code>. Alle informationen zu diesem Fall, darunter auch die Belege und Scan, Sind darin gespeicher.</p>
-<div class="admonition note">
-<p class="admonition-title">Verwaltete Installationen</p>
-<p>Unter Windows kann der Ordner per Gruppenrichtlinie umgelegt sein, etwa auf
-ein Netzlaufwerk.</p>
-</div>
-<h2 id="importieren-und-exportieren">Importieren und Exportieren</h2>
-<p><strong>Importieren</strong> übernimmt eine Falldatei in das Programm und öffnet sie. Sie
-liegt danach im selben Ordner wie die übrigen Prüfungen.</p>
-<p>Das Pfeilsymbol in der Zeile legt umgekehrt eine Kopie der Prüfung ab, wo Sie
-wollen. Genaueres unter <a href="../import-export/">Import und Export</a>.</p>
-<h2 id="loschen">Löschen</h2>
-<p>Das Papierkorbsymbol am Ende der Zeile löscht eine Prüfung mitsamt Rechnungen und Belegen.
-Löschen kann i.d.R. nicht rückgängig gemacht werden.</p>
-<p><img alt="Die Rückfrage vor dem Löschen" src="../img/pruefungen-loeschen.png" /></p>
+<h1 id="import-und-export">Import und Export</h1>
+<h2 id="prufung-weitergeben">Prüfung weitergeben</h2>
+<p>Eine Prüfung ist eine einzelne Datei, siehe <a href="../pruefungen/">Prüfungen</a>.
+Rechnungen, Belege und Scans liegen darin, es geht nichts verloren.</p>
+<p>Das Pfeilsymbol in der Zeile der Liste legt eine Kopie dieser Datei ab, wo Sie
+wollen. <strong>Importieren</strong> ist der Weg zurück: die Datei wandert in den
+Prüfungsordner und wird geöffnet. Ist die Prüfung dort schon vorhanden, fragt
+das Programm, ob sie ersetzt werden soll.</p>
+<h2 id="regeln-gehen-nicht-mit">Regeln gehen nicht mit</h2>
+<p>Zutaten, Produkte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung,
+sondern im Regelspeicher des Rechners, siehe <a href="regeln.md">Regeln</a>. Die Prüfung
+verweist nur darauf.</p>
+<p>Auf einem Rechner mit anderen Regeln sucht das Programm deshalb für jede
+Rechnungszeile wieder selbst eine Zuordnung. Findet es keine, bleibt die Zeile
+ungeklärt und fällt aus der Kalkulation. Die Zahlen können also von denen des
+Absenders abweichen.</p>
+<h2 id="bericht-und-einzelne-rechnung">Bericht und einzelne Rechnung</h2>
+<p>Der Bericht der Prüfung geht über <strong>Als PDF speichern</strong> heraus, so wie er
+angezeigt wird.</p>
+<p>In einer geöffneten Rechnung schreibt <strong>CSV exportieren</strong> deren gelesene Daten
+als Tabelle: Kopf mit Lieferant, Nummer, Datum und Summen, darunter jede
+Position mit Menge, Preisen, Steuersatz und der Zutat, der sie zugeordnet ist.
+Der Knopf ist gesperrt, solange Änderungen offen sind — gespeichert wird, was
+in der Prüfung steht.</p>
+<p>Trennzeichen ist das Semikolon, die Zahlen stehen so darin, wie sie am
+Bildschirm stehen, mit Komma und Einheit (<code>1.110,00 €</code>, <code>12 Keg</code>). Excel öffnet
+die Datei ohne Nachfrage.</p>
+<h2 id="rechnungen">Rechnungen</h2>
+<p>Rechnungen kommen nicht über diesen Weg in die Prüfung, sondern über den Import
+in der Prüfung selbst, siehe <a href="rechnungen.md">Rechnungen importieren</a>.</p>
 
 
 
