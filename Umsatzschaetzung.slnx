@@ -2,7 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
     <Project Path="src/Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
-    <Project Path="src/Umsatzschaetzung.E2e/Umsatzschaetzung.E2e.csproj" />
+    <Project Path="src/Umsatzschaetzung.Tests/Umsatzschaetzung.Tests.csproj" />
     <Project Path="src/RapidOcrNet/RapidOcrNet.csproj" />
   </Folder>
   <Folder Name="/tools/">
