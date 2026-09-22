@@ -14,7 +14,7 @@
   <ItemGroup>
     <ModelFile Include="belegtagger.int8.onnx;vocab.json;merges.txt;byte_to_unicode.json;spec.json">
       <Dir>belegtagger</Dir>
-      <Release>belegtagger-v1.0.0</Release>
+      <Release>belegtagger-v2.0.0</Release>
     </ModelFile>
     <ModelFile Include="PP-OCRv6_det_small.onnx">
       <Dir>v6</Dir>
@@ -27,7 +27,7 @@
       <Release>rapidocrnet-3.0.0</Release>
     </ModelFile>
 
-    <ModelFile Update="belegtagger.int8.onnx" Sha256="20e008dc763f0be6332b343d348de1fc22461d05fedb5b7a58433c56cd5a22ca" />
+    <ModelFile Update="belegtagger.int8.onnx" Sha256="e6af841041df64c8b89a4add251a94d9a14f7a6b9fc05f218f29ac76bde477c5" />
     <ModelFile Update="vocab.json" Sha256="58f7ec138a70ded60140087b6ae1a7a63bcbd16c4b59fd128fb2fc49b2b8aeb0" />
     <ModelFile Update="merges.txt" Sha256="92f04b1cfffbdfc3495a01f2cce2a81c874d1bfa255ea3859f6f0d43356ac57f" />
     <ModelFile Update="byte_to_unicode.json" Sha256="cbb1623eed136cceb032401db5efec4d36c8e1608810c0e7d4ef533d586960df" />
