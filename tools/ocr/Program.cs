@@ -86,9 +86,10 @@ static class Program
         Liest jede .png/.jpg/.jpeg/.pdf unterhalb von <verzeichnis> wie die App
         (Raster, Reinigung, Begradigung, RapidOCR) und schreibt <name>.ocr.json
         daneben. Bereits erkannte Seiten werden übersprungen, ausser mit --force.
-        Gelesen werden nur Scans: eine .pdf ist die Vorlage, aus der ein Scan
-        gemacht wurde, und wird übersprungen, solange sie nicht selbst einen
-        Scan benennt (x.pdf.scan.pdf). --all liest auch die Vorlagen. --dpi ist
+        Liegt unter <verzeichnis> irgendein Scan (x.pdf.scan.png), werden nur
+        Scans gelesen: die .pdf daneben ist die Vorlage, aus der er gemacht
+        wurde. Ein Verzeichnis ganz ohne Scans - der Korpus aus tools/corpus -
+        wird vollstaendig gelesen. --all liest in jedem Fall alles. --dpi ist
         das Raster der PDF-Seiten; der Korpus aus tools/corpus wurde mit
         --scale 3 = 288 dpi geschrieben und braucht dasselbe Raster.
         """);
@@ -97,13 +98,16 @@ static class Program
     // File.Exists per page: over a network share the round trips cost more than the bytes. Not
     // SearchOption.AllDirectories: a shared-folder driver can hand back "." and ".." as real
     // entries and append a NUL to every name.
-    // Only scans are read. A PDF below the corpus is the source a scan was made from - the
-    // clean raster of fixtures/dataset/2025/*/x.pdf, a page nobody hands in and tools/eval no
-    // longer scores, so reading it costs minutes per refresh and buys nothing. A PDF that is
-    // itself a scan says so in its name, and the page images of tools/corpus are scans
-    // throughout. --all reads the sources too, for measuring what the scanning costs.
-    static IEnumerable<string> Walk(string root, bool force, bool all)
+    // A corpus that holds scans is read for its scans alone. In fixtures/dataset/2025 every
+    // invoice is a .pdf beside a .pdf.scan.*: the PDF is the source the scan was made from, a
+    // page nobody hands in and tools/eval no longer scores, and reading it costs minutes per
+    // refresh for nothing. A corpus without a single scan is a corpus of scans already - the
+    // pages of tools/corpus are degraded renderings, some of them PDFs - and is read whole.
+    // --all reads everything either way.
+    static List<string> Walk(string root, bool force, bool all)
     {
+        var listings = new List<(string Dir, List<string> Pages, HashSet<string> Dumps)>();
+        var scans = false;
         var pending = new Stack<string>();
         pending.Push(root);
         while (pending.Count > 0)
@@ -115,18 +119,22 @@ static class Program
             {
                 var name = entry.Name.TrimEnd('\0');
                 if (name is "." or "..") continue;
+                scans |= IsScan(name);
                 if (entry.Attributes.HasFlag(FileAttributes.Directory)) pending.Push(Path.Combine(dir, name));
                 else if (name.EndsWith(Dump.Suffix, StringComparison.OrdinalIgnoreCase)) dumps.Add(name);
                 else if (Extensions.Contains(Path.GetExtension(name).ToLowerInvariant())) pages.Add(name);
             }
-            foreach (var name in pages)
-                if ((all || !Source(name))
-                    && (force || !dumps.Contains(Path.GetFileNameWithoutExtension(name) + Dump.Suffix)))
-                    yield return Path.Combine(dir, name);
+            listings.Add((dir, pages, dumps));
         }
+
+        var todo = new List<string>();
+        foreach (var (dir, pages, dumps) in listings)
+            foreach (var name in pages)
+                if ((all || !scans || IsScan(name))
+                    && (force || !dumps.Contains(Path.GetFileNameWithoutExtension(name) + Dump.Suffix)))
+                    todo.Add(Path.Combine(dir, name));
+        return todo;
     }
 
-    static bool Source(string name) =>
-        Path.GetExtension(name).Equals(".pdf", StringComparison.OrdinalIgnoreCase)
-        && !name.Contains(Scanned, StringComparison.OrdinalIgnoreCase);
+    static bool IsScan(string name) => name.Contains(Scanned, StringComparison.OrdinalIgnoreCase);
 }
