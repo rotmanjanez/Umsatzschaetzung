@@ -160,6 +160,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             SupplierName = supplier,
             Gtin = line.Gtin,
             Observed = line.Name,
+            UnitCode = string.IsNullOrEmpty(line.UnitCode) ? null : line.UnitCode,
             IngredientId = ingredientId,
             Factor = factor,
         };
