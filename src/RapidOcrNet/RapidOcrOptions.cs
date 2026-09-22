@@ -138,6 +138,14 @@ public sealed record RapidOcrOptions
     public bool RotateTallCrops { get; init; }
 
     /// <summary>
+    /// Whether a detection that ran several short lines together is cut into one box per line
+    /// before it is read (<see cref="OcrUtils.SplitStackedBoxes"/>). Off in both presets: it
+    /// costs an ink profile over every tall box and only pays where a narrow column of short
+    /// tokens is printed tightly enough for the detector to join it up.
+    /// </summary>
+    public bool SplitStackedCrops { get; init; }
+
+    /// <summary>
     /// When true, the classifier preprocesses crops the way Python rapidocr does:
     /// resize preserving aspect ratio to (resized_w, cls input height) and pad the
     /// remainder with midgray (equivalent to Python's "zero-pad after normalization").

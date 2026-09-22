@@ -24,13 +24,16 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // TextScore. A crop taller than it is wide holds no vertical script either - it is a
     // position number in a narrow column - and a quarter turn loses it the same way. Correction
     // reads the classifier's votes and turns the whole page, which is the only turn a German
-    // invoice needs.
+    // invoice needs. What is left of a tall box is a stack: a unit column printed tightly
+    // enough that the detector joined three "kg" into one box, which no line reader can read.
+    // It is cut back into lines before it is read.
     static readonly RapidOcrOptions Options = RapidOcrOptions.PPOCRv6 with
     {
         ReturnWordBox = true,
         MaxSideLen = MaxImageDimension,
         ClsRotate = false,
         RotateTallCrops = false,
+        SplitStackedCrops = true,
     };
 
     public static string Detector => Accelerator.Available ? "WebGPU" : "CPU";

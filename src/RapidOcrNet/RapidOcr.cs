@@ -120,7 +120,7 @@ public sealed class RapidOcr : IDisposable
             options.DoAngle, options.MostAngle,
             options.ReturnWordBox, options.ReturnSingleCharBox,
             options.TextScore, options.ClsThresh, options.ClsRotate,
-            options.RotateTallCrops, options.ClsPreserveAspectRatio);
+            options.RotateTallCrops, options.SplitStackedCrops, options.ClsPreserveAspectRatio);
     }
 
     /// <summary>
@@ -291,7 +291,7 @@ public sealed class RapidOcr : IDisposable
     private OcrResult DetectOnce(in DetectorInput input, float boxScoreThresh,
         float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
         bool returnWordBox, bool returnSingleCharBox, float textScore, float clsThresh,
-        bool clsRotate, bool rotateTall, bool clsPreserveAspectRatio)
+        bool clsRotate, bool rotateTall, bool splitStacked, bool clsPreserveAspectRatio)
     {
         SKBitmap src = input.Bitmap;
 
@@ -300,6 +300,7 @@ public sealed class RapidOcr : IDisposable
 
         // step: dbNet getTextBoxes
         var textBoxes = _textDetector.GetTextBoxes(src, input.Scale, boxScoreThresh, boxThresh, unClipRatio) ?? [];
+        if (splitStacked) textBoxes = OcrUtils.SplitStackedBoxes(src, textBoxes);
         var dbNetTime = sw.ElapsedMilliseconds;
 
         // getPartImages: capture crop bookkeeping when word boxes are requested.

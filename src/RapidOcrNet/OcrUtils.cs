@@ -350,6 +350,106 @@ internal static class OcrUtils
         return persp.TryInvert(out SKMatrix perspInv) ? perspInv : SKMatrix.Identity; // TODO - Check what's best to return when not inv
     }
 
+
+    /// <summary>
+    /// Cut a detection that ran several short lines together into one box per line.
+    /// DBNet returns one connected component; a column of two-glyph tokens - a unit column
+    /// reading "kg", "kg", "kg" down the page - comes back as a single tall box, and a line
+    /// reader has no way to read it: turned it is sideways, upright it is squeezed to a
+    /// sliver. Boxes that are not clearly taller than they are wide, that are skewed, or
+    /// whose ink does not fall into separate bands are returned untouched.
+    /// </summary>
+    public static IReadOnlyList<TextBox> SplitStackedBoxes(SKBitmap src, IReadOnlyList<TextBox> boxes)
+    {
+        List<TextBox>? split = null;
+        for (var i = 0; i < boxes.Count; i++)
+        {
+            var bands = Stacked(src, boxes[i]);
+            if (bands is null)
+            {
+                split?.Add(boxes[i]);
+                continue;
+            }
+            split ??= [.. boxes.Take(i)];
+            split.AddRange(bands);
+        }
+        return split ?? boxes;
+    }
+
+    // The bands of a stacked box, or null when it is one line after all.
+    static List<TextBox>? Stacked(SKBitmap src, TextBox box)
+    {
+        int x0 = int.MaxValue, y0 = int.MaxValue, x1 = int.MinValue, y1 = int.MinValue;
+        foreach (var p in box.BoxPoints)
+        {
+            x0 = Math.Min(x0, p.X); y0 = Math.Min(y0, p.Y);
+            x1 = Math.Max(x1, p.X); y1 = Math.Max(y1, p.Y);
+        }
+        x0 = Math.Max(x0, 0); y0 = Math.Max(y0, 0);
+        x1 = Math.Min(x1, src.Width - 1); y1 = Math.Min(y1, src.Height - 1);
+        int w = x1 - x0 + 1, h = y1 - y0 + 1;
+        if (w < 4 || h < 4 * MinBand || h < 1.5 * w) return null;
+
+        // A quad that leans is a line at an angle, not a stack: cutting it horizontally
+        // would slice through its own glyphs.
+        var lean = Math.Max(
+            Math.Abs(box.BoxPoints[0].Y - box.BoxPoints[1].Y),
+            Math.Abs(box.BoxPoints[0].X - box.BoxPoints[3].X));
+        if (lean > w / 4) return null;
+
+        // The bitmap is read once: GetPixel costs about a microsecond and a page carries these
+        // boxes by the dozen. Reading every other column instead is a third of the work again
+        // and costs a cell on the fixtures, so the profile sees every pixel.
+        var lum = new byte[w * h];
+        int dark = 255, light = 0;
+        for (var y = 0; y < h; y++)
+            for (int x = 0, i = y * w; x < w; x++, i++)
+            {
+                var v = Luminance(src.GetPixel(x0 + x, y0 + y));
+                lum[i] = (byte)v;
+                if (v < dark) dark = v;
+                if (v > light) light = v;
+            }
+        if (light - dark < 40) return null;
+        var threshold = (dark + light) / 2;
+
+        var ink = new int[h];
+        for (var y = 0; y < h; y++)
+            for (int x = 0, i = y * w; x < w; x++, i++)
+                if (lum[i] < threshold) ink[y]++;
+
+        var bands = new List<(int Top, int Height)>();
+        int? start = null;
+        for (var y = 0; y < h; y++)
+        {
+            if (ink[y] > 1 && start is null) start = y;
+            else if (ink[y] <= 1 && start is { } s) { if (y - s >= MinBand) bands.Add((s, y - s)); start = null; }
+        }
+        if (start is { } last && h - last >= MinBand) bands.Add((last, h - last));
+        if (bands.Count < 2) return null;
+
+        // What the unclip pulled in from the row above or below is a fragment, not a line.
+        var tallest = bands.Max(b => b.Height);
+        bands.RemoveAll(b => b.Height * 2 < tallest);
+        if (bands.Count < 2) return null;
+
+        return [.. bands.Select(b => new TextBox
+        {
+            Score = box.Score,
+            BoxPoints =
+            [
+                new SKPointI(x0, y0 + b.Top),
+                new SKPointI(x1, y0 + b.Top),
+                new SKPointI(x1, y0 + b.Top + b.Height),
+                new SKPointI(x0, y0 + b.Top + b.Height),
+            ],
+        })];
+    }
+
+    const int MinBand = 6;
+
+    static int Luminance(SKColor c) => (c.Red * 299 + c.Green * 587 + c.Blue * 114) / 1000;
+
     public static SKBitmap GetRotateCropImage(SKBitmap src, SKPointI[] box, bool rotateTall = true)
     {
         return GetRotateCropImage(src, box, out _, rotateTall);
