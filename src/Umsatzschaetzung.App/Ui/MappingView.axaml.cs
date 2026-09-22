@@ -109,6 +109,7 @@ public partial class MappingView : Screen
     protected override void OnEnter()
     {
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
+        IngredientBox.SetSimilar(this, Session.SimilarIngredients);
         model.Assigned = "";
         model.Ingredients = Session.Ingredients();
         model.Groups.Clear();

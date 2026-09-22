@@ -174,6 +174,10 @@ public sealed class Session : Observable
     public List<Ingredient> Ingredients() =>
         Rules is null ? [] : Rules.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
 
+    public async Task<IReadOnlyList<string>> SimilarIngredients(string text, CancellationToken ct) =>
+        (await Service.SuggestMapping(Case?.Id ?? "", new InvoiceLine { Name = text }, null, ct))
+            .Select(c => c.Mapping.IngredientId).ToList();
+
     public List<Product> Products() =>
         Rules is null ? [] : Rules.Products.Values.OrderBy(p => p.Name, StringComparer.Ordinal).ToList();
 

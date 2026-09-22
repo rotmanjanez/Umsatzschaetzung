@@ -122,7 +122,7 @@
                                                     <ColumnDefinition Width="240"/>
                                                     <ColumnDefinition Width="90"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:IngredientBox ItemsSource="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
+                                                <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
                                                                   Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"/>
                                                 <DockPanel Grid.Column="1" Margin="8,0,0,0">
                                                     <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
@@ -243,7 +243,7 @@
                                             <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
                                                      IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
                                         </StackPanel>
-                                        <ui:IngredientBox ItemsSource="{Binding IngredientOptions}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
+                                        <ui:IngredientBox Choices="{Binding IngredientOptions}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
                                                           IsVisible="{Binding ScopeIsIngredient}" Classes.invalid="{Binding ScopeInvalid}" HorizontalAlignment="Stretch"/>
                                     </StackPanel>
                                 </Grid>

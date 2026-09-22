@@ -237,6 +237,7 @@ public partial class RulesView : Screen
         var ingredients = Session.Ingredients();
 
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
+        IngredientBox.SetSimilar(this, Session.SimilarIngredients);
 
         model.Ingredients.Items.Clear();
         foreach (var i in ingredients) model.Ingredients.Items.Add(new IngredientItem(i, Session.CategoryName(i.CategoryId)));

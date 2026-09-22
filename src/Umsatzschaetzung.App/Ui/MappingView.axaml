@@ -89,7 +89,7 @@
                             <Grid IsVisible="{Binding Manual}" Margin="0,12,0,0" ColumnDefinitions="*,16,160">
                                 <StackPanel>
                                     <TextBlock Text="Zutat *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <ui:IngredientBox ItemsSource="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+                                    <ui:IngredientBox Choices="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="Faktor" ToolTip.Tip="Inhalt eines Gebindes in der Rezepteinheit. Bei kg, l und Stück rechnet das Programm selbst um."
