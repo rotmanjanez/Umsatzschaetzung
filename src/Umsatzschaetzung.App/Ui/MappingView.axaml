@@ -16,6 +16,7 @@
         </Style>
         <Style Selector="DataGridRow TextBlock.cell">
             <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
