@@ -19,6 +19,7 @@ public sealed record RapidOcrOptions
         TextScore = 0.5f,
         ClsThresh = 0.9f,
         ClsRotate = true,
+        RotateTallCrops = true,
         ClsPreserveAspectRatio = true,// aspect-preserving + midgray pad
         BoxScoreThresh = 0.5f,
         BoxThresh = 0.3f,
@@ -46,6 +47,7 @@ public sealed record RapidOcrOptions
         TextScore = 0.5f,
         ClsThresh = 0.9f,
         ClsRotate = true,
+        RotateTallCrops = true,
         ClsPreserveAspectRatio = true,  // aspect-preserving + midgray pad
         BoxScoreThresh = 0.5f,
         BoxThresh = 0.3f,
@@ -125,6 +127,15 @@ public sealed record RapidOcrOptions
     /// an options record built from scratch has to set it too.
     /// </summary>
     public bool ClsRotate { get; init; }
+
+    /// <summary>
+    /// Whether a crop taller than 1.5x its width is turned a quarter turn before it is read,
+    /// on the assumption that it holds a line of vertical script. In a Latin document it holds
+    /// no such thing: it is a digit in a narrow column, or several short tokens the detector
+    /// ran together, and turning it costs the reading. Both presets set it; an options record
+    /// built from scratch has to set it too.
+    /// </summary>
+    public bool RotateTallCrops { get; init; }
 
     /// <summary>
     /// When true, the classifier preprocesses crops the way Python rapidocr does:

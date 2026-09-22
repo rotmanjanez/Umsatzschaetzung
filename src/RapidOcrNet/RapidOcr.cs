@@ -120,7 +120,7 @@ public sealed class RapidOcr : IDisposable
             options.DoAngle, options.MostAngle,
             options.ReturnWordBox, options.ReturnSingleCharBox,
             options.TextScore, options.ClsThresh, options.ClsRotate,
-            options.ClsPreserveAspectRatio);
+            options.RotateTallCrops, options.ClsPreserveAspectRatio);
     }
 
     /// <summary>
@@ -291,7 +291,7 @@ public sealed class RapidOcr : IDisposable
     private OcrResult DetectOnce(in DetectorInput input, float boxScoreThresh,
         float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
         bool returnWordBox, bool returnSingleCharBox, float textScore, float clsThresh,
-        bool clsRotate, bool clsPreserveAspectRatio)
+        bool clsRotate, bool rotateTall, bool clsPreserveAspectRatio)
     {
         SKBitmap src = input.Bitmap;
 
@@ -308,11 +308,11 @@ public sealed class RapidOcr : IDisposable
         CropContext[] cropContexts;
         if (returnWordBox)
         {
-            (partImages, cropContexts) = OcrUtils.GetPartImagesWithContext(src, textBoxes);
+            (partImages, cropContexts) = OcrUtils.GetPartImagesWithContext(src, textBoxes, rotateTall);
         }
         else
         {
-            partImages = OcrUtils.GetPartImages(src, textBoxes);
+            partImages = OcrUtils.GetPartImages(src, textBoxes, rotateTall);
             cropContexts = [];
         }
 

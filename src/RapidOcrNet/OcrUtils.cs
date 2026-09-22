@@ -253,7 +253,8 @@ internal static class OcrUtils
     /// eagerly-allocated array; if any single crop throws partway through, all already
     /// allocated bitmaps are disposed before the exception propagates.
     /// </summary>
-    public static SKBitmap[] GetPartImages(SKBitmap src, IReadOnlyList<TextBox>? textBoxes)
+    public static SKBitmap[] GetPartImages(SKBitmap src, IReadOnlyList<TextBox>? textBoxes,
+        bool rotateTall = true)
     {
         if (textBoxes is null || textBoxes.Count == 0)
         {
@@ -266,7 +267,7 @@ internal static class OcrUtils
         {
             for (int i = 0; i < textBoxes.Count; ++i)
             {
-                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints);
+                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, rotateTall);
                 produced = i + 1;
             }
 
@@ -287,7 +288,7 @@ internal static class OcrUtils
     /// bookkeeping for later word-box inverse mapping. Same exception-safety contract.
     /// </summary>
     public static (SKBitmap[] PartImages, CropContext[] Contexts) GetPartImagesWithContext(SKBitmap src,
-        IReadOnlyList<TextBox>? textBoxes)
+        IReadOnlyList<TextBox>? textBoxes, bool rotateTall = true)
     {
         if (textBoxes is null || textBoxes.Count == 0)
         {
@@ -301,7 +302,7 @@ internal static class OcrUtils
         {
             for (int i = 0; i < textBoxes.Count; ++i)
             {
-                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, out contexts[i]);
+                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, out contexts[i], rotateTall);
                 produced = i + 1;
             }
 
@@ -349,12 +350,13 @@ internal static class OcrUtils
         return persp.TryInvert(out SKMatrix perspInv) ? perspInv : SKMatrix.Identity; // TODO - Check what's best to return when not inv
     }
 
-    public static SKBitmap GetRotateCropImage(SKBitmap src, SKPointI[] box)
+    public static SKBitmap GetRotateCropImage(SKBitmap src, SKPointI[] box, bool rotateTall = true)
     {
-        return GetRotateCropImage(src, box, out _);
+        return GetRotateCropImage(src, box, out _, rotateTall);
     }
 
-    public static SKBitmap GetRotateCropImage(SKBitmap src, SKPointI[] box, out CropContext context)
+    public static SKBitmap GetRotateCropImage(SKBitmap src, SKPointI[] box, out CropContext context,
+        bool rotateTall = true)
     {
         System.Diagnostics.Debug.Assert(box.Length == 4);
 
@@ -434,7 +436,7 @@ internal static class OcrUtils
 
         if (m.IsIdentity)
         {
-            bool rotated = imgCrop.Height >= imgCrop.Width * 1.5;
+            bool rotated = rotateTall && imgCrop.Height >= imgCrop.Width * 1.5;
             context = new CropContext(
                 left, top,
                 imgCrop.Width, imgCrop.Height,
@@ -465,7 +467,7 @@ internal static class OcrUtils
         }
         imgCrop.Dispose();
 
-        bool rotated90Flag = partImg.Height >= partImg.Width * 1.5;
+        bool rotated90Flag = rotateTall && partImg.Height >= partImg.Width * 1.5;
         context = new CropContext(
             left, top,
             partImg.Width, partImg.Height,
