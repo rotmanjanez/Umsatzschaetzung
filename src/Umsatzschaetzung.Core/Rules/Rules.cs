@@ -47,14 +47,14 @@ public static class RuleCheck
 
     static void ValidateCategory(Category e)
     {
-        if (e.Name == "") throw new RulesException("Kategorie: Name darf nicht leer sein");
+        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Kategorie: Name darf nicht leer sein");
         foreach (var g in e.Gewerbe)
             if (!Gewerbe.Kennzahl(g)) throw new RulesException($"Kategorie \"{e.Name}\": Gewerbekennzahl \"{g}\" ist ungültig");
     }
 
     static void ValidateIngredient(RuleSet rs, Ingredient e)
     {
-        if (e.Name == "") throw new RulesException("Zutat: Name darf nicht leer sein");
+        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Zutat: Name darf nicht leer sein");
         if (e.CategoryId != "" && !rs.Categories.ContainsKey(e.CategoryId))
             throw new RulesException($"Zutat \"{e.Name}\": Kategorie \"{e.CategoryId}\" existiert nicht");
     }
@@ -70,7 +70,7 @@ public static class RuleCheck
 
     static void ValidateProduct(RuleSet rs, Product e)
     {
-        if (e.Name == "") throw new RulesException("Produkt: Name darf nicht leer sein");
+        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Produkt: Name darf nicht leer sein");
         if (e.Recipe is not { Count: > 0 })
             throw new RulesException($"Produkt \"{e.Name}\": Rezept darf nicht leer sein");
         foreach (var l in e.Recipe)
@@ -109,7 +109,7 @@ public static class RuleCheck
 
     static void ValidateYieldRule(RuleSet rs, YieldRule e)
     {
-        if (e.Name == "") throw new RulesException("Ausbeuteregel: Name darf nicht leer sein");
+        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Ausbeuteregel: Name darf nicht leer sein");
         var category = e.CategoryId ?? "";
         var ingredient = e.IngredientId ?? "";
         if (category == "" && ingredient == "")

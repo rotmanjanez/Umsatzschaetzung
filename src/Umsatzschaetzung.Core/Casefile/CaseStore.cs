@@ -559,7 +559,17 @@ public sealed partial class CaseStore(string dir)
     static SqliteConnection Open(string path, SqliteOpenMode mode)
     {
         var db = Connect(path, mode);
-        var from = Schema.Version(db);
+        int from;
+        try
+        {
+            from = Schema.Version(db);
+        }
+        catch (SqliteException e)
+        {
+            db.Dispose();
+            if (e.SqliteErrorCode is 11 or 26) throw new CaseInvalidException("Falldatei ungültig: " + e.Message, e);
+            throw;
+        }
         if (from == Migrations.Length) return db;
         db.Dispose();
         if (from > 0 && from < Migrations.Length) File.Copy(path, $"{path}.v{from}.bak", true);
