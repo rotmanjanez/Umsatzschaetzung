@@ -108,7 +108,8 @@ internal static class Xml
         var text = charset switch
         {
             "" or "utf-8" or "utf8" or "us-ascii" or "ascii" => Encoding.UTF8.GetString(span),
-            "iso-8859-1" or "iso8859-1" or "latin1" or "windows-1252" or "cp1252" => Encoding.Latin1.GetString(span),
+            "iso-8859-1" or "iso8859-1" or "latin1" => Encoding.Latin1.GetString(span),
+            "windows-1252" or "cp1252" => CodePagesEncodingProvider.Instance.GetEncoding(1252)!.GetString(span),
             _ => throw new InvalidDataException($"unsupported charset \"{charset}\""),
         };
         return text.TrimStart();

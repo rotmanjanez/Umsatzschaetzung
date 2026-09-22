@@ -46,7 +46,7 @@ public sealed record VatRow(long Vat, long Declared, long Calculated, bool Total
             if (!p.Disabled) calculated[p.Vat] = calculated.GetValueOrDefault(p.Vat) + p.RevenueNet;
         List<VatRow> rows = [];
         long sumDeclared = 0, sumCalculated = 0;
-        foreach (var rate in Rates.Concat(calculated.Keys.Where(k => !Rates.Contains(k)).Order()))
+        foreach (var rate in Rates.Concat(declared.Keys.Union(calculated.Keys).Where(k => !Rates.Contains(k)).Order()))
         {
             var d = declared.GetValueOrDefault(rate);
             var k = calculated.GetValueOrDefault(rate);
