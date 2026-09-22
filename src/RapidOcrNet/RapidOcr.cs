@@ -119,7 +119,7 @@ public sealed class RapidOcr : IDisposable
             options.BoxScoreThresh, options.BoxThresh, options.UnClipRatio,
             options.DoAngle, options.MostAngle,
             options.ReturnWordBox, options.ReturnSingleCharBox,
-            options.TextScore, options.ClsThresh,
+            options.TextScore, options.ClsThresh, options.ClsRotate,
             options.ClsPreserveAspectRatio);
     }
 
@@ -291,7 +291,7 @@ public sealed class RapidOcr : IDisposable
     private OcrResult DetectOnce(in DetectorInput input, float boxScoreThresh,
         float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
         bool returnWordBox, bool returnSingleCharBox, float textScore, float clsThresh,
-        bool clsPreserveAspectRatio)
+        bool clsRotate, bool clsPreserveAspectRatio)
     {
         SKBitmap src = input.Bitmap;
 
@@ -321,20 +321,22 @@ public sealed class RapidOcr : IDisposable
 
         // Rotate partImgs only if the classifier is confident enough (Python <c>cls_thresh</c>).
         // Without this gate, low-confidence flips wrongly invert clean upright text and the
-        // recognizer produces garbage like "1997" → "L66" or "This" → "s".
+        // recognizer produces garbage like "1997" → "L66" or "This" → "s". With clsRotate
+        // off the verdict is still reported but no crop is turned, which leaves the call
+        // to the caller: a two-glyph crop carries too little evidence to be turned on its own.
         for (int i = 0; i < partImages.Length; ++i)
         {
-            if (angles[i].Index == 1 && angles[i].Score >= clsThresh)
-            {
-                var original = partImages[i];
-                partImages[i] = OcrUtils.BitmapRotateClockWise180(original);
-                original.Dispose();
-            }
-            else if (angles[i].Index == 1)
+            if (angles[i].Index != 1) continue;
+            if (angles[i].Score < clsThresh)
             {
                 // Below threshold, treat as no-flip for downstream consumers / word-box mapping.
                 angles[i].Index = 0;
+                continue;
             }
+            if (!clsRotate) continue;
+            var original = partImages[i];
+            partImages[i] = OcrUtils.BitmapRotateClockWise180(original);
+            original.Dispose();
         }
 
         // step: crnnNet getTextLines
@@ -358,7 +360,7 @@ public sealed class RapidOcr : IDisposable
                 wordResults = CalRecBoxes.Build(
                     textLine,
                     cropContexts[i],
-                    cls180: angle.Index == 1,
+                    cls180: clsRotate && angle.Index == 1,
                     returnSingleCharBox: returnSingleCharBox);
 
                 if (wordResults is not null)

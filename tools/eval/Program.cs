@@ -61,6 +61,12 @@ foreach (var variation in rows == "" ? Corpus.ReadDumps(corpus) : Corpus.ReadRow
         $"\t{(auto ? "auto" : "review")}\t{string.Join(",", flags.Select(f => f.Code).Distinct().Order(StringComparer.Ordinal))}");
 }
 
+if (rows == "" && results.Count == 0)
+{
+    Console.Error.WriteLine($"keine Scan-Dumps (*{Corpus.ScanDump}) unter {corpus}; " +
+        $"dotnet run -c Release --project tools/ocr -- {corpus}");
+    return 2;
+}
 if (parity) Console.WriteLine(agree.Report() + "\n");
 var title = (rows == "" ? $"{corpus}, app path" : $"{rows} / {split}" + (parity ? ", C# tagger" : "")) + (full ? ", full" : ", core");
 var text = $"[{title}]\n" + Score.Report(results, full)

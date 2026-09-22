@@ -12,10 +12,14 @@ public sealed record Variation(string Invoice, string Template, List<Page> Pages
 public static class Corpus
 {
     // The dumps tools/ocr wrote beside the fixtures, untagged: the words go through the app's
-    // own row grouping and tagger, so this scores the app.
+    // own row grouping and tagger, so this scores the app. Only the scans are read. The clean
+    // raster of a source PDF is a page no auditor ever hands in, and reading it perfectly says
+    // nothing about the paper that arrives in the post.
+    public const string ScanDump = ".scan" + Dump.Suffix;
+
     public static IEnumerable<Variation> ReadDumps(string corpus)
     {
-        foreach (var file in Directory.EnumerateFiles(corpus, "*" + Dump.Suffix, SearchOption.AllDirectories).Order(StringComparer.Ordinal))
+        foreach (var file in Directory.EnumerateFiles(corpus, "*" + ScanDump, SearchOption.AllDirectories).Order(StringComparer.Ordinal))
         {
             var pages = Dump.Read(file).Pages
                 .Select(p => new Page(p.Width, p.Height, [.. p.OcrWords().Select(w => new TaggedWord(w, null, Tagging.Role.LineItem, -1))]))

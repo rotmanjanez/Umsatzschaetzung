@@ -8,7 +8,7 @@ the app's number, not a second implementation's.
     dotnet run -c Release --project tools/eval -- --rows pred.jsonl  # a Python dump
 
     --corpus    fixtures/dataset/2025 unless given; holds the expected.json files and,
-                without --rows, the <name>.ocr.json dumps to score
+                without --rows, the <name>.scan.ocr.json dumps to score
     --rows      page.jsonl: labelled or predicted words, one page per line, scored as is
     --split     with --rows; "" scores every split
     --parity    with --rows: re-tag the dump's words in C# and report word-for-word agreement
@@ -17,13 +17,18 @@ the app's number, not a second implementation's.
     --detail    per-variation TSV, for diffing two runs
     --show X    columns, cells and assembled-against-expected lines of invoices matching X
 
-Without `--rows` the eval reads every `*.ocr.json` under the corpus, groups the words into
-rows the way the app does, tags them through the app's ONNX path and assembles them with
+Without `--rows` the eval reads every `*.scan.ocr.json` under the corpus, groups the words
+into rows the way the app does, tags them through the app's ONNX path and assembles them with
 `Core`. The dumps are what `tools/ocr` writes off the app's own rendering, cleaning,
 straightening and OCR; they are gitignored, so refresh them with
 `dotnet run -c Release --project tools/ocr -- fixtures/dataset/2025 --force` whenever
-`Service/` changes. An invoice's `.pdf.scan` variation shares its `expected.json`; where the
-PDF and the e-invoice XML both carry one, the PDF's wins.
+`Service/` changes.
+
+**Only scans are scored.** The clean raster of a source PDF is a page nobody hands in: it
+carries no paper, no camera and no photocopier, and reading it perfectly says nothing about
+what the app meets. A scan shares the `expected.json` of the invoice it was made from; where
+the PDF and the e-invoice XML both carry one, the PDF's wins. A corpus without a single
+`.scan` dump is an error, not a run over nothing.
 
 A `--rows` word is `{t, box, row, pred|field, role, col, cell_start}`. `pred` wins over
 `field`, so the same reader scores a prediction or verifies a ground truth: **run it on

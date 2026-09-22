@@ -18,8 +18,16 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // The detector's long-side cap; boxes come back in source pixels regardless.
     public const int MaxImageDimension = 4000;
 
-    static readonly RapidOcrOptions Options =
-        RapidOcrOptions.PPOCRv6 with { ReturnWordBox = true, MaxSideLen = MaxImageDimension };
+    // The direction classifier votes on the page and turns nothing itself: on a line of two
+    // glyphs it is as confident as on a sentence and wrong often enough that a "kg" comes back
+    // upside down, reads as "ER" and is dropped for scoring below TextScore. Correction reads
+    // the same votes and turns the whole page, which is the only turn these documents need.
+    static readonly RapidOcrOptions Options = RapidOcrOptions.PPOCRv6 with
+    {
+        ReturnWordBox = true,
+        MaxSideLen = MaxImageDimension,
+        ClsRotate = false,
+    };
 
     public static string Detector => Accelerator.Available ? "WebGPU" : "CPU";
 

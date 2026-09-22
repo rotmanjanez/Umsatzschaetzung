@@ -18,6 +18,7 @@ public sealed record RapidOcrOptions
         MinHeight = 30,
         TextScore = 0.5f,
         ClsThresh = 0.9f,
+        ClsRotate = true,
         ClsPreserveAspectRatio = true,// aspect-preserving + midgray pad
         BoxScoreThresh = 0.5f,
         BoxThresh = 0.3f,
@@ -44,6 +45,7 @@ public sealed record RapidOcrOptions
         MinHeight = 30,
         TextScore = 0.5f,
         ClsThresh = 0.9f,
+        ClsRotate = true,
         ClsPreserveAspectRatio = true,  // aspect-preserving + midgray pad
         BoxScoreThresh = 0.5f,
         BoxThresh = 0.3f,
@@ -113,6 +115,16 @@ public sealed record RapidOcrOptions
     /// as not-confident-enough and the crop is left in its original orientation.
     /// </summary>
     public float ClsThresh { get; init; }
+
+    /// <summary>
+    /// Whether a confident 180° prediction actually turns the crop. When false the
+    /// classifier still runs and still reports its verdict in
+    /// <see cref="TextBlock.AngleIndex"/>, but every crop is recognized in the
+    /// orientation the detector found it in, so the verdict can decide the orientation
+    /// of the page as a whole instead of that of a single line. Both presets set it;
+    /// an options record built from scratch has to set it too.
+    /// </summary>
+    public bool ClsRotate { get; init; }
 
     /// <summary>
     /// When true, the classifier preprocesses crops the way Python rapidocr does:

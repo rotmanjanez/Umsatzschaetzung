@@ -12,10 +12,14 @@ static class Program
 {
     static readonly string[] Extensions = [".png", ".jpg", ".jpeg", ".pdf"];
 
+    // What a scan of "x.pdf" is called: "x.pdf.scan.png", and a scanned PDF "x.pdf.scan.pdf".
+    const string Scanned = ".scan.";
+
     static async Task<int> Main(string[] args)
     {
         string? root = null;
         var force = false;
+        var all = false;
         var dpi = Scan.Dpi;
         var workers = Math.Max(1, Environment.ProcessorCount / 2);
 
@@ -24,6 +28,7 @@ static class Program
             switch (args[i])
             {
                 case "--force": force = true; break;
+                case "--all": all = true; break;
                 case "--dpi": dpi = int.Parse(args[++i]); break;
                 case "--workers": workers = int.Parse(args[++i]); break;
                 case "-h" or "--help": Usage(); return 0;
@@ -36,7 +41,7 @@ static class Program
         if (root is null) { Usage(); return 2; }
         if (!Directory.Exists(root)) { Console.Error.WriteLine($"kein Verzeichnis: {root}"); return 2; }
 
-        var todo = Walk(root, force).Order(StringComparer.Ordinal).ToList();
+        var todo = Walk(root, force, all).Order(StringComparer.Ordinal).ToList();
         Console.WriteLine($"{todo.Count} Seiten, {workers} parallel, PDF-Raster {dpi} dpi, Erkennung auf {RapidOcr.Detector}");
 
         var pdf = new PdfiumPages();
@@ -76,12 +81,15 @@ static class Program
 
     static void Usage() => Console.WriteLine(
         $"""
-        corpus-ocr <verzeichnis> [--force] [--workers N] [--dpi {Scan.Dpi}]
+        corpus-ocr <verzeichnis> [--force] [--all] [--workers N] [--dpi {Scan.Dpi}]
 
         Liest jede .png/.jpg/.jpeg/.pdf unterhalb von <verzeichnis> wie die App
         (Raster, Reinigung, Begradigung, RapidOCR) und schreibt <name>.ocr.json
         daneben. Bereits erkannte Seiten werden übersprungen, ausser mit --force.
-        --dpi ist das Raster der PDF-Seiten; der Korpus aus tools/corpus wurde mit
+        Gelesen werden nur Scans: eine .pdf ist die Vorlage, aus der ein Scan
+        gemacht wurde, und wird übersprungen, solange sie nicht selbst einen
+        Scan benennt (x.pdf.scan.pdf). --all liest auch die Vorlagen. --dpi ist
+        das Raster der PDF-Seiten; der Korpus aus tools/corpus wurde mit
         --scale 3 = 288 dpi geschrieben und braucht dasselbe Raster.
         """);
 
@@ -89,7 +97,12 @@ static class Program
     // File.Exists per page: over a network share the round trips cost more than the bytes. Not
     // SearchOption.AllDirectories: a shared-folder driver can hand back "." and ".." as real
     // entries and append a NUL to every name.
-    static IEnumerable<string> Walk(string root, bool force)
+    // Only scans are read. A PDF below the corpus is the source a scan was made from - the
+    // clean raster of fixtures/dataset/2025/*/x.pdf, a page nobody hands in and tools/eval no
+    // longer scores, so reading it costs minutes per refresh and buys nothing. A PDF that is
+    // itself a scan says so in its name, and the page images of tools/corpus are scans
+    // throughout. --all reads the sources too, for measuring what the scanning costs.
+    static IEnumerable<string> Walk(string root, bool force, bool all)
     {
         var pending = new Stack<string>();
         pending.Push(root);
@@ -107,8 +120,13 @@ static class Program
                 else if (Extensions.Contains(Path.GetExtension(name).ToLowerInvariant())) pages.Add(name);
             }
             foreach (var name in pages)
-                if (force || !dumps.Contains(Path.GetFileNameWithoutExtension(name) + Dump.Suffix))
+                if ((all || !Source(name))
+                    && (force || !dumps.Contains(Path.GetFileNameWithoutExtension(name) + Dump.Suffix)))
                     yield return Path.Combine(dir, name);
         }
     }
+
+    static bool Source(string name) =>
+        Path.GetExtension(name).Equals(".pdf", StringComparison.OrdinalIgnoreCase)
+        && !name.Contains(Scanned, StringComparison.OrdinalIgnoreCase);
 }
