@@ -19,13 +19,12 @@
                         <TextBlock Text="Regeln"/>
                     </StackPanel>
                 </Button>
-                <Button Theme="{StaticResource SecondaryButton}" Click="Import">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
-                        <TextBlock Text="Importieren"/>
-                    </StackPanel>
+                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Importieren" Click="Import">
+                    <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
                 </Button>
-                <Button Content="Neue Prüfung" Theme="{StaticResource PrimaryButton}" Click="StartNew"/>
+                <Button Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Neue Prüfung" Click="StartNew">
+                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                </Button>
                 <Button Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
             </StackPanel>
             <TextBlock Text="Prüfungen" Theme="{StaticResource PageTitle}"/>

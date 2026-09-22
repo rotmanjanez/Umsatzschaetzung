@@ -3,8 +3,8 @@ using Avalonia;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Media;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -13,7 +13,7 @@ public sealed class SearchBox : Grid
     public static readonly StyledProperty<bool> NoMatchesProperty =
         AvaloniaProperty.Register<SearchBox, bool>(nameof(NoMatches));
 
-    readonly TextBox box = new() { Padding = new Thickness(12, 5, 30, 6) };
+    readonly TextBox box = new() { Padding = new Thickness(12, 5, 6, 6) };
     readonly TextBlock hint = new()
     {
         Text = "  Filtern",
@@ -23,14 +23,10 @@ public sealed class SearchBox : Grid
     };
     readonly Button clear = new()
     {
-        Content = "✕",
         IsVisible = false,
-        Background = Brushes.Transparent,
-        BorderThickness = new Thickness(0),
-        Padding = new Thickness(6, 0),
-        Margin = new Thickness(0, 1, 2, 1),
-        HorizontalAlignment = HorizontalAlignment.Right,
-        VerticalAlignment = VerticalAlignment.Stretch,
+        Focusable = false,
+        Cursor = new Cursor(StandardCursorType.Hand),
+        Padding = new Thickness(8, 4),
     };
     readonly List<(DataGridCollectionView View, IEnumerable Source)> views = [];
 
@@ -38,10 +34,14 @@ public sealed class SearchBox : Grid
     {
         Width = 220;
         hint[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
+        var icon = new PathIcon { Width = 10, Height = 10 };
+        icon[!PathIcon.DataProperty] = new DynamicResourceExtension("ClearIcon");
+        clear.Content = icon;
+        clear[!ThemeProperty] = new DynamicResourceExtension("IconButton");
         ToolTip.SetTip(clear, "Filter zurücksetzen");
+        box.InnerRightContent = clear;
         Children.Add(box);
         Children.Add(hint);
-        Children.Add(clear);
         box.TextChanged += (_, _) =>
         {
             foreach (var v in views) v.View.Refresh();

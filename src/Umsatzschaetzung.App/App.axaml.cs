@@ -16,7 +16,11 @@ public partial class App : Application
 {
     readonly List<IDisposable> owned = [];
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+        Headers.Register();
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
