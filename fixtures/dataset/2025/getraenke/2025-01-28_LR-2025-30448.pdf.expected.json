@@ -71,7 +71,7 @@
       "lineNet": 3180,
       "vat": 1900,
       "gtin": "4001234000210",
-      "expectedIngredientId": "ing.bier.weizen",
+      "expectedIngredientId": "ing.flaschenbier",
       "expectedFactor": 10000
     },
     {

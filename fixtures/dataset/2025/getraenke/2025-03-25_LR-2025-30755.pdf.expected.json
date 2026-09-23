@@ -57,7 +57,7 @@
       "lineNet": 2780,
       "vat": 1900,
       "gtin": "4001234000227",
-      "expectedIngredientId": "ing.bier.alkoholfrei",
+      "expectedIngredientId": "ing.alkoholfreies.bier",
       "expectedFactor": 7920
     },
     {

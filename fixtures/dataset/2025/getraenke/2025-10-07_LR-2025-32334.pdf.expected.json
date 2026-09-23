@@ -101,7 +101,7 @@
       "lineNet": 1140,
       "vat": 1900,
       "gtin": "4004910000047",
-      "expectedIngredientId": "ing.apfelsaft",
+      "expectedIngredientId": "ing.fruchtsaft",
       "expectedFactor": 6000
     },
     {

@@ -28,7 +28,7 @@
       "lineNet": 4188,
       "vat": 700,
       "gtin": "4056489011231",
-      "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+      "expectedIngredientId": "ing.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -43,7 +43,7 @@
       "lineNet": 1580,
       "vat": 700,
       "gtin": "4056489011248",
-      "expectedIngredientId": "ing.kroketten",
+      "expectedIngredientId": "ing.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 1290,
       "vat": 700,
       "gtin": "4062300020368",
-      "expectedIngredientId": "ing.nudeln",
+      "expectedIngredientId": "ing.pasta",
       "expectedFactor": 5000
     },
     {
@@ -73,7 +73,7 @@
       "lineNet": 2079,
       "vat": 700,
       "gtin": "4062300031005",
-      "expectedIngredientId": "ing.panade",
+      "expectedIngredientId": "ing.paniermehl",
       "expectedFactor": 1000
     },
     {
@@ -88,7 +88,7 @@
       "lineNet": 10950,
       "vat": 700,
       "gtin": "4062300040991",
-      "expectedIngredientId": "ing.oel.fritteuse",
+      "expectedIngredientId": "ing.pflanzenoel",
       "expectedFactor": 10000
     },
     {
@@ -103,7 +103,7 @@
       "lineNet": 4320,
       "vat": 700,
       "gtin": "4062300052029",
-      "expectedIngredientId": "ing.mozzarella.abgetropft",
+      "expectedIngredientId": "ing.mozzarella",
       "expectedFactor": 1000
     },
     {

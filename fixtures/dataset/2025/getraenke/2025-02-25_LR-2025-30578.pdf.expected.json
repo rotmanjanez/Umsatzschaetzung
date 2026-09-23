@@ -86,7 +86,7 @@
       "lineNet": 5040,
       "vat": 1900,
       "gtin": "5449000011527",
-      "expectedIngredientId": "ing.limo.orange",
+      "expectedIngredientId": "ing.erfrischungsgetraenk",
       "expectedFactor": 4800
     },
     {

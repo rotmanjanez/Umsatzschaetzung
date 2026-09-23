@@ -28,7 +28,7 @@
       "lineNet": 7990,
       "vat": 1900,
       "gtin": "4009862310035",
-      "expectedIngredientId": "ing.korn",
+      "expectedIngredientId": "ing.spirituose",
       "expectedFactor": 700
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 19840,
       "vat": 1900,
       "gtin": "4067700010208",
-      "expectedIngredientId": "ing.kraeuterlikoer",
+      "expectedIngredientId": "ing.likoer",
       "expectedFactor": 700
     }
   ]

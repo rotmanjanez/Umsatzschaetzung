@@ -58,7 +58,7 @@
       "lineNet": 6960,
       "vat": 700,
       "gtin": "4006040032106",
-      "expectedIngredientId": "ing.kaese",
+      "expectedIngredientId": "ing.schnittkaese",
       "expectedFactor": 1000
     }
   ]

@@ -33,7 +33,7 @@
       "lineNet": 2900,
       "vat": 700,
       "gtin": "4056489011231",
-      "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+      "expectedIngredientId": "ing.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -48,7 +48,7 @@
       "lineNet": 3160,
       "vat": 700,
       "gtin": "4056489011248",
-      "expectedIngredientId": "ing.kroketten",
+      "expectedIngredientId": "ing.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -63,7 +63,7 @@
       "lineNet": 2268,
       "vat": 700,
       "gtin": "4062300031005",
-      "expectedIngredientId": "ing.panade",
+      "expectedIngredientId": "ing.paniermehl",
       "expectedFactor": 1000
     },
     {
@@ -78,7 +78,7 @@
       "lineNet": 7020,
       "vat": 700,
       "gtin": "4062300040991",
-      "expectedIngredientId": "ing.oel.fritteuse",
+      "expectedIngredientId": "ing.pflanzenoel",
       "expectedFactor": 10000
     },
     {
@@ -108,7 +108,7 @@
       "lineNet": 343,
       "vat": 700,
       "gtin": "4062300030527",
-      "expectedIngredientId": "ing.speisesalz",
+      "expectedIngredientId": "ing.gewuerzmischung",
       "expectedFactor": 500
     },
     {

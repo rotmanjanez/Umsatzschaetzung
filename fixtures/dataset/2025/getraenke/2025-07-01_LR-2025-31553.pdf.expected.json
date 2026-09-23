@@ -55,7 +55,7 @@
       "priceBaseQty": 1000,
       "lineNet": 33960,
       "vat": 1900,
-      "expectedIngredientId": "ing.bier.weizen.fass",
+      "expectedIngredientId": "ing.fassbier",
       "expectedFactor": 30000
     },
     {
@@ -100,7 +100,7 @@
       "lineNet": 8400,
       "vat": 1900,
       "gtin": "5449000011527",
-      "expectedIngredientId": "ing.limo.orange",
+      "expectedIngredientId": "ing.erfrischungsgetraenk",
       "expectedFactor": 4800
     },
     {
@@ -130,7 +130,7 @@
       "lineNet": 1140,
       "vat": 1900,
       "gtin": "4004910000047",
-      "expectedIngredientId": "ing.apfelsaft",
+      "expectedIngredientId": "ing.fruchtsaft",
       "expectedFactor": 6000
     },
     {

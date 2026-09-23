@@ -27,7 +27,7 @@
       "priceBaseQty": 1000,
       "lineNet": 6804,
       "vat": 700,
-      "expectedIngredientId": "ing.schwein.schnitzel",
+      "expectedIngredientId": "ing.schweinefleisch",
       "expectedFactor": 1000
     },
     {
@@ -55,7 +55,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4346,
       "vat": 700,
-      "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+      "expectedIngredientId": "ing.bratwurst",
       "expectedFactor": 1
     }
   ]

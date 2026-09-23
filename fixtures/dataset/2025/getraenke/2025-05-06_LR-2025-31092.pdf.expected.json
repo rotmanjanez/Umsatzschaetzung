@@ -71,7 +71,7 @@
       "lineNet": 1590,
       "vat": 1900,
       "gtin": "4001234000210",
-      "expectedIngredientId": "ing.bier.weizen",
+      "expectedIngredientId": "ing.flaschenbier",
       "expectedFactor": 10000
     },
     {
@@ -101,7 +101,7 @@
       "lineNet": 1680,
       "vat": 1900,
       "gtin": "5449000011527",
-      "expectedIngredientId": "ing.limo.orange",
+      "expectedIngredientId": "ing.erfrischungsgetraenk",
       "expectedFactor": 4800
     },
     {

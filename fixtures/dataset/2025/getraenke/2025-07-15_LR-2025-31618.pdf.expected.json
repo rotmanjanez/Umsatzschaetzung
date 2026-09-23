@@ -86,7 +86,7 @@
       "lineNet": 6720,
       "vat": 1900,
       "gtin": "5449000011527",
-      "expectedIngredientId": "ing.limo.orange",
+      "expectedIngredientId": "ing.erfrischungsgetraenk",
       "expectedFactor": 4800
     },
     {
@@ -116,7 +116,7 @@
       "lineNet": 3420,
       "vat": 1900,
       "gtin": "4004910000047",
-      "expectedIngredientId": "ing.apfelsaft",
+      "expectedIngredientId": "ing.fruchtsaft",
       "expectedFactor": 6000
     },
     {

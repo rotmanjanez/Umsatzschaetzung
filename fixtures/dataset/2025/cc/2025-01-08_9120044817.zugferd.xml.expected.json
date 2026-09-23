@@ -30,7 +30,7 @@
       "priceBaseQty": 1000,
       "lineNet": 8376,
       "vat": 700,
-      "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+      "expectedIngredientId": "ing.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -42,7 +42,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4740,
       "vat": 700,
-      "expectedIngredientId": "ing.kroketten",
+      "expectedIngredientId": "ing.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -54,7 +54,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1323,
       "vat": 700,
-      "expectedIngredientId": "ing.panade",
+      "expectedIngredientId": "ing.paniermehl",
       "expectedFactor": 1000
     },
     {
@@ -66,7 +66,7 @@
       "priceBaseQty": 1000,
       "lineNet": 6870,
       "vat": 700,
-      "expectedIngredientId": "ing.oel.fritteuse",
+      "expectedIngredientId": "ing.pflanzenoel",
       "expectedFactor": 10000
     },
     {
@@ -102,7 +102,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2880,
       "vat": 700,
-      "expectedIngredientId": "ing.mozzarella.abgetropft",
+      "expectedIngredientId": "ing.mozzarella",
       "expectedFactor": 1000
     },
     {

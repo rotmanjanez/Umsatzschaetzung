@@ -369,7 +369,7 @@
      "lineNet": 1390,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -414,7 +414,7 @@
      "lineNet": 2280,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -496,7 +496,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10574,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -524,7 +524,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9828,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -570,7 +570,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -585,7 +585,7 @@
      "lineNet": 4740,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -600,7 +600,7 @@
      "lineNet": 1323,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -615,7 +615,7 @@
      "lineNet": 6870,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -660,7 +660,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -1040,7 +1040,7 @@
      "lineNet": 2780,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -1194,7 +1194,7 @@
      "priceBaseQty": 1000,
      "lineNet": 11280,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -1222,7 +1222,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7673,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -1250,7 +1250,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2958,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -1264,7 +1264,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2125,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -1278,7 +1278,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9906,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -1540,7 +1540,7 @@
      "lineNet": 3180,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -1694,7 +1694,7 @@
      "priceBaseQty": 1000,
      "lineNet": 11383,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -1708,7 +1708,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4600,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -1736,7 +1736,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6435,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -1764,7 +1764,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2311,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -1778,7 +1778,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4368,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -1824,7 +1824,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -1839,7 +1839,7 @@
      "lineNet": 1580,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -1869,7 +1869,7 @@
      "lineNet": 3870,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -1884,7 +1884,7 @@
      "lineNet": 6570,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -1929,7 +1929,7 @@
      "lineNet": 294,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -1944,7 +1944,7 @@
      "lineNet": 5340,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -1959,7 +1959,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -2059,7 +2059,7 @@
      "lineNet": 17010,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 1000
     },
     {
@@ -2074,7 +2074,7 @@
      "lineNet": 7920,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 500
     }
    ]
@@ -2282,7 +2282,7 @@
      "lineNet": 4770,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -2297,7 +2297,7 @@
      "lineNet": 2780,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -2327,7 +2327,7 @@
      "lineNet": 3360,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -2357,7 +2357,7 @@
      "lineNet": 2280,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -2495,7 +2495,7 @@
      "priceBaseQty": 1000,
      "lineNet": 13133,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -2509,7 +2509,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5946,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -2537,7 +2537,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3841,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -2565,7 +2565,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2894,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -2579,7 +2579,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2958,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -2593,7 +2593,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8580,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -2607,7 +2607,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2622,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -2621,7 +2621,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1415,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -3210,7 +3210,7 @@
      "lineNet": 5040,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -3307,7 +3307,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5495,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -3335,7 +3335,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8112,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -3381,7 +3381,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -3411,7 +3411,7 @@
      "lineNet": 3870,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -3426,7 +3426,7 @@
      "lineNet": 1701,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -3441,7 +3441,7 @@
      "lineNet": 8760,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -3486,7 +3486,7 @@
      "lineNet": 245,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -3501,7 +3501,7 @@
      "lineNet": 4450,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -3516,7 +3516,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -3761,7 +3761,7 @@
      "lineNet": 6360,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -3806,7 +3806,7 @@
      "lineNet": 2280,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -3930,7 +3930,7 @@
      "priceBaseQty": 1000,
      "lineNet": 14360,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -3958,7 +3958,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9653,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -3986,7 +3986,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2372,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -4000,7 +4000,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2657,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -4014,7 +4014,7 @@
      "priceBaseQty": 1000,
      "lineNet": 13416,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -4290,7 +4290,7 @@
      "lineNet": 2780,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -4444,7 +4444,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10489,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -4458,7 +4458,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3937,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -4486,7 +4486,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3540,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -4500,7 +4500,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3895,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -4514,7 +4514,7 @@
      "priceBaseQty": 1000,
      "lineNet": 12636,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -4528,7 +4528,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3312,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     }
    ]
@@ -4574,7 +4574,7 @@
      "lineNet": 5584,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -4589,7 +4589,7 @@
      "lineNet": 4740,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -4619,7 +4619,7 @@
      "lineNet": 1290,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -4634,7 +4634,7 @@
      "lineNet": 1323,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -4649,7 +4649,7 @@
      "lineNet": 13140,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -4694,7 +4694,7 @@
      "lineNet": 392,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -4709,7 +4709,7 @@
      "lineNet": 3560,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -4724,7 +4724,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -5199,7 +5199,7 @@
      "priceBaseQty": 1000,
      "lineNet": 25470,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.weizen.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -5229,7 +5229,7 @@
      "lineNet": 6360,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -5244,7 +5244,7 @@
      "lineNet": 4170,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -5274,7 +5274,7 @@
      "lineNet": 6720,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -5304,7 +5304,7 @@
      "lineNet": 4560,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -5442,7 +5442,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10799,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -5456,7 +5456,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4960,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -5484,7 +5484,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9573,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -5512,7 +5512,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1180,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -5526,7 +5526,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3831,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -5540,7 +5540,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6864,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -5554,7 +5554,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8280,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -5568,7 +5568,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2588,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -5735,7 +5735,7 @@
      "lineNet": 6960,
      "vat": 700,
      "gtin": "4006040032106",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     }
    ]
@@ -5805,7 +5805,7 @@
      "lineNet": 9540,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -5820,7 +5820,7 @@
      "lineNet": 5560,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -5865,7 +5865,7 @@
      "lineNet": 1140,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -5947,7 +5947,7 @@
      "priceBaseQty": 1000,
      "lineNet": 11614,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -5975,7 +5975,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5382,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -6016,7 +6016,7 @@
      "lineNet": 4188,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -6031,7 +6031,7 @@
      "lineNet": 1580,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -6046,7 +6046,7 @@
      "lineNet": 1290,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -6061,7 +6061,7 @@
      "lineNet": 2079,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -6076,7 +6076,7 @@
      "lineNet": 10950,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -6091,7 +6091,7 @@
      "lineNet": 4320,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -6147,7 +6147,7 @@
      "lineNet": 6392,
      "vat": 1900,
      "gtin": "4009862310035",
-     "expectedIngredientId": "ing.korn",
+     "expectedIngredientId": "ing.spirituose",
      "expectedFactor": 700
     },
     {
@@ -6177,7 +6177,7 @@
      "lineNet": 3870,
      "vat": 1900,
      "gtin": "8501110080231",
-     "expectedIngredientId": "ing.rum.braun",
+     "expectedIngredientId": "ing.rum",
      "expectedFactor": 700
     },
     {
@@ -6192,7 +6192,7 @@
      "lineNet": 13640,
      "vat": 1900,
      "gtin": "4067700010208",
-     "expectedIngredientId": "ing.kraeuterlikoer",
+     "expectedIngredientId": "ing.likoer",
      "expectedFactor": 700
     }
    ]
@@ -6276,7 +6276,7 @@
      "lineNet": 1590,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -6306,7 +6306,7 @@
      "lineNet": 1680,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -6445,7 +6445,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7351,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -6459,7 +6459,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3088,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -6501,7 +6501,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4778,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -6515,7 +6515,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10660,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -6529,7 +6529,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3623,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -6777,7 +6777,7 @@
      "lineNet": 1590,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -6807,7 +6807,7 @@
      "lineNet": 3360,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -6837,7 +6837,7 @@
      "lineNet": 1140,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -6961,7 +6961,7 @@
      "priceBaseQty": 1000,
      "lineNet": 14800,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -6989,7 +6989,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9158,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -7017,7 +7017,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2826,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -7031,7 +7031,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4264,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -7045,7 +7045,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2318,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -7091,7 +7091,7 @@
      "lineNet": 8376,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -7106,7 +7106,7 @@
      "lineNet": 3160,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -7136,7 +7136,7 @@
      "lineNet": 2580,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -7151,7 +7151,7 @@
      "lineNet": 1134,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -7166,7 +7166,7 @@
      "lineNet": 10950,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -7211,7 +7211,7 @@
      "lineNet": 245,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -7226,7 +7226,7 @@
      "lineNet": 2670,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -7241,7 +7241,7 @@
      "lineNet": 2160,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -7745,7 +7745,7 @@
      "priceBaseQty": 1000,
      "lineNet": 25470,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.weizen.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -7775,7 +7775,7 @@
      "lineNet": 12720,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -7790,7 +7790,7 @@
      "lineNet": 6950,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -7820,7 +7820,7 @@
      "lineNet": 1680,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -7850,7 +7850,7 @@
      "lineNet": 4560,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -7988,7 +7988,7 @@
      "priceBaseQty": 1000,
      "lineNet": 18460,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -8002,7 +8002,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3720,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -8044,7 +8044,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2360,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -8058,7 +8058,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6643,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -8072,7 +8072,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5469,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -8086,7 +8086,7 @@
      "priceBaseQty": 1000,
      "lineNet": 22058,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -8100,7 +8100,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5796,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -8114,7 +8114,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4361,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -8256,7 +8256,7 @@
      "lineNet": 35530,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 1000
     },
     {
@@ -8271,7 +8271,7 @@
      "lineNet": 4950,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 500
     },
     {
@@ -8385,7 +8385,7 @@
      "lineNet": 6360,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -8400,7 +8400,7 @@
      "lineNet": 1390,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -8512,7 +8512,7 @@
      "priceBaseQty": 1000,
      "lineNet": 19030,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -8540,7 +8540,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9594,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -8586,7 +8586,7 @@
      "lineNet": 4188,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -8601,7 +8601,7 @@
      "lineNet": 4740,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -8631,7 +8631,7 @@
      "lineNet": 2268,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -8646,7 +8646,7 @@
      "lineNet": 13140,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -8691,7 +8691,7 @@
      "lineNet": 147,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -8706,7 +8706,7 @@
      "lineNet": 6230,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -8721,7 +8721,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -8821,7 +8821,7 @@
      "lineNet": 10387,
      "vat": 1900,
      "gtin": "4009862310035",
-     "expectedIngredientId": "ing.korn",
+     "expectedIngredientId": "ing.spirituose",
      "expectedFactor": 700
     },
     {
@@ -8866,7 +8866,7 @@
      "lineNet": 29760,
      "vat": 1900,
      "gtin": "4067700010208",
-     "expectedIngredientId": "ing.kraeuterlikoer",
+     "expectedIngredientId": "ing.likoer",
      "expectedFactor": 700
     }
    ]
@@ -8934,7 +8934,7 @@
      "priceBaseQty": 1000,
      "lineNet": 33960,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.weizen.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -8979,7 +8979,7 @@
      "lineNet": 8400,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -9009,7 +9009,7 @@
      "lineNet": 1140,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -9133,7 +9133,7 @@
      "priceBaseQty": 1000,
      "lineNet": 22290,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -9175,7 +9175,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5169,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -9189,7 +9189,7 @@
      "priceBaseQty": 1000,
      "lineNet": 18040,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -9203,7 +9203,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7935,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -9217,7 +9217,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1953,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -9508,7 +9508,7 @@
      "lineNet": 6720,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -9538,7 +9538,7 @@
      "lineNet": 3420,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -9662,7 +9662,7 @@
      "priceBaseQty": 1000,
      "lineNet": 18745,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -9676,7 +9676,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9821,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -9704,7 +9704,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3835,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -9718,7 +9718,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6396,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -9732,7 +9732,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6624,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -9746,7 +9746,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3222,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -9792,7 +9792,7 @@
      "lineNet": 7250,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -9807,7 +9807,7 @@
      "lineNet": 1580,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -9837,7 +9837,7 @@
      "lineNet": 3870,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -9852,7 +9852,7 @@
      "lineNet": 1323,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -9867,7 +9867,7 @@
      "lineNet": 8760,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -9912,7 +9912,7 @@
      "lineNet": 245,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -9927,7 +9927,7 @@
      "lineNet": 4450,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -9942,7 +9942,7 @@
      "lineNet": 3600,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -10509,7 +10509,7 @@
      "priceBaseQty": 1000,
      "lineNet": 42450,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.weizen.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -10539,7 +10539,7 @@
      "lineNet": 6360,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -10554,7 +10554,7 @@
      "lineNet": 1390,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -10584,7 +10584,7 @@
      "lineNet": 5040,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -10614,7 +10614,7 @@
      "lineNet": 4560,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -10752,7 +10752,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16300,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -10766,7 +10766,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6715,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -10808,7 +10808,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2655,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -10822,7 +10822,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4095,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -10836,7 +10836,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3490,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -10850,7 +10850,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7216,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -10864,7 +10864,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3243,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -10878,7 +10878,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4706,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -11143,7 +11143,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8490,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.weizen.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -11203,7 +11203,7 @@
      "lineNet": 5700,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -11285,7 +11285,7 @@
      "priceBaseQty": 1000,
      "lineNet": 11206,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -11313,7 +11313,7 @@
      "priceBaseQty": 1000,
      "lineNet": 19680,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -11359,7 +11359,7 @@
      "lineNet": 2900,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -11374,7 +11374,7 @@
      "lineNet": 3160,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -11389,7 +11389,7 @@
      "lineNet": 2268,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -11404,7 +11404,7 @@
      "lineNet": 7020,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -11434,7 +11434,7 @@
      "lineNet": 343,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -11519,7 +11519,7 @@
      "lineNet": 18810,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 1000
     },
     {
@@ -11534,7 +11534,7 @@
      "lineNet": 3960,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 500
     },
     {
@@ -11762,7 +11762,7 @@
      "lineNet": 4170,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -11792,7 +11792,7 @@
      "lineNet": 6720,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -11822,7 +11822,7 @@
      "lineNet": 3420,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -11946,7 +11946,7 @@
      "priceBaseQty": 1000,
      "lineNet": 22926,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -11960,7 +11960,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8457,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -11988,7 +11988,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9940,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -12016,7 +12016,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2798,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -12030,7 +12030,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8528,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -12618,7 +12618,7 @@
      "lineNet": 4170,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -12648,7 +12648,7 @@
      "lineNet": 3360,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -12678,7 +12678,7 @@
      "lineNet": 3420,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -12802,7 +12802,7 @@
      "priceBaseQty": 1000,
      "lineNet": 12795,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -12816,7 +12816,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5530,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -12844,7 +12844,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3387,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -12858,7 +12858,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10086,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -12872,7 +12872,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2898,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     },
     {
@@ -12886,7 +12886,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1753,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -12932,7 +12932,7 @@
      "lineNet": 8700,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -12947,7 +12947,7 @@
      "lineNet": 3160,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -12977,7 +12977,7 @@
      "lineNet": 2580,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -12992,7 +12992,7 @@
      "lineNet": 2268,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -13007,7 +13007,7 @@
      "lineNet": 11700,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -13052,7 +13052,7 @@
      "lineNet": 196,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -13067,7 +13067,7 @@
      "lineNet": 7120,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -13082,7 +13082,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -13266,7 +13266,7 @@
      "priceBaseQty": 1000,
      "lineNet": 16980,
      "vat": 1900,
-     "expectedIngredientId": "ing.bier.weizen.fass",
+     "expectedIngredientId": "ing.fassbier",
      "expectedFactor": 30000
     },
     {
@@ -13296,7 +13296,7 @@
      "lineNet": 3180,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -13311,7 +13311,7 @@
      "lineNet": 1390,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -13341,7 +13341,7 @@
      "lineNet": 6720,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -13371,7 +13371,7 @@
      "lineNet": 2280,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -13509,7 +13509,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10504,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -13523,7 +13523,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6820,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -13551,7 +13551,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7425,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -13579,7 +13579,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2785,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -13593,7 +13593,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4095,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -13607,7 +13607,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3763,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -13621,7 +13621,7 @@
      "priceBaseQty": 1000,
      "lineNet": 15252,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -13635,7 +13635,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1725,
      "vat": 700,
-     "expectedIngredientId": "ing.leberkaese.gebacken",
+     "expectedIngredientId": "ing.leberkaese",
      "expectedFactor": 1000
     }
    ]
@@ -13772,7 +13772,7 @@
      "lineNet": 14382,
      "vat": 1900,
      "gtin": "4009862310035",
-     "expectedIngredientId": "ing.korn",
+     "expectedIngredientId": "ing.spirituose",
      "expectedFactor": 700
     },
     {
@@ -13817,7 +13817,7 @@
      "lineNet": 9030,
      "vat": 1900,
      "gtin": "8501110080231",
-     "expectedIngredientId": "ing.rum.braun",
+     "expectedIngredientId": "ing.rum",
      "expectedFactor": 700
     },
     {
@@ -13832,7 +13832,7 @@
      "lineNet": 22320,
      "vat": 1900,
      "gtin": "4067700010208",
-     "expectedIngredientId": "ing.kraeuterlikoer",
+     "expectedIngredientId": "ing.likoer",
      "expectedFactor": 700
     },
     {
@@ -13847,7 +13847,7 @@
      "lineNet": 3380,
      "vat": 1900,
      "gtin": "4067700012516",
-     "expectedIngredientId": "ing.kraeuterlikoer",
+     "expectedIngredientId": "ing.likoer",
      "expectedFactor": 480
     },
     {
@@ -13990,7 +13990,7 @@
      "lineNet": 1140,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -14072,7 +14072,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6804,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -14100,7 +14100,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4346,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -14146,7 +14146,7 @@
      "lineNet": 4350,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -14161,7 +14161,7 @@
      "lineNet": 3160,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -14191,7 +14191,7 @@
      "lineNet": 3870,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -14206,7 +14206,7 @@
      "lineNet": 1512,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -14221,7 +14221,7 @@
      "lineNet": 14040,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -14266,7 +14266,7 @@
      "lineNet": 1780,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -14281,7 +14281,7 @@
      "lineNet": 2880,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -14493,7 +14493,7 @@
      "lineNet": 6360,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -14508,7 +14508,7 @@
      "lineNet": 1390,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -14538,7 +14538,7 @@
      "lineNet": 6720,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -14677,7 +14677,7 @@
      "priceBaseQty": 1000,
      "lineNet": 14473,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -14719,7 +14719,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2030,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -14733,7 +14733,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4477,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -14747,7 +14747,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1920,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -14761,7 +14761,7 @@
      "priceBaseQty": 1000,
      "lineNet": 9758,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -15334,7 +15334,7 @@
      "lineNet": 1680,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -15473,7 +15473,7 @@
      "priceBaseQty": 1000,
      "lineNet": 13214,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -15487,7 +15487,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3869,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -15529,7 +15529,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4586,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -15543,7 +15543,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5073,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -15557,7 +15557,7 @@
      "priceBaseQty": 1000,
      "lineNet": 11562,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -15603,7 +15603,7 @@
      "lineNet": 4350,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -15618,7 +15618,7 @@
      "lineNet": 4740,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -15648,7 +15648,7 @@
      "lineNet": 1290,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -15663,7 +15663,7 @@
      "lineNet": 2079,
      "vat": 700,
      "gtin": "4062300031005",
-     "expectedIngredientId": "ing.panade",
+     "expectedIngredientId": "ing.paniermehl",
      "expectedFactor": 1000
     },
     {
@@ -15678,7 +15678,7 @@
      "lineNet": 9360,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -15723,7 +15723,7 @@
      "lineNet": 343,
      "vat": 700,
      "gtin": "4062300030527",
-     "expectedIngredientId": "ing.speisesalz",
+     "expectedIngredientId": "ing.gewuerzmischung",
      "expectedFactor": 500
     },
     {
@@ -15738,7 +15738,7 @@
      "lineNet": 7120,
      "vat": 700,
      "gtin": "4062300052012",
-     "expectedIngredientId": "ing.kaese",
+     "expectedIngredientId": "ing.schnittkaese",
      "expectedFactor": 1000
     },
     {
@@ -15753,7 +15753,7 @@
      "lineNet": 3600,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -15858,7 +15858,7 @@
      "lineNet": 41800,
      "vat": 700,
      "gtin": "4260123450012",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 1000
     },
     {
@@ -15873,7 +15873,7 @@
      "lineNet": 7920,
      "vat": 700,
      "gtin": "4260123450029",
-     "expectedIngredientId": "ing.kaffee.geroestet",
+     "expectedIngredientId": "ing.kaffee",
      "expectedFactor": 500
     },
     {
@@ -15987,7 +15987,7 @@
      "lineNet": 1590,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -16002,7 +16002,7 @@
      "lineNet": 5560,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -16032,7 +16032,7 @@
      "lineNet": 6720,
      "vat": 1900,
      "gtin": "5449000011527",
-     "expectedIngredientId": "ing.limo.orange",
+     "expectedIngredientId": "ing.erfrischungsgetraenk",
      "expectedFactor": 4800
     },
     {
@@ -16062,7 +16062,7 @@
      "lineNet": 2280,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -16200,7 +16200,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6913,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -16214,7 +16214,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3187,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -16242,7 +16242,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3990,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -16270,7 +16270,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2867,
      "vat": 700,
-     "expectedIngredientId": "ing.speck",
+     "expectedIngredientId": "ing.schinken",
      "expectedFactor": 1000
     },
     {
@@ -16284,7 +16284,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3349,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -16298,7 +16298,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4241,
      "vat": 700,
-     "expectedIngredientId": "ing.haehnchen.schenkel",
+     "expectedIngredientId": "ing.haehnchenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -16312,7 +16312,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4674,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -16326,7 +16326,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4692,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     }
    ]
@@ -16630,7 +16630,7 @@
      "lineNet": 11130,
      "vat": 1900,
      "gtin": "4001234000210",
-     "expectedIngredientId": "ing.bier.weizen",
+     "expectedIngredientId": "ing.flaschenbier",
      "expectedFactor": 10000
     },
     {
@@ -16675,7 +16675,7 @@
      "lineNet": 4560,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -16757,7 +16757,7 @@
      "priceBaseQty": 1000,
      "lineNet": 17317,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -16785,7 +16785,7 @@
      "priceBaseQty": 1000,
      "lineNet": 10414,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     }
    ]
@@ -16831,7 +16831,7 @@
      "lineNet": 7250,
      "vat": 700,
      "gtin": "4056489011231",
-     "expectedIngredientId": "ing.pommes.frites.tiefgekuehlt",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -16846,7 +16846,7 @@
      "lineNet": 3160,
      "vat": 700,
      "gtin": "4056489011248",
-     "expectedIngredientId": "ing.kroketten",
+     "expectedIngredientId": "ing.pommes.frites",
      "expectedFactor": 10000
     },
     {
@@ -16876,7 +16876,7 @@
      "lineNet": 1290,
      "vat": 700,
      "gtin": "4062300020368",
-     "expectedIngredientId": "ing.nudeln",
+     "expectedIngredientId": "ing.pasta",
      "expectedFactor": 5000
     },
     {
@@ -16891,7 +16891,7 @@
      "lineNet": 7020,
      "vat": 700,
      "gtin": "4062300040991",
-     "expectedIngredientId": "ing.oel.fritteuse",
+     "expectedIngredientId": "ing.pflanzenoel",
      "expectedFactor": 10000
     },
     {
@@ -16921,7 +16921,7 @@
      "lineNet": 1440,
      "vat": 700,
      "gtin": "4062300052029",
-     "expectedIngredientId": "ing.mozzarella.abgetropft",
+     "expectedIngredientId": "ing.mozzarella",
      "expectedFactor": 1000
     },
     {
@@ -16992,7 +16992,7 @@
      "lineNet": 7990,
      "vat": 1900,
      "gtin": "4009862310035",
-     "expectedIngredientId": "ing.korn",
+     "expectedIngredientId": "ing.spirituose",
      "expectedFactor": 700
     },
     {
@@ -17022,7 +17022,7 @@
      "lineNet": 19840,
      "vat": 1900,
      "gtin": "4067700010208",
-     "expectedIngredientId": "ing.kraeuterlikoer",
+     "expectedIngredientId": "ing.likoer",
      "expectedFactor": 700
     }
    ]
@@ -17106,7 +17106,7 @@
      "lineNet": 5560,
      "vat": 1900,
      "gtin": "4001234000227",
-     "expectedIngredientId": "ing.bier.alkoholfrei",
+     "expectedIngredientId": "ing.alkoholfreies.bier",
      "expectedFactor": 7920
     },
     {
@@ -17151,7 +17151,7 @@
      "lineNet": 5700,
      "vat": 1900,
      "gtin": "4004910000047",
-     "expectedIngredientId": "ing.apfelsaft",
+     "expectedIngredientId": "ing.fruchtsaft",
      "expectedFactor": 6000
     },
     {
@@ -17275,7 +17275,7 @@
      "priceBaseQty": 1000,
      "lineNet": 17124,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.schnitzel",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -17289,7 +17289,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3379,
      "vat": 700,
-     "expectedIngredientId": "ing.schwein.nacken",
+     "expectedIngredientId": "ing.schweinefleisch",
      "expectedFactor": 1000
     },
     {
@@ -17317,7 +17317,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3812,
      "vat": 700,
-     "expectedIngredientId": "ing.rind.gulasch",
+     "expectedIngredientId": "ing.rindfleisch",
      "expectedFactor": 1000
     },
     {
@@ -17331,7 +17331,7 @@
      "priceBaseQty": 1000,
      "lineNet": 8645,
      "vat": 700,
-     "expectedIngredientId": "ing.pute.brust",
+     "expectedIngredientId": "ing.putenfleisch",
      "expectedFactor": 1000
     },
     {
@@ -17345,7 +17345,7 @@
      "priceBaseQty": 1000,
      "lineNet": 14432,
      "vat": 700,
-     "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+     "expectedIngredientId": "ing.bratwurst",
      "expectedFactor": 1
     },
     {
@@ -17359,7 +17359,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6555,
      "vat": 700,
-     "expectedIngredientId": "ing.currywurst.kuechenfertig",
+     "expectedIngredientId": "ing.bruehwurst",
      "expectedFactor": 1
     }
    ]

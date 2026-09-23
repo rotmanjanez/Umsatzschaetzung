@@ -57,7 +57,7 @@
       "lineNet": 4170,
       "vat": 1900,
       "gtin": "4001234000227",
-      "expectedIngredientId": "ing.bier.alkoholfrei",
+      "expectedIngredientId": "ing.alkoholfreies.bier",
       "expectedFactor": 7920
     },
     {
@@ -87,7 +87,7 @@
       "lineNet": 6720,
       "vat": 1900,
       "gtin": "5449000011527",
-      "expectedIngredientId": "ing.limo.orange",
+      "expectedIngredientId": "ing.erfrischungsgetraenk",
       "expectedFactor": 4800
     },
     {
@@ -117,7 +117,7 @@
       "lineNet": 3420,
       "vat": 1900,
       "gtin": "4004910000047",
-      "expectedIngredientId": "ing.apfelsaft",
+      "expectedIngredientId": "ing.fruchtsaft",
       "expectedFactor": 6000
     },
     {

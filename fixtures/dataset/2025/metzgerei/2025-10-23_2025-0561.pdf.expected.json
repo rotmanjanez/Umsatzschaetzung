@@ -27,7 +27,7 @@
       "priceBaseQty": 1000,
       "lineNet": 14473,
       "vat": 700,
-      "expectedIngredientId": "ing.schwein.schnitzel",
+      "expectedIngredientId": "ing.schweinefleisch",
       "expectedFactor": 1000
     },
     {
@@ -69,7 +69,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2030,
       "vat": 700,
-      "expectedIngredientId": "ing.speck",
+      "expectedIngredientId": "ing.schinken",
       "expectedFactor": 1000
     },
     {
@@ -83,7 +83,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4477,
       "vat": 700,
-      "expectedIngredientId": "ing.pute.brust",
+      "expectedIngredientId": "ing.putenfleisch",
       "expectedFactor": 1000
     },
     {
@@ -97,7 +97,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1920,
       "vat": 700,
-      "expectedIngredientId": "ing.haehnchen.schenkel",
+      "expectedIngredientId": "ing.haehnchenfleisch",
       "expectedFactor": 1000
     },
     {
@@ -111,7 +111,7 @@
       "priceBaseQty": 1000,
       "lineNet": 9758,
       "vat": 700,
-      "expectedIngredientId": "ing.bratwurst.kuechenfertig",
+      "expectedIngredientId": "ing.bratwurst",
       "expectedFactor": 1
     }
   ]

@@ -71,7 +71,7 @@
       "lineNet": 6360,
       "vat": 1900,
       "gtin": "4001234000210",
-      "expectedIngredientId": "ing.bier.weizen",
+      "expectedIngredientId": "ing.flaschenbier",
       "expectedFactor": 10000
     },
     {
@@ -116,7 +116,7 @@
       "lineNet": 2280,
       "vat": 1900,
       "gtin": "4004910000047",
-      "expectedIngredientId": "ing.apfelsaft",
+      "expectedIngredientId": "ing.fruchtsaft",
       "expectedFactor": 6000
     },
     {
