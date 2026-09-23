@@ -1,4 +1,5 @@
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Calc;
 
@@ -21,6 +22,7 @@ public static class Normalize
         var inRecipe = RecipeIngredients(c, rs);
         var ex = new Excluded([], []);
         List<Flag> flags = [];
+        var estimated = new SortedDictionary<string, int>(StringComparer.Ordinal);
         IngredientUse Use(string id)
         {
             if (!uses.TryGetValue(id, out var u))
@@ -44,7 +46,7 @@ public static class Normalize
                     ex.Unused.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
                     continue;
                 }
-                if (Convert(line, m, unit) is not { } conv)
+                if (Convert(line, m, unit, ing.Piece) is not { } conv)
                 {
                     ex.Unmapped.Add(new UnmappedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet });
                     flags.Add(new Flag
@@ -76,10 +78,23 @@ public static class Normalize
                     UnitCode = line.UnitCode,
                     Unit = unit,
                     Factor = conv.Factor,
+                    Per = conv.Per,
+                    Source = conv.Source,
                     Qty = conv.Qty,
                     Net = line.LineNet,
                 });
+                if (conv.Source == FactorSource.Piece) estimated[ing.Id] = estimated.GetValueOrDefault(ing.Id) + 1;
             }
+        foreach (var (id, n) in estimated)
+        {
+            var ing = rs.Ingredients[id];
+            flags.Add(new Flag
+            {
+                Code = "piece_weight",
+                Message = $"„{ing.Name}“: {n} {(n == 1 ? "Position" : "Positionen")} über das Stückgewicht umgerechnet — "
+                    + $"1 Stk {ing.Name} ≈ {Format.Qty(ing.Piece!.Amount, ing.Piece.Unit)} (Richtwert der Zutat)",
+            });
+        }
         foreach (var u in uses.Values) u.Used = u.Bought;
         foreach (var e in c.Inventory)
         {
@@ -98,14 +113,10 @@ public static class Normalize
         return (uses, ex, flags);
     }
 
-    // Eine Rechnungsposition in der Rezepteinheit. Bei Gebinden und über Dimensionsgrenzen
-    // hinweg sagt nur der Faktor der Zuordnung, wie viel drin ist; sonst rechnet die
-    // Einheitentabelle -- 2 kg sind 2.000 g, ohne dass jemand etwas pflegen muss.
-    static (long Qty, long Factor)? Convert(InvoiceLine line, ArticleMapping m, Unit unit)
-    {
-        if (Units.Lookup(line.UnitCode) is { Container: false } u && u.Base == unit)
-            return (line.Quantity * u.Factor / 1000, 0);
-        if (m.Factor is not { } factor) return null;
-        return (line.Quantity * factor / 1000, factor);
-    }
+    // Eine Rechnungsposition in der Rezepteinheit. 2 kg sind 2.000 g, ohne dass jemand etwas
+    // pflegen muss; Gebinde und Dimensionswechsel rechnet der Faktor, den Factors findet.
+    static (long Qty, long Factor, long Per, FactorSource Source)? Convert(InvoiceLine line, ArticleMapping m, Unit unit, Piece? piece) =>
+        Factors.Of(unit, piece, line.UnitCode, PackSize.Read(line.Name), m.Factor) is { } f
+            ? (Factors.Qty(line.Quantity, line.UnitCode, f), f.Factor, f.Per, f.Source)
+            : null;
 }

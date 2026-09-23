@@ -79,7 +79,7 @@ public class RuleStoreTests
     static IRuleEntity Full(string kind) => kind switch
     {
         "category" => new Category { Id = "e", Name = "Café & Bar", Gewerbe = ["561", "56101.0"], Sparte = Sparte.Speisen, Meta = Stamped() },
-        "ingredient" => new Ingredient { Id = "e", Name = "Gouda", CategoryId = "cat.x", Aliases = ["Schnittkäse", "Käse jung"], Meta = Stamped() },
+        "ingredient" => new Ingredient { Id = "e", Name = "Gouda", CategoryId = "cat.x", Aliases = ["Schnittkäse", "Käse jung"], Piece = new(250, Unit.G), Meta = Stamped() },
         "mapping" => new ArticleMapping
         {
             Id = "e", SupplierName = "Rheinland", SupplierArticleId = "31090", Gtin = "4001234567890", Name = "Pils Fass",
@@ -253,6 +253,41 @@ public class RuleStoreTests
     }
 
     [Fact]
+    public void ASeedPieceWeightFillsOnlyAnIngredientWithoutOne()
+    {
+        using var tmp = new TempDir();
+        var store = Open(tmp);
+        store.Save(new Ingredient { Id = "ing.gurke", Name = "Gurken" });
+        store.Save(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(55, Unit.G) });
+        var seed = TestData.Seed();
+        seed.Put(new Ingredient { Id = "ing.gurke", Name = "Gurke", Piece = new(400, Unit.G) });
+        seed.Put(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(60, Unit.G) });
+
+        var rs = new RuleStore(tmp.Path, seed).Load();
+
+        Assert.Equal((new Piece(400, Unit.G), "Gurken"), (rs.Ingredients["ing.gurke"].Piece, rs.Ingredients["ing.gurke"].Name));
+        Assert.Equal(new Piece(55, Unit.G), rs.Ingredients["ing.ei"].Piece);
+        Assert.Equal(2, rs.Version);
+    }
+
+    [Fact]
+    public void AStoreFromBeforePieceWeightsLearnsThemFromTheSeed()
+    {
+        using var tmp = new TempDir();
+        Open(tmp).Save(new Ingredient { Id = "ing.gurke", Name = "Gurken" });
+        var file = tmp.Sub("rules.db");
+        var schema = Sql.UserVersion(file);
+        Sql.Exec(file, $"ALTER TABLE ingredient DROP COLUMN piece_unit; ALTER TABLE ingredient DROP COLUMN piece_amount; PRAGMA user_version = {schema - 2}");
+        var seed = TestData.Seed();
+        seed.Put(new Ingredient { Id = "ing.gurke", Name = "Gurken", Piece = new(400, Unit.Ml) });
+
+        var rs = new RuleStore(tmp.Path, seed).Load();
+
+        Assert.Equal(schema, Sql.UserVersion(file));
+        Assert.Equal(new Piece(400, Unit.Ml), rs.Ingredients["ing.gurke"].Piece);
+    }
+
+    [Fact]
     public void ReopeningRunsNoMigrationTwice()
     {
         using var tmp = new TempDir();
@@ -276,7 +311,8 @@ public class RuleStoreTests
         Open(tmp).Save(new Ingredient { Id = "ing.x", Name = "X" });
         var file = tmp.Sub("rules.db");
         var schema = Sql.UserVersion(file);
-        Sql.Exec(file, "ALTER TABLE ingredient DROP COLUMN aliases; PRAGMA user_version = 1");
+        Sql.Exec(file, "ALTER TABLE ingredient DROP COLUMN aliases; ALTER TABLE ingredient DROP COLUMN piece_unit; "
+            + "ALTER TABLE ingredient DROP COLUMN piece_amount; PRAGMA user_version = 1");
 
         var store = Open(tmp);
         var rs = store.Save(new Ingredient { Id = "ing.y", Name = "Y", Aliases = ["Ypsilon"] });

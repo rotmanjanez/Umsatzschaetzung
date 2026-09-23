@@ -57,6 +57,8 @@ public static class RuleCheck
         if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Zutat: Name darf nicht leer sein");
         if (e.CategoryId != "" && !rs.Categories.ContainsKey(e.CategoryId))
             throw new RulesException($"Zutat \"{e.Name}\": Kategorie \"{e.CategoryId}\" existiert nicht");
+        if (e.Piece is { } p && (p.Amount <= 0 || p.Unit == Unit.Piece))
+            throw new RulesException($"Zutat \"{e.Name}\": das Stückgewicht muss größer als 0 sein und in g oder ml gelten");
     }
 
     static void ValidateMapping(RuleSet rs, ArticleMapping e)

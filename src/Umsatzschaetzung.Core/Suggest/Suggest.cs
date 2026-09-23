@@ -63,7 +63,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             .Select(s => (Confidence: encoder.Confidence(s.Value), Ingredient: rs.Ingredients[s.Key]))
             .Where(c => c.Confidence >= Floor)
             .Select(c => new Suggestion(
-                Mapping(supplier, line, c.Ingredient.Id, Factor(pack, line.UnitCode, Scale.Of(rs, c.Ingredient.Id))),
+                Mapping(supplier, line, c.Ingredient.Id, Packed(rs, c.Ingredient, line.UnitCode, pack)),
                 c.Confidence,
                 OriginKind.Encoder))
             .ToList();
@@ -192,18 +192,9 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         return m;
     }
 
-    public static long? Factor(RuleSet rs, string ingredientId, InvoiceLine line) =>
-        Factor(PackSize.Read(line.Name), line.UnitCode, Scale.Of(rs, ingredientId));
-
-    // Der Inhalt eines Gebindes in der Rezepteinheit, aus der Packungsangabe in der
-    // Bezeichnung. Null heißt: entweder rechnet die Einheitentabelle ohnehin um, oder
-    // die Zeile braucht einen Faktor, den nur ein Mensch kennt.
-    public static long? Factor(Pack? pack, string unitCode, Unit? recipeUnit)
-    {
-        if (recipeUnit is not { } unit) return null;
-        if (Units.Lookup(unitCode) is { Container: false } u && u.Base == unit) return null;
-        if (pack is not { } p) return null;
-        if (unit == Unit.Piece) return p.Base == Unit.Piece ? p.Count : null;
-        return p.Base == unit || p.Base is null ? p.Count * p.Size : null;
-    }
+    // Only a factor read from the article name is kept with the mapping; one from the
+    // ingredient's piece weight is looked up at calculation time, so correcting the weight
+    // corrects every case.
+    static long? Packed(RuleSet rs, Ingredient ing, string unitCode, Pack? pack) =>
+        Factors.Of(Scale.Of(rs, ing.Id), ing.Piece, unitCode, pack, null) is (var f, _, FactorSource.Pack) ? f : null;
 }

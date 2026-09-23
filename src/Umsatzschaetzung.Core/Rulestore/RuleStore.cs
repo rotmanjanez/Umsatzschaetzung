@@ -80,6 +80,8 @@ public sealed class RuleStore
             'cat.shisha.bar', 'cat.tabakwaren.und.e.zigaretten', 'cat.tattoo.und.piercing', 'cat.tierbedarf.und.tierpflege')
         """,
         "UPDATE ingredient SET name = 'Ausstattung und Bedarf' WHERE id = 'ing.nonfood' AND name = 'Nonfood'",
+        "ALTER TABLE ingredient ADD COLUMN piece_amount INTEGER",
+        "ALTER TABLE ingredient ADD COLUMN piece_unit TEXT",
     ];
 
     static readonly string[] SammlungTables =
@@ -111,6 +113,7 @@ public sealed class RuleStore
             Schema.Migrate(db, Migrations);
             using var tx = db.BeginTransaction(deferred: false);
             SeedRules(db, tx, seed);
+            SeedPieces(db, tx, seed);
             SeedSammlungen(db, tx);
             tx.Commit();
             return 0;
@@ -241,14 +244,16 @@ public sealed class RuleStore
                 break;
 
             case Ingredient x:
-                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, aliases, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @category, @aliases, @from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, aliases, piece_amount, piece_unit, "
+                    + "valid_from, valid_to, changed_at, rev) "
+                    + "VALUES(@id, @name, @category, @aliases, @piece, @pieceUnit, @from, @to, @changed, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
-                    + "aliases = excluded.aliases, "
+                    + "aliases = excluded.aliases, piece_amount = excluded.piece_amount, piece_unit = excluded.piece_unit, "
                     + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@category", x.CategoryId),
-                        ("@aliases", x.Aliases.Count == 0 ? null : string.Join("\n", x.Aliases))));
+                        ("@aliases", x.Aliases.Count == 0 ? null : string.Join("\n", x.Aliases)),
+                        ("@piece", x.Piece?.Amount), ("@pieceUnit", x.Piece is { } p ? Units.Code(p.Unit) : null)));
                 break;
 
             case ArticleMapping x:
@@ -338,11 +343,13 @@ public sealed class RuleStore
                 Sparte = ReadSparte(r, 6),
             }));
 
-        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, rev, aliases FROM ingredient WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, rev, aliases, piece_amount, piece_unit "
+            + "FROM ingredient WHERE deleted_at IS NULL",
             r => rs.Put(new Ingredient
             {
                 Id = r.GetString(0), Name = r.GetString(1), CategoryId = r.GetString(2), Meta = ReadMeta(r, 3),
                 Aliases = [.. (Str(r, 7) ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries)],
+                Piece = ReadPiece(r, 8),
             }));
 
         Rows(db, tx, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, "
@@ -394,6 +401,23 @@ public sealed class RuleStore
         "handelsware" => Sparte.Handelsware,
         _ => Sparte.Unbestimmt,
     };
+
+    static Piece? ReadPiece(SqliteDataReader r, int i) => (Num(r, i), Str(r, i + 1)) switch
+    {
+        ({ } amount, "g") => new Piece(amount, Unit.G),
+        ({ } amount, "ml") => new Piece(amount, Unit.Ml),
+        _ => null,
+    };
+
+    // SeedRules lässt vorhandene Zutaten stehen; ein neu mitgelieferter Stück-Richtwert kommt
+    // nur dort hinzu, wo noch keiner steht.
+    static void SeedPieces(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
+    {
+        foreach (var e in seed.Ingredients.Values)
+            if (e.Piece is { } p)
+                Exec(db, tx, "UPDATE ingredient SET piece_amount = @amount, piece_unit = @unit WHERE id = @id AND piece_amount IS NULL",
+                    ("@id", e.Id), ("@amount", p.Amount), ("@unit", Units.Code(p.Unit)));
+    }
 
     static void SeedRules(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {

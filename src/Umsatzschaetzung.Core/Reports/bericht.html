@@ -263,7 +263,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         <tbody>
           {% for i in report.ingredients %}
           <tr>
-            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}</td>
+            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}{% if i.estimated %}<sup>≈</sup>{% endif %}</td>
             <td class="num">{{ i.opening | qty:i.unit }}</td>
             <td class="num">{{ i.bought | qty:i.unit }}</td>
             <td class="num">{{ i.closing | qty:i.unit }}</td>
@@ -291,7 +291,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         <tbody>
           {% for i in report.ingredients %}
           <tr>
-            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}</td>
+            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}{% if i.estimated %}<sup>≈</sup>{% endif %}</td>
             <td class="num">{{ i.bought | qty:i.unit }}</td>
             <td class="num">{{ i.usedCost | cents }}</td>
             <td class="num">{{ i.yieldRate | bp }}</td>
@@ -307,6 +307,9 @@ ol.warnings li { margin-bottom: 0.3em; }
       {% endif %}
       {% if anyBinding %}
       <p class="note">* Diese Zutat ist vollständig verbraucht und begrenzt die Portionszahl.</p>
+      {% endif %}
+      {% if anyEstimated %}
+      <p class="note">≈ Der Einkauf ist teilweise in Stück berechnet und über den Richtwert der Zutat je Stück umgerechnet, siehe Hinweise.</p>
       {% endif %}
       {% if anyApproximate %}
       <p class="note">Die Zuteilung wurde für einen Teil der Zutaten näherungsweise bestimmt.</p>

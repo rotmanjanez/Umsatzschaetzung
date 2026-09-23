@@ -72,8 +72,12 @@ public sealed class Ingredient : IRuleEntity
     // Warenarten, die unter dieser Zutat gebucht werden: "Gouda" bei Schnittkäse. Der
     // Zuordner sucht in Name und Aliassen; sie sind, was ein Prüfer statt Namensmustern pflegt.
     public List<string> Aliases { get; set; } = [];
+    // Richtwert für ein Stück in g oder ml: macht "1 Stk Gurke" ohne Faktor zu 400 g.
+    public Piece? Piece { get; set; }
     public Meta Meta { get; set; } = new();
 }
+
+public sealed record Piece(long Amount, Unit Unit);
 
 public sealed class ArticleMapping : IRuleEntity
 {

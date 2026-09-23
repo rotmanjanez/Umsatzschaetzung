@@ -28,6 +28,19 @@ public class JsonTests
     };
 
     [Fact]
+    public void APieceWeightIsWrittenAsInTheSeedAndLeftOutWhenUnknown()
+    {
+        const string json = """{"ingredients":{"ing.gurke":{"name":"Gurken","piece":{"amount":400,"unit":"g"}},"ing.salz":{"name":"Salz"}}}""";
+        var rs = Json.Deserialize<RuleSet>(json);
+        Assert.Equal(new Piece(400, Unit.G), rs.Ingredients["ing.gurke"].Piece);
+        Assert.Null(rs.Ingredients["ing.salz"].Piece);
+        var back = JsonNode.Parse(Json.Serialize(rs))!["ingredients"]!;
+        Assert.Equal("""{"amount":400,"unit":"g"}""", back["ing.gurke"]!["piece"]!.ToJsonString());
+        Assert.Null(back["ing.salz"]!.AsObject()["piece"]);
+        Assert.False(back["ing.salz"]!.AsObject().ContainsKey("piece"));
+    }
+
+    [Fact]
     public void AnInvoiceSurvivesARoundTrip()
     {
         var json = Json.Serialize(Sample());

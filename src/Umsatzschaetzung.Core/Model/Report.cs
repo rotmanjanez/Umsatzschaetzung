@@ -100,6 +100,8 @@ public sealed class Purchase
     public string UnitCode { get; set; } = "";
     public Unit Unit { get; set; }
     public long Factor { get; set; }
+    public long Per { get; set; } = 1;
+    public FactorSource Source { get; set; }
     public long Qty { get; set; }
     public long Net { get; set; }
 }
@@ -110,6 +112,7 @@ public sealed class IngredientRow
     public string Name { get; set; } = "";
     public Unit Unit { get; set; }
     public List<Purchase> Purchases { get; set; } = [];
+    public bool Estimated => Purchases.Exists(p => p.Source == FactorSource.Piece);
     public long Opening { get; set; }
     public long Closing { get; set; }
     public long Bought { get; set; }
