@@ -186,6 +186,11 @@ public class TemplateTests
             """));
 
     [Fact]
+    public void AWindowsCheckoutRendersLikeAnyOther() =>
+        Assert.Equal("<ul>\n  <li>a</li>\n  <li>b</li>\n</ul>\n",
+            Render("<ul>\r\n  {% for z in zeilen %}\r\n  <li>{{ z }}</li>\r\n  {% endfor %}\r\n</ul>\r\n"));
+
+    [Fact]
     public void AnElseOnItsOwnLineTakesItsLineWithIt() =>
         Assert.Equal("  nein\n", Render("  {% if falsch %}\n  ja\n  {% else %}\n  nein\n  {% endif %}\n"));
 

@@ -11,7 +11,7 @@ public static class Template
     public static string Render(string source, JsonObject data)
     {
         var i = 0;
-        var body = Parse(source, ref i, [], out _);
+        var body = Parse(source.ReplaceLineEndings("\n"), ref i, [], out _);
         var b = new StringBuilder(64 * 1024);
         Write(b, body, data, []);
         return b.ToString();
