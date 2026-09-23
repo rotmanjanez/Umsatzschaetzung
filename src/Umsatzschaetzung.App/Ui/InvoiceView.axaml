@@ -39,8 +39,8 @@
             <RowDefinition Height="9*" MinHeight="120"/>
         </Grid.RowDefinitions>
         <Border x:Name="FormPane" Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12" ClipToBounds="True">
-            <DockPanel LastChildFill="False">
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" VerticalAlignment="Top">
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
                     <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
                     <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
                     <Button DockPanel.Dock="Right" Content="CSV exportieren" Theme="{StaticResource SecondaryButton}" IsEnabled="{Binding CanExport}" Click="ExportCsv"/>
@@ -51,7 +51,7 @@
                     </Border>
                     <TextBlock Text="Rechnung" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
                 </DockPanel>
-                <StackPanel DockPanel.Dock="Top">
+                <StackPanel Grid.Row="1">
                     <Grid ColumnDefinitions="*,12,*,12,*">
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Lieferant" Theme="{StaticResource FieldLabel}"/>
@@ -86,7 +86,7 @@
                     </ItemsControl>
                     <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8"/>
                 </StackPanel>
-                <DataGrid x:Name="Lines" DockPanel.Dock="Top" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged" PreparingCellForEdit="EditStarted">
+                <DataGrid x:Name="Lines" Grid.Row="2" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged" PreparingCellForEdit="EditStarted">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Menge" Width="90" SortMemberPath="Quantity">
                             <DataGridTemplateColumn.CellTemplate>
@@ -187,8 +187,8 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Button DockPanel.Dock="Top" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine"/>
-                <DataGrid x:Name="Totals" DockPanel.Dock="Top" Theme="{StaticResource Grid}" Margin="0,8,0,0" CanUserSortColumns="False"
+                <Button Grid.Row="3" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine"/>
+                <DataGrid x:Name="Totals" Grid.Row="4" Theme="{StaticResource Grid}" Margin="0,8,0,0" CanUserSortColumns="False"
                           ItemsSource="{Binding Totals}" CurrentCellChanged="TotalChanged" PreparingCellForEdit="EditStarted">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Summe" Binding="{Binding Label, DataType=ui:TotalRow}" Width="*" IsReadOnly="True"/>
@@ -217,7 +217,7 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-            </DockPanel>
+            </Grid>
         </Border>
 
         <GridSplitter x:Name="PaneSplit" Grid.Row="1" Height="6" ResizeDirection="Rows" Background="Transparent"/>
