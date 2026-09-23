@@ -50,10 +50,14 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     };
 
     readonly Lock gate = new();
-    Engine? engine;
+    Engine? engine, retired;
     bool accelerated;
 
-    public void Dispose() => engine?.Dispose();
+    public void Dispose()
+    {
+        engine?.Dispose();
+        retired?.Dispose();
+    }
 
     // Compiles the detector's shaders for the accelerator before the first import asks for
     // them, on a blank A4 page at the import's resolution.
@@ -97,23 +101,36 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     static OcrPage Page(SKBitmap page, OcrResult result, Correction correction) =>
         new() { Width = page.Width, Height = page.Height, Correction = correction, Words = Words(result) };
 
-    // A detector that fails on the accelerator, at load or on a page, is replaced by one on
-    // the CPU and the page read again.
+    // Pages are read side by side: the accelerator takes one detector run at a time behind
+    // its own gate, and everything around it goes to the thread pool, so one page is
+    // recognised on the cores while the next is detected. A detector that fails on the
+    // accelerator, at load or on a page, is replaced by one on the CPU and the page read
+    // again; the failed engine may still be reading another page and is kept until the end.
     OcrResult Read(SKBitmap page)
+    {
+        var current = Current();
+        try
+        {
+            return current.Detect(page, Options);
+        }
+        catch (OnnxRuntimeException) when (accelerated)
+        {
+            return Replace(current).Detect(page, Options);
+        }
+    }
+
+    Engine Current()
+    {
+        lock (gate) return engine ??= Open(Accelerator.Available);
+    }
+
+    Engine Replace(Engine failed)
     {
         lock (gate)
         {
-            engine ??= Open(Accelerator.Available);
-            try
-            {
-                return engine.Detect(page, Options);
-            }
-            catch (OnnxRuntimeException) when (accelerated)
-            {
-                engine.Dispose();
-                engine = Open(false);
-                return engine.Detect(page, Options);
-            }
+            if (!ReferenceEquals(engine, failed)) return engine!;
+            retired = failed;
+            return engine = Open(false);
         }
     }
 

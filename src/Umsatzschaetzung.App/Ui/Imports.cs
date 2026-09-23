@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Umsatzschaetzung.Invoices;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 
@@ -108,16 +109,24 @@ public sealed class Imports
 
     ImportJob? Next() => Jobs.FirstOrDefault(j => !j.Ct.IsCancellationRequested && j.Queue.Count > 0);
 
+    // Scans further down the queue are read while the one before them is stored: the
+    // reader overlaps one page on the accelerator with another on the cores. The case is
+    // still written one file at a time, in the order the files were picked.
+    const int Ahead = 4;
+
     async Task Run(ImportJob job)
     {
         job.Running = true;
-        while (job.Queue.Count > 0 && !job.Ct.IsCancellationRequested)
+        var reading = new Queue<(PickedFile File, Task<OcrResp>? Ocr)>();
+        while (!job.Ct.IsCancellationRequested)
         {
-            var file = job.Queue.Dequeue();
+            while (reading.Count <= Ahead && job.Queue.TryDequeue(out var next)) reading.Enqueue((next, Read(job, next)));
+            if (!reading.TryDequeue(out var item)) break;
+            var file = item.File;
             job.File = file.Name;
             try
             {
-                await Import(job, file);
+                await Import(job, file, item.Ocr);
             }
             catch (OperationCanceledException)
             {
@@ -134,7 +143,12 @@ public sealed class Imports
         Finish(job);
     }
 
-    async Task Import(ImportJob job, PickedFile file)
+    Task<OcrResp>? Read(ImportJob job, PickedFile file) =>
+        InvoiceParser.Detect(file.Data) is Kind.Pdf or Kind.Image
+            ? session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct)
+            : null;
+
+    async Task Import(ImportJob job, PickedFile file, Task<OcrResp>? reading)
     {
         job.Progress.Begin(ImportStage.Parse);
         var parsed = await session.Service.ParseInvoice(job.CaseId, file.Name, file.Data, job.Ct);
@@ -145,7 +159,7 @@ public sealed class Imports
             return;
         }
         job.Progress.Begin(ImportStage.Ocr);
-        var ocr = await session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct);
+        var ocr = await (reading ?? session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct));
         job.Progress.Begin(ImportStage.Verify);
         var v = await session.Service.VerifyInvoice(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data, ocr.Pages), job.Ct);
         Adopt(job, v.Case);
