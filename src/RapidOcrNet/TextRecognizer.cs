@@ -72,11 +72,10 @@ public sealed class TextRecognizer : IDisposable
         // characters and 1-char substitutions on a few inputs. So we keep the legacy
         // per-image, tight-fit recognizer call (which the model evidently was
         // re-tuned for) while still recording CTC column indices.
+        // A crop is too small a run to spread over cores; the crops are spread instead, and
+        // the session is best given one intra-op thread.
         var textLines = new TextLine[partImgs.Length];
-        for (int i = 0; i < partImgs.Length; i++)
-        {
-            textLines[i] = GetTextLine(partImgs[i]);
-        }
+        Parallel.For(0, partImgs.Length, i => textLines[i] = GetTextLine(partImgs[i]));
         return textLines;
     }
 

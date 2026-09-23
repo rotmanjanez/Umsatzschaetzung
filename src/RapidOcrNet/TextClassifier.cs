@@ -66,10 +66,7 @@ public sealed class TextClassifier : IDisposable
         var angles = new Angle[partImgs.Length];
         if (doAngle)
         {
-            for (int i = 0; i < partImgs.Length; i++)
-            {
-                angles[i] = GetAngle(partImgs[i], preserveAspectRatio);
-            }
+            Parallel.For(0, partImgs.Length, i => angles[i] = GetAngle(partImgs[i], preserveAspectRatio));
 
             // Most Possible AngleIndex
             if (mostAngle)

@@ -9,8 +9,9 @@ namespace Umsatzschaetzung.Service;
 
 // The v6 detector with the v5 latin recogniser: v6 reads scripts these invoices never
 // carry and is slower for it. The two normalise differently, so the detector's mean and
-// deviation travel with its path. Threads is per instance: one page at a time wants every
-// core, a corpus run with a page per core wants one each.
+// deviation travel with its path. Threads is the detector's on the CPU, per instance: one page
+// at a time wants every core, a corpus run with a page per core wants one each. The crops
+// are read one per core, each on a single thread.
 public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
 {
     public const string Name = "RapidOcrNet/PP-OCRv6-det-small+PP-OCRv5-latin-rec";
@@ -158,7 +159,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         try
         {
             using var detector = gpu ? Accelerator.Session(threads) : Engine.GetDefaultSessionOptions(threads);
-            using var reader = Engine.GetDefaultSessionOptions(threads);
+            using var reader = Engine.GetDefaultSessionOptions(1);
             if (gpu) lock (Accelerator.Gate) engine.InitModels(Models, detector, reader, Accelerator.Gate);
             else engine.InitModels(Models, detector, reader);
         }
