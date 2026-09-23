@@ -114,6 +114,16 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
+    public void ASliverFarTallerThanWideIsReadWithoutFailing()
+    {
+        using var sliver = Images.Blank(2, 200);
+
+        var line = models.Recognizer.GetTextLine(sliver);
+
+        Assert.Empty(line.Chars ?? []);
+    }
+
+    [Fact]
     public void DetectedBoxesAreTheBoxesTheLinesAreReadFrom()
     {
         var boxes = models.Engine.DetectBoxes(models.Page, OcrModels.App);

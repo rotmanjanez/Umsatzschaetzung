@@ -83,7 +83,9 @@ public sealed class TextRecognizer : IDisposable
     {
         var sw = ValueStopwatch.StartNew();
         float scale = CrnnDstHeight / (float)src.Height;
-        int dstWidth = (int)(src.Width * scale);
+        // A sliver far taller than wide rounds to no width at all, and Skia hands back no
+        // bitmap for that.
+        int dstWidth = Math.Max((int)(src.Width * scale), 1);
 
         Tensor<float> inputTensors;
         using (SKBitmap srcResize = src.Resize(new SKSizeI(dstWidth, CrnnDstHeight), OcrUtils.NetworkSampling))
