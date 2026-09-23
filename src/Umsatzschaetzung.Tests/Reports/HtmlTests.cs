@@ -50,8 +50,8 @@ public class HtmlTests
     {
         var html = Html.Render(Kase, Rules, Report, null);
         Assert.StartsWith("<!DOCTYPE html>", html.TrimStart(), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("<h1>3 Rohgewinnaufschlag</h1>", html);
-        Assert.Contains("Anhang E", html);
+        Assert.Contains("<h1>2 Rohgewinnaufschlag</h1>", html);
+        Assert.Contains("Anhang D", html);
         Assert.Contains("2024-04711", html);
         Assert.Contains("Pils 0,3 l vom Fass", html);
         Assert.DoesNotContain("{{", html);

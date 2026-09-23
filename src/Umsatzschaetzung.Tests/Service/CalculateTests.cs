@@ -96,8 +96,8 @@ public sealed class CalculateTests : IDisposable
         var report = await svc.RenderReport(Vorlage.Id, false, ct);
 
         Assert.Contains("7.335,95 €", report.Html);
-        Assert.Contains("Anhang E", report.Html);
-        Assert.Contains("<h1>3 Rohgewinnaufschlag</h1>", report.Html);
+        Assert.Contains("Anhang D", report.Html);
+        Assert.Contains("<h1>2 Rohgewinnaufschlag</h1>", report.Html);
         Assert.Contains("404,56 %", report.Html);
         Assert.Null(report.Pdf);
         Assert.EndsWith(".html", report.FileName);
