@@ -615,7 +615,7 @@ public sealed class RuleStore
         {
             try { File.Delete(temp); } catch (IOException) { }
             throw new StoreUnavailableException(
-                $"Im Regelspeicher lässt sich keine Sicherung anlegen: {snapshotDir}\n\n{e.Message}\n\n"
+                $"In der Regel-Datenbank lässt sich keine Sicherung anlegen: {snapshotDir}\n\n{e.Message}\n\n"
                 + "Die Gruppe der Anwender braucht in diesem Ordner Lese-, Schreib-, Erstell- und Löschrechte.", e);
         }
         // Zwei gleichzeitig startende Instanzen räumen denselben Ordner auf.
