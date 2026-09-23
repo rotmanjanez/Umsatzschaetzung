@@ -199,7 +199,6 @@ public partial class CalcView : Screen
             new("davon nicht zugeteilte Ware", Format.Cents(s.UnallocatedCost)),
             new("Einsatz der verkauften Portionen", Format.Cents(s.AllocatedCost)),
             new("Rohgewinn", Format.Cents(s.GrossProfit)),
-            new("Rohgewinnaufschlagsatz", Format.Bp(s.Markup)),
             new("Erfasste Einkäufe (netto)", Format.Cents(s.Purchases)),
             new("Bestandsveränderung", Format.Cents(s.StockChange)),
             new("Nicht berücksichtigt", $"{Format.Cents(s.UnmappedCost + s.UnusedCost)} ({Format.Bp(s.ExcludedShare)})"),
