@@ -7,7 +7,7 @@
   <style>
 :root { --ink: #141414; --muted: #646464; --hairline: #bebebe; }
 html { color-scheme: light; }
-body { margin: 0; background: #f2f2f0; color: var(--ink); font-family: "Libertinus Serif", "Linux Libertine", Georgia, "Times New Roman", serif; font-size: 9.5pt; line-height: 1.45; }
+body { margin: 0; background: #f2f2f0; color: var(--ink); font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; font-size: 9.5pt; line-height: 1.45; }
 main { max-width: 165mm; margin: 0 auto; padding: 20mm 20mm 24mm 25mm; background: #fff; }
 p { margin: 0 0 0.6em; text-align: justify; hyphens: auto; }
 h1 { font-size: 10.5pt; font-weight: bold; margin: 1.8em 0 0.7em; }
@@ -46,10 +46,10 @@ ol.warnings li { margin-bottom: 0.3em; }
 @page {
   size: A4;
   margin: 20mm 20mm 24mm 25mm;
-  @top-left { content: "Umsatzschätzung · " {{ case.label | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
-  @top-right { content: {{ case.periodFrom | date | css }} " bis " {{ case.periodTo | date | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
-  @bottom-left { content: "Steuernummer " {{ case.taxpayer.taxNumber | css }} "   ·   Name des Steuerpflichtigen " {{ case.taxpayer.name | css }} "   ·   PaB-Nr. " {{ case.taxpayer.pabNumber | css }} "   ·   Datum " {{ report.computedAt | day | css }}; font-size: 8pt; white-space: pre; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
-  @bottom-right { content: "Seite " counter(page) " von " counter(pages); font-size: 8pt; font-family: "Libertinus Serif", "Linux Libertine", Georgia, serif; }
+  @top-left { content: "Umsatzschätzung · " {{ case.label | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
+  @top-right { content: {{ case.periodFrom | date | css }} " bis " {{ case.periodTo | date | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
+  @bottom-left { content: "Steuernummer " {{ case.taxpayer.taxNumber | css }} "   ·   Name des Steuerpflichtigen " {{ case.taxpayer.name | css }} "   ·   PaB-Nr. " {{ case.taxpayer.pabNumber | css }} "   ·   Datum " {{ report.computedAt | day | css }}; font-size: 8pt; white-space: pre; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
+  @bottom-right { content: "Seite " counter(page) " von " counter(pages); font-size: 8pt; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
 }
 @page :first {
   @top-left { content: none; }
