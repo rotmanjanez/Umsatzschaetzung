@@ -69,7 +69,7 @@
                   SourceUrl="%(MissingModel.Url)"
                   DestinationFolder="$(ModelCacheDir)/%(MissingModel.Release)/%(MissingModel.Dir)"
                   DestinationFileName="%(MissingModel.Identity)"
-                  Retries="3" />
+                  Retries="6" RetryDelayMilliseconds="15000" />
 
     <GetFileHash Files="@(ModelFile->'%(Path)')" Algorithm="SHA256" HashEncoding="hex">
       <Output TaskParameter="Items" ItemName="HashedModel" />
