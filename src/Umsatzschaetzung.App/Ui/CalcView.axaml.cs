@@ -34,6 +34,8 @@ public sealed class CalcModel : Observable
     public ObservableCollection<RevenueRow> Revenue { get; } = [];
     public ObservableCollection<MarkupRow> Markups { get; } = [];
     public ObservableCollection<KV> Summary { get; } = [];
+    public ObservableCollection<YieldKindGroup> Yields { get; } = [];
+    public bool HasYields => Yields.Count > 0;
     public bool Busy { get => busy; set => Set(ref busy, value); }
     public bool EmptyAssortment => Products.Count == 0;
     public ProductDetail? Detail { get => detail; set { if (Set(ref detail, value)) Raise(nameof(NoDetail)); } }
@@ -45,6 +47,7 @@ public sealed class CalcModel : Observable
     public CalcModel()
     {
         Products.CollectionChanged += (_, _) => Raise(nameof(EmptyAssortment));
+        Yields.CollectionChanged += (_, _) => Raise(nameof(HasYields));
     }
 }
 
@@ -73,11 +76,39 @@ public partial class CalcView : Screen
             model.HasResult = false;
             return;
         }
+        ShowYields(kase, rs);
+        await Recalculate(kase, rs);
+    }
+
+    async Task Recalculate(Case kase, RuleSet rs)
+    {
         var g = ++generation;
         model.Busy = model.HasResult;
         var report = await Assortment.Calculate(Session, kase, rs, Ct);
         if (report is not null && g == generation) ShowResult(kase, rs, report);
         if (g == generation) model.Busy = false;
+    }
+
+    void ShowYields(Case kase, RuleSet rs)
+    {
+        model.Yields.Clear();
+        foreach (var group in Yields.Groups(kase, rs, Session.Ingredients(), Session.CategoryName))
+        {
+            foreach (var row in group.Rows) row.Changed += YieldChosen;
+            model.Yields.Add(group);
+        }
+    }
+
+    async void YieldChosen()
+    {
+        if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
+        kase.Yields = Yields.Choices(model.Yields);
+        if (!await Session.SaveCase(CancellationToken.None))
+        {
+            Session.Fail("Ertragsregel konnte nicht gespeichert werden");
+            return;
+        }
+        if (Session.Case is { } saved && IsActive) await Recalculate(saved, rs);
     }
 
     void ShowResult(Case kase, RuleSet rs, Report r)

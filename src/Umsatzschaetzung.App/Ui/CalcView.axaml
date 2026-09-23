@@ -15,6 +15,30 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
     </ui:Screen.Styles>
+    <ui:Screen.Resources>
+        <DataTemplate x:Key="YieldGroupTemplate" x:DataType="ui:YieldKindGroup">
+            <StackPanel Margin="0,0,0,16">
+                <TextBlock Text="{Binding Kind}" Theme="{StaticResource FieldLabel}"/>
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="ui:YieldGroupRow">
+                            <Grid ColumnDefinitions="260,16,*" Margin="0,0,0,6">
+                                <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="2" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected, Mode=TwoWay}"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="ui:RuleOption">
+                                            <TextBlock Text="{Binding Text}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+    </ui:Screen.Resources>
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Right" Text="Wird neu berechnet …" Theme="{StaticResource Muted}" Margin="0,0,0,16" IsVisible="{Binding Busy}"/>
         <Grid>
@@ -196,7 +220,7 @@
                     </DataGrid>
 
                     <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
-                    <ItemsControl Margin="0,0,0,16" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
+                    <ItemsControl Margin="0,0,0,24" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="ui:KV">
                                 <Grid>
@@ -211,6 +235,10 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <StackPanel IsVisible="{Binding HasYields}">
+                        <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
+                        <ItemsControl Margin="0,0,0,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

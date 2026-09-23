@@ -5,31 +5,6 @@
            xmlns:model="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:CaseModel"
            Margin="0,12,0,0">
-    <ui:Screen.Resources>
-        <DataTemplate x:Key="YieldGroupTemplate" x:DataType="ui:YieldKindGroup">
-            <StackPanel Margin="0,0,0,16">
-                <TextBlock Text="{Binding Kind}" Theme="{StaticResource FieldLabel}"/>
-                <ItemsControl ItemsSource="{Binding Rows}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="ui:YieldGroupRow">
-                            <Grid ColumnDefinitions="260,16,*" Margin="0,0,0,6">
-                                <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Column="2" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected, Mode=TwoWay}"
-                                          HorizontalAlignment="Stretch">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate x:DataType="ui:RuleOption">
-                                            <TextBlock Text="{Binding Text}"/>
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </DataTemplate>
-    </ui:Screen.Resources>
-
     <DockPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="0,0,16,0">
@@ -106,14 +81,6 @@
                         </DataGrid.Columns>
                     </DataGrid>
                     <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0"/>
-                </StackPanel>
-
-                <Border Theme="{StaticResource SectionRule}"/>
-                <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
-                <StackPanel Margin="0,0,0,24">
-                    <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding NoYields}"
-                               Text="Sobald Rechnungen zugeordnet sind, erscheinen hier die Ertragsregeln der betroffenen Kategorien und Zutaten."/>
-                    <ItemsControl ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}"/>
                 </StackPanel>
 
                 <Border Theme="{StaticResource SectionRule}"/>
