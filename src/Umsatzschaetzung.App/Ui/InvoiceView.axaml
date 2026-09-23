@@ -29,6 +29,7 @@
         <Style Selector="Border.cell">
             <Setter Property="Padding" Value="8,0"/>
             <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="Transparent"/>
         </Style>
     </ui:Screen.Styles>
     <Grid x:Name="Panes">
@@ -70,20 +71,10 @@
                             <TextBox x:Name="DateBox" Text="{Binding Date, Mode=TwoWay}" GotFocus="HeaderFocus"/>
                         </StackPanel>
                     </Grid>
-                    <Grid ColumnDefinitions="*,12,*,12,*">
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Netto" Theme="{StaticResource FieldLabel}"/>
-                            <TextBlock Text="{Binding NetTotal}" Theme="{StaticResource Number}" HorizontalAlignment="Left" ToolTip.Tip="{Binding NetFlag}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Brutto" Theme="{StaticResource FieldLabel}"/>
-                            <TextBlock Text="{Binding GrossTotal}" Theme="{StaticResource Number}" HorizontalAlignment="Left" ToolTip.Tip="{Binding GrossFlag}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="4">
-                            <TextBlock Text="Beleg" Theme="{StaticResource FieldLabel}"/>
-                            <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding FileName}"/>
-                        </StackPanel>
-                    </Grid>
+                    <StackPanel>
+                        <TextBlock Text="Beleg" Theme="{StaticResource FieldLabel}"/>
+                        <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding FileName}"/>
+                    </StackPanel>
                     <ItemsControl ItemsSource="{Binding HeaderFlags}" Margin="0,12,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="x:String">
@@ -95,7 +86,7 @@
                     </ItemsControl>
                     <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8"/>
                 </StackPanel>
-                <DataGrid x:Name="Lines" DockPanel.Dock="Top" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged">
+                <DataGrid x:Name="Lines" DockPanel.Dock="Top" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged" PreparingCellForEdit="EditStarted">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Menge" Width="90" SortMemberPath="Quantity">
                             <DataGridTemplateColumn.CellTemplate>
@@ -197,6 +188,35 @@
                     </DataGrid.Columns>
                 </DataGrid>
                 <Button DockPanel.Dock="Top" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine"/>
+                <DataGrid x:Name="Totals" DockPanel.Dock="Top" Theme="{StaticResource Grid}" Margin="0,8,0,0" CanUserSortColumns="False"
+                          ItemsSource="{Binding Totals}" CurrentCellChanged="TotalChanged" PreparingCellForEdit="EditStarted">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Summe" Binding="{Binding Label, DataType=ui:TotalRow}" Width="*" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Laut Beleg" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:TotalRow">
+                                    <Border Classes="cell" Classes.flagged="{Binding Flagged}" ToolTip.Tip="{Binding Flag}">
+                                        <TextBlock Text="{Binding Stated}" Theme="{StaticResource Number}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:TotalRow">
+                                    <TextBox Text="{Binding Stated, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Aus Positionen" Width="130" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:TotalRow">
+                                    <Border Classes="cell">
+                                        <TextBlock Text="{Binding Sum}" Theme="{StaticResource Number}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
             </DockPanel>
         </Border>
 

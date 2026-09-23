@@ -110,18 +110,37 @@ public sealed class LineRow : Observable
     }
 }
 
+// A total as the document prints it, next to what its positions add up to.
+public sealed class TotalRow(string label, Field of) : Observable
+{
+    string stated = "", sum = "";
+    string? flag;
+
+    public string Label => label;
+    public Field Field => of;
+    public long? Value { get; private set; }
+    public string Stated { get => stated; set { if (Set(ref stated, value)) Value = Input.Cents(value); } }
+    public string Sum { get => sum; set => Set(ref sum, value); }
+    public string? Flag { get => flag; set { if (Set(ref flag, value)) Raise(nameof(Flagged)); } }
+    public bool Flagged => flag is not null;
+
+    public void Show(long? value, long sum)
+    {
+        Value = value;
+        Set(ref stated, value is { } v ? Format.Cents(v) : "", nameof(Stated));
+        Sum = Format.Cents(sum);
+    }
+}
+
 public sealed class InvoiceModel : Observable
 {
-    string supplier = "", number = "", date = "", netTotal = "", grossTotal = "", fileName = "", stateText = "", periodHint = "";
-    string? netFlag, grossFlag;
+    string supplier = "", number = "", date = "", fileName = "", stateText = "", periodHint = "";
     Checked state = Checked.Pending;
     bool valid, saving, dirty, outsidePeriod;
 
     public string Supplier { get => supplier; set => Set(ref supplier, value); }
     public string Number { get => number; set => Set(ref number, value); }
     public string Date { get => date; set => Set(ref date, value); }
-    public string NetTotal { get => netTotal; set => Set(ref netTotal, value); }
-    public string GrossTotal { get => grossTotal; set => Set(ref grossTotal, value); }
     public string FileName { get => fileName; set => Set(ref fileName, value); }
     public string PeriodHint { get => periodHint; set => Set(ref periodHint, value); }
     public bool OutsidePeriod { get => outsidePeriod; set => Set(ref outsidePeriod, value); }
@@ -149,26 +168,29 @@ public sealed class InvoiceModel : Observable
     public bool CanExport => !dirty && !saving;
     public string SaveLabel => saving ? "Wird gespeichert …" : state == Checked.Pending ? "Bestätigen" : "Änderungen speichern";
 
-    public string? NetFlag => netFlag;
-    public string? GrossFlag => grossFlag;
+    public TotalRow Net { get; } = new("Netto", Field.NetTotal);
+    public TotalRow Gross { get; } = new("Brutto", Field.GrossTotal);
     public ObservableCollection<string> HeaderFlags { get; } = [];
     public ObservableCollection<LineRow> Lines { get; } = [];
+    public TotalRow[] Totals { get; }
+
+    public InvoiceModel() => Totals = [Net, Gross];
 
     public void SetHeaderFlags(IEnumerable<Flag> flags)
     {
-        netFlag = grossFlag = null;
+        string? net = null, gross = null;
         HeaderFlags.Clear();
         foreach (var f in flags)
         {
             HeaderFlags.Add(f.Message);
             switch (f.Field)
             {
-                case Field.NetTotal: netFlag ??= f.Message; break;
-                case Field.GrossTotal: grossFlag ??= f.Message; break;
+                case Field.NetTotal: net ??= f.Message; break;
+                case Field.GrossTotal: gross ??= f.Message; break;
             }
         }
-        Raise(nameof(NetFlag));
-        Raise(nameof(GrossFlag));
+        Net.Flag = net;
+        Gross.Flag = gross;
     }
 }
 
@@ -204,6 +226,8 @@ public partial class InvoiceView : Screen
         pages = ocr?.Pages ?? [];
         DataContext = model;
         model.PropertyChanged += HeaderEdited;
+        model.Net.PropertyChanged += TotalEdited;
+        model.Gross.PropertyChanged += TotalEdited;
         timer.Tick += (_, _) =>
         {
             timer.Stop();
@@ -326,8 +350,7 @@ public partial class InvoiceView : Screen
         model.Supplier = invoice.SupplierName;
         model.Number = invoice.Number;
         model.Date = Format.Date(invoice.Date);
-        model.NetTotal = Format.Cents(invoice.NetTotal);
-        model.GrossTotal = Format.Cents(invoice.GrossTotal);
+        ShowTotals();
         model.FileName = invoice.FileName;
         model.State = Checks.Of(invoice);
         model.StateText = Checks.Text(invoice);
@@ -358,6 +381,23 @@ public partial class InvoiceView : Screen
         invoice.Number = model.Number;
         if (Input.Date(model.Date) is { } d) invoice.Date = d;
         ShowPeriod();
+        Schedule();
+    }
+
+    void ShowTotals()
+    {
+        var was = applying;
+        applying = true;
+        model.Net.Show(invoice.StatedNet, invoice.NetTotal);
+        model.Gross.Show(invoice.StatedGross, invoice.GrossTotal);
+        applying = was;
+    }
+
+    void TotalEdited(object? sender, PropertyChangedEventArgs e)
+    {
+        if (applying || e.PropertyName != nameof(TotalRow.Stated)) return;
+        invoice.StatedNet = model.Net.Value;
+        invoice.StatedGross = model.Gross.Value;
         Schedule();
     }
 
@@ -395,10 +435,7 @@ public partial class InvoiceView : Screen
     {
         invoice.NetTotal = v.Invoice.NetTotal;
         invoice.GrossTotal = v.Invoice.GrossTotal;
-        applying = true;
-        model.NetTotal = Format.Cents(invoice.NetTotal);
-        model.GrossTotal = Format.Cents(invoice.GrossTotal);
-        applying = false;
+        ShowTotals();
         ApplyFlags(v.Flags, v.Blocked);
     }
 
@@ -425,6 +462,7 @@ public partial class InvoiceView : Screen
         if (Session.Case is null) return;
         timer.Stop();
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
+        Totals.CommitEdit(DataGridEditingUnit.Row, true);
         var req = new VerifyReq(Session.Case.Id, Current(), Intent.Confirm, null, null);
         model.Saving = true;
         await Session.Run(async () =>
@@ -478,6 +516,21 @@ public partial class InvoiceView : Screen
         }
         var (page, box) = Where(row, LineFields[column.DisplayIndex]);
         FocusCell(page, box);
+    }
+
+    void TotalChanged(object? sender, EventArgs e)
+    {
+        if (Totals.SelectedItem is not TotalRow row) return;
+        var (page, box) = Stated(row.Field);
+        FocusCell(page, box);
+    }
+
+    // A template cell leaves focus on the cell itself; typing should land in its box right away.
+    void EditStarted(object? sender, DataGridPreparingCellForEditEventArgs e)
+    {
+        if (e.EditingElement is not TextBox box) return;
+        box.Focus();
+        box.SelectAll();
     }
 
     // A value the row does not print itself, like the one rate the totals state, was read once
