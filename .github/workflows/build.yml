@@ -19,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.local/share/umsatzschaetzung/models
@@ -47,7 +47,7 @@ jobs:
       PFX_BASE64: ${{ secrets.PFX_BASE64 }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.local/share/umsatzschaetzung/models
@@ -85,7 +85,7 @@ jobs:
       CERT_BASE64: ${{ secrets.MACOS_CERT_BASE64 }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.local/share/umsatzschaetzung/models

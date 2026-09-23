@@ -21,7 +21,7 @@
 { "do": "tab", "header": "1. Rechnungen" }
 { "do": "shot", "name": "rechnungen-leer", "at": { "text": "1. Rechnungen", "up": "TabControl" }, "trim": { "top": 16 } }
 
-{ "do": "import", "files": ["fixtures/dataset/2025/metzgerei/2025-01-03_2025-0118.pdf", "fixtures/dataset/2025/getraenke/2025-01-04_LR-2025-30117.pdf", "fixtures/dataset/2025/cc/2025-01-08_9120044817.pdf", "fixtures/dataset/2025/baeckerei/2025-01-10_SR-250107.pdf", "fixtures/dataset/2025/getraenke/2025-01-14_LR-2025-30306.pdf", "fixtures/dataset/2025/gemuese/2025-01-20_R-25-014.pdf"] }
+{ "do": "import", "files": ["beispiel-rechnungen/2025-01-03_2025-0118.png", "beispiel-rechnungen/2025-01-04_LR-2025-30117.png", "beispiel-rechnungen/2025-01-08_9120044817.jpeg", "beispiel-rechnungen/2025-01-10_SR-250107.pdf", "beispiel-rechnungen/2025-01-14_LR-2025-30306.png", "beispiel-rechnungen/2025-01-20_R-25-014.jpeg"] }
 { "do": "shot", "name": "rechnungen-import", "window": "dialog" }
 { "do": "click", "window": "dialog", "at": { "text": "Schließen" } }
 
@@ -29,7 +29,7 @@
 { "do": "shot", "name": "rechnungen-liste", "at": { "text": "Lieferant", "up": "DataGrid" }, "clip": "DataGridRow" }
 
 // Korrektur: drei Scans, die nicht aufgehen - eine fehlende Einheit, eine verlesene Ziffer, eine zerrissene Zeile
-{ "do": "import", "files": ["fixtures/dataset/2025/wein/2025-10-18_WS-2025-346.pdf.scan.png", "fixtures/dataset/2025/metzgerei/2025-10-23_2025-0561.pdf.scan.png", "fixtures/dataset/2025/tiefkuehl/2025-08-21_TK25-1583.pdf.scan.png"] }
+{ "do": "import", "files": ["beispiel-rechnungen/2025-10-18_WS-2025-346.png", "beispiel-rechnungen/2025-10-23_2025-0561.png", "beispiel-rechnungen/2025-08-21_TK25-1583.png"] }
 { "do": "click", "window": "dialog", "at": { "text": "Schließen" } }
 { "do": "deselect", "at": { "text": "Lieferant", "up": "DataGrid" } }
 { "do": "shot", "name": "korrektur-liste", "at": { "text": "Lieferant", "up": "DataGrid" }, "clip": "DataGridRow" }
