@@ -45,3 +45,12 @@ nav:
   - Start: index.md
   - Prüfungen: pruefungen.md
   - Import und Export: import-export.md
+  - Beispielprüfung:
+      - Übersicht: guide/index.md
+      - macOS: guide/install-macos.md
+      - Windows: guide/install-windows.md
+      - Erste Prüfung: guide/start.md
+      - Prüfungsdaten: guide/pruefungsdaten.md
+      - Rechnungen: guide/rechnungen.md
+      - Korrektur: guide/korrektur.md
+      - Kalkulation: guide/kalkulation.md
