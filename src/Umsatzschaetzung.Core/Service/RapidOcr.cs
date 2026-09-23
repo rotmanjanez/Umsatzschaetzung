@@ -117,17 +117,22 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         }
     }
 
-    // A crop the classifier called upside down was read that way round; its words are no
-    // reading, only its verdict counts.
-    static List<OcrWord> Words(OcrResult result)
+    // The engine keeps every crop the classifier called upside down, for its verdict, whatever
+    // it read. On a page that is not turned that verdict is mostly wrong: a "kg" reads cleanly
+    // the right way up. Such a crop keeps its words on the score every other crop is held to;
+    // one truly on its head reads as garbage and falls below it.
+    internal static List<OcrWord> Words(OcrResult result)
     {
         var words = new List<OcrWord>();
         foreach (var block in result.TextBlocks)
-            foreach (var word in block.AngleIndex == 1 ? [] : block.WordResults ?? [])
+            foreach (var word in Reads(block) ? block.WordResults ?? [] : [])
                 if (!string.IsNullOrWhiteSpace(word.Text))
                     words.Add(new OcrWord { Text = word.Text, Box = Bounds(word.BoxPoints), Confidence = word.Score });
         return words;
     }
+
+    static bool Reads(TextBlock block) =>
+        block.AngleIndex != 1 || block.CharScores is { Length: > 0 } scores && scores.Average() >= Options.TextScore;
 
     // Lines running down the page mean a quarter turn; the direction classifier having
     // flipped every crop means upside down. Strict majorities only: turning an upright
