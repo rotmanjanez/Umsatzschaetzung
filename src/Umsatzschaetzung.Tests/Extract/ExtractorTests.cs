@@ -65,8 +65,11 @@ public class ExtractorTests(TaggerFixture fixture) : IClassFixture<TaggerFixture
         var page = Invoice(net: "41,00", first: "25,00");
         await Extractor.InvoiceAsync(fixture.Tagger, [page], TestContext.Current.CancellationToken);
 
-        Assert.Equal(["line_total"], page.Lines[0].Flags.Select(f => f.Code));
-        Assert.Empty(page.Lines[1].Flags);
+        Assert.Equal(
+            [("line_total", Field.Quantity), ("line_total", Field.UnitPrice), ("line_total", Field.LineNet),
+             ("sum_net", Field.LineNet), ("gross_check", Field.Vat)],
+            page.Lines[0].Flags.Select(f => (f.Code, f.Field!.Value)));
+        Assert.Equal([("sum_net", Field.LineNet), ("gross_check", Field.Vat)], page.Lines[1].Flags.Select(f => (f.Code, f.Field!.Value)));
         Assert.Contains(page.Flags, f => f.Code == "sum_net" && f.LineNo == 0);
         Assert.DoesNotContain(page.Flags, f => f.LineNo != 0);
     }

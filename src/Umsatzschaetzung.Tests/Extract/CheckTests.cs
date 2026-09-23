@@ -109,14 +109,16 @@ public class CheckTests
     }
 
     [Fact]
-    public void QuantityTimesPriceMissingTheLineNetIsReportedWithBothAmounts()
+    public void QuantityTimesPriceMissingTheLineNetIsReportedOnAllThreeWithBothAmounts()
     {
         var inv = Clean();
         inv.Lines[0].UnitPrice = 4_990_000;
-        var flag = Single(Checks.Invoice(inv), "line_total");
-        Assert.Equal((1L, (Field?)Field.LineNet), (flag.LineNo, flag.Field));
-        Assert.Contains(Format.Cents(499), flag.Message);
-        Assert.Contains(Format.Cents(500), flag.Message);
+        var flags = Checks.Invoice(inv).FindAll(f => f.Code == "line_total");
+        Assert.Equal(
+            [(1L, Field.Quantity), (1L, Field.UnitPrice), (1L, Field.LineNet)],
+            flags.Select(f => (f.LineNo, f.Field!.Value)));
+        Assert.All(flags, f => Assert.Contains(Format.Cents(499), f.Message));
+        Assert.All(flags, f => Assert.Contains(Format.Cents(500), f.Message));
     }
 
     [Fact]
@@ -133,12 +135,13 @@ public class CheckTests
     }
 
     [Fact]
-    public void PositionsNotAddingUpToTheStatedNetAreReported()
+    public void PositionsNotAddingUpToTheStatedNetAreReportedOnTheNetAndEveryLineNet()
     {
         var inv = Clean();
         inv.Lines.Add(Line(2, 100));
-        var flag = Single(Checks.Invoice(inv), "sum_net");
-        Assert.Equal((0L, (Field?)Field.NetTotal), (flag.LineNo, flag.Field));
+        Assert.Equal(
+            [(0L, Field.NetTotal), (1L, Field.LineNet), (2L, Field.LineNet)],
+            Checks.Invoice(inv).Where(f => f.Code == "sum_net").Select(f => (f.LineNo, f.Field!.Value)));
     }
 
     [Fact]
@@ -175,9 +178,11 @@ public class CheckTests
     {
         var inv = Clean();
         inv.StatedGross = 600;
-        var flag = Single(Checks.Invoice(inv), "gross_check");
-        Assert.Equal(Field.GrossTotal, flag.Field);
-        Assert.Contains(Format.Cents(595), flag.Message);
+        var flags = Checks.Invoice(inv).FindAll(f => f.Code == "gross_check");
+        Assert.Equal(
+            [(0L, Field.GrossTotal), (0L, Field.NetTotal), (1L, Field.Vat)],
+            flags.Select(f => (f.LineNo, f.Field!.Value)));
+        Assert.All(flags, f => Assert.Contains(Format.Cents(595), f.Message));
     }
 
     // Two lines of 0,50 at 7 %: once on the total 1,07, per position 0,04 + 0,04 = 1,08.

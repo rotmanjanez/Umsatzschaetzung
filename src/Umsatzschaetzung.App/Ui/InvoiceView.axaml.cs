@@ -182,7 +182,7 @@ public sealed class InvoiceModel : Observable
         HeaderFlags.Clear();
         foreach (var f in flags)
         {
-            HeaderFlags.Add(f.Message);
+            if (!HeaderFlags.Contains(f.Message)) HeaderFlags.Add(f.Message);
             switch (f.Field)
             {
                 case Field.NetTotal: net ??= f.Message; break;

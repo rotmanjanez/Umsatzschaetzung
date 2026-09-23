@@ -7,6 +7,7 @@ public static class Check
     // Line nets and line sums reproduce the document's own integer arithmetic to the cent. The
     // gross total does not: suppliers either apply the rate once to the net total or round the
     // tax per position and add those up, which differ by a cent on half-way lines. Both count.
+    // A mismatch sits on every cell of its formula, since any of them may be the misread one.
     public static List<Flag> Invoice(Invoice inv)
     {
         var flags = new List<Flag>();
@@ -24,25 +25,20 @@ public static class Check
                 flags.Add(new Flag { Code = "no_unit", LineNo = l.No, Field = Field.Unit, Message = $"Zeile {l.No}: Einheit fehlt" });
             var expected = InvoiceMath.LineNet(l.Quantity, l.UnitPrice, l.PriceBaseQty);
             if (expected != l.LineNet)
-                flags.Add(new Flag
-                {
-                    Code = "line_total",
-                    LineNo = l.No,
-                    Field = Field.LineNet,
-                    Message = $"Zeile {l.No}: Menge × Einzelpreis ergibt {Format.Cents(expected)}, Gesamtpreis ist {Format.Cents(l.LineNet)}",
-                });
+                flags.AddRange(Cells(
+                    "line_total",
+                    $"Zeile {l.No}: Menge × Einzelpreis ergibt {Format.Cents(expected)}, Gesamtpreis ist {Format.Cents(l.LineNet)}",
+                    [(l.No, Field.Quantity), (l.No, Field.UnitPrice), (l.No, Field.LineNet)]));
         }
         if (net <= 0)
             flags.Add(new Flag { Code = "nonpositive", Field = Field.NetTotal, Message = "Nettobetrag ist nicht positiv" });
         if (gross <= 0)
             flags.Add(new Flag { Code = "nonpositive", Field = Field.GrossTotal, Message = "Bruttobetrag ist nicht positiv" });
         if (inv.Lines.Count > 0 && sum != net)
-            flags.Add(new Flag
-            {
-                Code = "sum_net",
-                Field = Field.NetTotal,
-                Message = $"Summe der Positionen {Format.Cents(sum)} weicht vom Nettobetrag {Format.Cents(net)} ab",
-            });
+            flags.AddRange(Cells(
+                "sum_net",
+                $"Summe der Positionen {Format.Cents(sum)} weicht vom Nettobetrag {Format.Cents(net)} ab",
+                [(0, Field.NetTotal), .. inv.Lines.Select(l => (l.No, Field.LineNet))]));
         if (rates.Count == 1 && rates.Single() is var vat and > 0)
         {
             var expected = InvoiceMath.RoundDiv(net * (Bp.Full + vat), Bp.Full);
@@ -50,15 +46,16 @@ public static class Check
             foreach (var l in inv.Lines)
                 perLine += InvoiceMath.RoundDiv(l.LineNet * vat, Bp.Full);
             if (expected != gross && perLine != gross)
-                flags.Add(new Flag
-                {
-                    Code = "gross_check",
-                    Field = Field.GrossTotal,
-                    Message = $"Netto {Format.Cents(net)} zzgl. {Format.Bp(vat)} MwSt ergibt {Format.Cents(expected)}, Bruttobetrag ist {Format.Cents(gross)}",
-                });
+                flags.AddRange(Cells(
+                    "gross_check",
+                    $"Netto {Format.Cents(net)} zzgl. {Format.Bp(vat)} MwSt ergibt {Format.Cents(expected)}, Bruttobetrag ist {Format.Cents(gross)}",
+                    [(0, Field.GrossTotal), (0, Field.NetTotal), .. inv.Lines.Select(l => (l.No, Field.Vat))]));
         }
         return flags;
     }
+
+    static IEnumerable<Flag> Cells(string code, string message, List<(long LineNo, Field Field)> cells) =>
+        cells.Select(c => new Flag { Code = code, Message = message, LineNo = c.LineNo, Field = c.Field });
 
     // Taken over without a human means nobody ever looks at it: that needs a complete reading
     // whose positions add up to the totals the document itself prints.
