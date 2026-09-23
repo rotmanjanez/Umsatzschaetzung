@@ -22,7 +22,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // itself: on a line of two glyphs it is as confident as on a sentence and wrong often enough
     // that a "kg" comes back upside down, reads as "ER" and is dropped for scoring below
     // TextScore. A crop taller than it is wide holds no vertical script either - it is a
-    // position number in a narrow column - and a quarter turn loses it the same way. Correction
+    // position number in a narrow column - and a quarter turn loses it the same way. Turn
     // reads the classifier's votes and turns the whole page, which is the only turn a German
     // invoice needs. What is left of a tall box is a stack: a unit column printed tightly
     // enough that the detector joined three "kg" into one box, which no line reader can read.
@@ -78,22 +78,26 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     async Task<OcrPage> Recognize(SKBitmap decoded, byte[]? delivered)
     {
         using var cleaned = Deink.Apply(decoded);
-        using var straightened = Deskew.Apply(cleaned ?? decoded);
-        var page = straightened ?? cleaned ?? decoded;
+        var read = cleaned ?? decoded;
+        using var straightened = Deskew.Apply(read, out var skew);
+        var page = straightened ?? read;
+        var correction = new Correction { Scale = (double)read.Width / decoded.Width, Skew = skew };
         var image = delivered is not null && ReferenceEquals(page, decoded) ? Task.FromResult(delivered) : Task.Run(() => Encode(page));
         var first = Read(page);
-        var turn = Correction(first);
-        if (turn == 0) return Page(page, first, await image);
+        var turn = Turn(first);
+        if (turn == 0) return Page(page, first, await image, correction);
         await image;
         using var turned = Rotate(page, turn);
-        using var settled = Deskew.Apply(turned);
+        using var settled = Deskew.Apply(turned, out var settle);
         var upright = settled ?? turned;
+        correction.Turn = turn;
+        correction.Settle = settle;
         var record = Task.Run(() => Encode(upright));
-        return Page(upright, Read(upright), await record);
+        return Page(upright, Read(upright), await record, correction);
     }
 
-    static OcrPage Page(SKBitmap page, OcrResult result, byte[] image) =>
-        new() { Width = page.Width, Height = page.Height, Words = Words(result), Image = image };
+    static OcrPage Page(SKBitmap page, OcrResult result, byte[] image, Correction correction) =>
+        new() { Width = page.Width, Height = page.Height, Correction = correction, Words = Words(result), Image = image };
 
     // A detector that fails on the accelerator, at load or on a page, is replaced by one on
     // the CPU and the page read again.
@@ -130,7 +134,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // Lines running down the page mean a quarter turn; the direction classifier having
     // flipped every crop means upside down. Strict majorities only: turning an upright
     // page costs far more than leaving a sideways one.
-    static int Correction(OcrResult result)
+    static int Turn(OcrResult result)
     {
         int tall = 0, wide = 0, flipped = 0, upright = 0;
         foreach (var block in result.TextBlocks)
@@ -188,7 +192,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     }
 
     // The detector reads straight off the pixel buffer and accepts only this layout.
-    static SKBitmap Decode(byte[] image)
+    internal static SKBitmap Decode(byte[] image)
     {
         using var data = SKData.CreateCopy(image);
         using var codec = SKCodec.Create(data);
@@ -200,7 +204,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
                 ?? throw new InvalidOperationException("Das Seitenbild konnte nicht umgewandelt werden.");
     }
 
-    static SKBitmap Rotate(SKBitmap source, int degrees)
+    internal static SKBitmap Rotate(SKBitmap source, int degrees)
     {
         var swap = degrees != 180;
         var width = swap ? source.Height : source.Width;

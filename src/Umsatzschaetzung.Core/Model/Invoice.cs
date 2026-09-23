@@ -121,11 +121,22 @@ public sealed class OcrLine
     public List<Flag> Flags { get; set; } = [];
 }
 
+// How a page was brought upright before it was read, in order: scaled, straightened, turned
+// and straightened again. A fresh render of the document replays it to sit under the boxes.
+public sealed class Correction
+{
+    public double Scale { get; set; } = 1;
+    public double Skew { get; set; }
+    public int Turn { get; set; }
+    public double Settle { get; set; }
+}
+
 public sealed class OcrPage
 {
     public byte[] Image { get; set; } = [];
     public int Width { get; set; }
     public int Height { get; set; }
+    public Correction Correction { get; set; } = new();
     public List<OcrWord> Words { get; set; } = [];
     public Dictionary<Field, OcrWord> Header { get; set; } = [];
     public List<OcrLine> Lines { get; set; } = [];

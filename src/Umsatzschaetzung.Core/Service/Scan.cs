@@ -29,6 +29,32 @@ public static class Scan
         return pages;
     }
 
+    // A fresh render of the document is brought into the frame the reading's boxes sit in.
+    public static byte[] Upright(byte[] image, Correction c)
+    {
+        if (c is { Scale: 1, Skew: 0, Turn: 0, Settle: 0 }) return image;
+        var page = RapidOcr.Decode(image);
+        if (c.Scale != 1) page = Next(page, Scaled(page, c.Scale));
+        if (c.Skew != 0) page = Next(page, Deskew.Straighten(page, c.Skew));
+        if (c.Turn != 0) page = Next(page, RapidOcr.Rotate(page, c.Turn));
+        if (c.Settle != 0) page = Next(page, Deskew.Straighten(page, c.Settle));
+        using (page) return PdfiumPages.Png(page);
+    }
+
+    static SKBitmap Next(SKBitmap page, SKBitmap next)
+    {
+        page.Dispose();
+        return next;
+    }
+
+    static SKBitmap Scaled(SKBitmap page, double scale)
+    {
+        var info = new SKImageInfo(Math.Max((int)Math.Round(page.Width * scale), 1), Math.Max((int)Math.Round(page.Height * scale), 1),
+            SKColorType.Bgra8888, SKAlphaType.Premul);
+        return page.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
+            ?? throw new InvalidOperationException("Das Seitenbild konnte nicht skaliert werden.");
+    }
+
     public static Task<List<byte[]>> Render(IPdfPages? pdf, byte[] data, int dpi, CancellationToken ct) =>
         pdf?.Render(data, dpi, ct) ?? throw new ServiceError(ErrorCode.Unsupported, "PDF-Darstellung nicht verfügbar");
 

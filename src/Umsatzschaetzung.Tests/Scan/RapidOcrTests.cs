@@ -1,6 +1,7 @@
 using SkiaSharp;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
+using Reader = Umsatzschaetzung.Service.Scan;
 
 namespace Umsatzschaetzung.Tests.Scan;
 
@@ -58,6 +59,33 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
     {
         using var line = Line("Rechnung 4711");
         Plausible(await fixture.Ocr.Recognize(Sheets.Png(line), Ct), line.Width, line.Height);
+    }
+
+    [Fact]
+    public async Task AnUpsideDownPageIsTurnedAndARenderOfItReplaysTheTurn()
+    {
+        using var line = Line("Rechnung 4711");
+        using var flipped = new SKBitmap(line.Info);
+        using (var canvas = new SKCanvas(flipped))
+        {
+            canvas.RotateDegrees(180, line.Width / 2f, line.Height / 2f);
+            canvas.DrawBitmap(line, 0, 0);
+        }
+        var png = Sheets.Png(flipped);
+
+        var page = await fixture.Ocr.Recognize(png, Ct);
+
+        Assert.Equal(180, page.Correction.Turn);
+        page.Image = Reader.Upright(png, page.Correction);
+        Plausible(page, line.Width, line.Height);
+    }
+
+    [Fact]
+    public void AnUncorrectedRenderIsHandedBackAsItIs()
+    {
+        using var blank = Sheets.Blank(40, 30);
+        var png = Sheets.Png(blank);
+        Assert.Same(png, Reader.Upright(png, new Correction()));
     }
 
     [Fact]

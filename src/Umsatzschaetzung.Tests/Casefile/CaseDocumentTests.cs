@@ -195,6 +195,7 @@ public class CaseDocumentTests
         Image = [1, 2, 3],
         Width = 1240,
         Height = 1754,
+        Correction = new Correction { Scale = 0.75, Skew = -2.5, Turn = 180, Settle = 0.25 },
         Words = [Word("Rechnung", 0.5f), Word("Nr.", 1f), Word("ä€", 0f)],
         Header = { [Field.InvoiceNumber] = Word("R-1", 0.93f), [Field.Supplier] = Word("Rheinland", 0.25f) },
         Flags = [new Flag { Code = "sum", Message = "Summe weicht ab", Field = Field.NetTotal }, new Flag { Code = "x", Message = "", LineNo = 3 }],
@@ -220,7 +221,8 @@ public class CaseDocumentTests
         static string W(OcrWord w) => $"{w.Text}@{w.Box}:{w.Confidence}";
         static string F(Flag f) => $"{f.Code}|{f.Message}|{f.LineNo}|{f.Field}";
         static string D(Dictionary<Field, OcrWord> d) => string.Join(",", d.OrderBy(e => e.Key).Select(e => $"{e.Key}={W(e.Value)}"));
-        return $"{p.Width}x{p.Height} [{string.Join(",", p.Words.Select(W))}] {{{D(p.Header)}}} "
+        var c = p.Correction;
+        return $"{p.Width}x{p.Height} {c.Scale}/{c.Skew}/{c.Turn}/{c.Settle} [{string.Join(",", p.Words.Select(W))}] {{{D(p.Header)}}} "
             + $"<{string.Join(",", p.Flags.Select(F))}> "
             + string.Join(";", p.Lines.Select(l => $"{Json.Serialize(new Invoice { Lines = [l.Parsed] })} {{{D(l.Cells)}}} <{string.Join(",", l.Flags.Select(F))}>"));
     }

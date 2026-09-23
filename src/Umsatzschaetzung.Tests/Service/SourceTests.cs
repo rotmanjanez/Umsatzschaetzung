@@ -77,4 +77,20 @@ public sealed class SourceTests : IDisposable
         Assert.Equal([[1], [2]], read.Select(p => p.Image));
         Assert.Equal([Umsatzschaetzung.Service.Scan.Dpi], pages.Dpis);
     }
+
+    [Fact]
+    public async Task AScanIsShownTheWayItWasTurnedToBeRead()
+    {
+        using var sheet = Tests.Scan.Sheets.Blank(40, 30);
+        sheet.SetPixel(0, 0, SKColors.Black);
+        var reading = new List<OcrPage> { new() { Width = 20, Height = 15, Correction = new Correction { Scale = 0.5, Turn = 180 } } };
+        var at = (await Store("scan.png", Tests.Scan.Sheets.Png(sheet), reading)).Split('/');
+
+        var page = Assert.Single((await svc.InvoiceSource(at[0], at[1], ct)).Pages);
+
+        using var shown = SKBitmap.Decode(page.Image);
+        Assert.Equal((40, 30), (shown.Width, shown.Height));
+        Assert.Equal(SKColors.Black, shown.GetPixel(39, 29));
+        Assert.Equal(SKColors.White, shown.GetPixel(0, 0));
+    }
 }

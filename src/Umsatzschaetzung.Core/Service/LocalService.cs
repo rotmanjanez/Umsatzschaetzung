@@ -217,8 +217,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             Kind.Pdf or Kind.Zugferd => (await Scan.Render(pdf, data, PreviewDpi, ct)).Select(p => new SourcePage(p, null)).ToList(),
             _ => [new SourcePage(null, Encoding.UTF8.GetString(data))],
         };
+        if (cases.LoadReading(caseId, invoiceId) is { } read)
+            await Task.Run(() =>
+            {
+                for (var i = 0; i < pages.Count && i < read.Count; i++)
+                    if (pages[i].Image is { } image) pages[i] = new SourcePage(Scan.Upright(image, Unscaled(read[i].Correction)), null);
+            }, ct);
         return new InvoiceSourceResp(name, pages);
     });
+
+    // The preview keeps its own resolution; the turns do not depend on it.
+    static Correction Unscaled(Correction c) => new() { Skew = c.Skew, Turn = c.Turn, Settle = c.Settle };
 
     public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, async () =>
     {
@@ -238,7 +247,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             Kind.Pdf when pdf is not null => await pdf.Render(data, Scan.Dpi, ct),
             _ => new List<byte[]>(),
         };
-        for (var i = 0; i < pages.Count && i < images.Count; i++) pages[i].Image = images[i];
+        await Task.Run(() =>
+        {
+            for (var i = 0; i < pages.Count && i < images.Count; i++) pages[i].Image = Scan.Upright(images[i], pages[i].Correction);
+        }, ct);
         return new InvoiceReadingResp(pages);
     });
 

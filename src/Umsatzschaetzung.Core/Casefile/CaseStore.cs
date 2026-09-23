@@ -76,6 +76,14 @@ public sealed partial class CaseStore(string dir)
             ord INTEGER NOT NULL, code TEXT NOT NULL, message TEXT NOT NULL, line_no INTEGER NOT NULL, field TEXT,
             PRIMARY KEY(invoice_id, page, line, ord)) WITHOUT ROWID;
         """,
+        """
+        -- Wie die Seite vor dem Lesen aufgerichtet wurde: das neu gerenderte Bild wird ebenso
+        -- gedreht, damit es wieder unter den Kästen liegt.
+        ALTER TABLE reading_page ADD COLUMN scale REAL NOT NULL DEFAULT 1;
+        ALTER TABLE reading_page ADD COLUMN skew REAL NOT NULL DEFAULT 0;
+        ALTER TABLE reading_page ADD COLUMN turn INTEGER NOT NULL DEFAULT 0;
+        ALTER TABLE reading_page ADD COLUMN settle REAL NOT NULL DEFAULT 0;
+        """,
     ];
 
     static readonly string[] ReadingTables =
@@ -433,8 +441,11 @@ public sealed partial class CaseStore(string dir)
         for (var p = 0; p < pages.Count; p++)
         {
             var page = pages[p];
-            Exec(db, tx, "INSERT INTO reading_page(invoice_id, ord, width, height) VALUES(@id, @ord, @width, @height)",
-                ("@id", key), ("@ord", p), ("@width", page.Width), ("@height", page.Height));
+            var c = page.Correction;
+            Exec(db, tx, "INSERT INTO reading_page(invoice_id, ord, width, height, scale, skew, turn, settle) "
+                + "VALUES(@id, @ord, @width, @height, @scale, @skew, @turn, @settle)",
+                ("@id", key), ("@ord", p), ("@width", page.Width), ("@height", page.Height),
+                ("@scale", c.Scale), ("@skew", c.Skew), ("@turn", c.Turn), ("@settle", c.Settle));
 
             for (var i = 0; i < page.Words.Count; i++)
                 Exec(db, tx, "INSERT INTO reading_word(invoice_id, page, ord, text, x, y, w, h, confidence) "
@@ -474,8 +485,13 @@ public sealed partial class CaseStore(string dir)
     static List<OcrPage>? ReadReading(SqliteConnection db, string key)
     {
         List<OcrPage> pages = [];
-        ReadRows(db, "SELECT width, height FROM reading_page WHERE invoice_id = @id ORDER BY ord",
-            r => pages.Add(new OcrPage { Width = r.GetInt32(0), Height = r.GetInt32(1) }), ("@id", key));
+        ReadRows(db, "SELECT width, height, scale, skew, turn, settle FROM reading_page WHERE invoice_id = @id ORDER BY ord",
+            r => pages.Add(new OcrPage
+            {
+                Width = r.GetInt32(0),
+                Height = r.GetInt32(1),
+                Correction = new Correction { Scale = r.GetDouble(2), Skew = r.GetDouble(3), Turn = r.GetInt32(4), Settle = r.GetDouble(5) },
+            }), ("@id", key));
         if (pages.Count == 0) return null;
 
         ReadRows(db, "SELECT page, text, x, y, w, h, confidence FROM reading_word WHERE invoice_id = @id ORDER BY page, ord",

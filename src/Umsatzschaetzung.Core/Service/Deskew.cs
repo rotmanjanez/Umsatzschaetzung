@@ -21,10 +21,13 @@ public static class Deskew
     // pages that lock on from 28/40 to 39/40. How much is cropped barely matters.
     const double Margin = 0.15;
 
-    public static SKBitmap? Apply(SKBitmap page)
+    public static SKBitmap? Apply(SKBitmap page) => Apply(page, out _);
+
+    public static SKBitmap? Apply(SKBitmap page, out double applied)
     {
         var angle = Angle(page);
-        return Moves(angle, page.Width) ? Straighten(page, angle) : null;
+        applied = Moves(angle, page.Width) ? angle : 0;
+        return applied == 0 ? null : Straighten(page, angle);
     }
 
     // Below a pixel of travel across the page there is nothing to correct and a resample
