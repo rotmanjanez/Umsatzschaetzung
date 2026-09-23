@@ -234,16 +234,19 @@ public sealed class CaseTests : IDisposable
     }
 
     [Fact]
-    public async Task AnImportedAssortmentJoinsTheCaseAndExportsAgain()
+    public async Task AReadAssortmentJoinsTheCaseAndExportsAgain()
     {
         var kase = await host.PutVorlage();
         var product = TestData.Seed().Products.Values.First();
 
-        var imported = await svc.ImportAssortment(kase.Id, System.Text.Encoding.UTF8.GetBytes($"Produkt-ID;Bruttopreis;USt\n{product.Id};3,90;19\nfehlt;1;7\n"), ct);
+        var read = await svc.ReadAssortment(System.Text.Encoding.UTF8.GetBytes($"Produkt-ID;Bruttopreis;USt\n{product.Id};3,90;19\nfehlt;1;7\n"), ct);
 
-        Assert.Equal(["fehlt"], imported.Unknown);
-        var listed = Assert.Single((await svc.GetCase(kase.Id, ct)).Products, p => p.ProductId == product.Id);
-        Assert.Equal((390L, 1900L, false), (listed.GrossPrice, listed.Vat, listed.Disabled));
+        Assert.Equal(["fehlt"], read.Unknown);
+        var listed = Assert.Single(read.Products);
+        Assert.Equal((product.Id, 390L, 1900L, false), (listed.ProductId, listed.GrossPrice, listed.Vat, listed.Disabled));
+        kase.Products.RemoveAll(p => p.ProductId == product.Id);
+        kase.Products.Add(listed);
+        await svc.PutCase(kase, ct);
         var export = await svc.ExportAssortment(kase.Id, ct);
         Assert.Contains(";3,90 €;19 %;" + product.Id, System.Text.Encoding.UTF8.GetString(export.Data));
         Assert.Matches(@"^Umsatzschätzung-Schankwirtschaft_Zum_Alten_Fass_Bp_2024_Sortiment-\d{4}-\d{2}-\d{2}\.csv$", export.FileName);

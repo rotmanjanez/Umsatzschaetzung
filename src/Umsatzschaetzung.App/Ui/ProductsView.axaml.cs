@@ -213,14 +213,25 @@ public partial class ProductsView : Screen
     async void ImportCsv(object? sender, RoutedEventArgs e)
     {
         if (Session.Case is null || (await Session.PickFiles(Session.CsvFilter, false)).FirstOrDefault() is not { } file) return;
-        timer.Stop();
-        if (!await Session.SaveCase(Ct) || Session.Case is not { } kase) return;
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.ImportAssortment(kase.Id, file.Data, Ct);
-            Session.SetCase(resp.Case);
+            var read = await Session.Service.ReadAssortment(file.Data, Ct);
+            if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
+            var listed = kase.Products.DistinctBy(p => p.ProductId).ToDictionary(p => p.ProductId);
+            var conflicts = read.Products
+                .Where(p => listed.TryGetValue(p.ProductId, out var l) && !l.Disabled && (l.GrossPrice, l.Vat) != (p.GrossPrice, p.Vat))
+                .Select(p => new AssortmentConflict(Names.Product(rs, p.ProductId), listed[p.ProductId], p))
+                .OrderBy(c => c.Name, StringComparer.CurrentCulture)
+                .ToList();
+            HashSet<string>? take = conflicts.Count == 0 ? [] : await AssortmentConflicts.Ask(TopLevel.GetTopLevel(this) as Window, conflicts);
+            if (take is null || Session.Case != kase) return;
+            foreach (var p in read.Products)
+            {
+                if (!listed.TryGetValue(p.ProductId, out var l)) kase.Products.Add(p);
+                else if (l.Disabled || take.Contains(p.ProductId)) (l.GrossPrice, l.Vat, l.Disabled) = (p.GrossPrice, p.Vat, false);
+            }
             Load();
-            if (resp.Unknown.Count > 0) Session.Fail("Nicht im Katalog: " + string.Join(", ", resp.Unknown));
+            if (read.Unknown.Count > 0) Session.Fail("Nicht im Katalog: " + string.Join(", ", read.Unknown));
         });
     }
 

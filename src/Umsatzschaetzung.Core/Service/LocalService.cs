@@ -121,18 +121,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return new ExportResp(Csv.Assortment(c, rules.Load()), FileName(c.Label + " Sortiment", "csv"));
     });
 
-    public Task<AssortmentImportResp> ImportAssortment(string caseId, byte[] data, CancellationToken ct) => Guard(ct, () =>
-    {
-        var c = LoadCase(caseId);
-        var read = Csv.ReadAssortment(data, rules.Load());
-        foreach (var p in read.Products)
-        {
-            c.Products.RemoveAll(x => x.ProductId == p.ProductId);
-            c.Products.Add(p);
-        }
-        SaveCase(c);
-        return new AssortmentImportResp(c, read.Unknown);
-    });
+    public Task<AssortmentImport> ReadAssortment(byte[] data, CancellationToken ct) => Guard(ct, () => Csv.ReadAssortment(data, rules.Load()));
 
     public Task<ParseResp> ParseInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(ct, async () =>
     {
