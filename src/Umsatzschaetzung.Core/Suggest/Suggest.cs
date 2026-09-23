@@ -192,6 +192,9 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         return m;
     }
 
+    public static long? Factor(RuleSet rs, string ingredientId, InvoiceLine line) =>
+        Factor(PackSize.Read(line.Name), line.UnitCode, Scale.Of(rs, ingredientId));
+
     // Der Inhalt eines Gebindes in der Rezepteinheit, aus der Packungsangabe in der
     // Bezeichnung. Null heißt: entweder rechnet die Einheitentabelle ohnehin um, oder
     // die Zeile braucht einen Faktor, den nur ein Mensch kennt.

@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
+using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -73,16 +74,21 @@ public sealed class SnippetRow(Invoice invoice, int line) : Observable
 
 public sealed class MappingModel : Observable
 {
-    bool noInvoices, hasSelection, loading, mapping, manual, currentAuto;
-    string summary = "", title = "", facts = "", factor = "", current = "";
+    bool noInvoices, hasSelection, loading, mapping, manual, currentAuto, needsFactor;
+    string summary = "", title = "", supplier = "", article = "", total = "", factor = "", current = "";
     string assigned = "";
     Ingredient? ingredient;
     List<Ingredient> ingredients = [];
+    RuleSet? rules;
+    InvoiceLine? line;
+    long quantity;
+    string? target;
 
     public ObservableCollection<LineGroup> Groups { get; } = [];
     public ObservableCollection<CandidateRow> Candidates { get; } = [];
     public ObservableCollection<SnippetRow> Snippets { get; } = [];
     public bool HasSnippets => Snippets.Count > 0;
+    public string SnippetsTitle => Snippets.Count == 1 ? "BELEG" : Snippets.Count + " BELEGE";
     public string Summary { get => summary; set => Set(ref summary, value); }
     public bool NoInvoices { get => noInvoices; set => Set(ref noInvoices, value); }
     public bool HasSelection { get => hasSelection; set { if (Set(ref hasSelection, value)) Raise(nameof(NoSelection)); } }
@@ -98,29 +104,63 @@ public sealed class MappingModel : Observable
         {
             if (!Set(ref manual, value)) return;
             Raise(nameof(ShowCandidates));
+            Raise(nameof(ShowFields));
             Raise(nameof(ManualLabel));
             Raise(nameof(AssignLabel));
             Raise(nameof(CanAssign));
+            Prefill();
         }
     }
+    public bool NeedsFactor { get => needsFactor; private set { if (Set(ref needsFactor, value)) Raise(nameof(ShowFields)); } }
+    public bool ShowFields => manual || needsFactor;
     public string ManualLabel => manual ? "Vorschlag verwenden" : "Manuell zuordnen";
     public string AssignLabel => !manual && currentAuto && Candidates.FirstOrDefault(c => c.Selected) is { IsExact: true } ? "Bestätigen" : "Zuordnen";
     public bool CanAssign => !mapping && (manual || Candidates.Any(c => c.Selected));
     public string Title { get => title; set => Set(ref title, value); }
-    public string Facts { get => facts; set => Set(ref facts, value); }
+    public string Supplier { get => supplier; set => Set(ref supplier, value); }
+    public string Article { get => article; set { if (Set(ref article, value)) Raise(nameof(HasArticle)); } }
+    public bool HasArticle => article != "";
+    public string Total { get => total; set => Set(ref total, value); }
     public string Current { get => current; set { if (Set(ref current, value)) Raise(nameof(HasCurrent)); } }
     public bool HasCurrent => current != "";
     public bool CurrentAuto { get => currentAuto; set { if (Set(ref currentAuto, value)) Raise(nameof(AssignLabel)); } }
     public string Assigned { get => assigned; set { if (Set(ref assigned, value)) Raise(nameof(HasAssigned)); } }
     public bool HasAssigned => assigned != "";
-    public string Factor { get => factor; set => Set(ref factor, value); }
-    public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
+    public string Factor { get => factor; set { if (Set(ref factor, value)) Raise(nameof(FactorHint)); } }
+    public string FactorUnit => Unit is { } u ? Format.UnitName(u) + " / " + Units.Label(line!.UnitCode) : "";
+
+    // What the typed factor makes of this position: its content per package, then the whole delivery.
+    public string FactorHint
+    {
+        get
+        {
+            if (Unit is not { } u) return "";
+            var pack = Units.Label(line!.UnitCode);
+            var name = Names.Ingredient(rules!, target!);
+            if (Input.Int(factor) is not { } f || f <= 0)
+                return $"Wie viel {Format.UnitName(u)} {name} enthält 1 {pack}?";
+            var each = Format.Qty(f, u);
+            return $"1 {pack} = {each} {name} · {Format.Milli(quantity)} {pack} × {each} = {Format.Qty(quantity * f / 1000, u)}";
+        }
+    }
+
+    Unit? Unit => NeedsFactor ? Scale.Of(rules!, target!) : null;
+    public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) Prefill(); } }
     public List<Ingredient> Ingredients { get => ingredients; set => Set(ref ingredients, value); }
+
+    public void Select(RuleSet? rs, InvoiceLine? l, long qty = 0)
+    {
+        rules = rs;
+        line = l;
+        quantity = qty;
+        Prefill();
+    }
 
     public void ClearSnippets()
     {
         Snippets.Clear();
         Raise(nameof(HasSnippets));
+        Raise(nameof(SnippetsTitle));
     }
 
     public void SetSnippets(IEnumerable<SnippetRow> rows)
@@ -128,6 +168,7 @@ public sealed class MappingModel : Observable
         ClearSnippets();
         foreach (var row in rows) Snippets.Add(row);
         Raise(nameof(HasSnippets));
+        Raise(nameof(SnippetsTitle));
     }
 
     public void SetCandidates(List<CandidateRow> candidates)
@@ -157,6 +198,17 @@ public sealed class MappingModel : Observable
     {
         Raise(nameof(CanAssign));
         Raise(nameof(AssignLabel));
+        Prefill();
+    }
+
+    void Prefill()
+    {
+        var chosen = manual ? null : Candidates.FirstOrDefault(c => c.Selected)?.Candidate.Mapping;
+        target = manual ? ingredient?.Id : chosen?.IngredientId;
+        NeedsFactor = rules is not null && line is not null && target is not null && Scale.NeedsFactor(rules, target, line.UnitCode);
+        Factor = NeedsFactor && (chosen?.Factor ?? Matcher.Factor(rules!, target!, line!)) is { } f ? Format.Group(f) : "";
+        Raise(nameof(FactorUnit));
+        Raise(nameof(FactorHint));
     }
 }
 
@@ -248,7 +300,7 @@ public partial class MappingView : Screen
             for (var j = 0; j < inv.Lines.Count; j++)
             {
                 var l = inv.Lines[j];
-                var key = inv.SupplierName + "|" + (string.IsNullOrEmpty(l.SellerArticleId) ? l.Name : l.SellerArticleId);
+                var key = inv.SupplierName + "|" + Identity(inv.SupplierName, l) + "|" + l.UnitCode.ToUpperInvariant();
                 if (!groups.TryGetValue(key, out var g))
                 {
                     g = new LineGroup { Key = key, Supplier = inv.SupplierName, Article = l.SellerArticleId, Name = l.Name, Unit = l.UnitCode };
@@ -262,6 +314,12 @@ public partial class MappingView : Screen
         return [.. groups.Values];
     }
 
+    // A group holds exactly the lines one mapping covers: the key Match picks a rule by, and its unit.
+    static string Identity(string? supplier, InvoiceLine l) =>
+        !string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(l.SellerArticleId) ? "a:" + l.SellerArticleId
+        : !string.IsNullOrEmpty(l.Gtin) ? "g:" + l.Gtin
+        : "n:" + ArticleName.Canonical(l.Name);
+
     // A group is settled by the weakest of its lines: one open line keeps it open, one
     // machine decision keeps it automatic.
     Checked StateOf(LineGroup g)
@@ -271,6 +329,7 @@ public partial class MappingView : Screen
         {
             var id = Session.Case!.Invoices[inv].Lines[line].MappingId;
             if (string.IsNullOrEmpty(id) || Session.Rules?.Mappings.GetValueOrDefault(id) is not { } m) return Checked.Pending;
+            if (m.Factor is null && Scale.NeedsFactor(Session.Rules, m.IngredientId, Session.Case.Invoices[inv].Lines[line].UnitCode)) return Checked.Pending;
             g.MappingId ??= id;
             if (!m.Confirmed) state = Checked.Automatic;
         }
@@ -290,12 +349,15 @@ public partial class MappingView : Screen
         if (Groups.SelectedItem is not LineGroup g || Session.Case is null)
         {
             model.HasSelection = false;
+            model.Select(null, null);
             return;
         }
         model.Assigned = "";
         model.Title = g.Name;
-        var total = (Format.Milli(g.Quantity) + " " + Units.Label(g.Unit)).Trim();
-        model.Facts = string.IsNullOrEmpty(g.Article) ? total : g.Article + ", " + total;
+        model.Supplier = g.Supplier;
+        model.Article = g.Article ?? "";
+        var total = Format.Quantity(g.Quantity, g.Unit);
+        model.Total = g.Lines.Count == 1 ? total : total + " in " + g.Lines.Count + " Positionen";
         model.Current = g.MappingId is null || Session.Rules is null ? ""
             : Names.Mapping(Session.Rules, g.MappingId) + " · " + g.StateText.ToLowerInvariant();
         model.CurrentAuto = g.IsAutomatic;
@@ -303,6 +365,7 @@ public partial class MappingView : Screen
         model.Loading = true;
         var (inv, line) = g.Lines[0];
         var lineItem = Session.Case.Invoices[inv].Lines[line];
+        model.Select(Session.Rules, lineItem, g.Quantity);
         ShowSnippets(seq, g);
         await Session.Run(async () =>
         {
@@ -375,19 +438,20 @@ public partial class MappingView : Screen
         if (Groups.SelectedItem is not LineGroup g || Session.Case is null) return;
         if (!model.Manual)
         {
-            if (model.Candidates.FirstOrDefault(c => c.Selected) is not { } chosen) return;
+            if (model.Candidates.FirstOrDefault(c => c.Selected) is not { } chosen || !ReadFactor(g, out var packed)) return;
             var suggested = chosen.Candidate.Mapping;
-            if (suggested.Id == "" || !suggested.Confirmed)
+            if (suggested.Id == "" || !suggested.Confirmed || model.NeedsFactor && suggested.Factor != packed)
             {
                 if (suggested.Id == "")
                 {
                     suggested.Id = g.MappingId ?? Session.NewId("map");
                     suggested.UnitCode = g.Unit;
                 }
+                if (model.NeedsFactor) suggested.Factor = packed;
                 suggested.Confirmed = true;
                 if (!await Session.Put(suggested, Ct)) return;
             }
-            await AssignId(g, suggested.Id, chosen.Display);
+            await AssignId(g, suggested.Id, Names.Candidate(Session.Rules!, suggested));
             return;
         }
         if (model.Ingredient is null)
@@ -395,14 +459,7 @@ public partial class MappingView : Screen
             Session.Fail("Bitte eine Zutat wählen.");
             return;
         }
-        var unit = Scale.Of(Session.Rules!, model.Ingredient.Id);
-        var needsFactor = Units.Lookup(g.Unit) is not { Container: false } u || u.Base != unit;
-        var factor = model.Factor.Trim() == "" ? null : Input.Int(model.Factor);
-        if (needsFactor && factor is null)
-        {
-            Session.Fail($"{Units.Label(g.Unit)} lässt sich nicht umrechnen — bitte den Inhalt je {Units.Label(g.Unit)} angeben.");
-            return;
-        }
+        if (!ReadFactor(g, out var factor)) return;
         var mapping = new ArticleMapping
         {
             Id = g.MappingId ?? Session.NewId("map"),
@@ -412,13 +469,18 @@ public partial class MappingView : Screen
             Observed = g.Name,
             UnitCode = g.Unit,
             IngredientId = model.Ingredient.Id,
-            Factor = needsFactor ? factor : null,
+            Factor = factor,
             Confirmed = true,
         };
-        if (await Session.Put(mapping, Ct))
-            await AssignId(g, mapping.Id, mapping.Factor is { } f && unit is { } bu
-                ? model.Ingredient.Name + " × " + Format.Qty(f, bu)
-                : model.Ingredient.Name);
+        if (await Session.Put(mapping, Ct)) await AssignId(g, mapping.Id, Names.Candidate(Session.Rules!, mapping));
+    }
+
+    bool ReadFactor(LineGroup g, out long? factor)
+    {
+        factor = model.NeedsFactor ? Input.Int(model.Factor) : null;
+        if (!model.NeedsFactor || factor > 0) return true;
+        Session.Fail($"{Units.Label(g.Unit)} lässt sich nicht umrechnen — bitte den Inhalt je {Units.Label(g.Unit)} angeben.");
+        return false;
     }
 
     void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);

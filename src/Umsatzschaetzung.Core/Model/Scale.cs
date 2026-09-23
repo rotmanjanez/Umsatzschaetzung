@@ -49,6 +49,9 @@ public static class Scale
         return flags;
     }
 
+    public static bool NeedsFactor(RuleSet rs, string ingredientId, string unitCode) =>
+        Of(rs, ingredientId) is { } unit && !(Units.Lookup(unitCode) is { Container: false } u && u.Base == unit);
+
     public static long ToBase(long amount, string unit) =>
         Units.Lookup(unit) is { } u ? amount * u.Factor : amount;
 }
