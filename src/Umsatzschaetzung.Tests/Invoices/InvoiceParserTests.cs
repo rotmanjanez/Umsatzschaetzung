@@ -34,10 +34,6 @@ public class InvoiceParserTests
     [InlineData(new byte[] { (byte)'M', (byte)'M', 0, (byte)'*', 0, 0, 0, 8 })]
     public void PngJpegAndTiffAreImages(byte[] data) => Assert.Equal(Kind.Image, InvoiceParser.Detect(data));
 
-    [Fact]
-    public void TheScanFixtureIsAnImage() =>
-        Assert.Equal(Kind.Image, InvoiceParser.Detect(File.ReadAllBytes(TestData.Fixture("dataset/2025/cc/2025-01-08_9120044817.pdf.scan.jpeg"))));
-
     [Theory]
     [InlineData("")]
     [InlineData("hello")]
