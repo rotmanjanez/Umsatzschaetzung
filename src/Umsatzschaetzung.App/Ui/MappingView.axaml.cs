@@ -10,6 +10,7 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed class LineGroup
 {
+    public required string Key { get; init; }
     public required string Supplier { get; init; }
     public required string? Article { get; init; }
     public required string Name { get; init; }
@@ -165,6 +166,7 @@ public partial class MappingView : Screen
 
     readonly MappingModel model = new();
     int suggestSeq;
+    bool refreshing;
     (Case?, RuleSet?) caughtUp;
 
     public MappingView(Session session) : base(session)
@@ -210,18 +212,31 @@ public partial class MappingView : Screen
         caughtUp = (Session.Case, Session.Rules);
     }
 
+    // The open position stays open, and its detail untouched unless the refresh changed its mapping.
     void Refresh()
     {
+        var kept = Groups.SelectedItem as LineGroup;
+        var focused = Groups.IsKeyboardFocusWithin;
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         IngredientBox.SetSimilar(this, Session.SimilarIngredients);
-        model.Assigned = "";
         model.Ingredients = Session.Ingredients();
+        refreshing = true;
         model.Groups.Clear();
         foreach (var g in LineGroups()) model.Groups.Add(g);
+        var again = kept is null ? null : model.Groups.FirstOrDefault(g => g.Key == kept.Key);
+        if (again is not null && again.State == kept!.State && again.MappingId == kept.MappingId) Groups.SelectedItem = again;
+        refreshing = false;
         model.NoInvoices = Session.Case?.Invoices.Count == 0;
         model.Counted();
-        model.SetCandidates([]);
-        model.HasSelection = false;
+        if (again is null)
+        {
+            model.Assigned = "";
+            Show();
+            return;
+        }
+        if (Groups.SelectedItem != again) Groups.SelectedItem = again;
+        Groups.ScrollIntoView(again, null);
+        if (focused) Groups.Focus();
     }
 
     List<LineGroup> LineGroups()
@@ -237,7 +252,7 @@ public partial class MappingView : Screen
                 var key = inv.SupplierName + "|" + (string.IsNullOrEmpty(l.SellerArticleId) ? l.Name : l.SellerArticleId);
                 if (!groups.TryGetValue(key, out var g))
                 {
-                    g = new LineGroup { Supplier = inv.SupplierName, Article = l.SellerArticleId, Name = l.Name, Unit = l.UnitCode };
+                    g = new LineGroup { Key = key, Supplier = inv.SupplierName, Article = l.SellerArticleId, Name = l.Name, Unit = l.UnitCode };
                     groups[key] = g;
                 }
                 g.Lines.Add((i, j));
@@ -263,7 +278,12 @@ public partial class MappingView : Screen
         return state;
     }
 
-    async void GroupSelected(object? sender, SelectionChangedEventArgs e)
+    void GroupSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!refreshing) Show();
+    }
+
+    async void Show()
     {
         var seq = ++suggestSeq;
         model.SetCandidates([]);
