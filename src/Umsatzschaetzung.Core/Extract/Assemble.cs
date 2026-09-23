@@ -70,8 +70,11 @@ public static class Assemble
             }
         }
 
-        if (TotalsVat(tagged) is { } rate)
-            foreach (var l in inv.Lines.Where(l => l.Vat == 0)) l.Vat = rate;
+        if (TotalsVat(tagged) is { } stated)
+        {
+            foreach (var l in inv.Lines.Where(l => l.Vat == 0)) l.Vat = stated.Rate;
+            pages[stated.Page].Header[Field.Vat] = stated.Word;
+        }
 
         var header = new Dictionary<Field, string>();
         foreach (var f in Header)
@@ -206,24 +209,29 @@ public static class Assemble
 
     // Two stated rates cannot be attributed to lines; the vatLabel retry drops a rate read
     // off some other totals row.
-    static long? TotalsVat(IReadOnlyList<List<TaggedWord>> tagged)
+    static (long Rate, int Page, OcrWord Word)? TotalsVat(IReadOnlyList<List<TaggedWord>> tagged)
     {
         var rates = Rates(tagged, labelledOnly: false);
         if (rates.Count > 1) rates = Rates(tagged, labelledOnly: true);
-        return rates.Count == 1 ? rates.Single() : null;
+        if (rates.Count != 1) return null;
+        var (rate, at) = rates.Single();
+        return (rate, at.Page, at.Word);
     }
 
-    static HashSet<long> Rates(IReadOnlyList<List<TaggedWord>> tagged, bool labelledOnly)
+    // Where a rate is stated more than once, its first mention is where it came from.
+    static Dictionary<long, (int Page, OcrWord Word)> Rates(IReadOnlyList<List<TaggedWord>> tagged, bool labelledOnly)
     {
-        var rates = new HashSet<long>();
-        foreach (var page in tagged)
-            foreach (var row in Group(page).Where(r => r[0].Role == Role.Total))
+        var rates = new Dictionary<long, (int Page, OcrWord Word)>();
+        for (var p = 0; p < tagged.Count; p++)
+            foreach (var row in Group(tagged[p]).Where(r => r[0].Role == Role.Total))
             {
                 if (labelledOnly && !row.Any(w => w.Field == Field.VatLabel)) continue;
                 foreach (var w in row.Where(w => w.Field == Field.Vat))
                 {
                     var rate = Parse.Number(Parse.Digits(w.Word.Text), Parse.ScaleBp);
-                    if (rate != 0) rates.Add(rate);
+                    if (rate == 0 || rates.ContainsKey(rate)) continue;
+                    var said = row.Where(v => v.Field == Field.VatLabel).Append(w).ToList();
+                    rates[rate] = (p, new OcrWord { Text = w.Word.Text, Box = Union(said), Confidence = w.Word.Confidence });
                 }
             }
         return rates;

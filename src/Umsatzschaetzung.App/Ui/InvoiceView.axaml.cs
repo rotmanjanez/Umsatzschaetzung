@@ -476,16 +476,31 @@ public partial class InvoiceView : Screen
             FocusCell(currentPage, null);
             return;
         }
-        FocusCell(row.Page, row.Cells.GetValueOrDefault(LineFields[column.DisplayIndex])?.Box);
+        var (page, box) = Where(row, LineFields[column.DisplayIndex]);
+        FocusCell(page, box);
+    }
+
+    // A value the row does not print itself, like the one rate the totals state, was read once
+    // for the whole document.
+    (int Page, Box? Box) Where(LineRow row, Field field) =>
+        row.Cells.TryGetValue(field, out var cell) ? (row.Page, cell.Box)
+        : Stated(field) is { Box: not null } stated ? stated
+        : (row.Page, null);
+
+    (int Page, Box? Box) Stated(Field field)
+    {
+        for (var i = 0; i < pages.Count; i++)
+            if (pages[i].Header.TryGetValue(field, out var word)) return (i, word.Box);
+        return (currentPage, null);
     }
 
     void HeaderFocus(object? sender, FocusChangedEventArgs e)
     {
-        if (pages.Count == 0) return;
         var field = ReferenceEquals(sender, SupplierBox) ? Field.Supplier
             : ReferenceEquals(sender, NumberBox) ? Field.InvoiceNumber
             : Field.InvoiceDate;
-        FocusCell(0, pages[0].Header.GetValueOrDefault(field)?.Box);
+        var (page, box) = Stated(field);
+        FocusCell(page, box);
     }
 
     void PageChanged(object? sender, SelectionChangedEventArgs e)
@@ -548,9 +563,9 @@ public partial class InvoiceView : Screen
         var boxes = new List<Box>();
         foreach (var f in flags.Where(f => f.LineNo == 0 && f.Field is not null))
             if (page.Header.TryGetValue(f.Field!.Value, out var cell)) boxes.Add(cell.Box);
-        foreach (var row in model.Lines.Where(r => r.Page == currentPage))
+        foreach (var row in model.Lines)
         foreach (var f in flags.Where(f => f.LineNo == row.Line.No && f.LineNo != 0 && f.Field is not null))
-            if (row.Cells.TryGetValue(f.Field!.Value, out var cell)) boxes.Add(cell.Box);
+            if (Where(row, f.Field!.Value) is (var at, { } box) && at == currentPage) boxes.Add(box);
         foreach (var b in boxes)
         {
             var rect = new Rectangle

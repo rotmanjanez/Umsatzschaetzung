@@ -59,7 +59,7 @@ public class AssembleTests
         Assert.Equal([inv.Lines[0], inv.Lines[1]], page.Lines.Select(l => l.Parsed));
         Assert.Equal("Tomaten rot", page.Lines[0].Cells[Field.Name].Text);
         Assert.Equal(
-            [Field.InvoiceNumber, Field.InvoiceDate, Field.Supplier, Field.NetTotal, Field.GrossTotal],
+            [Field.Vat, Field.InvoiceNumber, Field.InvoiceDate, Field.Supplier, Field.NetTotal, Field.GrossTotal],
             page.Header.Keys.Order());
         Assert.Equal("Pucher OG", page.Header[Field.Supplier].Text);
         Assert.Equal(new Box(50, 0, 88, 20), page.Header[Field.Supplier].Box);
@@ -123,6 +123,17 @@ public class AssembleTests
             .Cells(Role.LineItem, (100, "2"), (300, "Tomaten"), (700, "3,50"), (900, "7,00"), (1000, "19 %"))
             .Cells(Role.LineItem, (100, "1"), (300, "Gurken"), (700, "4,00"), (900, "4,00"))));
         Assert.Equal([1900L, 700L], inv.Lines.Select(l => l.Vat));
+    }
+
+    [Fact]
+    public void TheTotalsRateKeepsWhereItWasStated()
+    {
+        var (_, pages) = Read(new Sheet(), Receipt());
+        Assert.False(pages[0].Header.ContainsKey(Field.Vat));
+        var stated = pages[1].Header[Field.Vat];
+        Assert.Equal("7", stated.Text);
+        Assert.Equal(50, stated.Box.X);
+        Assert.True(stated.Box.X + stated.Box.W > 300);
     }
 
     [Fact]
