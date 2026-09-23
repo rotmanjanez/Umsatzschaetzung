@@ -74,15 +74,19 @@ public sealed class SnippetRow(Invoice invoice, int line) : Observable
 
 public sealed class MappingModel : Observable
 {
-    bool noInvoices, hasSelection, loading, mapping, manual, currentAuto, needsFactor;
+    bool noInvoices, hasSelection, loading, mapping, manual, currentAuto;
     string summary = "", title = "", supplier = "", article = "", total = "", factor = "", current = "";
-    string assigned = "";
+    string assigned = "", prefilled = "";
     Ingredient? ingredient;
     List<Ingredient> ingredients = [];
     RuleSet? rules;
     InvoiceLine? line;
     long quantity;
     string? target;
+    Unit? unit;
+    Pack? pack;
+    long? stored;
+    (long Factor, long Per, FactorSource Source)? resolved;
 
     public ObservableCollection<LineGroup> Groups { get; } = [];
     public ObservableCollection<CandidateRow> Candidates { get; } = [];
@@ -111,8 +115,10 @@ public sealed class MappingModel : Observable
             Prefill();
         }
     }
-    public bool NeedsFactor { get => needsFactor; private set { if (Set(ref needsFactor, value)) Raise(nameof(ShowFields)); } }
-    public bool ShowFields => manual || needsFactor;
+    public bool ShowFactor => unit is not null && resolved is not { Source: FactorSource.Table };
+    public bool NeedsFactor => ShowFactor && resolved is null && stored is null;
+    public bool ShowFields => manual || ShowFactor;
+    public string FactorLabel => NeedsFactor ? "Faktor *" : "Faktor";
     public string ManualLabel => manual ? "Vorschlag verwenden" : "Manuell zuordnen";
     public string AssignLabel => !manual && currentAuto && Candidates.FirstOrDefault(c => c.Selected) is { IsExact: true } ? "Bestätigen" : "Zuordnen";
     public bool CanAssign => !mapping && (manual || Candidates.Any(c => c.Selected));
@@ -126,25 +132,98 @@ public sealed class MappingModel : Observable
     public bool CurrentAuto { get => currentAuto; set { if (Set(ref currentAuto, value)) Raise(nameof(AssignLabel)); } }
     public string Assigned { get => assigned; set { if (Set(ref assigned, value)) Raise(nameof(HasAssigned)); } }
     public bool HasAssigned => assigned != "";
-    public string Factor { get => factor; set { if (Set(ref factor, value)) Raise(nameof(FactorHint)); } }
-    public string FactorUnit => Unit is { } u ? Format.UnitName(u) + " / " + Units.Label(line!.UnitCode) : "";
+    public string Factor
+    {
+        get => factor;
+        set
+        {
+            if (!Set(ref factor, value)) return;
+            Raise(nameof(FactorHint));
+            Raise(nameof(FactorOrigin));
+            Raise(nameof(HasOrigin));
+            Raise(nameof(Estimate));
+        }
+    }
+    public string FactorUnit => unit is { } u ? Format.UnitName(u) + " / " + Units.Label(line!.UnitCode) : "";
 
     // What the typed factor makes of this position: its content per package, then the whole delivery.
     public string FactorHint
     {
         get
         {
-            if (Unit is not { } u) return "";
-            var pack = Units.Label(line!.UnitCode);
+            if (unit is not { } u) return "";
+            var billed = Units.Label(line!.UnitCode);
             var name = Names.Ingredient(rules!, target!);
-            if (Input.Int(factor) is not { } f || f <= 0)
-                return $"Wie viel {Format.UnitName(u)} {name} enthält 1 {pack}?";
+            if (Typed is not { } f)
+                return $"Wie viel {Format.UnitName(u)} {name} enthält 1 {billed}?";
             var each = Format.Qty(f, u);
-            return $"1 {pack} = {each} {name} · {Format.Milli(quantity)} {pack} × {each} = {Format.Qty(quantity * f / 1000, u)}";
+            return $"1 {billed} = {each} {name} · {Format.Milli(quantity)} {billed} × {each} = {Format.Qty(quantity * f / 1000, u)}";
         }
     }
 
-    Unit? Unit => NeedsFactor ? Scale.Of(rules!, target!) : null;
+    // Where an untouched factor comes from, or where a typed one goes. The piece weight is only a
+    // guess: a cash&carry "Stk" can be a 10 kg sack, which the price per kilogram gives away.
+    public string FactorOrigin
+    {
+        get
+        {
+            if (!ShowFactor) return "";
+            var price = PricePer();
+            if (Teaches)
+                return $"Wird als Stückgewicht für {Names.Ingredient(rules!, target!)} gespeichert" + price;
+            if (Untouched && resolved is { Source: FactorSource.Pack } && pack is { } p)
+                return "Aus der Packungsangabe: " + PackText(p) + price;
+            if (Untouched && stored is null && resolved is { Source: FactorSource.Piece } && Weight is { } w)
+                return $"Richtwert der Zutat: 1 Stück ≈ {Format.Qty(w.Amount, w.Unit)}{price} — stimmt das für diesen Artikel?";
+            return "";
+        }
+    }
+    public bool HasOrigin => FactorOrigin != "";
+    public bool Estimate => Untouched && stored is null && resolved is { Source: FactorSource.Piece };
+
+    Piece? Weight => rules?.Ingredients.GetValueOrDefault(target ?? "")?.Piece;
+    long? Typed => Input.Int(factor) is > 0 and var f ? f : null;
+    bool Untouched => factor == prefilled || factor.Trim() == "";
+
+    // A single piece measured in g or ml says how heavy the ingredient is, not this article:
+    // that belongs to the ingredient, where every other line of it finds it.
+    bool Learns => unit is Unit.G or Unit.Ml && pack is null
+        && Units.Lookup(line!.UnitCode) is { Container: false, Base: Unit.Piece };
+    bool Teaches => Learns && !Untouched && Typed is { } t && t != resolved?.Factor;
+
+    string PricePer()
+    {
+        if (unit is not (Unit.G or Unit.Ml) || Typed is not { } f || line is not { UnitPrice: > 0 } l) return "";
+        var each = l.PriceBaseQty > 0 ? l.UnitPrice * 1000 / l.PriceBaseQty : l.UnitPrice;
+        return " · ≈ " + Format.Cents((each * 1000 / f + 5000) / 10000) + (unit == Unit.G ? "/kg" : "/l");
+    }
+
+    string PackText(Pack p)
+    {
+        if (p.Base == Unit.Piece) return p.Count + " Stück";
+        var size = Format.Qty(p.Size, p.Base ?? unit!.Value);
+        return p.Count > 1 ? p.Count + " × " + size : size;
+    }
+
+    // Nothing to store when the factor is what the line resolves anyway; a piece weight is kept
+    // with the ingredient, a pack size with the mapping as the matcher does it.
+    public bool Decide(out long? mappingFactor, out Piece? piece)
+    {
+        mappingFactor = null;
+        piece = null;
+        if (!ShowFactor) return true;
+        if (Untouched)
+        {
+            mappingFactor = stored ?? (resolved is (var r, 1, FactorSource.Pack) ? r : null);
+            return !NeedsFactor;
+        }
+        if (Typed is not { } f) return false;
+        if (resolved is (var same, 1, var source) && f == same) mappingFactor = source == FactorSource.Pack ? f : null;
+        else if (Learns) piece = new Piece(f, unit!.Value);
+        else mappingFactor = f;
+        return true;
+    }
+
     public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) Prefill(); } }
     public List<Ingredient> Ingredients { get => ingredients; set => Set(ref ingredients, value); }
 
@@ -205,10 +284,16 @@ public sealed class MappingModel : Observable
     {
         var chosen = manual ? null : Candidates.FirstOrDefault(c => c.Selected)?.Candidate.Mapping;
         target = manual ? ingredient?.Id : chosen?.IngredientId;
-        NeedsFactor = rules is not null && line is not null && target is not null && Scale.NeedsFactor(rules, target, line.UnitCode);
-        Factor = NeedsFactor && (chosen?.Factor ?? Matcher.Factor(rules!, target!, line!)) is { } f ? Format.Group(f) : "";
-        Raise(nameof(FactorUnit));
-        Raise(nameof(FactorHint));
+        unit = rules is not null && line is not null && target is not null ? Scale.Of(rules, target) : null;
+        pack = line is null ? null : PackSize.Read(line.Name);
+        resolved = unit is null ? null : Factors.Of(rules!, target!, line!, null);
+        stored = ShowFactor ? chosen?.Factor : null;
+        prefilled = stored is { } s ? Format.Group(s)
+            : resolved is (var f, var per, _) && f % per == 0 ? Format.Group(f / per) : "";
+        Factor = prefilled;
+        foreach (var name in (string[])[nameof(ShowFactor), nameof(NeedsFactor), nameof(ShowFields), nameof(FactorLabel), nameof(FactorUnit),
+                     nameof(FactorHint), nameof(FactorOrigin), nameof(HasOrigin), nameof(Estimate)])
+            Raise(name);
     }
 }
 
@@ -329,7 +414,7 @@ public partial class MappingView : Screen
         {
             var id = Session.Case!.Invoices[inv].Lines[line].MappingId;
             if (string.IsNullOrEmpty(id) || Session.Rules?.Mappings.GetValueOrDefault(id) is not { } m) return Checked.Pending;
-            if (m.Factor is null && Scale.NeedsFactor(Session.Rules, m.IngredientId, Session.Case.Invoices[inv].Lines[line].UnitCode)) return Checked.Pending;
+            if (m.Factor is null && Scale.NeedsFactor(Session.Rules, m.IngredientId, Session.Case.Invoices[inv].Lines[line])) return Checked.Pending;
             g.MappingId ??= id;
             if (!m.Confirmed) state = Checked.Automatic;
         }
@@ -438,16 +523,17 @@ public partial class MappingView : Screen
         if (Groups.SelectedItem is not LineGroup g || Session.Case is null) return;
         if (!model.Manual)
         {
-            if (model.Candidates.FirstOrDefault(c => c.Selected) is not { } chosen || !ReadFactor(g, out var packed)) return;
+            if (model.Candidates.FirstOrDefault(c => c.Selected) is not { } chosen || !ReadFactor(g, out var packed, out var piece)) return;
             var suggested = chosen.Candidate.Mapping;
-            if (suggested.Id == "" || !suggested.Confirmed || model.NeedsFactor && suggested.Factor != packed)
+            if (!await Weigh(suggested.IngredientId, piece)) return;
+            if (suggested.Id == "" || !suggested.Confirmed || model.ShowFactor && suggested.Factor != packed)
             {
                 if (suggested.Id == "")
                 {
                     suggested.Id = g.MappingId ?? Session.NewId("map");
                     suggested.UnitCode = g.Unit;
                 }
-                if (model.NeedsFactor) suggested.Factor = packed;
+                if (model.ShowFactor) suggested.Factor = packed;
                 suggested.Confirmed = true;
                 if (!await Session.Put(suggested, Ct)) return;
             }
@@ -459,7 +545,7 @@ public partial class MappingView : Screen
             Session.Fail("Bitte eine Zutat wählen.");
             return;
         }
-        if (!ReadFactor(g, out var factor)) return;
+        if (!ReadFactor(g, out var factor, out var weight) || !await Weigh(model.Ingredient.Id, weight)) return;
         var mapping = new ArticleMapping
         {
             Id = g.MappingId ?? Session.NewId("map"),
@@ -475,12 +561,18 @@ public partial class MappingView : Screen
         if (await Session.Put(mapping, Ct)) await AssignId(g, mapping.Id, Names.Candidate(Session.Rules!, mapping));
     }
 
-    bool ReadFactor(LineGroup g, out long? factor)
+    bool ReadFactor(LineGroup g, out long? factor, out Piece? piece)
     {
-        factor = model.NeedsFactor ? Input.Int(model.Factor) : null;
-        if (!model.NeedsFactor || factor > 0) return true;
+        if (model.Decide(out factor, out piece)) return true;
         Session.Fail($"{Units.Label(g.Unit)} lässt sich nicht umrechnen — bitte den Inhalt je {Units.Label(g.Unit)} angeben.");
         return false;
+    }
+
+    async Task<bool> Weigh(string ingredientId, Piece? piece)
+    {
+        if (piece is null) return true;
+        if (Session.Rules?.Ingredients.GetValueOrDefault(ingredientId) is not { } i) return false;
+        return await Session.Put(new Ingredient { Id = i.Id, Name = i.Name, CategoryId = i.CategoryId, Aliases = [.. i.Aliases], Piece = piece }, Ct);
     }
 
     void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);

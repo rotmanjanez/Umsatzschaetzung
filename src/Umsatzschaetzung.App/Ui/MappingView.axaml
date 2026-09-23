@@ -179,10 +179,10 @@
                                                 <TextBlock Text="Zutat *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
                                                 <ui:IngredientBox Choices="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2" IsVisible="{Binding NeedsFactor}">
-                                                <TextBlock Text="Faktor *" ToolTip.Tip="Inhalt eines Gebindes in der Rezepteinheit."
+                                            <StackPanel Grid.Column="2" IsVisible="{Binding ShowFactor}">
+                                                <TextBlock Text="{Binding FactorLabel}" ToolTip.Tip="Inhalt eines Gebindes in der Rezepteinheit."
                                                            Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                                <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Factor, Mode=TwoWay}">
+                                                <TextBox x:Name="FactorBox" Theme="{StaticResource NumberBox}" Text="{Binding Factor, Mode=TwoWay}">
                                                     <TextBox.InnerRightContent>
                                                         <TextBlock Text="{Binding FactorUnit}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,0,8,0"/>
                                                     </TextBox.InnerRightContent>
@@ -190,7 +190,13 @@
                                             </StackPanel>
                                         </Grid>
                                         <TextBlock Text="{Binding FactorHint}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,6,0,0"
-                                                   HorizontalAlignment="Right" TextAlignment="Right" IsVisible="{Binding NeedsFactor}"/>
+                                                   HorizontalAlignment="Right" TextAlignment="Right" IsVisible="{Binding ShowFactor}"/>
+                                        <DockPanel HorizontalAlignment="Right" Margin="0,4,0,0" IsVisible="{Binding HasOrigin}">
+                                            <PathIcon DockPanel.Dock="Left" Data="{StaticResource WarningIcon}" Foreground="{DynamicResource WarningBrush}"
+                                                      Width="12" Height="12" Margin="0,2,6,0" VerticalAlignment="Top" IsVisible="{Binding Estimate}"/>
+                                            <TextBlock Text="{Binding FactorOrigin}" Theme="{StaticResource Muted}" FontSize="12"
+                                                       TextAlignment="Right" TextWrapping="Wrap"/>
+                                        </DockPanel>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                                         <Button Content="{Binding AssignLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"/>
