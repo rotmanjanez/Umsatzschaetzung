@@ -28,6 +28,7 @@ public partial class Shell : Window
             new CaseView(session),
             new InvoicesView(session),
             new MappingView(session),
+            new ProductsView(session),
             new CalcView(session),
             new ReportView(session),
         ];

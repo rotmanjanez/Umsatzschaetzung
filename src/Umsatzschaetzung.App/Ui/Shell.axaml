@@ -41,8 +41,9 @@
                     <TabItem Header="Prüfung"/>
                     <TabItem Header="1. Rechnungen"/>
                     <TabItem Header="2. Zuordnung"/>
-                    <TabItem Header="3. Kalkulation"/>
-                    <TabItem Header="4. Bericht"/>
+                    <TabItem Header="3. Sortiment"/>
+                    <TabItem Header="4. Kalkulation"/>
+                    <TabItem Header="5. Bericht"/>
                 </TabControl>
             </DockPanel>
         </Grid>

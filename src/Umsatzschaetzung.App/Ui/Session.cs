@@ -8,7 +8,7 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed record PickedFile(string Name, byte[] Data);
 
-public enum Tab { Case, Invoices, Mapping, Calc, Report }
+public enum Tab { Case, Invoices, Mapping, Products, Calc, Report }
 
 public sealed class Session : Observable
 {

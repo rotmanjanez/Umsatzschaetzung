@@ -2,13 +2,9 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-           xmlns:m="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:CalcModel"
            Margin="0,12,0,0">
     <ui:Screen.Styles>
-        <Style Selector="DataGrid#ProductGrid DataGridRow" x:DataType="ui:ProductRowModel">
-            <Setter Property="Opacity" Value="{Binding Fade}"/>
-        </Style>
         <Style Selector="DataGrid#RevenueGrid DataGridRow">
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
@@ -31,102 +27,98 @@
             </StackPanel>
             <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasResult}">
                 <StackPanel Margin="0,0,16,0">
-                    <TextBlock Text="Produkte" Theme="{StaticResource SectionHeader}"/>
-                    <StackPanel Margin="0,0,0,24">
-                        <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True">
+                    <TextBlock Text="Verteilung" Theme="{StaticResource SectionHeader}"/>
+                    <StackPanel MaxWidth="440" HorizontalAlignment="Left" Margin="0,0,0,24" IsVisible="{Binding EmptyAssortment}">
+                        <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
+                                   Text="Noch keine Produkte im Sortiment."/>
+                        <Button Content="Zu den Produkten" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="GoProducts"/>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="*,16,340" Margin="0,0,0,24" IsVisible="{Binding !EmptyAssortment}">
+                        <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True" MaxHeight="480"
+                                  SelectionMode="Single" SelectionChanged="ProductSelected" VerticalAlignment="Top">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Produkt" Width="260" MinWidth="120" SortMemberPath="Name">
+                                <DataGridTemplateColumn Header="Produkt" Width="280" MinWidth="120" SortMemberPath="Name">
                                     <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
+                                        <DataTemplate x:DataType="ui:ResultRow">
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Portionen" Width="130" SortMemberPath="Portions">
+                                <DataGridTemplateColumn Header="Portionen" Width="110" SortMemberPath="PortionsValue">
                                     <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
+                                        <DataTemplate x:DataType="ui:ResultRow">
                                             <TextBlock Text="{Binding Portions}" Theme="{StaticResource Number}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Einsatz je Portion" Width="150" SortMemberPath="Cost">
                                     <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
+                                        <DataTemplate x:DataType="ui:ResultRow">
                                             <TextBlock Text="{Binding Cost}" Theme="{StaticResource Number}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Bruttopreis" Width="130">
+                                <DataGridTemplateColumn Header="Umsatz (netto)" Width="150" SortMemberPath="RevenueValue">
                                     <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
-                                            <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Price, Mode=TwoWay}" Margin="2"/>
+                                        <DataTemplate x:DataType="ui:ResultRow">
+                                            <Panel>
+                                                <TextBlock Text="{Binding Revenue}" Theme="{StaticResource Number}"/>
+                                                <Border Theme="{StaticResource BadgeWarning}" HorizontalAlignment="Right" IsVisible="{Binding PriceMissing}">
+                                                    <TextBlock Text="Preis fehlt" Theme="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </Panel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="USt" Width="100">
+                                <DataGridTemplateColumn Header="Aufschlagsatz" Width="130" SortMemberPath="Markup">
                                     <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
-                                            <ComboBox ItemsSource="{Binding VatNames}" SelectedIndex="{Binding VatIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Umsatz (netto)" Width="140" SortMemberPath="Revenue">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
-                                            <TextBlock Text="{Binding Revenue}" Theme="{StaticResource Number}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Aufschlagsatz" Width="140" SortMemberPath="Markup">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
+                                        <DataTemplate x:DataType="ui:ResultRow">
                                             <TextBlock Text="{Binding Markup}" Theme="{StaticResource Number}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Aktiv" Width="90">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
-                                            <CheckBox IsChecked="{Binding Active, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Width="110">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ProductRowModel">
-                                            <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding PriceMissing}">
-                                                <TextBlock Text="Preis fehlt" Theme="{StaticResource BadgeText}"/>
-                                            </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <Expander Header="Fixierte Portionen" Margin="0,12,0,0">
-                            <StackPanel Margin="0,8,0,0">
-                                <Grid ColumnDefinitions="*,120,220,90">
-                                    <TextBlock Text="Produkt" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <TextBlock Grid.Column="1" Text="Portionen" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
-                                    <TextBlock Grid.Column="2" Text="Begründung" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
-                                </Grid>
-                                <ItemsControl ItemsSource="{Binding Pinned}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="ui:PinnedRow">
-                                            <Grid Margin="0,0,0,6" ColumnDefinitions="*,120,220,90">
-                                                <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=m:Product}" SelectedItem="{Binding Product, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
-                                                <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Margin="8,0,0,0" Text="{Binding Portions, Mode=TwoWay}"/>
-                                                <TextBox Grid.Column="2" Margin="8,0,0,0" Text="{Binding Reason, Mode=TwoWay}"/>
-                                                <Button Grid.Column="3" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" HorizontalAlignment="Right" Click="RemovePinned">
-                                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
-                                                </Button>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <Button Content="Produkt hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddPinned"/>
-                            </StackPanel>
-                        </Expander>
-                    </StackPanel>
+                        <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16" VerticalAlignment="Top">
+                            <Grid>
+                                <TextBlock Text="Kein Produkt gewählt" Theme="{StaticResource Muted}" IsVisible="{Binding NoDetail}"/>
+                                <Panel IsVisible="{Binding !NoDetail}">
+                                <StackPanel DataContext="{Binding Detail}" x:DataType="ui:ProductDetail">
+                                    <TextBlock Text="{Binding Name}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                                    <ItemsControl ItemsSource="{Binding Facts}" Margin="0,0,0,16" Grid.IsSharedSizeScope="True">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="ui:KV">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" SharedSizeGroup="DetailKey"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Label}" Theme="{StaticResource KeyLabel}"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Value}" Theme="{StaticResource Number}" Margin="0,0,0,6"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="Rezeptur je Portion" Theme="{StaticResource FieldLabel}"/>
+                                    <ItemsControl ItemsSource="{Binding Recipe}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="ui:RecipeUse">
+                                                <StackPanel Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Amount}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                    </Grid>
+                                                    <TextBlock Text="{Binding Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding HasNote}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="{Binding Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding HasNote}"/>
+                                </StackPanel>
+                                </Panel>
+                            </Grid>
+                        </Border>
+                    </Grid>
 
                     <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}"/>
                     <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True">

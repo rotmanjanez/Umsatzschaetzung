@@ -15,6 +15,7 @@ public static class Help
     public const string Invoices = "rechnungen/";
     public const string Invoice = "rechnungen/#durchsicht";
     public const string Mapping = "zuordnung/";
+    public const string Products = "kalkulation/";
     public const string Calc = "kalkulation/";
     public const string Report = "bericht/";
     public const string Rules = "regeln/";
