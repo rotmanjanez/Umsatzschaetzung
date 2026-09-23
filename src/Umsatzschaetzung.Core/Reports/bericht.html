@@ -151,7 +151,6 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </tbody>
       </table>
-      <p class="note">{{ report.totals.allocatedCost | markup:report.totals.markup:report.totals.calculatedRevenueNet }}</p>
       {% if rahmen %}
       <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohaufschlag {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}

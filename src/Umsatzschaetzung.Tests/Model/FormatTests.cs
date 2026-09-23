@@ -94,13 +94,6 @@ public class FormatTests
         Assert.Equal(text, Format.UnitPrice(price, baseQty, unit));
 
     [Theory]
-    [InlineData(145_391, 40_456, 733_595, "1.453,91 € × (100 % + 404,56 %) ≈ 7.335,95 €")]
-    [InlineData(10_000, 5_000, 15_000, "100,00 € × (100 % + 50 %) = 150,00 €")]
-    [InlineData(0, 0, 0, "0,00 € × (100 % + 0 %) = 0,00 €")]
-    public void TheMarkupProbeSaysWhetherItHitsTheCent(long cost, long markup, long revenue, string text) =>
-        Assert.Equal(text, Format.Markup(cost, markup, revenue));
-
-    [Theory]
     [InlineData(Sparte.Getränke, "Getränke")]
     [InlineData(Sparte.Speisen, "Speisen")]
     [InlineData(Sparte.Handelsware, "Handelsware")]

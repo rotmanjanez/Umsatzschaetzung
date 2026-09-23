@@ -51,7 +51,6 @@ public class HtmlTests
         var html = Html.Render(Kase, Rules, Report, null);
         Assert.StartsWith("<!DOCTYPE html>", html.TrimStart(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("<h1>3 Rohgewinnaufschlag</h1>", html);
-        Assert.Contains("1.453,91 € × (100 % + 404,56 %) ≈ 7.335,95 €", html);
         Assert.Contains("Anhang E", html);
         Assert.Contains("2024-04711", html);
         Assert.Contains("Pils 0,3 l vom Fass", html);

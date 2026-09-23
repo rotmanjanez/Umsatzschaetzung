@@ -54,7 +54,6 @@ public sealed class PinnedRow(List<Product> options) : Observable
 public sealed class CalcModel : Observable
 {
     bool busy, hasResult, noInvoices;
-    string markupNote = "";
 
     public ObservableCollection<ProductRowModel> Products { get; } = [];
     public ObservableCollection<PinnedRow> Pinned { get; } = [];
@@ -62,7 +61,6 @@ public sealed class CalcModel : Observable
     public ObservableCollection<MarkupRow> Markups { get; } = [];
     public ObservableCollection<KV> Summary { get; } = [];
     public bool Busy { get => busy; set => Set(ref busy, value); }
-    public string MarkupNote { get => markupNote; set => Set(ref markupNote, value); }
     public bool HasResult { get => hasResult; set { if (Set(ref hasResult, value)) Raise(nameof(Calculating)); } }
     public bool NoInvoices { get => noInvoices; set { if (Set(ref noInvoices, value)) Raise(nameof(Calculating)); } }
     public bool Calculating => !hasResult && !noInvoices;
@@ -202,7 +200,6 @@ public partial class CalcView : Screen
         foreach (var v in Revenue(kase, r)) model.Revenue.Add(v);
         model.Markups.Clear();
         foreach (var m in Markups(r)) model.Markups.Add(m);
-        model.MarkupNote = MarkupNote(r.Totals, calc.Rahmen);
         model.Summary.Clear();
         foreach (var kv in Summary(r)) model.Summary.Add(kv);
         model.HasResult = true;
@@ -238,21 +235,6 @@ public partial class CalcView : Screen
         new("Gesamt", Format.Cents(r.Totals.AllocatedCost), Format.Cents(r.Totals.CalculatedRevenueNet),
             Format.Cents(r.Totals.GrossProfit), Format.Bp(r.Totals.Markup), true),
     ];
-
-    // Der Rahmensatz gilt dem Betrieb, nicht einer seiner Sparten: er steht deshalb unter der
-    // Tabelle, nicht in einer ihrer Zeilen.
-    static string MarkupNote(Totals s, Rahmen? rahmen)
-    {
-        var formula = Format.Markup(s.AllocatedCost, s.Markup, s.CalculatedRevenueNet);
-        if (rahmen is null) return formula;
-        return $"{formula} · Richtsatzsammlung {rahmen.Von} bis {rahmen.Bis} % (Mittel {rahmen.Aufschlag.Mittel} %) — "
-            + rahmen.Lage(s.Markup) switch
-            {
-                Rahmenlage.Unter => "unter dem Rahmen",
-                Rahmenlage.Über => "über dem Rahmen",
-                _ => "im Rahmen",
-            };
-    }
 
     void ProductEdited(ProductRowModel row, string? property)
     {

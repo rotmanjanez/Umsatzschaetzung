@@ -163,7 +163,7 @@
                     </DataGrid>
 
                     <TextBlock Text="Rohgewinnaufschlag" Theme="{StaticResource SectionHeader}"/>
-                    <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True">
+                    <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Sparte" Width="220" MinWidth="120">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -202,7 +202,6 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <TextBlock Text="{Binding MarkupNote}" Theme="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,24"/>
 
                     <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
                     <ItemsControl Margin="0,0,0,16" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">

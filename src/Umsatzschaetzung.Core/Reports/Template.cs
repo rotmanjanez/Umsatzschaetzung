@@ -141,7 +141,6 @@ public static class Template
         ["quantity"] = (n, a) => Format.Quantity(Number(n), Print(a[0])),
         ["price"] = (n, a) => Format.UnitPrice(Number(n), Number(a[0]), Print(a[1])),
         ["unitname"] = (n, _) => Units.Label(Print(n)),
-        ["markup"] = (n, a) => Format.Markup(Number(n), Number(a[0]), Number(a[1])),
     };
 
     static T Enum<T>(JsonNode? n) where T : struct =>

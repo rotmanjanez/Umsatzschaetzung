@@ -78,7 +78,6 @@ public class TemplateTests
     [InlineData("{{ menge | qty:einheit }}", "20 l")]
     [InlineData("{{ menge | quantity:code }}", "20 Liter")]
     [InlineData("{{ betrag | price:basis:code }}", "0,733595 € je 5 Liter")]
-    [InlineData("{{ menge | markup:satz:betrag }}", "200,00 € × (100 % + 404,56 %) ≈ 7.335,95 €")]
     public void EveryFilterFormatsItsRawValue(string source, string expected) => Assert.Equal(expected, Render(source));
 
     [Fact]

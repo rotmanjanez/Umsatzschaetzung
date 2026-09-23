@@ -56,9 +56,6 @@ public static class Format
         _ => s.ToString(),
     };
 
-    public static string Markup(long cost, long markup, long revenue) =>
-        $"{Cents(cost)} × (100 % + {Bp(markup)}) {(cost + cost * markup / Model.Bp.Full == revenue ? "=" : "≈")} {Cents(revenue)}";
-
     public static string Period(DateOnly from, DateOnly to) => Date(from) + " bis " + Date(to);
 
     public static string Quantity(long qty, string unitCode) => (Milli(qty) + " " + Units.Label(unitCode)).Trim();

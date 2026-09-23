@@ -99,7 +99,6 @@ public sealed class CalculateTests : IDisposable
         Assert.Contains("Anhang E", report.Html);
         Assert.Contains("<h1>3 Rohgewinnaufschlag</h1>", report.Html);
         Assert.Contains("404,56 %", report.Html);
-        Assert.Contains("1.453,91 € × (100 % + 404,56 %) ≈ 7.335,95 €", report.Html);
         Assert.Null(report.Pdf);
         Assert.EndsWith(".html", report.FileName);
         Assert.Null(printer.Html);
