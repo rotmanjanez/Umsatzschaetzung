@@ -22,7 +22,6 @@ public sealed class ImportJob(string caseId, string label) : Observable
     public int Stored { get; set; }
     public int Drafts { get; set; }
     public List<string> Failed { get; } = [];
-    public string? FirstDraft { get; set; }
 
     public int Total { get => total; set { if (Set(ref total, value)) { Raise(nameof(Count)); Raise(nameof(Detail)); } } }
     public int Done { get => done; set { if (Set(ref done, value)) Raise(nameof(Count)); } }
@@ -71,8 +70,6 @@ public sealed class Imports
     public Imports(Session session) => this.session = session;
 
     public ObservableCollection<ImportJob> Jobs { get; } = [];
-
-    public event Action<ImportJob>? Finished;
 
     public void Add(string caseId, string label, List<PickedFile> files)
     {
@@ -158,7 +155,6 @@ public sealed class Imports
             return;
         }
         job.Drafts++;
-        job.FirstDraft ??= v.Invoice.Id;
     }
 
     void Adopt(ImportJob job, Case? kase)
@@ -171,7 +167,6 @@ public sealed class Imports
         var where = session.Case?.Id == job.CaseId ? "" : job.Label + ": ";
         job.Summary = job.Stored + " Rechnungen übernommen, " + job.Drafts + " zur Durchsicht";
         if (job.Failed.Count > 0) session.Fail(where + "Nicht importiert: " + string.Join("; ", job.Failed));
-        Finished?.Invoke(job);
         Jobs.Remove(job);
     }
 }

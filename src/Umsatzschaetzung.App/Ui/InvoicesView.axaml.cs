@@ -97,7 +97,6 @@ public partial class InvoicesView : Screen
         Session.CaseChanged += Refresh;
         Session.CaseClosed += CaseClosed;
         Session.InvoiceRequested += id => { if (Session.Case?.Invoices.Find(i => i.Id == id) is { } inv) Show(new InvoiceRow(inv)); };
-        Session.Imports.Finished += ImportFinished;
     }
 
     static string Text(InvoiceRow r) => r.Supplier + " " + r.Number + " " + r.Date + " " + r.NetTotal + " " + r.FileName + " " + r.StateText;
@@ -227,14 +226,5 @@ public partial class InvoicesView : Screen
     void StartImport(List<PickedFile> files)
     {
         if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, files);
-    }
-
-    // A freshly read scan is what the user asked for: put it up for review right away.
-    void ImportFinished(ImportJob job)
-    {
-        if (job.FirstDraft is not { } id || Session.Case?.Id != job.CaseId || !IsActive) return;
-        if (model.Invoices.FirstOrDefault(r => r.Id == id) is not { } row) return;
-        List.SelectedItem = row;
-        Show(row);
     }
 }
