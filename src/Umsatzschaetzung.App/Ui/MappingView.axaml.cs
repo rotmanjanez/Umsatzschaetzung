@@ -198,11 +198,10 @@ public partial class MappingView : Screen
             .Any(l => !string.IsNullOrEmpty(l.MappingId) && Session.Rules?.Mappings.ContainsKey(l.MappingId) != true);
 
     // What the matcher is sure about it maps on its own; the list then shows the rest.
-    // Case and rules are replaced on every change, so an unchanged pair would map nothing new.
     async void MapOpen()
     {
-        if (Session.Case is not { } k || model.Mapping || !model.Groups.Any(g => g.IsPending)
-            || caughtUp == (k, Session.Rules)) return;
+        if (Session.Case is not { } k || Session.Rules is not { } rs || model.Mapping || !model.Groups.Any(g => g.IsPending)
+            || caughtUp == (k, rs) || k.MappedAt == rs.Version) return;
         model.Mapping = true;
         Case? mapped = null;
         await Session.Run(async () => mapped = await Session.Service.MapCase(k.Id, Ct));

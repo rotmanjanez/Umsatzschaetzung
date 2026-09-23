@@ -125,6 +125,29 @@ public class MappingTests(MatcherHost host)
     }
 
     [Fact]
+    public async Task MapCaseAsksOncePerRulesVersion()
+    {
+        var kase = Vorlage.Blank("Einmal");
+        kase.Invoices =
+        [
+            new Invoice
+            {
+                Id = "re-einmal", Source = Source.Ubl, SupplierName = "Irgendwer", Number = "E-1", Date = new DateOnly(2024, 4, 1),
+                Lines = [new InvoiceLine { No = 1, Name = "Servietten 3-lagig 250 Stk", UnitCode = "H87", Quantity = 1000 }],
+            },
+        ];
+        var stored = await svc.PutCase(kase, ct);
+        var version = (await svc.Rules(ct)).Version;
+
+        var first = await svc.MapCase(stored.Id, ct);
+        var again = await svc.MapCase(stored.Id, ct);
+
+        Assert.Equal(version, first.MappedAt);
+        Assert.Equal(version, again.MappedAt);
+        Assert.Equal(version, (await svc.GetCase(stored.Id, ct)).MappedAt);
+    }
+
+    [Fact]
     public async Task MapCaseOfAnUnknownCaseIsNotFound()
     {
         var e = await Assert.ThrowsAsync<ServiceError>(() => svc.MapCase("fall-gibt-es-nicht", ct));

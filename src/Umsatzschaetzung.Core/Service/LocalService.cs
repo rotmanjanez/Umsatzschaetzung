@@ -253,12 +253,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     // Lines imported before a rule or the model existed, and lines an edit set free,
     // get their turn here: what the matcher is sure about is mapped, the rest stays open.
+    // Against the same rules the matcher would answer the same, so a case is asked once per version.
     public Task<Case> MapCase(string caseId, CancellationToken ct) => Guard(ct, () => Task.Run(async () =>
     {
         var c = LoadCase(caseId);
+        var rs = rules.Load();
+        if (c.MappedAt == rs.Version) return c;
         var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
-        foreach (var inv in c.Invoices) await MapLines(inv, c.Taxpayer.Gewerbe, true, ct);
+        foreach (var inv in c.Invoices) rs = (await MapLines(inv, c.Taxpayer.Gewerbe, true, ct)).Rules;
+        c.MappedAt = rs.Version;
         if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) SaveCase(c);
+        else cases.SaveMappedAt(c.Id, c.MappedAt);
         return c;
     }, ct));
 
@@ -333,6 +338,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
+        if (inv.Lines.Any(l => string.IsNullOrEmpty(l.MappingId))) c.MappedAt = 0;
         SaveCase(c, new Attachment(inv.Id, fileName, data, reading));
         return c;
     }

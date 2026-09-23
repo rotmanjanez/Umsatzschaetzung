@@ -60,6 +60,8 @@ public sealed class Case
     public List<CaseProduct> Products { get; set; } = [];
     public List<YieldChoice> Yields { get; set; } = [];
     public List<PinnedPortions> Pinned { get; set; } = [];
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public long MappedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }
