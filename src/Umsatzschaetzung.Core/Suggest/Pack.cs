@@ -89,7 +89,9 @@ public static partial class PackSize
     {
         if (m.Groups["c"].Success) return Number(m.Groups["c"].Value);
         var pre = Multipack().Match(text[..m.Index]);
-        return pre.Success ? Number(pre.Groups["c"].Value) : 1;
+        if (pre.Success) return Number(pre.Groups["c"].Value);
+        var pieces = Pieces().Match(text, m.Index + m.Length);
+        return pieces.Success ? Number(pieces.Groups["c"].Value) : 1;
     }
 
     static long Number(string s) => long.Parse(s, CultureInfo.InvariantCulture);
