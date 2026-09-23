@@ -111,6 +111,20 @@ public class RepairTests
     }
 
     [Fact]
+    public void AReturnLineIsRepairedLikeAnyOther() =>
+        Assert.Equal(-9000, Repaired(-6000, 900_000, -810).Quantity);
+
+    [Theory]
+    [InlineData(30_000_000, -27_000, -9000)]
+    [InlineData(3_300_000, -2970, -9000)]
+    public void AReturnedQuantityTheScanLostComesBackFromPriceAndNet(long price, long net, long expected) =>
+        Assert.Equal(expected, Repaired(0, price, net).Quantity);
+
+    [Fact]
+    public void ALostPriceOfAReturnComesBack() =>
+        Assert.Equal(3_100_000, Repaired(-18_000, 0, -5580).UnitPrice);
+
+    [Fact]
     public void AQuantityTheScanLostComesBackFromPriceAndNet() =>
         Assert.Equal(9000, Repaired(0, 900_000, 810).Quantity);
 

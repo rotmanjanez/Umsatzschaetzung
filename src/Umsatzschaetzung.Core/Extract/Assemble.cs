@@ -124,7 +124,7 @@ public static class Assemble
     public static void Repair(InvoiceLine line)
     {
         if (Restore(line)) return;
-        if (line.Quantity <= 0 || line.UnitPrice <= 0 || line.LineNet <= 0) return;
+        if (line.Quantity == 0 || line.UnitPrice == 0 || line.LineNet == 0) return;
         if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, line.LineNet)) return;
 
         var found = new List<(int Field, long Value)>();
@@ -146,15 +146,15 @@ public static class Assemble
     // exact. Never the line net: quantity times price is its definition, not a check.
     static bool Restore(InvoiceLine line)
     {
-        if (line.LineNet <= 0) return false;
+        if (line.LineNet == 0) return false;
         var baseQty = line.PriceBaseQty > 0 ? line.PriceBaseQty : 1000;
-        if (line.Quantity == 0 && line.UnitPrice > 0)
+        if (line.Quantity == 0 && line.UnitPrice != 0)
         {
             if (QuantityFrom(line.LineNet, baseQty, line.UnitPrice) is not { } q) return false;
             line.Quantity = q;
             return true;
         }
-        if (line.UnitPrice == 0 && line.Quantity > 0)
+        if (line.UnitPrice == 0 && line.Quantity != 0)
         {
             if (PriceFrom(line.LineNet, baseQty, line.Quantity) is { } p)
             {
@@ -185,17 +185,18 @@ public static class Assemble
         Whole(InvoiceMath.RoundDiv(net * baseQty * 10000, quantity), 10000) is { } p
             && Adds(quantity, p, baseQty, net) ? p : null;
 
-    static long? Whole(long value, long step) => value > 0 && value % step == 0 ? value : null;
+    static long? Whole(long value, long step) => value != 0 && value % step == 0 ? value : null;
 
     static HashSet<long> Confusions(long value)
     {
-        var digits = value.ToString(CultureInfo.InvariantCulture);
+        var sign = Math.Sign(value);
+        var digits = Math.Abs(value).ToString(CultureInfo.InvariantCulture);
         var seen = new HashSet<long>();
         for (var i = 0; i < digits.Length; i++)
             foreach (var swap in Confusable.GetValueOrDefault(digits[i], ""))
             {
                 if (i == 0 && swap == '0' && digits.Length > 1) continue;
-                seen.Add(long.Parse(digits[..i] + swap + digits[(i + 1)..], CultureInfo.InvariantCulture));
+                seen.Add(sign * long.Parse(digits[..i] + swap + digits[(i + 1)..], CultureInfo.InvariantCulture));
             }
         seen.Remove(value);
         return seen;

@@ -165,5 +165,6 @@ public static class InvoiceMath
         RoundDiv(quantity * unitPrice, (priceBaseQty > 0 ? priceBaseQty : 1000) * 10000);
 
     public static long RoundDiv(long num, long den) =>
-        num < 0 ? -((-num + den / 2) / den) : (num + den / 2) / den;
+        den < 0 ? RoundDiv(-num, -den)
+        : num < 0 ? -((-num + den / 2) / den) : (num + den / 2) / den;
 }
