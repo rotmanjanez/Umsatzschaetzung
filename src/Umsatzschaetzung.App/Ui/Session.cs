@@ -43,7 +43,18 @@ public sealed class Session : Observable
     public Dictionary<string, OcrResp> Readings { get; } = [];
     public Dictionary<string, InvoiceSourceResp> Sources { get; } = [];
 
-    public string Error { get => error; set => Set(ref error, value); }
+    public Window? ActiveWindow { get; set; }
+    public Window? ErrorWindow { get; private set; }
+
+    public string Error
+    {
+        get => error;
+        set
+        {
+            ErrorWindow = value == "" ? null : ActiveWindow;
+            Set(ref error, value);
+        }
+    }
 
     public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed, RulesRequested;
 

@@ -38,6 +38,7 @@ public partial class Shell : Window
         session.RulesRequested += () => ShowRules();
         session.ProductRequested += (name, created) => ShowRules().NewProduct(name, created);
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
+        Activated += (_, _) => session.ActiveWindow = this;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
         if (OperatingSystem.IsMacOS()) NativeMenu.SetMenu(this, HelpMenu());
         else MenuBar.IsVisible = true;
@@ -146,9 +147,10 @@ public partial class Shell : Window
 
     void RefreshError()
     {
-        var text = session.Error != "" ? session.Error : session.Status?.Problem ?? "";
+        var error = session.ErrorWindow is RulesWindow ? "" : session.Error;
+        var text = error != "" ? error : session.Status?.Problem ?? "";
         ErrorText.Text = text;
         ErrorBanner.IsVisible = text != "";
-        ErrorClose.IsVisible = session.Error != "";
+        ErrorClose.IsVisible = error != "";
     }
 }
