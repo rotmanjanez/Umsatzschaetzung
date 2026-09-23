@@ -82,6 +82,16 @@ public sealed class RuleStore
         "UPDATE ingredient SET name = 'Ausstattung und Bedarf' WHERE id = 'ing.nonfood' AND name = 'Nonfood'",
         "ALTER TABLE ingredient ADD COLUMN piece_amount INTEGER",
         "ALTER TABLE ingredient ADD COLUMN piece_unit TEXT",
+        """
+        UPDATE ingredient SET id = 'ing.burgerbun' WHERE id = 'ing.burgerbroetchen'
+            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbun');
+        UPDATE recipe_line SET ingredient_id = 'ing.burgerbun' WHERE ingredient_id = 'ing.burgerbroetchen'
+            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbroetchen');
+        UPDATE mapping SET ingredient_id = 'ing.burgerbun' WHERE ingredient_id = 'ing.burgerbroetchen'
+            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbroetchen');
+        UPDATE yield_rule SET ingredient_id = 'ing.burgerbun' WHERE ingredient_id = 'ing.burgerbroetchen'
+            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbroetchen');
+        """,
     ];
 
     static readonly string[] SammlungTables =

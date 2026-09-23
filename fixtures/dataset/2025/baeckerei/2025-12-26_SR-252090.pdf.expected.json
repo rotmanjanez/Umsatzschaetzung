@@ -55,7 +55,7 @@
       "priceBaseQty": 1000,
       "lineNet": 7316,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel.zugekauft",
+      "expectedIngredientId": "ing.brezel",
       "expectedFactor": 1
     },
     {
@@ -97,7 +97,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4464,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel.zugekauft",
+      "expectedIngredientId": "ing.brezel",
       "expectedFactor": 1
     },
     {
@@ -139,7 +139,7 @@
       "priceBaseQty": 1000,
       "lineNet": 6262,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel.zugekauft",
+      "expectedIngredientId": "ing.brezel",
       "expectedFactor": 1
     },
     {
@@ -181,7 +181,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3286,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel.zugekauft",
+      "expectedIngredientId": "ing.brezel",
       "expectedFactor": 1
     },
     {
@@ -251,7 +251,7 @@
       "priceBaseQty": 1000,
       "lineNet": 5890,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel.zugekauft",
+      "expectedIngredientId": "ing.brezel",
       "expectedFactor": 1
     },
     {
@@ -321,7 +321,7 @@
       "priceBaseQty": 1000,
       "lineNet": 7006,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel.zugekauft",
+      "expectedIngredientId": "ing.brezel",
       "expectedFactor": 1
     },
     {

@@ -746,7 +746,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3162,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-03",
      "deliveryNoteNo": "LS-250103-21"
@@ -810,7 +810,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3224,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-06",
      "deliveryNoteNo": "LS-250106-11"
@@ -874,7 +874,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4092,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-08",
      "deliveryNoteNo": "LS-250108-43"
@@ -938,7 +938,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3596,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-01-10",
      "deliveryNoteNo": "LS-250110-28"
@@ -2789,7 +2789,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-10",
      "deliveryNoteNo": "LS-250210-38"
@@ -2869,7 +2869,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4650,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-12",
      "deliveryNoteNo": "LS-250212-13"
@@ -2933,7 +2933,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3596,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-14",
      "deliveryNoteNo": "LS-250214-20"
@@ -2965,7 +2965,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2480,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-17",
      "deliveryNoteNo": "LS-250217-53"
@@ -3045,7 +3045,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2914,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-19",
      "deliveryNoteNo": "LS-250219-48"
@@ -3093,7 +3093,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3100,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-02-21",
      "deliveryNoteNo": "LS-250221-49"
@@ -4825,7 +4825,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2170,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-24",
      "deliveryNoteNo": "LS-250324-50"
@@ -4905,7 +4905,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2294,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-26",
      "deliveryNoteNo": "LS-250326-78"
@@ -4953,7 +4953,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5022,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-28",
      "deliveryNoteNo": "LS-250328-74"
@@ -4985,7 +4985,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1984,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-03-31",
      "deliveryNoteNo": "LS-250331-81"
@@ -5049,7 +5049,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4712,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-04-02",
      "deliveryNoteNo": "LS-250402-11"
@@ -5113,7 +5113,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5270,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-04-04",
      "deliveryNoteNo": "LS-250404-34"
@@ -7387,7 +7387,7 @@
      "priceBaseQty": 1000,
      "lineNet": 1922,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-19",
      "deliveryNoteNo": "LS-250519-63"
@@ -7435,7 +7435,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3968,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-21",
      "deliveryNoteNo": "LS-250521-53"
@@ -7467,7 +7467,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-23",
      "deliveryNoteNo": "LS-250523-26"
@@ -7531,7 +7531,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2790,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-26",
      "deliveryNoteNo": "LS-250526-27"
@@ -7595,7 +7595,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3844,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-28",
      "deliveryNoteNo": "LS-250528-51"
@@ -7659,7 +7659,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3100,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-05-30",
      "deliveryNoteNo": "LS-250530-87"
@@ -10087,7 +10087,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-14",
      "deliveryNoteNo": "LS-250714-49"
@@ -10167,7 +10167,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7688,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-16",
      "deliveryNoteNo": "LS-250716-75"
@@ -10199,7 +10199,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4836,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-18",
      "deliveryNoteNo": "LS-250718-44"
@@ -10279,7 +10279,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5704,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-21",
      "deliveryNoteNo": "LS-250721-29"
@@ -10343,7 +10343,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5518,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-23",
      "deliveryNoteNo": "LS-250723-27"
@@ -10423,7 +10423,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3038,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-07-25",
      "deliveryNoteNo": "LS-250725-57"
@@ -12212,7 +12212,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3100,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-08-25",
      "deliveryNoteNo": "LS-250825-36"
@@ -12292,7 +12292,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6200,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-08-27",
      "deliveryNoteNo": "LS-250827-32"
@@ -12340,7 +12340,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4774,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-08-29",
      "deliveryNoteNo": "LS-250829-73"
@@ -12388,7 +12388,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2108,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-09-01",
      "deliveryNoteNo": "LS-250901-34"
@@ -12452,7 +12452,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4712,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-09-03",
      "deliveryNoteNo": "LS-250903-25"
@@ -12500,7 +12500,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2170,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-09-05",
      "deliveryNoteNo": "LS-250905-73"
@@ -14943,7 +14943,7 @@
      "priceBaseQty": 1000,
      "lineNet": 2356,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-20",
      "deliveryNoteNo": "LS-251020-76"
@@ -15007,7 +15007,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5332,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-22",
      "deliveryNoteNo": "LS-251022-20"
@@ -15071,7 +15071,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3348,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-24",
      "deliveryNoteNo": "LS-251024-70"
@@ -15135,7 +15135,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6200,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-27",
      "deliveryNoteNo": "LS-251027-13"
@@ -15183,7 +15183,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5952,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-29",
      "deliveryNoteNo": "LS-251029-42"
@@ -15247,7 +15247,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4588,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-10-31",
      "deliveryNoteNo": "LS-251031-71"
@@ -17527,7 +17527,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7316,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-15",
      "deliveryNoteNo": "LS-251215-60"
@@ -17575,7 +17575,7 @@
      "priceBaseQty": 1000,
      "lineNet": 4464,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-17",
      "deliveryNoteNo": "LS-251217-58"
@@ -17623,7 +17623,7 @@
      "priceBaseQty": 1000,
      "lineNet": 6262,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-19",
      "deliveryNoteNo": "LS-251219-85"
@@ -17671,7 +17671,7 @@
      "priceBaseQty": 1000,
      "lineNet": 3286,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-22",
      "deliveryNoteNo": "LS-251222-45"
@@ -17751,7 +17751,7 @@
      "priceBaseQty": 1000,
      "lineNet": 5890,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-24",
      "deliveryNoteNo": "LS-251224-50"
@@ -17831,7 +17831,7 @@
      "priceBaseQty": 1000,
      "lineNet": 7006,
      "vat": 700,
-     "expectedIngredientId": "ing.brezel.zugekauft",
+     "expectedIngredientId": "ing.brezel",
      "expectedFactor": 1,
      "deliveryDate": "2025-12-26",
      "deliveryNoteNo": "LS-251226-16"
