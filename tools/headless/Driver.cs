@@ -36,6 +36,15 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
             case DeselectStep s:
                 Set(Find(window, s.At), "SelectedItem", null);
                 break;
+            case SelectStep s:
+                Select(Find(window, s.At));
+                break;
+            case EditStep s:
+                Edit(Find(window, s.At), s.Column, s.Text);
+                break;
+            case OpenStep s:
+                Open(s.Number);
+                break;
             case TabStep s:
                 Tab(window, s.Header);
                 break;
@@ -81,6 +90,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     static void Click(Visual visual)
     {
         var button = visual as Button ?? visual.GetVisualAncestors().OfType<Button>().FirstOrDefault()
+            ?? visual.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.IsEffectivelyVisible)
             ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
         button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     }
@@ -91,6 +101,38 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         var property = AvaloniaPropertyRegistry.Instance.GetRegistered(target).FirstOrDefault(p => p.Name == name)
             ?? throw new InvalidOperationException(visual.GetType().Name + " has no " + name);
         target.SetValue(property, value);
+    }
+
+    static void Select(Visual row)
+    {
+        var list = row.GetVisualAncestors().FirstOrDefault(v => v is DataGrid or SelectingItemsControl)
+            ?? throw new InvalidOperationException("no list above " + row.GetType().Name);
+        Set(list, "SelectedItem", (row as StyledElement)?.DataContext);
+    }
+
+    // Puts the cursor on a cell of the row `at` sits in; with a text the cell is edited and
+    // committed as if typed.
+    static void Edit(Visual cell, string column, string? text)
+    {
+        var grid = (DataGrid)Up(cell, "DataGrid");
+        grid.SelectedItem = (cell as StyledElement)?.DataContext;
+        grid.CurrentColumn = grid.Columns.FirstOrDefault(c => c.Header as string == column)
+            ?? throw new InvalidOperationException("no column " + column);
+        if (text is null) return;
+        grid.BeginEdit();
+        Settle();
+        var box = grid.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsFocused)
+            ?? throw new InvalidOperationException("no editor in column " + column);
+        box.Text = text;
+        grid.CommitEdit(DataGridEditingUnit.Cell, true);
+        grid.CommitEdit(DataGridEditingUnit.Row, true);
+    }
+
+    void Open(string number)
+    {
+        var invoice = shell.Session.Case?.Invoices.Find(i => i.Number == number)
+            ?? throw new InvalidOperationException("no invoice " + number);
+        shell.Session.OpenInvoice(invoice.Id);
     }
 
     static void Tab(Visual root, string header)

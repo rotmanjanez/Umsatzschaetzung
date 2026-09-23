@@ -27,6 +27,9 @@ public sealed record Inset
 [JsonDerivedType(typeof(TypeStep), "type")]
 [JsonDerivedType(typeof(FocusStep), "focus")]
 [JsonDerivedType(typeof(DeselectStep), "deselect")]
+[JsonDerivedType(typeof(SelectStep), "select")]
+[JsonDerivedType(typeof(EditStep), "edit")]
+[JsonDerivedType(typeof(OpenStep), "open")]
 [JsonDerivedType(typeof(TabStep), "tab")]
 [JsonDerivedType(typeof(ImportStep), "import")]
 [JsonDerivedType(typeof(WaitStep), "wait")]
@@ -64,6 +67,23 @@ public sealed record FocusStep : Step
 public sealed record DeselectStep : Step
 {
     public required Target At { get; init; }
+}
+
+public sealed record SelectStep : Step
+{
+    public required Target At { get; init; }
+}
+
+public sealed record EditStep : Step
+{
+    public required Target At { get; init; }
+    public required string Column { get; init; }
+    public string? Text { get; init; }
+}
+
+public sealed record OpenStep : Step
+{
+    public required string Number { get; init; }
 }
 
 public sealed record TabStep : Step
