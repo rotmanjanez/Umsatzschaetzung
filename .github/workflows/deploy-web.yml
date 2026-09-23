@@ -37,6 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: ~/.local/share/umsatzschaetzung/models
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x

@@ -28,7 +28,7 @@ jobs:
             ~/.local/share/umsatzschaetzung/models
             ~/AppData/Local/umsatzschaetzung/models
             ~/Library/Application Support/umsatzschaetzung/models
-          key: models-${{ hashFiles('Models.targets') }}
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
@@ -56,7 +56,7 @@ jobs:
             ~/.local/share/umsatzschaetzung/models
             ~/AppData/Local/umsatzschaetzung/models
             ~/Library/Application Support/umsatzschaetzung/models
-          key: models-${{ hashFiles('Models.targets') }}
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
@@ -94,7 +94,7 @@ jobs:
             ~/.local/share/umsatzschaetzung/models
             ~/AppData/Local/umsatzschaetzung/models
             ~/Library/Application Support/umsatzschaetzung/models
-          key: models-${{ hashFiles('Models.targets') }}
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
