@@ -54,16 +54,12 @@ public sealed class PinnedRow(List<Product> options) : Observable
 public sealed class CalcModel : Observable
 {
     bool busy, hasResult, noInvoices;
-    long revenueNet;
     string markupNote = "";
 
     public ObservableCollection<ProductRowModel> Products { get; } = [];
     public ObservableCollection<PinnedRow> Pinned { get; } = [];
     public ObservableCollection<RevenueRow> Revenue { get; } = [];
     public ObservableCollection<MarkupRow> Markups { get; } = [];
-    public ObservableCollection<IngredientRow> Ingredients { get; } = [];
-    public ObservableCollection<ProductRow> Sold { get; } = [];
-    public long RevenueNet { get => revenueNet; set => Set(ref revenueNet, value); }
     public ObservableCollection<KV> Summary { get; } = [];
     public bool Busy { get => busy; set => Set(ref busy, value); }
     public string MarkupNote { get => markupNote; set => Set(ref markupNote, value); }
@@ -209,12 +205,6 @@ public partial class CalcView : Screen
         model.MarkupNote = MarkupNote(r.Totals, calc.Rahmen);
         model.Summary.Clear();
         foreach (var kv in Summary(r)) model.Summary.Add(kv);
-        model.Ingredients.Clear();
-        foreach (var i in r.Ingredients) model.Ingredients.Add(i);
-        model.Sold.Clear();
-        foreach (var p in r.Products)
-            if (p.Portions > 0) model.Sold.Add(p);
-        model.RevenueNet = r.Totals.CalculatedRevenueNet;
         model.HasResult = true;
         loading = false;
     }
