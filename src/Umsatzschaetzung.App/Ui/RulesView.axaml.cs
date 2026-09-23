@@ -128,13 +128,30 @@ public abstract class EntityForm<T> : EntityForm
 
 public sealed class IngredientForm : EntityForm<IngredientItem>
 {
-    string name = "", aliases = "";
-    bool nameInvalid;
+    public static readonly Unit[] PieceUnits = [Unit.G, Unit.Ml];
+
+    string name = "", aliases = "", piece = "";
+    int pieceUnitIndex;
+    bool nameInvalid, pieceInvalid, pieceUnitFree = true;
 
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
     public string Aliases { get => aliases; set => Set(ref aliases, value); }
     public CategoryPicker Category { get; } = new();
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
+    public string Piece { get => piece; set { if (Set(ref piece, value)) PieceInvalid = false; } }
+    public List<string> PieceUnitNames { get; } = [.. PieceUnits.Select(Format.UnitName)];
+    public int PieceUnitIndex { get => pieceUnitIndex; set => Set(ref pieceUnitIndex, value); }
+    // The recipes fix g or ml; only an ingredient counted in pieces, or in none yet, may choose.
+    public bool PieceUnitFree { get => pieceUnitFree; set => Set(ref pieceUnitFree, value); }
+    public bool PieceInvalid { get => pieceInvalid; set => Set(ref pieceInvalid, value); }
+
+    public void LoadPiece(Piece? p, Unit? recipe)
+    {
+        Piece = p is null ? "" : Format.Group(p.Amount);
+        var fixedUnit = recipe is Unit.G or Unit.Ml ? recipe : null;
+        PieceUnitIndex = Math.Max(Array.IndexOf(PieceUnits, fixedUnit ?? p?.Unit ?? Unit.G), 0);
+        PieceUnitFree = fixedUnit is null;
+    }
 }
 
 public sealed class ProductForm : EntityForm<ProductItem>
@@ -298,6 +315,7 @@ public partial class RulesView : Screen
         f.Title = i.Name;
         f.Name = i.Name;
         f.Aliases = string.Join(Environment.NewLine, i.Aliases);
+        f.LoadPiece(i.Piece, Session.Rules is { } rs ? Scale.Of(rs, i.Id) : null);
         f.Category.Load(Session.Categories(), i.CategoryId);
     }
 
@@ -310,20 +328,27 @@ public partial class RulesView : Screen
         f.Active = true;
         f.Title = "Neue Zutat";
         f.Name = f.Aliases = "";
+        f.LoadPiece(null, null);
         f.Category.Load(Session.Categories(), null);
     }
 
     async void SaveIngredient(object? sender, RoutedEventArgs e)
     {
         var f = model.Ingredients;
+        var weight = Input.Int(f.Piece);
         f.NameInvalid = f.Name.Trim() == "";
-        if (f.NameInvalid)
+        f.PieceInvalid = f.Piece.Trim() != "" && weight is not > 0;
+        if (f.NameInvalid || f.PieceInvalid)
         {
-            Session.Fail(Missing("Name"));
+            Session.Fail(Missing(f.NameInvalid ? "Name" : null, f.PieceInvalid ? "Stückgewicht (größer als 0)" : null));
             return;
         }
         var id = f.CurrentId ?? Session.NewId("ingredient");
-        var data = new Ingredient { Id = id, Name = f.Name.Trim(), Aliases = AliasLines(f.Aliases) };
+        var data = new Ingredient
+        {
+            Id = id, Name = f.Name.Trim(), Aliases = AliasLines(f.Aliases),
+            Piece = weight is { } w ? new Piece(w, IngredientForm.PieceUnits[f.PieceUnitIndex]) : null,
+        };
         await Compose(async () =>
         {
             if (await CategoryId(f.Category) is not { } categoryId) return;

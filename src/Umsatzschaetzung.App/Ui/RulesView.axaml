@@ -58,6 +58,18 @@
                                                Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <StackPanel>
+                                    <TextBlock Text="Stückgewicht" Theme="{StaticResource FieldLabel}"
+                                               ToolTip.Tip="Ungefähres Gewicht oder Volumen eines Stücks."/>
+                                    <DockPanel HorizontalAlignment="Left" Width="240">
+                                        <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding PieceUnitNames}" SelectedIndex="{Binding PieceUnitIndex, Mode=TwoWay}"
+                                                  IsEnabled="{Binding PieceUnitFree}" Width="104" Margin="6,0,0,0"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Piece, Mode=TwoWay}" Classes.invalid="{Binding PieceInvalid}"
+                                                 PlaceholderText="kein Richtwert"/>
+                                    </DockPanel>
+                                    <TextBlock Text="Rechnet Positionen in Stück ohne eigenen Faktor um, etwa 1 Gurke ≈ 400 g. Ein Richtwert — leer lassen, wenn es keinen gibt."
+                                               Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <StackPanel>
                                     <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
                                     <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
                                               DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"/>
