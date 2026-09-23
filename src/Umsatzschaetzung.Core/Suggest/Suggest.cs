@@ -29,6 +29,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
     string[] owner = [];
     Meta[] ware = [];
     Meta?[] rule = [];
+    string[] wording = [];
     float[] vectors = [];
 
     public void Dispose() => encoder.Dispose();
@@ -119,9 +120,21 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             if (m.Confirmed && covered.TryGetValue(m.IngredientId, out var ing)) Add(ing, m.Meta, Wording(m));
         }
 
-        var embedded = Embed(texts);
-        vectors = new float[texts.Count * Encoder.Width];
-        for (var i = 0; i < embedded.Length; i++) embedded[i].CopyTo(vectors, i * Encoder.Width);
+        // A save bumps the version for every mapping the import proposes, and almost none
+        // of them adds a wording: what the last index holds is carried over, not read again.
+        var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
+        for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
+        var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
+        var embedded = fresh.Zip(Embed(fresh)).ToDictionary(StringComparer.Ordinal);
+        var next = new float[texts.Count * Encoder.Width];
+        for (var i = 0; i < texts.Count; i++)
+        {
+            var into = next.AsSpan(i * Encoder.Width, Encoder.Width);
+            if (prior.TryGetValue(texts[i], out var at)) vectors.AsSpan(at * Encoder.Width, Encoder.Width).CopyTo(into);
+            else embedded[texts[i]].CopyTo(into);
+        }
+        vectors = next;
+        wording = [.. texts];
         owner = [.. owners];
         ware = [.. wares];
         rule = [.. rules];
