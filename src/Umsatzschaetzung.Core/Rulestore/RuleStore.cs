@@ -79,6 +79,7 @@ public sealed class RuleStore
             'cat.kraftstoffe.und.brennstoffe', 'cat.manufaktur.und.kreativbetrieb', 'cat.optik.und.schmuck', 'cat.reinigung.und.fahrzeugpflege',
             'cat.shisha.bar', 'cat.tabakwaren.und.e.zigaretten', 'cat.tattoo.und.piercing', 'cat.tierbedarf.und.tierpflege')
         """,
+        "UPDATE ingredient SET name = 'Ausstattung und Bedarf' WHERE id = 'ing.nonfood' AND name = 'Nonfood'",
     ];
 
     static readonly string[] SammlungTables =

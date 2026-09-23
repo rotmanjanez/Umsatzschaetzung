@@ -19,7 +19,7 @@ public static class Matching
     const int Auto = 80;
 
     static readonly HashSet<string> NonGoods =
-        ["Verpackung und Einweg", "Reinigung und Hygiene", "Nonfood sonstiges", "Pfand und Leergut", "Dienstleistung", "Unklar"];
+        ["Verpackung und Einweg", "Reinigung und Hygiene", "Ausstattung und Bedarf", "Pfand und Leergut", "Dienstleistung", "Unklar"];
 
     static readonly int[] Coverages = [25, 50, 75, 100];
 
@@ -138,8 +138,10 @@ public static class Matching
             using var doc = JsonDocument.Parse(line);
             var r = doc.RootElement;
             var label = r.GetProperty("label");
+            var gruppe = label.GetProperty("gruppe").GetString()!;
+            if (gruppe == "Nonfood sonstiges") gruppe = "Ausstattung und Bedarf";
             yield return new Row(r.GetProperty("name").GetString()!, label.GetProperty("produkt").GetString()!,
-                label.GetProperty("gruppe").GetString()!, r.GetProperty("source").GetString()!);
+                gruppe, r.GetProperty("source").GetString()!);
         }
     }
 }
