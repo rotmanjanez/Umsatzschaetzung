@@ -1,0 +1,98 @@
+<ui:Screen x:Class="Umsatzschaetzung.App.Ui.ProductsView"
+           xmlns="https://github.com/avaloniaui"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
+           xmlns:m="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
+           x:DataType="ui:ProductsModel"
+           Margin="0,12,0,0">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,16,0">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,12">
+                <TextBlock Text="Sortiment" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="CSV importieren" Margin="0,0,8,0" Click="ImportCsv">
+                    <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
+                </Button>
+                <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="CSV exportieren" Margin="0,0,8,0" IsEnabled="{Binding !EmptyAssortment}" Click="ExportCsv">
+                    <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>
+                </Button>
+                <AutoCompleteBox x:Name="CatalogBox" Grid.Column="3" Width="300" PlaceholderText="Produkt hinzufügen …"
+                                 ItemsSource="{Binding Catalog}" FilterMode="Custom" MinimumPrefixLength="1" MaxDropDownHeight="320"
+                                 ValueMemberBinding="{Binding Name, DataType=m:Product}" DropDownClosed="CatalogPicked">
+                    <AutoCompleteBox.ItemTemplate>
+                        <DataTemplate x:DataType="m:Product">
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </AutoCompleteBox.ItemTemplate>
+                </AutoCompleteBox>
+            </Grid>
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding EmptyAssortment}"
+                           Text="Noch keine Produkte im Sortiment."/>
+                <DataGrid ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" IsVisible="{Binding !EmptyAssortment}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Produkt" Width="320" MinWidth="120" SortMemberPath="Name">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Bruttopreis" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Price, Mode=TwoWay}" Margin="2"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="USt" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <ComboBox ItemsSource="{Binding VatNames}" SelectedIndex="{Binding VatIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding PriceMissing}">
+                                        <TextBlock Text="Preis fehlt" Theme="{StaticResource BadgeText}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="50">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Aus dem Sortiment nehmen" HorizontalAlignment="Center" Click="RemoveFromAssortment">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+
+            <TextBlock Text="Vorschläge" Theme="{StaticResource SectionHeader}"/>
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="Vorschläge werden berechnet …" Theme="{StaticResource Muted}" IsVisible="{Binding Suggesting}"/>
+                <TextBlock Text="Keine Vorschläge." Theme="{StaticResource Muted}" IsVisible="{Binding NoSuggestions}"/>
+                <ItemsControl ItemsSource="{Binding Suggestions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="ui:SuggestionRow">
+                            <Border Theme="{StaticResource Card}" Margin="0,0,0,6" Padding="12,8">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <Button Grid.Column="1" Content="Ins Sortiment" Theme="{StaticResource SecondaryButton}" Margin="16,0,8,0" Click="AcceptSuggestion"/>
+                                    <Button Grid.Column="2" Theme="{StaticResource IconButton}" ToolTip.Tip="Führt der Betrieb nicht" VerticalAlignment="Center" Click="DismissSuggestion">
+                                        <PathIcon Data="{StaticResource ClearIcon}" Width="10" Height="10"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ui:Screen>

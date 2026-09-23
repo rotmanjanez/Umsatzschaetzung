@@ -28,6 +28,8 @@ public interface IService
     Task<ExportResp> ExportInvoice(string caseId, string invoiceId, CancellationToken ct);                                  // GET  /cases/{id}/invoices/{inv}/export   the read invoice as CSV
     Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct);                           // GET  /cases/{id}/invoices/{inv}/source
     Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct);                         // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading, images rendered again
+    Task<ExportResp> ExportAssortment(string caseId, CancellationToken ct);                                                 // GET  /cases/{id}/assortment/export   the listed products as CSV
+    Task<AssortmentImportResp> ImportAssortment(string caseId, byte[] data, CancellationToken ct);                         // POST /cases/{id}/assortment/import   lists the products of the CSV with their price, resp.Unknown names the rows no product matched
     Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct);   // POST /cases/{id}/mappings/suggest   caseId "" suggests without a Gewerbe filter
     Task<Case> MapCase(string caseId, CancellationToken ct);                                                                // POST /cases/{id}/mappings/run       maps every open line the matcher is sure about
 

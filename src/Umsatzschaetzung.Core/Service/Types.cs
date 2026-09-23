@@ -35,3 +35,5 @@ public sealed record CalcResp(Report Report, Rahmen? Rahmen);
 public sealed record ReportResp(string Html, byte[]? Pdf, string FileName);
 
 public sealed record ExportResp(byte[] Data, string FileName);
+
+public sealed record AssortmentImportResp(Case Case, List<string> Unknown);
