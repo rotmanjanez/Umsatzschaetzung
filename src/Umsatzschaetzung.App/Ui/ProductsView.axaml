@@ -16,11 +16,28 @@
                     <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>
                 </Button>
                 <AutoCompleteBox x:Name="CatalogBox" Grid.Column="3" Width="300" PlaceholderText="Produkt hinzufügen …"
-                                 ItemsSource="{Binding Catalog}" FilterMode="Custom" MinimumPrefixLength="1" MaxDropDownHeight="320"
-                                 ValueMemberBinding="{Binding Name, DataType=m:Product}" DropDownClosed="CatalogPicked">
+                                 FilterMode="None" MinimumPrefixLength="1" MaxDropDownHeight="320"
+                                 ValueMemberBinding="{ReflectionBinding Name}" SelectionChanged="CatalogSelected" DropDownClosed="CatalogPicked">
                     <AutoCompleteBox.ItemTemplate>
-                        <DataTemplate x:DataType="m:Product">
-                            <TextBlock Text="{Binding Name}"/>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate x:DataType="m:Product">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                    <DataTemplate x:DataType="ui:ProductDraft">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Border Background="{DynamicResource AccentButtonBackground}" Width="18" Height="18" CornerRadius="9">
+                                                <Path Data="{StaticResource NewIcon}" Fill="{DynamicResource AccentButtonForeground}"
+                                                      Stretch="Uniform" Width="9" Height="9"/>
+                                            </Border>
+                                            <TextBlock Foreground="{DynamicResource AccentButtonBackground}" VerticalAlignment="Center">
+                                                <Run Text="„"/><Run Text="{Binding Typed}" FontWeight="SemiBold"/><Run Text="“ neu erstellen"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
                         </DataTemplate>
                     </AutoCompleteBox.ItemTemplate>
                 </AutoCompleteBox>

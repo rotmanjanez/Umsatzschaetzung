@@ -22,14 +22,18 @@ public sealed class AssortmentRow(string productId) : Observable
     public bool PriceMissing { get => priceMissing; set => Set(ref priceMissing, value); }
 }
 
+public sealed record ProductDraft(string Typed)
+{
+    public string Name => "„" + Typed + "“ neu erstellen";
+}
+
 public sealed class ProductsModel : Observable
 {
     bool suggesting;
-    List<Product> catalog = [];
 
     public ObservableCollection<AssortmentRow> Rows { get; } = [];
     public ObservableCollection<SuggestionRow> Suggestions { get; } = [];
-    public List<Product> Catalog { get => catalog; set => Set(ref catalog, value); }
+    public List<Product> Catalog { get; set; } = [];
     public bool EmptyAssortment => Rows.Count == 0;
     public bool Suggesting { get => suggesting; set { if (Set(ref suggesting, value)) Raise(nameof(NoSuggestions)); } }
     public bool NoSuggestions => !suggesting && Suggestions.Count == 0;
@@ -58,7 +62,16 @@ public partial class ProductsView : Screen
             timer.Stop();
             _ = Refresh();
         };
-        CatalogBox.ItemFilter = (text, item) => item is Product p && Matches(text, p.Name);
+        CatalogBox.AsyncPopulator = (text, _) => Task.FromResult(Choices(text));
+    }
+
+    IEnumerable<object> Choices(string? text)
+    {
+        var name = (text ?? "").Trim();
+        var hits = model.Catalog.Where(p => Matches(name, p.Name)).ToList<object>();
+        if (name != "" && !model.Catalog.Exists(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)))
+            hits.Add(new ProductDraft(name));
+        return hits;
     }
 
     static bool Matches(string? text, string name) =>
@@ -67,11 +80,13 @@ public partial class ProductsView : Screen
     protected override async void OnEnter()
     {
         if (Session.Case is null) return;
+        Session.RulesChanged += RulesChanged;
         await Session.LoadRules(Ct);
         if (Session.Case is null || Session.Rules is null || !IsActive) return;
-        model.Catalog = Session.Products();
         Load();
     }
+
+    void RulesChanged() => model.Catalog = Session.Products();
 
     void Load()
     {
@@ -85,6 +100,7 @@ public partial class ProductsView : Screen
 
     protected override void OnLeave()
     {
+        Session.RulesChanged -= RulesChanged;
         timer.Stop();
         if (Session.Case is not null) _ = Session.SaveCase(CancellationToken.None);
     }
@@ -175,15 +191,17 @@ public partial class ProductsView : Screen
         Schedule(0);
     }
 
+    void CatalogSelected(object? sender, SelectionChangedEventArgs e) => CatalogPicked(sender, e);
+
     void CatalogPicked(object? sender, EventArgs e)
     {
-        if (sender is not AutoCompleteBox box || box.SelectedItem is not Product p || box.Text != p.Name) return;
-        Add(p.Id);
-        Dispatcher.UIThread.Post(() =>
-        {
-            box.SelectedItem = null;
-            box.Text = "";
-        });
+        if (sender is not AutoCompleteBox box || box.IsDropDownOpen) return;
+        if (box.SelectedItem is Product p && box.Text == p.Name) Add(p.Id);
+        else if (box.SelectedItem is ProductDraft d && box.Text == d.Name && Session.Case is { } kase)
+            Session.NewProduct(d.Typed, id => { if (Session.Case == kase) Add(id); });
+        else return;
+        box.SelectedItem = null;
+        Dispatcher.UIThread.Post(() => box.Text = "");
     }
 
     void AcceptSuggestion(object? sender, RoutedEventArgs e)

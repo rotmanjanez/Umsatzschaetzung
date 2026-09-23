@@ -48,6 +48,9 @@ public sealed class Session : Observable
     public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed, RulesRequested;
 
     public void ShowRules() => RulesRequested?.Invoke();
+    public event Action<string, Action<string>>? ProductRequested;
+
+    public void NewProduct(string name, Action<string> created) => ProductRequested?.Invoke(name, created);
     public event Action<Case>? CaseOpened;
     public event Action<Tab>? TabRequested;
     public event Action<string>? InvoiceRequested;

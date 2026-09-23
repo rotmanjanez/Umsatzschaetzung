@@ -35,7 +35,8 @@ public partial class Shell : Window
         session.CaseOpened += OpenCase;
         session.CaseChanged += RefreshContext;
         session.StatusChanged += RefreshError;
-        session.RulesRequested += ShowRules;
+        session.RulesRequested += () => ShowRules();
+        session.ProductRequested += (name, created) => ShowRules().NewProduct(name, created);
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
         if (OperatingSystem.IsMacOS()) NativeMenu.SetMenu(this, HelpMenu());
@@ -87,7 +88,7 @@ public partial class Shell : Window
 
     void ShowRules(object? sender, RoutedEventArgs e) => ShowRules();
 
-    void ShowRules()
+    RulesWindow ShowRules()
     {
         if (rules is null)
         {
@@ -96,6 +97,7 @@ public partial class Shell : Window
             rules.Show();
         }
         else rules.Activate();
+        return rules;
     }
 
     void Show(Screen screen)

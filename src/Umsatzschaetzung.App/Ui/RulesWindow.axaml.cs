@@ -15,4 +15,6 @@ public partial class RulesWindow : Window
         Help.OnF1(this, () => view.Topic);
         Closed += (_, _) => view.Leave();
     }
+
+    public void NewProduct(string name, Action<string> created) => view.NewProduct(name, created);
 }

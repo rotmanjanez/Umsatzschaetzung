@@ -210,6 +210,7 @@ public partial class RulesView : Screen
 
     readonly RulesModel model = new();
     bool loading, saving;
+    Action<string>? productCreated;
 
     public override string Topic => Tabs.SelectedIndex switch
     {
@@ -265,7 +266,8 @@ public partial class RulesView : Screen
 
         loading = false;
         if (IngredientGrid.SelectedItem is IngredientItem ii) LoadIngredient(ii.Ingredient); else model.Ingredients.Active = false;
-        if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product); else model.Products.Active = false;
+        if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product);
+        else if (model.Products.CurrentId is not null) model.Products.Active = false;
         if (ScopeGrid.SelectedItem is ScopeItem si) ShowScope(si, model.Yields.CurrentId); else model.Yields.Active = false;
     }
 
@@ -344,6 +346,7 @@ public partial class RulesView : Screen
     void LoadProduct(Product p)
     {
         var f = model.Products;
+        productCreated = null;
         var options = Session.Ingredients();
         f.CurrentId = p.Id;
         f.Existing = f.Active = true;
@@ -359,16 +362,21 @@ public partial class RulesView : Screen
             });
     }
 
-    void NewProduct(object? sender, RoutedEventArgs e)
+    void NewProduct(object? sender, RoutedEventArgs e) => NewProduct("", null);
+
+    public void NewProduct(string name, Action<string>? created)
     {
         var f = model.Products;
+        Tabs.SelectedIndex = 1;
         ProductGrid.SelectedItem = null;
+        productCreated = created;
         f.CurrentId = null;
         f.Existing = false;
         f.Active = true;
         f.Title = "Neues Produkt";
-        f.Name = "";
+        f.Name = name;
         f.Recipe.Clear();
+        if (created is not null) f.Recipe.Add(new RecipeRow(Session.Ingredients()));
     }
 
     void AddRecipeLine(object? sender, RoutedEventArgs e) => model.Products.Recipe.Add(new RecipeRow(Session.Ingredients()));
@@ -401,8 +409,13 @@ public partial class RulesView : Screen
                     : lines ? null : "Rezept (Zutat und Menge je Portion, Menge größer als 0)"));
             return;
         }
+        var isNew = f.CurrentId is null;
         f.CurrentId = id;
-        await Session.Put(data, Ct);
+        if (await Session.Put(data, Ct) && isNew && productCreated is { } created)
+        {
+            productCreated = null;
+            created(id);
+        }
     }
 
     async void DeleteProduct(object? sender, RoutedEventArgs e) => await Delete(model.Products, Entity.Product);
