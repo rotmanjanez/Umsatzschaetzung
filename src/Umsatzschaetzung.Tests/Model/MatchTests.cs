@@ -77,12 +77,11 @@ public class MatchTests
     }
 
     [Fact]
-    public void AnUnconfirmedGuessOnlyFitsTheWordingItWasMadeFrom()
+    public void AnUnconfirmedGuessFitsItsKeyWhateverTheWording()
     {
         var rs = Rules(new ArticleMapping { Id = "m", Gtin = "4006381333931", Observed = "Pils 0,5 l", IngredientId = "i" });
-        Assert.Equal("m", Match.Mapping(rs, Supplier, Day, Line("PILS 0,5 L"))?.Id);
-        Assert.Null(Match.Mapping(rs, Supplier, Day, Line("Pils 0,33 l")));
-        Assert.False(Match.Fits(rs.Mappings["m"], Supplier, Day, Line("Pils 0,33 l")));
+        Assert.Equal("m", Match.Mapping(rs, Supplier, Day, Line("Pils O,5 1"))?.Id);
+        Assert.True(Match.Fits(rs.Mappings["m"], Supplier, Day, Line("Pils O,5 1")));
     }
 
     [Fact]

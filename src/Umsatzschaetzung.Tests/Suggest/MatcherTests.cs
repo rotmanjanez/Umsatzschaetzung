@@ -122,17 +122,15 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
     }
 
     [Fact]
-    public void AnUnconfirmedMappingFitsOnlyItsOwnWording()
+    public void AnUnconfirmedMappingFitsItsArticleWhateverTheWording()
     {
         var rs = f.Rules(new ArticleMapping
         {
             Id = "map.guess", SupplierName = Rheinland, SupplierArticleId = "G-1",
             Observed = "Pils Kiste 20 x 0,5 l", IngredientId = "ing.bier.fass", Confirmed = false,
         });
-        var same = f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", SellerArticleId = "G-1" });
-        var other = f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Weizen Kiste 20 x 0,5 l", SellerArticleId = "G-1" });
-        Assert.Equal("map.guess", same[0].Mapping.Id);
-        Assert.All(other, x => Assert.NotEqual("map.guess", x.Mapping.Id));
+        var misread = f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" });
+        Assert.Equal(("map.guess", OriginKind.Exact), (misread[0].Mapping.Id, misread[0].Kind));
     }
 
     [Theory]

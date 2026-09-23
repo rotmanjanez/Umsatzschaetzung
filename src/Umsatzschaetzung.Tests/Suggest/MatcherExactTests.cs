@@ -101,15 +101,15 @@ public class MatcherExactTests
     }
 
     [Fact]
-    public void AnUnconfirmedMappingFitsOnlyItsOwnWording()
+    public void AnUnconfirmedMappingFitsItsArticleWhateverTheWording()
     {
         var rs = Seed(new ArticleMapping
         {
             Id = "map.guess", SupplierName = Rheinland, SupplierArticleId = "G-1",
             Observed = "Pils Kiste 20 x 0,5 l", IngredientId = "ing.bier.fass", Confirmed = false,
         });
-        Assert.Equal("map.guess", Hit(rs, Rheinland, new InvoiceLine { Name = "Pils  kiste 20 x 0,5 L", SellerArticleId = "G-1" })?.Mapping.Id);
-        Assert.Null(Hit(rs, Rheinland, new InvoiceLine { Name = "Weizen Kiste 20 x 0,5 l", SellerArticleId = "G-1" }));
+        Assert.Equal("map.guess", Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", SellerArticleId = "G-1" })?.Mapping.Id);
+        Assert.Equal("map.guess", Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" })?.Mapping.Id);
     }
 
     [Fact]

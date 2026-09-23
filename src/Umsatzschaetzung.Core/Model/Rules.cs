@@ -138,17 +138,14 @@ public static class Match
     }
 
     // Whether a line still belongs to the mapping it carries: an edited article number
-    // or unit leaves the rule behind, and a machine's guess only ever fit its own wording.
+    // or unit leaves the rule behind.
     public static bool Fits(ArticleMapping m, string? supplier, DateOnly? date, InvoiceLine line) =>
         Usable(m, date, line) && (ByArticle(m, supplier, line) || ByGtin(m, line) || ByName(m, line));
 
-    static bool Usable(ArticleMapping m, DateOnly? date, InvoiceLine line)
-    {
-        if (!m.Meta.ValidOn(date)) return false;
-        if (!string.IsNullOrEmpty(m.UnitCode) && !string.IsNullOrEmpty(line.UnitCode)
-            && !string.Equals(m.UnitCode, line.UnitCode, StringComparison.OrdinalIgnoreCase)) return false;
-        return m.Confirmed || ArticleName.Canonical(m.Observed) == ArticleName.Canonical(line.Name);
-    }
+    static bool Usable(ArticleMapping m, DateOnly? date, InvoiceLine line) =>
+        m.Meta.ValidOn(date)
+        && (string.IsNullOrEmpty(m.UnitCode) || string.IsNullOrEmpty(line.UnitCode)
+            || string.Equals(m.UnitCode, line.UnitCode, StringComparison.OrdinalIgnoreCase));
 
     static bool ByArticle(ArticleMapping m, string? supplier, InvoiceLine line) =>
         !string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(line.SellerArticleId)
