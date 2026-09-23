@@ -61,10 +61,12 @@ public class PdfTests
     [InlineData((byte)'\r')]
     public void CompressedDataEndingInALineBreakByteSurvives(byte last)
     {
+        // zlib ends in the low byte of the Adler-32 byte sum; each odd 'a' steps it through all 256
+        // within 512 tries, whatever line endings the checkout gave CiiXml.
         byte[] xml = [], z = [];
-        for (var i = 0; z.Length == 0 || z[^1] != last; i++)
+        for (var pad = 0; z.Length == 0 || z[^1] != last; pad++)
         {
-            xml = Bytes(CiiXml() + $"<!-- {i} -->");
+            xml = Bytes(CiiXml() + $"<!-- {new string('a', pad)} -->");
             z = Deflate(xml);
         }
         var pdf = PdfFile((EmbeddedFile + " /Filter /FlateDecode", z));
