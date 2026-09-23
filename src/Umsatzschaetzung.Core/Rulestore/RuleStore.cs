@@ -29,7 +29,7 @@ public sealed class RuleStore
         CREATE TABLE ingredient(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT NOT NULL,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
-            deleted_at TEXT) WITHOUT ROWID;
+            deleted_at TEXT, aliases TEXT, piece_amount INTEGER, piece_unit TEXT) WITHOUT ROWID;
 
         CREATE TABLE mapping(
             id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT, name TEXT,
@@ -69,28 +69,6 @@ public sealed class RuleStore
 
         CREATE INDEX synonym_begriff ON synonym(begriff);
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
-        """,
-        "ALTER TABLE ingredient ADD COLUMN aliases TEXT",
-        """
-        UPDATE category SET sparte = 'handelsware' WHERE sparte IS NULL AND id IN (
-            'cat.bau.und.installationsmaterial', 'cat.bestattung', 'cat.druck.und.fotografie', 'cat.einzelhandel.technik.und.haushalt',
-            'cat.einzelhandel.textilien', 'cat.fahrradwerkstatt', 'cat.fitness.und.sport', 'cat.floristik.und.garten',
-            'cat.friseur.und.kosmetik', 'cat.handwerk.und.reparatur', 'cat.kfz.werkstatt', 'cat.kino.und.freizeit',
-            'cat.kraftstoffe.und.brennstoffe', 'cat.manufaktur.und.kreativbetrieb', 'cat.optik.und.schmuck', 'cat.reinigung.und.fahrzeugpflege',
-            'cat.shisha.bar', 'cat.tabakwaren.und.e.zigaretten', 'cat.tattoo.und.piercing', 'cat.tierbedarf.und.tierpflege')
-        """,
-        "UPDATE ingredient SET name = 'Ausstattung und Bedarf' WHERE id = 'ing.nonfood' AND name = 'Nonfood'",
-        "ALTER TABLE ingredient ADD COLUMN piece_amount INTEGER",
-        "ALTER TABLE ingredient ADD COLUMN piece_unit TEXT",
-        """
-        UPDATE ingredient SET id = 'ing.burgerbun' WHERE id = 'ing.burgerbroetchen'
-            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbun');
-        UPDATE recipe_line SET ingredient_id = 'ing.burgerbun' WHERE ingredient_id = 'ing.burgerbroetchen'
-            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbroetchen');
-        UPDATE mapping SET ingredient_id = 'ing.burgerbun' WHERE ingredient_id = 'ing.burgerbroetchen'
-            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbroetchen');
-        UPDATE yield_rule SET ingredient_id = 'ing.burgerbun' WHERE ingredient_id = 'ing.burgerbroetchen'
-            AND NOT EXISTS (SELECT 1 FROM ingredient WHERE id = 'ing.burgerbroetchen');
         """,
     ];
 

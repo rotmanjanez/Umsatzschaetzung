@@ -29,7 +29,9 @@ public sealed partial class CaseStore(string dir)
             id TEXT PRIMARY KEY, label TEXT NOT NULL,
             period_from TEXT NOT NULL, period_to TEXT NOT NULL,
             name TEXT NOT NULL, tax_number TEXT NOT NULL, pab_number TEXT NOT NULL, gewerbe TEXT NOT NULL,
-            created_at TEXT NOT NULL, updated_at TEXT NOT NULL) WITHOUT ROWID;
+            created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+            -- Stand der Regeln, gegen den die offenen Positionen zuletzt geprüft wurden.
+            mapped_at INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID;
         CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
         CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
         CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL, disabled INTEGER NOT NULL) WITHOUT ROWID;
@@ -50,8 +52,12 @@ public sealed partial class CaseStore(string dir)
 
         -- Was der Scan aus dem Beleg geholt hat. Das Seitenbild steht nicht dabei: der Beleg
         -- liegt daneben und wird zum Anzeigen neu gerendert.
+        -- scale, skew, turn und settle sagen, wie die Seite vor dem Lesen aufgerichtet wurde:
+        -- das neu gerenderte Bild wird ebenso gedreht, damit es wieder unter den Kästen liegt.
         CREATE TABLE reading_page(invoice_id TEXT NOT NULL, ord INTEGER NOT NULL,
             width INTEGER NOT NULL, height INTEGER NOT NULL,
+            scale REAL NOT NULL DEFAULT 1, skew REAL NOT NULL DEFAULT 0,
+            turn INTEGER NOT NULL DEFAULT 0, settle REAL NOT NULL DEFAULT 0,
             PRIMARY KEY(invoice_id, ord)) WITHOUT ROWID;
         CREATE TABLE reading_word(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, ord INTEGER NOT NULL,
             text TEXT NOT NULL, x INTEGER NOT NULL, y INTEGER NOT NULL, w INTEGER NOT NULL, h INTEGER NOT NULL,
@@ -75,18 +81,6 @@ public sealed partial class CaseStore(string dir)
         CREATE TABLE reading_line_flag(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, line INTEGER NOT NULL,
             ord INTEGER NOT NULL, code TEXT NOT NULL, message TEXT NOT NULL, line_no INTEGER NOT NULL, field TEXT,
             PRIMARY KEY(invoice_id, page, line, ord)) WITHOUT ROWID;
-        """,
-        """
-        -- Wie die Seite vor dem Lesen aufgerichtet wurde: das neu gerenderte Bild wird ebenso
-        -- gedreht, damit es wieder unter den Kästen liegt.
-        ALTER TABLE reading_page ADD COLUMN scale REAL NOT NULL DEFAULT 1;
-        ALTER TABLE reading_page ADD COLUMN skew REAL NOT NULL DEFAULT 0;
-        ALTER TABLE reading_page ADD COLUMN turn INTEGER NOT NULL DEFAULT 0;
-        ALTER TABLE reading_page ADD COLUMN settle REAL NOT NULL DEFAULT 0;
-        """,
-        """
-        -- Stand der Regeln, gegen den die offenen Positionen zuletzt geprüft wurden.
-        ALTER TABLE kase ADD COLUMN mapped_at INTEGER NOT NULL DEFAULT 0;
         """,
     ];
 

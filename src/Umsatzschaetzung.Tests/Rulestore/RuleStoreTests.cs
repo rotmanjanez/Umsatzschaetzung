@@ -271,44 +271,6 @@ public class RuleStoreTests
     }
 
     [Fact]
-    public void AStoreFromBeforePieceWeightsLearnsThemFromTheSeed()
-    {
-        using var tmp = new TempDir();
-        Open(tmp).Save(new Ingredient { Id = "ing.gurke", Name = "Gurken" });
-        var file = tmp.Sub("rules.db");
-        var schema = Sql.UserVersion(file);
-        Sql.Exec(file, $"ALTER TABLE ingredient DROP COLUMN piece_unit; ALTER TABLE ingredient DROP COLUMN piece_amount; PRAGMA user_version = {schema - 3}");
-        var seed = TestData.Seed();
-        seed.Put(new Ingredient { Id = "ing.gurke", Name = "Gurken", Piece = new(400, Unit.Ml) });
-
-        var rs = new RuleStore(tmp.Path, seed).Load();
-
-        Assert.Equal(schema, Sql.UserVersion(file));
-        Assert.Equal(new Piece(400, Unit.Ml), rs.Ingredients["ing.gurke"].Piece);
-    }
-
-    [Fact]
-    public void TheBurgerbroetchenBecomeTheBurgerbun()
-    {
-        using var tmp = new TempDir();
-        var store = Open(tmp);
-        store.Save(new Ingredient { Id = "ing.burgerbroetchen", Name = "Burgerbrötchen" });
-        store.Save(new Product { Id = "prod.b", Name = "B", Recipe = [new RecipeLine { IngredientId = "ing.burgerbroetchen", Amount = 1, Unit = "H87" }] });
-        store.Save(new ArticleMapping { Id = "map.b", Name = "Bun", IngredientId = "ing.burgerbroetchen", Confirmed = true });
-        Sql.Exec(tmp.Sub("rules.db"), "DELETE FROM ingredient WHERE id = 'ing.burgerbun'");
-        var file = tmp.Sub("rules.db");
-        var schema = Sql.UserVersion(file);
-        Sql.Exec(file, $"PRAGMA user_version = {schema - 1}");
-
-        var rs = Open(tmp).Load();
-
-        Assert.False(rs.Ingredients.ContainsKey("ing.burgerbroetchen"));
-        Assert.Equal("Burgerbrötchen", rs.Ingredients["ing.burgerbun"].Name);
-        Assert.Equal("ing.burgerbun", rs.Products["prod.b"].Recipe[0].IngredientId);
-        Assert.Equal("ing.burgerbun", rs.Mappings["map.b"].IngredientId);
-    }
-
-    [Fact]
     public void ReopeningRunsNoMigrationTwice()
     {
         using var tmp = new TempDir();
@@ -323,24 +285,6 @@ public class RuleStoreTests
         Assert.Equal(schema, Sql.UserVersion(file));
         Assert.Equal(1, rs.Version);
         Assert.Equal(Dump(rs), Dump(Open(tmp).Load()));
-    }
-
-    [Fact]
-    public void AnOlderStoreIsMigratedForward()
-    {
-        using var tmp = new TempDir();
-        Open(tmp).Save(new Ingredient { Id = "ing.x", Name = "X" });
-        var file = tmp.Sub("rules.db");
-        var schema = Sql.UserVersion(file);
-        Sql.Exec(file, "ALTER TABLE ingredient DROP COLUMN aliases; ALTER TABLE ingredient DROP COLUMN piece_unit; "
-            + "ALTER TABLE ingredient DROP COLUMN piece_amount; PRAGMA user_version = 1");
-
-        var store = Open(tmp);
-        var rs = store.Save(new Ingredient { Id = "ing.y", Name = "Y", Aliases = ["Ypsilon"] });
-
-        Assert.Equal(schema, Sql.UserVersion(file));
-        Assert.Empty(rs.Ingredients["ing.x"].Aliases);
-        Assert.Equal(["Ypsilon"], rs.Ingredients["ing.y"].Aliases);
     }
 
     [Fact]
