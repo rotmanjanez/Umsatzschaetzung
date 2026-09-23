@@ -7,9 +7,6 @@
         <Style Selector="TextBox.flagged /template/ Border#PART_BorderElement">
             <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
         </Style>
-        <Style Selector="Border.flagged">
-            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
-        </Style>
         <Style Selector="Rectangle.flagged">
             <Setter Property="Stroke" Value="{DynamicResource WarningBrush}"/>
             <Setter Property="Fill" Value="{DynamicResource WarningSoftBrush}"/>
@@ -30,6 +27,13 @@
             <Setter Property="Padding" Value="8,0"/>
             <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="3"/>
+        </Style>
+        <Style Selector="Border.cell.flagged">
+            <Setter Property="Background" Value="{DynamicResource WarningSoftBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
         </Style>
     </ui:Screen.Styles>
     <Grid x:Name="Panes">
