@@ -88,15 +88,10 @@
                     <ScrollViewer x:Name="Detail" VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelection}">
                         <StackPanel>
                             <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                            <Grid Margin="0,0,0,16" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-                                <TextBlock Text="Artikelnummer" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasArticle}"/>
-                                <TextBlock Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasArticle}"/>
-                                <TextBlock Grid.Row="1" Text="Einheit" Theme="{StaticResource KeyLabel}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Unit}" Theme="{StaticResource KeyValue}"/>
-                                <TextBlock Grid.Row="2" Text="Menge" Theme="{StaticResource KeyLabel}"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Quantity}" Theme="{StaticResource KeyValue}"/>
-                                <TextBlock Grid.Row="3" Text="Zugeordnet" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasCurrent}"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Current}" Theme="{StaticResource KeyValue}" IsVisible="{Binding HasCurrent}"/>
+                            <TextBlock Text="{Binding Facts}" Theme="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <Grid Margin="0,0,0,12" ColumnDefinitions="Auto,*" IsVisible="{Binding HasCurrent}">
+                                <TextBlock Text="Zugeordnet" Theme="{StaticResource KeyLabel}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Current}" Theme="{StaticResource KeyValue}"/>
                             </Grid>
                             <StackPanel IsVisible="{Binding ShowCandidates}">
                                 <TextBlock Text="Vorschläge werden ermittelt …" Theme="{StaticResource Muted}" IsVisible="{Binding Loading}"/>
@@ -134,10 +129,53 @@
                                     <TextBlock Text="nur bei Gebinden nötig" Theme="{StaticResource Muted}" FontSize="12"/>
                                 </StackPanel>
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,16">
                                 <Button Content="{Binding AssignLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"/>
                                 <Button Content="{Binding ManualLabel}" Theme="{StaticResource SecondaryButton}" Click="ToggleManual"/>
                             </StackPanel>
+                            <DataGrid ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Snippets}" IsReadOnly="True"
+                                      Margin="0,0,0,12" IsVisible="{Binding HasSnippets}">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Rechnung" Width="110">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:SnippetRow">
+                                                <TextBlock Classes="cell" Text="{Binding Number}" ToolTip.Tip="{Binding Number}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Datum" Width="96">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:SnippetRow">
+                                                <TextBlock Classes="cell" Text="{Binding Date}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Auszug" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:SnippetRow">
+                                                <Panel Margin="4">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding Loading}">
+                                                        <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="Auszug wird geladen …" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="Kein Auszug verfügbar" Theme="{StaticResource Muted}" VerticalAlignment="Center" IsVisible="{Binding Missing}"/>
+                                                    <Image Source="{Binding Scan}" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding HasScan}"/>
+                                                    <SelectableTextBlock Text="{Binding Excerpt}" FontFamily="{StaticResource MonoFont}" FontSize="11" TextWrapping="Wrap" IsVisible="{Binding HasExcerpt}"/>
+                                                </Panel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:SnippetRow">
+                                                <Button Theme="{StaticResource IconButton}" ToolTip.Tip="Rechnung öffnen" Click="OpenInvoice" VerticalAlignment="Center">
+                                                    <PathIcon Data="{StaticResource OpenIcon}" Width="14" Height="14"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </ScrollViewer>
                     </Grid>

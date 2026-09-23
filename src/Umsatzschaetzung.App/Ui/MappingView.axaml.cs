@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 
@@ -44,16 +45,43 @@ public sealed class CandidateRow(MappingCandidate candidate, string label, bool 
     public bool Selected { get => selected; set => Set(ref selected, value); }
 }
 
+public sealed class SnippetRow(Invoice invoice, int line) : Observable
+{
+    bool loading = true;
+
+    public Invoice Invoice { get; } = invoice;
+    public int Line { get; } = line;
+    public string Number => Invoice.Number;
+    public string Date { get; } = Format.Date(invoice.Date);
+    public Bitmap? Scan { get; private set; }
+    public string Excerpt { get; private set; } = "";
+    public bool Loading => loading;
+    public bool HasScan => Scan is not null;
+    public bool HasExcerpt => Excerpt != "";
+    public bool Missing => !loading && !HasScan && !HasExcerpt;
+
+    public void Show(Bitmap? image, string? text)
+    {
+        Scan = image;
+        Excerpt = text ?? "";
+        loading = false;
+        foreach (var name in (string[])[nameof(Scan), nameof(Excerpt), nameof(Loading), nameof(HasScan), nameof(HasExcerpt), nameof(Missing)])
+            Raise(name);
+    }
+}
+
 public sealed class MappingModel : Observable
 {
     bool noInvoices, hasSelection, loading, mapping, manual, currentAuto;
-    string summary = "", title = "", article = "", unit = "", quantity = "", factor = "", current = "";
+    string summary = "", title = "", facts = "", factor = "", current = "";
     string assigned = "";
     Ingredient? ingredient;
     List<Ingredient> ingredients = [];
 
     public ObservableCollection<LineGroup> Groups { get; } = [];
     public ObservableCollection<CandidateRow> Candidates { get; } = [];
+    public ObservableCollection<SnippetRow> Snippets { get; } = [];
+    public bool HasSnippets => Snippets.Count > 0;
     public string Summary { get => summary; set => Set(ref summary, value); }
     public bool NoInvoices { get => noInvoices; set => Set(ref noInvoices, value); }
     public bool HasSelection { get => hasSelection; set { if (Set(ref hasSelection, value)) Raise(nameof(NoSelection)); } }
@@ -78,10 +106,7 @@ public sealed class MappingModel : Observable
     public string AssignLabel => !manual && currentAuto && Candidates.FirstOrDefault(c => c.Selected) is { IsExact: true } ? "Bestätigen" : "Zuordnen";
     public bool CanAssign => !mapping && (manual || Candidates.Any(c => c.Selected));
     public string Title { get => title; set => Set(ref title, value); }
-    public string Article { get => article; set { if (Set(ref article, value)) Raise(nameof(HasArticle)); } }
-    public bool HasArticle => article != "";
-    public string Unit { get => unit; set => Set(ref unit, value); }
-    public string Quantity { get => quantity; set => Set(ref quantity, value); }
+    public string Facts { get => facts; set => Set(ref facts, value); }
     public string Current { get => current; set { if (Set(ref current, value)) Raise(nameof(HasCurrent)); } }
     public bool HasCurrent => current != "";
     public bool CurrentAuto { get => currentAuto; set { if (Set(ref currentAuto, value)) Raise(nameof(AssignLabel)); } }
@@ -90,6 +115,19 @@ public sealed class MappingModel : Observable
     public string Factor { get => factor; set => Set(ref factor, value); }
     public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
     public List<Ingredient> Ingredients { get => ingredients; set => Set(ref ingredients, value); }
+
+    public void ClearSnippets()
+    {
+        Snippets.Clear();
+        Raise(nameof(HasSnippets));
+    }
+
+    public void SetSnippets(IEnumerable<SnippetRow> rows)
+    {
+        ClearSnippets();
+        foreach (var row in rows) Snippets.Add(row);
+        Raise(nameof(HasSnippets));
+    }
 
     public void SetCandidates(List<CandidateRow> candidates)
     {
@@ -229,6 +267,7 @@ public partial class MappingView : Screen
     {
         var seq = ++suggestSeq;
         model.SetCandidates([]);
+        model.ClearSnippets();
         if (Groups.SelectedItem is not LineGroup g || Session.Case is null)
         {
             model.HasSelection = false;
@@ -236,9 +275,8 @@ public partial class MappingView : Screen
         }
         model.Assigned = "";
         model.Title = g.Name;
-        model.Article = g.Article ?? "";
-        model.Unit = Units.Label(g.Unit);
-        model.Quantity = (Format.Milli(g.Quantity) + " " + Units.Label(g.Unit)).Trim();
+        var total = (Format.Milli(g.Quantity) + " " + Units.Label(g.Unit)).Trim();
+        model.Facts = string.IsNullOrEmpty(g.Article) ? total : g.Article + ", " + total;
         model.Current = g.MappingId is null || Session.Rules is null ? ""
             : Names.Mapping(Session.Rules, g.MappingId) + " · " + g.StateText.ToLowerInvariant();
         model.CurrentAuto = g.IsAutomatic;
@@ -246,6 +284,7 @@ public partial class MappingView : Screen
         model.Loading = true;
         var (inv, line) = g.Lines[0];
         var lineItem = Session.Case.Invoices[inv].Lines[line];
+        ShowSnippets(seq, g);
         await Session.Run(async () =>
         {
             var candidates = await Session.Service.SuggestMapping(Session.Case.Id, lineItem, g.Supplier, Ct);
@@ -256,10 +295,57 @@ public partial class MappingView : Screen
         if (seq == suggestSeq) model.Loading = false;
     }
 
+    // Each position the group was built from, in the order they were delivered. The rows are there at
+    // once; their excerpts are cut in parallel, only the PDF rendering behind a scan's reading is serial.
+    async void ShowSnippets(int seq, LineGroup g)
+    {
+        var k = Session.Case!;
+        var rows = g.Lines.Select(p => new SnippetRow(k.Invoices[p.Invoice], p.Line)).OrderBy(r => r.Invoice.Date).ToList();
+        model.SetSnippets(rows);
+        await Task.WhenAll(rows.Select(async row =>
+        {
+            var (image, text) = await Snippet(k.Id, row.Invoice, row.Line);
+            if (seq == suggestSeq) row.Show(image, text);
+            else image?.Dispose();
+        }));
+    }
+
+    async Task<(Bitmap?, string?)> Snippet(string caseId, Invoice inv, int index)
+    {
+        var line = inv.Lines[index];
+        try
+        {
+            if (inv.Source == Source.Scan)
+            {
+                if (!Session.Readings.TryGetValue(inv.Id, out var read))
+                {
+                    read = new OcrResp(inv.Id, (await Session.Service.InvoiceReading(caseId, inv.Id, Ct)).Pages, inv);
+                    if (read.Pages.Count > 0) Session.Readings[inv.Id] = read;
+                }
+                return (await Task.Run(() => Ui.Snippet.Crop(read.Pages, index, line)), null);
+            }
+            if (inv.Source is Source.Ubl or Source.Cii)
+            {
+                if (!Session.Sources.TryGetValue(inv.Id, out var src))
+                    Session.Sources[inv.Id] = src = await Session.Service.InvoiceSource(caseId, inv.Id, Ct);
+                if (src.Pages.FirstOrDefault()?.Text is { } xml) return (null, Ui.Snippet.Excerpt(xml, index, line));
+            }
+        }
+        catch (Exception e) when (e is ServiceError or OperationCanceledException)
+        {
+        }
+        return (null, null);
+    }
+
     List<CandidateRow> Rows(List<MappingCandidate> candidates, string? current) =>
         Session.Rules is { } rs
             ? candidates.Select(c => new CandidateRow(c, Names.Candidate(rs, c.Mapping), c.Mapping.Id != "" && c.Mapping.Id == current)).ToList()
             : [];
+
+    void OpenInvoice(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is SnippetRow row) Session.OpenInvoice(row.Invoice.Id);
+    }
 
     void ToggleManual(object? sender, RoutedEventArgs e) => model.Manual = !model.Manual;
 

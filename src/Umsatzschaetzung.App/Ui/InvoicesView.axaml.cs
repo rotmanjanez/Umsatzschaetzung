@@ -96,6 +96,7 @@ public partial class InvoicesView : Screen
         AddHandler(DragDrop.DropEvent, Dropped);
         Session.CaseChanged += Refresh;
         Session.CaseClosed += CaseClosed;
+        Session.InvoiceRequested += id => { if (Session.Case?.Invoices.Find(i => i.Id == id) is { } inv) Show(new InvoiceRow(inv)); };
         Session.Imports.Finished += ImportFinished;
     }
 

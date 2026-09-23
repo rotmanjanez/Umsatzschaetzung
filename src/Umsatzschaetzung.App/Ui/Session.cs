@@ -50,8 +50,11 @@ public sealed class Session : Observable
     public void ShowRules() => RulesRequested?.Invoke();
     public event Action<Case>? CaseOpened;
     public event Action<Tab>? TabRequested;
+    public event Action<string>? InvoiceRequested;
 
     public void Go(Tab tab) => TabRequested?.Invoke(tab);
+
+    public void OpenInvoice(string id) => InvoiceRequested?.Invoke(id);
 
     public async Task<bool> Run(Func<Task> work)
     {
