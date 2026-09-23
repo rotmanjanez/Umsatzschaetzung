@@ -34,14 +34,6 @@
             </StackPanel>
             <DataGrid Grid.Column="1" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" MaxHeight="240" Margin="24,0,0,0" IsVisible="{Binding HasExcluded}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Rechnung" Binding="{Binding Invoice, DataType=ui:ExcludedLineRow}" Width="160"/>
-                    <DataGridTemplateColumn Header="Pos." Width="60" SortMemberPath="LineNo">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="ui:ExcludedLineRow">
-                                <TextBlock Text="{Binding LineNo}" Theme="{StaticResource Number}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name, DataType=ui:ExcludedLineRow}" Width="260" MinWidth="140"/>
                     <DataGridTemplateColumn Header="Grund" Width="220" SortMemberPath="Reason">
                         <DataGridTemplateColumn.CellTemplate>
@@ -50,7 +42,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Netto" Width="110" SortMemberPath="LineNet">
+                    <DataGridTemplateColumn Header="Netto" Width="110" SortMemberPath="Net">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="ui:ExcludedLineRow">
                                 <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Number}"/>

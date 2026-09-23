@@ -7,7 +7,10 @@ using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed record ExcludedLineRow(string Invoice, long LineNo, string Name, string Reason, string LineNet);
+public sealed record ExcludedLineRow(string Name, string Reason, long Net)
+{
+    public string LineNet => Format.Cents(Net);
+}
 
 public sealed class ReportModel : Observable
 {
@@ -30,18 +33,21 @@ public sealed class ReportModel : Observable
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }
     public bool ShowNote => note != "";
 
-    public void SetExcluded(Case c, Report r, RuleSet rs)
+    public void SetExcluded(Report r, RuleSet rs)
     {
         var s = r.Totals;
         Purchases = Format.Cents(s.Purchases);
         Included = Format.Cents(s.CostOfGoods + s.StockChange);
         Excluded = Format.Cents(s.UnmappedCost + s.UnusedCost) + " (" + Format.Bp(s.ExcludedShare) + ")";
         Rows.Clear();
-        foreach (var l in r.Unmapped)
-            Rows.Add(new ExcludedLineRow(Names.Invoice(c, l.InvoiceId), l.LineNo, l.Name, "ohne Zuordnung", Format.Cents(l.LineNet)));
-        foreach (var l in r.Unused)
-            Rows.Add(new ExcludedLineRow(Names.Invoice(c, l.InvoiceId), l.LineNo, l.Name,
-                "in keiner Rezeptur: " + Names.Ingredient(rs, l.IngredientId), Format.Cents(l.LineNet)));
+        var unmapped = r.Unmapped
+            .GroupBy(l => l.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+            .Select(g => new ExcludedLineRow(g.First().Name.Trim(), "ohne Zuordnung", g.Sum(l => l.LineNet)));
+        var unused = r.Unused
+            .GroupBy(l => l.IngredientId)
+            .Select(g => new ExcludedLineRow(Names.Ingredient(rs, g.Key), "in keiner Rezeptur", g.Sum(l => l.LineNet)));
+        foreach (var row in unmapped.Concat(unused).OrderByDescending(x => x.Net))
+            Rows.Add(row);
         HasExcluded = Rows.Count > 0;
     }
 }
@@ -71,7 +77,7 @@ public partial class ReportView : Screen
         {
             var calc = await Session.Service.Calculate(kase.Id, Ct);
             var report = await Session.Service.RenderReport(kase.Id, false, Ct);
-            model.SetExcluded(kase, calc.Report, rs);
+            model.SetExcluded(calc.Report, rs);
             await ShowHtml(report.Html);
             model.Ready = true;
         });
