@@ -24,14 +24,14 @@ public sealed class ImportJob(string caseId, string label) : Observable
     public List<string> Failed { get; } = [];
     public string? FirstDraft { get; set; }
 
-    public int Total { get => total; set { if (Set(ref total, value)) Raise(nameof(Text)); } }
-    public int Done { get => done; set { if (Set(ref done, value)) Raise(nameof(Text)); } }
-    public string File { get => file; set { if (Set(ref file, value)) Raise(nameof(Text)); } }
-    public bool Running { get => running; set { if (Set(ref running, value)) Raise(nameof(Text)); } }
+    public int Total { get => total; set { if (Set(ref total, value)) { Raise(nameof(Count)); Raise(nameof(Detail)); } } }
+    public int Done { get => done; set { if (Set(ref done, value)) Raise(nameof(Count)); } }
+    public string File { get => file; set { if (Set(ref file, value)) Raise(nameof(Detail)); } }
+    public bool Running { get => running; set { if (Set(ref running, value)) { Raise(nameof(Count)); Raise(nameof(Detail)); } } }
 
-    public string Text => Running
-        ? Math.Min(Done + 1, Total) + " von " + Total + " · " + File
-        : "Wartet · " + Total + (Total == 1 ? " Datei" : " Dateien");
+    public string Count => Running ? "Datei " + Math.Min(Done + 1, Total) + " von " + Total : "Wartet";
+
+    public string Detail => Running ? File : Total + (Total == 1 ? " Datei" : " Dateien");
 
     public string Summary { get => summary; set { if (Set(ref summary, value)) { Raise(nameof(Complete)); Raise(nameof(Pending)); } } }
     public bool Complete => summary != "";

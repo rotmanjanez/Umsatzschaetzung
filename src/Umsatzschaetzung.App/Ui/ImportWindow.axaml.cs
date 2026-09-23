@@ -24,11 +24,11 @@ public partial class ImportWindow : Window
         if (job.Complete)
         {
             timer.Stop();
-            Title = "Import · " + job.Label;
+            Title = "Import " + job.Label;
             return;
         }
         job.Sample();
-        Title = "Import · " + job.Percent + " · " + job.Label;
+        Title = "Import " + job.Label + " (" + job.Percent + ")";
     }
 
     void CancelClick(object? sender, RoutedEventArgs e) => Close();
