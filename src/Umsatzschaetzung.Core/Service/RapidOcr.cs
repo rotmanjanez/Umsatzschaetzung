@@ -240,7 +240,8 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
 }
 
 // The WebGPU plugin: DirectX 12 on Windows, Metal on macOS, loaded beside the CPU runtime
-// the tagger is pinned to. No adapter, no library, or a runtime that refuses it all mean CPU.
+// the tagger is pinned to. No adapter, no library, or a runtime that refuses it all mean CPU,
+// and so does UMSATZSCHAETZUNG_CPU=1 for machines whose only adapter is a software one.
 // The device takes one session at a time, at load and per run: the corpus tool runs a
 // reader per core and they all queue here for the detector.
 static class Accelerator
@@ -260,6 +261,7 @@ static class Accelerator
 
     static OrtEpDevice? Find()
     {
+        if (Environment.GetEnvironmentVariable("UMSATZSCHAETZUNG_CPU") == "1") return null;
         try
         {
             var env = OrtEnv.Instance();

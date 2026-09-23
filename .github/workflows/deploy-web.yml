@@ -11,6 +11,9 @@ concurrency:
   group: deploy-web
   cancel-in-progress: false
 
+env:
+  UMSATZSCHAETZUNG_CPU: 1
+
 jobs:
   landing:
     runs-on: ubuntu-latest
