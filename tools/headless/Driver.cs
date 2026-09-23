@@ -148,7 +148,9 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
             .Select(p => new PickedFile(Path.GetFileName(p), File.ReadAllBytes(p)))
             .ToList();
         shell.Session.Imports.Add(kase.Id, kase.Label, picked);
+        var job = shell.Session.Imports.Jobs.Single(j => j.CaseId == kase.Id);
         while (shell.Session.Imports.Jobs.Count > 0) Settle();
+        if (job.Failed.Count > 0) throw new InvalidOperationException("import failed: " + string.Join("; ", job.Failed));
     }
 
     void Shot(Window window, ShotStep step)
