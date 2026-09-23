@@ -43,8 +43,6 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
         Assert.True(rechnung.Box.X + rechnung.Box.W <= number.Box.X);
         Assert.InRange(Math.Abs(rechnung.Box.Y - number.Box.Y), 0, 15);
         Assert.All(page.Words, w => Assert.InRange(w.Confidence, 0.5f, 1f));
-        using var image = SKBitmap.Decode(page.Image);
-        Assert.Equal((width, height), (image.Width, image.Height));
     }
 
     [Fact]
@@ -76,8 +74,9 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
         var page = await fixture.Ocr.Recognize(png, Ct);
 
         Assert.Equal(180, page.Correction.Turn);
-        page.Image = Reader.Upright(png, page.Correction);
         Plausible(page, line.Width, line.Height);
+        using var shown = SKBitmap.Decode(Reader.Upright(png, page.Correction));
+        Assert.Equal((page.Width, page.Height), (shown.Width, shown.Height));
     }
 
     [Fact]
@@ -89,13 +88,12 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
     }
 
     [Fact]
-    public async Task ABlankPageHasNoWordsAndKeepsItsImage()
+    public async Task ABlankPageHasNoWordsAndNoImage()
     {
         using var blank = Sheets.Blank(400, 300);
-        var png = Sheets.Png(blank);
-        var page = await fixture.Ocr.Recognize(png, Ct);
+        var page = await fixture.Ocr.Recognize(Sheets.Png(blank), Ct);
         Assert.Empty(page.Words);
-        Assert.Same(png, page.Image);
+        Assert.Empty(page.Image);
         Assert.Equal((400, 300), (page.Width, page.Height));
     }
 

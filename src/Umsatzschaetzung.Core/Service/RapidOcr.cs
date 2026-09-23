@@ -64,41 +64,38 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         Read(blank);
     });
 
-    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(async () =>
+    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(() =>
     {
         using var decoded = Decode(image);
-        return await Recognize(decoded, image);
+        return Recognize(decoded);
     }, ct);
 
-    public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => Task.Run(() => Recognize(page, null), ct);
+    public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => Task.Run(() => Recognize(page), ct);
 
     // Show-through goes first, on the original pixels, so it cannot vote on the lean; then
     // the page is straightened and read. A sideways or upside-down page is turned and read
-    // again, since the boxes of the first pass sit in the turned frame. The record of the
-    // page is encoded beside the read: the read wants every core, the encoder one of them.
-    async Task<OcrPage> Recognize(SKBitmap decoded, byte[]? delivered)
+    // again, since the boxes of the first pass sit in the turned frame. The page carries no
+    // image: the correction renders it again from the document when it is looked at.
+    OcrPage Recognize(SKBitmap decoded)
     {
         using var cleaned = Deink.Apply(decoded);
         var read = cleaned ?? decoded;
         using var straightened = Deskew.Apply(read, out var skew);
         var page = straightened ?? read;
         var correction = new Correction { Scale = (double)read.Width / decoded.Width, Skew = skew };
-        var image = delivered is not null && ReferenceEquals(page, decoded) ? Task.FromResult(delivered) : Task.Run(() => Encode(page));
         var first = Read(page);
         var turn = Turn(first);
-        if (turn == 0) return Page(page, first, await image, correction);
-        await image;
+        if (turn == 0) return Page(page, first, correction);
         using var turned = Rotate(page, turn);
         using var settled = Deskew.Apply(turned, out var settle);
         var upright = settled ?? turned;
         correction.Turn = turn;
         correction.Settle = settle;
-        var record = Task.Run(() => Encode(upright));
-        return Page(upright, Read(upright), await record, correction);
+        return Page(upright, Read(upright), correction);
     }
 
-    static OcrPage Page(SKBitmap page, OcrResult result, byte[] image, Correction correction) =>
-        new() { Width = page.Width, Height = page.Height, Correction = correction, Words = Words(result), Image = image };
+    static OcrPage Page(SKBitmap page, OcrResult result, Correction correction) =>
+        new() { Width = page.Width, Height = page.Height, Correction = correction, Words = Words(result) };
 
     // A detector that fails on the accelerator, at load or on a page, is replaced by one on
     // the CPU and the page read again.
@@ -218,8 +215,6 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         canvas.DrawBitmap(source, 0, 0);
         return turned;
     }
-
-    static byte[] Encode(SKBitmap bitmap) => PdfiumPages.Png(bitmap);
 }
 
 // The WebGPU plugin: DirectX 12 on Windows, Metal on macOS, loaded beside the CPU runtime
