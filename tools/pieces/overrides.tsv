@@ -1,0 +1,16 @@
+id	amount	unit	basis
+ing.broetchen	60	g	Weizenbrötchen ca. 50–65 g
+ing.fladenbrot	130	g	Dönerbrot/Pide-Viertel ca. 120–150 g, Pita/Naan 80–120 g
+ing.kraeuter	40	g	Bund Petersilie/Dill ca. 30–50 g, Topf Basilikum ca. 25 g
+ing.knoblauch	50	g	Knoblauchknolle ca. 40–60 g
+ing.mozzarella	125	g	Mozzarella-Kugel 125 g
+ing.paprika	160	g	Gemüsepaprika ca. 150–200 g
+ing.toastbrot	500	g	Toastbrot-Laib 500 g
+ing.haehnchenfleisch			Sammelware Brust, Keule, Flügel: nach Gewicht
+ing.speiseeis			Eis im Gebinde nach Volumen/Gewicht, Kugel ist keine Einkaufseinheit
+ing.druckpapier			Blattpapier im Pack, Blattzahl steht im Artikel
+ing.blattsalat	350	g	Kopfsalat, Lollo, Romana ca. 300–400 g; Eisberg eigene Zutat
+ing.kuchen			Stück oder ganzer Kuchen, 80 g bis 2 kg: nicht eindeutig
+ing.salat.eisberg	600	g	Eisbergsalat-Kopf 600 g laut Fixture-Rechnungen (fixtures/dataset/2025)
+ing.brezel	90	g	Laugenbrezel 90 g laut Fixture-Rechnungen (fixtures/dataset/2025)
+ing.baguette	250	g	Baguette 250 g laut Fixture-Rechnungen (fixtures/dataset/2025)

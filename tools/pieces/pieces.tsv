@@ -1,0 +1,372 @@
+id	name	dimension	amount	unit	confidence	basis	flags
+ing.algen	Algen	keine			0.98	Algen und Algenprodukte werden üblicherweise nach Gewicht bzw. Packung verkauft.	
+ing.alkoholfreies.bier	Alkoholfreies Bier	keine			0.99	Flaschen- und Dosenware; Gebindegröße variiert.	
+ing.anzuendholz	Anzündholz, Bund	piece			0.99	Nicht-Lebensmittel; Bundgewicht ist nicht sinnvoll als Stückgewicht festzulegen.	
+ing.armbanduhr	Armbanduhr, Handelsware	piece			0.99	Handelsware ohne sinnvolles Stückgewicht für diese Schätzung.	
+ing.aroma	Aroma und Lebensmittelfarbe	keine			0.98	Aromen und Farbstoffe sind keine einheitlichen Stückartikel.	
+ing.autolack	Autolack	ml			0.99	Unzählbare Flüssigkeit; Gebindegröße ist produktabhängig.	
+ing.autopflegemittel	Autopflegemittel	ml			0.99	Unzählbare Flüssigkeit; Gebindegröße ist produktabhängig.	
+ing.avocado	Avocado	g	200	g	0.82	Eine typische Avocado wiegt etwa 200 g mit Schale und Kern.	
+ing.ayran	Ayran	ml			0.99	Getränk wird nach Volumen verkauft; keine feste Stückgröße.	
+ing.backfischportion	Backfischportion, je Stück	piece	150	g	0.78	Typische einzelne Backfisch- oder Fischfiletportion liegt bei etwa 150 g.	
+ing.backmischung	Backmischung	g			0.99	Pulverförmige Ware wird nach Gewicht verkauft, nicht als Stück.	
+ing.backtriebmittel	Backtriebmittel	g			0.99	Sammelbegriff für unterschiedliche, nach Gewicht bemessene Backzutaten.	
+ing.baguette	Baguette	piece	250	g	1.00	Baguette 250 g laut Fixture-Rechnungen (fixtures/dataset/2025)	override
+ing.baklava	Baklava	g			0.99	Süßware wird nach Gewicht verkauft; keine einheitliche Stückgröße.	
+ing.bauelement	Bauelement (Tür, Fenster)	piece			0.99	Bauelemente haben stark unterschiedliche Maße und kein sinnvolles Stückgewicht.	
+ing.bauholz	Bauholz	piece			0.99	Stark unterschiedliche Querschnitte und Längen; kein einheitliches Stückgewicht.	
+ing.bauplatte	Bauplatte	piece			0.99	Plattenformate und Materialstärken variieren stark.	
+ing.befestigungsmaterial	Befestigungsmaterial	piece			0.99	Sammelbegriff für verschiedenartige Befestigungsteile und Packungsgrößen.	
+ing.betriebsfluessigkeit	Kfz-Betriebsflüssigkeit	ml			0.99	Flüssigkeiten werden nach Volumen bemessen; keine feste Stückgröße.	
+ing.bienenwachs	Bienenwachs	g			0.99	Wachs wird nach Gewicht verkauft; keine einheitliche Stückgröße.	
+ing.biermischgetraenk	Biermischgetränk	keine			0.99	Flaschen- und Dosenware; Gebindegröße variiert.	
+ing.bilderrahmen	Bilderrahmen	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht für diese Schätzung.	
+ing.bindematerial	Binde- und Laminiermaterial	piece			0.99	Sammelbegriff für unterschiedliche Materialien und Formate.	
+ing.blattsalat	Blattsalat	g	350	g	1.00	Kopfsalat, Lollo, Romana ca. 300–400 g; Eisberg eigene Zutat	override
+ing.blondierpulver	Blondierpulver	g			0.99	Pulver wird nach Gewicht dosiert; keine feste Stückgröße.	
+ing.bratwurst	Bratwurst	g	120	g	0.85	Eine übliche Bratwurst wiegt etwa 100–150 g; Ansatz 120 g.	
+ing.braugerstenmalz	Braugerstenmalz	g			0.99	Schüttgut, das nach Gewicht bemessen wird.	
+ing.brauhefe	Brau- und Weinhefe	g			0.99	Hefe wird nach Gewicht dosiert; keine feste Stückgröße.	
+ing.brennholz	Brennholz und Pellets	g			0.99	Brennholz und Pellets werden nach Gewicht verkauft, nicht als Einzelstück.	
+ing.brezel	Brezel	piece	90	g	1.00	Laugenbrezel 90 g laut Fixture-Rechnungen (fixtures/dataset/2025)	override
+ing.brillenfassung	Brillenfassung	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht für diese Schätzung.	
+ing.broetchen	Brötchen	piece	60	g	1.00	Weizenbrötchen ca. 50–65 g	override
+ing.brot	Brot	piece	750	g	0.72	Ein typischer Brotlaib im Handel wiegt etwa 750 g.	
+ing.bruehepulver	Brühe- und Suppenkonzentrat	g			0.99	Konzentrat oder Pulver wird nach Gewicht dosiert; kein einheitliches Stück.	
+ing.bruehwurst	Brühwurst	g			0.96	Sammelbegriff umfasst Stückwürste und Aufschnitt; kein einheitliches Stückgewicht.	null-split
+ing.burgerbun	Burgerbrötchen	piece	80	g	0.82	Ein übliches Burgerbrötchen wiegt etwa 70–90 g.	
+ing.burgerpatty.pflanzlich	Burgerpatty, pflanzlich	g			0.97	Wird im Rezept nach Gewicht bemessen; keine feste Stückgröße für den Sammelbegriff.	
+ing.butter	Butter	g			0.99	Streichfett wird nach Gewicht verkauft und portioniert.	
+ing.champagner	Champagner	ml			0.99	Getränk wird nach Volumen verkauft; Flaschengröße ist produktabhängig.	
+ing.cola	Cola	keine			1.00	Flaschen und Dosen tragen ihre Füllmenge in der Bezeichnung	override
+ing.dachziegel	Dachziegel	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht für diese Schätzung.	
+ing.daemmstoff	Dämmstoff	piece			0.99	Platten- und Dämmstoffformate variieren stark.	
+ing.dekorationsmoos	Dekorationsmoos	g			0.99	Dekorationsmaterial wird nach Gewicht oder Gebinde verkauft, nicht stückweise.	
+ing.dessert	Dessert, fertig	keine			0.91	Fertigdesserts gibt es in Einzelportionen und unterschiedlichen Gebindegrößen.	
+ing.dessertpulver	Dessert- und Puddingpulver	keine			0.99	Pulverware wird nach Gewicht bzw. Packung verkauft.	
+ing.diamant	Diamant	piece			0.99	Steine variieren stark im Gewicht; Stückzahl allein legt keine typische Größe fest.	
+ing.dienstleistung	Dienstleistung und Fracht	keine			1.00	Dienstleistungen und Gutscheine haben kein Stückgewicht.	
+ing.dieselkraftstoff	Dieselkraftstoff	ml			0.99	Kraftstoff wird nach Volumen verkauft.	
+ing.dispersionsfarbe	Wandfarbe und Grundierung	ml			0.99	Farbe wird nach Volumen verkauft; keine feste Stückgröße.	
+ing.doener.drehspiessfleisch.haehnchen	Drehspießfleisch Hähnchen	g			0.97	Fleisch wird nach Gewicht portioniert; Drehspieße variieren stark.	
+ing.doener.drehspiessfleisch.kalb.rind	Drehspießfleisch Kalb/Rind	g			0.98	Fleisch wird nach Gewicht eingekauft, nicht als einheitliches Stück.	
+ing.doenersauce	Dönersauce	g			0.99	Sauce wird nach Gewicht oder Gebindegröße bemessen.	
+ing.druckertinte	Druckertinte	ml			0.99	Tinte wird nach Volumen gekauft; Patronenfüllmengen variieren.	
+ing.druckpapier	Druckpapier, je Blatt	piece			1.00	Blattpapier im Pack, Blattzahl steht im Artikel	override
+ing.duenger	Dünger	g			0.99	Dünger wird nach Gewicht oder Gebindegröße gekauft.	
+ing.e.bike.handelsware	E-Bike, Handelsware	piece			0.99	Für E-Bikes gibt es kein einheitliches typisches Stückgewicht.	
+ing.e.zigarette	E-Zigarette und Liquid	piece			0.99	E-Zigaretten, Liquids und Pods sind uneinheitliche Artikel.	
+ing.eingelegtes.gemuese	Eingelegtes Gemüse	g			0.99	Sammelkategorie mit sehr unterschiedlichen Produkten, kein typisches Stück.	
+ing.einstaerkenglas	Einstärkenglas	piece			0.98	Glasgewicht variiert stark nach Material und Sehstärke.	
+ing.einstreu	Einstreu	g			0.99	Einstreu wird als Schütt- oder Sackware nach Gewicht gekauft.	
+ing.einwegwerkzeug	Einwegwerkzeug (Klingen, Feilen, Tips)	piece			0.99	Sammelkategorie mit unterschiedlich großen Werkzeugen.	
+ing.eiswaffel	Eiswaffel	piece	8	g	0.82	Eine einfache Eiswaffel wiegt typischerweise etwa 6–10 g.	spread 8/5
+ing.elektroinstallationsmaterial	Elektroinstallationsmaterial	piece			0.99	Sammelkategorie mit sehr unterschiedlichen Bauteilen.	
+ing.elektronikzubehoer.handelsware	Elektronikzubehör, Handelsware	piece			0.99	Sammelkategorie mit stark variierenden Artikeln.	
+ing.energydrink	Energydrink	ml			0.99	Getränk wird nach Volumen bemessen; Gebindegrößen variieren.	
+ing.entenfleisch	Enten- und Gänsefleisch	g			0.98	Ente, Keule und Brust sind unterschiedliche Zuschnitte.	
+ing.enthaarungsmittel	Enthaarungsmittel	g			0.99	Enthaarungsmittel wird nach Gewicht oder Gebindegröße verkauft.	
+ing.epoxidharz	Epoxidharz	g			0.99	Harz wird nach Gewicht oder Gebindegröße verkauft.	
+ing.erdbeeren.schale	Erdbeeren, Schale	piece	500	g	0.99	Typische Erdbeerschale im Handel: 500 g.	
+ing.erfrischungsgetraenk	Erfrischungsgetränk	ml			0.99	Getränke werden nach Volumen bemessen; Gebindegrößen variieren.	
+ing.erfrischungsgetraenk.handelsware	Erfrischungsgetränk, Verkaufsflasche	piece			0.99	Verkaufsflaschen haben unterschiedliche, meist ausgewiesene Volumina.	
+ing.essig	Essig	ml			0.99	Essig wird nach Volumen oder Gebindegröße verkauft.	
+ing.fahrrad.ersatzteil	Fahrrad-Ersatzteil	piece			0.99	Sammelkategorie mit unterschiedlich schweren Ersatzteilen.	
+ing.fahrrad.handelsware	Fahrrad, Handelsware	piece			0.99	Fahrräder unterscheiden sich stark nach Typ und Ausstattung.	
+ing.fahrradbereifung	Fahrradbereifung	piece			0.98	Reifen und Schläuche variieren stark nach Radtyp und Größe.	
+ing.fahrradzubehoer	Fahrradzubehör	piece			0.99	Sammelkategorie mit unterschiedlich schweren Zubehörartikeln.	
+ing.falafelmasse	Falafelmasse	g			0.99	Falafelmasse wird nach Gewicht bemessen; Rezeptportionen sind keine Stückgröße.	
+ing.fassbier	Fassbier	ml			0.99	Bier wird nach Volumen ausgeschenkt oder nach Fassgröße gekauft.	
+ing.feingebaeck	Feingebäck	piece	70	g	0.72	Ein typisches einzelnes Croissant oder Gebäckstück wiegt etwa 60–80 g.	
+ing.feingold	Feingold	g			0.99	Gold wird nach Gewicht berechnet, nicht als typisches Stück.	
+ing.feinkostsalat	Feinkostsalat	keine			0.99	Feinkostsalat wird nach Gewicht oder in variierenden Gebinden verkauft.	
+ing.feinschnitttabak	Feinschnitttabak	piece			0.99	Beutelgrößen variieren; kein einheitliches Einzelstück.	
+ing.feinsilber	Feinsilber	g			0.99	Silber wird nach Gewicht berechnet, nicht als typisches Stück.	
+ing.fertigcocktail	Fertigcocktail und Longdrink	keine			0.98	Fertigcocktails sind Getränke; Gebinde- und Portionsgrößen variieren.	
+ing.fertiggericht	Fertiggericht	keine			0.95	Sammelkategorie mit stark variierenden Produkten und Portionsgrößen.	
+ing.fertigsauce	Fertigsauce	g			0.99	Saucen werden nach Gewicht oder Gebindegröße gekauft.	
+ing.feta	Feta und Grillkäse	g			0.99	Käse wird nach Gewicht oder Gebindegröße gekauft.	
+ing.filament	3D-Druck-Filament	g			0.99	Filament wird als Spule nach Gewicht verkauft.	
+ing.fladenbrot	Fladenbrot	piece	130	g	1.00	Dönerbrot/Pide-Viertel ca. 120–150 g, Pita/Naan 80–120 g	override
+ing.flaschenbier	Flaschenbier	ml			0.99	Bier wird nach Volumen bemessen; Flaschengrößen variieren.	
+ing.flaschenbier.handelsware	Flaschenbier, Verkaufsflasche	piece			0.99	Verkaufsflaschen haben unterschiedliche, meist ausgewiesene Volumina.	
+ing.flaschenetikett	Flaschenetikett	piece			0.99	Etiketten sind Nicht-Lebensmittel ohne sinnvolles Stückgewicht für diese Schätzung.	
+ing.flaschenverschluss	Flaschenverschluss	piece			0.99	Verschlussarten und Materialien variieren; kein relevantes typisches Stückgewicht.	
+ing.fleischersatz	Fleischersatz	keine			0.95	Fleischersatz wird überwiegend nach Gewicht oder Packung verkauft.	
+ing.flexfolie	Flexfolie für Textildruck	piece			0.99	Zuschnittgröße und Materialstärke variieren; kein typisches Stückgewicht.	
+ing.fliese	Fliese	piece			0.99	Format und Stärke variieren; kein einheitliches Stückgewicht.	
+ing.floristikbedarf	Floristikbedarf	piece			0.99	Sammelbegriff für unterschiedliche Materialien; kein typisches Stück.	
+ing.fotopapier	Fotopapier, je Blatt	piece			0.98	Blattgewicht hängt stark vom Format und Papier ab.	
+ing.freizeitbedarf	Freizeitbedarf, je Stück	piece			0.99	Sammelbegriff für sehr unterschiedliche Artikel.	
+ing.frikadelle	Frikadelle und Fleischbällchen	keine	80	g	0.78	Eine typische Frikadelle liegt etwa bei 70–100 g.	
+ing.frischkaese	Frischkäse	g			0.99	Wird nach Gewicht verkauft oder portioniert, nicht als einheitliches Stück.	
+ing.frischobst	Frischobst	g	150	g	0.72	Apfel als häufige Sorte, typischerweise etwa 150 g pro Stück.	
+ing.fruchtgemuese	Zucchini und Auberginen	g	300	g	0.70	Zucchini als häufige Sorte, meist etwa 250–350 g pro Stück.	
+ing.fruchtpueree	Fruchtpüree	keine			0.99	Püree und Mus werden nach Gewicht bzw. Gebinde verkauft.	
+ing.fruchtsaft	Fruchtsaft	ml			0.99	Wird nach Volumen ausgeschenkt oder verkauft.	
+ing.futtermittel	Futtermittel	g			0.99	Wird nach Gewicht verkauft; kein typisches Einzelstück.	
+ing.garn	Garn	g			0.95	Knäuelgrößen und Garngewichte variieren; keine einheitliche Stückgröße.	
+ing.garnelen	Garnelen und Krabben	g			0.93	Sammelbegriff; Garnelen werden üblicherweise nach Gewicht verkauft.	
+ing.gehoelz	Gehölz	piece			0.99	Pflanzenarten und Verkaufsgrößen unterscheiden sich stark.	
+ing.gelatine	Gelatine	g			0.99	Pulver und Blattgelatine werden nach Gewicht beziehungsweise Packung verkauft.	
+ing.geliermittel	Binde- und Geliermittel	keine			0.99	Pulver und Bindemittel werden nach Gewicht verkauft.	
+ing.gesichtspflege	Gesichtsmaske und Peeling	g			0.99	Pflegeprodukte werden nach Inhalt dosiert, nicht stückweise gezählt.	
+ing.getraenkekasten.handelsware	Getränkekasten, Handelsware	piece			0.98	Kastengrößen und Gebindeinhalt variieren; Getränke werden nach Volumen verkauft.	
+ing.getraenkesirup	Getränkesirup	ml			0.99	Wird nach Volumen dosiert.	
+ing.getreidebeilage	Getreidebeilage	g			0.99	Getreide und Flocken werden nach Gewicht portioniert.	
+ing.gewuerzmischung	Gewürze	g			0.99	Gewürze werden nach Gewicht dosiert.	
+ing.giessseifenbasis	Gießseifenbasis	g			0.98	Wird nach Gewicht abgewogen; Stückgröße richtet sich nach dem Gießprojekt.	
+ing.gin	Gin	ml			0.99	Spirituose wird nach Volumen ausgeschenkt.	
+ing.glasperlen	Glasperlen	g			0.99	Wird nach Gewicht oder Stückzahl verschiedener Perlengrößen verkauft.	
+ing.gleitsichtglas	Gleitsichtglas	piece			0.96	Glasgewicht hängt von Stärke, Material und Form ab.	
+ing.gluehwein	Glühwein	ml			0.99	Getränk wird nach Volumen ausgeschenkt.	
+ing.grabkreuz	Grabkreuz	piece			0.99	Material und Abmessungen variieren stark.	
+ing.grossformatmedium	Großformatmedium	piece			0.99	Format, Material und Zuschnitt variieren; kein typisches Stückgewicht.	
+ing.gurken	Gurken	g	400	g	0.82	Salatgurke wiegt typischerweise etwa 350–450 g.	
+ing.gyrosfleisch.schwein	Gyrosfleisch Schwein	g			0.99	Fleisch wird nach Gewicht verkauft und portioniert.	
+ing.haarfarbe	Haarfarbe	g			0.99	Wird nach Gewicht beziehungsweise Inhalt dosiert.	
+ing.haarfarbenentwickler	Entwickler und Umformmittel	ml			0.99	Wird nach Volumen dosiert.	
+ing.haarpflegemittel	Haarpflegemittel für Salonanwendung	ml			0.99	Salonprodukte werden nach Volumen dosiert.	
+ing.hackfleisch	Hackfleisch	g			0.98	Hackfleisch wird nach Gewicht verkauft; Burger und Frikadellen sind nur einzelne Aliasformen.	
+ing.haehnchenfleisch	Hähnchenfleisch	g			1.00	Sammelware Brust, Keule, Flügel: nach Gewicht	override
+ing.haehnchennugget	Hähnchennugget, je Stück	piece	20	g	0.78	Ein übliches Hähnchennugget wiegt etwa 15–25 g.	
+ing.haferdrink	Pflanzendrink	ml			0.99	Pflanzendrink wird nach Volumen ausgeschenkt oder verkauft.	
+ing.hartkaese	Hartkäse, gerieben	g			0.99	Geriebener Käse wird nach Gewicht verkauft und portioniert.	
+ing.haushaltsware.handelsware	Haushalts- und Geschenkartikel, Handelsware	piece			0.99	Sammelbegriff für sehr unterschiedliche Haushalts- und Geschenkartikel.	
+ing.hautpflegemittel	Hautpflege- und Massagemittel	ml			0.99	Pflege- und Massageprodukte werden nach Volumen dosiert.	
+ing.holzkohle	Holzkohle	g			0.99	Brennstoff wird nach Gewicht verkauft.	
+ing.holzlack	Lack und Holzöl	ml			0.99	Lack und Öl werden nach Volumen dosiert.	
+ing.holzleim	Leim	ml			0.99	Handwerksmaterial, kein Lebensmittel mit sinnvollem Stückvolumen.	
+ing.honig	Honig	g			0.99	Wird üblicherweise nach Gewicht abgefüllt oder entnommen.	
+ing.hopfenpellets	Hopfenpellets	g			0.99	Lose Pellets werden nach Gewicht verkauft.	
+ing.huehnerei	Hühnerei	piece	60	g	0.90	Ein Hühnerei Größe M wiegt etwa 53–63 g mit Schale.	
+ing.huelsenfruechte	Hülsenfrüchte	g			0.98	Sammelbegriff für Hülsenfrüchte, üblicherweise nach Gewicht verkauft.	
+ing.hummus	Hummus und Gemüsedip	g			0.99	Aufstriche und Dips werden nach Gewicht abgefüllt.	
+ing.installationskabel	Installationskabel, je Meter	piece			0.99	Je Meter verkauft; Gewicht hängt stark von Kabeltyp und Querschnitt ab.	
+ing.installationsrohr	Installationsrohr, je Meter	piece			0.99	Je Meter verkauft; Gewicht hängt stark von Rohrtyp und Durchmesser ab.	
+ing.instantkaffee	Instantkaffee	g			0.99	Pulver wird nach Gewicht verkauft.	
+ing.kaesealternative	Käsealternative, pflanzlich	keine			0.98	Käsealternativen werden nach Gewicht bzw. Packung verkauft.	
+ing.kaesereikultur	Käsereikultur	g			0.99	Kultur wird nach Gewicht dosiert und verkauft.	
+ing.kaffee	Röstkaffee	g			0.99	Kaffee wird nach Gewicht verkauft; Gebindegrößen variieren.	
+ing.kakaomasse	Kakaomasse	g			0.99	Wird als Masse nach Gewicht verkauft.	
+ing.kakaopulver	Kakaopulver	g			0.99	Pulver wird nach Gewicht verkauft.	
+ing.kartoffeln	Kartoffeln	g			0.98	Kartoffeln sind hier als lose Ware nach Gewicht angegeben.	
+ing.kartoffeln.sack	Kartoffeln, Sack	piece			0.99	Sackware; das Gebindegewicht ist produktabhängig und teils ausdrücklich angegeben.	null-split
+ing.katzenstreu	Katzenstreu	g			0.99	Sackware wird nach Gewicht verkauft; kein sinnvolles Einzelstück.	
+ing.kaviar	Kaviar und Fischrogen	keine			0.99	Rogen wird nach Gewicht oder im Glas verkauft.	
+ing.keks	Keks und Dauerbackware	keine	10	g	0.62	Ein typischer Butterkeks wiegt ungefähr 8–12 g.	
+ing.kellereihilfsstoff	Kellereihilfsstoff	g			0.99	Hilfsstoff wird nach Gewicht dosiert und verkauft.	
+ing.keltergut	Keltergut	g			0.99	Rohware wird nach Gewicht oder Verarbeitungsausbeute bemessen.	
+ing.keramikglasur	Keramikglasur	g			0.99	Glasur wird nach Gewicht verkauft und dosiert.	
+ing.kerzenduftoel	Duftöl	ml			0.99	Duftöl wird nach Volumen abgefüllt.	
+ing.kerzenwachs	Kerzenwachs	g			0.99	Wachs wird nach Gewicht verkauft und dosiert.	
+ing.kerzenzubehoer	Kerzenzubehör	piece			0.99	Unspezifisches Zubehör; kein typisches Einzelstückgewicht bestimmbar.	
+ing.ketchup	Ketchup und Grillsauce	g			0.99	Sauce wird nach Gewicht oder in variablen Gebinden verkauft.	
+ing.kettenoel	Kettenöl	ml			0.99	Öl wird nach Volumen abgefüllt.	
+ing.kfz.filter	Kfz-Filter	piece			0.99	Filter sind fahrzeugspezifisch und haben stark unterschiedliche Gewichte.	
+ing.kfz.kleinteil	Kfz-Kleinteil	piece			0.99	Unspezifische Kfz-Teile haben kein typisches Stückgewicht.	
+ing.kloesse	Klöße und Knödel	keine	100	g	0.76	Ein Kartoffelklöß typischer Handelsgröße wiegt etwa 90–120 g.	
+ing.knabbergebaeck	Salzgebäck und Chips	keine			0.96	Chips und Salzgebäck werden überwiegend nach Packungsgewicht verkauft.	
+ing.knoblauch	Knoblauch und Ingwer	g	50	g	1.00	Knoblauchknolle ca. 40–60 g	override
+ing.kohlgemuese	Kohlgemüse	g			0.98	Sammelkategorie mit sehr unterschiedlichen Gemüsesorten und Stückgewichten.	null-split
+ing.kokosmilch	Kokosmilch	ml			0.99	Wird nach Volumen in variablen Gebinden verkauft.	
+ing.konfituere	Konfitüre	g			0.99	Konfitüre wird nach Gewicht abgefüllt; Gebindegrößen variieren.	
+ing.kontaktlinsen	Kontaktlinsen	piece			0.99	Kein sinnvolles Stückgewicht für die Einkaufs- oder Umsatzschätzung.	
+ing.kosmetik.verkaufsware	Kosmetik, Verkaufsware	piece			0.99	Verkaufsgebinde variieren; Produktmenge steht meist auf der Packung.	
+ing.kraeuter	Frische Kräuter	g	40	g	1.00	Bund Petersilie/Dill ca. 30–50 g, Topf Basilikum ca. 25 g	override
+ing.kuchen	Kuchen und Torte	keine			1.00	Stück oder ganzer Kuchen, 80 g bis 2 kg: nicht eindeutig	override
+ing.kuvertuere	Kuvertüre und Nougat	g			0.99	Schokolade und Nougat werden nach Gewicht verkauft.	
+ing.lab	Lab	ml			0.99	Lab wird nach Volumen dosiert und verkauft.	
+ing.lachsfilet	Lachsfilet	g			0.99	Filetware wird nach Gewicht portioniert und verkauft.	null-split
+ing.lammfleisch	Lammfleisch	g			0.99	Fleisch wird nach Gewicht verkauft; Zuschnitte variieren.	
+ing.lebensmittel.handelsware	Lebensmittel, Handelsware	piece			0.99	Sammelbegriff für unterschiedlich verpackte Lebensmittel ohne typisches Stückgewicht.	
+ing.leber	Leber	g			0.99	Leber und Leberprodukte werden nach Gewicht verkauft.	
+ing.leberkaese	Leberkäse	g			0.99	Leberkäse wird nach Gewicht portioniert; Stückformate variieren.	
+ing.leerflasche	Leerflasche	piece			0.99	Leeres Verpackungsgebinde, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.leergebinde	Leergebinde	piece			0.99	Leeres Verpackungsgebinde, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.likoer	Likör	ml			0.99	Likör wird nach Volumen dosiert, nicht stückweise.	
+ing.likoerwein	Likörwein	keine			0.99	Likörwein wird nach Flaschenvolumen verkauft.	
+ing.loeffelbiskuits	Löffelbiskuits	g			0.99	Nach Gewicht verwendete Backware, kein typisches Stück verlangt.	
+ing.margarine	Margarine	keine			0.99	Margarine und Streichfett werden in variierenden Packungen verkauft.	
+ing.mayonnaise	Mayonnaise und Remoulade	g			0.99	Sauce und Feinkost werden nach Gewicht portioniert.	
+ing.medien.handelsware	Bücher, Zeitungen und Tonträger, Handelsware	piece			0.99	Handelsware außerhalb von Lebensmitteln, kein sinnvolles Stückgewicht.	
+ing.mehl	Mehl	g			0.99	Unzählbare Trockenware, wird nach Gewicht verkauft und dosiert.	
+ing.milchmischgetraenk	Milchmischgetränk	keine			0.97	Getränk mit unterschiedlichen Flaschen-, Becher- und Packungsgrößen.	
+ing.milchpulver	Milchpulver	g			0.99	Pulver wird nach Gewicht dosiert, nicht stückweise.	
+ing.mineralwasser	Mineralwasser	ml			0.99	Getränk wird nach Volumen abgegeben.	
+ing.moertel.und.kleber	Mörtel und Kleber	g			0.99	Nicht-Lebensmittel und kein sinnvolles Stückgewicht.	
+ing.motoroel	Motoröl	ml			0.99	Flüssigkeit wird nach Volumen berechnet.	
+ing.motoroel.verkaufsflasche	Motoröl, Verkaufsflasche	piece			0.99	Nicht-Lebensmittel; Füllmenge der Verkaufsflasche ist bereits artikelbezogen.	
+ing.mozzarella	Mozzarella	g	125	g	1.00	Mozzarella-Kugel 125 g	override
+ing.muesli	Müsli und Cerealien	keine			0.99	Müsli und Cerealien werden nach Gewicht bzw. Packung verkauft.	
+ing.muscheln	Muscheln	g			0.98	Sammelbegriff für verschiedene Muschelarten, üblicherweise nach Gewicht verkauft.	
+ing.naehgarn	Nähgarn, Rolle	piece			0.99	Nicht-Lebensmittel; kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.nagelmodellage.fluessig	Nagellack und Modellageflüssigkeit	ml			0.99	Kosmetikflüssigkeiten werden nach Volumen dosiert.	
+ing.nagelmodellage.pulver	Modellagepulver und UV-Gel	g			0.99	Kosmetikpulver und Gel werden nach Gewicht dosiert.	
+ing.naturjoghurt	Joghurt und Quark	g			0.99	Joghurt und Quark werden nach Gewicht portioniert.	
+ing.nonfood	Ausstattung und Bedarf	keine			1.00	Ausstattung und Bedarf haben kein einheitliches sinnvolles Stückgewicht.	
+ing.noriblatt	Noriblatt	piece	3	g	0.82	Ein Nori-Algenblatt wiegt typischerweise etwa 2–3 g.	
+ing.nusskerne	Nüsse, Kerne und Trockenfrüchte	g			0.99	Sammelkategorie für lose Nüsse, Kerne und Trockenfrüchte, nach Gewicht verkauft.	
+ing.nussmus	Sesam- und Nussmus	g			0.99	Mus und Cremes werden nach Gewicht portioniert.	
+ing.oberbekleidung.handelsware	Oberbekleidung, Handelsware	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.obstkonserve	Obstkonserve	g			0.99	Konservenobst wird üblicherweise nach Gewicht verwendet; kein einzelnes Stück gemeint.	
+ing.obstwein	Obstwein und Cidre	keine			0.99	Obstwein und Cidre werden nach Flaschenvolumen verkauft.	
+ing.oliven	Oliven	g			0.99	Oliven werden typischerweise nach Gewicht portioniert.	
+ing.olivenoel	Olivenöl	ml			0.99	Öl wird nach Volumen dosiert.	
+ing.optikzubehoer	Optikzubehör	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.ottokraftstoff	Ottokraftstoff	ml			0.99	Kraftstoff wird nach Volumen verkauft.	
+ing.paniermehl	Paniermehl	g			0.99	Trockenware wird nach Gewicht verkauft und dosiert.	
+ing.paprika	Paprika	g	160	g	1.00	Gemüsepaprika ca. 150–200 g	override
+ing.passierte.tomaten	Passierte Tomaten	g			0.99	Tomatenprodukte werden nach Gewicht verwendet, nicht stückweise.	
+ing.pasta	Pasta, trocken	g			0.99	Trockene Pasta wird nach Gewicht portioniert.	
+ing.pastete	Pastete und Terrine	keine			0.97	Pasteten und Terrinen werden nach Gewicht bzw. Packung verkauft.	
+ing.pesto	Pesto	g			0.99	Pesto wird nach Gewicht portioniert.	
+ing.pfand	Pfand und Leergut	keine			1.00	Pfand und Leergut sind keine Lebensmittel mit Stückgewicht.	
+ing.pflanzenjoghurt	Pflanzlicher Joghurt und Dessert	keine			0.98	Joghurtalternativen werden in variierenden Bechern und Gebinden verkauft.	
+ing.pflanzenoel	Pflanzenöl	ml			0.99	Öl wird nach Volumen dosiert.	
+ing.pflanzensahne	Pflanzliche Koch- und Schlagcreme	keine			0.98	Koch- und Schlagcremes werden in variierenden Packungen verkauft.	
+ing.pflanzerde	Pflanzerde und Mulch	g			0.99	Nicht-Lebensmittel; Erde wird nach Gewicht oder Gebinde verkauft.	
+ing.pflasterstein	Pflasterstein	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.piercingschmuck	Piercingschmuck	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.pizzateigling	Pizzateigling	piece	250	g	0.78	Üblicher einzelner Pizzateigling für eine Standardpizza wiegt etwa 250 g.	
+ing.pkw.bremsteile	Pkw-Bremsteile	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.pkw.reifen	Pkw-Reifen	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.pkw.starterbatterie	Pkw-Starterbatterie	piece			0.99	Nicht-Lebensmittel, kein sinnvolles Stückgewicht für die Zutatenschätzung.	
+ing.pommes.frites	Pommes frites	g			0.99	Tiefkühlware wird üblicherweise nach Gewicht verkauft.	
+ing.popcornmais	Popcornmais	g			0.99	Trockenware wird nach Gewicht verkauft.	
+ing.praline	Praline und Konfekt	keine	12	g	0.69	Eine einzelne Praline wiegt typischerweise etwa 10–15 g.	
+ing.propangasflasche	Propangasflasche, Füllung	piece			0.99	Füllmenge ist bereits als 11 kg angegeben; kein Lebensmittelstück.	
+ing.proteinriegel	Proteinriegel, Verkaufsware	piece	55	g	0.75	Ein handelsüblicher Proteinriegel wiegt meist etwa 50–60 g.	
+ing.putenfleisch	Putenfleisch	keine			0.95	Putenfleisch wird üblicherweise nach Gewicht verkauft; Zuschnitte variieren.	
+ing.raeucherfisch	Räucher- und Marinadenfisch	g			0.98	Räucherfisch und Filets werden üblicherweise nach Gewicht verkauft.	
+ing.rasensaat	Rasensaat	g			0.99	Saatgut wird nach Gewicht verkauft; kein sinnvolles Stückgewicht.	
+ing.rasierbedarf	Rasier- und Bartpflegemittel	ml			0.99	Pflegeprodukte werden nach Volumen verkauft.	
+ing.reibekuchen	Reibekuchen, je Stück	piece	80	g	0.78	Ein handelsüblicher TK-Reibekuchen wiegt ungefähr 70–90 g.	spread 80/60
+ing.reinigung	Reinigung und Hygiene	keine			1.00	Reinigungs- und Hygieneartikel haben kein einheitliches Stückgewicht.	
+ing.reinigungsloesemittel	Lösemittel für Textilreinigung	ml			0.99	Lösemittel wird nach Volumen verkauft.	
+ing.reinigungsmittel	Reinigungsmittel, Gebäudereinigung	ml			0.99	Reinigungsmittel wird nach Volumen verkauft.	
+ing.reinigungsverbrauchsmaterial	Reinigungsverbrauchsmaterial	piece			0.98	Sammelbegriff für unterschiedliche Verbrauchsartikel ohne typisches Stückgewicht.	
+ing.reis	Reis	g			0.99	Reis wird als Trockenware nach Gewicht verkauft.	
+ing.reispapierblatt	Reispapierblatt	piece	8	g	0.75	Ein übliches Reispapierblatt wiegt etwa 7–10 g.	
+ing.reissverschluss	Reißverschluss	piece			0.99	Nicht-Lebensmittel ohne sinnvolles typisches Stückgewicht.	
+ing.riegel	Müsli- und Schokoriegel	keine	40	g	0.77	Ein typischer Müsliriegel oder Schokoriegel wiegt etwa 30–50 g.	spread 40/30
+ing.rind.hack	Rinderhackfleisch	g			1.00	Wird nach Gewicht gehandelt	override
+ing.rindersteak	Rindersteak	g			0.95	Steaks werden üblicherweise nach Gewicht verkauft; Beispiel nennt Verkauf je kg.	
+ing.rindfleisch	Rindfleisch	g			0.99	Fleisch wird nach Gewicht verkauft; Sammelbegriff mit unterschiedlichen Zuschnitten.	
+ing.rohkaffee	Rohkaffee	g			0.99	Rohkaffee wird nach Gewicht verkauft.	
+ing.rohwurst	Rohwurst	g			0.97	Wurstsorten und Aufschnitt werden üblicherweise nach Gewicht verkauft.	
+ing.rosewein	Roséwein	keine			0.99	Roséwein wird nach Flaschenvolumen verkauft.	
+ing.rotwein	Rotwein	ml			0.99	Wein wird nach Volumen verkauft.	
+ing.rum	Rum	ml			0.99	Spirituosen werden nach Volumen verkauft.	
+ing.sahne	Sahne	ml			0.99	Sahne und verwandte Produkte werden nach Volumen verkauft.	
+ing.salat.eisberg	Eisbergsalat	keine	600	g	1.00	Eisbergsalat-Kopf 600 g laut Fixture-Rechnungen (fixtures/dataset/2025)	override
+ing.sand	Sand und Splitt	g			0.99	Schüttgut wird nach Gewicht oder Volumen, nicht je Stück verkauft.	
+ing.sanitaerinstallationsmaterial	Sanitärinstallationsmaterial	piece			0.99	Sammelbegriff für unterschiedliche Bauteile ohne typisches Stückgewicht.	
+ing.sanitaerobjekt	Sanitärobjekt	piece			0.99	Sanitärobjekte sind Nicht-Lebensmittel ohne sinnvolles typisches Stückgewicht.	
+ing.sarg	Sarg	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht.	
+ing.sargausstattung	Sargausstattung	piece			0.99	Sammelbegriff für unterschiedliche Nicht-Lebensmittel ohne typisches Stückgewicht.	
+ing.schinken	Schinken und Speck	g			0.98	Schinken und Speck werden üblicherweise nach Gewicht verkauft.	
+ing.schluesselrohling	Schlüsselrohling	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht.	
+ing.schmalz	Schmalz und Butterschmalz	keine			0.99	Schmalz und Bratfett werden nach Gewicht bzw. Packung verkauft.	
+ing.schmuck.handelsware	Schmuck, Handelsware	piece			0.99	Sammelbegriff für Schmuckstücke mit stark unterschiedlichem Gewicht.	
+ing.schmuckzubehoer	Schmuckzubehör	piece			0.99	Sammelbegriff für Zubehör mit stark unterschiedlichem Gewicht.	
+ing.schnittblume	Schnittblume, je Stiel	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht.	
+ing.schnittgruen	Schnittgrün	piece			0.99	Floristikware ohne einheitliches typisches Stückgewicht.	
+ing.schnittkaese	Schnittkäse	g			0.99	Käse und Käsesortimente werden nach Gewicht verkauft.	
+ing.schnitzel.paniert	Schnitzel, paniert, je Stück	piece	180	g	0.82	Ein paniertes Gastronomie-Schnitzel wiegt typischerweise etwa 160–200 g.	
+ing.schokolade	Schokolade	keine			0.94	Schokolade wird üblicherweise nach Tafeln- oder Packungsgewicht verkauft.	
+ing.schuhabsatz	Schuhabsatz, Paar	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht.	
+ing.schuhpaar.handelsware	Schuhpaar, Handelsware	piece			0.99	Nicht-Lebensmittel ohne sinnvolles Stückgewicht.	
+ing.schweinefleisch	Schweinefleisch	g			0.99	Fleisch wird nach Gewicht verkauft; Sammelbegriff mit unterschiedlichen Zuschnitten.	
+ing.schweinefleisch.mit.knochen	Schweinefleisch mit Knochen	g			0.99	Fleisch mit Knochen wird nach Gewicht verkauft.	
+ing.seefischfilet	Seefischfilet	g			0.98	Fischfilets werden üblicherweise nach Gewicht verkauft.	
+ing.sekt	Schaumwein	ml			0.99	Schaumwein wird nach Volumen verkauft.	
+ing.senf	Senf	g			0.98	Senf wird als Sauce nach Gewicht oder Gebindegröße bezogen, nicht als Stück.	
+ing.senfsaat	Senfsaat	g			0.99	Senfsaat ist lose beziehungsweise als variable Packungsware erhältlich.	
+ing.serviceverpackung	Servierverpackung	piece			0.99	Verpackung ist kein Lebensmittel mit sinnvollem Stückgewicht.	
+ing.silikondichtstoff	Silikondichtstoff	g			0.99	Nicht-Lebensmittel; keine sinnvolle Stückgewichtsangabe.	
+ing.smartphone.ersatzteil	Smartphone-Ersatzteil	piece			0.99	Ersatzteile unterscheiden sich stark und haben kein sinnvolles typisches Stückgewicht.	
+ing.smartphone.handelsware	Smartphone, Handelsware	piece			0.99	Technikware ohne sinnvolles typisches Stückgewicht.	
+ing.sonnenbrille	Sonnenbrille	piece			0.99	Handelsware ohne sinnvolles Stückgewicht für die Umsatzschätzung.	
+ing.spargel	Spargel	keine	25	g	0.68	Eine Spargelstange wiegt je nach Sorte und Stärke etwa 20–35 g.	null-split
+ing.speiseeis	Speiseeis	g			1.00	Eis im Gebinde nach Volumen/Gewicht, Kugel ist keine Einkaufseinheit	override
+ing.speisefisch.ganz	Speisefisch, ganz	g	450	g	0.85	Ganze Dorade liegt typischerweise bei etwa 400–500 g; Rezept nennt 450 g.	
+ing.speisepilze	Speisepilze	g			0.93	Pilze und Pilzmischungen werden üblicherweise nach Gewicht bezogen.	
+ing.spielware.handelsware	Spielware, Handelsware	piece			0.99	Handelsware ohne sinnvolles typisches Stückgewicht.	
+ing.spinat	Spinat und Blattgemüse	keine			0.95	Spinat und Blattgemüse werden überwiegend nach Gewicht verkauft.	
+ing.spirituose	Spirituose	ml			0.99	Spirituosen werden nach Volumen bezogen und dosiert.	
+ing.spirituose.handelsware	Spirituose, Verkaufsflasche	piece			0.97	Flaschengrößen variieren; die Beispielware nennt bereits 0,7 l.	
+ing.sportartikel.verkaufsware	Sportartikel, Verkaufsware	piece			0.99	Sportartikel sind keine Lebensmittel mit sinnvoller Stückgewichtsangabe.	
+ing.sportnahrungspulver	Sportnahrungspulver	g			0.97	Pulver wird nach Gewicht bezogen; Packungsgrößen variieren.	
+ing.stieleis	Stieleis, einzeln verpackt	piece	60	g	0.72	Ein einzelnes Stieleis wiegt typischerweise etwa 50–80 g.	
+ing.stoff	Stoff, je Meter	piece			0.99	Stoff wird nach Länge verkauft; kein sinnvolles Stückgewicht.	
+ing.stopfleber	Stopfleber	keine			0.98	Stopfleber wird nach Gewicht oder als Block verkauft.	
+ing.sublimationstransfer	Sublimationstransfer	piece			0.99	Nicht-Lebensmittel ohne sinnvolles typisches Stückgewicht.	
+ing.suessungsmittel	Sirup und Süßungsmittel	keine			0.99	Sammelkategorie aus Sirupen und Süßungsmitteln; keine einheitliche Stückgröße.	
+ing.suessware	Bonbon und Fruchtgummi	keine			0.98	Bonbons und Fruchtgummi werden üblicherweise nach Gewicht oder Packung verkauft.	
+ing.suesswaren.handelsware	Süßwaren und Knabberartikel, Verkaufspackung	piece			0.98	Verkaufspackungen haben stark unterschiedliche Füllmengen.	
+ing.suppe	Suppe und Eintopf	keine			0.98	Suppen und Eintöpfe werden nach Packungs- oder Portionsgröße verkauft, nicht als Stück.	
+ing.tapete	Tapete, Rolle	piece			0.99	Nicht-Lebensmittel; Rollen unterscheiden sich in Format und Gewicht.	
+ing.tapiokaperlen	Tapiokaperlen	g			0.99	Tapiokaperlen werden als Trockenware nach Gewicht bezogen.	
+ing.tattoo.farbe	Tattoo-Farbe	ml			0.99	Nicht-Lebensmittel; Farbe wird nach Volumen abgefüllt.	
+ing.tattoo.verbrauchsmaterial	Tattoo- und Piercingverbrauchsmaterial	piece			0.99	Verbrauchsmaterial umfasst unterschiedliche Artikel ohne einheitliches Stückgewicht.	
+ing.tee	Tee	g			0.98	Tee wird als lose Ware oder Packung nach Gewicht bezogen.	
+ing.teigblatt	Teig und Teigblätter	keine			0.96	Teige und Teigblätter unterscheiden sich stark in Form und Größe.	
+ing.teigtasche	Teigtasche, je Stück	piece	50	g	0.72	Eine typische Maultasche wiegt etwa 40–60 g.	
+ing.textildruckfarbe	Textildruckfarbe	g			0.99	Nicht-Lebensmittel; Farbe wird nach Gewicht beziehungsweise Gebinde verkauft.	
+ing.textilrohling	Textilrohling	piece			0.99	Textilware hat je nach Kleidungsstück und Größe stark unterschiedliche Gewichte.	
+ing.thunfischkonserve	Thunfischkonserve	g			0.97	Konservendosen unterscheiden sich in Füll- und Abtropfgewicht.	
+ing.tiefkuehlgemuese	Gemüse, tiefgekühlt	g			0.98	Tiefkühlgemüse wird üblicherweise nach Gewicht bezogen.	
+ing.tiefkuehlobst	Obst, tiefgekühlt	g			0.98	Tiefkühlobst wird üblicherweise nach Gewicht bezogen.	
+ing.tiefkuehlpizza	Tiefkühlpizza, je Stück	piece	350	g	0.82	Eine handelsübliche Tiefkühlpizza wiegt meist etwa 300–400 g.	
+ing.tierarzneimittel	Tierarzneimittel	piece			0.99	Arzneimittel unterscheiden sich stark; kein sinnvolles einheitliches Stückgewicht.	
+ing.tierfutter	Tierfutter	g			0.98	Tierfutter wird nach Gewicht verkauft; Packungs- und Gebindegrößen variieren.	
+ing.tierpflegemittel	Tierpflegemittel	ml			0.98	Pflegemittel werden nach Volumen abgefüllt.	
+ing.tierzubehoer	Tierzubehör, Handelsware	piece			0.99	Zubehörartikel unterscheiden sich stark und haben kein typisches Stückgewicht.	
+ing.tintenfisch	Tintenfisch	g			0.92	Tintenfisch und Ringe werden üblicherweise nach Gewicht bezogen.	
+ing.toastbrot	Toastbrot	g	500	g	1.00	Toastbrot-Laib 500 g	override
+ing.toepferton	Töpferton	g			0.99	Nicht-Lebensmittel; Ton wird nach Gewicht bezogen.	
+ing.tofu	Tofu und Seitan	g			0.94	Tofu und Seitan werden meist in variablen Packungen nach Gewicht bezogen.	
+ing.tomaten	Tomaten	g	120	g	0.78	Eine mittelgroße frische Tomate wiegt typischerweise etwa 100–150 g.	
+ing.tomatenmark	Tomatenmark	g			0.99	Paste wird nach Gewicht dosiert, kein typisches Stück.	
+ing.tonerkartusche	Tonerkartusche	piece			0.99	Kein Lebensmittel; Kartuschengewicht ist kein sinnvolles Stückgewicht.	
+ing.topfpflanze	Topfpflanze	piece			0.99	Pflanzen unterscheiden sich stark; kein sinnvolles Stückgewicht.	
+ing.tortenboden	Tortenboden	piece	300	g	0.75	Handelsüblicher Biskuit-Tortenboden liegt häufig bei etwa 250–350 g.	
+ing.tortendekor	Tortendekor und Glasur	keine			0.98	Dekor und Glasur sind keine einheitliche, typischerweise gezählte Stückware.	
+ing.tortillachips	Tortillachips	g			0.99	Chips werden üblicherweise nach Packungs- oder Portionsgewicht verkauft.	
+ing.trauergesteck	Trauergesteck	piece			0.99	Kein Lebensmittel; kein übliches Stückgewicht.	
+ing.trueffel	Trüffel	keine			0.96	Sammelkategorie aus frischen Trüffeln und verarbeiteten Trüffelprodukten; keine einheitliche Stückgröße.	
+ing.uhrenknopfzelle	Uhrenknopfzelle	piece			0.99	Kein Lebensmittel; Gewicht ist für die Stückschätzung nicht sinnvoll.	
+ing.urne	Urne	piece			0.99	Kein Lebensmittel; kein sinnvolles Stückgewicht.	
+ing.veredelungsrohling	Rohling zum Veredeln	piece			0.99	Rohlinge variieren je nach Material und Produkt; kein typisches Stückgewicht.	
+ing.verpackung	Verpackung und Einweg	keine			1.00	Verpackungs- und Einwegartikel haben kein sinnvolles Stückgewicht für die Schätzung.	
+ing.vollei	Flüssigei	g			0.99	Flüssigei wird als Masse dosiert, nicht pro Stück.	
+ing.vollmilch	Milch	ml			0.99	Milch wird nach Volumen dosiert; Packungsgrößen stehen üblicherweise am Artikel.	
+ing.waesche.und.accessoires.handelsware	Wäsche und Accessoires, Handelsware	piece			0.99	Textilien sind keine Lebensmittel; Stückgewicht ist nicht sinnvoll standardisierbar.	
+ing.waschmittel	Waschmittel, Wäscherei	ml			0.99	Flüssiges Waschmittel wird nach Volumen dosiert.	
+ing.wasserpfeifentabak	Wasserpfeifentabak	g			0.99	Tabak wird nach Gewicht verkauft und dosiert, nicht pro Stück.	
+ing.wasserpfeifenzubehoer	Wasserpfeifenzubehör	piece			0.99	Zubehör ist kein Lebensmittel; Stücke sind zu unterschiedlich.	
+ing.weichkaese	Weichkäse	g			0.99	Weichkäse wird als Zutat nach Gewicht dosiert.	
+ing.weihnachtsbaum	Weihnachtsbaum	piece			0.99	Kein Lebensmittel; Baumgröße und -gewicht variieren stark.	
+ing.wein.handelsware	Wein, Verkaufsflasche	piece			0.99	Verkaufsflasche; das Volumen ist üblicherweise im Artikelnamen angegeben.	null-split
+ing.weisswein	Weißwein	ml			0.99	Wein wird nach Volumen dosiert.	
+ing.weizentortilla	Weizentortilla	piece	60	g	0.80	Ein handelsüblicher Wrap wiegt meist etwa 50–70 g.	
+ing.wermut	Wermut und Bitteraperitif	ml			0.99	Aperitif wird nach Volumen dosiert.	
+ing.whiskey	Whiskey	ml			0.99	Whiskey wird nach Volumen dosiert.	
+ing.wildfleisch	Wildfleisch	keine			0.97	Wildfleisch umfasst unterschiedliche Zuschnitte und wird üblicherweise nach Gewicht verkauft.	
+ing.wimpernextensions	Wimpernextensions	piece			0.99	Einzelne Extensions sind kein sinnvoll nach Gewicht standardisierbares Stück.	
+ing.wimpernkleber	Wimpernkleber	ml			0.99	Kleber wird nach Volumen dosiert.	
+ing.wodka	Wodka	ml			0.99	Wodka wird nach Volumen dosiert.	
+ing.wuerzpaste	Würzpaste	g			0.99	Paste wird nach Gewicht dosiert, kein typisches Stück.	
+ing.wuerzsauce	Würzsauce, flüssig	ml			0.99	Flüssige Würzsauce wird nach Volumen dosiert.	
+ing.wurstaufschnitt	Wurstaufschnitt	g			0.99	Aufschnitt wird üblicherweise nach Gewicht verkauft und dosiert.	
+ing.wurzelgemuese	Wurzel- und Knollengemüse	g	80	g	0.60	Karotte ist die häufigste Sorte; eine typische Möhre wiegt etwa 70–100 g.	
+ing.zement	Zement	g			0.99	Baustoff wird nach Gewicht bzw. Sackinhalt verkauft; kein Stückgewicht.	
+ing.zierfisch	Zierfisch, Handelsware	piece			0.99	Tiergröße und -art variieren; kein sinnvolles Stückgewicht für die Schätzung.	
+ing.zierkuerbis	Zierkürbis	piece	500	g	0.50	Kleine Zierkürbisse liegen häufig ungefähr bei 300–800 g pro Stück.	
+ing.zigaretten	Zigaretten und Zigarillos	piece			0.99	Packungsware; kein sinnvolles Stückgewicht für die Umsatzschätzung.	
+ing.zirkonia	Zirkonia	piece			0.99	Steingrößen variieren stark; kein typisches Stückgewicht.	
+ing.zitrusfruechte	Zitrusfrüchte	g	130	g	0.70	Als häufigste Sorte angesetzt: eine mittelgroße Zitrone wiegt etwa 120–150 g.	
+ing.zitrussaft	Zitrussaft	ml			0.99	Saft und Konzentrate werden nach Volumen dosiert.	
+ing.zucker	Zucker	g			0.99	Zucker wird nach Gewicht dosiert; kein typisches Stück.	
+ing.zwiebeln	Zwiebeln und Lauch	g	100	g	0.70	Als häufigste Sorte angesetzt: eine mittelgroße Küchenzwiebel wiegt etwa 80–120 g.	
