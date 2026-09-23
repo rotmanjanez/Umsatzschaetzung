@@ -43,19 +43,69 @@ public class CheckTests
         Assert.False(Checks.Complete(new Invoice(), flags));
     }
 
-    [Theory]
-    [InlineData(Field.Quantity)]
-    [InlineData(Field.UnitPrice)]
-    [InlineData(Field.LineNet)]
-    public void ANonPositiveCellIsReportedOnItsLineAndField(Field field)
+    [Fact]
+    public void AZeroQuantityIsReportedOnItsLineAndField()
     {
         var inv = Clean();
-        var l = inv.Lines[0];
-        if (field == Field.Quantity) l.Quantity = -1000;
-        if (field == Field.UnitPrice) l.UnitPrice = 0;
-        if (field == Field.LineNet) l.LineNet = 0;
-        var flag = Assert.Single(Checks.Invoice(inv), f => f.Code == "nonpositive");
-        Assert.Equal((1L, (Field?)field), (flag.LineNo, flag.Field));
+        inv.Lines[0].Quantity = 0;
+        inv.Lines[0].LineNet = 0;
+        inv.StatedNet = 0;
+        var flag = Assert.Single(Checks.Invoice(inv), f => f.Code == "zero");
+        Assert.Equal((1L, (Field?)Field.Quantity), (flag.LineNo, flag.Field));
+    }
+
+    [Fact]
+    public void AFreeLineIsCompleteLikeAnyOther()
+    {
+        var inv = Clean();
+        inv.Lines.Add(new InvoiceLine
+        {
+            No = 2, Name = "Gratis", Quantity = 1000, UnitPrice = 0, PriceBaseQty = 1000, LineNet = 0, Vat = 1900, UnitCode = "C62",
+        });
+        var flags = Checks.Invoice(inv);
+        Assert.Empty(flags);
+        Assert.True(Checks.Complete(inv, flags));
+    }
+
+    [Fact]
+    public void AFreeLineWithAPriceIsReported()
+    {
+        var inv = Clean();
+        inv.Lines.Add(new InvoiceLine
+        {
+            No = 2, Name = "Gratis", Quantity = 1000, UnitPrice = 2_000_000, PriceBaseQty = 1000, LineNet = 0, Vat = 1900, UnitCode = "C62",
+        });
+        Assert.Contains(Checks.Invoice(inv), f => f.Code == "line_total" && f.LineNo == 2);
+    }
+
+    [Theory]
+    [InlineData(-2000, 250_000)]
+    [InlineData(2000, -250_000)]
+    public void ANegativeLineThatAddsUpIsCompleteLikeAnyOther(long quantity, long unitPrice)
+    {
+        var inv = Clean();
+        inv.StatedNet = 450;
+        inv.StatedGross = 536;
+        inv.Lines.Add(new InvoiceLine
+        {
+            No = 2, Name = "Pfand", Quantity = quantity, UnitPrice = unitPrice, PriceBaseQty = 1000, LineNet = -50, Vat = 1900, UnitCode = "C62",
+        });
+        var flags = Checks.Invoice(inv);
+        Assert.Empty(flags);
+        Assert.True(Checks.Complete(inv, flags));
+    }
+
+    [Fact]
+    public void ANegativeLineThatLostItsSignIsReported()
+    {
+        var inv = Clean();
+        inv.StatedNet = 450;
+        inv.StatedGross = 536;
+        inv.Lines.Add(new InvoiceLine
+        {
+            No = 2, Name = "Pfand", Quantity = 2000, UnitPrice = 250_000, PriceBaseQty = 1000, LineNet = -50, Vat = 1900, UnitCode = "C62",
+        });
+        Assert.Contains(Checks.Invoice(inv), f => f.Code == "line_total" && f.LineNo == 2);
     }
 
     [Fact]

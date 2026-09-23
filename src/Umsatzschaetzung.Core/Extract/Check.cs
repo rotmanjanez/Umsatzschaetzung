@@ -18,12 +18,8 @@ public static class Check
         {
             sum += l.LineNet;
             rates.Add(l.Vat);
-            if (l.Quantity <= 0)
-                flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.Quantity, Message = $"Zeile {l.No}: Menge ist nicht positiv" });
-            if (l.UnitPrice <= 0)
-                flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.UnitPrice, Message = $"Zeile {l.No}: Einzelpreis ist nicht positiv" });
-            if (l.LineNet <= 0)
-                flags.Add(new Flag { Code = "nonpositive", LineNo = l.No, Field = Field.LineNet, Message = $"Zeile {l.No}: Gesamtpreis ist nicht positiv" });
+            if (l.Quantity == 0)
+                flags.Add(new Flag { Code = "zero", LineNo = l.No, Field = Field.Quantity, Message = $"Zeile {l.No}: Menge ist null" });
             if (l.UnitCode == "")
                 flags.Add(new Flag { Code = "no_unit", LineNo = l.No, Field = Field.Unit, Message = $"Zeile {l.No}: Einheit fehlt" });
             var expected = InvoiceMath.LineNet(l.Quantity, l.UnitPrice, l.PriceBaseQty);
