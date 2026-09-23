@@ -11,7 +11,7 @@ namespace Umsatzschaetzung.Suggest;
 // model directory.
 public sealed class Encoder : IDisposable
 {
-    public const string Name = "zuordnung-0.1.1/int8";
+    public const string Name = "zuordnung-0.1.2/int8";
     public const int Width = 768;
 
     // An article wording is a handful of words; 48 tokens hold the longest of them whole.

@@ -18,7 +18,7 @@
     </ModelFile>
     <ModelFile Include="zuordnung.int8.onnx;calibration.json">
       <Dir>zuordnung</Dir>
-      <Release>zuordnung-v0.1.1</Release>
+      <Release>zuordnung-v0.1.2</Release>
     </ModelFile>
     <ModelFile Include="PP-OCRv6_det_small.onnx">
       <Dir>v6</Dir>
@@ -36,8 +36,8 @@
     <ModelFile Update="merges.txt" Sha256="92f04b1cfffbdfc3495a01f2cce2a81c874d1bfa255ea3859f6f0d43356ac57f" />
     <ModelFile Update="byte_to_unicode.json" Sha256="cbb1623eed136cceb032401db5efec4d36c8e1608810c0e7d4ef533d586960df" />
     <ModelFile Update="spec.json" Sha256="37f94f042c4bb411ba9de2413a2b2b5783c567489caeb889f4a5f7ada4b7e05a" />
-    <ModelFile Update="zuordnung.int8.onnx" Sha256="6ce35b85bbbed1f55dd205b0d5fd7dab3f486581138c7d55f760f76461ca437a" />
-    <ModelFile Update="calibration.json" Sha256="a646e87b0a7cde044f11ee08bbff8aa48b54affdc5aaa3dc6d334f86222ca45f" />
+    <ModelFile Update="zuordnung.int8.onnx" Sha256="e66e2b7e28109850fbf90a406c6c0189474105b88f3310f94f51a8888933485c" />
+    <ModelFile Update="calibration.json" Sha256="95f047a9b92b592ae015a7ad1cf49101dfa7f41a528399d52bac0b68875dae71" />
     <ModelFile Update="PP-OCRv6_det_small.onnx" Sha256="090f04abcd9d9a7498bc4ebf677e4cb9bdce1fe4197ddb7e529f1ef44e1ff94f" />
     <ModelFile Update="ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx" Sha256="54379ae5174d026780215fc748a7f31910dee36818e63d49e17dc598ecc82df7" Url="$(RapidOcrNetModels)/ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx" />
     <ModelFile Update="latin_PP-OCRv5_rec_mobile_infer.onnx" Sha256="b20bd37c168a570f583afbc8cd7925603890efbcdc000a59e22c269d160b5f5a" Url="$(RapidOcrNetModels)/latin_PP-OCRv5_rec_mobile_infer.onnx" />
