@@ -8,23 +8,25 @@ wechseln.
 
 ## Was nicht in der Rechnung ist
 
-Oben auf dem Reiter steht, wie viel vom Einkauf in die Kalkulation eingegangen
-ist und was außen vor blieb, mit dem Grund je Position:
+Oben auf dem Reiter stehen die Einkäufe, die nicht über Rezeptur und Preis in
+den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
 ![Der obere Teil des Reiters „5. Bericht“ mit den nicht berücksichtigten Einkäufen](img/bericht-oben.png)
 
-- **ohne Zuordnung**: Die Position ist auf **2. Zuordnung** noch offen. Im
-  Beispiel sollte hier nichts mehr stehen.
-- **in keiner Rezeptur**: Die Zutat wird eingekauft, kommt aber in keinem
-  Produkt des Sortiments vor. Steht hier eine echte Ware, fehlt im Sortiment
-  ein Produkt.
+- **Nicht in der Umsatzschätzung**: Die Position ist auf **2. Zuordnung**
+  noch offen, oder der Zuordnung fehlt der Faktor. Im Beispiel sollte hier
+  nichts mehr stehen.
+- **Nicht Teil der RGAS-Ermittlung**: Die Zutat wird eingekauft, kommt aber in
+  keinem Produkt des Sortiments vor. Ihr Umsatz wird über den
+  Rohgewinnaufschlagsatz geschätzt. Steht hier eine echte Ware, fehlt im
+  Sortiment wahrscheinlich ein Produkt.
 
 Pfand und Leergut stehen nicht in der Liste, sie gleichen sich über die Zeit
 aus. Darunter steht grau, wie viel Pfand berechnet und wie viel Leergut
 gutgeschrieben wurde.
 
-Diese Liste ist der letzte Blick, bevor der Bericht rausgeht: Was hier steht,
-fehlt im kalkulierten Umsatz.
+Diese Listen sind der letzte Blick, bevor der Bericht rausgeht: Was in der
+ersten steht, fehlt im Umsatz nach BP.
 
 ## Die Vorschau
 
@@ -35,8 +37,9 @@ wird:
    196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
 2. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
    Sparte.
-3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt und der
-   Warenfluss von Einkauf über Verbrauch bis zur Ausbeute je Zutat, damit jede
+3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, der
+   Warenfluss von Einkauf über Verbrauch bis zur Ausbeute je Zutat und der
+   über den Aufschlagsatz geschätzte Umsatz, damit jede
    Zahl des Berichts nachvollziehbar bleibt. Für die Prüfung angepasste
    Rezepte sind als **abweichend vom Katalog** gekennzeichnet, das
    Katalogrezept steht grau darunter.
@@ -50,7 +53,7 @@ Zuordnung oder einen Preis ändert, sieht das in der Vorschau sofort und
 speichert das PDF neu.
 
 !!! geschafft "Geschafft, wenn …"
-    - unter **Nicht berücksichtigte Einkäufe** nichts mehr **ohne Zuordnung** ist
+    - unter **Nicht in der Umsatzschätzung** nichts mehr steht
     - das PDF gespeichert ist und sich öffnen lässt
 
 !!! nachlesen "Zum Nachlesen"

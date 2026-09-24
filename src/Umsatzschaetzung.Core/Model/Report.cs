@@ -22,8 +22,14 @@ public sealed class Totals
     public long AllocatedCost { get; set; }
     public long ShrinkageCost => CostOfGoods - SellableCost;
     public long UnallocatedCost => SellableCost - AllocatedCost;
-    public long GrossProfit => CalculatedRevenueNet - AllocatedCost;
-    public long Markup => Rohaufschlag.Of(CalculatedRevenueNet, AllocatedCost);
+    // Der Aufschlagsatz wird nur an Portionen mit Preis ermittelt.
+    public long PricedCost { get; set; }
+    public long PricedPortions { get; set; }
+    public long GrossProfit => CalculatedRevenueNet - PricedCost;
+    public long Markup => Rohaufschlag.Of(CalculatedRevenueNet, PricedCost);
+    public long EstimatedCost { get; set; }
+    public long EstimatedRevenueNet { get; set; }
+    public long RevenueNet => CalculatedRevenueNet + EstimatedRevenueNet;
     public long Portions { get; set; }
     public long UnmappedCost { get; set; }
     public long UnusedCost { get; set; }
@@ -46,6 +52,8 @@ public sealed record VatRow(long Vat, long Declared, long Calculated, bool Total
         var calculated = new Dictionary<long, long>();
         foreach (var p in r.Products)
             calculated[p.Vat] = calculated.GetValueOrDefault(p.Vat) + p.RevenueNet;
+        foreach (var (vat, net) in Estimated(r))
+            calculated[vat] = calculated.GetValueOrDefault(vat) + net;
         List<VatRow> rows = [];
         long sumDeclared = 0, sumCalculated = 0;
         foreach (var rate in Rates.Concat(declared.Keys.Union(calculated.Keys).Where(k => !Rates.Contains(k)).Order()))
@@ -59,6 +67,33 @@ public sealed record VatRow(long Vat, long Declared, long Calculated, bool Total
         }
         rows.Add(new VatRow(0, sumDeclared, sumCalculated, true));
         return rows;
+    }
+
+    // Der geschätzte Umsatz folgt den Steuersätzen des Umsatzes, dessen Aufschlagsatz er trägt.
+    static Dictionary<long, long> Estimated(Report r)
+    {
+        var byBasis = new Dictionary<Sparte, long>();
+        foreach (var e in r.Estimated) byBasis[e.Basis] = byBasis.GetValueOrDefault(e.Basis) + e.RevenueNet;
+        var output = new Dictionary<long, long>();
+        foreach (var (basis, amount) in byBasis)
+        {
+            var weights = new Dictionary<long, long>();
+            foreach (var p in r.Products)
+                if (!p.PriceMissing && (basis == Sparte.Unbestimmt || p.Sparte == basis))
+                    weights[p.Vat] = weights.GetValueOrDefault(p.Vat) + p.RevenueNet;
+            var sum = weights.Values.Sum();
+            if (sum <= 0) continue;
+            var order = weights.OrderByDescending(w => w.Value).ThenByDescending(w => w.Key).ToList();
+            var left = amount;
+            foreach (var (vat, weight) in order.Skip(1))
+            {
+                var part = (long)((Int128)amount * weight / sum);
+                output[vat] = output.GetValueOrDefault(vat) + part;
+                left -= part;
+            }
+            output[order[0].Key] = output.GetValueOrDefault(order[0].Key) + left;
+        }
+        return output;
     }
 }
 
@@ -77,6 +112,29 @@ public sealed class UnusedLine
     public string Name { get; set; } = "";
     public long LineNet { get; set; }
     public string IngredientId { get; set; } = "";
+}
+
+public enum EstimateSource
+{
+    [JsonStringEnumMemberName("preis")] PriceMissing,
+    [JsonStringEnumMemberName("rest")] Leftover,
+    [JsonStringEnumMemberName("rezeptur")] Unused,
+}
+
+// Einsatz, dessen Umsatz über den Aufschlagsatz statt über Portion und Preis geschätzt wird.
+// Basis ist die Sparte, deren Satz gilt; Unbestimmt steht für den Satz des Betriebs.
+public sealed class EstimateRow
+{
+    public EstimateSource Source { get; set; }
+    public string Name { get; set; } = "";
+    public string Invoice { get; set; } = "";
+    public DateOnly? Date { get; set; }
+    public Unit Unit { get; set; }
+    public long Qty { get; set; }
+    public Sparte Basis { get; set; }
+    public long Cost { get; set; }
+    public long Markup { get; set; }
+    public long RevenueNet { get; set; }
 }
 
 public sealed class ProductPortions
@@ -186,6 +244,7 @@ public sealed class Report
     public List<UnmappedLine> Unmapped { get; set; } = [];
     public List<UnusedLine> Unused { get; set; } = [];
     public List<UnusedLine> Deposits { get; set; } = [];
+    public List<EstimateRow> Estimated { get; set; } = [];
     public List<Allocation> Allocations { get; set; } = [];
     public List<Flag> Warnings { get; set; } = [];
 }

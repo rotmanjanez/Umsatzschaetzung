@@ -47,8 +47,7 @@ internal static class Revenue
             var share = Scale.ToBase(r.Amount, r.Unit) * cost.GetValueOrDefault(r.IngredientId).Micro;
             if (share <= best) continue;
             best = share;
-            sparte = rs.Ingredients.TryGetValue(r.IngredientId, out var ing)
-                && rs.Categories.TryGetValue(ing.CategoryId, out var cat) ? cat.Sparte : Sparte.Unbestimmt;
+            sparte = SparteOf(rs, r.IngredientId);
         }
         return sparte;
     }
@@ -72,7 +71,7 @@ internal static class Revenue
         var bySparte = new SortedDictionary<Sparte, MarkupRow>();
         foreach (var row in rows)
         {
-            if (row.Portions == 0) continue;
+            if (row.Portions == 0 || row.PriceMissing) continue;
             if (!bySparte.TryGetValue(row.Sparte, out var m)) bySparte[row.Sparte] = m = new MarkupRow { Sparte = row.Sparte };
             m.Portions += row.Portions;
             m.CostOfGoods += row.CostOfGoods;
@@ -82,7 +81,69 @@ internal static class Revenue
         return [.. bySparte.Values.OrderBy(m => m.Sparte == Sparte.Unbestimmt ? 1 : 0)];
     }
 
-    internal static Report Run(Case c, RuleSet rs, RuleSet catalog, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses)
+    static Sparte SparteOf(RuleSet rs, string ingredientId) =>
+        rs.Ingredients.TryGetValue(ingredientId, out var ing) && rs.Categories.TryGetValue(ing.CategoryId, out var cat) ? cat.Sparte : Sparte.Unbestimmt;
+
+    static List<EstimateRow> Estimates(Case c, RuleSet rs, List<ProductRow> rows, List<Allocation> allocs,
+        Dictionary<string, UnitCost> unitCost, List<UnusedLine> unused)
+    {
+        List<EstimateRow> output = [];
+        foreach (var row in rows)
+            if (row.PriceMissing && row.Portions > 0)
+                output.Add(new EstimateRow { Source = EstimateSource.PriceMissing, Name = row.Name, Unit = Unit.Piece, Qty = row.Portions, Basis = row.Sparte, Cost = row.CostOfGoods });
+        var leftover = new SortedDictionary<string, long>(StringComparer.Ordinal);
+        foreach (var a in allocs)
+            foreach (var l in a.Leftover)
+                leftover[l.IngredientId] = leftover.GetValueOrDefault(l.IngredientId) + l.Qty;
+        foreach (var (id, qty) in leftover)
+            if (qty * unitCost.GetValueOrDefault(id).Micro / UnitCost.Scale is var cost and not 0)
+                output.Add(new EstimateRow { Source = EstimateSource.Leftover, Name = Names.Ingredient(rs, id), Unit = Scale.Of(rs, id) ?? Unit.Piece, Qty = qty, Basis = SparteOf(rs, id), Cost = cost });
+        var invoices = c.Invoices.ToDictionary(i => i.Id);
+        foreach (var l in unused)
+        {
+            var inv = invoices.GetValueOrDefault(l.InvoiceId);
+            output.Add(new EstimateRow
+            {
+                Source = EstimateSource.Unused,
+                Name = l.Name,
+                Invoice = inv is null ? "" : Names.Invoice(inv),
+                Date = inv?.Date,
+                Basis = SparteOf(rs, l.IngredientId),
+                Cost = l.LineNet,
+            });
+        }
+        return output;
+    }
+
+    // Die Sparte trägt ihren eigenen Satz, sobald er sich an Portionen mit Preis ermitteln ließ;
+    // sonst gilt der Satz des Betriebs.
+    static List<Flag> Price(List<EstimateRow> estimates, List<MarkupRow> markups, Totals t)
+    {
+        var rates = markups.Where(m => m.Sparte != Sparte.Unbestimmt && m.CostOfGoods > 0 && m.RevenueNet > 0).ToDictionary(m => m.Sparte, m => m.Markup);
+        var overall = t.PricedCost > 0 && t.CalculatedRevenueNet > 0;
+        long missing = 0;
+        foreach (var e in estimates)
+        {
+            if (!rates.TryGetValue(e.Basis, out var markup)) (e.Basis, markup) = (Sparte.Unbestimmt, t.Markup);
+            t.EstimatedCost += e.Cost;
+            if (e.Basis == Sparte.Unbestimmt && !overall)
+            {
+                missing += e.Cost;
+                continue;
+            }
+            e.Markup = markup;
+            e.RevenueNet = e.Cost + e.Cost * markup / Bp.Full;
+            t.EstimatedRevenueNet += e.RevenueNet;
+        }
+        if (missing == 0) return [];
+        return [new Flag
+        {
+            Code = "markup-missing",
+            Message = $"Kein Aufschlagsatz ermittelt, weil keine Portion einen Preis hat; {Format.Cents(missing)} Einsatz bleiben ohne Umsatz",
+        }];
+    }
+
+    internal static Report Run(Case c, RuleSet rs, RuleSet catalog, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses, List<UnusedLine> unused)
     {
         var byProduct = new Dictionary<string, ProductAllocation>();
         foreach (var a in allocs)
@@ -93,7 +154,7 @@ internal static class Revenue
         var settings = Calculation.CaseProducts(c);
         var unitCost = new Dictionary<string, UnitCost>(uses.Count);
         foreach (var (id, u) in uses) unitCost[id] = UnitCost.Of(u);
-        long total = 0, portions = 0, allocated = 0;
+        long total = 0, portions = 0, allocated = 0, priced = 0, pricedPortions = 0;
         List<ProductRow> rows = [];
         List<Flag> flags = [];
         foreach (var pid in rs.Products.Keys.Order(StringComparer.Ordinal))
@@ -131,7 +192,12 @@ internal static class Revenue
                 row.CostOfGoods = pa.Portions * perPortion / UnitCost.Scale;
                 allocated += row.CostOfGoods;
                 if (row.PriceMissing)
-                    flags.Add(new Flag { Code = "price_missing", Message = $"Preis fehlt für „{p.Name}“ ({Format.Portions(pa.Portions)} ohne Umsatz)" });
+                    flags.Add(new Flag { Code = "price_missing", Message = $"Preis fehlt für „{p.Name}“ ({Format.Portions(pa.Portions)}, Umsatz über den Aufschlagsatz geschätzt)" });
+                else
+                {
+                    priced += row.CostOfGoods;
+                    pricedPortions += pa.Portions;
+                }
             }
             rows.Add(row);
         }
@@ -151,8 +217,12 @@ internal static class Revenue
             StockChange = stock,
             SellableCost = sellable,
             AllocatedCost = allocated,
+            PricedCost = priced,
+            PricedPortions = pricedPortions,
             Portions = portions,
         };
+        var estimated = Estimates(c, rs, rows, allocs, unitCost, unused);
+        flags.AddRange(Price(estimated, markups, summary));
         return new Report
         {
             CaseId = c.Id,
@@ -160,6 +230,7 @@ internal static class Revenue
             Totals = summary,
             Products = rows,
             Markups = markups,
+            Estimated = estimated,
             Allocations = allocs,
             Warnings = [.. Warnings(c, rs, uses), .. flags, .. Undivided(markups)],
         };

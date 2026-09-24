@@ -320,7 +320,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         {
             throw new ServiceError(ErrorCode.Invalid, "Kalkulation: " + e.Message, inner: e);
         }
-        var rahmen = Vergleich.Aufschlag(Sammlung(c.PeriodTo.Year), c.Taxpayer.Gewerbe, rep.Totals.CalculatedRevenueNet);
+        var rahmen = Vergleich.Aufschlag(Sammlung(c.PeriodTo.Year), c.Taxpayer.Gewerbe, rep.Totals.RevenueNet);
         // Verglichen wird der Satz des Betriebs, nicht der einer Sparte: die Sammlung staffelt
         // den Aufschlag nach Gewerbeklasse, nicht nach Getränken und Speisen.
         if (rahmen is not null && rahmen.Lage(rep.Totals.Markup) is var lage && lage != Rahmenlage.Im)

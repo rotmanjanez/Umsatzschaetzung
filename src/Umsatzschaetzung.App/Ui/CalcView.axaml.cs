@@ -361,10 +361,13 @@ public partial class CalcView : Screen
             new("davon Schwund und Abzüge", Format.Cents(s.ShrinkageCost)),
             new("davon nicht zugeteilte Ware", Format.Cents(s.UnallocatedCost)),
             new("Einsatz der verkauften Portionen", Format.Cents(s.AllocatedCost)),
+            new("davon mit Preis", Format.Cents(s.PricedCost)),
             new("Rohgewinn", Format.Cents(s.GrossProfit)),
+            new("Einsatz mit geschätztem Umsatz", Format.Cents(s.EstimatedCost)),
+            new("Geschätzter Umsatz", Format.Cents(s.EstimatedRevenueNet)),
             new("Erfasste Einkäufe (netto)", Format.Cents(s.Purchases)),
             new("Bestandsveränderung", Format.Cents(s.StockChange)),
-            new("Nicht berücksichtigt", $"{Format.Cents(s.UnmappedCost + s.UnusedCost)} ({Format.Bp(s.ExcludedShare)})"),
+            new("Nicht in der Umsatzschätzung", $"{Format.Cents(s.UnmappedCost)} ({Format.Bp(s.ExcludedShare)})"),
         ];
     }
 
@@ -376,7 +379,7 @@ public partial class CalcView : Screen
     [
         .. r.Markups.Select(m => new MarkupRow(Format.Sparte(m.Sparte), Format.Cents(m.CostOfGoods),
             Format.Cents(m.RevenueNet), Format.Cents(m.GrossProfit), Format.Bp(m.Markup), false)),
-        new("Gesamt", Format.Cents(r.Totals.AllocatedCost), Format.Cents(r.Totals.CalculatedRevenueNet),
+        new("Gesamt", Format.Cents(r.Totals.PricedCost), Format.Cents(r.Totals.CalculatedRevenueNet),
             Format.Cents(r.Totals.GrossProfit), Format.Bp(r.Totals.Markup), true),
     ];
 

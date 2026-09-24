@@ -28,7 +28,7 @@ public class ReportTests
     [Fact]
     public void TotalsDeriveShrinkageRemainderProfitAndMarkup()
     {
-        var t = new Totals { CostOfGoods = 151_310, SellableCost = 145_395, AllocatedCost = 145_391, CalculatedRevenueNet = 733_595 };
+        var t = new Totals { CostOfGoods = 151_310, SellableCost = 145_395, AllocatedCost = 145_391, PricedCost = 145_391, CalculatedRevenueNet = 733_595 };
         Assert.Equal(5_915, t.ShrinkageCost);
         Assert.Equal(4, t.UnallocatedCost);
         Assert.Equal(588_204, t.GrossProfit);

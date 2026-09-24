@@ -26,7 +26,7 @@ public static class Calculation
         var (uses, ex, flags) = Normalize.Run(c, rs);
         Yield.Run(c, rs, uses);
         var allocs = Allocate(c, rs, uses);
-        var rep = Revenue.Run(c, rs, catalog, allocs, uses);
+        var rep = Revenue.Run(c, rs, catalog, allocs, uses, ex.Unused);
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Deposits = ex.Deposits;
@@ -39,7 +39,7 @@ public static class Calculation
         s.Purchases = c.Invoices.Sum(inv => inv.Lines.Sum(l => l.LineNet)) - s.DepositCharged - s.DepositRefunded;
         s.UnmappedCost = ex.Unmapped.Sum(l => l.LineNet);
         s.UnusedCost = ex.Unused.Sum(l => l.LineNet);
-        if (s.Purchases != 0) s.ExcludedShare = (s.UnmappedCost + s.UnusedCost) * Bp.Full / s.Purchases;
+        if (s.Purchases != 0) s.ExcludedShare = s.UnmappedCost * Bp.Full / s.Purchases;
         return rep;
     }
 

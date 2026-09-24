@@ -21,19 +21,27 @@ public sealed class ExcludedRow(LineGroup group, Exclusion why, string? ingredie
     public string LineNet => Format.Cents(Net);
 }
 
+public sealed record Exclusions(string Omitted, string Unused, string Deposit, List<ExcludedRow> Rows);
+
 public sealed class ReportModel : Observable
 {
-    string summary = "", note = "", why = "", deposit = "";
-    bool hasExcluded, ready, busy;
+    string omittedSummary = "", unusedSummary = "", note = "", why = "", whyTitle = "", deposit = "";
+    bool hasOmitted, hasUnused, ready, busy;
     string saved = "";
 
-    public ObservableCollection<ExcludedRow> Rows { get; } = [];
-    public string Summary { get => summary; set => Set(ref summary, value); }
-    public bool HasExcluded { get => hasExcluded; set { if (Set(ref hasExcluded, value)) Raise(nameof(DepositAlone)); } }
+    public ObservableCollection<ExcludedRow> Omitted { get; } = [];
+    public ObservableCollection<ExcludedRow> Unused { get; } = [];
+    public string OmittedSummary { get => omittedSummary; set => Set(ref omittedSummary, value); }
+    public string UnusedSummary { get => unusedSummary; set => Set(ref unusedSummary, value); }
+    public bool HasOmitted { get => hasOmitted; set { if (Set(ref hasOmitted, value)) RaiseExcluded(); } }
+    public bool HasUnused { get => hasUnused; set { if (Set(ref hasUnused, value)) RaiseExcluded(); } }
+    public bool HasExcluded => hasOmitted || hasUnused;
+    public bool NoneExcluded => !HasExcluded;
     public string Deposit { get => deposit; set { if (Set(ref deposit, value)) { Raise(nameof(DepositBelow)); Raise(nameof(DepositAlone)); } } }
-    public bool DepositBelow => deposit != "" && hasExcluded;
-    public bool DepositAlone => deposit != "" && !hasExcluded;
+    public bool DepositBelow => deposit != "" && HasExcluded;
+    public bool DepositAlone => deposit != "" && !HasExcluded;
     public string Why { get => why; set { if (Set(ref why, value)) Raise(nameof(HasWhy)); } }
+    public string WhyTitle { get => whyTitle; set => Set(ref whyTitle, value); }
     public bool HasWhy => why != "";
     public bool Ready { get => ready; set { if (Set(ref ready, value)) Raise(nameof(CanSave)); } }
     public bool Busy { get => busy; set { if (Set(ref busy, value)) { Raise(nameof(CanSave)); Raise(nameof(PdfLabel)); } } }
@@ -44,21 +52,33 @@ public sealed class ReportModel : Observable
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }
     public bool ShowNote => note != "";
 
-    public void SetExcluded((string Summary, string Deposit, List<ExcludedRow> Rows) excluded)
+    void RaiseExcluded()
     {
-        Summary = excluded.Summary;
+        Raise(nameof(HasExcluded));
+        Raise(nameof(NoneExcluded));
+        Raise(nameof(DepositBelow));
+        Raise(nameof(DepositAlone));
+    }
+
+    public void SetExcluded(Exclusions excluded)
+    {
+        OmittedSummary = excluded.Omitted;
+        UnusedSummary = excluded.Unused;
         Deposit = excluded.Deposit;
-        Rows.Clear();
-        foreach (var row in excluded.Rows) Rows.Add(row);
-        HasExcluded = Rows.Count > 0;
+        Omitted.Clear();
+        Unused.Clear();
+        foreach (var row in excluded.Rows) (row.Why == Exclusion.Unused ? Unused : Omitted).Add(row);
+        HasOmitted = Omitted.Count > 0;
+        HasUnused = Unused.Count > 0;
     }
 
     // One row per mapping group, as on the Zuordnung tab, so a row can be reassigned in place.
-    public static (string Summary, string Deposit, List<ExcludedRow> Rows) Excluded(Report r, Case c, RuleSet rs)
+    public static Exclusions Excluded(Report r, Case c, RuleSet rs)
     {
         var s = r.Totals;
-        var excluded = s.UnmappedCost + s.UnusedCost;
-        var summary = excluded == 0 ? "keine" : Format.Cents(excluded) + " (" + Format.Bp(s.ExcludedShare) + ")";
+        var omitted = s.UnmappedCost == 0 ? "keine" : Format.Cents(s.UnmappedCost) + " (" + Format.Bp(s.ExcludedShare) + ")";
+        var estimated = r.Estimated.Where(e => e.Source == EstimateSource.Unused).Sum(e => e.RevenueNet);
+        var unused = s.UnusedCost == 0 ? "keine" : Format.Cents(s.UnusedCost) + ", geschätzter Umsatz " + Format.Cents(estimated);
         var deposit = r.Deposits.Count == 0 ? ""
             : $"Nicht in den Einkäufen: Pfand berechnet +{Format.Cents(s.DepositCharged)}, Leergut gutgeschrieben {Format.Cents(s.DepositRefunded)}";
         var at = new Dictionary<(string, long), (LineGroup Group, Invoice Invoice, InvoiceLine Line)>();
@@ -78,16 +98,20 @@ public sealed class ReportModel : Observable
                 : new ExcludedRow(g, Exclusion.Unmapped, null, ""));
         foreach (var l in r.Unused)
             Add(l.InvoiceId, l.LineNo, l.LineNet, (g, _, _) => new ExcludedRow(g, Exclusion.Unused, l.IngredientId, Names.Ingredient(rs, l.IngredientId)));
-        return (summary, deposit, [.. rows.Values.OrderByDescending(x => x.Net)]);
+        return new(omitted, unused, deposit, [.. rows.Values.OrderByDescending(x => x.Net)]);
     }
 
-    public void Explain(ExcludedRow? row) => Why = row?.Why switch
+    public void Explain(ExcludedRow? row)
     {
-        null => "",
-        Exclusion.Unused => $"„{row.Ingredient}“ steht in keiner Rezeptur des Sortiments",
-        Exclusion.NoFactor => $"Der Zuordnung zu „{row.Ingredient}“ fehlt der Faktor",
-        _ => "Keiner Zutat zugeordnet",
-    };
+        WhyTitle = row?.Why == Exclusion.Unused ? "NICHT TEIL DER RGAS-ERMITTLUNG" : "NICHT IN DER UMSATZSCHÄTZUNG";
+        Why = row?.Why switch
+        {
+            null => "",
+            Exclusion.Unused => $"„{row.Ingredient}“ steht in keiner Rezeptur des Sortiments; der Umsatz wird über den Aufschlagsatz geschätzt",
+            Exclusion.NoFactor => $"Der Zuordnung zu „{row.Ingredient}“ fehlt der Faktor",
+            _ => "Keiner Zutat zugeordnet",
+        };
+    }
 }
 
 public partial class ReportView : Screen
@@ -126,7 +150,7 @@ public partial class ReportView : Screen
                 var report = await Session.Service.RenderReport(kase.Id, false, ct);
                 return (ReportModel.Excluded(calc.Report, kase, rs), report.Html);
             }, ct);
-            Fill(excluded, kase, rs);
+            Fill(excluded);
             await ShowHtml(html);
             model.Ready = true;
         });
@@ -134,13 +158,14 @@ public partial class ReportView : Screen
     }
 
     // A row that is still excluded for the same mapping keeps its detail, a note on a just assigned one stays.
-    void Fill((string, string, List<ExcludedRow>) excluded, Case kase, RuleSet rs)
+    void Fill(Exclusions excluded)
     {
-        var kept = Excluded.SelectedItem as ExcludedRow;
+        var kept = (OmittedGrid.SelectedItem ?? UnusedGrid.SelectedItem) as ExcludedRow;
         refreshing = true;
         model.SetExcluded(excluded);
-        var again = kept is null ? null : model.Rows.FirstOrDefault(r => r.Group.Key == kept.Group.Key);
-        Excluded.SelectedItem = again;
+        var again = kept is null ? null : model.Omitted.Concat(model.Unused).FirstOrDefault(r => r.Group.Key == kept.Group.Key);
+        OmittedGrid.SelectedItem = again?.Why == Exclusion.Unused ? null : again;
+        UnusedGrid.SelectedItem = again?.Why == Exclusion.Unused ? again : null;
         refreshing = false;
         var split = Split.RowDefinitions;
         if (split[1].Height.IsStar != model.HasExcluded)
@@ -148,6 +173,9 @@ public partial class ReportView : Screen
             split[1].Height = model.HasExcluded ? new GridLength(2, GridUnitType.Star) : GridLength.Auto;
             split[3].Height = new GridLength(3, GridUnitType.Star);
         }
+        var lists = Lists.RowDefinitions;
+        lists[1].Height = model.HasOmitted ? GridLength.Star : new GridLength(0);
+        lists[3].Height = model.HasUnused ? GridLength.Star : new GridLength(0);
         model.Explain(again);
         if (again is null) Detail.Show(null);
         else if (again.Group.MappingId != kept!.Group.MappingId || again.Why != kept.Why) Detail.Show(again.Group);
@@ -155,8 +183,12 @@ public partial class ReportView : Screen
 
     void RowSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (refreshing) return;
-        var row = Excluded.SelectedItem as ExcludedRow;
+        if (refreshing || sender is not DataGrid grid) return;
+        var row = grid.SelectedItem as ExcludedRow;
+        if (row is null && (OmittedGrid.SelectedItem ?? UnusedGrid.SelectedItem) is not null) return;
+        refreshing = true;
+        (grid == OmittedGrid ? UnusedGrid : OmittedGrid).SelectedItem = null;
+        refreshing = false;
         model.Explain(row);
         Detail.Show(row?.Group);
     }

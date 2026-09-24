@@ -123,7 +123,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
         </tbody>
       </table>
-      <p class="note">Alle Beträge netto.</p>
+      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Anhang D).</p>
     </section>
 
     <section>
@@ -152,14 +152,15 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
           <tr class="total">
             <td>Gesamt</td>
-            <td class="num">{{ report.totals.portions | portions }}</td>
-            <td class="num">{{ report.totals.allocatedCost | cents }}</td>
+            <td class="num">{{ report.totals.pricedPortions | portions }}</td>
+            <td class="num">{{ report.totals.pricedCost | cents }}</td>
             <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
             <td class="num">{{ report.totals.grossProfit | cents }}</td>
             <td class="num">{{ report.totals.markup | bp }}</td>
           </tr>
         </tbody>
       </table>
+      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Zutaten ohne Rezeptur tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang D).</p>
       {% if rahmen %}
       <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohaufschlag {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}
@@ -171,7 +172,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         <thead>
           <tr>
             <th>Rechnungsnr.</th>
-            <th>Datum</th>
+            <th>Fassung vom</th>
             <th class="wrap">Position</th>
             <th class="num">Menge</th>
             <th class="num">Einzelpreis</th>
@@ -236,7 +237,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <td class="num">{{ p.vat | bp }}</td>
             <td class="num">{{ p.revenueNet | cents }}</td>
             <td class="num">{% if p.costOfGoods %}{% if not p.priceMissing %}{{ p.markup | bp }}{% endif %}{% endif %}</td>
-            <td>{% if p.priceMissing %}Preis fehlt{% else %}{% if p.pinned %}vorgegeben{% endif %}{% endif %}</td>
+            <td>{% if p.priceMissing %}Preis fehlt, Umsatz geschätzt{% else %}{% if p.pinned %}vorgegeben{% endif %}{% endif %}</td>
           </tr>
           {% endfor %}
           <tr class="total">
@@ -362,16 +363,149 @@ ol.warnings li { margin-bottom: 0.3em; }
     </section>
 
     <section>
-      <h1>Anhang D: Kennzahlen</h1>
+      <h1>Anhang D: Umsatz über den Rohgewinnaufschlagsatz</h1>
+      <p>Für Wareneinsatz ohne Portion und Preis wird der Umsatz als Einsatz zuzüglich des Aufschlagsatzes geschätzt. Es gilt der Satz der Sparte, sonst der Gesamtsatz.</p>
+
+      <h2>Produkte ohne Preis</h2>
+      {% if estimated.products.rows %}
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Produkt</th>
+            <th class="num">Portionen</th>
+            <th>Satz</th>
+            <th class="num">Einsatz</th>
+            <th class="num">Aufschlagsatz</th>
+            <th class="num">Umsatz netto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in estimated.products.rows %}
+          <tr>
+            <td>{{ e.name }}</td>
+            <td class="num">{{ e.qty | group }}</td>
+            <td>{% if e.basis == "unbestimmt" %}Gesamt{% else %}{{ e.basis | sparte }}{% endif %}</td>
+            <td class="num">{{ e.cost | cents }}</td>
+            <td class="num">{{ e.markup | bp }}</td>
+            <td class="num">{{ e.revenueNet | cents }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="total">
+            <td>Summe</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ estimated.products.cost | cents }}</td>
+            <td></td>
+            <td class="num">{{ estimated.products.revenueNet | cents }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">Alle zugeteilten Produkte haben einen Preis.</p>
+      {% endif %}
+
+      <h2>Nicht zugeteilte Ware</h2>
+      {% if estimated.leftover.rows %}
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Zutat</th>
+            <th class="num">Rest</th>
+            <th>Satz</th>
+            <th class="num">Einsatz</th>
+            <th class="num">Aufschlagsatz</th>
+            <th class="num">Umsatz netto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in estimated.leftover.rows %}
+          <tr>
+            <td>{{ e.name }}</td>
+            <td class="num">{{ e.qty | qty:e.unit }}</td>
+            <td>{% if e.basis == "unbestimmt" %}Gesamt{% else %}{{ e.basis | sparte }}{% endif %}</td>
+            <td class="num">{{ e.cost | cents }}</td>
+            <td class="num">{{ e.markup | bp }}</td>
+            <td class="num">{{ e.revenueNet | cents }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="total">
+            <td>Summe</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ estimated.leftover.cost | cents }}</td>
+            <td></td>
+            <td class="num">{{ estimated.leftover.revenueNet | cents }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">Die verkaufsfähige Ware ist vollständig zugeteilt.</p>
+      {% endif %}
+
+      <h2>Eingangspositionen ohne Rezeptur</h2>
+      {% if estimated.lines.rows %}
+      <table class="lines">
+        <thead>
+          <tr>
+            <th>Rechnungsnr.</th>
+            <th>Datum</th>
+            <th class="wrap">Position</th>
+            <th>Satz</th>
+            <th class="num">Netto</th>
+            <th class="num">Aufschlagsatz</th>
+            <th class="num">Umsatz netto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in estimated.lines.rows %}
+          <tr>
+            <td>{{ e.invoice }}</td>
+            <td>{% if e.date %}{{ e.date | date }}{% endif %}</td>
+            <td class="wrap">{{ e.name }}</td>
+            <td>{% if e.basis == "unbestimmt" %}Gesamt{% else %}{{ e.basis | sparte }}{% endif %}</td>
+            <td class="num">{{ e.cost | cents }}</td>
+            <td class="num">{{ e.markup | bp }}</td>
+            <td class="num">{{ e.revenueNet | cents }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tbody>
+          <tr class="total">
+            <td>Summe</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ estimated.lines.cost | cents }}</td>
+            <td></td>
+            <td class="num">{{ estimated.lines.revenueNet | cents }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">Keine Eingangspositionen außerhalb der Rezepturen.</p>
+      {% endif %}
+
+      <table class="ledger">
+        <tbody>
+          <tr class="total">
+            <td>Geschätzter Umsatz gesamt</td>
+            <td class="num">{{ report.totals.estimatedRevenueNet | cents }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h1>Anhang E: Kennzahlen</h1>
       <table class="ledger">
         <tbody>
           <tr>
-            <td>Kalkulierter Umsatz (netto)</td>
+            <td>Kalkulierter Umsatz der Portionen mit Preis</td>
             <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
           </tr>
           <tr>
-            <td>abzüglich Einsatz der verkauften Portionen</td>
-            <td class="num">{{ report.totals.allocatedCost | cents }}</td>
+            <td>abzüglich Einsatz dieser Portionen</td>
+            <td class="num">{{ report.totals.pricedCost | cents }}</td>
           </tr>
           <tr class="total">
             <td>Rohgewinn</td>
@@ -380,6 +514,18 @@ ol.warnings li { margin-bottom: 0.3em; }
           <tr>
             <td>Rohgewinnaufschlagsatz</td>
             <td class="num">{{ report.totals.markup | bp }}</td>
+          </tr>
+          <tr>
+            <td>Einsatz mit geschätztem Umsatz</td>
+            <td class="num">{{ report.totals.estimatedCost | cents }}</td>
+          </tr>
+          <tr>
+            <td>Geschätzter Umsatz</td>
+            <td class="num">{{ report.totals.estimatedRevenueNet | cents }}</td>
+          </tr>
+          <tr class="total">
+            <td>Umsatz nach BP</td>
+            <td class="num">{{ report.totals.revenueNet | cents }}</td>
           </tr>
           <tr>
             <td>Wareneinsatz gesamt</td>
@@ -408,7 +554,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
           {% endif %}
           <tr>
-            <td>Nicht berücksichtigt</td>
+            <td>Nicht in der Umsatzschätzung</td>
             <td class="num">{{ excluded | cents }} ({{ report.totals.excludedShare | bp }})</td>
           </tr>
         </tbody>

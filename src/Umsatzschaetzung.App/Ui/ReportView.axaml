@@ -19,10 +19,10 @@
             <Button Content="{Binding PdfLabel}" Theme="{StaticResource PrimaryButton}" Click="SavePdf" IsEnabled="{Binding CanSave}"/>
         </StackPanel>
         <Grid x:Name="Split" RowDefinitions="Auto,2*,6,3*">
-            <StackPanel Margin="0,0,0,8">
+            <StackPanel Margin="0,0,0,8" IsVisible="{Binding NoneExcluded}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Left" Text="Nicht berücksichtigte Einkäufe" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
-                    <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock DockPanel.Dock="Left" Text="Einkäufe" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                    <TextBlock Text="alle in der Umsatzschätzung und der Ermittlung des Aufschlagsatzes" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 </DockPanel>
                 <TextBlock Text="{Binding Deposit}" Theme="{StaticResource Muted}" IsVisible="{Binding DepositAlone}" Margin="0,6,0,0" TextWrapping="Wrap"/>
             </StackPanel>
@@ -35,27 +35,62 @@
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Bottom" Text="{Binding Deposit}" Theme="{StaticResource Muted}" IsVisible="{Binding DepositBelow}"
                                Margin="4,8,0,0" TextWrapping="Wrap"/>
-                    <Border Theme="{StaticResource Panel}" ClipToBounds="True">
-                        <DataGrid x:Name="Excluded" ui:Blur.Detail="{Binding #Pane}" ui:Grids.Flex="1" Theme="{StaticResource Grid}"
-                                  ItemsSource="{Binding Rows}" IsReadOnly="True" SelectionChanged="RowSelected">
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ExcludedRow">
-                                            <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ExcludedRow">
-                                            <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
+                    <Grid x:Name="Lists" RowDefinitions="Auto,*,Auto,*">
+                        <DockPanel Grid.Row="0" IsVisible="{Binding HasOmitted}" Margin="0,0,0,8">
+                            <TextBlock DockPanel.Dock="Left" Text="Nicht in der Umsatzschätzung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                            <TextBlock Text="{Binding OmittedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                        <Grid Grid.Row="1" IsVisible="{Binding HasOmitted}">
+                        <Border Theme="{StaticResource Panel}" ClipToBounds="True">
+                            <DataGrid x:Name="OmittedGrid" ui:Blur.Detail="{Binding #Pane}" ui:Grids.Flex="1" Theme="{StaticResource Grid}"
+                                      ItemsSource="{Binding Omitted}" IsReadOnly="True" SelectionChanged="RowSelected">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:ExcludedRow">
+                                                <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:ExcludedRow">
+                                                <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                        </Grid>
+                        <DockPanel Grid.Row="2" IsVisible="{Binding HasUnused}" Margin="0,12,0,8">
+                            <TextBlock DockPanel.Dock="Left" Text="Nicht Teil der RGAS-Ermittlung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                            <TextBlock Text="{Binding UnusedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                        <Grid Grid.Row="3" IsVisible="{Binding HasUnused}">
+                        <Border Theme="{StaticResource Panel}" ClipToBounds="True">
+                            <DataGrid x:Name="UnusedGrid" ui:Blur.Detail="{Binding #Pane}" ui:Grids.Flex="1" Theme="{StaticResource Grid}"
+                                      ItemsSource="{Binding Unused}" IsReadOnly="True" SelectionChanged="RowSelected">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:ExcludedRow">
+                                                <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="ui:ExcludedRow">
+                                                <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                        </Grid>
+                    </Grid>
                 </DockPanel>
                 <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
                 <Border x:Name="Pane" Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
@@ -68,7 +103,7 @@
                                             ToolTip.Tip="Warum Einkäufe nicht in die Kalkulation eingehen"/>
                                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                         <PathIcon Data="{StaticResource WarningIcon}" Foreground="{DynamicResource WarningBrush}" Width="12" Height="12"/>
-                                        <TextBlock Text="NICHT IN DER KALKULATION" FontSize="11" FontWeight="SemiBold" LetterSpacing="0.8"
+                                        <TextBlock Text="{Binding WhyTitle}" FontSize="11" FontWeight="SemiBold" LetterSpacing="0.8"
                                                    Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </DockPanel>
