@@ -158,6 +158,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     {
         var kase = shell.Session.Case ?? throw new InvalidOperationException("import without an open case");
         var picked = paths
+            .SelectMany(Files)
             .Select(p => new PickedFile(Path.GetFileName(p), File.ReadAllBytes(p)))
             .ToList();
         shell.Session.Imports.Add(kase.Id, kase.Label, picked);
@@ -165,6 +166,9 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         while (shell.Session.Imports.Jobs.Count > 0) Settle();
         if (job.Failed.Count > 0) throw new InvalidOperationException("import failed: " + string.Join("; ", job.Failed));
     }
+
+    static IEnumerable<string> Files(string path) =>
+        Directory.Exists(path) ? Directory.EnumerateFiles(path).Order() : [path];
 
     void Pick(List<string> paths)
     {

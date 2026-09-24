@@ -27,6 +27,8 @@ th { font-size: 8pt; font-weight: bold; border-bottom: 0.7pt solid var(--ink); }
 th.wide { width: 40%; }
 td.num, th.num { text-align: right; white-space: nowrap; }
 tr.total td { font-weight: bold; border-top: 0.7pt solid var(--ink); }
+table.lines th, table.lines td { white-space: nowrap; }
+table.lines .wrap { width: 100%; white-space: normal; }
 table.ledger { width: auto; min-width: 70mm; }
 table.ledger td:first-child { padding-right: 4em; }
 .list span + span::before { content: ", "; }
@@ -93,7 +95,7 @@ ol.warnings li { margin-bottom: 0.3em; }
     {% endif %}
 
     <section{% if not report.warnings %} class="first"{% endif %}>
-      <h1>1 Umsätze vor und nach Betriebsprüfung</h1>
+      <h1>1 Umsätze vor und nach Betriebsprüfung (BP)</h1>
       <table>
         <thead>
           <tr>
@@ -158,12 +160,12 @@ ol.warnings li { margin-bottom: 0.3em; }
 
     <section>
       <h1>Anhang A: Eingangspositionen</h1>
-      <table>
+      <table class="lines">
         <thead>
           <tr>
             <th>Rechnungsnr.</th>
             <th>Datum</th>
-            <th class="wide">Position</th>
+            <th class="wrap">Position</th>
             <th class="num">Menge</th>
             <th class="num">Einzelpreis</th>
             <th class="num">Netto</th>
@@ -175,7 +177,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           <tr>
             <td>{% if inv.number %}{{ inv.number }}{% else %}{{ inv.fileName }}{% endif %}</td>
             <td>{{ inv.date | date }}</td>
-            <td>{{ l.name }}</td>
+            <td class="wrap">{{ l.name }}</td>
             <td class="num">{{ l.quantity | quantity:l.unitCode }}</td>
             <td class="num">{{ l.unitPrice | price:l.priceBaseQty:l.unitCode }}</td>
             <td class="num">{{ l.lineNet | cents }}</td>
