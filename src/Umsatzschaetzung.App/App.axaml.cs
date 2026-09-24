@@ -21,6 +21,7 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
         Headers.Register();
         Blur.Register();
+        Cells.Register();
     }
 
     public override void OnFrameworkInitializationCompleted()

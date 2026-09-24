@@ -34,6 +34,9 @@ public sealed class Session : Observable
     // Session has no visual of its own; Shell assigns itself so the file pickers have a parent.
     public TopLevel? Owner { get; set; }
 
+    // Answers the next file dialog in place of the person, where there is none to show.
+    public Func<IEnumerable<string>>? Picked { get; set; }
+
     public IService Service { get; }
     public Imports Imports { get; }
     public Case? Case { get; private set; }
@@ -203,6 +206,7 @@ public sealed class Session : Observable
 
     public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi)
     {
+        if (Picked is { } answer) return await ReadFiles(answer());
         if (Owner?.StorageProvider is not { } storage) return [];
         var picked = await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter });
         return await ReadFiles(picked.Select(f => f.TryGetLocalPath()).OfType<string>());
