@@ -23,8 +23,8 @@ Absenders abweichen.
 
 ## Bericht und einzelne Rechnung
 
-Der Bericht der Prüfung geht über **Als PDF speichern** heraus, so wie er
-angezeigt wird.
+Der Bericht der Prüfung geht über das Pfeilsymbol (**Als PDF speichern**)
+heraus, so wie er angezeigt wird.
 
 In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts
 (**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant,

@@ -7,7 +7,7 @@ ist. Das Programm bringt einen Grundstock mit, jede Prüfung ergänzt ihn.
 
 Die Regeln liegen auf dem Rechner, nicht in der Prüfung. Eine Änderung wirkt
 deshalb auf jede Prüfung, die danach gerechnet wird. Geöffnet werden sie über
-**Regeln** in der [Liste der Prüfungen](pruefungen.md). Nur ein Rezept kann eine
+das Reglersymbol (**Regeln**) in der [Liste der Prüfungen](pruefungen.md). Nur ein Rezept kann eine
 Prüfung zusätzlich für sich anpassen, siehe
 [Rezeptur anpassen](kalkulation.md#rezeptur).
 

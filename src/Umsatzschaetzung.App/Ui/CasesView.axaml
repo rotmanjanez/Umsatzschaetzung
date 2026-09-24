@@ -13,11 +13,8 @@
         <DockPanel DockPanel.Dock="Top">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
                 <ui:SearchBox x:Name="Search" Margin="0,0,16,0"/>
-                <Button Theme="{StaticResource SecondaryButton}" Click="ShowRules">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
-                        <TextBlock Text="Regeln"/>
-                    </StackPanel>
+                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Regeln" Click="ShowRules">
+                    <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
                 </Button>
                 <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Importieren" Click="Import">
                     <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>

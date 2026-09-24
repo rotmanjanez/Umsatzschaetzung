@@ -47,6 +47,7 @@ Der Anhang belegt, woher die Zahlen kommen:
 
 ## Als PDF speichern
 
-**Als PDF speichern** legt den Bericht ab, wo man will. Die Vorschau zeigt
+Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht ab, wo
+man will. Die Vorschau zeigt
 immer den aktuellen Stand; ein gespeichertes PDF ändert sich nicht mit. Wer
 danach eine Rechnung, Zuordnung oder einen Preis ändert, speichert neu.

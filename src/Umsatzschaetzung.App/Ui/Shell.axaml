@@ -26,11 +26,8 @@
                         <PathIcon Data="{StaticResource BackIcon}" Width="14" Height="14"/>
                     </Button>
                     <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Click="ShowHelp"/>
-                    <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" Click="ShowRules">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
-                            <TextBlock Text="Regeln"/>
-                        </StackPanel>
+                    <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" ToolTip.Tip="Regeln" Click="ShowRules">
+                        <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
                     </Button>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="CaseLabel" Theme="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis"/>

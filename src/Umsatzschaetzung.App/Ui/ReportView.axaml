@@ -8,7 +8,12 @@
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
             <TextBlock Text="{Binding Saved}" Theme="{StaticResource Muted}" IsVisible="{Binding ShowSaved}"
                        VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis" MaxWidth="320"/>
-            <Button Content="{Binding PdfLabel}" Theme="{StaticResource PrimaryButton}" Click="SavePdf" IsEnabled="{Binding CanSave}"/>
+            <Button Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Als PDF speichern" Click="SavePdf" IsEnabled="{Binding CanSave}">
+                <Panel>
+                    <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Busy}"/>
+                    <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14" IsVisible="{Binding !Busy}"/>
+                </Panel>
+            </Button>
         </StackPanel>
         <Border Theme="{StaticResource Panel}">
             <Grid>

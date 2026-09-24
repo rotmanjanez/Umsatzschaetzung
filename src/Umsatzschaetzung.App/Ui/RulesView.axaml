@@ -163,7 +163,9 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine"/>
+                                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zutat hinzufügen" HorizontalAlignment="Left" Click="AddRecipeLine">
+                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                </Button>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveProduct">
                                         <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>

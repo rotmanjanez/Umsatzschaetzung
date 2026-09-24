@@ -10,7 +10,9 @@
             <StackPanel Margin="0,0,16,0">
                 <Border Theme="{StaticResource Card}" IsVisible="{Binding NoInvoices}" MaxWidth="960" HorizontalAlignment="Left">
                     <DockPanel>
-                        <Button DockPanel.Dock="Right" Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" VerticalAlignment="Center" Margin="16,0,0,0" Click="GoInvoices"/>
+                        <Button DockPanel.Dock="Right" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Zu den Rechnungen" VerticalAlignment="Center" Margin="16,0,0,0" Click="GoInvoices">
+                            <PathIcon Data="{StaticResource ForwardIcon}" Width="14" Height="14"/>
+                        </Button>
                         <StackPanel>
                             <TextBlock Text="Nächster Schritt: Rechnungen" Theme="{StaticResource SectionHeader}"/>
                             <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
@@ -80,7 +82,9 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <Button Content="Zutat hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0"/>
+                    <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zutat hinzufügen" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0">
+                        <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                    </Button>
                 </StackPanel>
 
                 <Border Theme="{StaticResource SectionRule}"/>

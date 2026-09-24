@@ -12,9 +12,8 @@ public sealed class ReportModel : Observable
     bool ready, busy;
 
     public bool Ready { get => ready; set { if (Set(ref ready, value)) Raise(nameof(CanSave)); } }
-    public bool Busy { get => busy; set { if (Set(ref busy, value)) { Raise(nameof(CanSave)); Raise(nameof(PdfLabel)); } } }
+    public bool Busy { get => busy; set { if (Set(ref busy, value)) Raise(nameof(CanSave)); } }
     public bool CanSave => ready && !busy;
-    public string PdfLabel => busy ? "Wird erstellt …" : "Als PDF speichern";
     public string Saved { get => saved; set { if (Set(ref saved, value)) Raise(nameof(ShowSaved)); } }
     public bool ShowSaved => saved != "";
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }

@@ -37,8 +37,8 @@ kalkulierten **Umsatz nach BP**. Leere Felder gelten als 0 €.
 Ohne Angaben gilt alles, was im Zeitraum eingekauft wurde, als verbraucht. Das
 ist richtig, solange das Lager zu Beginn und Ende etwa gleich voll war.
 
-Liegt eine Inventur vor, trägt **Zutat hinzufügen** Anfangs- und Endbestand je
-Zutat ein. Verbraucht ist dann
+Liegt eine Inventur vor, trägt das Plus unter der Tabelle (**Zutat hinzufügen**)
+Anfangs- und Endbestand je Zutat ein. Verbraucht ist dann
 
     Anfangsbestand + Einkauf − Endbestand
 

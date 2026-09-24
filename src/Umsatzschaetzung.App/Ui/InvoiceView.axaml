@@ -198,7 +198,9 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Button Grid.Row="3" Content="Zeile hinzufügen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine"/>
+                <Button Grid.Row="3" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zeile hinzufügen" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine">
+                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                </Button>
                 <DataGrid x:Name="Totals" Grid.Row="4" Theme="{StaticResource Grid}" Margin="0,8,0,0" CanUserSortColumns="False"
                           ItemsSource="{Binding Totals}" CurrentCellChanged="TotalChanged" PreparingCellForEdit="EditStarted">
                     <DataGrid.Columns>

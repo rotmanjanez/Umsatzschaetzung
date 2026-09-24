@@ -23,7 +23,9 @@
     </ui:Screen.Styles>
     <DockPanel>
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-            <Button DockPanel.Dock="Right" Content="Rechnungen hinzufügen" Theme="{StaticResource PrimaryButton}" Click="AddFiles"/>
+            <Button DockPanel.Dock="Right" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Rechnungen hinzufügen" Click="AddFiles">
+                <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
+            </Button>
             <ui:SearchBox x:Name="Search" DockPanel.Dock="Right" Margin="0,0,12,0"/>
             <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
         </DockPanel>

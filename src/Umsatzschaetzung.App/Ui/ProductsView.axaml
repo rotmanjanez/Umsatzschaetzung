@@ -108,7 +108,9 @@
                             <Border Theme="{StaticResource Card}" Margin="0,0,0,6" Padding="12,8">
                                 <Grid ColumnDefinitions="*,Auto,Auto">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="1" Content="Ins Sortiment" Theme="{StaticResource SecondaryButton}" Margin="16,0,8,0" Click="AcceptSuggestion"/>
+                                    <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Ins Sortiment" Margin="16,0,8,0" Click="AcceptSuggestion">
+                                        <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                    </Button>
                                     <Button Grid.Column="2" Theme="{StaticResource IconButton}" ToolTip.Tip="Führt der Betrieb nicht" VerticalAlignment="Center" Click="DismissSuggestion">
                                         <PathIcon Data="{StaticResource ClearIcon}" Width="10" Height="10"/>
                                     </Button>

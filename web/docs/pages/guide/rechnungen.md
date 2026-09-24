@@ -24,7 +24,7 @@ In der Prüfung auf **1. Rechnungen** wechseln.
 
 ![Der noch leere Reiter „1. Rechnungen“](img/rechnungen-leer.png)
 
-**Rechnungen hinzufügen** öffnet die Dateiauswahl. In den entpackten Ordner
+Das Symbol oben rechts (**Rechnungen hinzufügen**) öffnet die Dateiauswahl. In den entpackten Ordner
 gehen, alle Dateien markieren und **Öffnen**.
 
 !!! windows "Unter Windows"

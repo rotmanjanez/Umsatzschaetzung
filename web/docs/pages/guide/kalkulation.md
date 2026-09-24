@@ -51,7 +51,7 @@ Passt ein Rezept nicht, gibt es zwei Wege:
   Katalog bleibt, wie er ist.
 
 Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit, dazu
-**Zutat hinzufügen**. Weicht eine Zeile vom Katalog ab, steht grau daneben, was
+fügt das Plus (**Zutat hinzufügen**) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was
 er vorsieht, etwa **Katalog: 200 g**. Eine Zutat wird in jedem Rezept in
 derselben Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei
 jeder Änderung sofort neu; in der Verteilung steht beim Produkt **angepasst**,

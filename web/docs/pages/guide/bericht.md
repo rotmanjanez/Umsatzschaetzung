@@ -22,7 +22,8 @@ wird:
 
 ## Als PDF speichern
 
-**Als PDF speichern** rechts oben legt den Bericht als PDF ab, wo man will. Er
+Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht als PDF
+ab, wo man will. Er
 gibt immer den aktuellen Stand wieder: Wer danach eine Rechnung, eine
 Zuordnung oder einen Preis ändert, sieht das in der Vorschau sofort und
 speichert das PDF neu.

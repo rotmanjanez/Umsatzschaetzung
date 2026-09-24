@@ -90,7 +90,7 @@ gewählten Produkts, gekennzeichnet mit **Katalog** oder **Nur diese Prüfung**.
   Prüfung an. Der Katalog bleibt unverändert.
 
 Die Abschrift ist das ganze Rezept, nicht nur die Abweichung. Ihre Zeilen
-lassen sich bearbeiten (Zutat, Menge, Einheit, **Zutat hinzufügen**);
+lassen sich bearbeiten (Zutat, Menge, Einheit, das Plus für **Zutat hinzufügen**);
 abweichende Zeilen zeigen grau den Katalogwert, etwa **Katalog: 200 g**. Jede
 Zutat bleibt in der Einheit, in der sie in allen Rezepten gemessen wird. Wird
 das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.
