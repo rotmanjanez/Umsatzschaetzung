@@ -68,7 +68,7 @@ public sealed class InvoicesModel : Observable
     public void Counted()
     {
         Empty = Invoices.Count == 0;
-        Summary = Empty ? "" : Count(Checked.Pending) + " offen · " + Count(Checked.Automatic) + " automatisch · " + Count(Checked.Manual) + " manuell";
+        Summary = Empty ? "" : Count(Checked.Pending) + " offen, " + Count(Checked.Automatic) + " automatisch, " + Count(Checked.Manual) + " manuell";
     }
 
     int Count(Checked state) => Invoices.Count(r => r.State == state);

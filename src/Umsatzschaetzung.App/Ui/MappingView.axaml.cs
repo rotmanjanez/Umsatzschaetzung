@@ -21,7 +21,7 @@ public sealed class MappingModel : Observable
         int Count(Checked state) => Groups.Count(g => g.State == state);
         var open = Count(Checked.Pending);
         Summary = Groups.Count == 0 ? ""
-            : (open == 0 ? "Alles zugeordnet" : open + " offen") + " · " + Count(Checked.Automatic) + " automatisch · " + Count(Checked.Manual) + " manuell";
+            : (open == 0 ? "Alles zugeordnet" : open + " offen") + ", " + Count(Checked.Automatic) + " automatisch, " + Count(Checked.Manual) + " manuell";
     }
 }
 
