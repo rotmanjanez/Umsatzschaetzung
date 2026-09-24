@@ -11,6 +11,12 @@
         <Style Selector="DataGrid#MarkupGrid DataGridRow">
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
+        <Style Selector="DataGridRow TextBlock.cell">
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
         <Style Selector="TextBlock.total">
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
@@ -223,6 +229,120 @@
                         </Border>
                     </Grid>
 
+                    <StackPanel IsVisible="{Binding HasYields}">
+                        <Border Theme="{StaticResource SectionRule}"/>
+                        <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
+                        <ItemsControl Margin="0,0,0,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                    <Border Theme="{StaticResource SectionRule}"/>
+
+                    <StackPanel DataContext="{Binding Exclusions}" x:DataType="ui:ExclusionModel" Margin="0,0,0,12">
+                        <StackPanel IsVisible="{Binding NoneExcluded}" Margin="0,0,0,12">
+                            <TextBlock Text="Einkäufe außerhalb der Verteilung" Theme="{StaticResource SectionHeader}"/>
+                            <TextBlock Text="Keine: alle Einkäufe gehen in die Ermittlung des Aufschlagsatzes ein." Theme="{StaticResource Muted}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    <Grid Height="560" Margin="0,0,0,12" IsVisible="{Binding HasExcluded}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48*" MinWidth="320"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="52*" MinWidth="360"/>
+                        </Grid.ColumnDefinitions>
+                        <DockPanel>
+                            <Grid x:Name="Lists" RowDefinitions="Auto,*,Auto,*">
+                                <DockPanel Grid.Row="0" IsVisible="{Binding HasUnused}" Margin="0,0,0,8">
+                                    <TextBlock DockPanel.Dock="Left" Text="Nicht Teil der RGAS-Ermittlung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                                    <TextBlock Text="{Binding UnusedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                                <Grid Grid.Row="1" IsVisible="{Binding HasUnused}">
+                                <Border Theme="{StaticResource Panel}" ClipToBounds="True">
+                                    <DataGrid x:Name="UnusedGrid" ui:Blur.Detail="{Binding #MappingPane}" ui:Grids.Flex="0" Theme="{StaticResource Grid}"
+                                              ItemsSource="{Binding Unused}" IsReadOnly="True" SelectionChanged="ExcludedSelected">
+                                        <DataGrid.Columns>
+                                            <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                                        <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                            <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                                        <TextBlock Classes="cell" Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Border>
+                                </Grid>
+                                <DockPanel Grid.Row="2" IsVisible="{Binding HasOmitted}" Margin="0,12,0,8">
+                                    <TextBlock DockPanel.Dock="Left" Text="Nicht in der Umsatzschätzung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                                    <TextBlock Text="{Binding OmittedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                                <Grid Grid.Row="3" IsVisible="{Binding HasOmitted}">
+                                <Border Theme="{StaticResource Panel}" ClipToBounds="True">
+                                    <DataGrid x:Name="OmittedGrid" ui:Blur.Detail="{Binding #MappingPane}" ui:Grids.Flex="0" Theme="{StaticResource Grid}"
+                                              ItemsSource="{Binding Omitted}" IsReadOnly="True" SelectionChanged="ExcludedSelected">
+                                        <DataGrid.Columns>
+                                            <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                                        <DockPanel Margin="0,0,8,0">
+                                                            <Border DockPanel.Dock="Right" Theme="{StaticResource Badge}" IsVisible="{Binding NoRevenue}" VerticalAlignment="Center">
+                                                                <TextBlock Text="kein Umsatz" Theme="{StaticResource BadgeText}"/>
+                                                            </Border>
+                                                            <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
+                                                        </DockPanel>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                            <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                                        <TextBlock Classes="cell" Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Border>
+                                </Grid>
+                            </Grid>
+                        </DockPanel>
+                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                        <Border x:Name="MappingPane" Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Top" Background="{DynamicResource WarningSoftBrush}" CornerRadius="8" Padding="14,12" Margin="0,0,14,12"
+                                        IsVisible="{Binding HasWhy}">
+                                    <StackPanel>
+                                        <DockPanel Margin="0,0,0,8">
+                                            <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Click="ShowExcludedHelp"
+                                                    ToolTip.Tip="Warum Einkäufe nicht in die Kalkulation eingehen"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <PathIcon Data="{StaticResource WarningIcon}" Foreground="{DynamicResource WarningBrush}" Width="12" Height="12"/>
+                                                <TextBlock Text="{Binding WhyTitle}" FontSize="11" FontWeight="SemiBold" LetterSpacing="0.8"
+                                                           Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding Why}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                                        <Button Content="Bringt in diesem Betrieb keinen Umsatz" Theme="{StaticResource SecondaryButton}" Margin="0,10,0,0"
+                                                IsVisible="{Binding CanDropRevenue}" Click="ToggleRevenue"
+                                                ToolTip.Tip="Die Positionsgruppe geht in dieser Prüfung nicht in die Umsatzschätzung ein, etwa Reinigungsmittel oder Müllbeutel."/>
+                                        <Button Content="Bringt doch Umsatz" Theme="{StaticResource SecondaryButton}" Margin="0,10,0,0"
+                                                IsVisible="{Binding CanRestoreRevenue}" Click="ToggleRevenue"
+                                                ToolTip.Tip="Der Umsatz der Positionsgruppe wird wieder über den Aufschlagsatz geschätzt."/>
+                                    </StackPanel>
+                                </Border>
+                                <ui:MappingDetail x:Name="Mapping"/>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                        <TextBlock Text="{Binding Deposit}" Theme="{StaticResource Muted}" IsVisible="{Binding HasDeposit}" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <Border Theme="{StaticResource SectionRule}"/>
+
                     <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}"/>
                     <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True">
                         <DataGrid.Columns>
@@ -313,11 +433,6 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
-                    <StackPanel IsVisible="{Binding HasYields}">
-                        <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
-                        <ItemsControl Margin="0,0,0,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
-                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

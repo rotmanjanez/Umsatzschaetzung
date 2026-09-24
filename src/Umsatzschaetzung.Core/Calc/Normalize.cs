@@ -3,7 +3,7 @@ using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Calc;
 
-internal sealed record Excluded(List<UnmappedLine> Unmapped, List<UnusedLine> Unused, List<UnusedLine> Deposits);
+internal sealed record Excluded(List<UnmappedLine> Unmapped, List<UnusedLine> Unused, List<UnusedLine> Deposits, List<UnmappedLine> NoRevenue);
 
 public static class Normalize
 {
@@ -22,7 +22,8 @@ public static class Normalize
     {
         var uses = new SortedDictionary<string, IngredientUse>(StringComparer.Ordinal);
         var inRecipe = RecipeIngredients(c, rs);
-        var ex = new Excluded([], [], []);
+        var ex = new Excluded([], [], [], []);
+        var noRevenue = c.NoRevenue.ToHashSet(StringComparer.Ordinal);
         List<Flag> flags = [];
         var estimated = new SortedDictionary<string, int>(StringComparer.Ordinal);
         IngredientUse Use(string id)
@@ -37,6 +38,11 @@ public static class Normalize
         foreach (var inv in c.Invoices)
             foreach (var line in inv.Lines)
             {
+                if (noRevenue.Contains(LineKey.Of(inv.SupplierName, line)))
+                {
+                    ex.NoRevenue.Add(new UnmappedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet });
+                    continue;
+                }
                 var m = Match.Mapping(rs, inv.SupplierName, inv.Date, line);
                 if (m is null || !rs.Ingredients.TryGetValue(m.IngredientId, out var ing))
                 {

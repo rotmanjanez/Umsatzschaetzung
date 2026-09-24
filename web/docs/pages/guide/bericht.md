@@ -6,31 +6,9 @@ Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben
 dem kalkulierten, mit allem, was zur Rechnung dazugehört. Auf **5. Bericht**
 wechseln.
 
-## Was nicht in der Rechnung ist
-
-Oben auf dem Reiter stehen die Einkäufe, die nicht über Rezeptur und Preis in
-den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
-
-![Der obere Teil des Reiters „5. Bericht“ mit den nicht berücksichtigten Einkäufen](img/bericht-oben.png)
-
-- **Nicht in der Umsatzschätzung**: Die Position ist auf **2. Zuordnung**
-  noch offen, oder der Zuordnung fehlt der Faktor. Im Beispiel sollte hier
-  nichts mehr stehen.
-- **Nicht Teil der RGAS-Ermittlung**: Die Zutat wird eingekauft, kommt aber in
-  keinem Produkt des Sortiments vor. Ihr Umsatz wird über den
-  Rohgewinnaufschlagsatz geschätzt. Steht hier eine echte Ware, fehlt im
-  Sortiment wahrscheinlich ein Produkt.
-
-Pfand und Leergut stehen nicht in der Liste, sie gleichen sich über die Zeit
-aus. Darunter steht grau, wie viel Pfand berechnet und wie viel Leergut
-gutgeschrieben wurde.
-
-Diese Listen sind der letzte Blick, bevor der Bericht rausgeht: Was in der
-ersten steht, fehlt im Umsatz nach BP.
-
 ## Die Vorschau
 
-Darunter zeigt der Reiter den fertigen Bericht so, wie er als PDF gespeichert
+Der Reiter zeigt den fertigen Bericht so, wie er als PDF gespeichert
 wird:
 
 1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von
@@ -55,7 +33,6 @@ Zuordnung oder einen Preis ändert, sieht das in der Vorschau sofort und
 speichert das PDF neu.
 
 !!! geschafft "Geschafft, wenn …"
-    - unter **Nicht in der Umsatzschätzung** nichts mehr steht
     - das PDF gespeichert ist und sich öffnen lässt
 
 !!! nachlesen "Zum Nachlesen"

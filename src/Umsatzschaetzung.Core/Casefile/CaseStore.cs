@@ -88,13 +88,17 @@ public sealed partial class CaseStore(string dir)
             amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
         ALTER TABLE case_product ADD COLUMN recipe_basis INTEGER;
         """,
+        """
+        -- Positionsgruppen ohne Umsatz, nach dem Schlüssel der Gruppe.
+        CREATE TABLE no_revenue(line_key TEXT PRIMARY KEY) WITHOUT ROWID;
+        """,
     ];
 
     static readonly string[] ReadingTables =
         ["reading_line_flag", "reading_page_flag", "reading_cell", "reading_line", "reading_header", "reading_word", "reading_page"];
 
     static readonly string[] CaseTables =
-        ["kase", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "invoice", "invoice_line"];
+        ["kase", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "no_revenue", "invoice", "invoice_line"];
 
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
@@ -341,6 +345,9 @@ public sealed partial class CaseStore(string dir)
                 ("@ord", i), ("@id", p.ProductId), ("@portions", p.Portions), ("@reason", p.Reason));
         }
 
+        foreach (var key in c.NoRevenue)
+            Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(line_key) VALUES(@key)", ("@key", key));
+
         for (var i = 0; i < c.Invoices.Count; i++)
         {
             var inv = c.Invoices[i];
@@ -391,6 +398,7 @@ public sealed partial class CaseStore(string dir)
                 {
                     ProductId = r.GetString(0), Portions = r.GetInt64(1), Reason = r.GetString(2),
                 }));
+            ReadRows(db, "SELECT line_key FROM no_revenue ORDER BY line_key", r => c.NoRevenue.Add(r.GetString(0)));
 
             var lines = ReadLines(db);
             ReadRows(db, "SELECT id, source, file_name, supplier_name, number, date, currency, net_total, gross_total, "
@@ -692,6 +700,7 @@ public sealed partial class CaseStore(string dir)
         c.Products ??= [];
         c.Yields ??= [];
         c.Pinned ??= [];
+        c.NoRevenue ??= [];
         foreach (var inv in c.Invoices) inv.Lines ??= [];
     }
 

@@ -30,6 +30,7 @@ public static class Calculation
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Deposits = ex.Deposits;
+        rep.NoRevenue = ex.NoRevenue;
         rep.Warnings.AddRange(flags);
         rep.Warnings.AddRange(Scale.Conflicts(rs, ex.Unused.Select(l => l.IngredientId)));
         rep.Ingredients = IngredientRows(rs, uses, allocs);
@@ -39,7 +40,8 @@ public static class Calculation
         s.Purchases = c.Invoices.Sum(inv => inv.Lines.Sum(l => l.LineNet)) - s.DepositCharged - s.DepositRefunded;
         s.UnmappedCost = ex.Unmapped.Sum(l => l.LineNet);
         s.UnusedCost = ex.Unused.Sum(l => l.LineNet);
-        if (s.Purchases != 0) s.ExcludedShare = s.UnmappedCost * Bp.Full / s.Purchases;
+        s.NoRevenueCost = ex.NoRevenue.Sum(l => l.LineNet);
+        if (s.Purchases != 0) s.ExcludedShare = (s.UnmappedCost + s.NoRevenueCost) * Bp.Full / s.Purchases;
         return rep;
     }
 

@@ -10,11 +10,15 @@ Verkauf, Zutat für Zutat.
 <li><b>Einkauf</b> Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit der Rezepte: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit <a href="../pruefung/#bestand">Bestand</a> zählt nur, was verbraucht wurde.</li>
 <li><b>Verkaufsfähige Menge</b> Davon ab gehen Schankverlust, Eigenverbrauch, Personalverpflegung und Freirunden, so wie es die gewählte Ertragsregel vorsieht.</li>
 <li><b>Portionen</b> Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt, nach deren Rezepten.</li>
-<li><b>Umsatz</b> Portionen mal Preis, netto gerechnet.</li>
+<li><b>Umsatz</b> Portionen mal Preis, netto gerechnet. Aus diesen Portionen folgt der Rohgewinnaufschlagsatz.</li>
+<li><b>Geschätzter Umsatz</b> Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Zutaten ohne Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.</li>
 </ol>
 
 Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
 Ertragsregeln rechnet die Kalkulation sofort neu.
+
+Der Reiter hat drei Teile: oben die Verteilung mit den Ertragsregeln, in der
+Mitte die Einkäufe außerhalb der Verteilung, unten das Ergebnis.
 
 ## Sortiment { #sortiment }
 
@@ -49,20 +53,21 @@ tragen **angepasst**.
 Die Verteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
 Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
 
-## Zusammenfassung
+## Ergebnis
 
 - **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz
-  je Steuersatz, mit Differenz. Der Steuersatz folgt dem Produkt, nicht der
-  Einkaufsrechnung.
+  je Steuersatz, mit Differenz, einschließlich des geschätzten Umsatzes. Der
+  Steuersatz folgt dem Produkt, nicht der Einkaufsrechnung; geschätzter Umsatz
+  verteilt sich wie der kalkulierte Umsatz seiner Sparte.
 - **Rohgewinnaufschlag**: um wie viel der Verkaufspreis über dem Einsatz liegt,
-  getrennt nach Sparte. Getränke und Speisen tragen sehr verschiedene
+  getrennt nach Sparte und nur an Portionen mit Preis ermittelt. Getränke und Speisen tragen sehr verschiedene
   Aufschläge und sind nur getrennt zu beurteilen. Mit
   [Gewerbekennzahl](pruefung.md#eckdaten) vergleicht der Bericht den Satz mit
   der Richtsatzsammlung.
 
 ## Ertragsregeln { #ertragsregeln }
 
-Unter der Zusammenfassung stehen die Zutaten und Kategorien der Prüfung, für
+Unter der Verteilung stehen die Zutaten und Kategorien der Prüfung, für
 die es mehr als eine [Ertragsregel](regeln.md#ertragsregeln) gibt. Ohne Wahl
 gilt die Standardregel. Hat der Betrieb etwa eine alte Schankanlage mit
 belegbar höherem Verlust, wird hier die passende Regel gewählt.
@@ -104,14 +109,48 @@ ein Rezept für jeden Betrieb falsch, gehört die Korrektur in den Katalog; weic
 nur dieser Betrieb belegbar ab, etwa mit größeren Portionen oder einem anderen
 Salat, in die Prüfung.
 
-## Was nicht mitzählt
+## Einkäufe außerhalb der Verteilung { #nicht-berucksichtigt }
 
-Eine Position geht nur in die Kalkulation ein, wenn sie zugeordnet ist und ihre
-Zutat in einem Rezept des Sortiments vorkommt. Alles andere steht im
-[Bericht](bericht.md#nicht-berucksichtigt) unter **Nicht berücksichtigte
-Einkäufe**. Bei Fracht ist das richtig; steht dort eine echte Ware,
-fehlt im kalkulierten Umsatz ein Stück. Pfand und Leergut zählen gar nicht zu
-den Einkäufen, weil sie sich über die Zeit ausgleichen.
+Der mittlere Teil der Kalkulation: was eingekauft wurde, aber nicht über
+Rezeptur und Preis in den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
+
+**Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP
+ganz.
+
+- **ohne Zuordnung**: Die Position ist unter [Zuordnung](zuordnung.md) noch
+  offen.
+- **Faktor fehlt**: Die Zutat ist klar, aber nicht, wie viel in einem Gebinde
+  steckt.
+
+**Nicht Teil der RGAS-Ermittlung**: Die Zutat kommt in keinem Produkt des
+Sortiments vor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz ihrer Sparte
+geschätzt (Abschnitt 3), sie verändert den Satz selbst aber nicht. Fracht und
+Verpackung gehören hierher und gehören besser auf eine Zutat ohne Sparte oder
+aus der Zuordnung heraus. Eine echte Ware hier heißt: Die Zuordnung ist falsch,
+oder im Sortiment fehlt ein Produkt. Welche Produkte die Zutat verwenden, steht
+unter [Regeln → Produkte](regeln.md#produkte); gehört eines davon zum Betrieb,
+kommt es ins Sortiment.
+
+Pfand und Leergut stehen nicht in der Liste. Über die Zeit gleichen sie sich
+aus, darum zählen sie auch nicht zu den erfassten Einkäufen. Unter der Liste
+steht grau, was an Pfand berechnet und an Leergut gutgeschrieben wurde.
+
+Ein Klick auf eine Zeile öffnet rechts dieselbe Ansicht wie unter
+[Zuordnung](zuordnung.md): die Position aus der Rechnung, ihre Zuordnung mit
+Vorschlägen und die Belege. Eine falsche Zuordnung lässt sich dort direkt
+korrigieren; die Kalkulation und die Vorschau rechnen danach neu.
+
+Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht an der Zutat. Eine Position
+unter **Nicht Teil der RGAS-Ermittlung** lässt sich darum rechts mit **Bringt in
+diesem Betrieb keinen Umsatz** aus der Schätzung nehmen, etwa Reinigungsmittel
+oder Müllbeutel. Das gilt für ihre ganze Positionsgruppe in dieser Prüfung, auch
+für später eingelesene Rechnungen; die Gruppe steht dann mit **kein Umsatz**
+unter **Nicht in der Umsatzschätzung**. **Bringt doch Umsatz** nimmt die
+Festlegung zurück.
+
+Neben **Nicht in der Umsatzschätzung** steht ihr Anteil an allen Einkäufen. So viel vom Umsatz
+kann die Kalkulation gar nicht erklären; vor dem Speichern sollte er klein und
+begründet sein.
 
 ## Grenzen
 

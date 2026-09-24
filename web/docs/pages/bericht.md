@@ -4,40 +4,8 @@ Der Bericht ist das Ergebnis der Prüfung, so wie es in die Akte kommt: der
 erklärte Umsatz neben dem kalkulierten, und dahinter alles, was nötig ist, um
 jede Zahl bis zur einzelnen Rechnungszeile zurückzuverfolgen.
 
-## Einkäufe außerhalb der Rezepturen { #nicht-berucksichtigt }
-
-Oben auf dem Reiter, nicht im PDF: was eingekauft wurde, aber nicht über
-Rezeptur und Preis in den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
-
-**Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP
-ganz.
-
-- **ohne Zuordnung**: Die Position ist unter [Zuordnung](zuordnung.md) noch
-  offen.
-- **Faktor fehlt**: Die Zutat ist klar, aber nicht, wie viel in einem Gebinde
-  steckt.
-
-**Nicht Teil der RGAS-Ermittlung**: Die Zutat kommt in keinem Produkt des
-Sortiments vor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz ihrer Sparte
-geschätzt (Anhang D), sie verändert den Satz selbst aber nicht. Fracht und
-Verpackung gehören hierher und gehören besser auf eine Zutat ohne Sparte oder
-aus der Zuordnung heraus. Eine echte Ware hier heißt: Die Zuordnung ist falsch,
-oder im Sortiment fehlt ein Produkt. Welche Produkte die Zutat verwenden, steht
-unter [Regeln → Produkte](regeln.md#produkte); gehört eines davon zum Betrieb,
-kommt es ins Sortiment.
-
-Pfand und Leergut stehen nicht in der Liste. Über die Zeit gleichen sie sich
-aus, darum zählen sie auch nicht zu den erfassten Einkäufen. Unter der Liste
-steht grau, was an Pfand berechnet und an Leergut gutgeschrieben wurde.
-
-Ein Klick auf eine Zeile öffnet rechts dieselbe Ansicht wie unter
-[Zuordnung](zuordnung.md): die Position aus der Rechnung, ihre Zuordnung mit
-Vorschlägen und die Belege. Eine falsche Zuordnung lässt sich dort direkt
-korrigieren; die Kalkulation und die Vorschau rechnen danach neu.
-
-Über der ersten Liste steht ihr Anteil an allen Einkäufen. So viel vom Umsatz
-kann die Kalkulation gar nicht erklären; vor dem Speichern sollte er klein und
-begründet sein.
+Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht,
+steht auf der [Kalkulation](kalkulation.md#nicht-berucksichtigt), nicht hier.
 
 ## Aufbau
 

@@ -37,6 +37,7 @@ public sealed class CalcModel : Observable
     public ObservableCollection<MarkupRow> Markups { get; } = [];
     public ObservableCollection<KV> Summary { get; } = [];
     public ObservableCollection<YieldKindGroup> Yields { get; } = [];
+    public ExclusionModel Exclusions { get; } = new();
     public bool HasYields => Yields.Count > 0;
     public bool Busy { get => busy; set => Set(ref busy, value); }
     public bool EmptyAssortment => Products.Count == 0;
@@ -62,7 +63,7 @@ public partial class CalcView : Screen
     readonly DispatcherTimer timer = new();
     readonly HashSet<string> promoting = [];
     int generation;
-    bool filling;
+    bool filling, choosing;
     (Case Case, RuleSet Rules, RuleSet Catalog, Report Report, List<ProductRow> Sold)? shown;
 
     public CalcView(Session session) : base(session)
@@ -70,6 +71,8 @@ public partial class CalcView : Screen
         InitializeComponent();
         DataContext = model;
         timer.Tick += (_, _) => _ = Flush();
+        Mapping.Attach(session, () => Ct);
+        Mapping.Assigned += _ => Reassigned();
     }
 
     protected override async void OnEnter()
@@ -80,6 +83,7 @@ public partial class CalcView : Screen
         Session.RulesChanged += RulesChanged;
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         IngredientBox.SetSimilar(this, Session.SimilarIngredients);
+        Mapping.Refresh();
         model.NoInvoices = kase.Invoices.Count == 0;
         if (model.NoInvoices)
         {
@@ -111,6 +115,12 @@ public partial class CalcView : Screen
         }
         if (promoted.Count > 0) Schedule(0);
         else _ = Recalculate(kase, rs);
+    }
+
+    async void Reassigned()
+    {
+        await Session.LoadRules(Ct);
+        if (Session.Case is { } kase && Session.Rules is { } rs && IsActive) await Recalculate(kase, rs);
     }
 
     static void Drop(CaseProduct cp)
@@ -198,8 +208,54 @@ public partial class CalcView : Screen
         foreach (var m in Markups(r)) model.Markups.Add(m);
         model.Summary.Clear();
         foreach (var kv in Summary(r)) model.Summary.Add(kv);
+        ShowExclusions(kase, catalog, r);
         model.HasResult = true;
     }
+
+    // A row that is still excluded for the same mapping keeps its detail, a note on a just assigned one stays.
+    void ShowExclusions(Case kase, RuleSet catalog, Report r)
+    {
+        var ex = model.Exclusions;
+        var kept = (UnusedGrid.SelectedItem ?? OmittedGrid.SelectedItem) as ExcludedRow;
+        choosing = true;
+        ex.Fill(r, kase, catalog);
+        var again = kept is null ? null : ex.Unused.Concat(ex.Omitted).FirstOrDefault(x => x.Group.Key == kept.Group.Key);
+        UnusedGrid.SelectedItem = again?.Why == Exclusion.Unused ? again : null;
+        OmittedGrid.SelectedItem = again?.Why == Exclusion.Unused ? null : again;
+        choosing = false;
+        var lists = Lists.RowDefinitions;
+        lists[1].Height = ex.HasUnused ? GridLength.Star : new GridLength(0);
+        lists[3].Height = ex.HasOmitted ? GridLength.Star : new GridLength(0);
+        ex.Explain(again);
+        if (again is null) Mapping.Show(null);
+        else if (again.Group.MappingId != kept!.Group.MappingId || again.Why != kept.Why) Mapping.Show(again.Group);
+    }
+
+    void ExcludedSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (choosing || sender is not DataGrid grid) return;
+        var row = grid.SelectedItem as ExcludedRow;
+        if (row is null && (UnusedGrid.SelectedItem ?? OmittedGrid.SelectedItem) is not null) return;
+        choosing = true;
+        (grid == UnusedGrid ? OmittedGrid : UnusedGrid).SelectedItem = null;
+        choosing = false;
+        model.Exclusions.Explain(row);
+        Mapping.Show(row?.Group);
+    }
+
+    async void ToggleRevenue(object? sender, RoutedEventArgs e)
+    {
+        if (model.Exclusions.Current is not { } row || Session.Case is not { } kase) return;
+        if (!kase.NoRevenue.Remove(row.Group.Key)) kase.NoRevenue.Add(row.Group.Key);
+        if (!await Session.SaveCase(CancellationToken.None))
+        {
+            Session.Fail("Festlegung konnte nicht gespeichert werden");
+            return;
+        }
+        if (Session.Case is { } saved && Session.Rules is { } rs && IsActive) await Recalculate(saved, rs);
+    }
+
+    void ShowExcludedHelp(object? sender, RoutedEventArgs e) => Help.Open(TopLevel.GetTopLevel(this) as Window, Help.Excluded);
 
     static string RecipeTip(RuleSet rs, CaseProduct cp)
     {
@@ -357,17 +413,14 @@ public partial class CalcView : Screen
         var s = r.Totals;
         return
         [
+            new("Erfasste Einkäufe (netto)", Format.Cents(s.Purchases)),
+            new("Bestandsveränderung", Format.Cents(s.StockChange)),
             new("Wareneinsatz", Format.Cents(s.CostOfGoods)),
             new("davon Schwund und Abzüge", Format.Cents(s.ShrinkageCost)),
             new("davon nicht zugeteilte Ware", Format.Cents(s.UnallocatedCost)),
             new("Einsatz der verkauften Portionen", Format.Cents(s.AllocatedCost)),
-            new("davon mit Preis", Format.Cents(s.PricedCost)),
-            new("Rohgewinn", Format.Cents(s.GrossProfit)),
             new("Einsatz mit geschätztem Umsatz", Format.Cents(s.EstimatedCost)),
             new("Geschätzter Umsatz", Format.Cents(s.EstimatedRevenueNet)),
-            new("Erfasste Einkäufe (netto)", Format.Cents(s.Purchases)),
-            new("Bestandsveränderung", Format.Cents(s.StockChange)),
-            new("Nicht in der Umsatzschätzung", $"{Format.Cents(s.UnmappedCost)} ({Format.Bp(s.ExcludedShare)})"),
         ];
     }
 

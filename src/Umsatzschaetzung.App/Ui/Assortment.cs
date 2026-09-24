@@ -52,6 +52,7 @@ public static class Assortment
         Products = products,
         Yields = c.Yields,
         Pinned = pinned,
+        NoRevenue = c.NoRevenue,
         CreatedAt = c.CreatedAt,
         UpdatedAt = c.UpdatedAt,
     };

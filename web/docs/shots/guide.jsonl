@@ -221,11 +221,6 @@
 { "do": "wait", "rounds": 2 }
 { "do": "shot", "name": "sortiment-liste", "at": { "text": "Produkt", "up": "DataGrid" }, "clip": "DataGridRow", "trim": { "top": 5 } }
 
-// Bericht: the purchases that stay out of the calculation; the preview itself is a web view
-{ "do": "tab", "header": "5. Bericht" }
-{ "do": "wait", "rounds": 8 }
-{ "do": "shot", "name": "bericht-oben", "at": { "text": "Nicht berücksichtigte Einkäufe", "up": "ReportView" }, "trim": { "bottom": 390 } }
-
 // Danach: back in the list, the case is there to reopen
 { "do": "click", "at": { "name": "BackButton" } }
 { "do": "deselect", "at": { "text": "Bezeichnung", "up": "DataGrid" } }

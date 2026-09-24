@@ -338,6 +338,7 @@ public class CaseStoreTests
 
     // So lag ein Fall vor der Rezeptur der Prüfung in der Datei.
     static void BeforeCaseRecipes(string path) => Sql.Exec(path, """
+        DROP TABLE no_revenue;
         DROP TABLE case_recipe;
         ALTER TABLE case_product DROP COLUMN recipe_basis;
         PRAGMA user_version = 1;
@@ -350,6 +351,7 @@ public class CaseStoreTests
         var store = new CaseStore(tmp.Path);
         var c = Cases.Full("fall-1");
         c.Products.RemoveAll(p => p.Recipe is not null);
+        c.NoRevenue = [];
         store.Save(c);
         var path = tmp.Sub("fall-1.db");
         BeforeCaseRecipes(path);

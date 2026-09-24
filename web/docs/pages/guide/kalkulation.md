@@ -7,9 +7,30 @@
 Auf **4. Kalkulation** wechseln. Der kalkulierte Umsatz liegt bei rund
 223.000 € netto, gut 27.000 € über dem erklärten.
 
+Der Reiter hat drei Teile: oben die Verteilung auf die Produkte mit den
+Ertragsregeln, in der Mitte die Einkäufe außerhalb der Verteilung, unten das
+Ergebnis mit Umsätzen, Rohgewinnaufschlag und Zusammenfassung.
+
+## Einkäufe außerhalb der Verteilung
+
+Der mittlere Teil zeigt die Einkäufe, die nicht über Rezeptur und Preis in den
+Umsatz eingehen, in zwei Listen mit dem Grund je Position:
+
+- **Nicht Teil der RGAS-Ermittlung**: Die Zutat wird eingekauft, kommt aber in
+  keinem Produkt des Sortiments vor. Ihr Umsatz wird über den
+  Rohgewinnaufschlagsatz geschätzt. Steht hier eine echte Ware, fehlt im
+  Sortiment wahrscheinlich ein Produkt.
+- **Nicht in der Umsatzschätzung**: Die Position ist auf **2. Zuordnung**
+  noch offen, oder der Zuordnung fehlt der Faktor. Im Beispiel sollte hier
+  nichts mehr stehen.
+
+Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche
+Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut stehen nicht in
+den Listen, sie gleichen sich über die Zeit aus.
+
 ## Ertragsregeln
 
-Unter der Zusammenfassung stehen die Ertragsregeln der Kategorien und Zutaten,
+Unter der Verteilung stehen die Ertragsregeln der Kategorien und Zutaten,
 die in der Prüfung vorkommen und für die es mehr als eine Regel gibt:
 Schankverlust, Eigenverbrauch, Personalverpflegung und Freirunden. Je Zutat oder
 Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort

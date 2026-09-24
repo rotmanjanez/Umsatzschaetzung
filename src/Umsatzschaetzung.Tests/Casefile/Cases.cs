@@ -48,6 +48,7 @@ static class Cases
             new() { CategoryId = "cat.bier", YieldRuleId = "yr.a" },
         ];
         c.Pinned = [new() { ProductId = "prod.pils.05", Portions = 1200, Reason = "laut Kassenbuch" }, new() { ProductId = "prod.x", Portions = 0, Reason = "" }];
+        c.NoRevenue = ["Metro|a:4711|H87", "|n:muellbeutel|H87"];
         c.Invoices =
         [
             new()
@@ -105,6 +106,7 @@ static class Cases
             actual.Products.Select(p => p.Recipe?.Select(l => (l.IngredientId, l.Amount, l.Unit)).ToList()));
         Assert.Equal(expected.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)),
             actual.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)));
+        Assert.Equal(expected.NoRevenue.Order(StringComparer.Ordinal), actual.NoRevenue);
         Assert.Equal(expected.Pinned.Select(p => (p.ProductId, p.Portions, p.Reason)),
             actual.Pinned.Select(p => (p.ProductId, p.Portions, p.Reason)));
         Assert.Equal(expected.Invoices.Select(Json.Serialize), actual.Invoices.Select(Json.Serialize));

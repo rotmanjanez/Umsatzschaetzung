@@ -90,7 +90,7 @@ public static class Html
             ["revenue"] = JsonSerializer.SerializeToNode(VatRow.Of(c, r), j.ListVatRow),
             ["invoiceCount"] = included.Count,
             ["includedNet"] = s.CostOfGoods + s.StockChange,
-            ["excluded"] = s.UnmappedCost,
+            ["excluded"] = s.UnmappedCost + s.NoRevenueCost,
             ["estimated"] = Estimated(r.Estimated),
             ["calculation"] = Calculation(r),
             ["rahmen"] = rahmen is null ? null : JsonSerializer.SerializeToNode(rahmen, j.Rahmen),

@@ -33,6 +33,7 @@ public sealed class Totals
     public long Portions { get; set; }
     public long UnmappedCost { get; set; }
     public long UnusedCost { get; set; }
+    public long NoRevenueCost { get; set; }
     public long DepositCharged { get; set; }
     public long DepositRefunded { get; set; }
     public long ExcludedShare { get; set; }
@@ -244,6 +245,7 @@ public sealed class Report
     public List<UnmappedLine> Unmapped { get; set; } = [];
     public List<UnusedLine> Unused { get; set; } = [];
     public List<UnusedLine> Deposits { get; set; } = [];
+    public List<UnmappedLine> NoRevenue { get; set; } = [];
     public List<EstimateRow> Estimated { get; set; } = [];
     public List<Allocation> Allocations { get; set; } = [];
     public List<Flag> Warnings { get; set; } = [];
