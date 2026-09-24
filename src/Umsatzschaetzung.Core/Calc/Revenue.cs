@@ -18,7 +18,7 @@ internal static class Revenue
 
     // Der Nettopreis einer Portion: der Bruttopreis der Karte ohne die Umsatzsteuer.
     static long UnitNet(CaseProduct cp) =>
-        PriceMissing(cp) ? 0 : cp.GrossPrice * Bp.Full / (Bp.Full + cp.Vat);
+        PriceMissing(cp) ? 0 : InvoiceMath.RoundDiv(cp.GrossPrice * Bp.Full, Bp.Full + cp.Vat);
 
     // Die Zutaten der Rezeptur, die diese Portionszahl begrenzt haben.
     static List<string> Binding(RuleSet rs, Product p, List<string> binding)

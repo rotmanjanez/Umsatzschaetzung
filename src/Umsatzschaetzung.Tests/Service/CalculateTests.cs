@@ -41,8 +41,8 @@ public sealed class CalculateTests : IDisposable
         Assert.Equal("1.690,00 €", Format.Cents(t.Purchases));
         Assert.Equal("1.513,10 €", Format.Cents(t.CostOfGoods));
         Assert.Equal("176,90 €", Format.Cents(t.StockChange));
-        Assert.Equal("7.335,95 €", Format.Cents(t.CalculatedRevenueNet));
-        Assert.Equal("404,56 %", Format.Bp(t.Markup));
+        Assert.Equal("7.353,35 €", Format.Cents(t.CalculatedRevenueNet));
+        Assert.Equal("405,76 %", Format.Bp(t.Markup));
         Assert.Equal("59,15 €", Format.Cents(t.ShrinkageCost));
         Assert.Equal("0,04 €", Format.Cents(t.UnallocatedCost));
         Assert.Equal("1.453,91 €", Format.Cents(t.AllocatedCost));
@@ -57,8 +57,8 @@ public sealed class CalculateTests : IDisposable
     {
         var drinks = (await svc.Calculate(Vorlage.Id, ct)).Report.Markups.Single(m => m.Sparte == Sparte.Getränke);
         Assert.Equal("1.453,91 €", Format.Cents(drinks.CostOfGoods));
-        Assert.Equal("7.335,95 €", Format.Cents(drinks.RevenueNet));
-        Assert.Equal("404,56 %", Format.Bp(drinks.Markup));
+        Assert.Equal("7.353,35 €", Format.Cents(drinks.RevenueNet));
+        Assert.Equal("405,76 %", Format.Bp(drinks.Markup));
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class CalculateTests : IDisposable
         var beer = (await svc.Calculate(Vorlage.Id, ct)).Report.Products.Single(p => Names.Product(rules, p.ProductId) == "Pils 0,3 l vom Fass");
         Assert.Equal(Sparte.Getränke, beer.Sparte);
         Assert.Equal("0,55 €", Format.Cents(beer.CostPerPortion));
-        Assert.Equal("382,88 %", Format.Bp(beer.Markup));
+        Assert.Equal("384,68 %", Format.Bp(beer.Markup));
     }
 
     [Fact]
@@ -96,10 +96,10 @@ public sealed class CalculateTests : IDisposable
     {
         var report = await svc.RenderReport(Vorlage.Id, false, ct);
 
-        Assert.Contains("7.335,95 €", report.Html);
+        Assert.Contains("7.353,35 €", report.Html);
         Assert.Contains("Anhang D", report.Html);
         Assert.Contains("<h1>2 Rohgewinnaufschlag</h1>", report.Html);
-        Assert.Contains("404,56 %", report.Html);
+        Assert.Contains("405,76 %", report.Html);
         Assert.Null(report.Pdf);
         Assert.EndsWith(".html", report.FileName);
         Assert.Null(printer.Html);
@@ -142,7 +142,7 @@ public sealed class CalculateTests : IDisposable
         Assert.Equal((2024, 178, 400), (calc.Rahmen!.Jahr, calc.Rahmen.Von, calc.Rahmen.Bis));
         Assert.Equal(Rahmenlage.Über, calc.Rahmen.Lage(calc.Report.Totals.Markup));
         var warning = Assert.Single(calc.Report.Warnings, w => w.Code == "markup-out-of-range");
-        Assert.Equal("Rohgewinnaufschlag 404,56 % liegt über dem Rahmensatz 178 bis 400 v.H. der Richtsatzsammlung 2024 für „Gast-, Speise- und Schankwirtschaften“", warning.Message);
+        Assert.Equal("Rohgewinnaufschlag 405,76 % liegt über dem Rahmensatz 178 bis 400 v.H. der Richtsatzsammlung 2024 für „Gast-, Speise- und Schankwirtschaften“", warning.Message);
     }
 
     [Fact]

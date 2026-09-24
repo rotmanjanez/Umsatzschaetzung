@@ -18,8 +18,8 @@ public class CalculationTests
         Assert.Equal(169_000, t.Purchases);
         Assert.Equal(151_310, t.CostOfGoods);
         Assert.Equal(17_690, t.StockChange);
-        Assert.Equal(733_595, t.CalculatedRevenueNet);
-        Assert.Equal(40_456, t.Markup);
+        Assert.Equal(735_335, t.CalculatedRevenueNet);
+        Assert.Equal(40_576, t.Markup);
         Assert.Equal(5_915, t.ShrinkageCost);
         Assert.Equal(4, t.UnallocatedCost);
         Assert.Equal(145_391, t.AllocatedCost);
@@ -63,8 +63,8 @@ public class CalculationTests
         var drinks = Assert.Single(Report.Markups);
         Assert.Equal(Sparte.Getränke, drinks.Sparte);
         Assert.Equal(145_391, drinks.CostOfGoods);
-        Assert.Equal(733_595, drinks.RevenueNet);
-        Assert.Equal(40_456, drinks.Markup);
+        Assert.Equal(735_335, drinks.RevenueNet);
+        Assert.Equal(40_576, drinks.Markup);
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class CalculationTests
         Assert.Equal("Pils 0,3 l vom Fass", Names.Product(Rules, beer.ProductId));
         Assert.Equal(Sparte.Getränke, beer.Sparte);
         Assert.Equal(55, beer.CostPerPortion);
-        Assert.Equal(38_288, beer.Markup);
+        Assert.Equal(38_468, beer.Markup);
         Assert.Equal(Report.Totals.CalculatedRevenueNet, Report.Products.Sum(p => p.RevenueNet));
         Assert.Equal(Report.Totals.Portions, Report.Products.Sum(p => p.Portions));
     }
