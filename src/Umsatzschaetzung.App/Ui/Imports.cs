@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.Invoices;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
@@ -95,6 +96,7 @@ public sealed class Imports
     async Task Pump()
     {
         pumping = true;
+        using var activity = ImportActivity.Begin();
         try
         {
             while (Next() is { } job)
