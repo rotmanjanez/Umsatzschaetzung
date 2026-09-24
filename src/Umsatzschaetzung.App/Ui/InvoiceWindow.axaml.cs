@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -16,10 +17,13 @@ public partial class InvoiceWindow : Window
         Body.Content = view;
         view.Enter();
         Help.OnF1(this, () => view.Topic);
+        view.Session.Anchor(this, ErrorBanner, ErrorText);
         Opened += (_, _) => Fit();
         // The view outlives the window when its review is unfinished, so it is handed back first.
         Closed += (_, _) => Body.Content = null;
     }
+
+    void DismissError(object? sender, RoutedEventArgs e) => view.Session.Error = "";
 
     void Fit()
     {

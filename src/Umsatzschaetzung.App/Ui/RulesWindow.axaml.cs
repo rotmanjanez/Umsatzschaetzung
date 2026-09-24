@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Umsatzschaetzung.Model;
@@ -18,22 +17,8 @@ public partial class RulesWindow : Window
         Body.Content = view;
         view.Enter();
         Help.OnF1(this, () => view.Topic);
-        session.PropertyChanged += ErrorChanged;
-        Activated += (_, _) => session.ActiveWindow = this;
-        Closed += (_, _) =>
-        {
-            session.PropertyChanged -= ErrorChanged;
-            if (session.ActiveWindow == this) session.ActiveWindow = null;
-            if (session.ErrorWindow == this) session.Error = "";
-            view.Leave();
-        };
-    }
-
-    void ErrorChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName != nameof(Session.Error)) return;
-        ErrorText.Text = session.Error;
-        ErrorBanner.IsVisible = session.ErrorWindow == this;
+        session.Anchor(this, ErrorBanner, ErrorText);
+        Closed += (_, _) => view.Leave();
     }
 
     void DismissError(object? sender, RoutedEventArgs e) => session.Error = "";

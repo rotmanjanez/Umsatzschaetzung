@@ -149,7 +149,7 @@ public partial class Shell : Window
 
     void RefreshError()
     {
-        var error = session.ErrorWindow is RulesWindow ? "" : session.Error;
+        var error = session.ErrorWindow is { } owner && owner != this ? "" : session.Error;
         var text = error != "" ? error : session.Status?.Problem ?? "";
         ErrorText.Text = text;
         ErrorBanner.IsVisible = text != "";

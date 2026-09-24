@@ -9,7 +9,7 @@ public abstract class Screen : UserControl
 
     protected Screen(Session session) => Session = session;
 
-    protected Session Session { get; }
+    public Session Session { get; }
 
     public abstract string Topic { get; }
 

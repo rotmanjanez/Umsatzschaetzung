@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Security.Cryptography;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
@@ -57,6 +58,25 @@ public sealed class Session : Observable
             ErrorWindow = value == "" ? null : ActiveWindow;
             Set(ref error, value);
         }
+    }
+
+    // An error belongs to the window it happened in; only that one shows it, and closing it drops it.
+    public void Anchor(Window window, Control banner, TextBlock text)
+    {
+        void Changed(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(Error)) return;
+            text.Text = error;
+            banner.IsVisible = ErrorWindow == window;
+        }
+        PropertyChanged += Changed;
+        window.Activated += (_, _) => ActiveWindow = window;
+        window.Closed += (_, _) =>
+        {
+            PropertyChanged -= Changed;
+            if (ActiveWindow == window) ActiveWindow = null;
+            if (ErrorWindow == window) Error = "";
+        };
     }
 
     public event Action? CaseChanged, RulesChanged, StatusChanged, CaseClosed, RulesRequested;
