@@ -43,6 +43,12 @@ public sealed class CaseProduct
     public string ProductId { get; set; } = "";
     public long GrossPrice { get; set; }
     public long Vat { get; set; }
+    // Rezeptur nur dieser Prüfung; null heißt: die des Katalogs. Basis ist die Änderungsnummer
+    // des Katalogprodukts, von der die Kopie stammt.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<RecipeLine>? Recipe { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public long RecipeBasis { get; set; }
 }
 
 public sealed class Case

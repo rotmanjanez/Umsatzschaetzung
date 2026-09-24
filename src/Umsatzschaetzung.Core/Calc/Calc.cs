@@ -20,12 +20,13 @@ internal sealed class IngredientUse
 
 public static class Calculation
 {
-    public static Report Run(Case c, RuleSet rs)
+    public static Report Run(Case c, RuleSet catalog)
     {
+        var rs = Recipes.Effective(c, catalog);
         var (uses, ex, flags) = Normalize.Run(c, rs);
         Yield.Run(c, rs, uses);
         var allocs = Allocate(c, rs, uses);
-        var rep = Revenue.Run(c, rs, allocs, uses);
+        var rep = Revenue.Run(c, rs, catalog, allocs, uses);
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Deposits = ex.Deposits;

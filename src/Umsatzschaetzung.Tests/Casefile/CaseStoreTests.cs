@@ -216,6 +216,10 @@ public class CaseStoreTests
         { "product twice", c => c.Products = [new() { ProductId = "p", Vat = 1900 }, new() { ProductId = "p", Vat = 700 }] },
         { "negative price", c => c.Products = [new() { ProductId = "p", GrossPrice = -1, Vat = 1900 }] },
         { "unknown product VAT", c => c.Products = [new() { ProductId = "p", Vat = 500 }] },
+        { "empty recipe", c => c.Products = [new() { ProductId = "p", Vat = 1900, Recipe = [] }] },
+        { "recipe line without ingredient", c => c.Products = [new() { ProductId = "p", Vat = 1900, Recipe = [new() { Amount = 1, Unit = "MLT" }] }] },
+        { "recipe line without amount", c => c.Products = [new() { ProductId = "p", Vat = 1900, Recipe = [new() { IngredientId = "i", Unit = "MLT" }] }] },
+        { "recipe line with unknown unit", c => c.Products = [new() { ProductId = "p", Vat = 1900, Recipe = [new() { IngredientId = "i", Amount = 1, Unit = "XYZ" }] }] },
         { "invoice without id", c => c.Invoices = [new() { Id = "" }] },
         { "invoice twice", c => c.Invoices = [new() { Id = "re-1" }, new() { Id = "re-1" }] },
         { "yield choice without rule", c => c.Yields = [new() { IngredientId = "i", YieldRuleId = "" }] },
@@ -316,6 +320,62 @@ public class CaseStoreTests
         Assert.True(version > 0);
         Assert.Equal(version, Sql.UserVersion(path));
         Assert.Empty(Directory.GetFiles(tmp.Path, "*.bak"));
+    }
+
+    [Fact]
+    public void AProductWithoutItsOwnRecipeKeepsTheCatalogOne()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        store.Save(Cases.Full("fall-1"));
+
+        var back = store.Load("fall-1");
+
+        Assert.Null(back.Products.Single(p => p.ProductId == "prod.pils.05").Recipe);
+        Assert.Equal(2, back.Products.Single(p => p.ProductId == "prod.radler").Recipe!.Count);
+        Assert.Equal(2L, Sql.Scalar(tmp.Sub("fall-1.db"), "SELECT count(*) FROM case_product WHERE recipe_basis IS NULL"));
+    }
+
+    // So lag ein Fall vor der Rezeptur der Prüfung in der Datei.
+    static void BeforeCaseRecipes(string path) => Sql.Exec(path, """
+        DROP TABLE case_recipe;
+        ALTER TABLE case_product DROP COLUMN recipe_basis;
+        PRAGMA user_version = 1;
+        """);
+
+    [Fact]
+    public void ACaseFileFromBeforeCaseRecipesLoadsAndKeepsABackup()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        var c = Cases.Full("fall-1");
+        c.Products.RemoveAll(p => p.Recipe is not null);
+        store.Save(c);
+        var path = tmp.Sub("fall-1.db");
+        BeforeCaseRecipes(path);
+
+        var back = store.Load("fall-1");
+
+        Cases.Same(c, back);
+        Assert.All(back.Products, p => Assert.Null(p.Recipe));
+        Assert.True(File.Exists(path + ".v1.bak"));
+        store.Save(Cases.Full("fall-1"));
+        Cases.Same(Cases.Full("fall-1"), store.Load("fall-1"));
+    }
+
+    [Fact]
+    public void ACaseFileFromBeforeCaseRecipesImportsWithoutLeavingABackup()
+    {
+        using var tmp = new TempDir();
+        var from = new CaseStore(tmp.Sub("a"));
+        from.Save(Cases.Minimal("fall-1"));
+        BeforeCaseRecipes(tmp.Sub("a/fall-1.db"));
+
+        var to = new CaseStore(tmp.Sub("b"));
+        to.Import(File.ReadAllBytes(tmp.Sub("a/fall-1.db")), false);
+
+        Cases.Same(Cases.Minimal("fall-1"), to.Load("fall-1"));
+        Assert.Equal(["fall-1.db"], Directory.GetFiles(tmp.Sub("b")).Select(Path.GetFileName));
     }
 
     [Fact]

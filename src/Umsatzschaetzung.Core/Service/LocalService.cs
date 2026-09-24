@@ -77,9 +77,18 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     public Task<Case> PutCase(Case kase, CancellationToken ct) => Guard(ct, () =>
     {
+        if (kase.Products?.Exists(p => p.Recipe is not null) == true) KnownIngredients(kase, rules.Load());
         SaveCase(kase);
         return kase;
     });
+
+    static void KnownIngredients(Case c, RuleSet rs)
+    {
+        foreach (var p in c.Products)
+            foreach (var l in p.Recipe ?? [])
+                if (!rs.Ingredients.ContainsKey(l.IngredientId))
+                    throw new ServiceError(ErrorCode.Invalid, $"Produkt \"{p.ProductId}\": Zutat \"{l.IngredientId}\" existiert nicht");
+    }
 
     public Task DeleteCase(string caseId, CancellationToken ct) => Guard(ct, () =>
     {

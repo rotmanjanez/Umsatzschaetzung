@@ -91,6 +91,19 @@ public sealed class CaseTests : IDisposable
         Assert.IsType<CaseInvalidException>(e.InnerException);
     }
 
+    [Fact]
+    public async Task ARecipeOfTheCaseMayOnlyUseKnownIngredients()
+    {
+        var kase = Vorlage.Blank();
+        kase.Products = [new() { ProductId = "prod.pils.05", Vat = 1900, Recipe = [new() { IngredientId = "ing.unbekannt", Amount = 500, Unit = "MLT" }] }];
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.PutCase(kase, ct));
+        Assert.Equal(ErrorCode.Invalid, e.Code);
+
+        kase.Products[0].Recipe = [new() { IngredientId = "ing.bier.fass", Amount = 500, Unit = "MLT" }];
+        var saved = await svc.PutCase(kase, ct);
+        Assert.Equal("ing.bier.fass", Assert.Single((await svc.GetCase(saved.Id, ct)).Products[0].Recipe!).IngredientId);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("../ausbruch")]

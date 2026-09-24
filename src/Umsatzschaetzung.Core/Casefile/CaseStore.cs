@@ -82,13 +82,19 @@ public sealed partial class CaseStore(string dir)
             ord INTEGER NOT NULL, code TEXT NOT NULL, message TEXT NOT NULL, line_no INTEGER NOT NULL, field TEXT,
             PRIMARY KEY(invoice_id, page, line, ord)) WITHOUT ROWID;
         """,
+        """
+        -- Rezeptur nur dieser Prüfung. Ein Produkt ohne Zeilen rechnet mit der des Katalogs.
+        CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
+            amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
+        ALTER TABLE case_product ADD COLUMN recipe_basis INTEGER;
+        """,
     ];
 
     static readonly string[] ReadingTables =
         ["reading_line_flag", "reading_page_flag", "reading_cell", "reading_line", "reading_header", "reading_word", "reading_page"];
 
     static readonly string[] CaseTables =
-        ["kase", "declared", "inventory", "case_product", "yield_choice", "pinned", "invoice", "invoice_line"];
+        ["kase", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "invoice", "invoice_line"];
 
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
@@ -210,6 +216,11 @@ public sealed partial class CaseStore(string dir)
             File.Delete(temp);
             throw;
         }
+        finally
+        {
+            // Eine ältere Datei wird beim Lesen nachgezogen; die Sicherung der Zwischenkopie braucht niemand.
+            foreach (var bak in Directory.EnumerateFiles(dir, Path.GetFileName(temp) + ".v*.bak")) File.Delete(bak);
+        }
     });
 
     public void SaveFile(string caseId, string invoiceId, string name, byte[] data) => Guarded(() =>
@@ -308,8 +319,12 @@ public sealed partial class CaseStore(string dir)
         for (var i = 0; i < c.Products.Count; i++)
         {
             var p = c.Products[i];
-            Exec(db, tx, "INSERT INTO case_product(product_id, ord, gross_price, vat) VALUES(@id, @ord, @price, @vat)",
-                ("@id", p.ProductId), ("@ord", i), ("@price", p.GrossPrice), ("@vat", p.Vat));
+            Exec(db, tx, "INSERT INTO case_product(product_id, ord, gross_price, vat, recipe_basis) VALUES(@id, @ord, @price, @vat, @basis)",
+                ("@id", p.ProductId), ("@ord", i), ("@price", p.GrossPrice), ("@vat", p.Vat), ("@basis", p.Recipe is null ? null : p.RecipeBasis));
+            if (p.Recipe is not { } recipe) continue;
+            for (var j = 0; j < recipe.Count; j++)
+                Exec(db, tx, "INSERT INTO case_recipe(product_id, ord, ingredient_id, amount, unit) VALUES(@id, @ord, @ing, @amount, @unit)",
+                    ("@id", p.ProductId), ("@ord", j), ("@ing", recipe[j].IngredientId), ("@amount", recipe[j].Amount), ("@unit", recipe[j].Unit));
         }
 
         for (var i = 0; i < c.Yields.Count; i++)
@@ -359,10 +374,12 @@ public sealed partial class CaseStore(string dir)
                 {
                     IngredientId = r.GetString(0), Opening = r.GetInt64(1), Closing = r.GetInt64(2), Unit = r.GetString(3),
                 }));
-            ReadRows(db, "SELECT product_id, gross_price, vat FROM case_product ORDER BY ord",
+            var recipes = ReadRecipes(db);
+            ReadRows(db, "SELECT product_id, gross_price, vat, recipe_basis FROM case_product ORDER BY ord",
                 r => c.Products.Add(new CaseProduct
                 {
                     ProductId = r.GetString(0), GrossPrice = r.GetInt64(1), Vat = r.GetInt64(2),
+                    Recipe = recipes.GetValueOrDefault(r.GetString(0)), RecipeBasis = Num(r, 3) ?? 0,
                 }));
             ReadRows(db, "SELECT ingredient_id, category_id, yield_rule_id FROM yield_choice ORDER BY ord",
                 r => c.Yields.Add(new YieldChoice
@@ -435,6 +452,17 @@ public sealed partial class CaseStore(string dir)
             list.Add(ReadLine(r, 1));
         });
         return lines;
+    }
+
+    static Dictionary<string, List<RecipeLine>> ReadRecipes(SqliteConnection db)
+    {
+        var recipes = new Dictionary<string, List<RecipeLine>>(StringComparer.Ordinal);
+        ReadRows(db, "SELECT product_id, ingredient_id, amount, unit FROM case_recipe ORDER BY product_id, ord", r =>
+        {
+            if (!recipes.TryGetValue(r.GetString(0), out var list)) recipes[r.GetString(0)] = list = [];
+            list.Add(new RecipeLine { IngredientId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3) });
+        });
+        return recipes;
     }
 
     static void DropReading(SqliteConnection db, SqliteTransaction tx, string key)
@@ -696,6 +724,17 @@ public sealed partial class CaseStore(string dir)
                 throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Bruttopreis darf nicht negativ sein");
             if (p.Vat is not (0 or 700 or 1900))
                 throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Umsatzsteuersatz muss 0, 7 oder 19 % sein");
+            if (p.Recipe is null) continue;
+            if (p.Recipe.Count == 0) throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Rezeptur darf nicht leer sein");
+            foreach (var l in p.Recipe)
+            {
+                if (string.IsNullOrEmpty(l.IngredientId))
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Rezeptur enthält eine Zeile ohne Zutat");
+                if (l.Amount <= 0)
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Menge der Zutat \"{l.IngredientId}\" muss größer als 0 sein");
+                if (Units.Lookup(l.Unit) is null)
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Zutat \"{l.IngredientId}\" hat die unbekannte Einheit \"{l.Unit}\"");
+            }
         }
         var invoices = new HashSet<string>(StringComparer.Ordinal);
         foreach (var inv in c.Invoices)

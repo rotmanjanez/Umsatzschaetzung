@@ -169,6 +169,10 @@ public sealed class ProductRow
     public long RevenueNet { get; set; }
     public long Markup => Rohaufschlag.Of(RevenueNet, CostOfGoods);
     public bool PriceMissing { get; set; }
+    public bool RecipeAdjusted { get; set; }
+    public long RecipeBasis { get; set; }
+    public bool RecipeStale { get; set; }
+    public List<RecipeLine> CatalogRecipe { get; set; } = [];
 }
 
 public sealed class Report

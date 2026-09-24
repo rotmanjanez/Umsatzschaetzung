@@ -82,7 +82,7 @@ internal static class Revenue
         return [.. bySparte.Values.OrderBy(m => m.Sparte == Sparte.Unbestimmt ? 1 : 0)];
     }
 
-    internal static Report Run(Case c, RuleSet rs, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses)
+    internal static Report Run(Case c, RuleSet rs, RuleSet catalog, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses)
     {
         var byProduct = new Dictionary<string, ProductAllocation>();
         foreach (var a in allocs)
@@ -116,6 +116,10 @@ internal static class Revenue
                 GrossPrice = cp.GrossPrice,
                 Vat = cp.Vat,
                 PriceMissing = PriceMissing(cp),
+                RecipeAdjusted = cp.Recipe is not null,
+                RecipeBasis = cp.RecipeBasis,
+                RecipeStale = Recipes.Stale(cp, catalog),
+                CatalogRecipe = cp.Recipe is null ? [] : catalog.Products[pid].Recipe,
             };
             if (hasPortions)
             {
