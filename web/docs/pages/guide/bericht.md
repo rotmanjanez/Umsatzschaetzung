@@ -37,7 +37,9 @@ wird:
    Sparte.
 3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt und der
    Warenfluss von Einkauf über Verbrauch bis zur Ausbeute je Zutat, damit jede
-   Zahl des Berichts nachvollziehbar bleibt.
+   Zahl des Berichts nachvollziehbar bleibt. Für die Prüfung angepasste
+   Rezepte sind als **abweichend vom Katalog** gekennzeichnet, das
+   Katalogrezept steht grau darunter.
 
 Stehen noch offene Punkte in der Prüfung, etwa ein Produkt ohne Preis, führt der
 Bericht sie vorneweg unter **Hinweise** auf.

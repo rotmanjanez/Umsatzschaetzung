@@ -49,7 +49,9 @@ Der Anhang belegt beides:
 
 - **A: Eingangspositionen**: jede Rechnungszeile, die eingegangen ist.
 - **B: Rezepturen und Produkte**: je Produkt Rezept, Portionen, Preis und
-  Aufschlagsatz.
+  Aufschlagsatz. Für die Prüfung angepasste Rezepte sind als **abweichend vom
+  Katalog** gekennzeichnet, mit dem Stand des Katalogrezepts; das
+  Katalogrezept steht grau darunter.
 - **C: Warenfluss und Ausbeute**: je Zutat vom Einkauf über die Abzüge bis zu
   dem, was verkauft oder übrig geblieben ist, dazu die angewandte Ertragsregel.
   In der Prüfung gewählte Regeln sind als solche vermerkt.

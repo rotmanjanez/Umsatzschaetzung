@@ -30,10 +30,10 @@ Ein paar Wörter kommen dabei immer wieder vor:
 |---|---|
 | **Zutat** | Eine Ware, wie sie eingekauft wird: Fassbier, Schweinefleisch, Rotwein. |
 | **Produkt** | Etwas, das verkauft wird: Bier 0,5 l vom Fass, Schnitzel mit Pommes. |
-| **Rezept** | Wie viel von welcher Zutat in ein Produkt geht. In ein Bier 0,5 l gehen 500 ml Fassbier. Die Rezepte bringt das Programm mit. |
+| **Rezept** | Wie viel von welcher Zutat in ein Produkt geht. In ein Bier 0,5 l gehen 500 ml Fassbier. Die Rezepte bringt das Programm mit; für eine einzelne Prüfung lässt sich ein Rezept anpassen, ohne den Katalog zu ändern. |
 | **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen. |
 | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat. |
-| **Regeln** | Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Sie gehören nicht zu einer Prüfung, sondern zum Programm, und wachsen mit jeder Prüfung. |
+| **Regeln** | Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Sie gehören nicht zu einer Prüfung, sondern zum Programm, und wachsen mit jeder Prüfung. Weicht ein Betrieb ab, trägt die Prüfung ein eigenes Rezept, die Regeln bleiben unverändert. |
 
 ## Das Beispiel
 

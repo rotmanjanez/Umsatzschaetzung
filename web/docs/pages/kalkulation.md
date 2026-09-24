@@ -13,14 +13,17 @@ Verkauf, Zutat für Zutat.
 <li><b>Umsatz</b> Portionen mal Preis, netto gerechnet.</li>
 </ol>
 
-Jede Änderung an Rechnungen, Zuordnung, Sortiment oder Ertragsregeln rechnet
-die Kalkulation sofort neu.
+Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
+Ertragsregeln rechnet die Kalkulation sofort neu.
 
 ## Sortiment { #sortiment }
 
 Das Sortiment sind die Produkte, die der Betrieb führt, mit Bruttopreis und
 Steuersatz, wie sie auf der Karte stehen. Die Produkte und ihre Rezepte kommen
-aus den [Regeln](regeln.md#produkte), nur der Preis gehört zur Prüfung.
+aus den [Regeln](regeln.md#produkte), nur der Preis gehört zur Prüfung. Ein
+Rezept lässt sich zusätzlich für die Prüfung anpassen, siehe
+[Rezeptur anpassen](#rezeptur); das Produkt steht dann mit
+**Rezept angepasst** in der Liste.
 
 Nur Produkte im Sortiment bekommen Portionen. Führt das Gasthaus kein Bier
 0,3 l, fließt das ganze Fassbier in die 0,5 l. Ein Produkt ohne Preis bekommt
@@ -40,7 +43,8 @@ am wenigsten Ware übrig lässt. Die Verkaufspreise spielen dabei keine Rolle.
 
 Unter **Verteilung** steht je Produkt, wie viele Portionen es bekommen hat, was
 eine Portion im Einkauf kostet und welcher Umsatz daraus folgt. Ein Klick auf
-ein Produkt zeigt rechts seine Rezeptur.
+ein Produkt zeigt rechts seine Rezeptur; für die Prüfung angepasste Produkte
+tragen **angepasst**.
 
 Die Verteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
 Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
@@ -67,6 +71,39 @@ Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug hat
 einen Namen, und der Bericht nennt ihn. Fehlt eine passende Regel, wird sie
 unter [Regeln](regeln.md#ertragsregeln) angelegt.
 
+## Rezeptur anpassen { #rezeptur }
+
+Rechts neben der Verteilung steht unter **Rezeptur je Portion** das Rezept des
+gewählten Produkts, gekennzeichnet mit **Katalog** oder **Nur diese Prüfung**.
+
+- **Im Katalog bearbeiten** öffnet das Produkt unter
+  [Regeln](regeln.md#produkte). Die Änderung gilt für alle Prüfungen.
+- **Für diese Prüfung anpassen** legt eine Abschrift des Rezepts in der
+  Prüfung an. Der Katalog bleibt unverändert.
+
+Die Abschrift ist das ganze Rezept, nicht nur die Abweichung. Ihre Zeilen
+lassen sich bearbeiten (Zutat, Menge, Einheit, **Zutat hinzufügen**);
+abweichende Zeilen zeigen grau den Katalogwert, etwa **Katalog: 200 g**. Jede
+Zutat bleibt in der Einheit, in der sie in allen Rezepten gemessen wird. Wird
+das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.
+
+**Auf Katalog zurücksetzen** verwirft die Anpassung. **In den Katalog
+übernehmen** öffnet die Regeln mit dem angepassten Rezept; ist es dort
+gespeichert, entfällt die Anpassung, und das Produkt steht wieder auf
+**Katalog**.
+
+Die Prüfung merkt sich, von welchem Stand des Katalogrezepts sie abgeschrieben
+hat. Ändert sich das Katalogrezept danach, wird nichts übernommen; beim
+Produkt und im Bericht steht **Katalogrezept seit der Anpassung geändert**, und
+die Prüferin entscheidet, ob die Anpassung bleibt oder zurückgesetzt wird.
+
+Anders als bei den Ertragsregeln wird hier ein freier Wert in die Prüfung
+eingetragen. Nachprüfbar bleibt er durch den Bericht, der das Produkt als
+**abweichend vom Katalog** mit dem Stand des Katalogrezepts führt. Ist
+ein Rezept für jeden Betrieb falsch, gehört die Korrektur in den Katalog; weicht
+nur dieser Betrieb belegbar ab, etwa mit größeren Portionen oder einem anderen
+Salat, in die Prüfung.
+
 ## Was nicht mitzählt
 
 Eine Position geht nur in die Kalkulation ein, wenn sie zugeordnet ist und ihre
@@ -81,11 +118,12 @@ den Einkäufen, weil sie sich über die Zeit ausgleichen.
 Die Kalkulation ist so gut wie ihre Annahmen:
 
 - Rezepte sind Durchschnittswerte. Wer großzügig einschenkt, verkauft weniger
-  Gläser aus einem Fass.
+  Gläser aus einem Fass. Was vor Ort festgestellt ist, gehört als
+  [angepasstes Rezept](#rezeptur) in die Prüfung.
 - Ein Preis je Produkt kennt keine Happy Hour. Aktionen und Preisänderungen im
   Zeitraum gehören als Mischpreis in das Sortiment.
 - Was nicht als Rechnung vorliegt, fehlt im Wareneinsatz.
 
 Das Ergebnis ist Anlass für das Gespräch mit dem Steuerpflichtigen, nicht schon
-die Hinzuschätzung. Seine Einwände gehören als Preis, Sortiment, Bestand oder
-gewählte Ertragsregel in die Prüfung, wo sie die Rechnung sichtbar verändern.
+die Hinzuschätzung. Seine Einwände gehören als Preis, Sortiment, Bestand,
+angepasstes Rezept oder gewählte Ertragsregel in die Prüfung, wo sie die Rechnung sichtbar verändern.

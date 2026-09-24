@@ -8,7 +8,10 @@ das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und
 Zutaten rechnet die Kalkulation den Umsatz.
 
 Die Produkte selbst, samt Rezept, bringt das Programm mit. Aus diesem Katalog
-wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb.
+wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb. Weicht
+ein Rezept in einem Betrieb ab, lässt es sich auf
+[4. Kalkulation](kalkulation.md#rezeptur-anpassen) für die Prüfung anpassen;
+im Sortiment steht das Produkt dann mit **Rezept angepasst**.
 
 ## Das erste Produkt von Hand
 

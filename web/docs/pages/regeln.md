@@ -7,7 +7,9 @@ ist. Das Programm bringt einen Grundstock mit, jede Prüfung ergänzt ihn.
 
 Die Regeln liegen auf dem Rechner, nicht in der Prüfung. Eine Änderung wirkt
 deshalb auf jede Prüfung, die danach gerechnet wird. Geöffnet werden sie über
-**Regeln** in der [Liste der Prüfungen](pruefungen.md).
+**Regeln** in der [Liste der Prüfungen](pruefungen.md). Nur ein Rezept kann eine
+Prüfung zusätzlich für sich anpassen, siehe
+[Rezeptur anpassen](kalkulation.md#rezeptur).
 
 | Regel | Gepflegt unter |
 |---|---|
@@ -46,7 +48,8 @@ Schinken, 30 g Käse und 200 g Pommes.
 Nur was in einem Rezept vorkommt, zählt in der Kalkulation. Eine Zutat ohne
 Rezept landet im Bericht unter **in keiner Rezeptur**. Ein Rezept ist ein
 Durchschnitt, keine Feststellung; es soll die übliche Portion treffen, nicht
-jede.
+jede. Weicht ein einzelner Betrieb belegbar ab, wird das Rezept in dessen
+Prüfung [angepasst](kalkulation.md#rezeptur), nicht hier.
 
 Preise stehen nicht hier. Sie gehören zum Betrieb und werden im
 [Sortiment](kalkulation.md#sortiment) der Prüfung eingetragen.
