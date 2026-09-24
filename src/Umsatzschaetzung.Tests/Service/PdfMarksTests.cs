@@ -7,7 +7,15 @@ namespace Umsatzschaetzung.Tests.Service;
 
 public class PdfMarksTests
 {
-    static readonly byte[] TwoPages = File.ReadAllBytes(TestData.Fixture("dataset/2025/baeckerei/2025-01-10_SR-250107.pdf.scan.pdf"));
+    static readonly byte[] TwoPages = Encoding.ASCII.GetBytes("""
+        %PDF-1.7
+        1 0 obj <</Type /Catalog /Pages 2 0 R>> endobj
+        2 0 obj <</Type /Pages /Kids [3 0 R 4 0 R] /Count 2>> endobj
+        3 0 obj <</Type /Page /Parent 2 0 R /MediaBox [0 0 595 842]>> endobj
+        4 0 obj <</Type /Page /Parent 2 0 R /MediaBox [0 0 595 842]>> endobj
+        trailer <</Root 1 0 R>>
+        %%EOF
+        """);
     static readonly PageMarks Marks = new("Umsatzschätzung · Bäckerei", "01.01.2025 bis 31.12.2025", ["Steuernummer 12/345", "Datum 24.09.2026"]);
 
     static List<string> Texts(byte[] pdf)

@@ -306,6 +306,7 @@ public partial class MappingDetail : UserControl
     public async void Show(LineGroup? g)
     {
         var seq = ++suggestSeq;
+        if (g?.Key != Group?.Key) model.Assigned = "";
         Group = g;
         model.SetCandidates([]);
         model.ClearSnippets();
@@ -315,7 +316,6 @@ public partial class MappingDetail : UserControl
             model.Select(null, null);
             return;
         }
-        model.Assigned = "";
         model.Title = g.Name;
         model.Supplier = g.Supplier;
         model.Article = g.Article ?? "";
