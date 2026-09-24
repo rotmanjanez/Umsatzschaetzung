@@ -38,7 +38,9 @@ window above the main window) and waits afterwards until the interface has settl
 |------------|--------|------|
 | `shot`     | `name`, `at?`, `trim?`, `clip?` | writes `<out>/<name>.png`; without `at` the whole window |
 | `click`    | `at` | triggers the button - if `at` is not one itself, the next one above it, else the first one inside it (a row's own button) |
-| `type`     | `at`, `text` | writes `text` into the field |
+| `type`     | `at`, `text` | writes `text` into the field - if `at` is none, into the first one inside it (the price in a row) |
+| `choose`   | `at`, `text`, `item` | types `text` into a search box and takes the entry `item` from its drop-down |
+| `pick`     | `files` | the next file dialog answers with these files |
 | `focus`    | `at?` | sets the focus; without `at` it takes it away (otherwise the caret blinks into the image) |
 | `deselect` | `at` | clears the selection of a list |
 | `select`   | `at` | selects the row of a list that `at` sits in |
@@ -49,7 +51,8 @@ window above the main window) and waits afterwards until the interface has settl
 | `wait`     | `rounds?` | waits further rounds, in case one is not enough |
 
 `at` looks for a control: `name` is the `x:Name` from the XAML, `text` the visible
-caption, `type` the type (`"DataGrid"`). Several fields narrow it down further, and
+caption, `tip` the tooltip (for buttons that only show an icon), `type` the type
+(`"DataGrid"`). Several fields narrow it down further, and
 `up` then climbs to the nearest ancestor of that type:
 
     { "text": "Lieferant", "up": "DataGrid" }

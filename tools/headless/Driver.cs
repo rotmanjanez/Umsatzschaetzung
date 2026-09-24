@@ -27,7 +27,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
                 Click(Find(window, s.At));
                 break;
             case TypeStep s:
-                Set(Find(window, s.At), "Text", s.Text);
+                Set(Editor(Find(window, s.At)), "Text", s.Text);
                 break;
             case FocusStep s:
                 if (s.At is null) window.FocusManager?.Focus(null);
@@ -51,6 +51,12 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
             case ImportStep s:
                 Import(s.Files);
                 break;
+            case PickStep s:
+                Pick(s.Files);
+                break;
+            case ChooseStep s:
+                Choose((AutoCompleteBox)Find(window, s.At), s.Text, s.Item);
+                break;
             case WaitStep s:
                 for (var i = 1; i < s.Rounds; i++) Settle();
                 break;
@@ -71,6 +77,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         if (target.Name is { } name) hits = hits.Where(v => (v as StyledElement)?.Name == name);
         if (target.Text is { } text) hits = hits.Where(v => Label(v) == text);
         if (target.Type is { } type) hits = hits.Where(v => v.GetType().Name == type);
+        if (target.Tip is { } tip) hits = hits.Where(v => v is Control c && ToolTip.GetTip(c) as string == tip);
         var hit = hits.FirstOrDefault() ?? throw new InvalidOperationException("not found: " + target);
         return target.Up is { } up ? Up(hit, up) : hit;
     }
@@ -94,6 +101,12 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
             ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
         button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     }
+
+    // A field, or the first text box inside what `at` found (the price in a row).
+    static Visual Editor(Visual visual) =>
+        AvaloniaPropertyRegistry.Instance.GetRegistered((AvaloniaObject)visual).Any(p => p.Name == "Text") ? visual
+        : visual.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsEffectivelyVisible)
+          ?? throw new InvalidOperationException("no text field in " + visual.GetType().Name);
 
     static void Set(Visual visual, string name, object? value)
     {
@@ -151,6 +164,30 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         var job = shell.Session.Imports.Jobs.Single(j => j.CaseId == kase.Id);
         while (shell.Session.Imports.Jobs.Count > 0) Settle();
         if (job.Failed.Count > 0) throw new InvalidOperationException("import failed: " + string.Join("; ", job.Failed));
+    }
+
+    void Pick(List<string> paths)
+    {
+        var files = paths.Select(Path.GetFullPath).ToList();
+        shell.Session.Picked = () =>
+        {
+            shell.Session.Picked = null;
+            return files;
+        };
+    }
+
+    // Types into a search box and takes the entry of its drop-down that reads `item`.
+    static void Choose(AutoCompleteBox box, string text, string item)
+    {
+        box.Focus();
+        box.GetVisualDescendants().OfType<TextBox>().First().Text = text;
+        Settle();
+        var popup = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child
+            ?? throw new InvalidOperationException("no drop-down below the search box");
+        var entry = popup.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item)
+            ?? throw new InvalidOperationException("not offered: " + item);
+        box.SelectedItem = entry.DataContext;
+        box.IsDropDownOpen = false;
     }
 
     void Shot(Window window, ShotStep step)

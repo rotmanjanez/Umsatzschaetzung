@@ -10,6 +10,7 @@ public sealed record Target
     public string? Name { get; init; }
     public string? Text { get; init; }
     public string? Type { get; init; }
+    public string? Tip { get; init; }
     public string? Up { get; init; }
 }
 
@@ -32,6 +33,8 @@ public sealed record Inset
 [JsonDerivedType(typeof(OpenStep), "open")]
 [JsonDerivedType(typeof(TabStep), "tab")]
 [JsonDerivedType(typeof(ImportStep), "import")]
+[JsonDerivedType(typeof(PickStep), "pick")]
+[JsonDerivedType(typeof(ChooseStep), "choose")]
 [JsonDerivedType(typeof(WaitStep), "wait")]
 public abstract record Step
 {
@@ -94,6 +97,18 @@ public sealed record TabStep : Step
 public sealed record ImportStep : Step
 {
     public required List<string> Files { get; init; }
+}
+
+public sealed record PickStep : Step
+{
+    public required List<string> Files { get; init; }
+}
+
+public sealed record ChooseStep : Step
+{
+    public required Target At { get; init; }
+    public required string Text { get; init; }
+    public required string Item { get; init; }
 }
 
 public sealed record WaitStep : Step
