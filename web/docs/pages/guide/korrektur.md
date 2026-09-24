@@ -34,13 +34,13 @@ Zelle bearbeitbar; `Flasche` eintragen.
 
 ![Alle vier Weine in Flaschen](img/korrektur-ws-fertig.png)
 
-Die Markierung verschwindet. Mit **Bestätigen** übernehmen und das Fenster
-schließen.
+Die Markierung verschwindet. Das Häkchen oben rechts (**Bestätigen**) markiert
+die Rechnung als durchgesehen und schließt das Fenster.
 
 ## Eine verlesene Ziffer: 2025/0561
 
 Die Metzgereirechnung öffnen. Beim Rinderhackfleisch sind Menge, Einzelpreis und
-Betrag markiert, und **Bestätigen** ist gesperrt:
+Betrag markiert, und das Häkchen ist gesperrt:
 
 ![Die Rechnung 2025/0561, eine Zeile geht nicht auf](img/korrektur-0561.png)
 
@@ -51,9 +51,9 @@ zeigt ihn auf dem Beleg:
 ![Auf dem Beleg steht 8,75, nicht 8,76](img/korrektur-0561-beleg.png)
 
 Den falsch gelesenen Einzelpreis `8,76` auf `8,75` korrigieren. Die Zeile geht
-auf, **Bestätigen** ist wieder frei.
+auf, das Häkchen ist wieder frei.
 
-Mit **Bestätigen** übernehmen und das Fenster schließen.
+Mit dem Häkchen bestätigen.
 
 ## Eine zerrissene Zeile: TK25-1583
 
@@ -113,11 +113,8 @@ Thermobox `19`. Danach ergeben auch die Positionen 912,12 €.
 
 ## Bestätigen
 
-Mit **Bestätigen** übernehmen. Der Status wechselt auf **Durchgesehen**:
-
-![Die Rechnung ist durchgesehen](img/korrektur-bestaetigt.png)
-
-In der Rechnungsliste stehen die drei jetzt mit **Manuell**, und die Bilanz
+Mit dem Häkchen bestätigen. In der Rechnungsliste stehen die drei jetzt mit
+**Manuell**, und die Bilanz
 über der Liste zeigt keine offene Rechnung mehr:
 
 ![Keine Rechnung mehr offen](img/korrektur-liste-fertig.png)
@@ -129,7 +126,7 @@ Die drei Fälle decken das meiste ab, was bei Scans schiefgeht:
 | Fehler | So zeigt es das Programm | Korrektur |
 |---|---|---|
 | Ein Wert fehlt | Das Feld ist markiert | Wert vom Beleg abschreiben |
-| Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, **Bestätigen** ist gesperrt | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
+| Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, das Häkchen ist gesperrt | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
 | Eine Zeile ist zerrissen (Stempel, Knick, Umbruch) | Eine Zeile ohne Namen oder mit 0,00 €, dazu fehlende Werte | Die Werte in einer Zeile zusammenführen, die andere löschen |
 | Der Lieferant fehlt | Leeres Feld | Eintragen |
 | Der Steuersatz ist falsch gelesen | Brutto ist markiert, **Laut Beleg** und **Aus Positionen** weichen voneinander ab | Steuersatz je Zeile eintragen |

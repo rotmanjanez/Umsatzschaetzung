@@ -46,8 +46,15 @@
             <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" VerticalAlignment="Top">
                 <DockPanel Grid.Row="0" Margin="0,0,0,8">
                     <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
-                    <Button DockPanel.Dock="Right" Content="{Binding SaveLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding SaveReady}" Click="Save"/>
-                    <Button DockPanel.Dock="Right" Content="CSV exportieren" Theme="{StaticResource SecondaryButton}" IsEnabled="{Binding CanExport}" Click="ExportCsv"/>
+                    <Button x:Name="AcceptInvoice" DockPanel.Dock="Right" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Bestätigen" IsEnabled="{Binding CanAccept}" Click="Accept">
+                        <Panel>
+                            <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Saving}"/>
+                            <PathIcon Data="{StaticResource ConfirmIcon}" Width="14" Height="14" IsVisible="{Binding !Saving}"/>
+                        </Panel>
+                    </Button>
+                    <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="CSV exportieren" Margin="0,0,8,0" IsEnabled="{Binding CanExport}" Click="ExportCsv">
+                        <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>
+                    </Button>
                     <Border x:Name="State" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="12,0"
                             VerticalAlignment="Center"
                             Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">

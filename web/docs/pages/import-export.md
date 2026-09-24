@@ -26,11 +26,12 @@ Absenders abweichen.
 Der Bericht der Prüfung geht über **Als PDF speichern** heraus, so wie er
 angezeigt wird.
 
-In einer geöffneten Rechnung schreibt **CSV exportieren** deren gelesene Daten
-als Tabelle: Kopf mit Lieferant, Nummer, Datum und Summen, darunter jede
-Position mit Menge, Preisen, Steuersatz und der Zutat, der sie zugeordnet ist.
-Der Knopf ist gesperrt, solange Änderungen offen sind — gespeichert wird, was
-in der Prüfung steht.
+In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts
+(**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant,
+Nummer, Datum und Summen, darunter jede Position mit Menge, Preisen,
+Steuersatz und der Zutat, der sie zugeordnet ist. Das Symbol ist gesperrt,
+bis die letzte Änderung gespeichert ist — exportiert wird, was in der Prüfung
+steht.
 
 Trennzeichen ist das Semikolon, die Zahlen stehen so darin, wie sie am
 Bildschirm stehen, mit Komma und Einheit (`1.110,00 €`, `12 Keg`). Excel öffnet
@@ -44,7 +45,7 @@ eine andere Prüfung importieren. Beide Knöpfe stehen in der Kopfzeile von
 
 ### Export
 
-**CSV exportieren** speichert die Prüfung und schreibt alle Produkte des
+Das rechte der beiden Symbole (**CSV exportieren**) speichert die Prüfung und schreibt alle Produkte des
 Sortiments nach Namen sortiert in eine Tabelle:
 
 ```

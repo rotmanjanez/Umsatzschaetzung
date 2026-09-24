@@ -151,7 +151,7 @@ public sealed class InvoiceModel : Observable
         set
         {
             if (!Set(ref state, value)) return;
-            foreach (var p in new[] { nameof(IsAutomatic), nameof(IsManual), nameof(IsPending), nameof(SaveLabel), nameof(SaveReady) }) Raise(p);
+            foreach (var p in new[] { nameof(IsAutomatic), nameof(IsManual), nameof(IsPending), nameof(CanAccept) }) Raise(p);
         }
     }
 
@@ -160,13 +160,12 @@ public sealed class InvoiceModel : Observable
     public bool IsManual => state == Checked.Manual;
     public bool IsPending => state == Checked.Pending;
 
-    public bool Valid { get => valid; set { if (Set(ref valid, value)) Raise(nameof(SaveReady)); } }
-    public bool Dirty { get => dirty; set { if (Set(ref dirty, value)) { Raise(nameof(SaveReady)); Raise(nameof(CanExport)); } } }
-    public bool Saving { get => saving; set { if (Set(ref saving, value)) { Raise(nameof(SaveReady)); Raise(nameof(SaveLabel)); Raise(nameof(CanExport)); } } }
+    public bool Valid { get => valid; set { if (Set(ref valid, value)) Raise(nameof(CanAccept)); } }
+    public bool Dirty { get => dirty; set { if (Set(ref dirty, value)) Raise(nameof(CanExport)); } }
+    public bool Saving { get => saving; set { if (Set(ref saving, value)) { Raise(nameof(CanAccept)); Raise(nameof(CanExport)); } } }
 
-    public bool SaveReady => valid && !saving && (dirty || state == Checked.Pending);
+    public bool CanAccept => valid && !saving && state != Checked.Manual;
     public bool CanExport => !dirty && !saving;
-    public string SaveLabel => saving ? "Wird gespeichert …" : state == Checked.Pending ? "Bestätigen" : "Änderungen speichern";
 
     public TotalRow Net { get; } = new("Netto", Field.NetTotal);
     public TotalRow Gross { get; } = new("Brutto", Field.GrossTotal);
@@ -214,7 +213,8 @@ public partial class InvoiceView : Screen
     Invoice invoice;
     List<Flag> flags = [];
     int currentPage = -1;
-    int previewSeq;
+    int edits;
+    Task stored = Task.CompletedTask;
     bool applying, sourceLoaded, checkedOnce, sideBySide;
 
 
@@ -231,7 +231,7 @@ public partial class InvoiceView : Screen
         timer.Tick += (_, _) =>
         {
             timer.Stop();
-            _ = Preview();
+            _ = Store();
         };
         Load();
         if (pages.Count > 0)
@@ -296,7 +296,7 @@ public partial class InvoiceView : Screen
 
     public string Id => invoice.Id;
 
-    // Worth keeping around once the user leaves it: unsaved edits, or a review still to be done.
+    // Worth keeping around once the user leaves it: edits on their way, or a review still to be done.
     public bool Keep => model.Dirty || model.State == Checked.Pending;
 
     protected override async void OnEnter()
@@ -304,7 +304,7 @@ public partial class InvoiceView : Screen
         if (!checkedOnce)
         {
             checkedOnce = true;
-            await Preview();
+            await Check();
         }
         if (pages.Count > 0 || sourceLoaded || Session.Case is null) return;
         if (await Read(Session.Case.Id)) return;
@@ -341,7 +341,7 @@ public partial class InvoiceView : Screen
         return true;
     }
 
-    // The case keeps the stored invoice; edits stay in this copy until they are saved.
+    // The case keeps the stored invoice; edits stay in this copy until they are stored.
     static Invoice Copy(Invoice inv) => Json.Deserialize<Invoice>(Json.Serialize(inv));
 
     void Load()
@@ -408,6 +408,7 @@ public partial class InvoiceView : Screen
 
     void Schedule()
     {
+        edits++;
         model.Dirty = true;
         timer.Stop();
         timer.Start();
@@ -419,16 +420,45 @@ public partial class InvoiceView : Screen
         return invoice;
     }
 
-    async Task Preview()
+    async Task Check()
     {
         if (Session.Case is null) return;
-        var seq = ++previewSeq;
         var req = new VerifyReq(Session.Case.Id, Current(), Intent.Check, null, null);
+        await Session.Run(async () => ApplyTotals(await Session.Service.VerifyInvoice(req, Ct)));
+    }
+
+    // Every edit is stored as it settles, one write after the other so an older one never lands
+    // last. Storing takes back an earlier review; only accepting marks the invoice as reviewed.
+    Task Store() => stored = StoreAfter(stored);
+
+    async Task StoreAfter(Task prior)
+    {
+        await prior;
+        if (Session.Case is null || !model.Dirty) return;
+        var seq = edits;
+        var req = new VerifyReq(Session.Case.Id, Copy(Current()), Intent.Store, null, null);
         await Session.Run(async () =>
         {
-            var v = await Session.Service.VerifyInvoice(req, Ct);
-            if (seq == previewSeq) ApplyTotals(v);
+            var v = await Session.Service.VerifyInvoice(req, CancellationToken.None);
+            invoice.Verification = v.Invoice.Verification;
+            model.State = Checks.Of(invoice);
+            model.StateText = Checks.Text(invoice);
+            if (seq == edits)
+            {
+                ApplyTotals(v);
+                model.Dirty = false;
+            }
+            if (v.Case is not null) onSaved(v.Case);
         });
+    }
+
+    protected override void OnLeave()
+    {
+        Lines.CommitEdit(DataGridEditingUnit.Row, true);
+        Totals.CommitEdit(DataGridEditingUnit.Row, true);
+        if (!timer.IsEnabled) return;
+        timer.Stop();
+        _ = Store();
     }
 
     void ApplyTotals(VerifyResp v)
@@ -457,27 +487,27 @@ public partial class InvoiceView : Screen
         RenderFlagged();
     }
 
-    async void Save(object? sender, RoutedEventArgs e)
+    async void Accept(object? sender, RoutedEventArgs e)
     {
-        if (Session.Case is null) return;
-        timer.Stop();
+        if (Session.Case is not { } kase) return;
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
         Totals.CommitEdit(DataGridEditingUnit.Row, true);
-        var req = new VerifyReq(Session.Case.Id, Current(), Intent.Confirm, null, null);
-        var confirming = model.State == Checked.Pending;
+        timer.Stop();
         model.Saving = true;
+        await Store();
+        var req = new VerifyReq(kase.Id, Copy(Current()), Intent.Confirm, null, null);
         await Session.Run(async () =>
         {
             var v = await Session.Service.VerifyInvoice(req, Ct);
             Apply(v);
             if (!v.Accepted || v.Case is null)
             {
-                Session.Fail("Nicht gespeichert, bitte die markierten Werte korrigieren.");
+                Session.Fail("Nicht bestätigt, bitte die markierten Werte korrigieren.");
                 return;
             }
             model.Dirty = false;
             onSaved(v.Case);
-            if (confirming) (TopLevel.GetTopLevel(this) as InvoiceWindow)?.Close();
+            (TopLevel.GetTopLevel(this) as InvoiceWindow)?.Close();
         });
         model.Saving = false;
     }

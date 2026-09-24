@@ -56,9 +56,14 @@ Die Rechnung öffnen. Oben die gelesenen Felder, darunter der Beleg. Jede
 Abweichung ist an allen Feldern markiert, die in die Prüfung eingehen, denn
 jedes davon kann falsch gelesen sein, und nennt, was nicht zusammenpasst, etwa
 „Menge × Einzelpreis ergibt 12,40 €, Gesamtpreis ist 21,40 €“. Felder
-korrigieren, Zeilen hinzufügen oder entfernen, dann **Bestätigen**.
+korrigieren, Zeilen hinzufügen oder entfernen, dann mit dem Häkchen oben rechts
+(**Bestätigen**) als durchgesehen markieren; das Fenster schließt sich.
 
-Bestätigen ist gesperrt, solange eine Zeile nicht aufgeht oder die Summe der
+Jede Änderung wird sofort gespeichert. Eine schon durchgesehene Rechnung, die
+noch einmal geändert wird, ist danach wieder offen und will erneut bestätigt
+werden.
+
+Das Häkchen ist gesperrt, solange eine Zeile nicht aufgeht oder die Summe der
 Positionen vom Nettobetrag abweicht und der Beleg keinen Nettobetrag lesbar
 ausweist. Ein ausgewiesener Betrag ist verbindlich; die Zeilen müssen zu ihm
 passen, nicht umgekehrt.
