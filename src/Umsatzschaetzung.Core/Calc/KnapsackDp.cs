@@ -175,29 +175,7 @@ sealed partial class Problem
         }
 
         var best = new long[states];
-        var coords = new long[dims];
-        foreach (var piece in pieces)
-        {
-            Array.Copy(capG, coords, dims);
-            for (var st = states - 1; st >= 0; st--)
-            {
-                if (FitsWeight(coords, piece.Weight))
-                {
-                    var v = best[st - piece.Offset] + piece.Value;
-                    if (v > best[st])
-                    {
-                        best[st] = v;
-                        piece.Taken[st >> 6] |= 1UL << (int)(st & 63);
-                    }
-                }
-                for (var d = 0; d < dims; d++)
-                {
-                    coords[d]--;
-                    if (coords[d] >= 0) break;
-                    coords[d] = capG[d];
-                }
-            }
-        }
+        foreach (var piece in pieces) Take(piece, best, capG, stride);
 
         var x = new long[items.Count];
         s = states - 1;
@@ -213,11 +191,40 @@ sealed partial class Problem
         return x;
     }
 
-    static bool FitsWeight(long[] coords, long[] weight)
+    // Walks only the states the piece fits into, in descending order, so each row along
+    // the first dimension is one tight run.
+    static void Take(DpPiece piece, long[] best, long[] capG, long[] stride)
     {
-        for (var d = 0; d < coords.Length; d++)
-            if (coords[d] < weight[d]) return false;
-        return true;
+        var dims = capG.Length;
+        var weight = piece.Weight;
+        var (offset, value, taken) = (piece.Offset, piece.Value, piece.Taken);
+        var coords = new long[dims];
+        long row = 0;
+        for (var d = 1; d < dims; d++)
+        {
+            coords[d] = capG[d];
+            row += capG[d] * stride[d];
+        }
+        while (true)
+        {
+            for (long st = row + capG[0], end = row + weight[0]; st >= end; st--)
+            {
+                var v = best[st - offset] + value;
+                if (v <= best[st]) continue;
+                best[st] = v;
+                taken[st >> 6] |= 1UL << (int)(st & 63);
+            }
+            var k = 1;
+            while (k < dims && coords[k] == weight[k])
+            {
+                row += (capG[k] - weight[k]) * stride[k];
+                coords[k] = capG[k];
+                k++;
+            }
+            if (k == dims) return;
+            coords[k]--;
+            row -= stride[k];
+        }
     }
 
     void Greedy(List<string> candidates, KnapsackResult res)

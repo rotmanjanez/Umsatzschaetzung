@@ -4,18 +4,20 @@ namespace Umsatzschaetzung.Model;
 // keine Einheit: "Pommes in Stück" und "Pommes in Gramm" sind nicht dieselbe Zutat.
 public static class Scale
 {
-    public static Unit? Of(RuleSet rs, string ingredientId)
+    public static Unit? Of(RuleSet rs, string ingredientId) => Bases(rs).GetValueOrDefault(ingredientId);
+
+    // Eine unbekannte Einheit oder zwei verschiedene Basen lassen die Zutat ohne Basis.
+    public static Dictionary<string, Unit?> Bases(RuleSet rs)
     {
-        Unit? found = null;
-        foreach (var id in rs.Products.Keys.Order(StringComparer.Ordinal))
-            foreach (var line in rs.Products[id].Recipe)
+        var output = new Dictionary<string, Unit?>(StringComparer.Ordinal);
+        foreach (var p in rs.Products.Values)
+            foreach (var line in p.Recipe)
             {
-                if (line.IngredientId != ingredientId) continue;
-                if (Units.Lookup(line.Unit) is not { } u) return null;
-                if (found is { } b && b != u.Base) return null;
-                found = u.Base;
+                var u = Units.Lookup(line.Unit)?.Base;
+                if (!output.TryGetValue(line.IngredientId, out var seen)) output[line.IngredientId] = u;
+                else if (seen != u) output[line.IngredientId] = null;
             }
-        return found;
+        return output;
     }
 
     public static List<Flag> Conflicts(RuleSet rs, IEnumerable<string> ingredientIds)

@@ -17,8 +17,8 @@ Verkauf, Zutat für Zutat.
 Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
 Ertragsregeln rechnet die Kalkulation sofort neu.
 
-Der Reiter hat drei Teile: oben die Verteilung mit den Ertragsregeln, in der
-Mitte die Einkäufe außerhalb der Verteilung, unten das Ergebnis.
+Der Reiter hat vier Seiten: **Ergebnis**, **Verteilung**, **Ertragsregeln** und
+**Einkäufe außerhalb der Verteilung**. Er öffnet mit dem Ergebnis.
 
 ## Sortiment { #sortiment }
 
@@ -45,15 +45,18 @@ aufgeteilt hat, weiß niemand. Das Programm setzt dafür keine Quote, sondern
 rechnet die Verteilung aus, die den Einkauf am vollständigsten aufbraucht, also
 am wenigsten Ware übrig lässt. Die Verkaufspreise spielen dabei keine Rolle.
 
-Unter **Verteilung** steht je Produkt, wie viele Portionen es bekommen hat, was
-eine Portion im Einkauf kostet und welcher Umsatz daraus folgt. Ein Klick auf
-ein Produkt zeigt rechts seine Rezeptur; für die Prüfung angepasste Produkte
+Unter **Verteilung** steht je Produkt, wie viele Portionen es bekommen hat und
+welcher Umsatz daraus folgt. Ein Klick auf ein Produkt zeigt rechts, was eine
+Portion im Einkauf kostet, und seine Rezeptur; für die Prüfung angepasste Produkte
 tragen **angepasst**.
 
 Die Verteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
 Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
 
 ## Ergebnis
+
+Oben stehen die Kennzahlen: Umsatz nach Betriebsprüfung, Differenz zum
+erklärten Umsatz und Rohgewinnaufschlagsatz. Darunter:
 
 - **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz
   je Steuersatz, mit Differenz, einschließlich des geschätzten Umsatzes. Der
@@ -67,7 +70,7 @@ Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
 
 ## Ertragsregeln { #ertragsregeln }
 
-Unter der Verteilung stehen die Zutaten und Kategorien der Prüfung, für
+Auf der Seite **Ertragsregeln** stehen die Zutaten und Kategorien der Prüfung, für
 die es mehr als eine [Ertragsregel](regeln.md#ertragsregeln) gibt. Ohne Wahl
 gilt die Standardregel. Hat der Betrieb etwa eine alte Schankanlage mit
 belegbar höherem Verlust, wird hier die passende Regel gewählt.
@@ -111,8 +114,8 @@ Salat, in die Prüfung.
 
 ## Einkäufe außerhalb der Verteilung { #nicht-berucksichtigt }
 
-Der mittlere Teil der Kalkulation: was eingekauft wurde, aber nicht über
-Rezeptur und Preis in den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
+Diese Seite zeigt, was eingekauft wurde, aber nicht über Rezeptur und Preis in
+den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
 
 **Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den
 Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Abschnitt 3), sie verändern den

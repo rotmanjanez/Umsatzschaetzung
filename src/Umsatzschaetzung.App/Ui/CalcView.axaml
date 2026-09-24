@@ -20,6 +20,10 @@
         <Style Selector="TextBlock.total">
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
+        <Style Selector="TabControl#Pages TabItem">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="MinHeight" Value="36"/>
+        </Style>
     </ui:Screen.Styles>
     <ui:Screen.Resources>
         <DataTemplate x:Key="YieldGroupTemplate" x:DataType="ui:YieldKindGroup">
@@ -45,31 +49,143 @@
             </StackPanel>
         </DataTemplate>
     </ui:Screen.Resources>
-    <DockPanel>
-        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Right" Text="Wird neu berechnet …" Theme="{StaticResource Muted}" Margin="0,0,0,16" IsVisible="{Binding Busy}"/>
-        <Grid>
-            <TextBlock Text="Wird berechnet …" Theme="{StaticResource EmptyState}" IsVisible="{Binding Calculating}"/>
-            <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding NoInvoices}">
-                <TextBlock Text="Noch keine Datengrundlage" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
-                <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
-                           Text="Die Kalkulation leitet Portionen und Umsätze aus den zugeordneten Rechnungspositionen ab. Ohne Rechnungen gibt es nichts zu rechnen."/>
-                <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
-            </StackPanel>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasResult}">
-                <StackPanel Margin="0,0,16,0">
-                    <TextBlock Text="Verteilung" Theme="{StaticResource SectionHeader}"/>
-                    <StackPanel MaxWidth="440" HorizontalAlignment="Left" Margin="0,0,0,24" IsVisible="{Binding EmptyAssortment}">
+    <Grid>
+        <TextBlock Text="Wird berechnet …" Theme="{StaticResource EmptyState}" IsVisible="{Binding Calculating}"/>
+        <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding NoInvoices}">
+            <TextBlock Text="Noch keine Datengrundlage" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
+                       Text="Die Kalkulation leitet Portionen und Umsätze aus den zugeordneten Rechnungspositionen ab. Ohne Rechnungen gibt es nichts zu rechnen."/>
+            <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
+        </StackPanel>
+        <TabControl x:Name="Pages" Background="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding HasResult}">
+            <TabItem Header="Ergebnis">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,16,16,0">
+                        <ItemsControl ItemsSource="{Binding Figures}" Margin="0,0,0,8">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="16"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="ui:KV">
+                                    <Border Theme="{StaticResource Card}" MinWidth="220">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding Label}" Theme="{StaticResource Muted}" FontSize="12"/>
+                                            <TextBlock Text="{Binding Value}" FontFamily="{StaticResource MonoFont}" FontSize="22" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}"/>
+                        <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Steuersatz" Width="220" MinWidth="120" SortMemberPath="Vat">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:RevenueRow">
+                                            <TextBlock Text="{Binding Vat}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Umsatz vor BP" Width="170" SortMemberPath="Declared">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:RevenueRow">
+                                            <TextBlock Text="{Binding Declared}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Umsatz nach BP" Width="170" SortMemberPath="Calculated">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:RevenueRow">
+                                            <TextBlock Text="{Binding Calculated}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Differenz" Width="170" SortMemberPath="Difference">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:RevenueRow">
+                                            <TextBlock Text="{Binding Difference}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBlock Text="Rohgewinnaufschlag" Theme="{StaticResource SectionHeader}"/>
+                        <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Sparte" Width="220" MinWidth="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:MarkupRow">
+                                            <TextBlock Text="{Binding Sparte}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Einsatz der Portionen" Width="180">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:MarkupRow">
+                                            <TextBlock Text="{Binding CostOfGoods}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Umsatz (netto)" Width="170">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:MarkupRow">
+                                            <TextBlock Text="{Binding RevenueNet}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Rohgewinn" Width="170">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:MarkupRow">
+                                            <TextBlock Text="{Binding GrossProfit}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Aufschlagsatz" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate x:DataType="ui:MarkupRow">
+                                            <TextBlock Text="{Binding Markup}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
+                        <ItemsControl Margin="0,0,0,24" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="ui:KV">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Key"/>
+                                            <ColumnDefinition Width="220"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Label}" Theme="{StaticResource KeyLabel}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Value}" Theme="{StaticResource Number}" Margin="0,0,0,6"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem x:Name="Distribution" Header="Verteilung">
+                <Grid Margin="0,16,0,0">
+                    <StackPanel MaxWidth="440" HorizontalAlignment="Left" IsVisible="{Binding EmptyAssortment}">
                         <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
                                    Text="Noch keine Produkte im Sortiment."/>
                         <Button Content="Zu den Produkten" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="GoProducts"/>
                     </StackPanel>
-                    <Grid Margin="0,0,0,24" IsVisible="{Binding !EmptyAssortment}">
+                    <Grid IsVisible="{Binding !EmptyAssortment}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="64*" MinWidth="360"/>
                             <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="36*" MinWidth="320"/>
                         </Grid.ColumnDefinitions>
-                        <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True" MaxHeight="480"
+                        <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True"
                                   SelectionMode="Single" SelectionChanged="ProductSelected" VerticalAlignment="Top">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Produkt" Width="280" MinWidth="120" SortMemberPath="Name">
@@ -88,13 +204,6 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ResultRow">
                                             <TextBlock Text="{Binding Portions}" Theme="{StaticResource Cell}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Einsatz je Portion" Width="150" SortMemberPath="Cost">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ResultRow">
-                                            <TextBlock Text="{Binding Cost}" Theme="{StaticResource Cell}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -120,8 +229,9 @@
                             </DataGrid.Columns>
                         </DataGrid>
                         <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                        <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16" VerticalAlignment="Top">
-                            <Grid>
+                        <Border Grid.Column="2" Theme="{StaticResource Panel}" VerticalAlignment="Top">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <Grid Margin="16">
                                 <TextBlock Text="Kein Produkt gewählt" Theme="{StaticResource Muted}" IsVisible="{Binding NoDetail}"/>
                                 <StackPanel IsVisible="{Binding !NoDetail}">
                                 <StackPanel DataContext="{Binding Detail}" x:DataType="ui:ProductDetail">
@@ -225,23 +335,23 @@
                                 </StackPanel>
                                 <TextBlock Text="{Binding Detail.Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" IsVisible="{Binding Detail.HasNote}"/>
                                 </StackPanel>
-                            </Grid>
+                                </Grid>
+                            </ScrollViewer>
                         </Border>
                     </Grid>
-
-                    <StackPanel IsVisible="{Binding HasYields}">
-                        <Border Theme="{StaticResource SectionRule}"/>
-                        <TextBlock Text="Ertragsregeln" Theme="{StaticResource SectionHeader}"/>
-                        <ItemsControl Margin="0,0,0,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
-                    </StackPanel>
-                    <Border Theme="{StaticResource SectionRule}"/>
-
-                    <StackPanel DataContext="{Binding Exclusions}" x:DataType="ui:ExclusionModel" Margin="0,0,0,12">
-                        <StackPanel IsVisible="{Binding NoneExcluded}" Margin="0,0,0,12">
-                            <TextBlock Text="Einkäufe außerhalb der Verteilung" Theme="{StaticResource SectionHeader}"/>
-                            <TextBlock Text="Keine: alle Einkäufe gehen in die Ermittlung des Aufschlagsatzes ein." Theme="{StaticResource Muted}" TextWrapping="Wrap"/>
-                        </StackPanel>
-                    <Grid Height="560" Margin="0,0,0,12" IsVisible="{Binding HasExcluded}">
+                </Grid>
+            </TabItem>
+            <TabItem Header="Ertragsregeln" IsVisible="{Binding HasYields}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl Margin="0,16,16,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Einkäufe außerhalb der Verteilung">
+                <DockPanel DataContext="{Binding Exclusions}" x:DataType="ui:ExclusionModel" Margin="0,16,0,0">
+                    <TextBlock DockPanel.Dock="Bottom" Text="{Binding Deposit}" Theme="{StaticResource Muted}" Margin="0,12,0,0" IsVisible="{Binding HasDeposit}" TextWrapping="Wrap"/>
+                    <TextBlock DockPanel.Dock="Top" Text="Keine: alle Einkäufe gehen in die Ermittlung des Aufschlagsatzes ein." Theme="{StaticResource Muted}"
+                               TextWrapping="Wrap" IsVisible="{Binding NoneExcluded}"/>
+                    <Grid IsVisible="{Binding HasExcluded}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="48*" MinWidth="320"/>
                             <ColumnDefinition Width="6"/>
@@ -331,103 +441,9 @@
                             </DockPanel>
                         </Border>
                     </Grid>
-                        <TextBlock Text="{Binding Deposit}" Theme="{StaticResource Muted}" IsVisible="{Binding HasDeposit}" TextWrapping="Wrap"/>
-                    </StackPanel>
-
-                    <Border Theme="{StaticResource SectionRule}"/>
-
-                    <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}"/>
-                    <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Steuersatz" Width="220" MinWidth="120" SortMemberPath="Vat">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Vat}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Umsatz vor BP" Width="170" SortMemberPath="Declared">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Declared}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Umsatz nach BP" Width="170" SortMemberPath="Calculated">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Calculated}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Differenz" Width="170" SortMemberPath="Difference">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Difference}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <TextBlock Text="Rohgewinnaufschlag" Theme="{StaticResource SectionHeader}"/>
-                    <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Sparte" Width="220" MinWidth="120">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding Sparte}" Classes.total="{Binding Total}" VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Einsatz der Portionen" Width="180">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding CostOfGoods}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Umsatz (netto)" Width="170">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding RevenueNet}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Rohgewinn" Width="170">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding GrossProfit}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Aufschlagsatz" Width="150">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding Markup}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
-                    <ItemsControl Margin="0,0,0,24" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="ui:KV">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Key"/>
-                                        <ColumnDefinition Width="220"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Label}" Theme="{StaticResource KeyLabel}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Value}" Theme="{StaticResource Number}" Margin="0,0,0,6"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
-    </DockPanel>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+        <TextBlock Text="Wird neu berechnet …" Theme="{StaticResource Muted}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,0,0" IsVisible="{Binding Busy}"/>
+    </Grid>
 </ui:Screen>

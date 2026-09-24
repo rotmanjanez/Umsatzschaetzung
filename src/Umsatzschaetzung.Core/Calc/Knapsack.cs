@@ -24,7 +24,7 @@ internal sealed class KnapsackResult
 
 internal static class Knapsack
 {
-    public const long StateBudget = 5_000_000;
+    public const long StateBudget = 1_000_000;
     public const int MaxDpDimensions = 4;
 
     public static List<Component> Components(RuleSet rs, List<string> products, IEnumerable<string> ingredients)

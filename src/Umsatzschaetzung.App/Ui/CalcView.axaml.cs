@@ -36,6 +36,7 @@ public sealed class CalcModel : Observable
     public ObservableCollection<RevenueRow> Revenue { get; } = [];
     public ObservableCollection<MarkupRow> Markups { get; } = [];
     public ObservableCollection<KV> Summary { get; } = [];
+    public ObservableCollection<KV> Figures { get; } = [];
     public ObservableCollection<YieldKindGroup> Yields { get; } = [];
     public ExclusionModel Exclusions { get; } = new();
     public bool HasYields => Yields.Count > 0;
@@ -201,9 +202,16 @@ public partial class CalcView : Screen
         ProductGrid.SelectedItem = model.Products.FirstOrDefault(p => p.ProductId == selected);
         filling = false;
         ProductSelected(null, null);
-        if (wanted is not null && ProductGrid.SelectedItem is { } item) ProductGrid.ScrollIntoView(item, null);
+        if (wanted is not null && ProductGrid.SelectedItem is { } item)
+        {
+            Pages.SelectedItem = Distribution;
+            ProductGrid.ScrollIntoView(item, null);
+        }
+        var vat = VatRow.Of(kase, r);
+        model.Figures.Clear();
+        foreach (var kv in Figures(vat[^1], r)) model.Figures.Add(kv);
         model.Revenue.Clear();
-        foreach (var v in Revenue(kase, r)) model.Revenue.Add(v);
+        foreach (var v in Revenue(vat)) model.Revenue.Add(v);
         model.Markups.Clear();
         foreach (var m in Markups(r)) model.Markups.Add(m);
         model.Summary.Clear();
@@ -420,8 +428,15 @@ public partial class CalcView : Screen
         ];
     }
 
-    static List<RevenueRow> Revenue(Case c, Report r) =>
-        [.. VatRow.Of(c, r).Select(v => new RevenueRow(v.Total ? "Summe" : Format.Bp(v.Vat),
+    static List<KV> Figures(VatRow total, Report r) =>
+    [
+        new("Umsatz nach BP", Format.Cents(total.Calculated)),
+        new("Differenz", Format.Cents(total.Difference)),
+        new("Aufschlagsatz", Format.Bp(r.Totals.Markup)),
+    ];
+
+    static List<RevenueRow> Revenue(List<VatRow> rows) =>
+        [.. rows.Select(v => new RevenueRow(v.Total ? "Summe" : Format.Bp(v.Vat),
             Format.Cents(v.Declared), Format.Cents(v.Calculated), Format.Cents(v.Difference), v.Total))];
 
     static List<MarkupRow> Markups(Report r) =>

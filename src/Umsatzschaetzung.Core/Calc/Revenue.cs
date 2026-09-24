@@ -84,7 +84,7 @@ internal static class Revenue
     static Sparte SparteOf(RuleSet rs, string ingredientId) =>
         rs.Ingredients.TryGetValue(ingredientId, out var ing) && rs.Categories.TryGetValue(ing.CategoryId, out var cat) ? cat.Sparte : Sparte.Unbestimmt;
 
-    static List<EstimateRow> Estimates(Case c, RuleSet rs, List<ProductRow> rows, List<Allocation> allocs,
+    static List<EstimateRow> Estimates(Case c, RuleSet rs, Dictionary<string, Unit?> bases, List<ProductRow> rows, List<Allocation> allocs,
         Dictionary<string, UnitCost> unitCost, List<UnusedLine> unused)
     {
         List<EstimateRow> output = [];
@@ -97,7 +97,7 @@ internal static class Revenue
                 leftover[l.IngredientId] = leftover.GetValueOrDefault(l.IngredientId) + l.Qty;
         foreach (var (id, qty) in leftover)
             if (qty * unitCost.GetValueOrDefault(id).Micro / UnitCost.Scale is var cost and not 0)
-                output.Add(new EstimateRow { Source = EstimateSource.Leftover, Name = Names.Ingredient(rs, id), Unit = Scale.Of(rs, id) ?? Unit.Piece, Qty = qty, Basis = SparteOf(rs, id), Cost = cost });
+                output.Add(new EstimateRow { Source = EstimateSource.Leftover, Name = Names.Ingredient(rs, id), Unit = bases.GetValueOrDefault(id) ?? Unit.Piece, Qty = qty, Basis = SparteOf(rs, id), Cost = cost });
         var invoices = c.Invoices.ToDictionary(i => i.Id);
         foreach (var l in unused)
         {
@@ -143,7 +143,7 @@ internal static class Revenue
         }];
     }
 
-    internal static Report Run(Case c, RuleSet rs, RuleSet catalog, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses, List<UnusedLine> unused)
+    internal static Report Run(Case c, RuleSet rs, RuleSet catalog, Dictionary<string, Unit?> bases, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses, List<UnusedLine> unused)
     {
         var byProduct = new Dictionary<string, ProductAllocation>();
         foreach (var a in allocs)
@@ -221,7 +221,7 @@ internal static class Revenue
             PricedPortions = pricedPortions,
             Portions = portions,
         };
-        var estimated = Estimates(c, rs, rows, allocs, unitCost, unused);
+        var estimated = Estimates(c, rs, bases, rows, allocs, unitCost, unused);
         flags.AddRange(Price(estimated, markups, summary));
         return new Report
         {

@@ -23,17 +23,18 @@ public static class Calculation
     public static Report Run(Case c, RuleSet catalog)
     {
         var rs = Recipes.Effective(c, catalog);
-        var (uses, ex, flags) = Normalize.Run(c, rs);
+        var bases = Scale.Bases(rs);
+        var (uses, ex, flags) = Normalize.Run(c, rs, bases);
         Yield.Run(c, rs, uses);
         var allocs = Allocate(c, rs, uses);
-        var rep = Revenue.Run(c, rs, catalog, allocs, uses, ex.Unused);
+        var rep = Revenue.Run(c, rs, catalog, bases, allocs, uses, ex.Unused);
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Deposits = ex.Deposits;
         rep.NoRevenue = ex.NoRevenue;
         rep.Warnings.AddRange(flags);
         rep.Warnings.AddRange(Scale.Conflicts(rs, ex.Unused.Select(l => l.IngredientId)));
-        rep.Ingredients = IngredientRows(rs, uses, allocs);
+        rep.Ingredients = IngredientRows(rs, bases, uses, allocs);
         var s = rep.Totals;
         s.DepositCharged = ex.Deposits.Where(l => l.LineNet > 0).Sum(l => l.LineNet);
         s.DepositRefunded = ex.Deposits.Where(l => l.LineNet < 0).Sum(l => l.LineNet);
@@ -45,7 +46,7 @@ public static class Calculation
         return rep;
     }
 
-    static List<IngredientRow> IngredientRows(RuleSet rs, SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
+    static List<IngredientRow> IngredientRows(RuleSet rs, Dictionary<string, Unit?> bases, SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
     {
         var leftover = new Dictionary<string, long>();
         HashSet<string> binding = [];
@@ -63,7 +64,7 @@ public static class Calculation
             {
                 IngredientId = id,
                 Name = Names.Ingredient(rs, id),
-                Unit = Scale.Of(rs, id) ?? Unit.Piece,
+                Unit = bases.GetValueOrDefault(id) ?? Unit.Piece,
                 Purchases = u.Purchases,
                 Opening = u.Opening,
                 Closing = u.Closing,

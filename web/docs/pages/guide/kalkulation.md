@@ -7,13 +7,14 @@
 Auf **4. Kalkulation** wechseln. Der kalkulierte Umsatz liegt bei rund
 223.000 € netto, gut 27.000 € über dem erklärten.
 
-Der Reiter hat drei Teile: oben die Verteilung auf die Produkte mit den
-Ertragsregeln, in der Mitte die Einkäufe außerhalb der Verteilung, unten das
-Ergebnis mit Umsätzen, Rohgewinnaufschlag und Zusammenfassung.
+Der Reiter öffnet mit dem **Ergebnis**: oben Umsatz nach Betriebsprüfung,
+Differenz und Aufschlagsatz, darunter Umsätze, Rohgewinnaufschlag und
+Zusammenfassung. Die Seiten **Verteilung**, **Ertragsregeln** und **Einkäufe
+außerhalb der Verteilung** zeigen, wie es zustande kommt.
 
 ## Einkäufe außerhalb der Verteilung
 
-Der mittlere Teil zeigt die Einkäufe, die nicht über Rezeptur und Preis in den
+Die Seite zeigt die Einkäufe, die nicht über Rezeptur und Preis in den
 Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
 - **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in keinem Produkt des
@@ -30,7 +31,7 @@ den Listen, sie gleichen sich über die Zeit aus.
 
 ## Ertragsregeln
 
-Unter der Verteilung stehen die Ertragsregeln der Kategorien und Zutaten,
+Auf der Seite **Ertragsregeln** stehen die Regeln der Kategorien und Zutaten,
 die in der Prüfung vorkommen und für die es mehr als eine Regel gibt:
 Schankverlust, Eigenverbrauch, Personalverpflegung und Freirunden. Je Zutat oder
 Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort

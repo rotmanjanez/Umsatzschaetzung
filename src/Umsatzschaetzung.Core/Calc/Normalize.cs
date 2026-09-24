@@ -18,7 +18,7 @@ public static class Normalize
         return output;
     }
 
-    internal static (SortedDictionary<string, IngredientUse> Uses, Excluded Ex, List<Flag> Flags) Run(Case c, RuleSet rs)
+    internal static (SortedDictionary<string, IngredientUse> Uses, Excluded Ex, List<Flag> Flags) Run(Case c, RuleSet rs, Dictionary<string, Unit?> bases)
     {
         var uses = new SortedDictionary<string, IngredientUse>(StringComparer.Ordinal);
         var inRecipe = RecipeIngredients(c, rs);
@@ -54,7 +54,7 @@ public static class Normalize
                     ex.NoRevenue.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
                     continue;
                 }
-                if (!inRecipe.Contains(ing.Id) || Scale.Of(rs, ing.Id) is not { } unit)
+                if (!inRecipe.Contains(ing.Id) || bases.GetValueOrDefault(ing.Id) is not { } unit)
                 {
                     ex.Unused.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
                     continue;
@@ -105,7 +105,7 @@ public static class Normalize
         foreach (var e in c.Inventory)
         {
             if (!rs.Ingredients.ContainsKey(e.IngredientId) || !inRecipe.Contains(e.IngredientId) || noRevenue.Contains(e.IngredientId)) continue;
-            if (Scale.Of(rs, e.IngredientId) is null) continue;
+            if (bases.GetValueOrDefault(e.IngredientId) is null) continue;
             var u = Use(e.IngredientId);
             u.Opening = Scale.ToBase(e.Opening, e.Unit);
             u.Closing = Scale.ToBase(e.Closing, e.Unit);
