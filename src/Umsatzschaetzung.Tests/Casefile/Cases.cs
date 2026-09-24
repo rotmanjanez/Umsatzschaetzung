@@ -35,7 +35,7 @@ static class Cases
         c.Products =
         [
             new() { ProductId = "prod.pils.05", GrossPrice = 450, Vat = 1900 },
-            new() { ProductId = "prod.pils.03", GrossPrice = 0, Vat = 700, Disabled = true },
+            new() { ProductId = "prod.pils.03", GrossPrice = 0, Vat = 700 },
         ];
         c.Yields =
         [
@@ -94,8 +94,8 @@ static class Cases
         Assert.Equal(expected.Declared.Select(d => (d.Vat, d.Net)), actual.Declared.Select(d => (d.Vat, d.Net)));
         Assert.Equal(expected.Inventory.Select(e => (e.IngredientId, e.Opening, e.Closing, e.Unit)),
             actual.Inventory.Select(e => (e.IngredientId, e.Opening, e.Closing, e.Unit)));
-        Assert.Equal(expected.Products.Select(p => (p.ProductId, p.GrossPrice, p.Vat, p.Disabled)),
-            actual.Products.Select(p => (p.ProductId, p.GrossPrice, p.Vat, p.Disabled)));
+        Assert.Equal(expected.Products.Select(p => (p.ProductId, p.GrossPrice, p.Vat)),
+            actual.Products.Select(p => (p.ProductId, p.GrossPrice, p.Vat)));
         Assert.Equal(expected.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)),
             actual.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)));
         Assert.Equal(expected.Pinned.Select(p => (p.ProductId, p.Portions, p.Reason)),

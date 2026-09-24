@@ -43,8 +43,6 @@ public sealed class CaseProduct
     public string ProductId { get; set; } = "";
     public long GrossPrice { get; set; }
     public long Vat { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Disabled { get; set; }
 }
 
 public sealed class Case

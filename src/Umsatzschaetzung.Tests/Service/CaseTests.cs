@@ -243,7 +243,7 @@ public sealed class CaseTests : IDisposable
 
         Assert.Equal(["fehlt"], read.Unknown);
         var listed = Assert.Single(read.Products);
-        Assert.Equal((product.Id, 390L, 1900L, false), (listed.ProductId, listed.GrossPrice, listed.Vat, listed.Disabled));
+        Assert.Equal((product.Id, 390L, 1900L), (listed.ProductId, listed.GrossPrice, listed.Vat));
         kase.Products.RemoveAll(p => p.ProductId == product.Id);
         kase.Products.Add(listed);
         await svc.PutCase(kase, ct);

@@ -107,10 +107,10 @@ Ware übrig lässt. Der Rest wird dabei mit dem Einkaufspreis bewertet, damit ei
 Verkaufspreise spielen für die Verteilung keine Rolle; sie kommen erst im
 nächsten Schritt hinzu.
 
-An der Verteilung nehmen nur die Produkte teil, die in der Prüfung **aktiv**
-sind. Ein Produkt, das der Betrieb nachweislich nicht führt, wird in der Prüfung
-deaktiviert und erhält keine Portionen; das ist eine Feststellung der Prüferin
-und erscheint als solche im Bericht.
+An der Verteilung nehmen nur die Produkte des **Sortiments** der Prüfung teil.
+Ein Produkt, das der Betrieb nicht führt, steht nicht im Sortiment und erhält
+keine Portionen; welche Produkte der Betrieb führt, ist eine Feststellung der
+Prüferin.
 
 In die Rechnung gehen zusätzlich die Vorgaben der Prüferin ein: festgesetzte
 Portionszahlen, etwa aus dem Kassenbericht oder einer Zählung. Ihr Verbrauch wird

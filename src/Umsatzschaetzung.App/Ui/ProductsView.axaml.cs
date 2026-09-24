@@ -52,6 +52,8 @@ public partial class ProductsView : Screen
     readonly ProductsModel model = new();
     readonly DispatcherTimer timer = new();
     int generation;
+    string dismissedCase = "";
+    HashSet<string> dismissed = [];
 
     public ProductsView(Session session) : base(session)
     {
@@ -91,8 +93,9 @@ public partial class ProductsView : Screen
     void Load()
     {
         if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
+        if (kase.Id != dismissedCase) (dismissedCase, dismissed) = (kase.Id, []);
         model.Rows.Clear();
-        foreach (var p in kase.Products.Where(p => !p.Disabled).OrderBy(p => Names.Product(rs, p.ProductId), StringComparer.CurrentCulture))
+        foreach (var p in kase.Products.OrderBy(p => Names.Product(rs, p.ProductId), StringComparer.CurrentCulture))
             model.Rows.Add(Row(rs, p));
         model.Suggestions.Clear();
         Schedule(0);
@@ -138,7 +141,7 @@ public partial class ProductsView : Screen
             if (!withInvoices || g != generation) return;
             var sold = await Assortment.Calculate(Session, saved, rs, Ct);
             if (sold is null || g != generation) return;
-            var suggestions = await Assortment.Suggest(Session, saved, rs, sold, Ct);
+            var suggestions = await Assortment.Suggest(Session, saved, rs, sold, dismissed, Ct);
             if (suggestions is null || g != generation) return;
             model.Suggestions.Clear();
             foreach (var s in suggestions) model.Suggestions.Add(s);
@@ -181,9 +184,7 @@ public partial class ProductsView : Screen
     void Add(string productId)
     {
         if (Session.Case is null || Session.Rules is not { } rs || model.Rows.Any(r => r.ProductId == productId)) return;
-        var cp = Settings(productId);
-        cp.Disabled = false;
-        var row = Row(rs, cp);
+        var row = Row(rs, Settings(productId));
         var at = 0;
         while (at < model.Rows.Count && StringComparer.CurrentCulture.Compare(model.Rows[at].Name, row.Name) < 0) at++;
         model.Rows.Insert(at, row);
@@ -212,7 +213,7 @@ public partial class ProductsView : Screen
     void DismissSuggestion(object? sender, RoutedEventArgs e)
     {
         if ((sender as Control)?.DataContext is not SuggestionRow s || Session.Case is null) return;
-        Settings(s.ProductId).Disabled = true;
+        dismissed.Add(s.ProductId);
         model.Suggestions.Remove(s);
         Schedule(0);
     }
@@ -237,7 +238,7 @@ public partial class ProductsView : Screen
             if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
             var listed = kase.Products.DistinctBy(p => p.ProductId).ToDictionary(p => p.ProductId);
             var conflicts = read.Products
-                .Where(p => listed.TryGetValue(p.ProductId, out var l) && !l.Disabled && (l.GrossPrice, l.Vat) != (p.GrossPrice, p.Vat))
+                .Where(p => listed.TryGetValue(p.ProductId, out var l) && (l.GrossPrice, l.Vat) != (p.GrossPrice, p.Vat))
                 .Select(p => new AssortmentConflict(Names.Product(rs, p.ProductId), listed[p.ProductId], p))
                 .OrderBy(c => c.Name, StringComparer.CurrentCulture)
                 .ToList();
@@ -246,7 +247,7 @@ public partial class ProductsView : Screen
             foreach (var p in read.Products)
             {
                 if (!listed.TryGetValue(p.ProductId, out var l)) kase.Products.Add(p);
-                else if (l.Disabled || take.Contains(p.ProductId)) (l.GrossPrice, l.Vat, l.Disabled) = (p.GrossPrice, p.Vat, false);
+                else if (take.Contains(p.ProductId)) (l.GrossPrice, l.Vat) = (p.GrossPrice, p.Vat);
             }
             Load();
             if (read.Unknown.Count > 0) Session.Fail("Nicht im Katalog: " + string.Join(", ", read.Unknown));

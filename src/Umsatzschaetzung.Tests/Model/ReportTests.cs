@@ -45,13 +45,13 @@ public class ReportTests
         Assert.Equal(0, new ProductRow { RevenueNet = 266 }.Markup);
     }
 
-    static ProductRow Row(long vat, long net, bool disabled = false) => new() { Vat = vat, RevenueNet = net, Disabled = disabled };
+    static ProductRow Row(long vat, long net) => new() { Vat = vat, RevenueNet = net };
 
     [Fact]
     public void VatRowsCompareDeclaredAndCalculatedPerRateThenInTotal()
     {
         var c = new Case { Declared = [new() { Vat = 1900, Net = 500_000 }, new() { Vat = 700, Net = 80_000 }, new() { Vat = 1900, Net = 20_000 }] };
-        var r = new Report { Products = [Row(700, 90_000), Row(1900, 600_000), Row(1900, 1_000, disabled: true), Row(1300, 7_000), Row(500, 3_000)] };
+        var r = new Report { Products = [Row(700, 90_000), Row(1900, 600_000), Row(1300, 7_000), Row(500, 3_000)] };
         var rows = VatRow.Of(c, r);
         Assert.Equal(
             [new(1900, 520_000, 600_000, false), new(700, 80_000, 90_000, false), new(500, 0, 3_000, false), new(1300, 0, 7_000, false),

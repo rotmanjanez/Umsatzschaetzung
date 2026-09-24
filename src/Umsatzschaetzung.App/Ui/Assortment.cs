@@ -10,18 +10,15 @@ public static class Assortment
     const int SuggestionCount = 5;
     const long Micro = 1_000_000;
 
-    public static HashSet<string> Listed(Case c) =>
-        [.. c.Products.Where(p => !p.Disabled).Select(p => p.ProductId)];
+    public static HashSet<string> Listed(Case c) => [.. c.Products.Select(p => p.ProductId)];
 
-    public static async Task<Report?> Calculate(Session session, Case c, RuleSet rs, CancellationToken ct)
-    {
-        return await Compute(session, WithProducts(c, ListedOnly(c, rs), []), rs, ct);
-    }
+    public static Task<Report?> Calculate(Session session, Case c, RuleSet rs, CancellationToken ct) => Compute(session, c, rs, ct);
 
-    public static async Task<List<SuggestionRow>?> Suggest(Session session, Case c, RuleSet rs, Report sold, CancellationToken ct)
+    public static async Task<List<SuggestionRow>?> Suggest(Session session, Case c, RuleSet rs, Report sold, IReadOnlySet<string> dismissed, CancellationToken ct)
     {
-        var candidates = Candidates(c, rs);
-        var report = await Compute(session, WithProducts(c, Excluded(c, rs, candidates), Fixed(c, sold, candidates)), rs, ct);
+        var candidates = Candidates(c, rs, dismissed);
+        List<CaseProduct> products = [.. c.Products, .. candidates.Select(id => new CaseProduct { ProductId = id })];
+        var report = await Compute(session, WithProducts(c, products, Fixed(c, sold, candidates)), rs, ct);
         return report is null ? null : Ranked(rs, sold, report, candidates);
     }
 
@@ -42,18 +39,6 @@ public static class Assortment
         }
     }
 
-    static CaseProduct Copy(CaseProduct p) =>
-        new() { ProductId = p.ProductId, GrossPrice = p.GrossPrice, Vat = p.Vat, Disabled = p.Disabled };
-
-    static List<CaseProduct> ListedOnly(Case c, RuleSet rs)
-    {
-        var products = c.Products.Select(Copy).ToList();
-        var known = products.Select(p => p.ProductId).ToHashSet();
-        foreach (var id in rs.Products.Keys)
-            if (!known.Contains(id)) products.Add(new CaseProduct { ProductId = id, Disabled = true });
-        return products;
-    }
-
     static Case WithProducts(Case c, List<CaseProduct> products, List<PinnedPortions> pinned) => new()
     {
         Id = c.Id,
@@ -71,26 +56,17 @@ public static class Assortment
         UpdatedAt = c.UpdatedAt,
     };
 
-    static List<string> Candidates(Case c, RuleSet rs)
+    static List<string> Candidates(Case c, RuleSet rs, IReadOnlySet<string> dismissed)
     {
-        var known = c.Products.Select(p => p.ProductId).ToHashSet();
+        var known = Listed(c);
         return [.. rs.Products.Values
-            .Where(p => !known.Contains(p.Id) && p.Meta.ValidOn(c.PeriodTo) && Fits(rs, p, c.Taxpayer.Gewerbe))
+            .Where(p => !known.Contains(p.Id) && !dismissed.Contains(p.Id) && p.Meta.ValidOn(c.PeriodTo) && Fits(rs, p, c.Taxpayer.Gewerbe))
             .Select(p => p.Id)];
     }
 
     static bool Fits(RuleSet rs, Product p, string gewerbe) =>
         p.Recipe.TrueForAll(r => !rs.Ingredients.TryGetValue(r.IngredientId, out var ing)
             || !rs.Categories.TryGetValue(ing.CategoryId, out var cat) || cat.Covers(gewerbe));
-
-    static List<CaseProduct> Excluded(Case c, RuleSet rs, List<string> candidates)
-    {
-        var products = c.Products.Select(Copy).ToList();
-        HashSet<string> keep = [.. products.Select(p => p.ProductId), .. candidates];
-        foreach (var id in rs.Products.Keys)
-            if (!keep.Contains(id)) products.Add(new CaseProduct { ProductId = id, Disabled = true });
-        return products;
-    }
 
     static List<PinnedPortions> Fixed(Case c, Report sold, List<string> candidates)
     {

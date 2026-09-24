@@ -115,7 +115,6 @@ internal static class Revenue
                 CostPerPortion = perPortion / UnitCost.Scale,
                 GrossPrice = cp.GrossPrice,
                 Vat = cp.Vat,
-                Disabled = cp.Disabled,
                 PriceMissing = PriceMissing(cp),
             };
             if (hasPortions)

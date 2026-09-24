@@ -34,7 +34,7 @@ public sealed partial class CaseStore(string dir)
             mapped_at INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID;
         CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
         CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
-        CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL, disabled INTEGER NOT NULL) WITHOUT ROWID;
+        CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL) WITHOUT ROWID;
         CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, ingredient_id TEXT, category_id TEXT, yield_rule_id TEXT NOT NULL);
         CREATE TABLE pinned(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, portions INTEGER NOT NULL, reason TEXT NOT NULL);
         CREATE TABLE invoice(
@@ -308,8 +308,8 @@ public sealed partial class CaseStore(string dir)
         for (var i = 0; i < c.Products.Count; i++)
         {
             var p = c.Products[i];
-            Exec(db, tx, "INSERT INTO case_product(product_id, ord, gross_price, vat, disabled) VALUES(@id, @ord, @price, @vat, @disabled)",
-                ("@id", p.ProductId), ("@ord", i), ("@price", p.GrossPrice), ("@vat", p.Vat), ("@disabled", p.Disabled));
+            Exec(db, tx, "INSERT INTO case_product(product_id, ord, gross_price, vat) VALUES(@id, @ord, @price, @vat)",
+                ("@id", p.ProductId), ("@ord", i), ("@price", p.GrossPrice), ("@vat", p.Vat));
         }
 
         for (var i = 0; i < c.Yields.Count; i++)
@@ -359,10 +359,10 @@ public sealed partial class CaseStore(string dir)
                 {
                     IngredientId = r.GetString(0), Opening = r.GetInt64(1), Closing = r.GetInt64(2), Unit = r.GetString(3),
                 }));
-            ReadRows(db, "SELECT product_id, gross_price, vat, disabled FROM case_product ORDER BY ord",
+            ReadRows(db, "SELECT product_id, gross_price, vat FROM case_product ORDER BY ord",
                 r => c.Products.Add(new CaseProduct
                 {
-                    ProductId = r.GetString(0), GrossPrice = r.GetInt64(1), Vat = r.GetInt64(2), Disabled = r.GetBoolean(3),
+                    ProductId = r.GetString(0), GrossPrice = r.GetInt64(1), Vat = r.GetInt64(2),
                 }));
             ReadRows(db, "SELECT ingredient_id, category_id, yield_rule_id FROM yield_choice ORDER BY ord",
                 r => c.Yields.Add(new YieldChoice

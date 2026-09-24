@@ -85,11 +85,10 @@ public static class Calculation
 
     internal static List<string> EnabledProducts(Case c, RuleSet rs)
     {
-        var settings = CaseProducts(c);
         List<string> output = [];
-        foreach (var (id, p) in rs.Products)
-            if (p.Meta.ValidOn(c.PeriodTo) && !(settings.TryGetValue(id, out var s) && s.Disabled))
-                output.Add(id);
+        foreach (var cp in c.Products)
+            if (rs.Products.TryGetValue(cp.ProductId, out var p) && p.Meta.ValidOn(c.PeriodTo))
+                output.Add(cp.ProductId);
         output.Sort(StringComparer.Ordinal);
         return output;
     }

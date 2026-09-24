@@ -43,7 +43,7 @@ public sealed record VatRow(long Vat, long Declared, long Calculated, bool Total
         foreach (var d in c.Declared) declared[d.Vat] = declared.GetValueOrDefault(d.Vat) + d.Net;
         var calculated = new Dictionary<long, long>();
         foreach (var p in r.Products)
-            if (!p.Disabled) calculated[p.Vat] = calculated.GetValueOrDefault(p.Vat) + p.RevenueNet;
+            calculated[p.Vat] = calculated.GetValueOrDefault(p.Vat) + p.RevenueNet;
         List<VatRow> rows = [];
         long sumDeclared = 0, sumCalculated = 0;
         foreach (var rate in Rates.Concat(declared.Keys.Union(calculated.Keys).Where(k => !Rates.Contains(k)).Order()))
@@ -166,7 +166,6 @@ public sealed class ProductRow
     public long UnitNet { get; set; }
     public long RevenueNet { get; set; }
     public long Markup => Rohaufschlag.Of(RevenueNet, CostOfGoods);
-    public bool Disabled { get; set; }
     public bool PriceMissing { get; set; }
 }
 

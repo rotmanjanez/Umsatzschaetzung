@@ -40,7 +40,7 @@ public static class Csv
     {
         var b = new StringBuilder("﻿");
         Append(b, ProductColumn, PriceColumn, VatColumn, IdColumn);
-        foreach (var (p, name) in c.Products.Where(p => !p.Disabled)
+        foreach (var (p, name) in c.Products
                      .Select(p => (p, Names.Product(rs, p.ProductId)))
                      .OrderBy(x => x.Item2, StringComparer.CurrentCulture))
             Append(b, name, p.GrossPrice > 0 ? Format.Cents(p.GrossPrice) : "", Format.Bp(p.Vat), p.ProductId);

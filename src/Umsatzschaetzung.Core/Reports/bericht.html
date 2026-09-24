@@ -223,7 +223,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <td class="num">{{ p.vat | bp }}</td>
             <td class="num">{{ p.revenueNet | cents }}</td>
             <td class="num">{% if p.costOfGoods %}{% if not p.priceMissing %}{{ p.markup | bp }}{% endif %}{% endif %}</td>
-            <td>{% if p.disabled %}deaktiviert{% else %}{% if p.priceMissing %}Preis fehlt{% else %}{% if p.pinned %}vorgegeben{% endif %}{% endif %}{% endif %}</td>
+            <td>{% if p.priceMissing %}Preis fehlt{% else %}{% if p.pinned %}vorgegeben{% endif %}{% endif %}</td>
           </tr>
           {% endfor %}
           <tr class="total">

@@ -22,9 +22,9 @@ INSERT INTO invoice_line(invoice_id, ord, no, name, seller_article_id, gtin, qua
     ('inv.bar.1', 1, 2, 'Pils 24 x 0,33 l Kiste',   '31210', NULL, 30000, 'XCS', 13200000, 1000,  39600, 1900, 'map.kiste24x033'),
     ('inv.bar.1', 2, 3, 'Doppelkorn 0,7 l 38% vol', '55120', NULL, 20000, 'XBO',  9200000, 1000,  18400, 1900, 'map.korn07');
 
-INSERT INTO case_product(product_id, ord, gross_price, vat, disabled) VALUES
-    ('prod.pils.03',      0, 320, 1900, 0),
-    ('prod.pils.05',      1, 450, 1900, 0),
-    ('prod.pils.flasche', 2, 350, 1900, 0),
-    ('prod.korn.2cl',     3, 180, 1900, 0),
-    ('prod.korn.4cl',     4, 320, 1900, 0);
+INSERT INTO case_product(product_id, ord, gross_price, vat) VALUES
+    ('prod.pils.03',      0, 320, 1900),
+    ('prod.pils.05',      1, 450, 1900),
+    ('prod.pils.flasche', 2, 350, 1900),
+    ('prod.korn.2cl',     3, 180, 1900),
+    ('prod.korn.4cl',     4, 320, 1900);

@@ -94,7 +94,6 @@ public class AssortmentCsvTests
             [
                 new CaseProduct { ProductId = First.Id, GrossPrice = 123450, Vat = 1900 },
                 new CaseProduct { ProductId = Second.Id, Vat = 700 },
-                new CaseProduct { ProductId = "gone", Disabled = true },
             ],
         };
 
@@ -102,11 +101,10 @@ public class AssortmentCsvTests
         var text = Encoding.UTF8.GetString(csv).TrimStart('﻿');
         Assert.StartsWith("Produkt;Bruttopreis;USt;Produkt-ID\r\n", text);
         Assert.Contains("1.234,50 €;19 %;" + First.Id + "\r\n", text);
-        Assert.DoesNotContain("gone", text);
 
         var read = Csv.ReadAssortment(csv, Rules);
         Assert.Empty(read.Unknown);
-        Assert.Equivalent(kase.Products.Take(2).OrderBy(p => p.ProductId), read.Products.OrderBy(p => p.ProductId), strict: true);
+        Assert.Equivalent(kase.Products.OrderBy(p => p.ProductId), read.Products.OrderBy(p => p.ProductId), strict: true);
     }
 
     [Fact]
