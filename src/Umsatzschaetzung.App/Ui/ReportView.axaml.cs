@@ -16,7 +16,6 @@ public sealed class ExcludedRow(LineGroup group, Exclusion why, string? ingredie
     public Exclusion Why { get; } = why;
     public string? IngredientId { get; } = ingredientId;
     public string Name => Group.Name;
-    public string Supplier => Group.Supplier;
     public string Ingredient { get; } = ingredient;
     public string Reason => Why switch
     {

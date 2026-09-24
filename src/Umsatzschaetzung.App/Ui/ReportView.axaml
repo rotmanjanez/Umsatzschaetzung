@@ -40,13 +40,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Lieferant" Width="130" SortMemberPath="Supplier">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="ui:ExcludedRow">
-                                        <TextBlock Classes="cell" Text="{Binding Supplier}" Theme="{StaticResource Muted}" ToolTip.Tip="{Binding Supplier}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Grund" Width="130" SortMemberPath="Reason">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:ExcludedRow">
