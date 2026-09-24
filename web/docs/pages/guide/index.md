@@ -38,14 +38,14 @@ Ein paar Wörter kommen dabei immer wieder vor:
 ## Das Beispiel
 
 Geprüft wird das **Gasthaus Zur Linde** für das Jahr 2025. Es hat einen Umsatz
-von 196.418 € netto erklärt. Vorliegen 106 Eingangsrechnungen, alle als Scan,
+von 196.418 € netto erklärt. Es liegen 106 Eingangsrechnungen vor, alle als Scan,
 dazu die Speisekarte als Tabelle. Beide Dateien sind an der Stelle verlinkt, an
 der sie gebraucht werden.
 
 ## Zeitbedarf
 
-Rund eine Stunde, davon etwa die Hälfte Wartezeit: Das Einlesen der 106 Scans
-dauert je nach Rechner 10 bis 30 Minuten.
+Rund eine Stunde. Das Einlesen der 106 Scans dauert je nach Rechner wenige
+Minuten bis eine halbe Stunde.
 
 !!! tip "Mitmachen"
     Am meisten bringt die Anleitung, wenn jeder Schritt gleich im Programm

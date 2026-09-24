@@ -44,7 +44,8 @@ Position und rechnet das Ergebnis gegen die Summen des Belegs. Geht die
 Rechnung auf, wird sie übernommen. Geht sie nicht auf, kommt sie zur
 Durchsicht: Sie wird trotzdem eingelesen, muss aber von Hand geprüft werden.
 
-Je nach Rechner dauert das für die 106 Scans 10 bis 30 Minuten. Am Ende steht
+Je nach Rechner dauert das für die 106 Scans wenige Minuten bis eine halbe
+Stunde. Am Ende steht
 im Fenster, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht
 anstehen:
 

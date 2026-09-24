@@ -40,7 +40,8 @@ die Rechnung als durchgesehen und schließt das Fenster.
 ## Eine verlesene Ziffer: 2025/0561
 
 Die Metzgereirechnung öffnen. Beim Rinderhackfleisch sind Menge, Einzelpreis und
-Betrag markiert, und das Häkchen ist gesperrt:
+Betrag markiert. Ein Klick auf das Häkchen meldet „Nicht bestätigt, bitte die
+markierten Werte korrigieren.“, danach ist es gesperrt:
 
 ![Die Rechnung 2025/0561, eine Zeile geht nicht auf](img/korrektur-0561.png)
 
@@ -126,7 +127,7 @@ Die drei Fälle decken das meiste ab, was bei Scans schiefgeht:
 | Fehler | So zeigt es das Programm | Korrektur |
 |---|---|---|
 | Ein Wert fehlt | Das Feld ist markiert | Wert vom Beleg abschreiben |
-| Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, das Häkchen ist gesperrt | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
+| Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, das Häkchen sperrt nach dem ersten Klick | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
 | Eine Zeile ist zerrissen (Stempel, Knick, Umbruch) | Eine Zeile ohne Namen oder mit 0,00 €, dazu fehlende Werte | Die Werte in einer Zeile zusammenführen, die andere löschen |
 | Der Lieferant fehlt | Leeres Feld | Eintragen |
 | Der Steuersatz ist falsch gelesen | Brutto ist markiert, **Laut Beleg** und **Aus Positionen** weichen voneinander ab | Steuersatz je Zeile eintragen |

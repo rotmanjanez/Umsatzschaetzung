@@ -45,8 +45,7 @@ Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste:
     - bei keinem **Preis fehlt** steht
 
 !!! tip "Wieder derselbe Betrieb"
-    Wird ein Betrieb ein zweites Mal geprüft, bei beratungsresistenten
-    Mitbürgern auch ein drittes Mal, muss das Sortiment nicht neu entstehen:
+    Wird ein Betrieb ein zweites oder drittes Mal geprüft, muss das Sortiment nicht neu entstehen:
     in der alten Prüfung **CSV exportieren**, in der neuen dieselbe Datei
     importieren. Danach nur noch geänderte Preise anpassen und löschen, was
     nicht mehr auf der Karte steht.

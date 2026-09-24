@@ -31,9 +31,8 @@ Das Gasthaus kauft das Fleisch aber roh und paniert selbst; im Sortiment steht
 **Schnitzel mit Pommes**, und dessen Rezept rechnet mit Schweinefleisch.
 
 Die Zeile anklicken, **Manuell zuordnen**, als Zutat `Schweinefleisch` wählen
-und **Zuordnen**. Steht beim Faktor nichts, `1000` eintragen: Abgerechnet wird
-in Kilogramm, das Rezept rechnet in Gramm. Die Position verschwindet aus der
-Liste und zählt ab jetzt zum Schnitzel.
+und **Zuordnen**. Die Position verschwindet aus der Liste und zählt ab jetzt
+zum Schnitzel.
 
 Die automatische Zuordnung liegt meistens richtig, aber nicht immer. Darum am
 Ende immer prüfen, ob alles zusammenpasst: Ein großer Betrag in dieser Liste
@@ -103,7 +102,7 @@ Unten stehen zwei Schaltflächen:
 
 Ändert sich das Katalogrezept später, übernimmt die Prüfung das nicht von
 selbst. Beim Produkt steht dann **Katalogrezept seit der Anpassung geändert**;
-ob die Anpassung bleibt oder zurückgesetzt wird, entscheidet die Prüferin.
+ob die Anpassung bleibt oder zurückgesetzt wird, entscheidet der Prüfer.
 
 !!! tip "Faustregel"
     Ist das Rezept für jeden Betrieb falsch, den Katalog berichtigen. Weicht nur
