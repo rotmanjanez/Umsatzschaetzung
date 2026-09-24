@@ -36,7 +36,6 @@ public sealed class CalcModel : Observable
     public ObservableCollection<RevenueRow> Revenue { get; } = [];
     public ObservableCollection<MarkupRow> Markups { get; } = [];
     public ObservableCollection<KV> Summary { get; } = [];
-    public ObservableCollection<KV> Figures { get; } = [];
     public ObservableCollection<YieldKindGroup> Yields { get; } = [];
     public ExclusionModel Exclusions { get; } = new();
     public bool HasYields => Yields.Count > 0;
@@ -208,8 +207,6 @@ public partial class CalcView : Screen
             ProductGrid.ScrollIntoView(item, null);
         }
         var vat = VatRow.Of(kase, r);
-        model.Figures.Clear();
-        foreach (var kv in Figures(vat[^1], r)) model.Figures.Add(kv);
         model.Revenue.Clear();
         foreach (var v in Revenue(vat)) model.Revenue.Add(v);
         model.Markups.Clear();
@@ -427,13 +424,6 @@ public partial class CalcView : Screen
             new("Geschätzter Umsatz", Format.Cents(s.EstimatedRevenueNet)),
         ];
     }
-
-    static List<KV> Figures(VatRow total, Report r) =>
-    [
-        new("Umsatz nach BP", Format.Cents(total.Calculated)),
-        new("Differenz", Format.Cents(total.Difference)),
-        new("Aufschlagsatz", Format.Bp(r.Totals.Markup)),
-    ];
 
     static List<RevenueRow> Revenue(List<VatRow> rows) =>
         [.. rows.Select(v => new RevenueRow(v.Total ? "Summe" : Format.Bp(v.Vat),

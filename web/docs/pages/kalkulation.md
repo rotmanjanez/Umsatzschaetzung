@@ -17,8 +17,8 @@ Verkauf, Zutat für Zutat.
 Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
 Ertragsregeln rechnet die Kalkulation sofort neu.
 
-Der Reiter hat vier Seiten: **Ergebnis**, **Verteilung**, **Ertragsregeln** und
-**Einkäufe außerhalb der Verteilung**. Er öffnet mit dem Ergebnis.
+Der Reiter hat vier Seiten: **Verteilung**, **Ertragsregeln**, **Einkäufe
+außerhalb der Verteilung** und zuletzt das **Ergebnis**.
 
 ## Sortiment { #sortiment }
 
@@ -55,8 +55,7 @@ Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
 
 ## Ergebnis
 
-Oben stehen die Kennzahlen: Umsatz nach Betriebsprüfung, Differenz zum
-erklärten Umsatz und Rohgewinnaufschlagsatz. Darunter:
+Die Seite zeigt:
 
 - **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz
   je Steuersatz, mit Differenz, einschließlich des geschätzten Umsatzes. Der
