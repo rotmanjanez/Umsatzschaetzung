@@ -17,12 +17,6 @@ public sealed class ExcludedRow(LineGroup group, Exclusion why, string? ingredie
     public string? IngredientId { get; } = ingredientId;
     public string Name => Group.Name;
     public string Ingredient { get; } = ingredient;
-    public string Reason => Why switch
-    {
-        Exclusion.Unused => "in keiner Rezeptur",
-        Exclusion.NoFactor => "Faktor fehlt",
-        _ => "ohne Zuordnung",
-    };
     public long Net { get; set; }
     public string LineNet => Format.Cents(Net);
 }

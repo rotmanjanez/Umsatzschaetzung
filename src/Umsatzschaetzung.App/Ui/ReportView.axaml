@@ -46,13 +46,6 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Grund" Width="130" SortMemberPath="Reason">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:ExcludedRow">
-                                            <TextBlock Classes="cell" Text="{Binding Reason}" Theme="{StaticResource Muted}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ExcludedRow">
