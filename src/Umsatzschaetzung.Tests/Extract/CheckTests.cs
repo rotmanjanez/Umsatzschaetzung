@@ -200,16 +200,20 @@ public class CheckTests
         Assert.Equal(clean, !Checks.Invoice(inv).Any(f => f.Code == "gross_check"));
     }
 
+    // 5,00 at 19 % and 5,00 at 7 % make 11,30; a rate that was never read counts as 0 %.
     [Theory]
-    [InlineData(1900, 700)]
-    [InlineData(0, 0)]
-    public void MixedOrZeroRatesAreNotCheckedAgainstTheGross(long first, long second)
+    [InlineData(1900, 700, 1130, true)]
+    [InlineData(1900, 700, 9999, false)]
+    [InlineData(0, 0, 1000, true)]
+    [InlineData(0, 0, 1130, false)]
+    [InlineData(700, 0, 1130, false)]
+    public void MixedAndZeroRatesAreCheckedAgainstTheGross(long first, long second, long gross, bool clean)
     {
         var inv = Clean();
         inv.StatedNet = 1000;
-        inv.StatedGross = 9999;
+        inv.StatedGross = gross;
         inv.Lines = [Line(1, 500, first), Line(2, 500, second)];
-        Assert.DoesNotContain(Checks.Invoice(inv), f => f.Code == "gross_check");
+        Assert.Equal(clean, !Checks.Invoice(inv).Any(f => f.Code == "gross_check"));
     }
 
     [Fact]

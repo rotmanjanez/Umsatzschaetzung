@@ -5,20 +5,21 @@ namespace Umsatzschaetzung.Extract;
 public static class Check
 {
     // Line nets and line sums reproduce the document's own integer arithmetic to the cent. The
-    // gross total does not: suppliers either apply the rate once to the net total or round the
-    // tax per position and add those up, which differ by a cent on half-way lines. Both count.
+    // gross total does not: suppliers either apply each rate once to its share of the net or round
+    // the tax per position and add those up, which differ by a cent on half-way lines. Both count.
     // A mismatch sits on every cell of its formula, since any of them may be the misread one.
     public static List<Flag> Invoice(Invoice inv)
     {
         var flags = new List<Flag>();
         var net = inv.StatedNet ?? inv.NetTotal;
         var gross = inv.StatedGross ?? inv.GrossTotal;
-        long sum = 0;
-        var rates = new HashSet<long>();
+        long sum = 0, lineTax = 0;
+        var bases = new Dictionary<long, long>();
         foreach (var l in inv.Lines)
         {
             sum += l.LineNet;
-            rates.Add(l.Vat);
+            bases[l.Vat] = bases.GetValueOrDefault(l.Vat) + l.LineNet;
+            lineTax += InvoiceMath.RoundDiv(l.LineNet * l.Vat, Bp.Full);
             if (l.Quantity == 0)
                 flags.Add(new Flag { Code = "zero", LineNo = l.No, Field = Field.Quantity, Message = $"Zeile {l.No}: Menge ist null" });
             if (l.UnitCode == "")
@@ -39,16 +40,16 @@ public static class Check
                 "sum_net",
                 $"Summe der Positionen {Format.Cents(sum)} weicht vom Nettobetrag {Format.Cents(net)} ab",
                 [(0, Field.NetTotal), .. inv.Lines.Select(l => (l.No, Field.LineNet))]));
-        if (rates.Count == 1 && rates.Single() is var vat and > 0)
+        if (inv.Lines.Count > 0)
         {
-            var expected = InvoiceMath.RoundDiv(net * (Bp.Full + vat), Bp.Full);
-            long perLine = net;
-            foreach (var l in inv.Lines)
-                perLine += InvoiceMath.RoundDiv(l.LineNet * vat, Bp.Full);
-            if (expected != gross && perLine != gross)
+            var single = bases.Count == 1 ? bases.Keys.Single() : (long?)null;
+            var expected = net + (single is { } vat
+                ? InvoiceMath.RoundDiv(net * vat, Bp.Full)
+                : bases.Sum(b => InvoiceMath.RoundDiv(b.Value * b.Key, Bp.Full)));
+            if (expected != gross && net + lineTax != gross)
                 flags.AddRange(Cells(
                     "gross_check",
-                    $"Netto {Format.Cents(net)} zzgl. {Format.Bp(vat)} MwSt ergibt {Format.Cents(expected)}, Bruttobetrag ist {Format.Cents(gross)}",
+                    $"Netto {Format.Cents(net)} zzgl. {(single is { } rate ? Format.Bp(rate) + " " : "")}MwSt ergibt {Format.Cents(expected)}, Bruttobetrag ist {Format.Cents(gross)}",
                     [(0, Field.GrossTotal), (0, Field.NetTotal), .. inv.Lines.Select(l => (l.No, Field.Vat))]));
         }
         return flags;
