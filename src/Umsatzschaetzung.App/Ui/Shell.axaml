@@ -29,6 +29,12 @@
                     <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" ToolTip.Tip="Regeln" Click="ShowRules">
                         <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
                     </Button>
+                    <Border x:Name="SaveBadge" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="0,0,12,0" IsVisible="False">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Theme="{StaticResource Spinner}" Width="12" Height="12"/>
+                            <TextBlock x:Name="SaveText" Theme="{StaticResource BadgeText}"/>
+                        </StackPanel>
+                    </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="CaseLabel" Theme="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis"/>
                         <TextBlock x:Name="CasePeriod" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>

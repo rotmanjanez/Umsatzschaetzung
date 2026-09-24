@@ -159,4 +159,27 @@ public class JsonTests
         Assert.Empty(rs.Mappings);
         Assert.Equal(0, rs.Version);
     }
+
+    [Fact]
+    public void ACopyOfACaseHoldsEverythingAndSharesNothing()
+    {
+        var c = Umsatzschaetzung.Tests.Casefile.Cases.Full("fall-1");
+        c.MappedAt = 7;
+        var copy = Json.Copy(c);
+        Assert.Equal(Json.Serialize(c), Json.Serialize(copy));
+        copy.Invoices[1].Lines[0].Name = "anders";
+        copy.Declared.Clear();
+        Assert.NotEqual("anders", c.Invoices[1].Lines[0].Name);
+        Assert.NotEmpty(c.Declared);
+    }
+
+    [Fact]
+    public void ARuleEntityIsCopiedAsItsOwnKind()
+    {
+        IRuleEntity rule = new Ingredient { Id = "ing.gurke", Name = "Gurken", Piece = new Piece(400, Unit.G) };
+        var copy = Json.Copy(rule);
+        var ingredient = Assert.IsType<Ingredient>(copy);
+        Assert.NotSame(rule, copy);
+        Assert.Equal(("ing.gurke", "Gurken", new Piece(400, Unit.G)), (ingredient.Id, ingredient.Name, ingredient.Piece));
+    }
 }

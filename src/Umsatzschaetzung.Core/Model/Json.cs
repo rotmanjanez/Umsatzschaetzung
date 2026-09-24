@@ -12,6 +12,7 @@ namespace Umsatzschaetzung.Model;
     UseStringEnumConverter = true,
     WriteIndented = true)]
 [JsonSerializable(typeof(RuleSet))]
+[JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(Invoice))]
 [JsonSerializable(typeof(Sammlung))]
 public sealed partial class ModelJsonContext : JsonSerializerContext
@@ -32,4 +33,10 @@ public static class Json
     public static T Deserialize<T>(string json) =>
         JsonSerializer.Deserialize(json, (JsonTypeInfo<T>)ModelJsonContext.Default.GetTypeInfo(typeof(T))!)
         ?? throw new JsonException("leeres Dokument");
+
+    public static T Copy<T>(T value) where T : class
+    {
+        var type = value.GetType();
+        return (T)JsonSerializer.Deserialize(JsonSerializer.SerializeToUtf8Bytes(value, type, ModelJsonContext.Default), type, ModelJsonContext.Default)!;
+    }
 }

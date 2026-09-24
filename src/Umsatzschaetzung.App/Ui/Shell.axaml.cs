@@ -42,6 +42,7 @@ public partial class Shell : Window
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
         Activated += (_, _) => session.ActiveWindow = this;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
+        session.Indicate(this, SaveBadge, SaveText);
         if (OperatingSystem.IsMacOS()) NativeMenu.SetMenu(this, HelpMenu());
         else MenuBar.IsVisible = true;
         Help.OnF1(this, () => current?.Topic ?? Help.Start);
@@ -51,10 +52,18 @@ public partial class Shell : Window
             await session.LoadStatus(CancellationToken.None);
             await session.LoadRules(CancellationToken.None);
         };
+        Closing += async (_, e) =>
+        {
+            current?.Leave();
+            current = null;
+            if (session.Saved.IsCompleted) return;
+            e.Cancel = true;
+            await session.Saved;
+            Close();
+        };
         Closed += (_, _) =>
         {
             session.Imports.CancelAll();
-            current?.Leave();
             rules?.Close();
         };
     }
@@ -126,10 +135,13 @@ public partial class Shell : Window
         Show(screens[0]);
     }
 
-    void Back(object? sender, RoutedEventArgs e)
+    async void Back(object? sender, RoutedEventArgs e)
     {
         current?.Leave();
         current = null;
+        CaseUi.IsEnabled = false;
+        await session.Saved;
+        CaseUi.IsEnabled = true;
         session.CloseCase();
         CaseUi.IsVisible = false;
         CasesHost.IsVisible = true;

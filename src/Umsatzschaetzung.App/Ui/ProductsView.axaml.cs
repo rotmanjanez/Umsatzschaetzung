@@ -136,14 +136,11 @@ public partial class ProductsView : Screen
         var g = ++generation;
         var withInvoices = kase.Invoices.Count > 0;
         model.Suggesting = withInvoices;
-        await Session.Run(async () =>
+        if (await Session.SaveCase(Ct) && withInvoices && g == generation) await Session.Run(async () =>
         {
-            var saved = await Session.Service.PutCase(kase, Ct);
-            if (Session.Case == kase) Session.SetCase(saved);
-            if (!withInvoices || g != generation) return;
-            var sold = await Assortment.Calculate(Session, saved, rs, Ct);
+            var sold = await Assortment.Calculate(Session, kase, rs, Ct);
             if (sold is null || g != generation) return;
-            var suggestions = await Assortment.Suggest(Session, saved, rs, sold, dismissed, Ct);
+            var suggestions = await Assortment.Suggest(Session, kase, rs, sold, dismissed, Ct);
             if (suggestions is null || g != generation) return;
             model.Suggestions.Clear();
             foreach (var s in suggestions) model.Suggestions.Add(s);

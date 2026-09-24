@@ -10,6 +10,14 @@
                 <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}"/>
             </DockPanel>
         </Border>
-        <ContentControl x:Name="Body"/>
+        <Panel>
+            <ContentControl x:Name="Body"/>
+            <Border x:Name="SaveBadge" Theme="{StaticResource Badge}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,28,72,0" IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Theme="{StaticResource Spinner}" Width="12" Height="12"/>
+                    <TextBlock x:Name="SaveText" Theme="{StaticResource BadgeText}"/>
+                </StackPanel>
+            </Border>
+        </Panel>
     </DockPanel>
 </Window>

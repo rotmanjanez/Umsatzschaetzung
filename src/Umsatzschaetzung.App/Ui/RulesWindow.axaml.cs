@@ -18,6 +18,7 @@ public partial class RulesWindow : Window
         view.Enter();
         Help.OnF1(this, () => view.Topic);
         session.Anchor(this, ErrorBanner, ErrorText);
+        session.Indicate(this, SaveBadge, SaveText);
         Closed += (_, _) => view.Leave();
     }
 

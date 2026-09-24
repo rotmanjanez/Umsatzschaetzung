@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Security.Cryptography;
+using Avalonia.Styling;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 using Avalonia.Controls;
@@ -10,6 +11,8 @@ namespace Umsatzschaetzung.App.Ui;
 public sealed record PickedFile(string Name, byte[] Data);
 
 public enum Tab { Case, Invoices, Mapping, Products, Calc, Report }
+
+public enum SaveState { Idle, Slow, Stuck }
 
 public sealed class Session : Observable
 {
@@ -24,6 +27,11 @@ public sealed class Session : Observable
 
     static readonly Dictionary<string, string> NoCategories = [];
 
+    static readonly TimeSpan SlowAfter = TimeSpan.FromSeconds(1), StuckAfter = TimeSpan.FromSeconds(10);
+
+    readonly List<Write> pending = [];
+    Task? draining;
+    SaveState saveState;
     string error = "";
 
     public Session(IService service)
@@ -172,46 +180,127 @@ public sealed class Session : Observable
 
     public string Period => Case is null ? "" : Format.Period(Case.PeriodFrom, Case.PeriodTo);
 
+    public SaveState SaveState
+    {
+        get => saveState;
+        private set => Set(ref saveState, value);
+    }
+
+    public Task Saved => draining ?? Task.CompletedTask;
+
     public Task<bool> SaveCase(CancellationToken ct)
     {
-        var kase = Case;
-        if (kase is null) return Task.FromResult(false);
-        return Run(async () =>
+        if (Case is not { } kase) return Task.FromResult(false);
+        return Enqueue(kase, async () =>
         {
-            var saved = await Service.PutCase(kase, ct);
-            if (Case == kase) SetCase(saved);
-        });
+            var saved = await Service.PutCase(Json.Copy(kase), CancellationToken.None);
+            kase.CreatedAt = saved.CreatedAt;
+            kase.UpdatedAt = saved.UpdatedAt;
+            if (Case == kase) SetCase(kase);
+        }, ct);
     }
 
     public Task<bool> Put(IRuleEntity data, CancellationToken ct)
     {
         data.Meta = new Meta { ChangedAt = Clock.Now() };
-        return SaveRule(data, ct);
-    }
-
-    public Task<bool> Delete(Entity entity, string id, CancellationToken ct) =>
-        Run(async () =>
-        {
-            Rules = await Service.DeleteRule(entity, id, ct);
-            RulesChanged?.Invoke();
-            await LoadStatus(ct);
-        });
-
-    Task<bool> SaveRule(IRuleEntity rule, CancellationToken ct) =>
-        Run(async () =>
+        return Enqueue((data.GetType(), data.Id), async () =>
         {
             try
             {
-                Rules = await Service.SaveRule(rule, ct);
+                Rules = await Service.SaveRule(Json.Copy(data), CancellationToken.None);
             }
             catch (ServiceError)
             {
-                await LoadRules(ct);
+                await LoadRules(CancellationToken.None);
                 throw;
             }
             RulesChanged?.Invoke();
-            await LoadStatus(ct);
-        });
+            await LoadStatus(CancellationToken.None);
+        }, ct);
+    }
+
+    public Task<bool> Delete(Entity entity, string id, CancellationToken ct) =>
+        Enqueue(null, async () =>
+        {
+            Rules = await Service.DeleteRule(entity, id, CancellationToken.None);
+            RulesChanged?.Invoke();
+            await LoadStatus(CancellationToken.None);
+        }, ct);
+
+    // One write at a time, in the order asked. A write for the same thing as one still
+    // waiting takes its place, unless a delete waits between them. Each write copies what
+    // it stores when it starts, so edits made meanwhile never reach it half done.
+    Task<bool> Enqueue(object? key, Func<Task> work, CancellationToken ct)
+    {
+        var i = pending.FindLastIndex(w => w.Key is null || w.Key.Equals(key));
+        if (key is null || i < 0 || pending[i].Key is null)
+        {
+            i = pending.Count;
+            pending.Add(new Write(key, work));
+        }
+        else pending[i].Work = work;
+        var done = pending[i].Done.Task;
+        if (draining is not { IsCompleted: false }) draining = Drain();
+        return ct.CanBeCanceled ? Outcome(done, ct) : done;
+    }
+
+    static async Task<bool> Outcome(Task<bool> write, CancellationToken ct)
+    {
+        try
+        {
+            return await write.WaitAsync(ct);
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+    }
+
+    async Task Drain()
+    {
+        while (pending.Count > 0)
+        {
+            var write = pending[0];
+            pending.RemoveAt(0);
+            write.Done.SetResult(await Watched(Run(write.Work)));
+        }
+        SaveState = SaveState.Idle;
+    }
+
+    async Task<bool> Watched(Task<bool> write)
+    {
+        if (await Task.WhenAny(write, Task.Delay(SlowAfter)) == write) return await write;
+        SaveState = SaveState.Slow;
+        if (await Task.WhenAny(write, Task.Delay(StuckAfter - SlowAfter)) == write) return await write;
+        SaveState = SaveState.Stuck;
+        return await write;
+    }
+
+    // Every window that edits shows the same badge while a write takes long.
+    public void Indicate(Window window, Border badge, TextBlock text)
+    {
+        void Changed(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(SaveState)) return;
+            var stuck = saveState == SaveState.Stuck;
+            badge.IsVisible = saveState != SaveState.Idle;
+            badge.Theme = (ControlTheme)window.FindResource(stuck ? "BadgeWarning" : "Badge")!;
+            text.Text = stuck ? "Speichern dauert ungewöhnlich lange" : "Speichert …";
+            ToolTip.SetTip(badge, stuck
+                ? "Die letzten Änderungen sind noch nicht gespeichert. Liegt der Speicher auf einem Netzlaufwerk, "
+                    + "kann die Verbindung langsam oder unterbrochen sein. Das Speichern läuft weiter."
+                : null);
+        }
+        PropertyChanged += Changed;
+        window.Closed += (_, _) => PropertyChanged -= Changed;
+    }
+
+    sealed class Write(object? key, Func<Task> work)
+    {
+        public object? Key { get; } = key;
+        public Func<Task> Work { get; set; } = work;
+        public TaskCompletionSource<bool> Done { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
 
     public static string NewId(string prefix) => prefix + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(6));
 
