@@ -10,8 +10,24 @@ public static class Cells
 {
     // The grid itself copies whole rows, and a template column has nothing to give it: the current
     // cell is what a click picks, so that is what goes to and comes from the clipboard.
-    public static void Register() =>
+    public static void Register()
+    {
         InputElement.KeyDownEvent.AddClassHandler<DataGrid>(Pressed, RoutingStrategies.Tunnel);
+        InputElement.TextInputEvent.AddClassHandler<DataGrid>(Typed);
+    }
+
+    // The grid only edits on F2 or a second click; typing into a selected cell replaces it like a sheet.
+    static void Typed(DataGrid grid, TextInputEventArgs e)
+    {
+        if (e.Source is TextBox || string.IsNullOrEmpty(e.Text) || grid.IsReadOnly) return;
+        if (grid.SelectedItem is not { } item || grid.CurrentColumn is not { IsReadOnly: false } column) return;
+        if (!grid.BeginEdit(e) || Box(column.GetCellContent(item)) is not { } box) return;
+        e.Handled = true;
+        box.Text = e.Text;
+        box.Focus();
+        box.ClearSelection();
+        box.CaretIndex = box.Text.Length;
+    }
 
     static void Pressed(DataGrid grid, KeyEventArgs e)
     {
