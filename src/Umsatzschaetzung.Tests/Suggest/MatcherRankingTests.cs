@@ -247,4 +247,33 @@ public class MatcherRankingTests
         var s = Suggest(new FixedCache().At("A", 0.9), rs, line: line);
         Assert.Equal(factor, Assert.Single(s).Mapping.Factor);
     }
+
+    static RuleSet Beer() => Rules(
+        new Category { Id = "cat.fass", Name = "Bier vom Fass", Gebinde = ["XKG", "XBA"] },
+        new Category { Id = "cat.flasche", Name = "Bier Flasche", Gebinde = ["XBO", "XCS"] },
+        Ing("ing.fass", "Fassbier", "cat.fass"),
+        Ing("ing.flasche", "Flaschenbier", "cat.flasche"));
+
+    [Theory]
+    [InlineData("Pils 30 l", "XKG", "ing.fass")]
+    [InlineData("Pils Fass 30 l", "H87", "ing.fass")]
+    [InlineData("Pils 30 l KEG", "", "ing.fass")]
+    [InlineData("Pils 20 x 0,5 l", "XCS", "ing.flasche")]
+    public void ThePackagingDecidesBetweenWaresTheWordsCannotTellApart(string name, string unit, string want)
+    {
+        var cache = new FixedCache().At("Fassbier", 0.9).At("Flaschenbier", 0.9).Query(name);
+        using var m = new Matcher(cache);
+        var s = m.Suggest(Beer(), "", null, new InvoiceLine { Name = name, UnitCode = unit });
+        Assert.Equal(want, s[0].Mapping.IngredientId);
+        Assert.Equal(Confidence(0.9), s[0].Confidence);
+    }
+
+    [Fact]
+    public void WithoutAContainerThePackagingSaysNothing()
+    {
+        var cache = new FixedCache().At("Fassbier", 0.8).At("Flaschenbier", 0.9).Query("Pils 0,33 l");
+        using var m = new Matcher(cache);
+        var s = m.Suggest(Beer(), "", null, new InvoiceLine { Name = "Pils 0,33 l", UnitCode = "H87" });
+        Assert.Equal([Confidence(0.9), Confidence(0.8)], s.Select(x => x.Confidence));
+    }
 }

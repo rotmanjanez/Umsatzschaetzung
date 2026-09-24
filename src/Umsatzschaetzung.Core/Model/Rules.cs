@@ -56,12 +56,17 @@ public sealed class Category : IRuleEntity
     // Gewerbekennzahlen der Richtsatzsammlung, auch als Präfix ("561" für alle Gastronomie).
     // Leer heißt: in jedem Gewerbe.
     public List<string> Gewerbe { get; set; } = [];
+    // Packmittel, in denen die Ware geliefert wird ("XKG" für Bier vom Fass). Leer heißt: in jedem.
+    public List<string> Gebinde { get; set; } = [];
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Sparte Sparte { get; set; }
     public Meta Meta { get; set; } = new();
 
     public bool Covers(string? kennzahl) =>
         string.IsNullOrEmpty(kennzahl) || Gewerbe.Count == 0 || Gewerbe.Exists(kennzahl.StartsWith);
+
+    public bool Contradicts(IReadOnlySet<string> containers) =>
+        Gebinde.Count > 0 && containers.Count > 0 && !Gebinde.Exists(containers.Contains);
 }
 
 public sealed class Ingredient : IRuleEntity

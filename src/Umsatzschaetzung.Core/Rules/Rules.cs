@@ -50,6 +50,9 @@ public static class RuleCheck
         if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Kategorie: Name darf nicht leer sein");
         foreach (var g in e.Gewerbe)
             if (!Gewerbe.Kennzahl(g)) throw new RulesException($"Kategorie \"{e.Name}\": Gewerbekennzahl \"{g}\" ist ungültig");
+        foreach (var u in e.Gebinde)
+            if (Units.Lookup(u) is not { Container: true } info || info.Code != u)
+                throw new RulesException($"Kategorie \"{e.Name}\": \"{u}\" ist kein Packmittelcode");
     }
 
     static void ValidateIngredient(RuleSet rs, Ingredient e)

@@ -17,7 +17,7 @@
     { "code": "XPK", "name": "Packung",   "base": "piece", "factor": 1, "container": true, "aliases": ["pk", "pkg", "packung", "pack"] },
     { "code": "XCR", "name": "Kasten",    "base": "piece", "factor": 1, "container": true, "aliases": ["kasten"] },
     { "code": "XBA", "name": "Fass",      "base": "piece", "factor": 1, "container": true, "aliases": [] },
-    { "code": "XKG", "name": "Keg",       "base": "piece", "factor": 1, "container": true, "aliases": ["fass", "fässer"] },
+    { "code": "XKG", "name": "Keg",       "base": "piece", "factor": 1, "container": true, "aliases": ["fass", "fässer", "keg", "kegs"] },
     { "code": "XBG", "name": "Beutel",    "base": "piece", "factor": 1, "container": true, "aliases": ["beutel", "btl"] },
     { "code": "XCI", "name": "Kanister",  "base": "piece", "factor": 1, "container": true, "aliases": ["kanister", "kan"] },
     { "code": "XSA", "name": "Sack",      "base": "piece", "factor": 1, "container": true, "aliases": ["sack", "säcke", "sa"] },

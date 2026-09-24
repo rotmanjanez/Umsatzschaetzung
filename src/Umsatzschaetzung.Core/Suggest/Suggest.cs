@@ -16,6 +16,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
 {
     const int Candidates = 5;
     const int Floor = 20;
+    const double Mismatch = 0.1;
 
     readonly Encoder encoder = new();
     readonly Lock gate = new();
@@ -54,6 +55,13 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             if (!best.TryGetValue(owner[i], out var b) || cos > b) best[owner[i]] = cos;
         }
 
+        // The encoder reads "Pils" and hardly the keg it comes in; the packaging decides
+        // between wares the words cannot tell apart.
+        var held = Containers(line);
+        foreach (var id in best.Keys)
+            if (rs.Categories.GetValueOrDefault(rs.Ingredients[id].CategoryId)?.Contradicts(held) == true)
+                best[id] -= Mismatch;
+
         var pack = PackSize.Read(line.Name);
         var sugs = best
             .Where(s => s.Key != hit?.IngredientId)
@@ -70,6 +78,18 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         if (hit is not null) sugs.Insert(0, new Suggestion(hit, 100, OriginKind.Exact));
         return sugs;
     }
+
+    // The line's own unit and every container its wording names: "Pils Fass 30 l KEG" is a keg
+    // whatever the supplier booked it in.
+    static HashSet<string> Containers(InvoiceLine line)
+    {
+        var held = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var word in line.Name.Split(Separators, StringSplitOptions.RemoveEmptyEntries).Append(line.UnitCode))
+            if (Units.Lookup(word) is { Container: true } u) held.Add(u.Code);
+        return held;
+    }
+
+    static readonly char[] Separators = [' ', ',', ';', '/', '(', ')'];
 
     double Dot(float[] query, int entry)
     {

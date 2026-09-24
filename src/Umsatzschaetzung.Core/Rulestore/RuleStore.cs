@@ -70,6 +70,10 @@ public sealed class RuleStore
         CREATE INDEX synonym_begriff ON synonym(begriff);
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
         """,
+        """
+        CREATE TABLE category_gebinde(category_id TEXT NOT NULL, ord INTEGER NOT NULL, unit_code TEXT NOT NULL,
+            PRIMARY KEY(category_id, ord)) WITHOUT ROWID;
+        """,
     ];
 
     static readonly string[] SammlungTables =
@@ -102,6 +106,7 @@ public sealed class RuleStore
             using var tx = db.BeginTransaction(deferred: false);
             SeedRules(db, tx, seed);
             SeedPieces(db, tx, seed);
+            SeedUntouched(db, tx, seed);
             SeedSammlungen(db, tx);
             tx.Commit();
             return 0;
@@ -229,6 +234,7 @@ public sealed class RuleStore
                 for (var i = 0; i < x.Gewerbe.Count; i++)
                     Exec(db, tx, "INSERT INTO category_gewerbe(category_id, ord, kennzahl) VALUES(@id, @ord, @kennzahl)",
                         ("@id", x.Id), ("@ord", i), ("@kennzahl", x.Gewerbe[i]));
+                PutGebinde(db, tx, x);
                 break;
 
             case Ingredient x:
@@ -323,11 +329,18 @@ public sealed class RuleStore
             if (!gewerbe.TryGetValue(r.GetString(0), out var list)) gewerbe[r.GetString(0)] = list = [];
             list.Add(r.GetString(1));
         });
+        var gebinde = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        Rows(db, tx, "SELECT category_id, unit_code FROM category_gebinde ORDER BY category_id, ord", r =>
+        {
+            if (!gebinde.TryGetValue(r.GetString(0), out var list)) gebinde[r.GetString(0)] = list = [];
+            list.Add(r.GetString(1));
+        });
         Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, rev, sparte FROM category WHERE deleted_at IS NULL",
             r => rs.Put(new Category
             {
                 Id = r.GetString(0), Name = r.GetString(1), Meta = ReadMeta(r, 2),
                 Gewerbe = gewerbe.GetValueOrDefault(r.GetString(0), []),
+                Gebinde = gebinde.GetValueOrDefault(r.GetString(0), []),
                 Sparte = ReadSparte(r, 6),
             }));
 
@@ -405,6 +418,26 @@ public sealed class RuleStore
             if (e.Piece is { } p)
                 Exec(db, tx, "UPDATE ingredient SET piece_amount = @amount, piece_unit = @unit WHERE id = @id AND piece_amount IS NULL",
                     ("@id", e.Id), ("@amount", p.Amount), ("@unit", Units.Code(p.Unit)));
+    }
+
+    // Rows nobody has edited since they were seeded (rev 0) follow the seed's aliases and
+    // Gebinde: what the matcher learns from ships with an update, not only with a new store.
+    static void SeedUntouched(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
+    {
+        foreach (var e in seed.Ingredients.Values)
+            Exec(db, tx, "UPDATE ingredient SET aliases = @aliases WHERE id = @id AND rev = 0 AND deleted_at IS NULL AND aliases IS NOT @aliases",
+                ("@id", e.Id), ("@aliases", e.Aliases.Count == 0 ? null : string.Join("\n", e.Aliases)));
+        foreach (var c in seed.Categories.Values)
+            if (Scalar(db, tx, "SELECT 1 FROM category WHERE id = @id AND rev = 0 AND deleted_at IS NULL", ("@id", c.Id)) is not null)
+                PutGebinde(db, tx, c);
+    }
+
+    static void PutGebinde(SqliteConnection db, SqliteTransaction tx, Category c)
+    {
+        Exec(db, tx, "DELETE FROM category_gebinde WHERE category_id = @id", ("@id", c.Id));
+        for (var i = 0; i < c.Gebinde.Count; i++)
+            Exec(db, tx, "INSERT INTO category_gebinde(category_id, ord, unit_code) VALUES(@id, @ord, @unit)",
+                ("@id", c.Id), ("@ord", i), ("@unit", c.Gebinde[i]));
     }
 
     static void SeedRules(SqliteConnection db, SqliteTransaction tx, RuleSet seed)

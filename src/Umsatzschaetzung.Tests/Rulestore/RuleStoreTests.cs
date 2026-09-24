@@ -78,7 +78,7 @@ public class RuleStoreTests
 
     static IRuleEntity Full(string kind) => kind switch
     {
-        "category" => new Category { Id = "e", Name = "Café & Bar", Gewerbe = ["561", "56101.0"], Sparte = Sparte.Speisen, Meta = Stamped() },
+        "category" => new Category { Id = "e", Name = "Café & Bar", Gewerbe = ["561", "56101.0"], Gebinde = ["XKG", "XBA"], Sparte = Sparte.Speisen, Meta = Stamped() },
         "ingredient" => new Ingredient { Id = "e", Name = "Gouda", CategoryId = "cat.x", Aliases = ["Schnittkäse", "Käse jung"], Piece = new(250, Unit.G), Meta = Stamped() },
         "mapping" => new ArticleMapping
         {
@@ -268,6 +268,29 @@ public class RuleStoreTests
         Assert.Equal((new Piece(400, Unit.G), "Gurken"), (rs.Ingredients["ing.gurke"].Piece, rs.Ingredients["ing.gurke"].Name));
         Assert.Equal(new Piece(55, Unit.G), rs.Ingredients["ing.ei"].Piece);
         Assert.Equal(2, rs.Version);
+    }
+
+    [Fact]
+    public void SeedAliasesAndGebindeReachOnlyRowsNobodyEdited()
+    {
+        using var tmp = new TempDir();
+        RuleSet Seed(string[] fass, string[] flasche, List<string> gebinde)
+        {
+            var seed = TestData.Seed();
+            seed.Put(new Category { Id = "cat.fass", Name = "Bier vom Fass", Gebinde = gebinde });
+            seed.Put(new Ingredient { Id = "ing.fass", Name = "Fassbier", CategoryId = "cat.fass", Aliases = [.. fass] });
+            seed.Put(new Ingredient { Id = "ing.flasche", Name = "Flaschenbier", Aliases = [.. flasche] });
+            return seed;
+        }
+        var store = new RuleStore(tmp.Path, Seed(["Fassbier"], ["Pils"], []));
+        store.Save(new Ingredient { Id = "ing.flasche", Name = "Flaschenbier", Aliases = ["Pils", "Hausmarke"] });
+
+        var rs = new RuleStore(tmp.Path, Seed(["Fassbier", "Pils Fass"], ["Pils", "Helles"], ["XKG"])).Load();
+
+        Assert.Equal(["Fassbier", "Pils Fass"], rs.Ingredients["ing.fass"].Aliases);
+        Assert.Equal(["Pils", "Hausmarke"], rs.Ingredients["ing.flasche"].Aliases);
+        Assert.Equal(["XKG"], rs.Categories["cat.fass"].Gebinde);
+        Assert.Equal(1, rs.Version);
     }
 
     [Fact]
