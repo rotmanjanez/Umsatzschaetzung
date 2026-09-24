@@ -3,7 +3,6 @@
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/DbNet.cs
 
-using System.Buffers;
 using System.Numerics;
 using Clipper2Lib;
 using Microsoft.ML.OnnxRuntime;
@@ -149,37 +148,27 @@ public sealed class TextDetector : IDisposable
         for (; x < into.Length; x++) into[x] |= from[x];
     }
 
+    // A page-sized map rented from the shared pool comes back rounded up to the next power of
+    // two and stays there, one per core, long after the import.
     private static SKPoint[][] FindContours(ReadOnlySpan<byte> array, int rows, int cols)
     {
-        int[]? vPool = null;
-        try
+        var v = GC.AllocateUninitializedArray<int>(array.Length);
+        for (int i = 0; i < array.Length; i++)
         {
-            Span<int> v = array.Length <= 256 ? stackalloc int[array.Length] : vPool = ArrayPool<int>.Shared.Rent(array.Length);
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                v[i] = array[i];
-            }
-
-            var contours = PContour.FindContours(v, cols, rows);
-
-            var result = new List<SKPoint[]>(contours.Count);
-            foreach (var c in contours)
-            {
-                if (!c.isHole)
-                {
-                    result.Add(PContour.ApproxPolyDP(c.GetSpan(), 1).ToArray());
-                }
-            }
-            return result.ToArray();
+            v[i] = array[i];
         }
-        finally
+
+        var contours = PContour.FindContours(v, cols, rows);
+
+        var result = new List<SKPoint[]>(contours.Count);
+        foreach (var c in contours)
         {
-            if (vPool is not null)
+            if (!c.isHole)
             {
-                ArrayPool<int>.Shared.Return(vPool);
+                result.Add(PContour.ApproxPolyDP(c.GetSpan(), 1).ToArray());
             }
         }
+        return result.ToArray();
     }
 
 

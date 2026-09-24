@@ -106,6 +106,9 @@ public sealed class Imports
         finally
         {
             pumping = false;
+            // Every page leaves a few hundred megabytes of large arrays behind, and an idle
+            // app never allocates enough to have them collected.
+            GC.Collect(2, GCCollectionMode.Aggressive, true, true);
         }
     }
 

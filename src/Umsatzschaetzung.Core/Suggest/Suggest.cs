@@ -141,20 +141,24 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         }
 
         // A save bumps the version for every mapping the import proposes, and almost none
-        // of them adds a wording: what the last index holds is carried over, not read again.
-        var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
-        for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
-        var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
-        var embedded = fresh.Zip(Embed(fresh)).ToDictionary(StringComparer.Ordinal);
-        var next = new float[texts.Count * Encoder.Width];
-        for (var i = 0; i < texts.Count; i++)
+        // of them adds a wording: the vectors stay as they are, or what the last index holds
+        // is carried over, not read again.
+        if (!texts.SequenceEqual(wording, StringComparer.Ordinal))
         {
-            var into = next.AsSpan(i * Encoder.Width, Encoder.Width);
-            if (prior.TryGetValue(texts[i], out var at)) vectors.AsSpan(at * Encoder.Width, Encoder.Width).CopyTo(into);
-            else embedded[texts[i]].CopyTo(into);
+            var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
+            for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
+            var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
+            var embedded = fresh.Zip(Embed(fresh)).ToDictionary(StringComparer.Ordinal);
+            var next = new float[texts.Count * Encoder.Width];
+            for (var i = 0; i < texts.Count; i++)
+            {
+                var into = next.AsSpan(i * Encoder.Width, Encoder.Width);
+                if (prior.TryGetValue(texts[i], out var at)) vectors.AsSpan(at * Encoder.Width, Encoder.Width).CopyTo(into);
+                else embedded[texts[i]].CopyTo(into);
+            }
+            vectors = next;
+            wording = [.. texts];
         }
-        vectors = next;
-        wording = [.. texts];
         owner = [.. owners];
         ware = [.. wares];
         rule = [.. rules];

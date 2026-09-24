@@ -259,10 +259,12 @@ static class Accelerator
 
     public static bool Available => device.Value is not null;
 
+    // The device's buffer cache keeps every page size it has seen, gigabytes of them in unified
+    // memory; without it a page reads as fast.
     public static SessionOptions Session(int threads)
     {
         var options = Engine.GetDefaultSessionOptions(threads);
-        if (device.Value is { } gpu) options.AppendExecutionProvider(OrtEnv.Instance(), [gpu], new Dictionary<string, string>());
+        if (device.Value is { } gpu) options.AppendExecutionProvider(OrtEnv.Instance(), [gpu], new Dictionary<string, string> { ["storageBufferCacheMode"] = "disabled" });
         return options;
     }
 
