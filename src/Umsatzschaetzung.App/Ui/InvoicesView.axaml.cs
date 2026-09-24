@@ -28,7 +28,7 @@ public sealed class InvoiceRow(Invoice invoice)
     {
         Checked.Automatic => "Automatisch",
         Checked.Manual => "Manuell",
-        _ => "Prüfung offen",
+        _ => "Durchsicht offen",
     };
 
     // What the three sortable columns sort by: the review still to be done comes first.

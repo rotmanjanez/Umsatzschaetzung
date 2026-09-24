@@ -24,7 +24,7 @@ public static class Csv
         Row("Datum", Format.Date(inv.Date));
         Row("Netto", Format.Cents(inv.NetTotal));
         Row("Brutto", Format.Cents(inv.GrossTotal));
-        Row("Geprüft", inv.Verification is { } v ? Format.Verified(v.At, v.Auto) : "");
+        Row("Durchsicht", inv.Verification is { } v ? Format.Verified(v.At, v.Auto) : "");
         Row("");
 
         Row("Zeile", "Position", "Artikelnummer", "GTIN", "Menge", "Einzelpreis", "Netto", "USt", "Zuordnung");

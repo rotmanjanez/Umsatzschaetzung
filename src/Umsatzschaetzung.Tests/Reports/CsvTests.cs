@@ -32,7 +32,7 @@ public class CsvTests
             "Datum;15.03.2024",
             "Netto;1.690,00 €",
             "Brutto;2.011,10 €",
-            "Geprüft;",
+            "Durchsicht;",
             "",
             "Zeile;Position;Artikelnummer;GTIN;Menge;Einzelpreis;Netto;USt;Zuordnung",
         ], rows[..11]);
@@ -53,7 +53,7 @@ public class CsvTests
         var inv = Vorlage.Load().Invoices[0];
         var at = new DateTimeOffset(2024, 5, 2, 8, 0, 0, TimeSpan.Zero);
         inv.Verification = new Verification { At = at, Auto = true };
-        Assert.Contains("Geprüft;" + Format.Verified(at, true), Rows(Kase, inv));
+        Assert.Contains("Durchsicht;" + Format.Verified(at, true), Rows(Kase, inv));
     }
 
     [Theory]

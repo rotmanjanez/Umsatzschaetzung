@@ -122,8 +122,8 @@ public class FormatTests
         var at = new DateTimeOffset(local);
         Assert.Equal("08.01.2025 14:05", Format.Timestamp(at));
         Assert.Equal("08.01.2025", Format.Day(at));
-        Assert.Equal("automatisch geprüft am 08.01.2025 14:05", Format.Verified(at, true));
-        Assert.Equal("geprüft am 08.01.2025 14:05", Format.Verified(at, false));
+        Assert.Equal("ohne Durchsicht übernommen am 08.01.2025 14:05", Format.Verified(at, true));
+        Assert.Equal("durchgesehen am 08.01.2025 14:05", Format.Verified(at, false));
         Assert.Equal("", Format.Timestamp(default));
         Assert.Equal("", Format.Day(default));
     }

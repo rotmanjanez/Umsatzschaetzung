@@ -23,8 +23,8 @@ public static class Checks
 
     public static string Text(Invoice inv) =>
         inv.Verification is { } v
-            ? (v.Auto ? "Automatisch geprüft am " : "Manuell geprüft am ") + Format.Timestamp(v.At)
-            : inv.Source == Source.Scan ? "Prüfung offen" : "Automatisch übernommen";
+            ? (v.Auto ? "Ohne Durchsicht übernommen am " : "Durchgesehen am ") + Format.Timestamp(v.At)
+            : inv.Source == Source.Scan ? "Durchsicht offen" : "Automatisch übernommen";
 }
 
 public sealed class LineRow : Observable

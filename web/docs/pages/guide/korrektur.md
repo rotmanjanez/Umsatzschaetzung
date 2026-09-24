@@ -4,11 +4,11 @@ Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
 Programm rechnet deshalb jeden Scan gegen sich selbst: Menge mal Einzelpreis
 gegen den Zeilenbetrag, die Zeilen gegen den Nettobetrag, Netto und Steuer gegen
 den Bruttobetrag. Was nicht aufgeht oder unvollständig ist, wird nicht
-übernommen, sondern steht mit **Prüfung offen** in der Liste.
+übernommen, sondern steht mit **Durchsicht offen** in der Liste.
 
 Im Beispieldatensatz sind das drei Rechnungen. Sie stehen ganz oben:
 
-![Drei Rechnungen mit „Prüfung offen“](img/korrektur-liste.png)
+![Drei Rechnungen mit „Durchsicht offen“](img/korrektur-liste.png)
 
 Jede zeigt eine andere Art Fehler. Auf dieser Seite werden alle drei korrigiert,
 von der einfachsten zur schwierigsten.
@@ -128,10 +128,10 @@ Thermobox `19`. Danach ergeben auch die Positionen 912,12 €.
 
 ## Bestätigen
 
-**Bestätigen** speichert die Rechnung. Der Status wechselt auf **Manuell
-geprüft**:
+**Bestätigen** speichert die Rechnung. Der Status wechselt auf
+**Durchgesehen**:
 
-![Die Rechnung ist manuell geprüft](img/korrektur-bestaetigt.png)
+![Die Rechnung ist durchgesehen](img/korrektur-bestaetigt.png)
 
 In der Rechnungsliste stehen jetzt alle drei mit **Manuell**:
 

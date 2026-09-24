@@ -64,7 +64,7 @@ public static class Format
         Micro(price) + " €" + (baseQty > 0 && baseQty != 1000 ? " je " + Milli(baseQty) + " " + Units.Label(unitCode) : "");
 
     public static string Verified(DateTimeOffset at, bool auto) =>
-        (auto ? "automatisch geprüft am " : "geprüft am ") + Timestamp(at);
+        (auto ? "ohne Durchsicht übernommen am " : "durchgesehen am ") + Timestamp(at);
 
     public static string Timestamp(DateTimeOffset t) =>
         t == default ? "" : t.ToLocalTime().ToString("dd.MM.yyyy HH:mm");

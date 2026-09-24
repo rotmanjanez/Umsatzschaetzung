@@ -22,9 +22,9 @@ wie viele zur Durchsicht anstehen.
 
 Danach steht jede Rechnung mit Lieferant, Nummer, Datum und Nettobetrag in der
 Liste. Der Status sagt, woher die Zeilen stammen: **Automatisch** für eine
-Rechnung, die aufging, **Prüfung offen** für eine, die durchgesehen werden muss.
+Rechnung, die aufging, **Durchsicht offen** für eine, die durchgesehen werden muss.
 
 ![Die Rechnungsliste nach dem Import](img/rechnungen-liste.png)
 
-Drei stehen auf **Prüfung offen**. Wie sie korrigiert werden, zeigt
+Drei stehen auf **Durchsicht offen**. Wie sie korrigiert werden, zeigt
 [die nächste Seite](korrektur.md).
