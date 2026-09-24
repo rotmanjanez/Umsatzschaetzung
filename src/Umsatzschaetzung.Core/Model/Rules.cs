@@ -198,9 +198,12 @@ public static class Match
     }
 }
 
+// Eine Zeile nennt eine Zutat oder, als Teilrezept, ein anderes Produkt: „Schnitzel mit
+// Pommes“ ist ein Schnitzel und eine Portion Pommes. Teilrezepte zählen in Stück.
 public sealed class RecipeLine
 {
     public string IngredientId { get; set; } = "";
+    public string? ProductId { get; set; }
     public long Amount { get; set; }
     public string Unit { get; set; } = "";
 }

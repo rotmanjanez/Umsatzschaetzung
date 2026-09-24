@@ -12,6 +12,7 @@ public static class RuleCheck
         foreach (var (id, e) in rs.Ingredients) ValidateIngredient(rs, Keyed(id, e));
         foreach (var (id, e) in rs.Mappings) ValidateMapping(rs, Keyed(id, e));
         foreach (var (id, e) in rs.Products) ValidateProduct(rs, Keyed(id, e));
+        ValidateNesting(rs);
         ValidateScales(rs);
         foreach (var (id, e) in rs.YieldRules) ValidateYieldRule(rs, Keyed(id, e));
     }
@@ -29,6 +30,10 @@ public static class RuleCheck
             .. Names(rs.Mappings.Values.Where(m => m.IngredientId == id).Select(m => "Zuordnung \u201e" + (m.Name ?? m.SupplierArticleId ?? m.Gtin ?? m.Id) + "\u201c")),
             .. Names(rs.Products.Values.Where(p => p.Recipe.Exists(l => l.IngredientId == id)).Select(p => "Produkt \u201e" + p.Name + "\u201c")),
             .. Names(rs.YieldRules.Values.Where(y => y.IngredientId == id).Select(y => "Ausbeuteregel \u201e" + y.Name + "\u201c")),
+        ],
+        Entity.Product =>
+        [
+            .. Names(rs.Products.Values.Where(p => p.Recipe.Exists(l => l.ProductId == id)).Select(p => "Produkt \u201e" + p.Name + "\u201c")),
         ],
         _ => [],
     };
@@ -80,6 +85,16 @@ public static class RuleCheck
             throw new RulesException($"Produkt \"{e.Name}\": Rezept darf nicht leer sein");
         foreach (var l in e.Recipe)
         {
+            if (l.ProductId is { } part)
+            {
+                if (!rs.Products.ContainsKey(part))
+                    throw new RulesException($"Produkt \"{e.Name}\": Teilrezept \"{part}\" existiert nicht");
+                if (l.Amount <= 0)
+                    throw new RulesException($"Produkt \"{e.Name}\": Portionen des Teilrezepts \"{part}\" müssen größer als 0 sein");
+                if (Units.Lookup(l.Unit) is not { Base: Unit.Piece })
+                    throw new RulesException($"Produkt \"{e.Name}\": Teilrezept \"{part}\" zählt in Portionen, nicht in \"{l.Unit}\"");
+                continue;
+            }
             if (!rs.Ingredients.ContainsKey(l.IngredientId))
                 throw new RulesException($"Produkt \"{e.Name}\": Zutat \"{l.IngredientId}\" existiert nicht");
             if (l.Amount <= 0)
@@ -87,6 +102,22 @@ public static class RuleCheck
             if (Units.Lookup(l.Unit) is null)
                 throw new RulesException($"Produkt \"{e.Name}\": Zutat \"{l.IngredientId}\" hat die unbekannte Einheit \"{l.Unit}\"");
         }
+    }
+
+    static void ValidateNesting(RuleSet rs)
+    {
+        HashSet<string> open = [], done = [];
+        foreach (var id in rs.Products.Keys.OrderBy(k => k, StringComparer.Ordinal)) Descend(rs, id, open, done);
+    }
+
+    static void Descend(RuleSet rs, string id, HashSet<string> open, HashSet<string> done)
+    {
+        if (done.Contains(id) || !rs.Products.TryGetValue(id, out var p)) return;
+        if (!open.Add(id)) throw new RulesException($"Produkt \"{p.Name}\": das Rezept enthält sich selbst");
+        foreach (var l in p.Recipe)
+            if (l.ProductId is { } part) Descend(rs, part, open, done);
+        open.Remove(id);
+        done.Add(id);
     }
 
     // Die Rezeptur ist die einzige Stelle, an der eine Zutat eine Einheit bekommt. Zwei
@@ -100,7 +131,7 @@ public static class RuleCheck
             var p = rs.Products[id];
             foreach (var l in p.Recipe)
             {
-                if (Units.Lookup(l.Unit) is not { } u) continue;
+                if (l.ProductId is not null || Units.Lookup(l.Unit) is not { } u) continue;
                 if (!seen.TryGetValue(l.IngredientId, out var first)) seen[l.IngredientId] = (u.Base, p.Name);
                 else if (first.Base != u.Base)
                     throw new RulesException(

@@ -88,7 +88,7 @@ public class RuleStoreTests
         "product" => new Product
         {
             Id = "e", Name = "Radler", Meta = Stamped(),
-            Recipe = [new() { IngredientId = "ing.b", Amount = 250, Unit = "MLT" }, new() { IngredientId = "ing.a", Amount = 250, Unit = "MLT" }],
+            Recipe = [new() { IngredientId = "ing.b", Amount = 250, Unit = "MLT" }, new() { IngredientId = "ing.a", Amount = 250, Unit = "MLT" }, new() { ProductId = "prod.x", Amount = 2, Unit = "H87" }],
         },
         _ => new YieldRule
         {

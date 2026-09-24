@@ -2,6 +2,7 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
+           xmlns:m="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:RulesModel"
            Margin="24">
     <DockPanel>
@@ -136,7 +137,7 @@
                                         <ColumnDefinition Width="240"/>
                                         <ColumnDefinition Width="90"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Zutat" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Zutat oder Produkt" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
                                     <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,48,4"/>
                                 </Grid>
                                 <ItemsControl ItemsSource="{Binding Recipe}">
@@ -148,11 +149,24 @@
                                                     <ColumnDefinition Width="240"/>
                                                     <ColumnDefinition Width="90"/>
                                                 </Grid.ColumnDefinitions>
-                                                <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
-                                                                  Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"/>
+                                                <DockPanel>
+                                                    <ComboBox DockPanel.Dock="Left" ItemsSource="{x:Static ui:RecipeRow.Kinds}" SelectedIndex="{Binding KindIndex, Mode=TwoWay}"
+                                                              Width="104" Margin="0,0,6,0"/>
+                                                    <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" IsVisible="{Binding IsIngredient}"
+                                                                      Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"/>
+                                                    <AutoCompleteBox ItemsSource="{Binding Products}" SelectedItem="{Binding Part, Mode=TwoWay}" IsVisible="{Binding IsPart}"
+                                                                     FilterMode="ContainsOrdinal" MinimumPrefixLength="0" MaxDropDownHeight="320" PlaceholderText="Produkt suchen …"
+                                                                     ValueMemberBinding="{ReflectionBinding Name}" Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch">
+                                                        <AutoCompleteBox.ItemTemplate>
+                                                            <DataTemplate x:DataType="m:Product">
+                                                                <TextBlock Text="{Binding Name}"/>
+                                                            </DataTemplate>
+                                                        </AutoCompleteBox.ItemTemplate>
+                                                    </AutoCompleteBox>
+                                                </DockPanel>
                                                 <DockPanel Grid.Column="1" Margin="8,0,0,0">
                                                     <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
-                                                              Width="104" Margin="6,0,0,0"/>
+                                                              IsEnabled="{Binding IsIngredient}" Width="104" Margin="6,0,0,0"/>
                                                     <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}"
                                                              Classes.invalid="{Binding AmountInvalid}"/>
                                                 </DockPanel>

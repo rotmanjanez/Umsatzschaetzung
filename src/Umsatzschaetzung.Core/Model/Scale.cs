@@ -13,6 +13,7 @@ public static class Scale
         foreach (var p in rs.Products.Values)
             foreach (var line in p.Recipe)
             {
+                if (line.ProductId is not null) continue;
                 var u = Units.Lookup(line.Unit)?.Base;
                 if (!output.TryGetValue(line.IngredientId, out var seen)) output[line.IngredientId] = u;
                 else if (seen != u) output[line.IngredientId] = null;
@@ -28,7 +29,7 @@ public static class Scale
         foreach (var id in rs.Products.Keys.Order(StringComparer.Ordinal))
             foreach (var line in rs.Products[id].Recipe)
             {
-                if (!wanted.Contains(line.IngredientId)) continue;
+                if (line.ProductId is not null || !wanted.Contains(line.IngredientId)) continue;
                 var name = rs.Ingredients.TryGetValue(line.IngredientId, out var ing) ? ing.Name : line.IngredientId;
                 if (Units.Lookup(line.Unit) is not { } u)
                 {

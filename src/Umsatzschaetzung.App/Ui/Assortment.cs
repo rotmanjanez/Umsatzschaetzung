@@ -66,7 +66,7 @@ public static class Assortment
     }
 
     static bool Fits(RuleSet rs, Product p, string gewerbe) =>
-        p.Recipe.TrueForAll(r => !rs.Ingredients.TryGetValue(r.IngredientId, out var ing)
+        Recipes.Flat(rs, p).TrueForAll(r => !rs.Ingredients.TryGetValue(r.IngredientId, out var ing)
             || !rs.Categories.TryGetValue(ing.CategoryId, out var cat) || cat.Covers(gewerbe));
 
     static List<PinnedPortions> Fixed(Case c, Report sold, List<string> candidates)
@@ -94,7 +94,7 @@ public static class Assortment
         {
             var p = rs.Products[id];
             var amount = new Dictionary<string, long>();
-            foreach (var r in p.Recipe)
+            foreach (var r in Recipes.Flat(rs, p))
                 if (Scale.ToBase(r.Amount, r.Unit) is var a and > 0)
                     amount[r.IngredientId] = amount.GetValueOrDefault(r.IngredientId) + a;
             if (amount.Count == 0 || !amount.Keys.All(left.ContainsKey)) continue;

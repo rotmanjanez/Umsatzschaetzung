@@ -274,6 +274,60 @@ public class RuleCheckTests
     }
 
     [Fact]
+    public void APartMustExist()
+    {
+        var rs = Valid();
+        rs.Put(new Product { Id = "prod.menu", Name = "Menü", Recipe = [new() { ProductId = "prod.fehlt", Amount = 1, Unit = "H87" }] });
+
+        Assert.Contains("Teilrezept \"prod.fehlt\" existiert nicht", Rejected(rs));
+    }
+
+    [Theory]
+    [InlineData("H87", true)]
+    [InlineData("stk", true)]
+    [InlineData("GRM", false)]
+    [InlineData("", false)]
+    public void APartCountsInPortions(string unit, bool ok)
+    {
+        var rs = Valid();
+        rs.Put(new Product { Id = "prod.menu", Name = "Menü", Recipe = [new() { ProductId = "prod.pils", Amount = 1, Unit = unit }] });
+
+        if (ok) RuleCheck.Validate(rs);
+        else Assert.Contains("zählt in Portionen", Rejected(rs));
+    }
+
+    [Fact]
+    public void APartNeedsPortions()
+    {
+        var rs = Valid();
+        rs.Put(new Product { Id = "prod.menu", Name = "Menü", Recipe = [new() { ProductId = "prod.pils", Amount = 0, Unit = "H87" }] });
+
+        Assert.Contains("Portionen des Teilrezepts", Rejected(rs));
+    }
+
+    [Fact]
+    public void ARecipeMayNotContainItself()
+    {
+        var rs = Valid();
+        rs.Put(new Product { Id = "prod.a", Name = "A", Recipe = [new() { ProductId = "prod.b", Amount = 1, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.b", Name = "B", Recipe = [new() { ProductId = "prod.a", Amount = 1, Unit = "H87" }] });
+
+        Assert.Contains("enthält sich selbst", Rejected(rs));
+        rs.Products["prod.b"].Recipe = [new() { ProductId = "prod.b", Amount = 1, Unit = "H87" }];
+        Assert.Contains("\"B\": das Rezept enthält sich selbst", Rejected(rs));
+    }
+
+    [Fact]
+    public void APartLineFixesNoScale()
+    {
+        var rs = Valid();
+        rs.Put(new Product { Id = "prod.menu", Name = "Menü", Recipe = [new() { ProductId = "prod.pils", Amount = 1, Unit = "H87" }, new() { IngredientId = "ing.pils", Amount = 1, Unit = "LTR" }] });
+
+        RuleCheck.Validate(rs);
+        Assert.Equal(["ing.pils"], Scale.Bases(rs).Keys);
+    }
+
+    [Fact]
     public void OneScaleInDifferentUnitsPasses()
     {
         var rs = Valid();
@@ -404,6 +458,16 @@ public class RuleCheckTests
 
         Assert.Contains(users, u => u.StartsWith("Produkt „", StringComparison.Ordinal));
         Assert.Contains(users, u => u.StartsWith("Zuordnung „", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void AProductIsUsedByTheRecipesThatContainIt()
+    {
+        var rs = Valid();
+        rs.Put(new Product { Id = "prod.menu", Name = "Menü", Recipe = [new() { ProductId = "prod.pils", Amount = 1, Unit = "H87" }] });
+
+        Assert.Equal(["Produkt „Menü“"], RuleCheck.Users(rs, Entity.Product, "prod.pils"));
+        Assert.DoesNotContain("Produkt „Menü“", RuleCheck.Users(rs, Entity.Ingredient, "ing.pils"));
     }
 
     [Theory]

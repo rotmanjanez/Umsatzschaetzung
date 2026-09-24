@@ -44,7 +44,7 @@ public sealed class RuleStore
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
         CREATE TABLE recipe_line(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
-            amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
+            sub_product_id TEXT, amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
 
         CREATE TABLE yield_rule(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT, ingredient_id TEXT,
@@ -273,9 +273,9 @@ public sealed class RuleStore
                 for (var i = 0; i < x.Recipe.Count; i++)
                 {
                     var l = x.Recipe[i];
-                    Exec(db, tx, "INSERT INTO recipe_line(product_id, ord, ingredient_id, amount, unit) "
-                        + "VALUES(@id, @ord, @ingredient, @amount, @unit)",
-                        ("@id", x.Id), ("@ord", i), ("@ingredient", l.IngredientId), ("@amount", l.Amount), ("@unit", l.Unit));
+                    Exec(db, tx, "INSERT INTO recipe_line(product_id, ord, ingredient_id, sub_product_id, amount, unit) "
+                        + "VALUES(@id, @ord, @ingredient, @part, @amount, @unit)",
+                        ("@id", x.Id), ("@ord", i), ("@ingredient", l.IngredientId), ("@part", l.ProductId), ("@amount", l.Amount), ("@unit", l.Unit));
                 }
                 break;
 
@@ -361,10 +361,10 @@ public sealed class RuleStore
             }));
 
         var recipes = new Dictionary<string, List<RecipeLine>>(StringComparer.Ordinal);
-        Rows(db, tx, "SELECT product_id, ingredient_id, amount, unit FROM recipe_line ORDER BY product_id, ord", r =>
+        Rows(db, tx, "SELECT product_id, ingredient_id, amount, unit, sub_product_id FROM recipe_line ORDER BY product_id, ord", r =>
         {
             if (!recipes.TryGetValue(r.GetString(0), out var list)) recipes[r.GetString(0)] = list = [];
-            list.Add(new RecipeLine { IngredientId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3) });
+            list.Add(new RecipeLine { IngredientId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3), ProductId = Str(r, 4) });
         });
         Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, rev FROM product WHERE deleted_at IS NULL",
             r => rs.Put(new Product

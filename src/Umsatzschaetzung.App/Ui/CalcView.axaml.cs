@@ -109,7 +109,7 @@ public partial class CalcView : Screen
         if (Session.Case is not { } kase || Session.Rules is not { } rs || !model.HasResult) return;
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         var promoted = kase.Products.Where(cp => promoting.Contains(cp.ProductId) && cp.Recipe is { } own
-            && rs.Products.TryGetValue(cp.ProductId, out var p) && Recipes.Same(own, p.Recipe)).ToList();
+            && rs.Products.TryGetValue(cp.ProductId, out var p) && Recipes.Same(own, Recipes.Flat(rs, p))).ToList();
         foreach (var cp in promoted)
         {
             promoting.Remove(cp.ProductId);
@@ -321,7 +321,7 @@ public partial class CalcView : Screen
     }
 
     static List<RecipeLine> CatalogRecipe(RuleSet catalog, string productId) =>
-        catalog.Products.TryGetValue(productId, out var p) ? p.Recipe : [];
+        catalog.Products.TryGetValue(productId, out var p) ? Recipes.Flat(catalog, p) : [];
 
     CaseProduct? Listed(string productId) => Session.Case?.Products.Find(p => p.ProductId == productId);
 
@@ -340,7 +340,7 @@ public partial class CalcView : Screen
     {
         if (model.Editor is not { } editor || Listed(editor.ProductId) is not { } cp || shown is not { } s
             || !s.Catalog.Products.TryGetValue(editor.ProductId, out var p)) return;
-        cp.Recipe = [.. p.Recipe.Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })];
+        cp.Recipe = [.. Recipes.Flat(s.Catalog, p).Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })];
         cp.RecipeBasis = p.Meta.Rev;
         ProductSelected(null, null);
         Schedule(0);

@@ -90,20 +90,44 @@ public sealed class ScopeItem(string id, bool ingredient, string label, string s
     public string Tip => Kind + " · " + Rules.Count + (Rules.Count == 1 ? " Regel" : " Regeln");
 }
 
-public sealed class RecipeRow(List<Ingredient> options) : Observable
+// A line is an ingredient or, as a sub-recipe, a product of the catalog counted in portions.
+public sealed class RecipeRow(List<Ingredient> options, List<Product> products) : Observable
 {
+    public static readonly string[] Kinds = ["Zutat", "Produkt"];
+
     Ingredient? ingredient;
+    Product? part;
     string amount = "";
     int unitIndex;
-    bool ingredientInvalid, amountInvalid;
+    bool isPart, ingredientInvalid, amountInvalid;
 
     public List<Ingredient> Options { get; } = options;
+    public List<Product> Products { get; } = products;
     public List<string> Units { get; } = [.. RulesView.RecipeUnits.Select(c => Model.Units.Label(c))];
     public Ingredient? Ingredient
     {
         get => ingredient;
         set { if (Set(ref ingredient, value)) IngredientInvalid = false; }
     }
+    public Product? Part
+    {
+        get => part;
+        set { if (Set(ref part, value)) IngredientInvalid = false; }
+    }
+    public bool IsPart
+    {
+        get => isPart;
+        set
+        {
+            if (!Set(ref isPart, value)) return;
+            IngredientInvalid = false;
+            if (value) UnitIndex = Array.IndexOf(RulesView.RecipeUnits, RulesView.PortionUnit);
+            Raise(nameof(IsIngredient));
+            Raise(nameof(KindIndex));
+        }
+    }
+    public bool IsIngredient => !isPart;
+    public int KindIndex { get => isPart ? 1 : 0; set => IsPart = value == 1; }
     public int UnitIndex { get => unitIndex; set => Set(ref unitIndex, value); }
     public string Amount { get => amount; set { if (Set(ref amount, value)) AmountInvalid = false; } }
     public bool IngredientInvalid { get => ingredientInvalid; set => Set(ref ingredientInvalid, value); }
@@ -225,6 +249,7 @@ public sealed class RulesModel
 public partial class RulesView : Screen
 {
     public static readonly string[] RecipeUnits = ["GRM", "KGM", "MLT", "LTR", "H87"];
+    public const string PortionUnit = "H87";
 
     readonly RulesModel model = new();
     bool loading, saving;
@@ -377,18 +402,24 @@ public partial class RulesView : Screen
         var f = model.Products;
         productCreated = null;
         var options = Session.Ingredients();
+        var parts = Parts(p.Id);
         f.CurrentId = p.Id;
         f.Existing = f.Active = true;
         f.Title = p.Name;
         f.Name = p.Name;
         f.Origin = "";
         f.Recipe.Clear();
-        foreach (var l in p.Recipe) f.Recipe.Add(Row(options, l));
+        foreach (var l in p.Recipe) f.Recipe.Add(Row(options, parts, l));
     }
 
-    static RecipeRow Row(List<Ingredient> options, RecipeLine l) => new(options)
+    // A product cannot be its own part; deeper loops the rule check refuses on save.
+    List<Product> Parts(string? productId) => [.. Session.Products().Where(p => p.Id != productId)];
+
+    static RecipeRow Row(List<Ingredient> options, List<Product> parts, RecipeLine l) => new(options, parts)
     {
+        IsPart = l.ProductId is not null,
         Ingredient = options.Find(i => i.Id == l.IngredientId),
+        Part = parts.Find(p => p.Id == l.ProductId),
         Amount = l.Amount.ToString(),
         UnitIndex = Math.Max(Array.IndexOf(RecipeUnits, l.Unit), 0),
     };
@@ -410,8 +441,9 @@ public partial class RulesView : Screen
         LoadProduct(item.Product);
         if (recipe is null) return;
         var options = Session.Ingredients();
+        var parts = Parts(id);
         model.Products.Recipe.Clear();
-        foreach (var l in recipe) model.Products.Recipe.Add(Row(options, l));
+        foreach (var l in recipe) model.Products.Recipe.Add(Row(options, parts, l));
         model.Products.Origin = "Rezeptur aus der Prüfung übernommen. Erst mit Speichern gilt sie im Katalog für alle Prüfungen.";
     }
 
@@ -430,10 +462,11 @@ public partial class RulesView : Screen
         f.Name = name;
         f.Origin = "";
         f.Recipe.Clear();
-        if (created is not null) f.Recipe.Add(new RecipeRow(Session.Ingredients()));
+        if (created is not null) f.Recipe.Add(new RecipeRow(Session.Ingredients(), Parts(null)));
     }
 
-    void AddRecipeLine(object? sender, RoutedEventArgs e) => model.Products.Recipe.Add(new RecipeRow(Session.Ingredients()));
+    void AddRecipeLine(object? sender, RoutedEventArgs e) =>
+        model.Products.Recipe.Add(new RecipeRow(Session.Ingredients(), Parts(model.Products.CurrentId)));
 
     void RemoveRecipeLine(object? sender, RoutedEventArgs e)
     {
@@ -450,9 +483,10 @@ public partial class RulesView : Screen
         foreach (var row in f.Recipe)
         {
             var amount = Input.Int(row.Amount);
-            row.IngredientInvalid = row.Ingredient is null;
+            row.IngredientInvalid = row.IsPart ? row.Part is null : row.Ingredient is null;
             row.AmountInvalid = amount is not > 0;
             if (row.IngredientInvalid || row.AmountInvalid) lines = false;
+            else if (row.IsPart) data.Recipe.Add(new RecipeLine { ProductId = row.Part!.Id, Amount = amount!.Value, Unit = PortionUnit });
             else data.Recipe.Add(new RecipeLine { IngredientId = row.Ingredient!.Id, Amount = amount!.Value, Unit = RecipeUnits[row.UnitIndex] });
         }
         if (f.NameInvalid || !lines || data.Recipe.Count == 0)
@@ -460,7 +494,7 @@ public partial class RulesView : Screen
             Session.Fail(Missing(
                 f.NameInvalid ? "Name" : null,
                 f.Recipe.Count == 0 ? "Rezept (mindestens eine Zutat)"
-                    : lines ? null : "Rezept (Zutat und Menge je Portion, Menge größer als 0)"));
+                    : lines ? null : "Rezept (Zutat oder Produkt und Menge je Portion, Menge größer als 0)"));
             return;
         }
         var isNew = f.CurrentId is null;

@@ -180,7 +180,7 @@ internal static class Revenue
                 RecipeAdjusted = cp.Recipe is not null,
                 RecipeBasis = cp.RecipeBasis,
                 RecipeStale = Recipes.Stale(cp, catalog),
-                CatalogRecipe = cp.Recipe is null ? [] : catalog.Products[pid].Recipe,
+                CatalogRecipe = cp.Recipe is null ? [] : Recipes.Flat(catalog, catalog.Products[pid]),
             };
             if (hasPortions)
             {

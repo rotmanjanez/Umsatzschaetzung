@@ -20,7 +20,10 @@ public static class Names
     }
 
     public static string Recipe(RuleSet rs, Product p) =>
-        string.Join(", ", p.Recipe.Select(l => RecipeAmount(l) + " " + Ingredient(rs, l.IngredientId)));
+        string.Join(", ", p.Recipe.Select(l => RecipeLine(rs, l)));
+
+    public static string RecipeLine(RuleSet rs, RecipeLine l) =>
+        l.ProductId is { } part ? Format.Portions(l.Amount) + " " + Product(rs, part) : RecipeAmount(l) + " " + Ingredient(rs, l.IngredientId);
 
     public static string RecipeAmount(RecipeLine l) =>
         Units.Lookup(l.Unit) is { } u ? Format.Group(l.Amount) + " " + u.Name : Format.Group(l.Amount);

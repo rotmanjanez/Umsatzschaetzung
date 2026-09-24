@@ -57,7 +57,8 @@ def candidates(seed):
     uses = defaultdict(list)
     for p in seed["products"].values():
         for r in p["recipe"]:
-            uses[r["ingredientId"]].append((p["name"], r["amount"], r["unit"]))
+            if "ingredientId" in r:
+                uses[r["ingredientId"]].append((p["name"], r["amount"], r["unit"]))
     used, free = [], []
     for iid, ing in seed["ingredients"].items():
         units = {DIMENSION[u] for _, _, u in uses[iid]}
