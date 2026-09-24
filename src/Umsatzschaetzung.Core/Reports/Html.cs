@@ -29,6 +29,7 @@ public static class Html
 
     public static string Render(Case c, RuleSet rs, Model.Report r, Rahmen? rahmen)
     {
+        rs = Recipes.Effective(c, rs);
         var s = r.Totals;
         var j = ReportJson.Default;
         var included = Included.Of(c, r);

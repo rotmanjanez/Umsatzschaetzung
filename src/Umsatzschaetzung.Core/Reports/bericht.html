@@ -225,7 +225,9 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% for p in report.products %}
           <tr>
             <td>{{ p.name }}</td>
-            <td class="list">{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</td>
+            <td class="list">{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}{% if p.recipeAdjusted %}
+              <div class="note">Rezeptur laut Prüfung, abweichend vom Katalog (Änderungsnummer {{ p.recipeBasis }}{% if p.recipeStale %}, seither geändert{% endif %})</div>
+              <div class="note">Katalog: {% for l in p.catalogRecipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</div>{% endif %}</td>
             <td>{{ p.sparte | sparte }}</td>
             <td class="num">{{ p.portions | group }}</td>
             <td class="num">{{ p.costPerPortion | cents }}</td>
