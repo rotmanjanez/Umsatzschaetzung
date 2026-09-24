@@ -4,59 +4,95 @@
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
            x:DataType="ui:ReportModel"
            Margin="0,12,0,0">
+    <ui:Screen.Styles>
+        <Style Selector="DataGridRow TextBlock.cell">
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+    </ui:Screen.Styles>
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
             <TextBlock Text="{Binding Saved}" Theme="{StaticResource Muted}" IsVisible="{Binding ShowSaved}"
                        VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis" MaxWidth="320"/>
             <Button Content="{Binding PdfLabel}" Theme="{StaticResource PrimaryButton}" Click="SavePdf" IsEnabled="{Binding CanSave}"/>
         </StackPanel>
-        <TextBlock DockPanel.Dock="Top" Text="Nicht berücksichtigte Einkäufe" Theme="{StaticResource SectionHeader}"/>
-        <Grid DockPanel.Dock="Top" Margin="0,0,0,16" ColumnDefinitions="Auto,*">
-            <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="220"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Erfasste Einkäufe (netto)" Theme="{StaticResource KeyLabel}"/>
-                    <TextBlock Grid.Column="1" Text="{Binding Purchases}" Theme="{StaticResource Number}" Margin="0,0,0,6"/>
-                    <TextBlock Grid.Row="1" Text="davon in der Kalkulation" Theme="{StaticResource KeyLabel}"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Included}" Theme="{StaticResource Number}" Margin="0,0,0,6"/>
-                    <TextBlock Grid.Row="2" Text="Nicht berücksichtigt" Theme="{StaticResource KeyLabel}"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Excluded}" Theme="{StaticResource Number}" Margin="0,0,0,6"/>
-                </Grid>
-                <TextBlock Text="Keine" Theme="{StaticResource Muted}" IsVisible="{Binding NoExcluded}"/>
-            </StackPanel>
-            <DataGrid Grid.Column="1" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" MaxHeight="240" Margin="24,0,0,0" IsVisible="{Binding HasExcluded}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name, DataType=ui:ExcludedLineRow}" Width="260" MinWidth="140"/>
-                    <DataGridTemplateColumn Header="Grund" Width="220" SortMemberPath="Reason">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="ui:ExcludedLineRow">
-                                <TextBlock Text="{Binding Reason}" Theme="{StaticResource Muted}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Netto" Width="110" SortMemberPath="Net">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate x:DataType="ui:ExcludedLineRow">
-                                <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-        <Border Theme="{StaticResource Panel}">
-            <Grid>
-                <NativeWebView x:Name="Web"/>
-                <TextBlock Text="{Binding Note}" Theme="{StaticResource EmptyState}" IsVisible="{Binding ShowNote}"/>
+        <Grid x:Name="Split" RowDefinitions="Auto,2*,6,3*">
+            <DockPanel Margin="0,0,0,8">
+                <TextBlock DockPanel.Dock="Left" Text="Nicht berücksichtigte Einkäufe" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+            <Grid Grid.Row="1" IsVisible="{Binding HasExcluded}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48*" MinWidth="320"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="52*" MinWidth="360"/>
+                </Grid.ColumnDefinitions>
+                <Border Theme="{StaticResource Panel}" ClipToBounds="True">
+                    <DataGrid x:Name="Excluded" ui:Blur.Detail="{Binding #Pane}" ui:Grids.Flex="1" Theme="{StaticResource Grid}"
+                              ItemsSource="{Binding Rows}" IsReadOnly="True" SelectionChanged="RowSelected">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                        <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Lieferant" Width="130" SortMemberPath="Supplier">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                        <TextBlock Classes="cell" Text="{Binding Supplier}" Theme="{StaticResource Muted}" ToolTip.Tip="{Binding Supplier}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Grund" Width="130" SortMemberPath="Reason">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                        <TextBlock Classes="cell" Text="{Binding Reason}" Theme="{StaticResource Muted}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Netto" Width="100" SortMemberPath="Net">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                        <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+                <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                <Border x:Name="Pane" Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Background="{DynamicResource WarningSoftBrush}" CornerRadius="8" Padding="14,12" Margin="0,0,14,12"
+                                IsVisible="{Binding HasWhy}">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,8">
+                                    <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Click="ShowExcludedHelp"
+                                            ToolTip.Tip="Warum Einkäufe nicht in die Kalkulation eingehen"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <PathIcon Data="{StaticResource WarningIcon}" Foreground="{DynamicResource WarningBrush}" Width="12" Height="12"/>
+                                        <TextBlock Text="NICHT IN DER KALKULATION" FontSize="11" FontWeight="SemiBold" LetterSpacing="0.8"
+                                                   Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <TextBlock Text="{Binding Why}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                        <ui:MappingDetail x:Name="Detail"/>
+                    </DockPanel>
+                </Border>
             </Grid>
-        </Border>
+            <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch" Background="Transparent" IsVisible="{Binding HasExcluded}"/>
+            <Border Grid.Row="3" Theme="{StaticResource Panel}">
+                <Grid>
+                    <NativeWebView x:Name="Web"/>
+                    <TextBlock Text="{Binding Note}" Theme="{StaticResource EmptyState}" IsVisible="{Binding ShowNote}"/>
+                </Grid>
+            </Border>
+        </Grid>
     </DockPanel>
 </ui:Screen>
