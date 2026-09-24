@@ -158,11 +158,11 @@ internal static class Revenue
             Products = rows,
             Markups = markups,
             Allocations = allocs,
-            Warnings = [.. Warnings(c, rs, uses, allocs), .. flags, .. Undivided(markups)],
+            Warnings = [.. Warnings(c, rs, uses), .. flags, .. Undivided(markups)],
         };
     }
 
-    static List<Flag> Warnings(Case c, RuleSet rs, SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
+    static List<Flag> Warnings(Case c, RuleSet rs, SortedDictionary<string, IngredientUse> uses)
     {
         List<Flag> output = [];
         foreach (var id in uses.Keys)
@@ -181,9 +181,6 @@ internal static class Revenue
             var name = rs.Products.TryGetValue(id, out var p) ? p.Name : id;
             output.Add(new Flag { Code = "pinned-overdrawn", Message = $"Vorgabe für „{name}“ übersteigt die verfügbaren Mengen; der Rest dieser Zutaten wurde auf null gesetzt" });
         }
-        foreach (var a in allocs)
-            if (a.Approximate)
-                output.Add(new Flag { Code = "allocation-approximate", Message = $"Komponente {a.Component + 1} wurde näherungsweise gelöst" });
         return output;
     }
 }

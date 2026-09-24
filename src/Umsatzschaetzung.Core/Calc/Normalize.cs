@@ -58,13 +58,6 @@ public static class Normalize
                     });
                     continue;
                 }
-                if (!m.Confirmed)
-                    flags.Add(new Flag
-                    {
-                        Code = "unconfirmed_mapping",
-                        LineNo = line.No,
-                        Message = $"Rechnung {inv.Number} Pos. {line.No} „{line.Name}“: Zuordnung zu „{ing.Name}“ ist ein unbestätigter automatischer Vorschlag",
-                    });
                 var u = Use(ing.Id);
                 u.Bought += conv.Qty;
                 u.Cost += line.LineNet;
