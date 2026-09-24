@@ -105,17 +105,19 @@ public class EstimateTests
     }
 
     [Fact]
-    public void GroupsWithoutRevenueLeaveTheEstimateAndTheWareneinsatz()
+    public void IngredientsWithoutRevenueLeaveTheEstimateAndTheWareneinsatz()
     {
-        var c = Kase(new InvoiceLine { No = 3, Name = "Sirup", Quantity = 1_000, UnitCode = "H87", LineNet = 1_000 });
+        var c = Kase(
+            new InvoiceLine { No = 3, Name = "Sirup", Quantity = 1_000, UnitCode = "H87", LineNet = 1_000 },
+            new InvoiceLine { No = 4, Name = "Sirup", Quantity = 2_000, UnitCode = "XBO", LineNet = 1_500 });
         var before = Calculation.Run(c, Rules());
-        c.NoRevenue = [LineKey.Of(c.Invoices[0].SupplierName, c.Invoices[0].Lines[2]), LineKey.Of(c.Invoices[0].SupplierName, c.Invoices[0].Lines[0])];
+        c.NoRevenue = ["ing.sirup", "ing.cola"];
         var r = Calculation.Run(c, Rules());
         Assert.Empty(r.Estimated);
-        Assert.Equal(["Sirup", "Cola"], r.NoRevenue.Select(l => l.Name).Order().Reverse());
-        Assert.Equal(6_000, r.Totals.NoRevenueCost);
+        Assert.Equal(["Cola", "Sirup", "Sirup"], r.NoRevenue.Select(l => l.Name).Order());
+        Assert.Equal(7_500, r.Totals.NoRevenueCost);
         Assert.Equal(before.Totals.CostOfGoods - 5_000, r.Totals.CostOfGoods);
-        Assert.Equal(6_000 * Bp.Full / r.Totals.Purchases, r.Totals.ExcludedShare);
+        Assert.Equal(7_500 * Bp.Full / r.Totals.Purchases, r.Totals.ExcludedShare);
     }
 
     [Fact]

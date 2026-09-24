@@ -149,7 +149,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </tbody>
       </table>
-      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Zutaten ohne Rezeptur tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Abschnitt 3).</p>
+      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Abschnitt 3).</p>
       {% if rahmen %}
       <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohaufschlag {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}
@@ -212,7 +212,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <td class="num">{{ estimated.leftover.revenueNet | cents }}</td>
           </tr>
           <tr>
-            <td>Eingangspositionen ohne Rezeptur</td>
+            <td>Eingangspositionen ohne Rezeptur oder Faktor</td>
             <td class="num">{{ estimated.lines.cost | cents }}</td>
             <td class="num">{{ estimated.lines.revenueNet | cents }}</td>
           </tr>
@@ -483,7 +483,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       <p class="empty">Die verkaufsfähige Ware ist vollständig zugeteilt.</p>
       {% endif %}
 
-      <h2>Eingangspositionen ohne Rezeptur</h2>
+      <h2>Eingangspositionen ohne Rezeptur oder Faktor</h2>
       {% if estimated.lines.rows %}
       <table class="lines">
         <thead>

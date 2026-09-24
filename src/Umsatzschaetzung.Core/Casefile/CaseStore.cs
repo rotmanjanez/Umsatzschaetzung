@@ -34,7 +34,8 @@ public sealed partial class CaseStore(string dir)
             mapped_at INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID;
         CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
         CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
-        CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL) WITHOUT ROWID;
+        CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL,
+            recipe_basis INTEGER) WITHOUT ROWID;
         CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, ingredient_id TEXT, category_id TEXT, yield_rule_id TEXT NOT NULL);
         CREATE TABLE pinned(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, portions INTEGER NOT NULL, reason TEXT NOT NULL);
         CREATE TABLE invoice(
@@ -81,16 +82,12 @@ public sealed partial class CaseStore(string dir)
         CREATE TABLE reading_line_flag(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, line INTEGER NOT NULL,
             ord INTEGER NOT NULL, code TEXT NOT NULL, message TEXT NOT NULL, line_no INTEGER NOT NULL, field TEXT,
             PRIMARY KEY(invoice_id, page, line, ord)) WITHOUT ROWID;
-        """,
-        """
+
         -- Rezeptur nur dieser Prüfung. Ein Produkt ohne Zeilen rechnet mit der des Katalogs.
         CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
             amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
-        ALTER TABLE case_product ADD COLUMN recipe_basis INTEGER;
-        """,
-        """
-        -- Positionsgruppen ohne Umsatz, nach dem Schlüssel der Gruppe.
-        CREATE TABLE no_revenue(line_key TEXT PRIMARY KEY) WITHOUT ROWID;
+        -- Ob eine Ware Umsatz bringt, entscheidet der Betrieb je Zutat.
+        CREATE TABLE no_revenue(ingredient_id TEXT PRIMARY KEY) WITHOUT ROWID;
         """,
     ];
 
@@ -345,8 +342,8 @@ public sealed partial class CaseStore(string dir)
                 ("@ord", i), ("@id", p.ProductId), ("@portions", p.Portions), ("@reason", p.Reason));
         }
 
-        foreach (var key in c.NoRevenue)
-            Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(line_key) VALUES(@key)", ("@key", key));
+        foreach (var id in c.NoRevenue)
+            Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(ingredient_id) VALUES(@id)", ("@id", id));
 
         for (var i = 0; i < c.Invoices.Count; i++)
         {
@@ -398,7 +395,7 @@ public sealed partial class CaseStore(string dir)
                 {
                     ProductId = r.GetString(0), Portions = r.GetInt64(1), Reason = r.GetString(2),
                 }));
-            ReadRows(db, "SELECT line_key FROM no_revenue ORDER BY line_key", r => c.NoRevenue.Add(r.GetString(0)));
+            ReadRows(db, "SELECT ingredient_id FROM no_revenue ORDER BY ingredient_id", r => c.NoRevenue.Add(r.GetString(0)));
 
             var lines = ReadLines(db);
             ReadRows(db, "SELECT id, source, file_name, supplier_name, number, date, currency, net_total, gross_total, "

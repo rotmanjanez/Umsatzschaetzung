@@ -245,7 +245,7 @@ public sealed class Report
     public List<UnmappedLine> Unmapped { get; set; } = [];
     public List<UnusedLine> Unused { get; set; } = [];
     public List<UnusedLine> Deposits { get; set; } = [];
-    public List<UnmappedLine> NoRevenue { get; set; } = [];
+    public List<UnusedLine> NoRevenue { get; set; } = [];
     public List<EstimateRow> Estimated { get; set; } = [];
     public List<Allocation> Allocations { get; set; } = [];
     public List<Flag> Warnings { get; set; } = [];

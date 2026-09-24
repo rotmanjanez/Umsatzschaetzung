@@ -226,7 +226,6 @@ public partial class CalcView : Screen
         var lists = Lists.RowDefinitions;
         lists[1].Height = ex.HasUnused ? GridLength.Star : new GridLength(0);
         lists[3].Height = ex.HasOmitted ? GridLength.Star : new GridLength(0);
-        ex.Explain(again);
         if (again is null) Mapping.Show(null);
         else if (again.Group.MappingId != kept!.Group.MappingId || again.Why != kept.Why) Mapping.Show(again.Group);
     }
@@ -239,14 +238,13 @@ public partial class CalcView : Screen
         choosing = true;
         (grid == UnusedGrid ? OmittedGrid : UnusedGrid).SelectedItem = null;
         choosing = false;
-        model.Exclusions.Explain(row);
         Mapping.Show(row?.Group);
     }
 
     async void ToggleRevenue(object? sender, RoutedEventArgs e)
     {
-        if (model.Exclusions.Current is not { } row || Session.Case is not { } kase) return;
-        if (!kase.NoRevenue.Remove(row.Group.Key)) kase.NoRevenue.Add(row.Group.Key);
+        if ((sender as Control)?.DataContext is not ExcludedRow { IngredientId: { } id } || Session.Case is not { } kase) return;
+        if (!kase.NoRevenue.Remove(id)) kase.NoRevenue.Add(id);
         if (!await Session.SaveCase(CancellationToken.None))
         {
             Session.Fail("Festlegung konnte nicht gespeichert werden");
@@ -254,8 +252,6 @@ public partial class CalcView : Screen
         }
         if (Session.Case is { } saved && Session.Rules is { } rs && IsActive) await Recalculate(saved, rs);
     }
-
-    void ShowExcludedHelp(object? sender, RoutedEventArgs e) => Help.Open(TopLevel.GetTopLevel(this) as Window, Help.Excluded);
 
     static string RecipeTip(RuleSet rs, CaseProduct cp)
     {

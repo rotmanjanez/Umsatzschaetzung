@@ -16,12 +16,12 @@ Ergebnis mit Umsätzen, Rohgewinnaufschlag und Zusammenfassung.
 Der mittlere Teil zeigt die Einkäufe, die nicht über Rezeptur und Preis in den
 Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
-- **Nicht Teil der RGAS-Ermittlung**: Die Zutat wird eingekauft, kommt aber in
-  keinem Produkt des Sortiments vor. Ihr Umsatz wird über den
+- **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in keinem Produkt des
+  Sortiments vor, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den
   Rohgewinnaufschlagsatz geschätzt. Steht hier eine echte Ware, fehlt im
   Sortiment wahrscheinlich ein Produkt.
 - **Nicht in der Umsatzschätzung**: Die Position ist auf **2. Zuordnung**
-  noch offen, oder der Zuordnung fehlt der Faktor. Im Beispiel sollte hier
+  noch offen, oder die Zutat ist ohne Umsatz festgelegt. Im Beispiel sollte hier
   nichts mehr stehen.
 
 Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche

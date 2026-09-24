@@ -64,7 +64,7 @@ public sealed class Case
     public List<CaseProduct> Products { get; set; } = [];
     public List<YieldChoice> Yields { get; set; } = [];
     public List<PinnedPortions> Pinned { get; set; } = [];
-    // Positionsgruppen, die in diesem Betrieb keinen Umsatz bringen, etwa Reinigungsmittel.
+    // Zutaten, die in diesem Betrieb keinen Umsatz bringen, etwa Reinigungsmittel.
     public List<string> NoRevenue { get; set; } = [];
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long MappedAt { get; set; }

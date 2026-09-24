@@ -336,50 +336,6 @@ public class CaseStoreTests
         Assert.Equal(2L, Sql.Scalar(tmp.Sub("fall-1.db"), "SELECT count(*) FROM case_product WHERE recipe_basis IS NULL"));
     }
 
-    // So lag ein Fall vor der Rezeptur der Prüfung in der Datei.
-    static void BeforeCaseRecipes(string path) => Sql.Exec(path, """
-        DROP TABLE no_revenue;
-        DROP TABLE case_recipe;
-        ALTER TABLE case_product DROP COLUMN recipe_basis;
-        PRAGMA user_version = 1;
-        """);
-
-    [Fact]
-    public void ACaseFileFromBeforeCaseRecipesLoadsAndKeepsABackup()
-    {
-        using var tmp = new TempDir();
-        var store = new CaseStore(tmp.Path);
-        var c = Cases.Full("fall-1");
-        c.Products.RemoveAll(p => p.Recipe is not null);
-        c.NoRevenue = [];
-        store.Save(c);
-        var path = tmp.Sub("fall-1.db");
-        BeforeCaseRecipes(path);
-
-        var back = store.Load("fall-1");
-
-        Cases.Same(c, back);
-        Assert.All(back.Products, p => Assert.Null(p.Recipe));
-        Assert.True(File.Exists(path + ".v1.bak"));
-        store.Save(Cases.Full("fall-1"));
-        Cases.Same(Cases.Full("fall-1"), store.Load("fall-1"));
-    }
-
-    [Fact]
-    public void ACaseFileFromBeforeCaseRecipesImportsWithoutLeavingABackup()
-    {
-        using var tmp = new TempDir();
-        var from = new CaseStore(tmp.Sub("a"));
-        from.Save(Cases.Minimal("fall-1"));
-        BeforeCaseRecipes(tmp.Sub("a/fall-1.db"));
-
-        var to = new CaseStore(tmp.Sub("b"));
-        to.Import(File.ReadAllBytes(tmp.Sub("a/fall-1.db")), false);
-
-        Cases.Same(Cases.Minimal("fall-1"), to.Load("fall-1"));
-        Assert.Equal(["fall-1.db"], Directory.GetFiles(tmp.Sub("b")).Select(Path.GetFileName));
-    }
-
     [Fact]
     public void AnEmptyDatabaseIsMigratedAndThenFoundToHoldNoCase()
     {

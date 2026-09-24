@@ -250,7 +250,7 @@
                         <DockPanel>
                             <Grid x:Name="Lists" RowDefinitions="Auto,*,Auto,*">
                                 <DockPanel Grid.Row="0" IsVisible="{Binding HasUnused}" Margin="0,0,0,8">
-                                    <TextBlock DockPanel.Dock="Left" Text="Nicht Teil der RGAS-Ermittlung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                                    <TextBlock DockPanel.Dock="Left" Text="Nicht Teil der Ermittlung des Aufschlagsatzes" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
                                     <TextBlock Text="{Binding UnusedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                 </DockPanel>
                                 <Grid Grid.Row="1" IsVisible="{Binding HasUnused}">
@@ -272,6 +272,15 @@
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
+                                            <DataGridTemplateColumn Width="Auto">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                                        <Button Theme="{StaticResource IconButton}" ToolTip.Tip="{Binding DropTip}" Click="ToggleRevenue">
+                                                            <PathIcon Data="{StaticResource ClearIcon}" Width="12" Height="12"/>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Border>
@@ -288,12 +297,7 @@
                                             <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate x:DataType="ui:ExcludedRow">
-                                                        <DockPanel Margin="0,0,8,0">
-                                                            <Border DockPanel.Dock="Right" Theme="{StaticResource Badge}" IsVisible="{Binding NoRevenue}" VerticalAlignment="Center">
-                                                                <TextBlock Text="kein Umsatz" Theme="{StaticResource BadgeText}"/>
-                                                            </Border>
-                                                            <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
-                                                        </DockPanel>
+                                                        <TextBlock Classes="cell" Text="{Binding Name}" FontWeight="SemiBold" ToolTip.Tip="{Binding Name}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -301,6 +305,16 @@
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate x:DataType="ui:ExcludedRow">
                                                         <TextBlock Classes="cell" Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                            <DataGridTemplateColumn Width="Auto">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate x:DataType="ui:ExcludedRow">
+                                                        <Button Theme="{StaticResource IconButton}" ToolTip.Tip="{Binding RestoreTip}" Click="ToggleRevenue"
+                                                                IsVisible="{Binding CanRestoreRevenue}">
+                                                            <PathIcon Data="{StaticResource ResetIcon}" Width="12" Height="12"/>
+                                                        </Button>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -313,27 +327,6 @@
                         <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
                         <Border x:Name="MappingPane" Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
                             <DockPanel>
-                                <Border DockPanel.Dock="Top" Background="{DynamicResource WarningSoftBrush}" CornerRadius="8" Padding="14,12" Margin="0,0,14,12"
-                                        IsVisible="{Binding HasWhy}">
-                                    <StackPanel>
-                                        <DockPanel Margin="0,0,0,8">
-                                            <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Click="ShowExcludedHelp"
-                                                    ToolTip.Tip="Warum Einkäufe nicht in die Kalkulation eingehen"/>
-                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                                <PathIcon Data="{StaticResource WarningIcon}" Foreground="{DynamicResource WarningBrush}" Width="12" Height="12"/>
-                                                <TextBlock Text="{Binding WhyTitle}" FontSize="11" FontWeight="SemiBold" LetterSpacing="0.8"
-                                                           Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </DockPanel>
-                                        <TextBlock Text="{Binding Why}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                                        <Button Content="Bringt in diesem Betrieb keinen Umsatz" Theme="{StaticResource SecondaryButton}" Margin="0,10,0,0"
-                                                IsVisible="{Binding CanDropRevenue}" Click="ToggleRevenue"
-                                                ToolTip.Tip="Die Positionsgruppe geht in dieser Prüfung nicht in die Umsatzschätzung ein, etwa Reinigungsmittel oder Müllbeutel."/>
-                                        <Button Content="Bringt doch Umsatz" Theme="{StaticResource SecondaryButton}" Margin="0,10,0,0"
-                                                IsVisible="{Binding CanRestoreRevenue}" Click="ToggleRevenue"
-                                                ToolTip.Tip="Der Umsatz der Positionsgruppe wird wieder über den Aufschlagsatz geschätzt."/>
-                                    </StackPanel>
-                                </Border>
                                 <ui:MappingDetail x:Name="Mapping"/>
                             </DockPanel>
                         </Border>

@@ -48,10 +48,11 @@ public class PieceWeightTests
     }
 
     [Fact]
-    public void WithoutAWeightThePieceStaysOpen()
+    public void WithoutAWeightThePieceIsEstimatedOverTheMarkup()
     {
         var r = Calculation.Run(Kase(), Rules(null));
-        Assert.Single(r.Unmapped);
+        Assert.Empty(r.Unmapped);
+        Assert.Single(r.Unused);
         Assert.Contains(r.Warnings, w => w.Code == "missing_factor");
         Assert.DoesNotContain(r.Warnings, w => w.Code == "piece_weight");
     }

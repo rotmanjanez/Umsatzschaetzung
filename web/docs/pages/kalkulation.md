@@ -114,22 +114,19 @@ Salat, in die Prüfung.
 Der mittlere Teil der Kalkulation: was eingekauft wurde, aber nicht über
 Rezeptur und Preis in den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
 
+**Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den
+Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Abschnitt 3), sie verändern den
+Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des
+Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
+in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine
+Zutat ohne Sparte oder aus der Zuordnung heraus. Eine echte Ware hier heißt: Die
+Zuordnung ist falsch, oder im Sortiment fehlt ein Produkt. Welche Produkte die
+Zutat verwenden, steht unter [Regeln → Produkte](regeln.md#produkte); gehört
+eines davon zum Betrieb, kommt es ins Sortiment.
+
 **Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP
-ganz.
-
-- **ohne Zuordnung**: Die Position ist unter [Zuordnung](zuordnung.md) noch
-  offen.
-- **Faktor fehlt**: Die Zutat ist klar, aber nicht, wie viel in einem Gebinde
-  steckt.
-
-**Nicht Teil der RGAS-Ermittlung**: Die Zutat kommt in keinem Produkt des
-Sortiments vor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz ihrer Sparte
-geschätzt (Abschnitt 3), sie verändert den Satz selbst aber nicht. Fracht und
-Verpackung gehören hierher und gehören besser auf eine Zutat ohne Sparte oder
-aus der Zuordnung heraus. Eine echte Ware hier heißt: Die Zuordnung ist falsch,
-oder im Sortiment fehlt ein Produkt. Welche Produkte die Zutat verwenden, steht
-unter [Regeln → Produkte](regeln.md#produkte); gehört eines davon zum Betrieb,
-kommt es ins Sortiment.
+ganz: Positionen, die unter [Zuordnung](zuordnung.md) noch offen sind, und
+Zutaten, die ohne Umsatz festgelegt sind.
 
 Pfand und Leergut stehen nicht in der Liste. Über die Zeit gleichen sie sich
 aus, darum zählen sie auch nicht zu den erfassten Einkäufen. Unter der Liste
@@ -140,13 +137,12 @@ Ein Klick auf eine Zeile öffnet rechts dieselbe Ansicht wie unter
 Vorschlägen und die Belege. Eine falsche Zuordnung lässt sich dort direkt
 korrigieren; die Kalkulation und die Vorschau rechnen danach neu.
 
-Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht an der Zutat. Eine Position
-unter **Nicht Teil der RGAS-Ermittlung** lässt sich darum rechts mit **Bringt in
-diesem Betrieb keinen Umsatz** aus der Schätzung nehmen, etwa Reinigungsmittel
-oder Müllbeutel. Das gilt für ihre ganze Positionsgruppe in dieser Prüfung, auch
-für später eingelesene Rechnungen; die Gruppe steht dann mit **kein Umsatz**
-unter **Nicht in der Umsatzschätzung**. **Bringt doch Umsatz** nimmt die
-Festlegung zurück.
+Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht am Katalog. Das × am Ende
+einer Zeile unter **Nicht Teil der Ermittlung des Aufschlagsatzes** nimmt ihre
+Zutat aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt
+für alle Positionen dieser Zutat in dieser Prüfung, auch für später eingelesene
+Rechnungen; sie stehen dann unter **Nicht in der Umsatzschätzung**. Das ↺ am
+Ende der Zeile nimmt die Festlegung zurück.
 
 Neben **Nicht in der Umsatzschätzung** steht ihr Anteil an allen Einkäufen. So viel vom Umsatz
 kann die Kalkulation gar nicht erklären; vor dem Speichern sollte er klein und

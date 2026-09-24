@@ -25,6 +25,8 @@ public sealed class RuleStore
             deleted_at TEXT) WITHOUT ROWID;
         CREATE TABLE category_gewerbe(category_id TEXT NOT NULL, ord INTEGER NOT NULL, kennzahl TEXT NOT NULL,
             PRIMARY KEY(category_id, ord)) WITHOUT ROWID;
+        CREATE TABLE category_gebinde(category_id TEXT NOT NULL, ord INTEGER NOT NULL, unit_code TEXT NOT NULL,
+            PRIMARY KEY(category_id, ord)) WITHOUT ROWID;
 
         CREATE TABLE ingredient(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT NOT NULL,
@@ -69,10 +71,6 @@ public sealed class RuleStore
 
         CREATE INDEX synonym_begriff ON synonym(begriff);
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
-        """,
-        """
-        CREATE TABLE category_gebinde(category_id TEXT NOT NULL, ord INTEGER NOT NULL, unit_code TEXT NOT NULL,
-            PRIMARY KEY(category_id, ord)) WITHOUT ROWID;
         """,
     ];
 

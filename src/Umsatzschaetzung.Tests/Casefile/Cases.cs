@@ -48,7 +48,7 @@ static class Cases
             new() { CategoryId = "cat.bier", YieldRuleId = "yr.a" },
         ];
         c.Pinned = [new() { ProductId = "prod.pils.05", Portions = 1200, Reason = "laut Kassenbuch" }, new() { ProductId = "prod.x", Portions = 0, Reason = "" }];
-        c.NoRevenue = ["Metro|a:4711|H87", "|n:muellbeutel|H87"];
+        c.NoRevenue = ["ing.spuelmittel", "ing.muellbeutel"];
         c.Invoices =
         [
             new()

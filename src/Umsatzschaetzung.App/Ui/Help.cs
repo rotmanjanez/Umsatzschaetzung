@@ -18,7 +18,6 @@ public static class Help
     public const string Products = "kalkulation/";
     public const string Calc = "kalkulation/";
     public const string Report = "bericht/";
-    public const string Excluded = "kalkulation/#nicht-berucksichtigt";
     public const string Rules = "regeln/";
 
     public static void Open(Window? owner, string topic)

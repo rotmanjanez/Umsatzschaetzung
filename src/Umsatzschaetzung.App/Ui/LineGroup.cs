@@ -1,4 +1,5 @@
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -37,7 +38,7 @@ public sealed class LineGroup
             for (var j = 0; j < inv.Lines.Count; j++)
             {
                 var l = inv.Lines[j];
-                var key = LineKey.Of(inv.SupplierName, l);
+                var key = inv.SupplierName + "|" + Identity(inv.SupplierName, l) + "|" + l.UnitCode.ToUpperInvariant();
                 if (!groups.TryGetValue(key, out var g))
                 {
                     g = new LineGroup { Key = key, Supplier = inv.SupplierName, Article = l.SellerArticleId, Name = l.Name, Unit = l.UnitCode };
@@ -54,6 +55,12 @@ public sealed class LineGroup
         }
         return [.. groups.Values];
     }
+
+    // A group holds exactly the lines one mapping covers: the key Match picks a rule by, and its unit.
+    static string Identity(string? supplier, InvoiceLine l) =>
+        !string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(l.SellerArticleId) ? "a:" + l.SellerArticleId
+        : !string.IsNullOrEmpty(l.Gtin) ? "g:" + l.Gtin
+        : "n:" + ArticleName.Canonical(l.Name);
 
     // Besides its own wording a group is found by what it maps to: "Bier" finds the Pils.
     string SearchOf(Case c, RuleSet? rs)

@@ -3,7 +3,7 @@ using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Calc;
 
-internal sealed record Excluded(List<UnmappedLine> Unmapped, List<UnusedLine> Unused, List<UnusedLine> Deposits, List<UnmappedLine> NoRevenue);
+internal sealed record Excluded(List<UnmappedLine> Unmapped, List<UnusedLine> Unused, List<UnusedLine> Deposits, List<UnusedLine> NoRevenue);
 
 public static class Normalize
 {
@@ -38,11 +38,6 @@ public static class Normalize
         foreach (var inv in c.Invoices)
             foreach (var line in inv.Lines)
             {
-                if (noRevenue.Contains(LineKey.Of(inv.SupplierName, line)))
-                {
-                    ex.NoRevenue.Add(new UnmappedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet });
-                    continue;
-                }
                 var m = Match.Mapping(rs, inv.SupplierName, inv.Date, line);
                 if (m is null || !rs.Ingredients.TryGetValue(m.IngredientId, out var ing))
                 {
@@ -54,6 +49,11 @@ public static class Normalize
                     ex.Deposits.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
                     continue;
                 }
+                if (noRevenue.Contains(ing.Id))
+                {
+                    ex.NoRevenue.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
+                    continue;
+                }
                 if (!inRecipe.Contains(ing.Id) || Scale.Of(rs, ing.Id) is not { } unit)
                 {
                     ex.Unused.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
@@ -61,13 +61,13 @@ public static class Normalize
                 }
                 if (Convert(line, m, unit, ing.Piece) is not { } conv)
                 {
-                    ex.Unmapped.Add(new UnmappedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet });
+                    ex.Unused.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
                     flags.Add(new Flag
                     {
                         Code = "missing_factor",
                         LineNo = line.No,
                         Message = $"Rechnung {inv.Number} Pos. {line.No} „{line.Name}“: {Units.Label(line.UnitCode)} lässt sich nicht "
-                            + $"in {Format.UnitName(unit)} umrechnen — der Zuordnung fehlt der Faktor",
+                            + $"in {Format.UnitName(unit)} umrechnen — der Zuordnung fehlt der Faktor, der Umsatz ist über den Aufschlagsatz geschätzt",
                     });
                     continue;
                 }
@@ -104,7 +104,7 @@ public static class Normalize
         foreach (var u in uses.Values) u.Used = u.Bought;
         foreach (var e in c.Inventory)
         {
-            if (!rs.Ingredients.ContainsKey(e.IngredientId) || !inRecipe.Contains(e.IngredientId)) continue;
+            if (!rs.Ingredients.ContainsKey(e.IngredientId) || !inRecipe.Contains(e.IngredientId) || noRevenue.Contains(e.IngredientId)) continue;
             if (Scale.Of(rs, e.IngredientId) is null) continue;
             var u = Use(e.IngredientId);
             u.Opening = Scale.ToBase(e.Opening, e.Unit);
