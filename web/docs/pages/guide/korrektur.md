@@ -1,6 +1,6 @@
 # Rechnungen korrigieren
 
-<p class="us-steps"><span>Prüfung</span><span class="here">1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
+<p class="us-steps"><a href="../start/">Prüfung</a><span class="here">1. Rechnungen</span><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
 Programm rechnet deshalb jeden Scan gegen sich selbst: Menge mal Einzelpreis

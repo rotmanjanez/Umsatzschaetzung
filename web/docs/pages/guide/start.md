@@ -1,6 +1,6 @@
 # Prüfung anlegen
 
-<p class="us-steps"><span class="here">Prüfung</span><span>1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
+<p class="us-steps"><span class="here">Prüfung</span><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was
 dazugehört. Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim

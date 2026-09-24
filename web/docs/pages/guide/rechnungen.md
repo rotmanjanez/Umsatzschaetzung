@@ -1,6 +1,6 @@
 # Rechnungen importieren
 
-<p class="us-steps"><span>Prüfung</span><span class="here">1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
+<p class="us-steps"><a href="../start/">Prüfung</a><span class="here">1. Rechnungen</span><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 Die Rechnungen sind die Grundlage von allem Weiteren: Aus ihnen kommt, was der
 Betrieb eingekauft hat. Für das Beispiel liegen die 106 Eingangsrechnungen des

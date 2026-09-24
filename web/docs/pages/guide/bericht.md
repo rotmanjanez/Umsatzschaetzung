@@ -1,6 +1,6 @@
 # Bericht
 
-<p class="us-steps"><span>Prüfung</span><span>1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span class="here">5. Bericht</span></p>
+<p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><span class="here">5. Bericht</span></p>
 
 Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben
 dem kalkulierten, mit allem, was zur Rechnung dazugehört. Auf **5. Bericht**

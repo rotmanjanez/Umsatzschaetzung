@@ -1,6 +1,6 @@
 # Zuordnung prüfen
 
-<p class="us-steps"><span>Prüfung</span><span>1. Rechnungen</span><span class="here">2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
+<p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><span class="here">2. Zuordnung</span><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu
 Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die

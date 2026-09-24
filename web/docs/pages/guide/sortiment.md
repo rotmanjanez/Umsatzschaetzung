@@ -1,6 +1,6 @@
 # Sortiment anlegen
 
-<p class="us-steps"><span>Prüfung</span><span>1. Rechnungen</span><span>2. Zuordnung</span><span class="here">3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
+<p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><span class="here">3. Sortiment</span><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht
 es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist

@@ -1,6 +1,6 @@
 # Kalkulation
 
-<p class="us-steps"><span>Prüfung</span><span>1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span class="here">4. Kalkulation</span><span>5. Bericht</span></p>
+<p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><span class="here">4. Kalkulation</span><a href="../bericht/">5. Bericht</a></p>
 
 ## Ergebnis
 

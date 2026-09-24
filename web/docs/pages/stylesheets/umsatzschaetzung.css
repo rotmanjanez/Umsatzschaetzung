@@ -119,7 +119,7 @@
   line-height: 1;
 }
 
-.md-typeset .us-steps span {
+.md-typeset .us-steps > * {
   padding: .35rem .65rem;
   border-radius: 999px;
   border: 1px solid transparent;
@@ -132,10 +132,15 @@
   color: #fff;
 }
 
-.md-typeset .us-steps span.here ~ span {
+.md-typeset .us-steps .here ~ * {
   background: transparent;
   border-color: var(--md-default-fg-color--lightest);
   color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .us-steps a:hover {
+  border-color: var(--us-blue);
+  color: var(--us-blue);
 }
 
 .md-typeset ol.us-flow {
