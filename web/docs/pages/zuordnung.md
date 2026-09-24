@@ -67,6 +67,18 @@ zusätzlich der **Faktor** anzugeben: der Inhalt eines Gebindes in der Einheit d
 Rezepts, etwa 3000 bei einem 3-kg-Block zu einem Rezept in Gramm. Bei kg, l und
 Stück rechnet das Programm selbst um.
 
+Steht die Packungsgröße im Artikeltext („12 × 400 g“) oder hat die Zutat ein
+**Stückgewicht**, ist der Faktor schon ausgefüllt; darunter steht, woher er
+kommt, und der Preis je kg oder l, der sich daraus ergibt. Das Stückgewicht ist
+ein Richtwert — rechnet ein Großmarkt einen 10-kg-Sack als „1 Stk“ ab, verrät
+ihn der viel zu hohe Kilopreis. Dann den Faktor überschreiben.
+
+Wird eine Position einzeln in Stück berechnet und das Rezept in g oder ml, ist
+der eingetragene Faktor das Gewicht eines Stücks. Er wird bei der Zutat
+gespeichert (**Regeln → Zutaten → Stückgewicht**) und gilt dann für jede Position
+dieser Zutat in Stück. Bei Gebinden wie Kiste oder Karton bleibt er bei der
+Zuordnung.
+
 ## Eine Zuordnung korrigieren
 
 Auch eine automatisch zugeordnete Position lässt sich auswählen. Rechts steht
@@ -107,4 +119,6 @@ geblieben ist, und nicht bloß vergessen wurde.
 
 Pfand ist der häufigste Fall. Es steht als eigene Position auf fast jeder
 Getränkerechnung, wird zurückgezahlt und hat mit dem Einkauf von Ware nichts zu
-tun.
+tun. Der Zutat **Pfand und Leergut** zugeordnet, zählt es auch nicht zu den
+erfassten Einkäufen und nicht zu den unberücksichtigten; der Bericht nennt nur
+die Summen von berechnetem Pfand und gutgeschriebenem Leergut.

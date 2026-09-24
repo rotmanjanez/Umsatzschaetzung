@@ -39,18 +39,28 @@ markdown_extensions:
   - footnotes
   - attr_list
   - pymdownx.details
+  - pymdownx.keys
   - pymdownx.superfences
 
 nav:
   - Start: index.md
   - Prüfungen: pruefungen.md
+  - Prüfung: pruefung.md
+  - Rechnungen importieren: rechnungen.md
+  - Zuordnung: zuordnung.md
+  - Kalkulation: kalkulation.md
+  - Bericht: bericht.md
+  - Regeln: regeln.md
   - Import und Export: import-export.md
   - Beispielprüfung:
-      - Übersicht: guide/index.md
-      - macOS: guide/install-macos.md
-      - Windows: guide/install-windows.md
-      - Erste Prüfung: guide/start.md
-      - Prüfungsdaten: guide/pruefungsdaten.md
-      - Rechnungen: guide/rechnungen.md
-      - Korrektur: guide/korrektur.md
-      - Kalkulation: guide/kalkulation.md
+      - Überblick: guide/index.md
+      - Installation macOS: guide/install-macos.md
+      - Installation Windows: guide/install-windows.md
+      - Prüfung anlegen: guide/start.md
+      - 1. Rechnungen importieren: guide/rechnungen.md
+      - 1. Rechnungen korrigieren: guide/korrektur.md
+      - 2. Zuordnung: guide/zuordnung.md
+      - 3. Sortiment: guide/sortiment.md
+      - 4. Kalkulation: guide/kalkulation.md
+      - 5. Bericht: guide/bericht.md
+      - Danach: guide/danach.md

@@ -1,3 +1,6 @@
+// The example case from the guide: created, filled with all 106 invoices, the three
+// open ones corrected, the open positions mapped, the assortment built, the report shown.
+
 { "do": "shot", "name": "neue-pruefung-knopf", "at": { "text": "Neue Prüfung", "up": "DockPanel" } }
 
 { "do": "click", "at": { "text": "Neue Prüfung" } }
@@ -12,28 +15,25 @@
 { "do": "type", "at": { "name": "NewPab" }, "text": "PaB 2025/0417" }
 { "do": "click", "at": { "text": "Anlegen" } }
 
+{ "do": "shot", "name": "pruefung-kopf", "at": { "name": "CaseLabel", "up": "DockPanel" }, "trim": { "bottom": -56 } }
 { "do": "shot", "name": "pruefung-leer", "at": { "text": "Erklärte Umsätze, netto in €", "up": "TabControl" }, "trim": { "top": 16 } }
 
 { "do": "type", "at": { "name": "Declared19" }, "text": "196.418,00" }
 { "do": "focus" }
 { "do": "shot", "name": "erklaerte-umsaetze", "at": { "name": "Declared19", "up": "Grid" }, "trim": { "top": -30 } }
 
+// Rechnungen: the whole year at once, three scans do not add up
 { "do": "tab", "header": "1. Rechnungen" }
 { "do": "shot", "name": "rechnungen-leer", "at": { "text": "1. Rechnungen", "up": "TabControl" }, "trim": { "top": 16 } }
 
-{ "do": "import", "files": ["beispiel-rechnungen/2025-01-03_2025-0118.png", "beispiel-rechnungen/2025-01-04_LR-2025-30117.png", "beispiel-rechnungen/2025-01-08_9120044817.jpeg", "beispiel-rechnungen/2025-01-10_SR-250107.pdf", "beispiel-rechnungen/2025-01-14_LR-2025-30306.png", "beispiel-rechnungen/2025-01-20_R-25-014.jpeg"] }
+{ "do": "import", "files": ["beispiel-rechnungen"] }
 { "do": "shot", "name": "rechnungen-import", "window": "dialog" }
 { "do": "click", "window": "dialog", "at": { "text": "Schließen" } }
 
 { "do": "deselect", "at": { "text": "Lieferant", "up": "DataGrid" } }
 { "do": "shot", "name": "rechnungen-liste", "at": { "text": "Lieferant", "up": "DataGrid" }, "clip": "DataGridRow" }
 
-// Korrektur: drei Scans, die nicht aufgehen - eine fehlende Einheit, eine verlesene Ziffer, eine zerrissene Zeile
-{ "do": "import", "files": ["beispiel-rechnungen/2025-10-18_WS-2025-346.png", "beispiel-rechnungen/2025-10-23_2025-0561.png", "beispiel-rechnungen/2025-08-21_TK25-1583.png"] }
-{ "do": "click", "window": "dialog", "at": { "text": "Schließen" } }
-{ "do": "deselect", "at": { "text": "Lieferant", "up": "DataGrid" } }
-{ "do": "shot", "name": "korrektur-liste", "at": { "text": "Lieferant", "up": "DataGrid" }, "clip": "DataGridRow" }
-
+// Korrektur: a missing unit, a misread digit, a torn line
 { "do": "open", "number": "WS-2025-346" }
 { "do": "wait", "rounds": 2 }
 { "do": "shot", "name": "korrektur-ws", "window": "dialog" }
@@ -87,4 +87,146 @@
 { "do": "shot", "name": "korrektur-bestaetigt", "window": "dialog", "at": { "text": "Rechnung", "up": "DockPanel" } }
 
 { "do": "deselect", "at": { "text": "Lieferant", "up": "DataGrid" } }
-{ "do": "shot", "name": "korrektur-liste-fertig", "at": { "text": "Lieferant", "up": "DataGrid" }, "clip": "DataGridRow" }
+{ "do": "shot", "name": "korrektur-liste-fertig", "at": { "starts": "0 offen", "up": "DockPanel" } }
+
+// Zuordnung: five open positions, then the kegs the program took for bottled beer
+{ "do": "tab", "header": "2. Zuordnung" }
+{ "do": "wait", "rounds": 8 }
+{ "do": "shot", "name": "zuordnung-liste", "at": { "name": "Groups", "up": "MappingView" } }
+
+{ "do": "select", "at": { "starts": "2022 Domina" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "shot", "name": "zuordnung-position", "at": { "name": "Groups", "up": "MappingView" } }
+{ "do": "click", "at": { "text": "Rotwein × 750 ml" } }
+{ "do": "wait", "rounds": 2 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+{ "do": "shot", "name": "zuordnung-zugeordnet", "at": { "starts": "„2022 Domina", "up": "Border" } }
+
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Frühkartoffeln" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Kaffeesahne" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "shot", "name": "zuordnung-faktor-fehlt", "at": { "text": "AUS DEN REGELN", "up": "Border" } }
+{ "do": "type", "at": { "name": "FactorBox" }, "text": "1800" }
+{ "do": "focus" }
+{ "do": "wait", "rounds": 2 }
+{ "do": "shot", "name": "zuordnung-faktor", "at": { "text": "AUS DEN REGELN", "up": "Border" } }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Petersilie" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "type", "at": { "name": "FactorBox" }, "text": "30" }
+{ "do": "focus" }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Pommes frites 7/7 blanchiert, 4 x" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "type", "at": { "name": "FactorBox" }, "text": "10000" }
+{ "do": "focus" }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "type", "at": { "name": "Search" }, "text": "Fass" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "deselect", "at": { "name": "Groups" } }
+{ "do": "shot", "name": "zuordnung-filter", "at": { "name": "Groups", "up": "Border" }, "clip": "DataGridRow" }
+{ "do": "select", "at": { "starts": "Frankenbräu Pils Fass 50" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "shot", "name": "zuordnung-fass", "at": { "name": "Groups", "up": "MappingView" } }
+{ "do": "click", "at": { "text": "Manuell zuordnen" } }
+{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "shot", "name": "zuordnung-fass-manuell", "at": { "text": "AUS DEN REGELN", "up": "Border" } }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "type", "at": { "name": "Search" }, "text": "Hefeweizen Fass" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "select", "at": { "starts": "Frankenbräu Hefeweizen" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "click", "at": { "text": "Manuell zuordnen" } }
+{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 30 Getränke" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "select", "at": { "starts": "Frankenbräu Pils Fass 30" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "click", "at": { "text": "Manuell zuordnen" } }
+{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 30 Automatisch" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "select", "at": { "starts": "Frankenbräu Pils Fass 30" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "click", "at": { "text": "Manuell zuordnen" } }
+{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "type", "at": { "name": "Search" }, "text": "Frankenbru" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "select", "at": { "starts": "Frankenbru Pils" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "click", "at": { "text": "Manuell zuordnen" } }
+{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "type", "at": { "name": "Search" }, "text": "" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "deselect", "at": { "name": "Groups" } }
+{ "do": "shot", "name": "zuordnung-fertig", "at": { "starts": "Alles zugeordnet", "up": "DockPanel" } }
+
+
+// Sortiment: one product by hand, the rest per CSV
+{ "do": "tab", "header": "3. Sortiment" }
+{ "do": "choose", "at": { "name": "CatalogBox" }, "text": "Bier 0,5", "item": "Bier 0,5 l vom Fass" }
+{ "do": "focus" }
+{ "do": "shot", "name": "sortiment-erstes", "at": { "text": "Produkt", "up": "DataGrid" }, "clip": "DataGridRow", "trim": { "top": 5 } }
+{ "do": "type", "at": { "text": "Bier 0,5 l vom Fass", "up": "DataGridRow" }, "text": "4,60" }
+{ "do": "focus" }
+
+{ "do": "shot", "name": "sortiment-kopf", "at": { "tip": "CSV importieren", "up": "Grid" }, "trim": { "bottom": 5 } }
+{ "do": "pick", "files": ["web/docs/pages/guide/sortiment-gasthaus.csv"] }
+{ "do": "click", "at": { "tip": "CSV importieren" } }
+{ "do": "wait", "rounds": 2 }
+{ "do": "shot", "name": "sortiment-liste", "at": { "text": "Produkt", "up": "DataGrid" }, "clip": "DataGridRow", "trim": { "top": 5 } }
+
+// Bericht: the purchases that stay out of the calculation; the preview itself is a web view
+{ "do": "tab", "header": "5. Bericht" }
+{ "do": "wait", "rounds": 8 }
+{ "do": "shot", "name": "bericht-oben", "at": { "text": "Nicht berücksichtigte Einkäufe", "up": "ReportView" }, "trim": { "bottom": 390 } }
+
+// Danach: back in the list, the case is there to reopen
+{ "do": "click", "at": { "name": "BackButton" } }
+{ "do": "deselect", "at": { "text": "Bezeichnung", "up": "DataGrid" } }
+{ "do": "shot", "name": "pruefungen-wieder", "at": { "text": "Bezeichnung", "up": "DataGrid" }, "trim": { "top": 16 }, "clip": "DataGridRow" }

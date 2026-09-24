@@ -1,7 +1,9 @@
 ﻿Produkt;Bruttopreis;USt
 Radler, 0,5 l;4,40 €;19 %
 Weißbier, 0,5 l Flasche;4,90 €;19 %
+Alkoholfreies Bier 0,33 l Flasche;3,90 €;19 %
 Erfrischungsgetränk 0,3 l;3,20 €;19 %
+Cola 0,2 l, Flasche;3,00 €;19 %
 Apfelschorle, 0,4 l;3,90 €;19 %
 Mineralwasser 0,25 l;2,60 €;19 %
 Weißwein 0,2 l;5,80 €;19 %
@@ -9,13 +11,18 @@ Rotwein 0,2 l;6,20 €;19 %
 Weißweinschorle, 0,25 l;4,80 €;19 %
 Sekt 0,1 l;4,50 €;19 %
 Spirituose 2 cl;3,00 €;19 %
+Likör 2 cl;3,00 €;19 %
 Longdrink 4 cl mit Filler;8,50 €;19 %
 Wodka Orange;7,50 €;19 %
 Tasse Kaffee, 7-g-Dosis;2,90 €;19 %
+Glühwein, 0,2 l, eigener Ansatz;4,50 €;19 %
 Schnitzel mit Pommes;15,90 €;19 %
+Mittagstisch, Braten mit Kartoffeln;11,90 €;19 %
 Halbes Hendl mit Brezel;12,90 €;19 %
 Rindersteak mit Pommes;24,90 €;19 %
 Käsespätzle, zugekaufte Spätzle;12,50 €;19 %
+Cheeseburger;13,90 €;19 %
+Schinken-Käse-Toast;6,90 €;19 %
 Bratwurst im Brötchen;4,50 €;19 %
 Wiener, ein Paar;4,90 €;19 %
 Brezel, zugekauft;1,80 €;19 %

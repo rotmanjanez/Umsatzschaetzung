@@ -1,19 +1,14 @@
-# Die erste Prüfung
+# Prüfung anlegen
 
-Am Ende der Anleitung steht ein Prüfbericht, der den kalkulierten Umsatz des
-Betriebs dem erklärten gegenüberstellt. Die Schritte dorthin:
+<p class="us-steps"><span class="here">Prüfung</span><span>1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
 
-1. Prüfung anlegen – dieser Schritt
-2. Erklärte Umsätze eintragen
-3. Rechnungen importieren
-4. Ausgelesene Rechnungen durchsehen
-5. Eingekaufte Waren den Produkten zuordnen
-6. Kalkulieren
-7. Bericht exportieren
+Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was
+dazugehört. Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim
+ersten Mal ist sie leer.
 
-## Prüfung anlegen
+![Die leere Liste der Prüfungen mit dem Knopf „Neue Prüfung“](img/neue-pruefung-knopf.png)
 
-![Kopfzeile der Prüfungsliste mit dem Knopf „Neue Prüfung“](img/neue-pruefung-knopf.png)
+## Die Eckdaten
 
 **Neue Prüfung** öffnet das Formular.
 
@@ -36,17 +31,50 @@ Richtsatzsammlung gebraucht.
 
 **Anlegen** öffnet die Prüfung.
 
-## Wo die Prüfung liegt
+## So sieht eine geöffnete Prüfung aus
 
-Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter
-`Umsatzschätzung`, etwa `fall-20250502-080000-a1b2c3d4.db`. Darin steht alles,
-was zu dieser Prüfung gehört: Eckdaten, erklärte Umsätze und Bestand, die
-Rechnungen samt Scans und das Sortiment mit Preisen. Nicht in der Datei stehen
-die Regeln, also Zutaten, Produkte und Zuordnungen; die liegen in der Regel-Datenbank
-des Rechners.
+![Die Kopfzeile einer geöffneten Prüfung mit den sechs Reitern](img/pruefung-kopf.png)
 
-Um eine Prüfung an Kollegen zu geben oder auf einem anderen Rechner
-weiterzuarbeiten, wird diese Datei exportiert und dort wieder importiert, siehe
-[Prüfung weitergeben](../import-export.md#prufung-weitergeben).
+Oben steht die Bezeichnung, darunter die Reiter **Prüfung**, **1. Rechnungen**
+bis **5. Bericht**: die fünf Schritte in der Reihenfolge, in der diese
+Anleitung sie durchgeht. Der Pfeil links oben führt zurück zur Liste.
 
-Weiter geht es mit [den Prüfungsdaten](pruefungsdaten.md).
+Einen Knopf zum Speichern gibt es nicht. Jede Eingabe wird sofort gespeichert.
+Das Programm kann jederzeit geschlossen werden; die Prüfung steht beim nächsten
+Start wieder in der Liste.
+
+Oben auf jedem Reiter sagt eine Karte, was als Nächstes ansteht. Wer nicht
+weiß, wie es weitergeht, folgt ihr.
+
+![Der Reiter „Prüfung“ direkt nach dem Anlegen](img/pruefung-leer.png)
+
+## Erklärte Umsätze
+
+Der Reiter **Prüfung** sammelt alles, was nicht aus den Rechnungen kommt. Für
+den Bericht wird davon eines gebraucht: der Umsatz, den der Betrieb erklärt
+hat. Unter **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
+
+| Feld | Wert |
+|---|---|
+| Umsatz zu 19 % | `196.418,00` |
+| Umsatz zu 7 % | leer lassen |
+| Umsatz zu 0 % | leer lassen |
+
+![Die erklärten Umsätze des Gasthauses](img/erklaerte-umsaetze.png)
+
+Das Gasthaus hat nur zu 19 % erklärt, weil 2025 Speisen und Getränke beide dem
+Regelsteuersatz unterliegen.
+
+Die übrigen Abschnitte bleiben für das Beispiel leer: Unter **Bestand** stünden
+Anfangs- und Endbestand je Zutat, wenn eine Inventur vorläge. Ohne Angaben gilt
+alles Eingekaufte als verbraucht.
+
+!!! geschafft "Geschafft, wenn …"
+    - oben **Gasthaus Zur Linde, Bp 2025** steht und der Reiter **Prüfung** offen ist
+    - unter **Umsatz zu 19 %** `196.418,00` steht
+
+!!! nachlesen "Zum Nachlesen"
+    Alle Felder des Reiters im Einzelnen beschreibt [Prüfung](../pruefung.md),
+    die Liste der Prüfungen beschreibt [Prüfungen](../pruefungen.md).
+
+[Weiter: 1. Rechnungen importieren <span>Die 106 Rechnungen des Gasthauses einlesen</span>](rechnungen.md){ .us-next }

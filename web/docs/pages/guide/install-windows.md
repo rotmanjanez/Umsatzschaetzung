@@ -25,4 +25,4 @@ Das Startmenü öffnen und **Umsatzschätzung** aufrufen.
 
 ---
 
-Weiter geht es mit [der ersten Prüfung](start.md).
+[Weiter: Prüfung anlegen <span>Den Fall im Programm eröffnen und den erklärten Umsatz eintragen</span>](start.md){ .us-next }

@@ -1,17 +1,20 @@
 # Rechnungen korrigieren
 
+<p class="us-steps"><span>Prüfung</span><span class="here">1. Rechnungen</span><span>2. Zuordnung</span><span>3. Sortiment</span><span>4. Kalkulation</span><span>5. Bericht</span></p>
+
 Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
 Programm rechnet deshalb jeden Scan gegen sich selbst: Menge mal Einzelpreis
 gegen den Zeilenbetrag, die Zeilen gegen den Nettobetrag, Netto und Steuer gegen
 den Bruttobetrag. Was nicht aufgeht oder unvollständig ist, wird nicht
-übernommen, sondern steht mit **Durchsicht offen** in der Liste.
+übernommen, sondern steht mit **Durchsicht offen** ganz oben in der Liste.
 
-Im Beispieldatensatz sind das drei Rechnungen. Sie stehen ganz oben:
+Im Beispiel sind das drei Rechnungen:
 
-![Drei Rechnungen mit „Durchsicht offen“](img/korrektur-liste.png)
+![Drei Rechnungen mit „Durchsicht offen“](img/rechnungen-liste.png)
 
 Jede zeigt eine andere Art Fehler. Auf dieser Seite werden alle drei korrigiert,
-von der einfachsten zur schwierigsten.
+von der einfachsten zur schwierigsten. Das ist die längste Seite der Anleitung
+und zugleich die, die sich bei eigenen Prüfungen am meisten auszahlt.
 
 ## Was schiefgehen kann
 
@@ -133,11 +136,20 @@ Thermobox `19`. Danach ergeben auch die Positionen 912,12 €.
 
 ![Die Rechnung ist durchgesehen](img/korrektur-bestaetigt.png)
 
-In der Rechnungsliste stehen jetzt alle drei mit **Manuell**:
+In der Rechnungsliste stehen die drei jetzt mit **Manuell**, und die Bilanz
+über der Liste zeigt keine offene Rechnung mehr:
 
 ![Keine Rechnung mehr offen](img/korrektur-liste-fertig.png)
 
 Eine bestätigte Rechnung lässt sich jederzeit wieder öffnen und ändern; der
 Knopf heißt dann **Änderungen speichern**.
 
-Weiter geht es mit [der Kalkulation](kalkulation.md).
+!!! geschafft "Geschafft, wenn …"
+    - über der Liste `0 offen · 103 automatisch · 3 manuell` steht
+    - keine Rechnung mehr **Durchsicht offen** trägt
+
+!!! nachlesen "Zum Nachlesen"
+    Wann ein Scan ohne Durchsicht übernommen wird und was das Fenster im
+    Einzelnen prüft, steht unter [Durchsicht](../rechnungen.md#durchsicht).
+
+[Weiter: 2. Zuordnung <span>Eingekaufte Waren den Zutaten zuordnen</span>](zuordnung.md){ .us-next }
