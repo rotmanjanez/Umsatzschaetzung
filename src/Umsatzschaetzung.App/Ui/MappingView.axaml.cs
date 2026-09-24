@@ -40,7 +40,7 @@ public partial class MappingView : Screen
         DataContext = model;
         Detail.Attach(session, () => Ct);
         Detail.Assigned += _ => MapOpen();
-        var view = Search.Attach(model.Groups, g => g.Supplier + " " + g.Name + " " + g.Article + " " + g.StateText);
+        var view = Search.Attach(model.Groups, g => g.Search);
         view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(LineGroup.Rank)));
         view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(LineGroup.Supplier)));
         view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(LineGroup.Name)));

@@ -14,6 +14,7 @@ public sealed class LineGroup
     public long Quantity { get; set; }
     public string? MappingId { get; set; }
     public Checked State { get; set; } = Checked.Pending;
+    public string Search { get; private set; } = "";
     public bool IsAutomatic => State == Checked.Automatic;
     public bool IsManual => State == Checked.Manual;
     public bool IsPending => State == Checked.Pending;
@@ -47,7 +48,11 @@ public sealed class LineGroup
                 g.Quantity += l.Quantity;
             }
         }
-        foreach (var g in groups.Values) g.State = g.StateOf(c, rs);
+        foreach (var g in groups.Values)
+        {
+            g.State = g.StateOf(c, rs);
+            g.Search = g.SearchOf(c, rs);
+        }
         return [.. groups.Values];
     }
 
@@ -56,6 +61,19 @@ public sealed class LineGroup
         !string.IsNullOrEmpty(supplier) && !string.IsNullOrEmpty(l.SellerArticleId) ? "a:" + l.SellerArticleId
         : !string.IsNullOrEmpty(l.Gtin) ? "g:" + l.Gtin
         : "n:" + ArticleName.Canonical(l.Name);
+
+    // Besides its own wording a group is found by what it maps to: "Bier" finds the Pils.
+    string SearchOf(Case c, RuleSet? rs)
+    {
+        var mapped = Lines
+            .Select(p => c.Invoices[p.Invoice].Lines[p.Line].MappingId)
+            .Select(id => string.IsNullOrEmpty(id) ? null : rs?.Mappings.GetValueOrDefault(id))
+            .Select(m => m is null ? null : rs!.Ingredients.GetValueOrDefault(m.IngredientId))
+            .OfType<Ingredient>()
+            .Distinct()
+            .Select(i => i.Name + " " + rs!.Categories.GetValueOrDefault(i.CategoryId)?.Name + " " + string.Join(" ", i.Aliases));
+        return string.Join(" ", [Supplier, Name, Article, StateText, .. mapped]);
+    }
 
     // A group is settled by the weakest of its lines: one open line keeps it open, one
     // machine decision keeps it automatic.
