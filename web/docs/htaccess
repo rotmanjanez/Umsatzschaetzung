@@ -4,6 +4,17 @@ RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} !^docs\.umsatzschaetzung\.amtstools\.de$ [NC]
 RewriteRule ^(.*)$ https://docs.umsatzschaetzung.amtstools.de/$1 [R=301,L]
 
+RewriteCond %{REQUEST_URI} !^/(dev|latest|[0-9][^/]*)/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/latest -d
+RewriteRule ^(.+)$ /latest/$1 [R=302,L]
+
+RewriteCond %{REQUEST_URI} !^/(dev|latest|[0-9][^/]*)/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ /dev/$1 [R=302,L]
+
 <IfModule mod_headers.c>
   <FilesMatch "\.(js|css|woff2|svg|png|jpg|webp|avif)$">
     Header set Cache-Control "public, max-age=31536000"
