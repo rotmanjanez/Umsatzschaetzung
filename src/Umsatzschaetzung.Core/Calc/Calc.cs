@@ -28,11 +28,14 @@ public static class Calculation
         var rep = Revenue.Run(c, rs, allocs, uses);
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
+        rep.Deposits = ex.Deposits;
         rep.Warnings.AddRange(flags);
         rep.Warnings.AddRange(Scale.Conflicts(rs, ex.Unused.Select(l => l.IngredientId)));
         rep.Ingredients = IngredientRows(rs, uses, allocs);
         var s = rep.Totals;
-        s.Purchases = c.Invoices.Sum(inv => inv.Lines.Sum(l => l.LineNet));
+        s.DepositCharged = ex.Deposits.Where(l => l.LineNet > 0).Sum(l => l.LineNet);
+        s.DepositRefunded = ex.Deposits.Where(l => l.LineNet < 0).Sum(l => l.LineNet);
+        s.Purchases = c.Invoices.Sum(inv => inv.Lines.Sum(l => l.LineNet)) - s.DepositCharged - s.DepositRefunded;
         s.UnmappedCost = ex.Unmapped.Sum(l => l.LineNet);
         s.UnusedCost = ex.Unused.Sum(l => l.LineNet);
         if (s.Purchases != 0) s.ExcludedShare = (s.UnmappedCost + s.UnusedCost) * Bp.Full / s.Purchases;

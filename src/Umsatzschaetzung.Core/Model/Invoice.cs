@@ -44,14 +44,14 @@ public sealed class InvoiceLine
 }
 
 // Die Rechnungszeilen, die in die Kalkulation eingegangen sind: ohne die Zeilen ohne
-// Zuordnung und die, deren Zutat in keiner Rezeptur vorkommt.
+// Zuordnung, die, deren Zutat in keiner Rezeptur vorkommt, und Pfand und Leergut.
 public sealed record Included(string Number, string FileName, DateOnly? Date, List<InvoiceLine> Lines)
 {
     public static List<Included> Of(Case c, Report r)
     {
         HashSet<(string, long)> excluded = [];
         foreach (var l in r.Unmapped) excluded.Add((l.InvoiceId, l.LineNo));
-        foreach (var l in r.Unused) excluded.Add((l.InvoiceId, l.LineNo));
+        foreach (var l in r.Unused.Concat(r.Deposits)) excluded.Add((l.InvoiceId, l.LineNo));
         List<Included> output = [];
         foreach (var inv in c.Invoices.OrderBy(i => i.Date).ThenBy(i => i.Number, StringComparer.Ordinal))
         {

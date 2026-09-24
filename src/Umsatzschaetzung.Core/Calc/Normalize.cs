@@ -3,10 +3,12 @@ using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Calc;
 
-internal sealed record Excluded(List<UnmappedLine> Unmapped, List<UnusedLine> Unused);
+internal sealed record Excluded(List<UnmappedLine> Unmapped, List<UnusedLine> Unused, List<UnusedLine> Deposits);
 
 public static class Normalize
 {
+    public const string Deposit = "ing.pfand";
+
     static HashSet<string> RecipeIngredients(Case c, RuleSet rs)
     {
         HashSet<string> output = [];
@@ -20,7 +22,7 @@ public static class Normalize
     {
         var uses = new SortedDictionary<string, IngredientUse>(StringComparer.Ordinal);
         var inRecipe = RecipeIngredients(c, rs);
-        var ex = new Excluded([], []);
+        var ex = new Excluded([], [], []);
         List<Flag> flags = [];
         var estimated = new SortedDictionary<string, int>(StringComparer.Ordinal);
         IngredientUse Use(string id)
@@ -39,6 +41,11 @@ public static class Normalize
                 if (m is null || !rs.Ingredients.TryGetValue(m.IngredientId, out var ing))
                 {
                     ex.Unmapped.Add(new UnmappedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet });
+                    continue;
+                }
+                if (ing.Id == Deposit)
+                {
+                    ex.Deposits.Add(new UnusedLine { InvoiceId = inv.Id, LineNo = line.No, Name = line.Name, LineNet = line.LineNet, IngredientId = ing.Id });
                     continue;
                 }
                 if (!inRecipe.Contains(ing.Id) || Scale.Of(rs, ing.Id) is not { } unit)

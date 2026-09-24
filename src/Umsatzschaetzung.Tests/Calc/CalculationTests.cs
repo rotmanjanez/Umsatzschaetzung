@@ -37,6 +37,27 @@ public class CalculationTests
     }
 
     [Fact]
+    public void DepositsStayOutOfThePurchases()
+    {
+        var kase = Vorlage.Load();
+        var rules = TestData.Seed();
+        rules.Ingredients[Normalize.Deposit] = new Ingredient { Id = Normalize.Deposit, Name = "Pfand und Leergut", CategoryId = "cat.kein.wareneinsatz" };
+        rules.Mappings["map.pfand"] = new ArticleMapping { Id = "map.pfand", IngredientId = Normalize.Deposit, Confirmed = true };
+        var lines = kase.Invoices[0].Lines;
+        var no = lines.Max(l => l.No);
+        lines.Add(new InvoiceLine { No = no + 1, Name = "Pfand Fass KEG", Quantity = 2000, UnitCode = "H87", UnitPrice = 30_000_000, PriceBaseQty = 1000, LineNet = 6_000, MappingId = "map.pfand" });
+        lines.Add(new InvoiceLine { No = no + 2, Name = "Leergut Fass KEG", Quantity = -1000, UnitCode = "H87", UnitPrice = 30_000_000, PriceBaseQty = 1000, LineNet = -3_000, MappingId = "map.pfand" });
+        var r = Calculation.Run(kase, rules);
+        Assert.Equal(2, r.Deposits.Count);
+        Assert.Empty(r.Unused);
+        Assert.Equal(6_000, r.Totals.DepositCharged);
+        Assert.Equal(-3_000, r.Totals.DepositRefunded);
+        Assert.Equal(Report.Totals.Purchases, r.Totals.Purchases);
+        Assert.Equal(0, r.Totals.ExcludedShare);
+        Assert.DoesNotContain(Included.Of(kase, r).SelectMany(i => i.Lines), l => l.No > no);
+    }
+
+    [Fact]
     public void TheDrinksDivisionCarriesTheWholeMarkup()
     {
         var drinks = Assert.Single(Report.Markups);
