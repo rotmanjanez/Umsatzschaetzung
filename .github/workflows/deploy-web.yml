@@ -58,6 +58,7 @@ jobs:
               --width 1320 --height 860 --out "$out"
           done
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: shots
           path: shots-out

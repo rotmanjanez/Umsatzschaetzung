@@ -165,7 +165,7 @@
 { "do": "click", "at": { "text": "Zuordnen" } }
 { "do": "wait", "rounds": 8 }
 
-{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 30 Getränke" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 30 Automatisch" }
 { "do": "wait", "rounds": 4 }
 { "do": "select", "at": { "starts": "Frankenbräu Pils Fass 30" } }
 { "do": "wait", "rounds": 20 }
@@ -189,9 +189,9 @@
 { "do": "click", "at": { "text": "Zuordnen" } }
 { "do": "wait", "rounds": 8 }
 
-{ "do": "type", "at": { "name": "Search" }, "text": "Frankenbru" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 50 Automatisch" }
 { "do": "wait", "rounds": 4 }
-{ "do": "select", "at": { "starts": "Frankenbru Pils" } }
+{ "do": "select", "at": { "starts": "Frankenbr" } }
 { "do": "wait", "rounds": 20 }
 { "do": "click", "at": { "text": "Manuell zuordnen" } }
 { "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
