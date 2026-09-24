@@ -39,7 +39,7 @@ die Datei ohne Nachfrage.
 
 ## Sortiment
 
-Das Sortiment einer Prüfung lässt sich als CSV exportieren und in dieselbe oder
+Das Sortiment einer Prüfung lässt sich als [CSV](hilfe/csv.md) exportieren und in dieselbe oder
 eine andere Prüfung importieren. Beide Knöpfe stehen in der Kopfzeile von
 **3. Sortiment**, neben **Produkt hinzufügen …**.
 

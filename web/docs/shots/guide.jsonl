@@ -119,14 +119,6 @@
 { "do": "wait", "rounds": 8 }
 
 { "do": "top", "at": { "name": "Groups" } }
-{ "do": "select", "at": { "starts": "Petersilie" } }
-{ "do": "wait", "rounds": 20 }
-{ "do": "type", "at": { "name": "FactorBox" }, "text": "30" }
-{ "do": "focus" }
-{ "do": "click", "at": { "text": "Zuordnen" } }
-{ "do": "wait", "rounds": 8 }
-
-{ "do": "top", "at": { "name": "Groups" } }
 { "do": "select", "at": { "starts": "Pommes frites 7/7 blanchiert, 4 x" } }
 { "do": "wait", "rounds": 20 }
 { "do": "type", "at": { "name": "FactorBox" }, "text": "10000" }
@@ -134,75 +126,8 @@
 { "do": "click", "at": { "text": "Zuordnen" } }
 { "do": "wait", "rounds": 8 }
 
-{ "do": "top", "at": { "name": "Groups" } }
-{ "do": "type", "at": { "name": "Search" }, "text": "Fass" }
-{ "do": "wait", "rounds": 4 }
 { "do": "deselect", "at": { "name": "Groups" } }
-{ "do": "shot", "name": "zuordnung-filter", "at": { "name": "Groups", "up": "Border" }, "clip": "DataGridRow" }
-{ "do": "select", "at": { "starts": "Frankenbräu Pils Fass 50" } }
-{ "do": "wait", "rounds": 20 }
-{ "do": "shot", "name": "zuordnung-fass", "at": { "name": "Groups", "up": "MappingView" } }
-{ "do": "click", "at": { "text": "Manuell zuordnen" } }
-{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "shot", "name": "zuordnung-fass-manuell", "at": { "text": "AUS DEN REGELN", "up": "Border" } }
-{ "do": "click", "at": { "text": "Zuordnen" } }
-{ "do": "wait", "rounds": 8 }
-
-{ "do": "type", "at": { "name": "Search" }, "text": "Hefeweizen Fass" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "select", "at": { "starts": "Frankenbräu Hefeweizen" } }
-{ "do": "wait", "rounds": 20 }
-{ "do": "click", "at": { "text": "Manuell zuordnen" } }
-{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "click", "at": { "text": "Zuordnen" } }
-{ "do": "wait", "rounds": 8 }
-
-{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 30 Automatisch" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "select", "at": { "starts": "Frankenbräu Pils Fass 30" } }
-{ "do": "wait", "rounds": 20 }
-{ "do": "click", "at": { "text": "Manuell zuordnen" } }
-{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "click", "at": { "text": "Zuordnen" } }
-{ "do": "wait", "rounds": 8 }
-
-{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 30 Automatisch" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "select", "at": { "starts": "Frankenbräu Pils Fass 30" } }
-{ "do": "wait", "rounds": 20 }
-{ "do": "click", "at": { "text": "Manuell zuordnen" } }
-{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "click", "at": { "text": "Zuordnen" } }
-{ "do": "wait", "rounds": 8 }
-
-{ "do": "type", "at": { "name": "Search" }, "text": "Pils Fass 50 Automatisch" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "select", "at": { "starts": "Frankenbr" } }
-{ "do": "wait", "rounds": 20 }
-{ "do": "click", "at": { "text": "Manuell zuordnen" } }
-{ "do": "type", "at": { "type": "IngredientBox" }, "text": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Fassbier", "item": "Fassbier" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "click", "at": { "text": "Zuordnen" } }
-{ "do": "wait", "rounds": 8 }
-
-{ "do": "type", "at": { "name": "Search" }, "text": "" }
-{ "do": "wait", "rounds": 4 }
-{ "do": "deselect", "at": { "name": "Groups" } }
-{ "do": "shot", "name": "zuordnung-fertig", "at": { "starts": "Alles zugeordnet", "up": "DockPanel" } }
+{ "do": "shot", "name": "zuordnung-fertig", "at": { "starts": "1 offen", "up": "DockPanel" } }
 
 
 // Sortiment: one product by hand, the rest per CSV
@@ -217,7 +142,7 @@
 { "do": "pick", "files": ["web/docs/pages/guide/sortiment-gasthaus.csv"] }
 { "do": "click", "at": { "tip": "CSV importieren" } }
 { "do": "wait", "rounds": 2 }
-{ "do": "shot", "name": "sortiment-liste", "at": { "text": "Produkt", "up": "DataGrid" }, "clip": "DataGridRow", "trim": { "top": 5 } }
+{ "do": "shot", "name": "sortiment-liste", "at": { "text": "Produkt", "up": "DataGrid" }, "clip": "DataGridRow", "trim": { "top": 5, "bottom": 465 } }
 
 // Danach: back in the list, the case is there to reopen
 { "do": "click", "at": { "name": "BackButton" } }

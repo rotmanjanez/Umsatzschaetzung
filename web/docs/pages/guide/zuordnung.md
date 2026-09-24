@@ -68,7 +68,7 @@ die Zeile darunter rechnet vor:
 |---|---|---|---|
 | Frühkartoffeln festkochend 12,5 kg | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500` | **Zuordnen** |
 | Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt) | `1800` eintragen | **Zuordnen** |
-| Petersilie glatt, Bund | **Frische Kräuter** (schon gewählt) | `30` eintragen, ein Bund wiegt etwa 30 g | **Zuordnen** |
+| Petersilie glatt, Bund | | | offen lassen |
 | Pommes frites 7/7 blanchiert, 4 x | **Pommes frites** (schon gewählt) | `10000` eintragen | **Zuordnen** |
 
 Bei den Pommes hat der Scan die Packungsangabe abgeschnitten, aus „4 × 2,5 kg“
@@ -76,50 +76,19 @@ wurde „4 x“. Was im Karton ist, zeigt der Beleg-Ausschnitt unten oder die
 gleichlautende Position des anderen Tiefkühllieferanten: 4 × 2,5 kg, also
 10.000 g.
 
-Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `Alles zugeordnet`
-steht.
+Die Petersilie bleibt offen. Nicht jede Position muss zugeordnet sein: Was
+offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter
+**Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht.
+Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht
+fällt, ist offen lassen die ehrlichere Antwort.
 
-## Stichprobe: die Fässer
+Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `1 offen` steht.
 
-Automatisch heißt nicht richtig. Wer prüfen will, wo das Programm daneben
-liegt, fängt bei dem an, was den meisten Umsatz bringt. In einem Gasthaus ist
-das das Bier vom Fass.
-
-In das Feld **Filtern** über der Liste `Fass` tippen. Übrig bleiben sieben
-Artikel: fünf Fässer und zweimal Fasspfand, alle **Automatisch**. Die Fässer
-stehen doppelt, weil der Scan den Lieferanten mal als „FRANKENBRÄU“ und mal
-als „Frankenbräu Getränke-Fachgroßhandel GmbH“ gelesen hat.
-
-![Die Liste, gefiltert nach „Fass“](img/zuordnung-filter.png)
-
-**Frankenbräu Pils Fass 50 l KEG** anklicken. Das Programm hat das Fass als
-**Flaschenbier** zugeordnet, weil es „Pils“ aus den Regeln als Flaschenbier
-kennt. Für die Kalkulation ist das ein großer Unterschied: 116 Fässer zu 50 l
-sind 5.800 l Bier, die als Flaschenbier verkauft würden statt als Bier vom
-Fass.
-
-![Das Fass ist als Flaschenbier zugeordnet](img/zuordnung-fass.png)
-
-**Manuell zuordnen**, als Zutat `Fassbier` wählen. Der Faktor bleibt bei
-50.000 ml je Keg, das Programm hat ihn aus „50 l“ im Artikeltext gelesen:
-
-![Fassbier mit 50 l je Keg](img/zuordnung-fass-manuell.png)
-
-**Zuordnen**. Dasselbe für die vier anderen Fässer: **Frankenbräu Hefeweizen
-hell Fass 30 l**, zweimal **Frankenbräu Pils Fass 30 l KEG** und das verlesene
-**Frankenbru Pils Fass 50 l KEG**. Bei allen bleibt der Faktor, wie er
-vorausgefüllt ist. Das Pfand bleibt, wie es ist; es ist kein Wareneinsatz und
-zählt in keiner Kalkulation mit.
-
-Danach den Filter mit dem **×** wieder leeren. Eine bestätigte Zuordnung merkt
-sich das Programm: In der nächsten Prüfung mit Rechnungen von Frankenbräu
-ordnet es die Fässer gleich richtig zu.
-
-![Alles zugeordnet](img/zuordnung-fertig.png)
+![Nur die Petersilie ist noch offen](img/zuordnung-fertig.png)
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `Alles zugeordnet, 144 automatisch, 10 manuell` steht
-    - nichts mehr **Offen** ist
+    - über der Liste `1 offen, 149 automatisch, 4 manuell` steht
+    - nur noch die Petersilie **Offen** ist
 
 !!! nachlesen "Zum Nachlesen"
     Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit

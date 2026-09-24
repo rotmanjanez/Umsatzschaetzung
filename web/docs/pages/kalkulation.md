@@ -121,10 +121,12 @@ Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Abschnitt 3), sie verändern den
 Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des
 Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
 in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine
-Zutat ohne Sparte oder aus der Zuordnung heraus. Eine echte Ware hier heißt: Die
-Zuordnung ist falsch, oder im Sortiment fehlt ein Produkt. Welche Produkte die
-Zutat verwenden, steht unter [Regeln → Produkte](regeln.md#produkte); gehört
-eines davon zum Betrieb, kommt es ins Sortiment.
+Zutat ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu
+Recht: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die
+ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient
+einen zweiten Blick; dann ist oft die Zuordnung falsch, oder im Sortiment fehlt
+ein Produkt. Welche Produkte die Zutat verwenden, steht unter
+[Regeln → Produkte](regeln.md#produkte).
 
 **Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP
 ganz: Positionen, die unter [Zuordnung](zuordnung.md) noch offen sind, und
