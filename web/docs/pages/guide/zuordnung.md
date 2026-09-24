@@ -6,7 +6,7 @@ Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu
 Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die
 Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für
 fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was
-es nicht wusste, und stichprobenartig geprüft, ob es richtig lag.
+es nicht wusste.
 
 ## Die Liste
 
