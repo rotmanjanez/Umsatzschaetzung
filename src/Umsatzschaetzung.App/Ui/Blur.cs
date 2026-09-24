@@ -19,8 +19,10 @@ public static class Blur
     public static void Register() =>
         InputElement.PointerPressedEvent.AddClassHandler<Window>(Pressed, RoutingStrategies.Bubble, handledEventsToo: true);
 
+    // A source the press itself took out of the tree, like a cell swapped for its editor, cannot tell where it was.
     static void Pressed(Window window, PointerPressedEventArgs e)
     {
+        if (e.Source is Visual source && TopLevel.GetTopLevel(source) is null) return;
         if (window.FocusManager?.GetFocusedElement() is not Visual focused) return;
         var list = focused.FindAncestorOfType<DataGrid>(true) ?? (Control?)focused.FindAncestorOfType<ListBox>(true);
         if (list is null || Within(list, e.Source)) return;
