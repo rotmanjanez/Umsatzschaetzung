@@ -96,7 +96,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding QuantityFlagged}" ToolTip.Tip="{Binding QuantityFlag}">
-                                        <TextBlock Text="{Binding Quantity}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Quantity}" Theme="{StaticResource Cell}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -142,7 +142,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding UnitPriceFlagged}" ToolTip.Tip="{Binding UnitPriceFlag}">
-                                        <TextBlock Text="{Binding UnitPrice}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding UnitPrice}" Theme="{StaticResource Cell}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -156,7 +156,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding LineNetFlagged}" ToolTip.Tip="{Binding LineNetFlag}">
-                                        <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -170,7 +170,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding VatFlagged}" ToolTip.Tip="{Binding VatFlag}">
-                                        <TextBlock Text="{Binding Vat}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Vat}" Theme="{StaticResource Cell}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -200,7 +200,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:TotalRow">
                                     <Border Classes="cell" Classes.flagged="{Binding Flagged}" ToolTip.Tip="{Binding Flag}">
-                                        <TextBlock Text="{Binding Stated}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Stated}" Theme="{StaticResource Cell}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -214,7 +214,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:TotalRow">
                                     <Border Classes="cell">
-                                        <TextBlock Text="{Binding Sum}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Sum}" Theme="{StaticResource Cell}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

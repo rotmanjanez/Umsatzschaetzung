@@ -129,6 +129,10 @@
         <Setter Property="VerticalAlignment" Value="Center"/>
     </ControlTheme>
 
+    <ControlTheme x:Key="Cell" TargetType="TextBlock" BasedOn="{StaticResource Number}">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </ControlTheme>
+
     <ControlTheme x:Key="NumberBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
         <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
         <Setter Property="TextAlignment" Value="Right"/>

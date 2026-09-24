@@ -45,7 +45,7 @@
                     <DataGridTemplateColumn Header="Netto" Width="110" SortMemberPath="Net">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="ui:ExcludedLineRow">
-                                <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Number}"/>
+                                <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

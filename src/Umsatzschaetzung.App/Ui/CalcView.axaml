@@ -71,14 +71,14 @@
                                 <DataGridTemplateColumn Header="Portionen" Width="110" SortMemberPath="PortionsValue">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ResultRow">
-                                            <TextBlock Text="{Binding Portions}" Theme="{StaticResource Number}"/>
+                                            <TextBlock Text="{Binding Portions}" Theme="{StaticResource Cell}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Einsatz je Portion" Width="150" SortMemberPath="Cost">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ResultRow">
-                                            <TextBlock Text="{Binding Cost}" Theme="{StaticResource Number}"/>
+                                            <TextBlock Text="{Binding Cost}" Theme="{StaticResource Cell}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -86,7 +86,7 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ResultRow">
                                             <Panel>
-                                                <TextBlock Text="{Binding Revenue}" Theme="{StaticResource Number}"/>
+                                                <TextBlock Text="{Binding Revenue}" Theme="{StaticResource Cell}"/>
                                                 <Border Theme="{StaticResource BadgeWarning}" HorizontalAlignment="Right" IsVisible="{Binding PriceMissing}">
                                                     <TextBlock Text="Preis fehlt" Theme="{StaticResource BadgeText}"/>
                                                 </Border>
@@ -97,7 +97,7 @@
                                 <DataGridTemplateColumn Header="Aufschlagsatz" Width="130" SortMemberPath="Markup">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ResultRow">
-                                            <TextBlock Text="{Binding Markup}" Theme="{StaticResource Number}"/>
+                                            <TextBlock Text="{Binding Markup}" Theme="{StaticResource Cell}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -157,21 +157,21 @@
                             <DataGridTemplateColumn Header="Umsatz vor BP" Width="170" SortMemberPath="Declared">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Declared}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Declared}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Umsatz nach BP" Width="170" SortMemberPath="Calculated">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Calculated}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Calculated}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Differenz" Width="170" SortMemberPath="Difference">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:RevenueRow">
-                                        <TextBlock Text="{Binding Difference}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Difference}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -191,28 +191,28 @@
                             <DataGridTemplateColumn Header="Einsatz der Portionen" Width="180">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding CostOfGoods}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding CostOfGoods}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Umsatz (netto)" Width="170">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding RevenueNet}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding RevenueNet}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Rohgewinn" Width="170">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding GrossProfit}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding GrossProfit}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Aufschlagsatz" Width="150">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:MarkupRow">
-                                        <TextBlock Text="{Binding Markup}" Classes.total="{Binding Total}" Theme="{StaticResource Number}"/>
+                                        <TextBlock Text="{Binding Markup}" Classes.total="{Binding Total}" Theme="{StaticResource Cell}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
