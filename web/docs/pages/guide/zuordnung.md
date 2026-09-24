@@ -19,9 +19,6 @@ Status:
 - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
-Die offenen Positionen stehen oben. Über der Liste steht die Bilanz, im
-Beispiel `5 offen, 149 automatisch, 0 manuell`.
-
 ![Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen](img/zuordnung-liste.png)
 
 ## Eine Position ansehen

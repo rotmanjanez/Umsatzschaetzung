@@ -90,7 +90,7 @@
 // Zuordnung: five open positions, then the kegs the program took for bottled beer
 { "do": "tab", "header": "2. Zuordnung" }
 { "do": "wait", "rounds": 8 }
-{ "do": "shot", "name": "zuordnung-liste", "at": { "name": "Groups", "up": "MappingView" } }
+{ "do": "shot", "name": "zuordnung-liste", "at": { "name": "Groups", "up": "MappingView" }, "trim": { "bottom": 371 } }
 
 { "do": "select", "at": { "starts": "2022 Domina" } }
 { "do": "wait", "rounds": 20 }
