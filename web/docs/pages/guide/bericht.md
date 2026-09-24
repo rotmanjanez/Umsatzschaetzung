@@ -41,8 +41,6 @@ wird:
    Rezepte sind als **abweichend vom Katalog** gekennzeichnet, das
    Katalogrezept steht grau darunter.
 
-Stehen noch offene Punkte in der Prüfung, etwa ein Produkt ohne Preis, führt der
-Bericht sie vorneweg unter **Hinweise** auf.
 
 ## Als PDF speichern
 

@@ -37,7 +37,7 @@ begründet sein.
 **Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne
 Preis, eine Zutat, die nur über ein geschätztes Stückgewicht umgerechnet wurde,
 eine näherungsweise Verteilung. Ein Bericht ohne Hinweise hat keine offenen
-Punkte.
+Punkte. Ins PDF gehen die Hinweise nicht mit.
 
 1. **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz
    netto je Steuersatz, mit Differenz. Das ist das Ergebnis.

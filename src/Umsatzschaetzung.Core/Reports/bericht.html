@@ -61,7 +61,8 @@ ol.warnings li { margin-bottom: 0.3em; }
   thead { display: table-header-group; }
   tr { break-inside: avoid; }
   h1, h2 { break-after: avoid; }
-  .stamp { display: none; }
+  .stamp, .hinweise { display: none; }
+  .hinweise + section { break-before: auto; }
 }
 </style>
 </head>
@@ -90,7 +91,7 @@ ol.warnings li { margin-bottom: 0.3em; }
     </header>
 
     {% if report.warnings %}
-    <section class="first">
+    <section class="first hinweise">
       <h1>Hinweise</h1>
       <ol class="warnings">
         {% for w in report.warnings %}
@@ -321,7 +322,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       <p class="note">* Diese Zutat ist vollständig verbraucht und begrenzt die Portionszahl.</p>
       {% endif %}
       {% if anyEstimated %}
-      <p class="note">≈ Der Einkauf ist teilweise in Stück berechnet und über den Richtwert der Zutat je Stück umgerechnet, siehe Hinweise.</p>
+      <p class="note">≈ Der Einkauf ist teilweise in Stück berechnet und über den Richtwert der Zutat je Stück umgerechnet<span class="hinweise">, siehe Hinweise</span>.</p>
       {% endif %}
       {% if anyApproximate %}
       <p class="note">Die Zuteilung wurde für einen Teil der Zutaten näherungsweise bestimmt.</p>
