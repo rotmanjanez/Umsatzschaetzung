@@ -1,10 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.VisualTree;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 
@@ -76,11 +78,15 @@ public sealed class IngredientBox : AutoCompleteBox
     protected override void OnLostFocus(FocusChangedEventArgs e)
     {
         base.OnLostFocus(e);
-        if (SelectedItem is not null || Text is null or "" || Choices is null) return;
+        if (InDropDown(TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement()) || SelectedItem is not null || Text is null or "" || Choices is null) return;
         var hits = Filter(Text).Take(2).ToList();
         if (hits.Count == 1) SetCurrentValue(SelectedItemProperty, hits[0]);
         else SetCurrentValue(TextProperty, "");
     }
+
+    // A click into the list moves the focus there before it selects: the box is left, but not yet decided.
+    bool InDropDown(IInputElement? focused) =>
+        focused is Visual v && this.GetVisualDescendants().OfType<Popup>().Any(p => p.Child?.IsVisualAncestorOf(v) == true);
 
     List<Ingredient> Filter(string? text) => Choices?.Where(i => Matches(text, i)).ToList() ?? [];
 
