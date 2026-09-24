@@ -2,10 +2,10 @@
 
 <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><span class="here">4. Kalkulation</span><a href="../bericht/">5. Bericht</a></p>
 
-## Einkäufe außerhalb der Verteilung
+## Übrige Einkäufe
 
-Auf **4. Kalkulation** wechseln und die Seite **Einkäufe außerhalb der
-Verteilung** öffnen. Bevor das Ergebnis zählt, wird hier aufgeräumt.
+Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe**
+öffnen. Bevor das Ergebnis zählt, wird hier aufgeräumt.
 
 Die Seite zeigt die Einkäufe, die nicht über Rezeptur und Preis in den
 Umsatz eingehen, in zwei Listen mit dem Grund je Position:
@@ -73,7 +73,7 @@ neu. Für das Beispiel bleiben die Standardregeln.
 
 ## Rezeptur anpassen
 
-Ein Klick auf ein Produkt der Verteilung öffnet rechts seine Details. Unter
+Ein Klick auf ein Produkt unter **Portionen** öffnet rechts seine Details. Unter
 **Rezeptur je Portion** steht, was in eine Portion geht, und daneben, woher das
 Rezept kommt: **Katalog** oder **Nur diese Prüfung**.
 
@@ -88,7 +88,7 @@ Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit, dazu
 fügt das Plus (**Zutat hinzufügen**) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was
 er vorsieht, etwa **Katalog: 200 g**. Eine Zutat wird in jedem Rezept in
 derselben Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei
-jeder Änderung sofort neu; in der Verteilung steht beim Produkt **angepasst**,
+jeder Änderung sofort neu; unter **Portionen** steht beim Produkt **angepasst**,
 auf **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.
 
 Der Bericht kennzeichnet das Produkt als **abweichend vom Katalog** und druckt

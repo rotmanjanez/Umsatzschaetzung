@@ -11,7 +11,7 @@ steht auf der [Kalkulation](kalkulation.md#nicht-berucksichtigt), nicht hier.
 
 **Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne
 Preis, eine Zutat, die nur über ein geschätztes Stückgewicht umgerechnet wurde,
-eine näherungsweise Verteilung. Ein Bericht ohne Hinweise hat keine offenen
+eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen
 Punkte. Ins PDF gehen die Hinweise nicht mit.
 
 1. **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz

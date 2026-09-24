@@ -58,7 +58,7 @@
             <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
         </StackPanel>
         <TabControl x:Name="Pages" Background="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding HasResult}">
-            <TabItem x:Name="Distribution" Header="Verteilung">
+            <TabItem x:Name="PortionsPage" Header="Portionen">
                 <Grid Margin="0,16,0,0">
                     <StackPanel MaxWidth="440" HorizontalAlignment="Left" IsVisible="{Binding EmptyAssortment}">
                         <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
@@ -232,7 +232,7 @@
                     <ItemsControl Margin="0,16,16,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Einkäufe außerhalb der Verteilung">
+            <TabItem Header="Übrige Einkäufe">
                 <DockPanel DataContext="{Binding Exclusions}" x:DataType="ui:ExclusionModel" Margin="0,16,0,0">
                     <TextBlock DockPanel.Dock="Bottom" Text="{Binding Deposit}" Theme="{StaticResource Muted}" Margin="0,12,0,0" IsVisible="{Binding HasDeposit}" TextWrapping="Wrap"/>
                     <TextBlock DockPanel.Dock="Top" Text="Keine: alle Einkäufe gehen in die Ermittlung des Aufschlagsatzes ein." Theme="{StaticResource Muted}"

@@ -17,8 +17,8 @@ Verkauf, Zutat für Zutat.
 Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
 Ertragsregeln rechnet die Kalkulation sofort neu.
 
-Der Reiter hat vier Seiten: **Verteilung**, **Ertragsregeln**, **Einkäufe
-außerhalb der Verteilung** und zuletzt das **Ergebnis**.
+Der Reiter hat vier Seiten: **Portionen**, **Ertragsregeln**, **Übrige
+Einkäufe** und zuletzt das **Ergebnis**.
 
 ## Sortiment { #sortiment }
 
@@ -37,20 +37,20 @@ der Preis nachgetragen ist.
 Die Speisekarte lässt sich auch als Tabelle übernehmen, siehe
 [Sortiment importieren und exportieren](import-export.md#sortiment).
 
-## Die Verteilung
+## Portionen
 
 Dieselbe Zutat steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l,
 Schweinefleisch in Schnitzel und Cordon Bleu. Wie der Betrieb sie tatsächlich
 aufgeteilt hat, weiß niemand. Das Programm setzt dafür keine Quote, sondern
-rechnet die Verteilung aus, die den Einkauf am vollständigsten aufbraucht, also
+rechnet die Aufteilung aus, die den Einkauf am vollständigsten aufbraucht, also
 am wenigsten Ware übrig lässt. Die Verkaufspreise spielen dabei keine Rolle.
 
-Unter **Verteilung** steht je Produkt, wie viele Portionen es bekommen hat und
+Unter **Portionen** steht je Produkt, wie viele Portionen es bekommen hat und
 welcher Umsatz daraus folgt. Ein Klick auf ein Produkt zeigt rechts, was eine
 Portion im Einkauf kostet, und seine Rezeptur; für die Prüfung angepasste Produkte
 tragen **angepasst**.
 
-Die Verteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
+Die Aufteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
 Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
 
 ## Ergebnis
@@ -80,7 +80,7 @@ unter [Regeln](regeln.md#ertragsregeln) angelegt.
 
 ## Rezeptur anpassen { #rezeptur }
 
-Rechts neben der Verteilung steht unter **Rezeptur je Portion** das Rezept des
+Rechts neben den Portionen steht unter **Rezeptur je Portion** das Rezept des
 gewählten Produkts, gekennzeichnet mit **Katalog** oder **Nur diese Prüfung**.
 
 - **Im Katalog bearbeiten** öffnet das Produkt unter
@@ -111,7 +111,7 @@ ein Rezept für jeden Betrieb falsch, gehört die Korrektur in den Katalog; weic
 nur dieser Betrieb belegbar ab, etwa mit größeren Portionen oder einem anderen
 Salat, in die Prüfung.
 
-## Einkäufe außerhalb der Verteilung { #nicht-berucksichtigt }
+## Übrige Einkäufe { #nicht-berucksichtigt }
 
 Diese Seite zeigt, was eingekauft wurde, aber nicht über Rezeptur und Preis in
 den Umsatz eingeht, in zwei Listen mit Betrag und Grund.

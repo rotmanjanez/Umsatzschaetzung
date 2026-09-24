@@ -205,7 +205,7 @@ public partial class CalcView : Screen
         ProductSelected(null, null);
         if (wanted is not null && ProductGrid.SelectedItem is { } item)
         {
-            Pages.SelectedItem = Distribution;
+            Pages.SelectedItem = PortionsPage;
             ProductGrid.ScrollIntoView(item, null);
         }
         var vat = VatRow.Of(kase, r);
@@ -293,7 +293,7 @@ public partial class CalcView : Screen
             return new RecipeUse(name, amount, note);
         }).ToList();
         var stuck = p.Portions == 0 && recipe.TrueForAll(x => x.Note == "");
-        model.Detail = new ProductDetail(row.Name, facts, stuck ? "Keine Portion passt in die Verteilung" : "");
+        model.Detail = new ProductDetail(row.Name, facts, stuck ? "Keine ganze Portion möglich" : "");
         ShowRecipe(catalog, product, recipe);
     }
 
@@ -389,7 +389,7 @@ public partial class CalcView : Screen
             return Mapped(c, rs, line.IngredientId) ? "Gebindeinhalt fehlt in der Zuordnung" : "kein Einkauf zugeordnet";
         if (ing.Sellable <= 0) return "nach Bestand und Abzügen nichts verkaufsfähig";
         if (product.Portions == 0 && ing.Leftover < Scale.ToBase(line.Amount, line.Unit))
-            return "verteilt an " + Consumers(rs, sold, line.IngredientId);
+            return "aufgebraucht von " + Consumers(rs, sold, line.IngredientId);
         return null;
     }
 
