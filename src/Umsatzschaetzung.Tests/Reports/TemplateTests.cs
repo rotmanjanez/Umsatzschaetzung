@@ -47,13 +47,6 @@ public class TemplateTests
     [Fact]
     public void QuotesAreEscaped() => Assert.Equal("er sagte &quot;ja&quot;\nund &#39;nein&#39;\\", Render("{{ zitat }}"));
 
-    [Fact]
-    public void CssWritesAQuotedCssString()
-    {
-        Assert.Equal("\"Bier & \\3c Brot\\3e \"", Render("{{ titel | css }}"));
-        Assert.Equal("\"er sagte \\\"ja\\\"\\A und 'nein'\\\\\"", Render("{{ zitat | css }}"));
-    }
-
     [Theory]
     [InlineData("{{ wahr }}", "true")]
     [InlineData("{{ null }}", "0")]
@@ -79,9 +72,6 @@ public class TemplateTests
     [InlineData("{{ menge | quantity:code }}", "20 Liter")]
     [InlineData("{{ betrag | price:basis:code }}", "0,733595 € je 5 Liter")]
     public void EveryFilterFormatsItsRawValue(string source, string expected) => Assert.Equal(expected, Render(source));
-
-    [Fact]
-    public void FiltersChain() => Assert.Equal("\"7.335,95 €\"", Render("{{ betrag | cents | css }}"));
 
     [Fact]
     public void AListIsRepeated() =>
@@ -156,8 +146,7 @@ public class TemplateTests
     [Theory]
     [InlineData("{{ titel | cents }}")]
     [InlineData("{{ wahr | bp }}")]
-    [InlineData("{{ titel | css | cents }}")]
-    [InlineData("{{ tief | css }}")]
+    [InlineData("{{ titel | sparte | cents }}")]
     [InlineData("{{ zeilen }}")]
     [InlineData("{{ menge | qty:code }}")]
     [InlineData("{% for x in titel %}{% endfor %}")]
@@ -205,11 +194,4 @@ public class TemplateTests
 
     [Fact]
     public void AFilteredValueIsEscaped() => Assert.Equal("5 &lt;b&gt;", Render("{{ basis | quantity:roh }}"));
-
-    [Fact]
-    public void ACssStringCannotCloseTheStyleSheet()
-    {
-        var data = new JsonObject { ["label"] = "</style><script>" };
-        Assert.DoesNotContain("<", Template.Render("{{ label | css }}", data));
-    }
 }

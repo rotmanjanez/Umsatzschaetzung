@@ -41,18 +41,7 @@ table.ledger td:first-child { padding-right: 4em; }
 ol.warnings { padding-left: 2em; }
 ol.warnings li { margin-bottom: 0.3em; }
 .stamp { display: flex; gap: 2.2em; margin-top: 3em; padding-top: 0.4em; border-top: 0.3pt solid var(--hairline); font-size: 8pt; }
-@page {
-  size: A4;
-  margin: 20mm 20mm 24mm 25mm;
-  @top-left { content: "Umsatzschätzung · " {{ case.label | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
-  @top-right { content: {{ case.periodFrom | date | css }} " bis " {{ case.periodTo | date | css }}; font-size: 8pt; color: #646464; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
-  @bottom-left { content: "Steuernummer " {{ case.taxpayer.taxNumber | css }} "   ·   Name des Steuerpflichtigen " {{ case.taxpayer.name | css }} "   ·   PaB-Nr. " {{ case.taxpayer.pabNumber | css }} "   ·   Datum " {{ report.computedAt | day | css }}; font-size: 8pt; white-space: pre; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
-  @bottom-right { content: "Seite " counter(page) " von " counter(pages); font-size: 8pt; font-family: "Libertinus Serif", "Linux Libertine", "Times New Roman", serif; }
-}
-@page :first {
-  @top-left { content: none; }
-  @top-right { content: none; }
-}
+@page { size: A4; margin: 20mm 20mm 24mm 25mm; }
 @media print {
   body { background: #fff; }
   main { max-width: none; margin: 0; padding: 0; }

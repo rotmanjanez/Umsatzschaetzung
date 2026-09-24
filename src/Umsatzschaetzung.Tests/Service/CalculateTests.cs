@@ -1,3 +1,4 @@
+using System.Text;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Richtsatz;
 using Umsatzschaetzung.Service;
@@ -13,7 +14,7 @@ public sealed class CalculateTests : IDisposable
         public Task<byte[]> Print(string html, CancellationToken ct)
         {
             Html = html;
-            return Task.FromResult("%PDF-1.7"u8.ToArray());
+            return Task.FromResult(File.ReadAllBytes(TestData.File("zugferd.pdf")));
         }
     }
 
@@ -108,7 +109,7 @@ public sealed class CalculateTests : IDisposable
     public async Task AReportPrintsWhereAPrinterIsAvailable()
     {
         var report = await svc.RenderReport(Vorlage.Id, true, ct);
-        Assert.Equal("%PDF-1.7"u8.ToArray(), report.Pdf);
+        Assert.StartsWith("%PDF-", Encoding.ASCII.GetString(report.Pdf!, 0, 5));
         Assert.Equal(report.Html, printer.Html);
         Assert.EndsWith(".pdf", report.FileName);
     }

@@ -19,6 +19,8 @@ namespace Umsatzschaetzung.Reports;
 [JsonSerializable(typeof(List<ProductRow>))]
 internal sealed partial class ReportJson : JsonSerializerContext;
 
+public sealed record PageMarks(string TopLeft, string TopRight, IReadOnlyList<string> Footer);
+
 public static class Html
 {
     static string Resource(string name)
@@ -62,6 +64,16 @@ public static class Html
             return [Group(null, priced, r.Totals.PricedPortions, r.Totals.Markup)];
         return [.. r.Markups.Select(m => Group(m.Sparte, priced.FindAll(p => p.Sparte == m.Sparte), m.Portions, m.Markup))];
     }
+
+    public static PageMarks Marks(Case c, Model.Report r) => new(
+        "Umsatzschätzung · " + c.Label,
+        Format.Period(c.PeriodFrom, c.PeriodTo),
+        [
+            "Steuernummer " + c.Taxpayer.TaxNumber,
+            "Name des Steuerpflichtigen " + c.Taxpayer.Name,
+            "PaB-Nr. " + c.Taxpayer.PabNumber,
+            "Datum " + Format.Day(r.ComputedAt),
+        ]);
 
     public static string Render(Case c, RuleSet rs, Model.Report r, Rahmen? rahmen)
     {

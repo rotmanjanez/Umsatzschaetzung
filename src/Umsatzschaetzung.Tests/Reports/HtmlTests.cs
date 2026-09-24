@@ -83,6 +83,5 @@ public class HtmlTests
 
         Assert.Contains("Bar &lt;script&gt;", html);
         Assert.Contains("Müller &amp; &quot;Söhne&quot;", html);
-        Assert.Contains("\"Müller & \\\"Söhne\\\"\"", html);
     }
 }

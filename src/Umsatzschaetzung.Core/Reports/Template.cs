@@ -127,7 +127,6 @@ public static class Template
 
     static readonly Dictionary<string, Func<JsonNode?, JsonNode?[], string>> Filters = new()
     {
-        ["css"] = (n, _) => CssString(Print(n)),
         ["date"] = (n, _) => Format.Date(DateOnly.Parse(Print(n))),
         ["day"] = (n, _) => Format.Day(DateTimeOffset.Parse(Print(n))),
         ["sparte"] = (n, _) => Print(n) switch { "getraenke" => "Getränke", "speisen" => "Speisen", "handelsware" => "Handelsware", _ => "Übrige" },
@@ -148,24 +147,6 @@ public static class Template
 
     static long Number(JsonNode? n) =>
         n is JsonValue v && v.TryGetValue<long>(out var l) ? l : throw new TemplateError($"{n?.GetPath()} ist keine Zahl");
-
-    static string CssString(string s)
-    {
-        var b = new StringBuilder(s.Length + 2).Append('"');
-        foreach (var ch in s)
-        {
-            switch (ch)
-            {
-                case '"': b.Append("\\\""); break;
-                case '\\': b.Append("\\\\"); break;
-                case '\n' or '\r': b.Append("\\A "); break;
-                case '<': b.Append("\\3c "); break;
-                case '>': b.Append("\\3e "); break;
-                default: b.Append(ch); break;
-            }
-        }
-        return b.Append('"').ToString();
-    }
 
     static void Flush(List<Node> nodes, StringBuilder text)
     {
@@ -202,7 +183,7 @@ public static class Template
                     var value = Resolve(v.Path, root, scope);
                     foreach (var (name, args) in v.Filters)
                         value = JsonValue.Create(Filters[name](value, [.. args.Select(a => Resolve(a, root, scope))]));
-                    b.Append(v.Filters.Count > 0 && v.Filters[^1].Name == "css" ? Print(value) : Esc(Print(value)));
+                    b.Append(Esc(Print(value)));
                     break;
                 case For f:
                     var items = Resolve(f.Path, root, scope) switch

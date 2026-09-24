@@ -57,4 +57,22 @@ internal static class Pdfium
     [DllImport(Lib)] public static extern int FPDFPageObj_GetBounds(nint obj, out float left, out float bottom, out float right, out float top);
     [DllImport(Lib)] public static extern int FPDFFormObj_CountObjects(nint obj);
     [DllImport(Lib)] public static extern nint FPDFFormObj_GetObject(nint obj, uint index);
+
+    [DllImport(Lib)] public static extern nint FPDFText_LoadStandardFont(nint document, string font);
+    [DllImport(Lib)] public static extern void FPDFFont_Close(nint font);
+    [DllImport(Lib)] public static extern nint FPDFPageObj_CreateTextObj(nint document, nint font, float size);
+    [DllImport(Lib)] public static extern int FPDFText_SetText(nint textObject, [MarshalAs(UnmanagedType.LPWStr)] string text);
+    [DllImport(Lib)] public static extern int FPDFPageObj_SetFillColor(nint obj, uint r, uint g, uint b, uint a);
+    [DllImport(Lib)] public static extern void FPDFPageObj_Transform(nint obj, double a, double b, double c, double d, double e, double f);
+    [DllImport(Lib)] public static extern void FPDFPageObj_Destroy(nint obj);
+    [DllImport(Lib)] public static extern void FPDFPage_InsertObject(nint page, nint obj);
+    [DllImport(Lib)] public static extern int FPDFPage_GenerateContent(nint page);
+    [DllImport(Lib)] public static extern int FPDF_SaveAsCopy(nint document, ref FileWrite writer, uint flags);
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct FileWrite
+{
+    public int Version;
+    public nint WriteBlock;
 }

@@ -33,6 +33,8 @@ public sealed class WebViewPdfPrinter : IPdfPrinter, IDisposable
     {
         var web = Host();
         await Navigate(web, html, ct);
+        if (OperatingSystem.IsMacOS() && web.TryGetWebViewPlatformHandle() is IAppleWKWebViewPlatformHandle mac)
+            return await MacPdfPrint.Print(mac.WKWebView, tempFolder, ct);
         using var pdf = await PrintToPdf(web).WaitAsync(ct);
         using var buffer = new MemoryStream();
         await pdf.CopyToAsync(buffer, ct);
