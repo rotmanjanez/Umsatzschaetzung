@@ -29,13 +29,16 @@ public sealed class ExcludedRow(LineGroup group, Exclusion why, string? ingredie
 
 public sealed class ReportModel : Observable
 {
-    string summary = "", note = "", why = "";
+    string summary = "", note = "", why = "", deposit = "";
     bool hasExcluded, ready, busy;
     string saved = "";
 
     public ObservableCollection<ExcludedRow> Rows { get; } = [];
     public string Summary { get => summary; set => Set(ref summary, value); }
-    public bool HasExcluded { get => hasExcluded; set => Set(ref hasExcluded, value); }
+    public bool HasExcluded { get => hasExcluded; set { if (Set(ref hasExcluded, value)) Raise(nameof(DepositAlone)); } }
+    public string Deposit { get => deposit; set { if (Set(ref deposit, value)) { Raise(nameof(DepositBelow)); Raise(nameof(DepositAlone)); } } }
+    public bool DepositBelow => deposit != "" && hasExcluded;
+    public bool DepositAlone => deposit != "" && !hasExcluded;
     public string Why { get => why; set { if (Set(ref why, value)) Raise(nameof(HasWhy)); } }
     public bool HasWhy => why != "";
     public bool Ready { get => ready; set { if (Set(ref ready, value)) Raise(nameof(CanSave)); } }
@@ -47,20 +50,23 @@ public sealed class ReportModel : Observable
     public string Note { get => note; set { if (Set(ref note, value)) Raise(nameof(ShowNote)); } }
     public bool ShowNote => note != "";
 
-    public void SetExcluded((string Summary, List<ExcludedRow> Rows) excluded)
+    public void SetExcluded((string Summary, string Deposit, List<ExcludedRow> Rows) excluded)
     {
         Summary = excluded.Summary;
+        Deposit = excluded.Deposit;
         Rows.Clear();
         foreach (var row in excluded.Rows) Rows.Add(row);
         HasExcluded = Rows.Count > 0;
     }
 
     // One row per mapping group, as on the Zuordnung tab, so a row can be reassigned in place.
-    public static (string Summary, List<ExcludedRow> Rows) Excluded(Report r, Case c, RuleSet rs)
+    public static (string Summary, string Deposit, List<ExcludedRow> Rows) Excluded(Report r, Case c, RuleSet rs)
     {
         var s = r.Totals;
         var excluded = s.UnmappedCost + s.UnusedCost;
         var summary = excluded == 0 ? "keine" : Format.Cents(excluded) + " (" + Format.Bp(s.ExcludedShare) + ")";
+        var deposit = r.Deposits.Count == 0 ? ""
+            : $"Nicht in den Einkäufen: Pfand berechnet +{Format.Cents(s.DepositCharged)}, Leergut gutgeschrieben {Format.Cents(s.DepositRefunded)}";
         var at = new Dictionary<(string, long), (LineGroup Group, Invoice Invoice, InvoiceLine Line)>();
         foreach (var g in LineGroup.Of(c, rs))
             foreach (var (i, j) in g.Lines)
@@ -78,7 +84,7 @@ public sealed class ReportModel : Observable
                 : new ExcludedRow(g, Exclusion.Unmapped, null, ""));
         foreach (var l in r.Unused)
             Add(l.InvoiceId, l.LineNo, l.LineNet, (g, _, _) => new ExcludedRow(g, Exclusion.Unused, l.IngredientId, Names.Ingredient(rs, l.IngredientId)));
-        return (summary, [.. rows.Values.OrderByDescending(x => x.Net)]);
+        return (summary, deposit, [.. rows.Values.OrderByDescending(x => x.Net)]);
     }
 
     public void Explain(ExcludedRow? row) => Why = row?.Why switch
@@ -134,7 +140,7 @@ public partial class ReportView : Screen
     }
 
     // A row that is still excluded for the same mapping keeps its detail, a note on a just assigned one stays.
-    void Fill((string, List<ExcludedRow>) excluded, Case kase, RuleSet rs)
+    void Fill((string, string, List<ExcludedRow>) excluded, Case kase, RuleSet rs)
     {
         var kept = Excluded.SelectedItem as ExcludedRow;
         refreshing = true;
