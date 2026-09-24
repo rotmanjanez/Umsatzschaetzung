@@ -14,20 +14,27 @@ public partial class SourceView : UserControl
 
     public SourceView() => InitializeComponent();
 
-    public void Show(InvoiceSourceResp? source, string note)
+    int shown;
+
+    public async void Show(InvoiceSourceResp? source, string note)
     {
+        var at = ++shown;
         Note.Text = note;
         Pages.Children.Clear();
-        foreach (var page in source?.Pages ?? [])
+        var list = source?.Pages ?? [];
+        var images = await Task.Run(() => list.Select(p => p.Image is { } data ? Images.Decode(data) : null).ToList());
+        if (at != shown) return;
+        for (var i = 0; i < list.Count; i++)
         {
-            if (page.Image is { } image)
+            var page = list[i];
+            if (images[i] is { } image)
             {
                 Pages.Children.Add(new Border
                 {
                     Theme = (ControlTheme)Application.Current!.FindResource("Panel")!,
                     Margin = new Thickness(0, 0, 0, 12),
                     HorizontalAlignment = HorizontalAlignment.Left,
-                    Child = new Image { Source = Images.Decode(image), Width = BaseWidth, Stretch = Stretch.Uniform },
+                    Child = new Image { Source = image, Width = BaseWidth, Stretch = Stretch.Uniform },
                 });
                 continue;
             }

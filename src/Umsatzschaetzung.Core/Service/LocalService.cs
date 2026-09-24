@@ -244,17 +244,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     });
 
     // A line asked about on its own carries no invoice date; the end of the audit period stands in.
-    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () => Task.Run(() =>
+    public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () =>
     {
         var c = Find(caseId);
         return matcher.Suggest(rules.Load(), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today())
             .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList();
-    }, ct));
+    });
 
     // Lines imported before a rule or the model existed, and lines an edit set free,
     // get their turn here: what the matcher is sure about is mapped, the rest stays open.
     // Against the same rules the matcher would answer the same, so a case is asked once per version.
-    public Task<Case> MapCase(string caseId, CancellationToken ct) => Guard(ct, () => Task.Run(async () =>
+    public Task<Case> MapCase(string caseId, CancellationToken ct) => Guard(ct, async () =>
     {
         var c = LoadCase(caseId);
         var rs = rules.Load();
@@ -265,7 +265,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) SaveCase(c);
         else cases.SaveMappedAt(c.Id, c.MappedAt);
         return c;
-    }, ct));
+    });
 
     public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
@@ -435,7 +435,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         ct.ThrowIfCancellationRequested();
         try
         {
-            return await body();
+            return await Task.Run(body, ct);
         }
         catch (Exception e) when (e is not (ServiceError or OperationCanceledException))
         {

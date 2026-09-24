@@ -187,8 +187,7 @@ public partial class ReportView : Screen
         model.Busy = true;
         await Session.Run(async () =>
         {
-            var ct = Ct;
-            var resp = await Task.Run(() => Session.Service.RenderReport(caseId, true, ct), ct);
+            var resp = await Session.Service.RenderReport(caseId, true, Ct);
             if (resp.Pdf is null)
             {
                 Session.Fail("PDF konnte nicht erstellt werden");

@@ -595,17 +595,30 @@ public partial class InvoiceView : Screen
         if (index == currentPage || index < 0 || index >= pages.Count) return;
         currentPage = index;
         var page = pages[index];
-        var image = Images.Decode(page.Image);
-        var w = page.Width > 0 ? page.Width : image.PixelSize.Width;
-        var h = page.Height > 0 ? page.Height : image.PixelSize.Height;
-        PageCanvas.Width = w;
-        PageCanvas.Height = h;
-        PageImage.Source = image;
-        PageImage.Width = w;
-        PageImage.Height = h;
+        PageImage.Source = null;
+        if (page.Width > 0 && page.Height > 0) Place(page.Width, page.Height);
         FocusBox.IsVisible = false;
         RenderFlagged();
         FitPage();
+        Decode(page, index);
+    }
+
+    async void Decode(OcrPage page, int index)
+    {
+        var image = await Task.Run(() => Images.Decode(page.Image));
+        if (currentPage != index || pages.ElementAtOrDefault(index) != page) return;
+        PageImage.Source = image;
+        if (page.Width > 0 && page.Height > 0) return;
+        Place(image.PixelSize.Width, image.PixelSize.Height);
+        FitPage();
+    }
+
+    void Place(double w, double h)
+    {
+        PageCanvas.Width = w;
+        PageCanvas.Height = h;
+        PageImage.Width = w;
+        PageImage.Height = h;
     }
 
     void RenderFlagged()

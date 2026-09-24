@@ -31,6 +31,7 @@ public partial class MappingView : Screen
 
     readonly MappingModel model = new();
     bool refreshing;
+    int refreshes;
     (Case?, RuleSet?) caughtUp;
 
     public MappingView(Session session) : base(session)
@@ -55,7 +56,7 @@ public partial class MappingView : Screen
     async void Reload(bool catchUp = false)
     {
         if (Stale() && !await Session.LoadRules(Ct)) return;
-        Refresh();
+        await Refresh();
         if (catchUp) MapOpen();
     }
 
@@ -78,14 +79,18 @@ public partial class MappingView : Screen
     }
 
     // The open position stays open, and its detail untouched unless the refresh changed its mapping.
-    void Refresh()
+    async Task Refresh()
     {
+        var at = ++refreshes;
+        var (kase, rs) = (Session.Case, Session.Rules);
+        var groups = await Task.Run(() => LineGroup.Of(kase, rs));
+        if (at != refreshes) return;
         var kept = Groups.SelectedItem as LineGroup;
         var focused = Groups.IsKeyboardFocusWithin;
         Detail.Refresh();
         refreshing = true;
         model.Groups.Clear();
-        foreach (var g in LineGroup.Of(Session.Case, Session.Rules)) model.Groups.Add(g);
+        foreach (var g in groups) model.Groups.Add(g);
         var again = kept is null ? null : model.Groups.FirstOrDefault(g => g.Key == kept.Key);
         if (again is not null && again.State == kept!.State && again.MappingId == kept.MappingId) Groups.SelectedItem = again;
         refreshing = false;
