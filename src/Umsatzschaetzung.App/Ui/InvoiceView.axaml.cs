@@ -464,6 +464,7 @@ public partial class InvoiceView : Screen
         Lines.CommitEdit(DataGridEditingUnit.Row, true);
         Totals.CommitEdit(DataGridEditingUnit.Row, true);
         var req = new VerifyReq(Session.Case.Id, Current(), Intent.Confirm, null, null);
+        var confirming = model.State == Checked.Pending;
         model.Saving = true;
         await Session.Run(async () =>
         {
@@ -476,6 +477,7 @@ public partial class InvoiceView : Screen
             }
             model.Dirty = false;
             onSaved(v.Case);
+            if (confirming) (TopLevel.GetTopLevel(this) as InvoiceWindow)?.Close();
         });
         model.Saving = false;
     }
