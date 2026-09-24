@@ -9,6 +9,7 @@ public sealed record Target
 {
     public string? Name { get; init; }
     public string? Text { get; init; }
+    public string? Starts { get; init; }
     public string? Type { get; init; }
     public string? Tip { get; init; }
     public string? Up { get; init; }
@@ -29,6 +30,7 @@ public sealed record Inset
 [JsonDerivedType(typeof(FocusStep), "focus")]
 [JsonDerivedType(typeof(DeselectStep), "deselect")]
 [JsonDerivedType(typeof(SelectStep), "select")]
+[JsonDerivedType(typeof(TopStep), "top")]
 [JsonDerivedType(typeof(EditStep), "edit")]
 [JsonDerivedType(typeof(OpenStep), "open")]
 [JsonDerivedType(typeof(TabStep), "tab")]
@@ -73,6 +75,11 @@ public sealed record DeselectStep : Step
 }
 
 public sealed record SelectStep : Step
+{
+    public required Target At { get; init; }
+}
+
+public sealed record TopStep : Step
 {
     public required Target At { get; init; }
 }

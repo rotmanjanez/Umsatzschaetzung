@@ -1,3 +1,4 @@
+using System.Collections;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -39,6 +40,9 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
             case SelectStep s:
                 Select(Find(window, s.At));
                 break;
+            case TopStep s:
+                Top(Find(window, s.At));
+                break;
             case EditStep s:
                 Edit(Find(window, s.At), s.Column, s.Text);
                 break;
@@ -76,6 +80,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         var hits = root.GetVisualDescendants().Where(v => v.IsEffectivelyVisible);
         if (target.Name is { } name) hits = hits.Where(v => (v as StyledElement)?.Name == name);
         if (target.Text is { } text) hits = hits.Where(v => Label(v) == text);
+        if (target.Starts is { } starts) hits = hits.Where(v => Label(v)?.StartsWith(starts, StringComparison.Ordinal) == true);
         if (target.Type is { } type) hits = hits.Where(v => v.GetType().Name == type);
         if (target.Tip is { } tip) hits = hits.Where(v => v is Control c && ToolTip.GetTip(c) as string == tip);
         var hit = hits.FirstOrDefault() ?? throw new InvalidOperationException("not found: " + target);
@@ -99,7 +104,8 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         var button = visual as Button ?? visual.GetVisualAncestors().OfType<Button>().FirstOrDefault()
             ?? visual.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.IsEffectivelyVisible)
             ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
-        button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        if (button is RadioButton radio) radio.IsChecked = true;
+        else button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     }
 
     // A field, or the first text box inside what `at` found (the price in a row).
@@ -121,6 +127,14 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         var list = row.GetVisualAncestors().FirstOrDefault(v => v is DataGrid or SelectingItemsControl)
             ?? throw new InvalidOperationException("no list above " + row.GetType().Name);
         Set(list, "SelectedItem", (row as StyledElement)?.DataContext);
+    }
+
+    // A list that scrolled away from its first rows shows them again; rows a list has scrolled
+    // out of view are not there to be found.
+    static void Top(Visual visual)
+    {
+        var grid = visual as DataGrid ?? (DataGrid)Up(visual, "DataGrid");
+        if (grid.ItemsSource?.Cast<object>().FirstOrDefault() is { } first) grid.ScrollIntoView(first, null);
     }
 
     // Puts the cursor on a cell of the row `at` sits in; with a text the cell is edited and
