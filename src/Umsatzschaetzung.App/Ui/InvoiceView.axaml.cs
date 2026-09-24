@@ -605,7 +605,8 @@ public partial class InvoiceView : Screen
 
     async void Decode(OcrPage page, int index)
     {
-        var image = await Task.Run(() => Images.Decode(page.Image));
+        if (page.Image is not { } raster) return;
+        var image = await Task.Run(() => Images.From(raster));
         if (currentPage != index || pages.ElementAtOrDefault(index) != page) return;
         PageImage.Source = image;
         if (page.Width > 0 && page.Height > 0) return;

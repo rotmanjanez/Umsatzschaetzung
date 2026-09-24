@@ -29,7 +29,7 @@ public class ScanTests
         {
             Images.Add(image);
             Tokens.Add(ct);
-            return Task.FromResult(new OcrPage { Image = image });
+            return Task.FromResult(new OcrPage());
         }
 
         public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct)
@@ -49,8 +49,7 @@ public class ScanTests
         public CancellationToken Token { get; private set; }
         public int Dpi { get; private set; }
 
-        public Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct) =>
-            Task.FromResult(Enumerable.Range(0, count).Select(_ => Png).ToList());
+        public Task<SKBitmap> Page(byte[] pdf, int index, int dpi, CancellationToken ct) => Task.FromResult(Sheets.Blank(10 + index, 10));
 
         public async IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, [EnumeratorCancellation] CancellationToken ct)
         {
@@ -72,7 +71,6 @@ public class ScanTests
         var ocr = new Ocr();
         var pages = await Reader.Read(ocr, null, "scan.png", Png, Reader.Dpi, Ct);
         Assert.Same(Png, Assert.Single(ocr.Images));
-        Assert.Same(Png, Assert.Single(pages).Image);
         Assert.Empty(ocr.Pages);
     }
 
@@ -166,15 +164,24 @@ public class ScanTests
     }
 
     [Fact]
-    public async Task RenderHandsThePdfToTheRenderer()
+    public async Task APageOfAPdfIsAskedOfTheRenderer()
     {
-        Assert.Equal(2, (await Reader.Render(new Pages(2), Pdf, 100, Ct)).Count);
+        using var page = await Reader.Page(new Pages(2), Pdf, 1, 100, Ct);
+        Assert.Equal(11, page.Width);
     }
 
     [Fact]
-    public async Task RenderWithoutARendererIsUnsupported()
+    public async Task AnImageIsItsOnlyPage()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Render(null, Pdf, 100, Ct));
+        using var page = await Reader.Page(null, Png, 0, 100, Ct);
+        Assert.Equal((20, 30), (page.Width, page.Height));
+        await Assert.ThrowsAsync<InvalidDataException>(() => Reader.Page(null, Png, 1, 100, Ct));
+    }
+
+    [Fact]
+    public async Task APageWithoutARendererIsUnsupported()
+    {
+        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Page(null, Pdf, 0, 100, Ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 }

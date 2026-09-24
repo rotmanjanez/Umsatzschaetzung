@@ -226,16 +226,23 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
 
     internal static SKBitmap Rotate(SKBitmap source, int degrees)
     {
-        var swap = degrees != 180;
-        var width = swap ? source.Height : source.Width;
-        var height = swap ? source.Width : source.Height;
-        var turned = new SKBitmap(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
+        var (map, size) = Turning(new SKSizeI(source.Width, source.Height), degrees);
+        var turned = new SKBitmap(new SKImageInfo(size.Width, size.Height, SKColorType.Bgra8888, SKAlphaType.Premul));
         using var canvas = new SKCanvas(turned);
-        canvas.Translate(degrees == 90 ? width : degrees == 180 ? width : 0,
-                         degrees == 180 ? height : degrees == 270 ? height : 0);
-        canvas.RotateDegrees(degrees);
+        canvas.Concat(map);
         canvas.DrawBitmap(source, 0, 0);
         return turned;
+    }
+
+    // Exact quarter turns: pixel centres land on pixel centres and nothing is resampled.
+    internal static (SKMatrix Map, SKSizeI Size) Turning(SKSizeI page, int degrees)
+    {
+        var swap = degrees != 180;
+        var width = swap ? page.Height : page.Width;
+        var height = swap ? page.Width : page.Height;
+        var (cos, sin) = degrees switch { 90 => (0, 1), 180 => (-1, 0), _ => (0, -1) };
+        var map = new SKMatrix(cos, -sin, degrees == 270 ? 0 : width, sin, cos, degrees == 90 ? 0 : height, 0, 0, 1);
+        return (map, new SKSizeI(width, height));
     }
 }
 

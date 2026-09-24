@@ -14,13 +14,11 @@ public sealed class PdfiumPages : IPdfPages
     // invoice are content, not decoration.
     const int WithAnnotations = 0x01;
 
-    public async Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct)
+    public async Task<SKBitmap> Page(byte[] pdf, int index, int dpi, CancellationToken ct)
     {
-        var pages = new List<byte[]>();
-        await foreach (var page in Rasterize(pdf, dpi, ct))
-            using (page)
-                pages.Add(await Task.Run(() => Png(page), ct));
-        return pages;
+        using var document = await Task.Run(() => new Document(pdf), ct);
+        if (index < 0 || index >= document.Count) throw new InvalidDataException($"pdf: keine Seite {index + 1}");
+        return await Task.Run(() => document.Render(index, dpi), ct);
     }
 
     // One page at a time: a page is 35 MB of pixels where its PNG is under one.
@@ -32,12 +30,6 @@ public sealed class PdfiumPages : IPdfPages
             ct.ThrowIfCancellationRequested();
             yield return await Task.Run(() => document.Render(i, dpi), ct);
         }
-    }
-
-    public static byte[] Png(SKBitmap page)
-    {
-        using var data = page.Encode(SKEncodedImageFormat.Png, 100);
-        return data.ToArray();
     }
 
     // Pdfium takes one caller at a time. The gate is held per call rather than for the life

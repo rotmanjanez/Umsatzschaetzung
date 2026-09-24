@@ -22,7 +22,7 @@ public partial class SourceView : UserControl
         Note.Text = note;
         Pages.Children.Clear();
         var list = source?.Pages ?? [];
-        var images = await Task.Run(() => list.Select(p => p.Image is { } data ? Images.Decode(data) : null).ToList());
+        var images = await Task.Run(() => list.Select(p => p.Image is { } raster ? Images.From(raster) : null).ToList());
         if (at != shown) return;
         for (var i = 0; i < list.Count; i++)
         {

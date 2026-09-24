@@ -131,9 +131,13 @@ public sealed class Correction
     public double Settle { get; set; }
 }
 
+// Pixels as the screen takes them: BGRA, premultiplied, rows back to back. Nothing is encoded
+// between the renderer and the view.
+public sealed record Raster(int Width, int Height, byte[] Pixels);
+
 public sealed class OcrPage
 {
-    public byte[] Image { get; set; } = [];
+    public Raster? Image { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     public Correction Correction { get; set; } = new();

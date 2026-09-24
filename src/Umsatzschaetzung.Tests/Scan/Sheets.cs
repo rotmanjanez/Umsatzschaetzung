@@ -55,6 +55,13 @@ static class Sheets
 
     public static int Dark(SKBitmap page) => Ink(page, int.MaxValue).Left;
 
+    public static SKBitmap Of(Umsatzschaetzung.Model.Raster raster)
+    {
+        var page = new SKBitmap(new SKImageInfo(raster.Width, raster.Height, SKColorType.Bgra8888, SKAlphaType.Premul));
+        System.Runtime.InteropServices.Marshal.Copy(raster.Pixels, 0, page.GetPixels(), raster.Pixels.Length);
+        return page;
+    }
+
     public static byte[] Png(SKBitmap page)
     {
         using var data = page.Encode(SKEncodedImageFormat.Png, 100);

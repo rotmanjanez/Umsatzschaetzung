@@ -39,12 +39,11 @@ public class PdfiumPagesTests
     }
 
     [Fact]
-    public async Task RenderEncodesEveryPageAsAPng()
+    public async Task APageRendersOnItsOwn()
     {
-        var pages = await pdf.Render(Zugferd, 72, TestContext.Current.CancellationToken);
-        var png = Assert.Single(pages);
-        using var decoded = SKBitmap.Decode(png);
-        Assert.Equal((595, 842), (decoded.Width, decoded.Height));
+        using var page = await pdf.Page(Zugferd, 0, 72, TestContext.Current.CancellationToken);
+        Assert.Equal((595, 842), (page.Width, page.Height));
+        await Assert.ThrowsAsync<InvalidDataException>(() => pdf.Page(Zugferd, 1, 72, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -73,14 +72,5 @@ public class PdfiumPagesTests
     {
         var broken = "%PDF-1.7\nnot a pdf"u8.ToArray();
         await Assert.ThrowsAsync<InvalidDataException>(() => Sizes(pdf.Rasterize(broken, 72, TestContext.Current.CancellationToken)));
-    }
-
-    [Fact]
-    public void PngRoundTripsTheBitmap()
-    {
-        using var page = Sheets.Ruled();
-        using var back = SKBitmap.Decode(PdfiumPages.Png(page));
-        Assert.Equal((page.Width, page.Height), (back.Width, back.Height));
-        Assert.Equal(Sheets.Dark(page), Sheets.Dark(back));
     }
 }

@@ -116,19 +116,27 @@ public static class Deskew
 
     public static SKBitmap Straighten(SKBitmap page, double degrees)
     {
+        var (map, size) = Straightening(new SKSizeI(page.Width, page.Height), degrees);
+        var turned = new SKBitmap(new SKImageInfo(size.Width, size.Height, SKColorType.Bgra8888, SKAlphaType.Premul));
+        using var canvas = new SKCanvas(turned);
+        canvas.Clear(SKColors.White);
+        canvas.Concat(map);
+        using var image = SKImage.FromBitmap(page);
+        canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None));
+        return turned;
+    }
+
+    // Turned about its centre onto a canvas that holds all of it.
+    public static (SKMatrix Map, SKSizeI Size) Straightening(SKSizeI page, double degrees)
+    {
         var radians = Math.Abs(Radians(degrees));
         double cos = Math.Cos(radians), sin = Math.Sin(radians);
         var width = (int)Math.Ceiling(page.Width * cos + page.Height * sin);
         var height = (int)Math.Ceiling(page.Width * sin + page.Height * cos);
-        var turned = new SKBitmap(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Premul));
-        using var canvas = new SKCanvas(turned);
-        canvas.Clear(SKColors.White);
-        canvas.Translate(width / 2f, height / 2f);
-        canvas.RotateDegrees((float)degrees);
-        canvas.Translate(-page.Width / 2f, -page.Height / 2f);
-        using var image = SKImage.FromBitmap(page);
-        canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None));
-        return turned;
+        var map = SKMatrix.CreateTranslation(width / 2f, height / 2f)
+            .PreConcat(SKMatrix.CreateRotationDegrees((float)degrees))
+            .PreConcat(SKMatrix.CreateTranslation(-page.Width / 2f, -page.Height / 2f));
+        return (map, new SKSizeI(width, height));
     }
 
     static double Radians(double degrees) => degrees * Math.PI / 180;

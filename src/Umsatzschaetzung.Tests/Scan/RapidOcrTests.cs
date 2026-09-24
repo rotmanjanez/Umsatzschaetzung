@@ -75,16 +75,16 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
 
         Assert.Equal(180, page.Correction.Turn);
         Plausible(page, line.Width, line.Height);
-        using var shown = SKBitmap.Decode(Reader.Upright(png, page.Correction));
+        var shown = Reader.Upright(flipped, page.Correction);
         Assert.Equal((page.Width, page.Height), (shown.Width, shown.Height));
     }
 
     [Fact]
-    public void AnUncorrectedRenderIsHandedBackAsItIs()
+    public void AnUncorrectedRenderKeepsItsPixels()
     {
-        using var blank = Sheets.Blank(40, 30);
-        var png = Sheets.Png(blank);
-        Assert.Same(png, Reader.Upright(png, new Correction()));
+        using var ruled = Sheets.Ruled(width: 40, height: 30);
+        using var shown = Sheets.Of(Reader.Upright(ruled, new Correction()));
+        Assert.Equal(ruled.Bytes, shown.Bytes);
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
         using var blank = Sheets.Blank(400, 300);
         var page = await fixture.Ocr.Recognize(Sheets.Png(blank), Ct);
         Assert.Empty(page.Words);
-        Assert.Empty(page.Image);
+        Assert.Null(page.Image);
         Assert.Equal((400, 300), (page.Width, page.Height));
     }
 

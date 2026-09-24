@@ -339,7 +339,7 @@ public partial class MappingDetail : UserControl
     }
 
     // Each position the group was built from, in the order they were delivered. The rows are there at
-    // once; their excerpts are cut in parallel, only the PDF rendering behind a scan's reading is serial.
+    // once; their excerpts are cut in parallel, each from its own page.
     async void ShowSnippets(int seq, LineGroup g)
     {
         var k = Session.Case!;
@@ -359,14 +359,7 @@ public partial class MappingDetail : UserControl
         try
         {
             if (inv.Source == Source.Scan)
-            {
-                if (!Session.Readings.TryGetValue(inv.Id, out var read))
-                {
-                    read = new OcrResp(inv.Id, (await Session.Service.InvoiceReading(caseId, inv.Id, Ct)).Pages, inv);
-                    if (read.Pages.Count > 0) Session.Readings[inv.Id] = read;
-                }
-                return (await Task.Run(() => Ui.Snippet.Crop(read.Pages, index, line)), null);
-            }
+                return (await Session.Service.InvoiceSnippet(caseId, inv.Id, index, line.Name, Ct) is { } row ? Images.From(row) : null, null);
             if (inv.Source is Source.Ubl or Source.Cii)
             {
                 if (!Session.Sources.TryGetValue(inv.Id, out var src))

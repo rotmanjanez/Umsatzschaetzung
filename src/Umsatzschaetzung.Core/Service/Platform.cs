@@ -13,7 +13,7 @@ public interface IOcr
 
 public interface IPdfPages
 {
-    Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct);
+    Task<SKBitmap> Page(byte[] pdf, int index, int dpi, CancellationToken ct);
     IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, CancellationToken ct);
 }
 

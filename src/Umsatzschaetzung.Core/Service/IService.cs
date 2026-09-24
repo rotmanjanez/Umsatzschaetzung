@@ -29,6 +29,7 @@ public interface IService
     Task<ExportResp> ExportInvoice(string caseId, string invoiceId, CancellationToken ct);                                  // GET  /cases/{id}/invoices/{inv}/export   the read invoice as CSV
     Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct);                           // GET  /cases/{id}/invoices/{inv}/source
     Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct);                         // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading, images rendered again
+    Task<Raster?> InvoiceSnippet(string caseId, string invoiceId, int line, string name, CancellationToken ct);            // GET  /cases/{id}/invoices/{inv}/lines/{n}/snippet?name=   the row of the scan the line was read from
     Task<ExportResp> ExportAssortment(string caseId, CancellationToken ct);                                                 // GET  /cases/{id}/assortment/export   the listed products as CSV
     Task<AssortmentImport> ReadAssortment(byte[] data, CancellationToken ct);                                               // POST /assortment/read   the products of the CSV with their price, nothing is saved; resp.Unknown names the rows no product matched
     Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct);   // POST /cases/{id}/mappings/suggest   caseId "" suggests without a Gewerbe filter

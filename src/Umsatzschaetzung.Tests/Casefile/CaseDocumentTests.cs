@@ -172,7 +172,7 @@ public class CaseDocumentTests
         var back = store.LoadReading("fall-1", "re-1")!;
 
         Assert.Equal(pages.Select(Text), back.Select(Text));
-        Assert.All(back, p => Assert.Empty(p.Image));
+        Assert.All(back, p => Assert.Null(p.Image));
     }
 
     [Fact]
@@ -192,7 +192,7 @@ public class CaseDocumentTests
 
     static OcrPage Page() => new()
     {
-        Image = [1, 2, 3],
+        Image = new Raster(1, 1, [1, 2, 3, 4]),
         Width = 1240,
         Height = 1754,
         Correction = new Correction { Scale = 0.75, Skew = -2.5, Turn = 180, Settle = 0.25 },

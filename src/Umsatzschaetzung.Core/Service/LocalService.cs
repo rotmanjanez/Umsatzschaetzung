@@ -200,18 +200,16 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         {
             throw new ServiceError(ErrorCode.NotFound, $"kein Beleg zu Rechnung {invoiceId} gespeichert", inner: e);
         }
-        var pages = InvoiceParser.Detect(data) switch
-        {
-            Kind.Image => [new SourcePage(data, null)],
-            Kind.Pdf or Kind.Zugferd => (await Scan.Render(pdf, data, PreviewDpi, ct)).Select(p => new SourcePage(p, null)).ToList(),
-            _ => [new SourcePage(null, Encoding.UTF8.GetString(data))],
-        };
-        if (cases.LoadReading(caseId, invoiceId) is { } read)
-            await Task.Run(() =>
+        if (InvoiceParser.Detect(data) is not (Kind.Image or Kind.Pdf or Kind.Zugferd))
+            return new InvoiceSourceResp(name, [new SourcePage(null, Encoding.UTF8.GetString(data))]);
+        var read = cases.LoadReading(caseId, invoiceId);
+        var pages = new List<SourcePage>();
+        await foreach (var page in Scan.Pages(pdf, data, PreviewDpi, ct))
+            using (page)
             {
-                for (var i = 0; i < pages.Count && i < read.Count; i++)
-                    if (pages[i].Image is { } image) pages[i] = new SourcePage(Scan.Upright(image, Unscaled(read[i].Correction)), null);
-            }, ct);
+                var c = read?.ElementAtOrDefault(pages.Count) is { } r ? Unscaled(r.Correction) : new Correction();
+                pages.Add(new SourcePage(await Task.Run(() => Scan.Upright(page, c), ct), null));
+            }
         return new InvoiceSourceResp(name, pages);
     });
 
@@ -230,17 +228,35 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         {
             return new InvoiceReadingResp([]);
         }
-        var images = InvoiceParser.Detect(data) switch
+        if (InvoiceParser.Detect(data) is var kind && (kind is Kind.Image || kind is Kind.Pdf && pdf is not null))
         {
-            Kind.Image => [data],
-            Kind.Pdf when pdf is not null => await pdf.Render(data, Scan.Dpi, ct),
-            _ => new List<byte[]>(),
-        };
-        await Task.Run(() =>
-        {
-            for (var i = 0; i < pages.Count && i < images.Count; i++) pages[i].Image = Scan.Upright(images[i], pages[i].Correction);
-        }, ct);
+            var i = 0;
+            await foreach (var image in Scan.Pages(pdf, data, Scan.Dpi, ct))
+                using (image)
+                {
+                    if (i >= pages.Count) break;
+                    var page = pages[i++];
+                    page.Image = await Task.Run(() => Scan.Upright(image, page.Correction), ct);
+                }
+        }
         return new InvoiceReadingResp(pages);
+    });
+
+    // The page is rendered once and only the row is drawn from it, the correction included.
+    public Task<Raster?> InvoiceSnippet(string caseId, string invoiceId, int line, string name, CancellationToken ct) => Guard<Raster?>(ct, async () =>
+    {
+        if (cases.LoadReading(caseId, invoiceId) is not { } pages || Rows.Of(pages, line, name) is not (var at, var box)) return null;
+        byte[] data;
+        try
+        {
+            (_, data) = cases.LoadFile(caseId, invoiceId);
+        }
+        catch (CaseNotFoundException)
+        {
+            return null;
+        }
+        using var page = await Scan.Page(pdf, data, at, Scan.Dpi, ct);
+        return Scan.Cut(page, pages[at].Correction, box);
     });
 
     // A line asked about on its own carries no invoice date; the end of the audit period stands in.

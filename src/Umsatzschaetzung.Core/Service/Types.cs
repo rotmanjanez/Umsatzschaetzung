@@ -19,7 +19,7 @@ public sealed record VerifyReq(string CaseId, Invoice Invoice, Intent Intent, st
 
 public sealed record VerifyResp(Invoice Invoice, List<Flag> Flags, bool Blocked, bool Accepted, Case? Case);
 
-public sealed record SourcePage(byte[]? Image, string? Text);
+public sealed record SourcePage(Raster? Image, string? Text);
 
 public sealed record InvoiceSourceResp(string FileName, List<SourcePage> Pages);
 

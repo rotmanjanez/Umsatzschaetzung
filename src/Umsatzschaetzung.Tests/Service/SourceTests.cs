@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using SkiaSharp;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
@@ -10,13 +11,21 @@ public sealed class SourceTests : IDisposable
     {
         public readonly List<int> Dpis = [];
 
-        public Task<List<byte[]>> Render(byte[] pdf, int dpi, CancellationToken ct)
+        public Task<SKBitmap> Page(byte[] pdf, int index, int dpi, CancellationToken ct)
         {
             Dpis.Add(dpi);
-            return Task.FromResult<List<byte[]>>([[1], [2]]);
+            return Task.FromResult(Tests.Scan.Sheets.Blank(index + 1, 1));
         }
 
-        public IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, CancellationToken ct) => throw new NotSupportedException();
+        public async IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, [EnumeratorCancellation] CancellationToken ct)
+        {
+            Dpis.Add(dpi);
+            for (var i = 1; i <= 2; i++)
+            {
+                await Task.Yield();
+                yield return Tests.Scan.Sheets.Blank(i, 1);
+            }
+        }
     }
 
     readonly Pages pages = new();
@@ -47,7 +56,7 @@ public sealed class SourceTests : IDisposable
         var source = await svc.InvoiceSource(at[0], at[1], ct);
 
         Assert.Equal("zugferd.pdf", source.FileName);
-        Assert.Equal([[1], [2]], source.Pages.Select(p => p.Image));
+        Assert.Equal([1, 2], source.Pages.Select(p => p.Image!.Width));
         Assert.All(source.Pages, p => Assert.Null(p.Text));
         Assert.Equal([150], pages.Dpis);
     }
@@ -74,7 +83,7 @@ public sealed class SourceTests : IDisposable
         var read = (await svc.InvoiceReading(at[0], at[1], ct)).Pages;
 
         Assert.Equal([1, 2], read.Select(p => p.Width));
-        Assert.Equal([[1], [2]], read.Select(p => p.Image));
+        Assert.Equal([1, 2], read.Select(p => p.Image!.Width));
         Assert.Equal([Umsatzschaetzung.Service.Scan.Dpi], pages.Dpis);
     }
 
@@ -88,9 +97,39 @@ public sealed class SourceTests : IDisposable
 
         var page = Assert.Single((await svc.InvoiceSource(at[0], at[1], ct)).Pages);
 
-        using var shown = SKBitmap.Decode(page.Image);
+        using var shown = Tests.Scan.Sheets.Of(page.Image!);
         Assert.Equal((40, 30), (shown.Width, shown.Height));
         Assert.Equal(SKColors.Black, shown.GetPixel(39, 29));
         Assert.Equal(SKColors.White, shown.GetPixel(0, 0));
+    }
+
+    static OcrLine Row(string name, int y) => new()
+    {
+        Parsed = new InvoiceLine { Name = name },
+        Cells =
+        {
+            [Field.Name] = new OcrWord { Text = name, Box = new Box(20, y, 30, 10) },
+            [Field.LineNet] = new OcrWord { Text = "1,00", Box = new Box(120, y + 2, 20, 8) },
+        },
+    };
+
+    [Fact]
+    public async Task ASnippetIsTheRowAcrossTheTable()
+    {
+        using var sheet = Tests.Scan.Sheets.Blank(200, 100);
+        var reading = new List<OcrPage> { new() { Width = 200, Height = 100, Lines = [Row("Mehl", 20), Row("Zucker", 50)] } };
+        var at = (await Store("scan.png", Tests.Scan.Sheets.Png(sheet), reading)).Split('/');
+
+        var row = await svc.InvoiceSnippet(at[0], at[1], 1, "Zucker", ct);
+
+        Assert.Equal((152 - 8, 72 - 38), row is { } r ? (r.Width, r.Height) : default);
+        Assert.Null(await svc.InvoiceSnippet(at[0], at[1], 5, "Salz", ct));
+    }
+
+    [Fact]
+    public async Task AnInvoiceWithoutAReadingHasNoSnippet()
+    {
+        var at = (await Store("re.xml", File.ReadAllBytes(TestData.Fixture("dataset/2025/spirituosen/2025-10-01_RE2503135.xml")))).Split('/');
+        Assert.Null(await svc.InvoiceSnippet(at[0], at[1], 0, "x", ct));
     }
 }

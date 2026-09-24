@@ -155,7 +155,8 @@ public class InvoiceTests(MatcherHost host)
         var kase = await NewCase();
         var reading = new List<OcrPage> { new() { Width = 10, Height = 20, Words = [new OcrWord { Text = "Servietten" }] } };
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Store, "r.png", Png, reading), ct);
+        using var sheet = Tests.Scan.Sheets.Blank(10, 20);
+        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Store, "r.png", Tests.Scan.Sheets.Png(sheet), reading), ct);
 
         Assert.False(v.Accepted);
         Assert.Null(v.Invoice.Verification);
@@ -164,10 +165,10 @@ public class InvoiceTests(MatcherHost host)
         Assert.Null(stored.Verification);
         var source = await svc.InvoiceSource(kase.Id, stored.Id, ct);
         Assert.Equal("r.png", source.FileName);
-        Assert.Equal(Png, Assert.Single(source.Pages).Image);
+        Assert.Equal((10, 20), Assert.Single(source.Pages).Image is { } shown ? (shown.Width, shown.Height) : default);
         var read = Assert.Single((await svc.InvoiceReading(kase.Id, stored.Id, ct)).Pages);
         Assert.Equal("Servietten", Assert.Single(read.Words).Text);
-        Assert.Equal(Png, read.Image);
+        Assert.Equal((10, 20), read.Image is { } image ? (image.Width, image.Height) : default);
     }
 
     [Theory]
