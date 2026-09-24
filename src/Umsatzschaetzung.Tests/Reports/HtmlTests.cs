@@ -30,7 +30,7 @@ public class HtmlTests
     {
         var rahmen = Vergleich.Aufschlag(Sammlung(2023), "56101.0", 12_000_000);
         Assert.Contains(
-            "Richtsatzsammlung 2023, „Gast-, Speise- und Schankwirtschaften“: Rohaufschlag 178 bis 400 % (Mittel 257 %), kalkuliert über dem Rahmen.",
+            "Richtsatzsammlung 2023, „Gast-, Speise- und Schankwirtschaften“: Rohgewinnaufschlagsatz 178 bis 400 % (Mittel 257 %), kalkuliert über dem Rahmen.",
             Html.Render(Kase, Rules, Report, rahmen));
     }
 
@@ -38,7 +38,7 @@ public class HtmlTests
     [InlineData(300, 500, "im Rahmen")]
     [InlineData(500, 900, "unter dem Rahmen")]
     public void TheReportSaysWhereTheMarkupLies(int von, int bis, string lage) =>
-        Assert.Contains($"Rohaufschlag {von} bis {bis} % (Mittel {von} %), kalkuliert {lage}.",
+        Assert.Contains($"Rohgewinnaufschlagsatz {von} bis {bis} % (Mittel {von} %), kalkuliert {lage}.",
             Html.Render(Kase, Rules, Report, new Rahmen(2024, "Klasse", null, new Satz(von, bis, von))));
 
     [Fact]
@@ -51,7 +51,6 @@ public class HtmlTests
         var html = Html.Render(Kase, Rules, Report, null);
         Assert.StartsWith("<!DOCTYPE html>", html.TrimStart(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("<h1>2 Rohgewinnaufschlag</h1>", html);
-        Assert.Contains("<h1>3 Umsatz über den Rohgewinnaufschlagsatz</h1>", html);
         Assert.Contains("<th class=\"wide\">Getränke</th>", html);
         Assert.Contains("Anhang D", html);
         Assert.Contains("2024-04711", html);

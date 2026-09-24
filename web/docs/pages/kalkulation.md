@@ -117,7 +117,7 @@ Diese Seite zeigt, was eingekauft wurde, aber nicht über Rezeptur und Preis in
 den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
 
 **Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den
-Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Abschnitt 3), sie verändern den
+Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang D), sie verändern den
 Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des
 Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
 in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine

@@ -112,7 +112,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
         </tbody>
       </table>
-      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Abschnitt 3).</p>
+      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Anhang D).</p>
     </section>
 
     <section>
@@ -125,7 +125,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="num">Einsatz der Portionen</th>
             <th class="num">Umsatz netto</th>
             <th class="num">Rohgewinn</th>
-            <th class="num">Aufschlagsatz</th>
+            <th class="num">Rohgewinnaufschlagsatz</th>
           </tr>
         </thead>
         <tbody>
@@ -149,9 +149,9 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </tbody>
       </table>
-      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Abschnitt 3).</p>
+      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang D).</p>
       {% if rahmen %}
-      <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohaufschlag {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
+      <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohgewinnaufschlagsatz {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}
 
       <h2>Kalkulation je Produkt</h2>
@@ -163,7 +163,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="num">Portionen</th>
             <th class="num">Einsatz je Portion</th>
             <th class="num">Nettopreis</th>
-            <th class="num">Aufschlagsatz</th>
+            <th class="num">Rohgewinnaufschlagsatz</th>
           </tr>
         </thead>
         <tbody>
@@ -179,51 +179,13 @@ ol.warnings li { margin-bottom: 0.3em; }
           <tr class="total">
             <td>Summe</td>
             <td class="num">{{ g.portions | group }}</td>
-            <td></td>
-            <td></td>
+            <td colspan="2" class="num">Gewichteter Rohgewinnaufschlagsatz</td>
             <td class="num">{{ g.markup | bp }}</td>
           </tr>
         </tbody>
       </table>
       {% endfor %}
       <p class="note">Einsatz je Portion aus Rezeptur (Anhang B) und Wareneinsatz der Zutaten (Anhang C), Nettopreis aus Bruttopreis und USt (Anhang B).</p>
-    </section>
-
-    <section>
-      <h1>3 Umsatz über den Rohgewinnaufschlagsatz</h1>
-      <p>Für Wareneinsatz ohne Portion und Preis wird der Umsatz als Einsatz zuzüglich des Aufschlagsatzes geschätzt. Es gilt der Satz der Sparte, sonst der Gesamtsatz.</p>
-      <table>
-        <thead>
-          <tr>
-            <th class="wide">Herkunft</th>
-            <th class="num">Einsatz</th>
-            <th class="num">Umsatz netto</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Produkte ohne Preis</td>
-            <td class="num">{{ estimated.products.cost | cents }}</td>
-            <td class="num">{{ estimated.products.revenueNet | cents }}</td>
-          </tr>
-          <tr>
-            <td>Nicht zugeteilte Ware</td>
-            <td class="num">{{ estimated.leftover.cost | cents }}</td>
-            <td class="num">{{ estimated.leftover.revenueNet | cents }}</td>
-          </tr>
-          <tr>
-            <td>Eingangspositionen ohne Rezeptur oder Faktor</td>
-            <td class="num">{{ estimated.lines.cost | cents }}</td>
-            <td class="num">{{ estimated.lines.revenueNet | cents }}</td>
-          </tr>
-          <tr class="total">
-            <td>Summe</td>
-            <td class="num">{{ report.totals.estimatedCost | cents }}</td>
-            <td class="num">{{ report.totals.estimatedRevenueNet | cents }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="note">Die einzelnen Positionen mit ihrem Satz stehen in Anhang D.</p>
     </section>
 
     <section>
@@ -416,7 +378,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="num">Portionen</th>
             <th>Satz</th>
             <th class="num">Einsatz</th>
-            <th class="num">Aufschlagsatz</th>
+            <th class="num">Rohgewinnaufschlagsatz</th>
             <th class="num">Umsatz netto</th>
           </tr>
         </thead>
@@ -454,7 +416,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="num">Rest</th>
             <th>Satz</th>
             <th class="num">Einsatz</th>
-            <th class="num">Aufschlagsatz</th>
+            <th class="num">Rohgewinnaufschlagsatz</th>
             <th class="num">Umsatz netto</th>
           </tr>
         </thead>
@@ -493,7 +455,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="wrap">Position</th>
             <th>Satz</th>
             <th class="num">Netto</th>
-            <th class="num">Aufschlagsatz</th>
+            <th class="num">Rohgewinnaufschlagsatz</th>
             <th class="num">Umsatz netto</th>
           </tr>
         </thead>

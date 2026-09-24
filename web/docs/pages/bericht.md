@@ -24,9 +24,6 @@ Punkte. Ins PDF gehen die Hinweise nicht mit.
    kalkulierte Satz darin liegt. Darunter die Kalkulation je Produkt, alles je
    Portion: Portionen, Einsatz je Portion, Nettopreis und Aufschlagsatz. In der
    Gastronomie eine Tabelle je Sparte, sonst eine für alle Produkte.
-3. **Umsatz über den Rohgewinnaufschlagsatz**: Einsatz und geschätzter Umsatz
-   für Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne
-   Rezeptur.
 
 Der Anhang belegt, woher die Zahlen kommen:
 
@@ -38,8 +35,8 @@ Der Anhang belegt, woher die Zahlen kommen:
 - **C: Warenfluss und Ausbeute**: je Zutat vom Einkauf über die Abzüge bis zu
   dem, was verkauft oder übrig geblieben ist, dazu die angewandte Ertragsregel.
   In der Prüfung gewählte Regeln sind als solche vermerkt.
-- **D: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen zu
-  Abschnitt 3, jede mit dem Satz, der für sie gilt. Es gilt der Satz der
+- **D: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen ohne Portion
+  und Preis, jede mit dem Satz, der für sie gilt. Es gilt der Satz der
   Sparte; hat die Sparte keinen, der Gesamtsatz. Auf die Steuersätze verteilt
   sich der geschätzte Umsatz wie der kalkulierte Umsatz derselben Sparte.
 - **E: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer
