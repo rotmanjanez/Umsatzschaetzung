@@ -53,28 +53,29 @@ Punkte. Ins PDF gehen die Hinweise nicht mit.
 2. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
    Sparte, ermittelt nur an Portionen mit Preis. Ist eine Gewerbekennzahl
    eingetragen, steht darunter der Rahmen der Richtsatzsammlung und ob der
-   kalkulierte Satz darin liegt.
+   kalkulierte Satz darin liegt. Darunter die Kalkulation je Produkt, alles je
+   Portion: Portionen, Einsatz je Portion, Nettopreis und Aufschlagsatz. In der
+   Gastronomie eine Tabelle je Sparte, sonst eine für alle Produkte.
+3. **Umsatz über den Rohgewinnaufschlagsatz**: Einsatz und geschätzter Umsatz
+   für Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne
+   Rezeptur.
 
-Der Anhang belegt beides:
+Der Anhang belegt, woher die Zahlen kommen:
 
 - **A: Eingangspositionen**: jede Rechnungszeile, die eingegangen ist.
-- **B: Rezepturen und Produkte**: je Produkt Rezept, Portionen, Preis und
-  Aufschlagsatz. Für die Prüfung angepasste Rezepte sind als **abweichend vom
+- **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und
+  Steuersatz. Für die Prüfung angepasste Rezepte sind als **abweichend vom
   Katalog** gekennzeichnet, mit dem Stand des Katalogrezepts; das
   Katalogrezept steht grau darunter.
 - **C: Warenfluss und Ausbeute**: je Zutat vom Einkauf über die Abzüge bis zu
   dem, was verkauft oder übrig geblieben ist, dazu die angewandte Ertragsregel.
   In der Prüfung gewählte Regeln sind als solche vermerkt.
-- **D: Umsatz über den Rohgewinnaufschlagsatz**: Wareneinsatz ohne Portion und
-  Preis, dessen Umsatz als Einsatz zuzüglich Aufschlagsatz geschätzt ist:
-  Produkte ohne Preis, nicht zugeteilte Ware je Zutat und Eingangspositionen
-  ohne Rezeptur. Es gilt der Satz der Sparte; hat die Sparte keinen, der
-  Gesamtsatz. Auf die Steuersätze verteilt sich der geschätzte Umsatz wie der
-  kalkulierte Umsatz derselben Sparte.
-- **E: Kennzahlen**: die Brücke vom Wareneinsatz zum Umsatz. Wie viel ging
-  durch Schwund und Abzüge verloren, wie viel wurde nicht zugeteilt, was blieb
-  als Einsatz der verkauften Portionen und was über den Aufschlagsatz
-  geschätzt ist.
+- **D: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen zu
+  Abschnitt 3, jede mit dem Satz, der für sie gilt. Es gilt der Satz der
+  Sparte; hat die Sparte keinen, der Gesamtsatz. Auf die Steuersätze verteilt
+  sich der geschätzte Umsatz wie der kalkulierte Umsatz derselben Sparte.
+- **E: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer
+  Aufstellung.
 
 ## Als PDF speichern
 

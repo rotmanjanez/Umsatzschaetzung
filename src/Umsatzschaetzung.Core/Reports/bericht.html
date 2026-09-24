@@ -123,7 +123,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
         </tbody>
       </table>
-      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Anhang D).</p>
+      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Abschnitt 3).</p>
     </section>
 
     <section>
@@ -160,10 +160,81 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </tbody>
       </table>
-      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Zutaten ohne Rezeptur tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang D).</p>
+      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Zutaten ohne Rezeptur tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Abschnitt 3).</p>
       {% if rahmen %}
       <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohaufschlag {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}
+
+      <h2>Kalkulation je Produkt</h2>
+      {% for g in calculation %}
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">{% if g.sparte %}{{ g.sparte | sparte }}{% else %}Produkt{% endif %}</th>
+            <th class="num">Portionen</th>
+            <th class="num">Einsatz je Portion</th>
+            <th class="num">Nettopreis</th>
+            <th class="num">Aufschlagsatz</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in g.rows %}
+          <tr>
+            <td>{{ p.name }}{% if p.pinned %}<br><span class="note">Portionen vorgegeben.</span>{% endif %}</td>
+            <td class="num">{{ p.portions | group }}</td>
+            <td class="num">{{ p.costPerPortion | cents }}</td>
+            <td class="num">{{ p.unitNet | cents }}</td>
+            <td class="num">{% if p.costOfGoods %}{{ p.markup | bp }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+          <tr class="total">
+            <td>Summe</td>
+            <td class="num">{{ g.portions | group }}</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ g.markup | bp }}</td>
+          </tr>
+        </tbody>
+      </table>
+      {% endfor %}
+      <p class="note">Einsatz je Portion aus Rezeptur (Anhang B) und Wareneinsatz der Zutaten (Anhang C), Nettopreis aus Bruttopreis und USt (Anhang B).</p>
+    </section>
+
+    <section>
+      <h1>3 Umsatz über den Rohgewinnaufschlagsatz</h1>
+      <p>Für Wareneinsatz ohne Portion und Preis wird der Umsatz als Einsatz zuzüglich des Aufschlagsatzes geschätzt. Es gilt der Satz der Sparte, sonst der Gesamtsatz.</p>
+      <table>
+        <thead>
+          <tr>
+            <th class="wide">Herkunft</th>
+            <th class="num">Einsatz</th>
+            <th class="num">Umsatz netto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Produkte ohne Preis</td>
+            <td class="num">{{ estimated.products.cost | cents }}</td>
+            <td class="num">{{ estimated.products.revenueNet | cents }}</td>
+          </tr>
+          <tr>
+            <td>Nicht zugeteilte Ware</td>
+            <td class="num">{{ estimated.leftover.cost | cents }}</td>
+            <td class="num">{{ estimated.leftover.revenueNet | cents }}</td>
+          </tr>
+          <tr>
+            <td>Eingangspositionen ohne Rezeptur</td>
+            <td class="num">{{ estimated.lines.cost | cents }}</td>
+            <td class="num">{{ estimated.lines.revenueNet | cents }}</td>
+          </tr>
+          <tr class="total">
+            <td>Summe</td>
+            <td class="num">{{ report.totals.estimatedCost | cents }}</td>
+            <td class="num">{{ report.totals.estimatedRevenueNet | cents }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">Die einzelnen Positionen mit ihrem Satz stehen in Anhang D.</p>
     </section>
 
     <section>
@@ -207,19 +278,16 @@ ol.warnings li { margin-bottom: 0.3em; }
     </section>
 
     <section>
-      <h1>Anhang B: Rezepturen und Produkte</h1>
+      <h1>Anhang B: Rezepturen</h1>
       <table>
         <thead>
           <tr>
             <th>Produkt</th>
             <th class="wide">Rezeptur</th>
             <th>Sparte</th>
-            <th class="num">Portionen</th>
             <th class="num">Einsatz je Portion</th>
             <th class="num">Bruttopreis</th>
             <th class="num">USt</th>
-            <th class="num">Umsatz netto</th>
-            <th class="num">Aufschlagsatz</th>
             <th>Bemerkung</th>
           </tr>
         </thead>
@@ -231,27 +299,12 @@ ol.warnings li { margin-bottom: 0.3em; }
               <div class="note">Rezeptur laut Prüfung, abweichend vom Katalog (Änderungsnummer {{ p.recipeBasis }}{% if p.recipeStale %}, seither geändert{% endif %})</div>
               <div class="note">Katalog: {% for l in p.catalogRecipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</div>{% endif %}</td>
             <td>{{ p.sparte | sparte }}</td>
-            <td class="num">{{ p.portions | group }}</td>
             <td class="num">{{ p.costPerPortion | cents }}</td>
             <td class="num">{% if not p.priceMissing %}{{ p.grossPrice | cents }}{% endif %}</td>
             <td class="num">{{ p.vat | bp }}</td>
-            <td class="num">{{ p.revenueNet | cents }}</td>
-            <td class="num">{% if p.costOfGoods %}{% if not p.priceMissing %}{{ p.markup | bp }}{% endif %}{% endif %}</td>
-            <td>{% if p.priceMissing %}Preis fehlt, Umsatz geschätzt{% else %}{% if p.pinned %}vorgegeben{% endif %}{% endif %}</td>
+            <td>{% if p.priceMissing %}Preis fehlt, Umsatz geschätzt{% else %}{% if not p.portions %}keine Portionen{% endif %}{% endif %}</td>
           </tr>
           {% endfor %}
-          <tr class="total">
-            <td>Summe</td>
-            <td></td>
-            <td></td>
-            <td class="num">{{ report.totals.portions | group }}</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
-            <td></td>
-            <td></td>
-          </tr>
         </tbody>
       </table>
     </section>
@@ -364,7 +417,6 @@ ol.warnings li { margin-bottom: 0.3em; }
 
     <section>
       <h1>Anhang D: Umsatz über den Rohgewinnaufschlagsatz</h1>
-      <p>Für Wareneinsatz ohne Portion und Preis wird der Umsatz als Einsatz zuzüglich des Aufschlagsatzes geschätzt. Es gilt der Satz der Sparte, sonst der Gesamtsatz.</p>
 
       <h2>Produkte ohne Preis</h2>
       {% if estimated.products.rows %}

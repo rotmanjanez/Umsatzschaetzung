@@ -16,6 +16,7 @@ namespace Umsatzschaetzung.Reports;
 [JsonSerializable(typeof(List<Included>))]
 [JsonSerializable(typeof(List<VatRow>))]
 [JsonSerializable(typeof(List<EstimateRow>))]
+[JsonSerializable(typeof(List<ProductRow>))]
 internal sealed partial class ReportJson : JsonSerializerContext;
 
 public static class Html
@@ -45,6 +46,23 @@ public static class Html
         return output;
     }
 
+    // Die Gastronomie kalkuliert je Sparte, jedes andere Gewerbe in einer Tabelle.
+    static JsonArray Calculation(Model.Report r)
+    {
+        var j = ReportJson.Default;
+        var priced = r.Products.FindAll(p => p.Portions > 0 && !p.PriceMissing);
+        JsonObject Group(Sparte? sparte, List<ProductRow> rows, long portions, long markup) => new()
+        {
+            ["sparte"] = sparte is { } s ? JsonSerializer.SerializeToNode(s, j.Sparte) : null,
+            ["rows"] = JsonSerializer.SerializeToNode(rows, j.ListProductRow),
+            ["portions"] = portions,
+            ["markup"] = markup,
+        };
+        if (r.Markups.Count == 0)
+            return [Group(null, priced, r.Totals.PricedPortions, r.Totals.Markup)];
+        return [.. r.Markups.Select(m => Group(m.Sparte, priced.FindAll(p => p.Sparte == m.Sparte), m.Portions, m.Markup))];
+    }
+
     public static string Render(Case c, RuleSet rs, Model.Report r, Rahmen? rahmen)
     {
         rs = Recipes.Effective(c, rs);
@@ -62,6 +80,7 @@ public static class Html
             ["includedNet"] = s.CostOfGoods + s.StockChange,
             ["excluded"] = s.UnmappedCost,
             ["estimated"] = Estimated(r.Estimated),
+            ["calculation"] = Calculation(r),
             ["rahmen"] = rahmen is null ? null : JsonSerializer.SerializeToNode(rahmen, j.Rahmen),
             ["lage"] = rahmen is null ? null : JsonSerializer.SerializeToNode(rahmen.Lage(s.Markup), j.Rahmenlage),
             ["anyBinding"] = r.Ingredients.Exists(i => i.Binding),

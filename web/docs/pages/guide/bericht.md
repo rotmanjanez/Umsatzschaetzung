@@ -36,13 +36,15 @@ wird:
 1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von
    196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
 2. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
-   Sparte.
-3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, der
-   Warenfluss von Einkauf über Verbrauch bis zur Ausbeute je Zutat und der
-   über den Aufschlagsatz geschätzte Umsatz, damit jede
-   Zahl des Berichts nachvollziehbar bleibt. Für die Prüfung angepasste
-   Rezepte sind als **abweichend vom Katalog** gekennzeichnet, das
-   Katalogrezept steht grau darunter.
+   Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
+3. **Umsatz über den Rohgewinnaufschlagsatz**: was ohne Portion und Preis über
+   den Aufschlagsatz geschätzt ist.
+4. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, der
+   Warenfluss von Einkauf über Verbrauch bis zur Ausbeute je Zutat und die
+   einzelnen geschätzten Positionen, damit jede Zahl des Berichts
+   nachvollziehbar bleibt. Für die Prüfung angepasste Rezepte sind
+   als **abweichend vom Katalog** gekennzeichnet, das Katalogrezept steht grau
+   darunter.
 
 
 ## Als PDF speichern
