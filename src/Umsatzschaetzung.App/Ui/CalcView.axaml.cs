@@ -28,7 +28,7 @@ public sealed record ProductDetail(string Name, List<KV> Facts, string Note)
 
 public sealed class CalcModel : Observable
 {
-    bool busy, hasResult, noInvoices;
+    bool busy, hasResult, noInvoices, slow;
     ProductDetail? detail;
     RecipeEditor? editor;
 
@@ -46,7 +46,8 @@ public sealed class CalcModel : Observable
     public RecipeEditor? Editor { get => editor; set => Set(ref editor, value); }
     public bool HasResult { get => hasResult; set { if (Set(ref hasResult, value)) Raise(nameof(Calculating)); } }
     public bool NoInvoices { get => noInvoices; set { if (Set(ref noInvoices, value)) Raise(nameof(Calculating)); } }
-    public bool Calculating => !hasResult && !noInvoices;
+    public bool Slow { get => slow; set { if (Set(ref slow, value)) Raise(nameof(Calculating)); } }
+    public bool Calculating => slow && !hasResult && !noInvoices;
 
     public CalcModel()
     {
@@ -77,6 +78,7 @@ public partial class CalcView : Screen
 
     protected override async void OnEnter()
     {
+        if (!model.Slow) DispatcherTimer.RunOnce(() => model.Slow = true, TimeSpan.FromMilliseconds(250));
         if (Session.Case is null) return;
         await Session.LoadRules(Ct);
         if (Session.Case is not { } kase || Session.Rules is not { } rs || !IsActive) return;
