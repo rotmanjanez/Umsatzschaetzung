@@ -79,6 +79,7 @@ public partial class MappingView : Screen
     }
 
     // The open position stays open, and its detail untouched unless the refresh changed its mapping.
+    // One that changed state moved away in the list, so the next open position takes its place.
     async Task Refresh()
     {
         var at = ++refreshes;
@@ -92,7 +93,9 @@ public partial class MappingView : Screen
         model.Groups.Clear();
         foreach (var g in groups) model.Groups.Add(g);
         var again = kept is null ? null : model.Groups.FirstOrDefault(g => g.Key == kept.Key);
-        if (again is not null && again.State == kept!.State && again.MappingId == kept.MappingId) Groups.SelectedItem = again;
+        if (again is not null && again.State != kept!.State)
+            again = ((DataGridCollectionView)Groups.ItemsSource).Cast<LineGroup>().FirstOrDefault(g => g.IsPending);
+        else if (again is not null && again.MappingId == kept!.MappingId) Groups.SelectedItem = again;
         refreshing = false;
         model.NoInvoices = Session.Case?.Invoices.Count == 0;
         model.Counted();
