@@ -8,7 +8,7 @@ using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed class CandidateRow(MappingCandidate candidate, string label, bool current) : Observable
+public sealed class CandidateRow(MappingCandidate candidate, string label, bool current, string usedIn = "") : Observable
 {
     bool selected;
 
@@ -18,6 +18,8 @@ public sealed class CandidateRow(MappingCandidate candidate, string label, bool 
     public bool IsSuggested => Candidate.Kind == OriginKind.Encoder;
     public string ExactText => current ? "Aktuelle Zuordnung" : "Exakter Treffer";
     public string Confidence => IsSuggested ? "Sicherheit " + Candidate.Confidence + " %" : "";
+    public bool InRecipe => UsedIn != "";
+    public string UsedIn { get; } = usedIn;
     public bool Selected { get => selected; set => Set(ref selected, value); }
 }
 
@@ -373,10 +375,19 @@ public partial class MappingDetail : UserControl
         return (null, null);
     }
 
-    List<CandidateRow> Rows(List<MappingCandidate> candidates, string? current) =>
-        Session.Rules is { } rs
-            ? candidates.Select(c => new CandidateRow(c, Names.Candidate(rs, c.Mapping), c.Mapping.Id != "" && c.Mapping.Id == current)).ToList()
-            : [];
+    List<CandidateRow> Rows(List<MappingCandidate> candidates, string? current)
+    {
+        if (Session.Rules is not { } rs || Session.Case is not { } k) return [];
+        var used = UsedIn(k, Recipes.Effective(k, rs));
+        return candidates.Select(c => new CandidateRow(c, Names.Candidate(rs, c.Mapping), c.Mapping.Id != "" && c.Mapping.Id == current,
+            used.GetValueOrDefault(c.Mapping.IngredientId, ""))).ToList();
+    }
+
+    static Dictionary<string, string> UsedIn(Case k, RuleSet rs) =>
+        k.Products.Select(cp => rs.Products.GetValueOrDefault(cp.ProductId)).OfType<Product>()
+            .SelectMany(p => p.Recipe.Select(l => (l.IngredientId, p.Name)).Distinct())
+            .GroupBy(x => x.IngredientId)
+            .ToDictionary(g => g.Key, g => string.Join(", ", g.Select(x => x.Name).Order(StringComparer.Ordinal)));
 
     void OpenInvoice(object? sender, RoutedEventArgs e)
     {

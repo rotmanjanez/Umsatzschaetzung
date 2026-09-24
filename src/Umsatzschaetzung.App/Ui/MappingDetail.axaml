@@ -99,6 +99,9 @@
                                                         <TextBlock Text="Vorschlag" Theme="{StaticResource BadgeText}"/>
                                                     </Border>
                                                     <TextBlock Text="{Binding Confidence}" Theme="{StaticResource Muted}" FontSize="12" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                                    <Border Theme="{StaticResource Badge}" Margin="8,0,0,0" IsVisible="{Binding InRecipe}" ToolTip.Tip="{Binding UsedIn}">
+                                                        <TextBlock Text="In Rezeptur" Theme="{StaticResource BadgeText}"/>
+                                                    </Border>
                                                 </StackPanel>
                                             </StackPanel>
                                         </RadioButton>
