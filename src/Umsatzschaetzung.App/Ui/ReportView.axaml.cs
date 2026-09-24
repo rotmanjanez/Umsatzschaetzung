@@ -148,7 +148,12 @@ public partial class ReportView : Screen
         var again = kept is null ? null : model.Rows.FirstOrDefault(r => r.Group.Key == kept.Group.Key);
         Excluded.SelectedItem = again;
         refreshing = false;
-        Split.RowDefinitions[1].Height = model.HasExcluded ? new GridLength(2, GridUnitType.Star) : GridLength.Auto;
+        var split = Split.RowDefinitions;
+        if (split[1].Height.IsStar != model.HasExcluded)
+        {
+            split[1].Height = model.HasExcluded ? new GridLength(2, GridUnitType.Star) : GridLength.Auto;
+            split[3].Height = new GridLength(3, GridUnitType.Star);
+        }
         model.Explain(again);
         if (again is null) Detail.Show(null);
         else if (again.Group.MappingId != kept!.Group.MappingId || again.Why != kept.Why) Detail.Show(again.Group);
