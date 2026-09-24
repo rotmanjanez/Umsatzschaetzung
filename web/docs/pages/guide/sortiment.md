@@ -8,10 +8,7 @@ das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und
 Zutaten rechnet die Kalkulation den Umsatz.
 
 Die Produkte selbst, samt Rezept, bringt das Programm mit. Aus diesem Katalog
-wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb. Weicht
-ein Rezept in einem Betrieb ab, lässt es sich auf
-[4. Kalkulation](kalkulation.md#rezeptur-anpassen) für die Prüfung anpassen;
-im Sortiment steht das Produkt dann mit **Rezept angepasst**.
+wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb.
 
 ## Das erste Produkt von Hand
 
@@ -42,10 +39,6 @@ Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste,
 alphabetisch sortiert:
 
 ![Das Sortiment nach dem CSV-Import](img/sortiment-liste.png)
-
-Bei einer eigenen Prüfung geht es genauso: Produkt für Produkt über das
-Suchfeld, oder die Speisekarte einmal in Excel abtippen und als CSV
-importieren.
 
 !!! geschafft "Geschafft, wenn …"
     - 28 Produkte in der Liste stehen

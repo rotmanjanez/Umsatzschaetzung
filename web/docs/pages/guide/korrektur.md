@@ -3,36 +3,18 @@
 <p class="us-steps"><a href="../start/">Prüfung</a><span class="here">1. Rechnungen</span><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
-Programm rechnet deshalb jeden Scan gegen sich selbst: Menge mal Einzelpreis
-gegen den Zeilenbetrag, die Zeilen gegen den Nettobetrag, Netto und Steuer gegen
-den Bruttobetrag. Was nicht aufgeht oder unvollständig ist, wird nicht
-übernommen, sondern steht mit **Durchsicht offen** ganz oben in der Liste.
-
-Im Beispiel sind das drei Rechnungen:
+Programm rechnet deshalb jede Rechnung nach: Menge mal Einzelpreis muss den
+Zeilenbetrag ergeben, die Zeilen den Nettobetrag, Netto und Steuer den
+Bruttobetrag. Was nicht aufgeht oder unvollständig ist, steht mit
+**Durchsicht offen** ganz oben in der Liste. Im Beispiel sind das drei
+Rechnungen, jede mit einer anderen Art Fehler:
 
 ![Drei Rechnungen mit „Durchsicht offen“](img/rechnungen-liste.png)
 
-Jede zeigt eine andere Art Fehler. Auf dieser Seite werden alle drei korrigiert,
-von der einfachsten zur schwierigsten. Das ist die längste Seite der Anleitung
-und zugleich die, die sich bei eigenen Prüfungen am meisten auszahlt.
-
-## Was schiefgehen kann
-
-| Fehler | So zeigt es das Programm | Korrektur |
-|---|---|---|
-| Ein Wert fehlt | Das Feld ist markiert | Wert vom Beleg abschreiben |
-| Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, **Bestätigen** ist gesperrt | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
-| Eine Zeile ist zerrissen (Stempel, Knick, Umbruch) | Eine Zeile ohne Namen oder mit 0,00 €, dazu fehlende Werte | Die Werte in einer Zeile zusammenführen, die andere löschen |
-| Der Lieferant fehlt | Leeres Feld | Eintragen |
-| Der Steuersatz ist falsch gelesen | Brutto **Laut Beleg** und **Aus Positionen** weichen voneinander ab | Steuersatz je Zeile eintragen |
-
-Markiert heißt: Das Feld ist orange hinterlegt, und auf dem Beleg ist dieselbe
-Stelle orange umrandet. Wer mit der Maus auf das Feld zeigt, sieht den Grund,
-etwa „Einheit fehlt“.
-
-Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das
-Speichern. Alles andere lässt sich bestätigen, gehört aber trotzdem korrigiert:
-Die Kalkulation rechnet mit genau diesen Zeilen.
+Eine Rechnung mit einem Doppelklick in der Liste öffnen.
+Was das Programm nicht zusammenbringt, ist markiert: Das Feld ist orange
+hinterlegt, und auf dem Beleg ist dieselbe Stelle orange umrandet. Wer mit der
+Maus auf das Feld zeigt, sieht den Grund, etwa „Einheit fehlt“.
 
 ## Eine fehlende Einheit: WS-2025-346
 
@@ -47,14 +29,13 @@ die Menge der Zeile zeigt auf dem Beleg blau umrandet, woher der Wert stammt:
 
 ![Auf dem Beleg steht „17 Fl“](img/korrektur-ws-beleg.png)
 
-Dort steht `17 Fl`. Das „Fl“ klebt so dicht an der Zahl, dass es nicht als
-Einheit erkannt wurde. Mit einem Doppelklick auf die Einheit (oder F2) wird die
+Dort steht `17 Fl`. Mit einem Doppelklick auf die Einheit (oder F2) wird die
 Zelle bearbeitbar; `Flasche` eintragen.
 
 ![Alle vier Weine in Flaschen](img/korrektur-ws-fertig.png)
 
-Die Markierung verschwindet. **Bestätigen** speichert die Rechnung, das Fenster
-kann geschlossen werden.
+Die Markierung verschwindet. Mit **Bestätigen** übernehmen und das Fenster
+schließen.
 
 ## Eine verlesene Ziffer: 2025/0561
 
@@ -69,16 +50,10 @@ zeigt ihn auf dem Beleg:
 
 ![Auf dem Beleg steht 8,75, nicht 8,76](img/korrektur-0561-beleg.png)
 
-Die Schreibmaschinenschrift macht aus der 5 fast eine 6. Wo auch der Beleg
-selbst keine Klarheit bringt, hilft das Zurückrechnen: 48,13 € ÷ 5,5 kg =
-8,75 €. Einen Einzelpreis von 8,76 € kann es bei diesem Betrag nicht geben.
+Den falsch gelesenen Einzelpreis `8,76` auf `8,75` korrigieren. Die Zeile geht
+auf, **Bestätigen** ist wieder frei.
 
-Den Einzelpreis auf `8,75` setzen. Die Zeile geht auf, **Bestätigen** ist wieder
-frei:
-
-![Die korrigierte Rechnung 2025/0561](img/korrektur-0561-fertig.png)
-
-Bestätigen und das Fenster schließen.
+Mit **Bestätigen** übernehmen und das Fenster schließen.
 
 ## Eine zerrissene Zeile: TK25-1583
 
@@ -97,32 +72,39 @@ Positionen ist daraus zweierlei geworden:
   21,00 €,
 - eine Zeile **Thermobox Leihgebühr je Woche** mit Einheit, aber mit 0,00 €.
 
-Markiert ist nur die fehlende Einheit, denn beide Hälften gehen für sich auf.
-Eine Zeile ohne Namen oder mit 0,00 € ist fast immer die Hälfte einer
-zerrissenen Zeile.
+Bei den beiden Hälften ist nur die fehlende Einheit markiert, denn jede geht für
+sich auf. Eine Zeile ohne Namen oder mit 0,00 € ist fast immer die Hälfte einer
+zerrissenen Zeile. Auf dem Beleg ist Position 8 eine einzige Zeile, der Stempel
+läuft quer darüber:
 
 ![Der Beleg: Position 8 in einer Zeile, der Stempel quer darüber](img/korrektur-tk-beleg.png)
 
 Zum Korrigieren die Werte in der Zeile mit dem Betrag vervollständigen:
 
 1. **Einheit**: `Stück`
-2. **Position**: `Thermobox Leihgebühr je Woche`
+2. **Position**: `Thermobox Leihgebühr je Woche`, am einfachsten aus der Zeile
+   mit 0,00 € kopiert
 3. Die Zeile mit 0,00 € mit dem Papierkorb rechts löschen.
+
+!!! windows "Unter Windows"
+    Die markierte Zelle kopiert ++ctrl+c++, ++ctrl+v++ fügt sie in eine andere
+    markierte Zelle ein.
+
+!!! macos "Auf dem Mac"
+    Die markierte Zelle kopiert ++cmd+c++, ++cmd+v++ fügt sie in eine andere
+    markierte Zelle ein.
 
 Dann oben den **Lieferanten** eintragen: `Frostwerk Tiefkühl-Service GmbH`.
 
-![Alle Zeilen vollständig, aber Brutto geht nicht auf](img/korrektur-tk-zusammengefuehrt.png)
+![Der Lieferant ist eingetragen](img/korrektur-tk-zusammengefuehrt.png)
 
 ### Die Steuersätze
 
-Jetzt ist nichts mehr markiert, doch unten in den Summen stimmt etwas nicht:
-Netto geht auf, Brutto aber nicht. Laut Beleg sind es 912,12 €, aus den
-Positionen nur 842,80 €. Die Differenz ist genau die Umsatzsteuer: Alle Zeilen
-stehen auf 0 %, denn der Beleg druckt den Satz nicht in eine eigene Spalte,
-sondern klein unter jeden Artikel („MwSt. 7 %“).
-
-!!! tip "Faustregel"
-    Stimmt Netto, aber nicht Brutto, dann liegt es am Steuersatz.
+Markiert sind jetzt nur noch die Steuersätze und die Summen: Netto geht auf,
+Brutto aber nicht. Laut Beleg sind es 912,12 €, aus den Positionen nur
+842,80 €. Die Differenz ist genau die Umsatzsteuer: Alle Zeilen stehen auf
+0 %, denn der Beleg druckt den Satz nicht in eine eigene Spalte, sondern klein
+unter jeden Artikel („MwSt. 7 %“).
 
 In der Spalte **USt** für die Lebensmittel `7` eintragen, für Trockeneis und
 Thermobox `19`. Danach ergeben auch die Positionen 912,12 €.
@@ -131,8 +113,7 @@ Thermobox `19`. Danach ergeben auch die Positionen 912,12 €.
 
 ## Bestätigen
 
-**Bestätigen** speichert die Rechnung. Der Status wechselt auf
-**Durchgesehen**:
+Mit **Bestätigen** übernehmen. Der Status wechselt auf **Durchgesehen**:
 
 ![Die Rechnung ist durchgesehen](img/korrektur-bestaetigt.png)
 
@@ -141,11 +122,24 @@ In der Rechnungsliste stehen die drei jetzt mit **Manuell**, und die Bilanz
 
 ![Keine Rechnung mehr offen](img/korrektur-liste-fertig.png)
 
-Eine bestätigte Rechnung lässt sich jederzeit wieder öffnen und ändern; der
-Knopf heißt dann **Änderungen speichern**.
+## Für eigene Rechnungen
+
+Die drei Fälle decken das meiste ab, was bei Scans schiefgeht:
+
+| Fehler | So zeigt es das Programm | Korrektur |
+|---|---|---|
+| Ein Wert fehlt | Das Feld ist markiert | Wert vom Beleg abschreiben |
+| Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, **Bestätigen** ist gesperrt | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
+| Eine Zeile ist zerrissen (Stempel, Knick, Umbruch) | Eine Zeile ohne Namen oder mit 0,00 €, dazu fehlende Werte | Die Werte in einer Zeile zusammenführen, die andere löschen |
+| Der Lieferant fehlt | Leeres Feld | Eintragen |
+| Der Steuersatz ist falsch gelesen | Brutto ist markiert, **Laut Beleg** und **Aus Positionen** weichen voneinander ab | Steuersatz je Zeile eintragen |
+
+Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das
+Bestätigen. Alles andere lässt sich bestätigen, gehört aber trotzdem korrigiert:
+Die Kalkulation rechnet mit genau diesen Zeilen.
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `0 offen · 103 automatisch · 3 manuell` steht
+    - über der Liste `0 offen, 103 automatisch, 3 manuell` steht
     - keine Rechnung mehr **Durchsicht offen** trägt
 
 !!! nachlesen "Zum Nachlesen"

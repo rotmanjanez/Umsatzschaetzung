@@ -38,7 +38,7 @@
 { "do": "wait", "rounds": 2 }
 { "do": "shot", "name": "korrektur-ws", "window": "dialog" }
 { "do": "edit", "window": "dialog", "at": { "text": "8,90 €" }, "column": "Menge" }
-{ "do": "shot", "name": "korrektur-ws-beleg", "window": "dialog", "at": { "name": "ScanPane" } }
+{ "do": "shot", "name": "korrektur-ws-beleg", "window": "dialog", "at": { "name": "ScanPane" }, "trim": { "top": 313, "bottom": 313 } }
 { "do": "edit", "window": "dialog", "at": { "text": "8,90 €" }, "column": "Einheit", "text": "Flasche" }
 { "do": "deselect", "window": "dialog", "at": { "name": "Lines" } }
 { "do": "wait", "rounds": 2 }
@@ -47,13 +47,12 @@
 
 { "do": "open", "number": "2025/0561" }
 { "do": "wait", "rounds": 2 }
-{ "do": "shot", "name": "korrektur-0561", "window": "dialog", "at": { "name": "FormPane" } }
+{ "do": "shot", "name": "korrektur-0561", "window": "dialog", "at": { "name": "FormPane" }, "clip": "DataGridRow", "trim": { "bottom": -16 } }
 { "do": "edit", "window": "dialog", "at": { "text": "8,76 €" }, "column": "Einzelpreis" }
-{ "do": "shot", "name": "korrektur-0561-beleg", "window": "dialog", "at": { "name": "ScanPane" } }
+{ "do": "shot", "name": "korrektur-0561-beleg", "window": "dialog", "at": { "name": "ScanPane" }, "trim": { "top": 313, "bottom": 313 } }
 { "do": "edit", "window": "dialog", "at": { "text": "8,76 €" }, "column": "Einzelpreis", "text": "8,75" }
 { "do": "deselect", "window": "dialog", "at": { "name": "Lines" } }
 { "do": "wait", "rounds": 2 }
-{ "do": "shot", "name": "korrektur-0561-fertig", "window": "dialog", "at": { "name": "FormPane" } }
 { "do": "click", "window": "dialog", "at": { "text": "Bestätigen" } }
 
 { "do": "open", "number": "TK25-1583" }
@@ -61,7 +60,7 @@
 { "do": "shot", "name": "korrektur-tk", "window": "dialog" }
 { "do": "shot", "name": "korrektur-tk-zeilen", "window": "dialog", "at": { "name": "Lines" }, "trim": { "top": 14 } }
 { "do": "edit", "window": "dialog", "at": { "text": "21,00 €" }, "column": "Einheit" }
-{ "do": "shot", "name": "korrektur-tk-beleg", "window": "dialog", "at": { "name": "ScanPane" } }
+{ "do": "shot", "name": "korrektur-tk-beleg", "window": "dialog", "at": { "name": "ScanPane" }, "trim": { "top": 470, "bottom": 235 } }
 { "do": "edit", "window": "dialog", "at": { "text": "21,00 €" }, "column": "Einheit", "text": "Stück" }
 { "do": "edit", "window": "dialog", "at": { "text": "21,00 €" }, "column": "Position", "text": "Thermobox Leihgebühr je Woche" }
 { "do": "click", "window": "dialog", "at": { "text": "0,00 €", "up": "DataGridRow" } }
@@ -69,7 +68,7 @@
 { "do": "focus", "window": "dialog" }
 { "do": "deselect", "window": "dialog", "at": { "name": "Lines" } }
 { "do": "wait", "rounds": 2 }
-{ "do": "shot", "name": "korrektur-tk-zusammengefuehrt", "window": "dialog", "at": { "name": "FormPane" } }
+{ "do": "shot", "name": "korrektur-tk-zusammengefuehrt", "window": "dialog", "at": { "name": "FormPane" }, "trim": { "bottom": 690 } }
 
 { "do": "edit", "window": "dialog", "at": { "text": "18,90 €" }, "column": "USt", "text": "7" }
 { "do": "edit", "window": "dialog", "at": { "text": "23,40 €" }, "column": "USt", "text": "7" }
@@ -81,7 +80,7 @@
 { "do": "edit", "window": "dialog", "at": { "text": "3,50 €" }, "column": "USt", "text": "19" }
 { "do": "deselect", "window": "dialog", "at": { "name": "Lines" } }
 { "do": "wait", "rounds": 2 }
-{ "do": "shot", "name": "korrektur-tk-fertig", "window": "dialog", "at": { "name": "FormPane" } }
+{ "do": "shot", "name": "korrektur-tk-fertig", "window": "dialog", "at": { "name": "FormPane" }, "clip": "DataGridRow", "trim": { "bottom": -16 } }
 { "do": "click", "window": "dialog", "at": { "text": "Bestätigen" } }
 { "do": "wait", "rounds": 2 }
 { "do": "shot", "name": "korrektur-bestaetigt", "window": "dialog", "at": { "text": "Rechnung", "up": "DockPanel" } }

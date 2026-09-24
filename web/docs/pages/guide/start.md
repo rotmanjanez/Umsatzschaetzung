@@ -26,8 +26,7 @@ Einzutragen sind:
 | PaB-Nr. | `PaB 2025/0417` |
 
 Der Zeitraum entscheidet, welche Rechnungen in die Kalkulation eingehen. Die
-Gewerbekennzahl bleibt leer; sie wird erst für den Vergleich mit der
-Richtsatzsammlung gebraucht.
+Gewerbekennzahl bleibt leer.
 
 **Anlegen** öffnet die Prüfung.
 
@@ -43,16 +42,15 @@ Einen Knopf zum Speichern gibt es nicht. Jede Eingabe wird sofort gespeichert.
 Das Programm kann jederzeit geschlossen werden; die Prüfung steht beim nächsten
 Start wieder in der Liste.
 
-Oben auf jedem Reiter sagt eine Karte, was als Nächstes ansteht. Wer nicht
-weiß, wie es weitergeht, folgt ihr.
+## Erklärte Umsätze
+
+Nach dem Anlegen ist der Reiter **Prüfung** geöffnet:
 
 ![Der Reiter „Prüfung“ direkt nach dem Anlegen](img/pruefung-leer.png)
 
-## Erklärte Umsätze
-
-Der Reiter **Prüfung** sammelt alles, was nicht aus den Rechnungen kommt. Für
-den Bericht wird davon eines gebraucht: der Umsatz, den der Betrieb erklärt
-hat. Unter **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
+Er sammelt alles, was nicht aus den Rechnungen kommt. Für den Bericht wird
+davon eines gebraucht: der Umsatz, den der Betrieb erklärt hat. Unter
+**Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
 
 | Feld | Wert |
 |---|---|
@@ -62,12 +60,8 @@ hat. Unter **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersat
 
 ![Die erklärten Umsätze des Gasthauses](img/erklaerte-umsaetze.png)
 
-Das Gasthaus hat nur zu 19 % erklärt, weil 2025 Speisen und Getränke beide dem
-Regelsteuersatz unterliegen.
-
-Die übrigen Abschnitte bleiben für das Beispiel leer: Unter **Bestand** stünden
-Anfangs- und Endbestand je Zutat, wenn eine Inventur vorläge. Ohne Angaben gilt
-alles Eingekaufte als verbraucht.
+Das Gasthaus hat alles zu 19 % erklärt. Die übrigen Abschnitte des Reiters
+bleiben für das Beispiel leer.
 
 !!! geschafft "Geschafft, wenn …"
     - oben **Gasthaus Zur Linde, Bp 2025** steht und der Reiter **Prüfung** offen ist

@@ -17,13 +17,8 @@ wird:
    Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
 3. **Umsatz über den Rohgewinnaufschlagsatz**: was ohne Portion und Preis über
    den Aufschlagsatz geschätzt ist.
-4. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, der
-   Warenfluss von Einkauf über Verbrauch bis zur Ausbeute je Zutat und die
-   einzelnen geschätzten Positionen, damit jede Zahl des Berichts
-   nachvollziehbar bleibt. Für die Prüfung angepasste Rezepte sind
-   als **abweichend vom Katalog** gekennzeichnet, das Katalogrezept steht grau
-   darunter.
-
+4. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt und der
+   Warenfluss je Zutat, damit jede Zahl des Berichts nachvollziehbar bleibt.
 
 ## Als PDF speichern
 

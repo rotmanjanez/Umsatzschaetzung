@@ -20,14 +20,9 @@ Status:
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
 Die offenen Positionen stehen oben. Über der Liste steht die Bilanz, im
-Beispiel `5 offen · 149 automatisch · 0 manuell`.
+Beispiel `5 offen, 149 automatisch, 0 manuell`.
 
 ![Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen](img/zuordnung-liste.png)
-
-Dieselbe Ware kann mehrmals in der Liste stehen, wenn der Scan den Namen oder
-den Lieferanten einmal anders gelesen hat, etwa „Frankenbru“ statt
-„Frankenbräu“. Jede Schreibweise ist für das Programm ein eigener Artikel und
-wird einmal zugeordnet.
 
 ## Eine Position ansehen
 
@@ -47,7 +42,7 @@ was zu diesem Artikel bekannt ist:
   hier 750 ml je Flasche. Das Programm hat ihn aus dem Artikeltext gelesen und
   rechnet darunter vor: 158 Flaschen × 750 ml = 118,5 l.
 - **Belege**: die Rechnungszeilen, aus denen der Artikel stammt, als
-  Ausschnitt des Scans. Ein Klick auf das Symbol rechts öffnet die Rechnung.
+  Ausschnitt des Scans.
 
 Ein Domina ist ein fränkischer Rotwein. Den Vorschlag **Rotwein × 750 ml**
 anklicken und **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die
@@ -126,7 +121,7 @@ ordnet es die Fässer gleich richtig zu.
 ![Alles zugeordnet](img/zuordnung-fertig.png)
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `Alles zugeordnet · 144 automatisch · 10 manuell` steht
+    - über der Liste `Alles zugeordnet, 144 automatisch, 10 manuell` steht
     - nichts mehr **Offen** ist
 
 !!! nachlesen "Zum Nachlesen"

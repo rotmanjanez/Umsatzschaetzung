@@ -30,28 +30,22 @@ Ein paar Wörter kommen dabei immer wieder vor:
 |---|---|
 | **Zutat** | Eine Ware, wie sie eingekauft wird: Fassbier, Schweinefleisch, Rotwein. |
 | **Produkt** | Etwas, das verkauft wird: Bier 0,5 l vom Fass, Schnitzel mit Pommes. |
-| **Rezept** | Wie viel von welcher Zutat in ein Produkt geht. In ein Bier 0,5 l gehen 500 ml Fassbier. Die Rezepte bringt das Programm mit; für eine einzelne Prüfung lässt sich ein Rezept anpassen, ohne den Katalog zu ändern. |
+| **Rezept** | Wie viel von welcher Zutat in ein Produkt geht: In ein Bier 0,5 l gehen 500 ml Fassbier. |
 | **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen. |
 | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat. |
-| **Regeln** | Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Sie gehören nicht zu einer Prüfung, sondern zum Programm, und wachsen mit jeder Prüfung. Weicht ein Betrieb ab, trägt die Prüfung ein eigenes Rezept, die Regeln bleiben unverändert. |
+| **Regeln** | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
 
 ## Das Beispiel
 
 Geprüft wird das **Gasthaus Zur Linde** für das Jahr 2025. Es hat einen Umsatz
-von 196.418 € netto erklärt. Vorliegen 106 Eingangsrechnungen von elf
-Lieferanten, alle als Scan, dazu die Speisekarte als Tabelle. Beide Dateien
-werden an der Stelle, an der sie gebraucht werden, noch einmal verlinkt:
-
-- [beispiel-rechnungen-2025.zip](https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip),
-  die Rechnungen, rund 430 MB
-- [sortiment-gasthaus.csv](sortiment-gasthaus.csv){ download="sortiment-gasthaus.csv" },
-  das Sortiment mit Preisen
+von 196.418 € netto erklärt. Vorliegen 106 Eingangsrechnungen, alle als Scan,
+dazu die Speisekarte als Tabelle. Beide Dateien sind an der Stelle verlinkt, an
+der sie gebraucht werden.
 
 ## Zeitbedarf
 
-Rund eine Stunde, davon etwa die Hälfte Wartezeit: Das Programm liest jeden
-der 106 Scans einzeln, und das dauert je nach Rechner 10 bis 30 Minuten. Die
-Anleitung sagt an der Stelle, was sich währenddessen schon erledigen lässt.
+Rund eine Stunde, davon etwa die Hälfte Wartezeit: Das Einlesen der 106 Scans
+dauert je nach Rechner 10 bis 30 Minuten.
 
 !!! tip "Mitmachen"
     Am meisten bringt die Anleitung, wenn jeder Schritt gleich im Programm
@@ -62,8 +56,8 @@ Anleitung sagt an der Stelle, was sich währenddessen schon erledigen lässt.
 
 Vorab muss das Programm auf dem Rechner installiert sein:
 
-[macOS](install-macos.md){ .md-button .md-button--primary }
-[Windows](install-windows.md){ .md-button }
+[Windows](install-windows.md){ .md-button .us-os-windows }
+[macOS](install-macos.md){ .md-button .us-os-macos }
 
 Wer es schon installiert hat, geht direkt weiter.
 

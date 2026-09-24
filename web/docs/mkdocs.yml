@@ -36,6 +36,9 @@ extra:
 extra_css:
   - stylesheets/umsatzschaetzung.css
 
+extra_javascript:
+  - javascripts/umsatzschaetzung.js
+
 markdown_extensions:
   - admonition
   - footnotes
