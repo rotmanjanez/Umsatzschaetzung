@@ -74,8 +74,9 @@ public static class Yields
     {
         var ids = new HashSet<string>();
         foreach (var e in k.Inventory) ids.Add(e.IngredientId);
+        var recipes = Recipes.Effective(k, rs);
         foreach (var p in k.Products)
-            if (rs.Products.TryGetValue(p.ProductId, out var product))
+            if (recipes.Products.TryGetValue(p.ProductId, out var product))
                 foreach (var line in product.Recipe) ids.Add(line.IngredientId);
         foreach (var invoice in k.Invoices)
             foreach (var line in invoice.Lines)

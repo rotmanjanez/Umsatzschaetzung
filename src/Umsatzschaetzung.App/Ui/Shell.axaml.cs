@@ -38,6 +38,7 @@ public partial class Shell : Window
         session.StatusChanged += RefreshError;
         session.RulesRequested += () => ShowRules();
         session.ProductRequested += (name, created) => ShowRules().NewProduct(name, created);
+        session.ProductEditRequested += (id, recipe) => ShowRules().EditProduct(id, recipe);
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
         Activated += (_, _) => session.ActiveWindow = this;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };

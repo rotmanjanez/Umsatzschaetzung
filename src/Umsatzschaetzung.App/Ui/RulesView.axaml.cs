@@ -156,10 +156,11 @@ public sealed class IngredientForm : EntityForm<IngredientItem>
 
 public sealed class ProductForm : EntityForm<ProductItem>
 {
-    string name = "";
+    string name = "", origin = "";
     bool nameInvalid;
 
     public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
+    public string Origin { get => origin; set => Set(ref origin, value); }
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
     public ObservableCollection<RecipeRow> Recipe { get; } = [];
 }
@@ -228,6 +229,7 @@ public partial class RulesView : Screen
     readonly RulesModel model = new();
     bool loading, saving;
     Action<string>? productCreated;
+    (string Id, List<RecipeLine>? Recipe)? wanted;
 
     public override string Topic => Tabs.SelectedIndex switch
     {
@@ -286,6 +288,8 @@ public partial class RulesView : Screen
         if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product);
         else if (model.Products.CurrentId is not null) model.Products.Active = false;
         if (ScopeGrid.SelectedItem is ScopeItem si) ShowScope(si, model.Yields.CurrentId); else model.Yields.Active = false;
+        if (wanted is { } w) EditProduct(w.Id, w.Recipe);
+        wanted = null;
     }
 
     static string Missing(params string?[] fields) =>
@@ -377,14 +381,38 @@ public partial class RulesView : Screen
         f.Existing = f.Active = true;
         f.Title = p.Name;
         f.Name = p.Name;
+        f.Origin = "";
         f.Recipe.Clear();
-        foreach (var l in p.Recipe)
-            f.Recipe.Add(new RecipeRow(options)
-            {
-                Ingredient = options.Find(i => i.Id == l.IngredientId),
-                Amount = l.Amount.ToString(),
-                UnitIndex = Math.Max(Array.IndexOf(RecipeUnits, l.Unit), 0),
-            });
+        foreach (var l in p.Recipe) f.Recipe.Add(Row(options, l));
+    }
+
+    static RecipeRow Row(List<Ingredient> options, RecipeLine l) => new(options)
+    {
+        Ingredient = options.Find(i => i.Id == l.IngredientId),
+        Amount = l.Amount.ToString(),
+        UnitIndex = Math.Max(Array.IndexOf(RecipeUnits, l.Unit), 0),
+    };
+
+    // Before the first rule set arrives the list is empty; Rebuild comes back here.
+    public void EditProduct(string id, List<RecipeLine>? recipe)
+    {
+        Tabs.SelectedIndex = 1;
+        ProductSearch.Reset();
+        if (model.Products.Items.FirstOrDefault(p => p.Product.Id == id) is not { } item)
+        {
+            wanted = (id, recipe);
+            return;
+        }
+        loading = true;
+        ProductGrid.SelectedItem = item;
+        loading = false;
+        ProductGrid.ScrollIntoView(item);
+        LoadProduct(item.Product);
+        if (recipe is null) return;
+        var options = Session.Ingredients();
+        model.Products.Recipe.Clear();
+        foreach (var l in recipe) model.Products.Recipe.Add(Row(options, l));
+        model.Products.Origin = "Rezeptur aus der Prüfung übernommen. Erst mit Speichern gilt sie im Katalog für alle Prüfungen.";
     }
 
     void NewProduct(object? sender, RoutedEventArgs e) => NewProduct("", null);
@@ -400,6 +428,7 @@ public partial class RulesView : Screen
         f.Active = true;
         f.Title = "Neues Produkt";
         f.Name = name;
+        f.Origin = "";
         f.Recipe.Clear();
         if (created is not null) f.Recipe.Add(new RecipeRow(Session.Ingredients()));
     }

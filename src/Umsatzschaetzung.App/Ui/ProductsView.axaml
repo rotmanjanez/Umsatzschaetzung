@@ -68,12 +68,20 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="110">
+                        <DataGridTemplateColumn Width="230">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:AssortmentRow">
-                                    <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding PriceMissing}">
-                                        <TextBlock Text="Preis fehlt" Theme="{StaticResource BadgeText}"/>
-                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <Border Theme="{StaticResource BadgeWarning}" IsVisible="{Binding PriceMissing}">
+                                            <TextBlock Text="Preis fehlt" Theme="{StaticResource BadgeText}"/>
+                                        </Border>
+                                        <Button Theme="{StaticResource LinkButton}" Padding="0" Cursor="Hand" IsVisible="{Binding Adjusted}"
+                                                ToolTip.Tip="Eigene Rezeptur in dieser Prüfung. Öffnet die Kalkulation." Click="ShowRecipe">
+                                            <Border Theme="{StaticResource BadgeInfo}">
+                                                <TextBlock Text="Rezept angepasst" Theme="{StaticResource BadgeText}"/>
+                                            </Border>
+                                        </Button>
+                                    </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

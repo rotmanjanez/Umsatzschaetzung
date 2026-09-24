@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -13,14 +14,14 @@ public sealed record MarkupRow(string Sparte, string CostOfGoods, string Revenue
     string Markup, bool Total);
 
 public sealed record ResultRow(string ProductId, string Name, string Portions, long PortionsValue, string Cost, string Revenue,
-    long RevenueValue, string Markup, bool PriceMissing);
+    long RevenueValue, string Markup, bool PriceMissing, bool Adjusted, string RecipeTip);
 
 public sealed record RecipeUse(string Name, string Amount, string Note)
 {
     public bool HasNote => Note != "";
 }
 
-public sealed record ProductDetail(string Name, List<KV> Facts, List<RecipeUse> Recipe, string Note)
+public sealed record ProductDetail(string Name, List<KV> Facts, string Note)
 {
     public bool HasNote => Note != "";
 }
@@ -29,6 +30,7 @@ public sealed class CalcModel : Observable
 {
     bool busy, hasResult, noInvoices;
     ProductDetail? detail;
+    RecipeEditor? editor;
 
     public ObservableCollection<ResultRow> Products { get; } = [];
     public ObservableCollection<RevenueRow> Revenue { get; } = [];
@@ -40,6 +42,7 @@ public sealed class CalcModel : Observable
     public bool EmptyAssortment => Products.Count == 0;
     public ProductDetail? Detail { get => detail; set { if (Set(ref detail, value)) Raise(nameof(NoDetail)); } }
     public bool NoDetail => detail is null;
+    public RecipeEditor? Editor { get => editor; set => Set(ref editor, value); }
     public bool HasResult { get => hasResult; set { if (Set(ref hasResult, value)) Raise(nameof(Calculating)); } }
     public bool NoInvoices { get => noInvoices; set { if (Set(ref noInvoices, value)) Raise(nameof(Calculating)); } }
     public bool Calculating => !hasResult && !noInvoices;
@@ -56,13 +59,17 @@ public partial class CalcView : Screen
     public override string Topic => Help.Calc;
 
     readonly CalcModel model = new();
+    readonly DispatcherTimer timer = new();
+    readonly HashSet<string> promoting = [];
     int generation;
-    (Case Case, RuleSet Rules, Report Report, List<ProductRow> Sold)? shown;
+    bool filling;
+    (Case Case, RuleSet Rules, RuleSet Catalog, Report Report, List<ProductRow> Sold)? shown;
 
     public CalcView(Session session) : base(session)
     {
         InitializeComponent();
         DataContext = model;
+        timer.Tick += (_, _) => _ = Flush();
     }
 
     protected override async void OnEnter()
@@ -70,6 +77,9 @@ public partial class CalcView : Screen
         if (Session.Case is null) return;
         await Session.LoadRules(Ct);
         if (Session.Case is not { } kase || Session.Rules is not { } rs || !IsActive) return;
+        Session.RulesChanged += RulesChanged;
+        IngredientBox.SetCategoryNames(this, Session.CategoryNames);
+        IngredientBox.SetSimilar(this, Session.SimilarIngredients);
         model.NoInvoices = kase.Invoices.Count == 0;
         if (model.NoInvoices)
         {
@@ -78,6 +88,53 @@ public partial class CalcView : Screen
         }
         ShowYields(kase, rs);
         await Recalculate(kase, rs);
+    }
+
+    protected override void OnLeave()
+    {
+        Session.RulesChanged -= RulesChanged;
+        if (!timer.IsEnabled) return;
+        timer.Stop();
+        _ = Session.SaveCase(CancellationToken.None);
+    }
+
+    void RulesChanged()
+    {
+        if (Session.Case is not { } kase || Session.Rules is not { } rs || !model.HasResult) return;
+        IngredientBox.SetCategoryNames(this, Session.CategoryNames);
+        var promoted = kase.Products.Where(cp => promoting.Contains(cp.ProductId) && cp.Recipe is { } own
+            && rs.Products.TryGetValue(cp.ProductId, out var p) && Recipes.Same(own, p.Recipe)).ToList();
+        foreach (var cp in promoted)
+        {
+            promoting.Remove(cp.ProductId);
+            Drop(cp);
+        }
+        if (promoted.Count > 0) Schedule(0);
+        else _ = Recalculate(kase, rs);
+    }
+
+    static void Drop(CaseProduct cp)
+    {
+        cp.Recipe = null;
+        cp.RecipeBasis = 0;
+    }
+
+    void Schedule(int delayMs)
+    {
+        timer.Stop();
+        timer.Interval = TimeSpan.FromMilliseconds(Math.Max(delayMs, 1));
+        timer.Start();
+    }
+
+    async Task Flush()
+    {
+        timer.Stop();
+        if (!await Session.SaveCase(CancellationToken.None))
+        {
+            Session.Fail("Rezeptur konnte nicht gespeichert werden");
+            return;
+        }
+        if (Session.Case is { } kase && Session.Rules is { } rs && IsActive) await Recalculate(kase, rs);
     }
 
     async Task Recalculate(Case kase, RuleSet rs)
@@ -111,20 +168,30 @@ public partial class CalcView : Screen
         if (Session.Case is { } saved && IsActive) await Recalculate(saved, rs);
     }
 
-    void ShowResult(Case kase, RuleSet rs, Report r)
+    void ShowResult(Case kase, RuleSet catalog, Report r)
     {
+        var rs = Recipes.Effective(kase, catalog);
         var listed = Assortment.Listed(kase);
         var sold = r.Products.Where(p => listed.Contains(p.ProductId))
             .OrderBy(p => Names.Product(rs, p.ProductId), StringComparer.CurrentCulture).ToList();
-        var selected = (ProductGrid.SelectedItem as ResultRow)?.ProductId;
-        shown = (kase, rs, r, sold);
+        var wanted = Session.WantedProduct;
+        Session.WantedProduct = null;
+        var selected = wanted ?? (ProductGrid.SelectedItem as ResultRow)?.ProductId;
+        shown = (kase, rs, catalog, r, sold);
+        filling = true;
         model.Products.Clear();
         foreach (var p in sold)
+        {
+            var own = kase.Products.Find(x => x.ProductId == p.ProductId);
             model.Products.Add(new ResultRow(p.ProductId, Names.Product(rs, p.ProductId), Format.Group(p.Portions), p.Portions,
                 Format.Cents(p.CostPerPortion), p.PriceMissing ? "" : Format.Cents(p.RevenueNet), p.RevenueNet,
-                p.CostOfGoods > 0 && !p.PriceMissing ? Format.Bp(p.Markup) : "", p.PriceMissing));
+                p.CostOfGoods > 0 && !p.PriceMissing ? Format.Bp(p.Markup) : "", p.PriceMissing,
+                own?.Recipe is not null, own is null ? "" : RecipeTip(rs, own)));
+        }
         ProductGrid.SelectedItem = model.Products.FirstOrDefault(p => p.ProductId == selected);
+        filling = false;
         ProductSelected(null, null);
+        if (wanted is not null && ProductGrid.SelectedItem is { } item) ProductGrid.ScrollIntoView(item, null);
         model.Revenue.Clear();
         foreach (var v in Revenue(kase, r)) model.Revenue.Add(v);
         model.Markups.Clear();
@@ -134,12 +201,21 @@ public partial class CalcView : Screen
         model.HasResult = true;
     }
 
+    static string RecipeTip(RuleSet rs, CaseProduct cp)
+    {
+        if (cp.Recipe is null) return "";
+        var lines = cp.Recipe.Select(l => RecipeEditor.Amount(l) + " " + Names.Ingredient(rs, l.IngredientId));
+        return "Rezeptur nur dieser Prüfung:\n" + string.Join("\n", lines);
+    }
+
     void ProductSelected(object? sender, SelectionChangedEventArgs? e)
     {
-        if (ProductGrid.SelectedItem is not ResultRow row || shown is not var (c, rs, r, sold)
+        if (filling) return;
+        if (ProductGrid.SelectedItem is not ResultRow row || shown is not var (c, rs, catalog, r, sold)
             || sold.Find(p => p.ProductId == row.ProductId) is not { } p || !rs.Products.TryGetValue(p.ProductId, out var product))
         {
             model.Detail = null;
+            model.Editor = null;
             return;
         }
         List<KV> facts = [new("Portionen", row.Portions), new("Einsatz je Portion", row.Cost)];
@@ -153,12 +229,99 @@ public partial class CalcView : Screen
         var recipe = product.Recipe.Select(l =>
         {
             var name = Names.Ingredient(rs, l.IngredientId);
-            var amount = Format.Qty(Scale.ToBase(l.Amount, l.Unit), Units.Lookup(l.Unit)?.Base ?? Unit.Piece);
+            var amount = RecipeEditor.Amount(l);
             var note = Issue(c, rs, ingredients, sold, p, l) ?? (p.Binding.Contains(name) ? "begrenzt die Portionen" : "");
             return new RecipeUse(name, amount, note);
         }).ToList();
         var stuck = p.Portions == 0 && recipe.TrueForAll(x => x.Note == "");
-        model.Detail = new ProductDetail(row.Name, facts, recipe, stuck ? "Keine Portion passt in die Verteilung" : "");
+        model.Detail = new ProductDetail(row.Name, facts, stuck ? "Keine Portion passt in die Verteilung" : "");
+        ShowRecipe(catalog, product, recipe);
+    }
+
+    // The editor outlives a recalculation, so a line being typed keeps its focus; only the notes move.
+    void ShowRecipe(RuleSet catalog, Product product, List<RecipeUse> uses)
+    {
+        var cp = Listed(product.Id);
+        var own = cp?.Recipe;
+        var editor = model.Editor;
+        if (editor is null || editor.ProductId != product.Id || editor.Adjusted != (own is not null))
+        {
+            editor = new RecipeEditor(product.Id) { Adjusted = own is not null };
+            var options = Session.Ingredients();
+            foreach (var l in own ?? []) editor.Add(new CaseRecipeRow(options, catalog, l));
+            var edited = editor;
+            edited.Edited += () => RecipeEdited(edited);
+            model.Editor = editor;
+        }
+        editor.Uses = uses;
+        editor.Stale = cp is not null && Recipes.Stale(cp, catalog);
+        editor.Compare(catalog, CatalogRecipe(catalog, product.Id));
+        var notes = new Dictionary<string, string>();
+        for (var i = 0; i < product.Recipe.Count && i < uses.Count; i++) notes.TryAdd(product.Recipe[i].IngredientId, uses[i].Note);
+        foreach (var row in editor.Rows) row.Note = row.Ingredient is { } ing ? notes.GetValueOrDefault(ing.Id, "") : "";
+    }
+
+    static List<RecipeLine> CatalogRecipe(RuleSet catalog, string productId) =>
+        catalog.Products.TryGetValue(productId, out var p) ? p.Recipe : [];
+
+    CaseProduct? Listed(string productId) => Session.Case?.Products.Find(p => p.ProductId == productId);
+
+    void RecipeEdited(RecipeEditor editor)
+    {
+        if (Listed(editor.ProductId) is not { Recipe: { } own } cp || shown is not { } s) return;
+        var lines = editor.Lines();
+        editor.Emptied = lines.Count == 0;
+        editor.Compare(s.Catalog, CatalogRecipe(s.Catalog, editor.ProductId));
+        if (lines.Count == 0 || Recipes.Same(lines, own)) return;
+        cp.Recipe = lines;
+        Schedule(600);
+    }
+
+    void AdjustRecipe(object? sender, RoutedEventArgs e)
+    {
+        if (model.Editor is not { } editor || Listed(editor.ProductId) is not { } cp || shown is not { } s
+            || !s.Catalog.Products.TryGetValue(editor.ProductId, out var p)) return;
+        cp.Recipe = [.. p.Recipe.Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })];
+        cp.RecipeBasis = p.Meta.Rev;
+        ProductSelected(null, null);
+        Schedule(0);
+    }
+
+    async void ResetRecipe(object? sender, RoutedEventArgs e)
+    {
+        if (model.Editor is not { } editor || Listed(editor.ProductId) is not { Recipe: not null }) return;
+        var confirmed = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+            "Die Rezeptur dieser Prüfung geht verloren. Danach gilt wieder das Katalogrezept.",
+            "Auf Katalog zurücksetzen");
+        if (!confirmed || Listed(editor.ProductId) is not { } cp) return;
+        promoting.Remove(cp.ProductId);
+        Drop(cp);
+        ProductSelected(null, null);
+        Schedule(0);
+    }
+
+    void PromoteRecipe(object? sender, RoutedEventArgs e)
+    {
+        if (model.Editor is not { } editor || Listed(editor.ProductId)?.Recipe is not { } own) return;
+        promoting.Add(editor.ProductId);
+        Session.EditProduct(editor.ProductId, [.. own.Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })]);
+    }
+
+    void EditCatalog(object? sender, RoutedEventArgs e)
+    {
+        if (model.Editor is { } editor) Session.EditProduct(editor.ProductId);
+    }
+
+    void AddRecipeLine(object? sender, RoutedEventArgs e)
+    {
+        if (model.Editor is { } editor && shown is { } s) editor.Add(new CaseRecipeRow(Session.Ingredients(), s.Catalog, null));
+    }
+
+    void RemoveRecipeLine(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is not CaseRecipeRow row || model.Editor is not { } editor) return;
+        editor.Rows.Remove(row);
+        RecipeEdited(editor);
     }
 
     static string? Issue(Case c, RuleSet rs, Dictionary<string, IngredientRow> ingredients, List<ProductRow> sold, ProductRow product, RecipeLine line)

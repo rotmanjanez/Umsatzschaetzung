@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -38,4 +39,6 @@ public partial class RulesWindow : Window
     void DismissError(object? sender, RoutedEventArgs e) => session.Error = "";
 
     public void NewProduct(string name, Action<string> created) => view.NewProduct(name, created);
+
+    public void EditProduct(string id, List<RecipeLine>? recipe) => view.EditProduct(id, recipe);
 }

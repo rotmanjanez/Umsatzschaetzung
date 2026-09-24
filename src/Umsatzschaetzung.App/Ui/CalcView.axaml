@@ -57,14 +57,24 @@
                                    Text="Noch keine Produkte im Sortiment."/>
                         <Button Content="Zu den Produkten" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="GoProducts"/>
                     </StackPanel>
-                    <Grid ColumnDefinitions="*,16,340" Margin="0,0,0,24" IsVisible="{Binding !EmptyAssortment}">
+                    <Grid Margin="0,0,0,24" IsVisible="{Binding !EmptyAssortment}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64*" MinWidth="360"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="36*" MinWidth="320"/>
+                        </Grid.ColumnDefinitions>
                         <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True" MaxHeight="480"
                                   SelectionMode="Single" SelectionChanged="ProductSelected" VerticalAlignment="Top">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Produkt" Width="280" MinWidth="120" SortMemberPath="Name">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:ResultRow">
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                <Border Theme="{StaticResource BadgeInfo}" IsVisible="{Binding Adjusted}" ToolTip.Tip="{Binding RecipeTip}">
+                                                    <TextBlock Text="angepasst" Theme="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -103,10 +113,11 @@
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
+                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
                         <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16" VerticalAlignment="Top">
                             <Grid>
                                 <TextBlock Text="Kein Produkt gewählt" Theme="{StaticResource Muted}" IsVisible="{Binding NoDetail}"/>
-                                <Panel IsVisible="{Binding !NoDetail}">
+                                <StackPanel IsVisible="{Binding !NoDetail}">
                                 <StackPanel DataContext="{Binding Detail}" x:DataType="ui:ProductDetail">
                                     <TextBlock Text="{Binding Name}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
                                     <ItemsControl ItemsSource="{Binding Facts}" Margin="0,0,0,16" Grid.IsSharedSizeScope="True">
@@ -123,23 +134,91 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                    <TextBlock Text="Rezeptur je Portion" Theme="{StaticResource FieldLabel}"/>
-                                    <ItemsControl ItemsSource="{Binding Recipe}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="ui:RecipeUse">
-                                                <StackPanel Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,Auto">
-                                                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
-                                                        <TextBlock Grid.Column="1" Text="{Binding Amount}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
-                                                    </Grid>
-                                                    <TextBlock Text="{Binding Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding HasNote}"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                    <TextBlock Text="{Binding Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding HasNote}"/>
                                 </StackPanel>
-                                </Panel>
+                                <StackPanel DataContext="{Binding Editor}" x:DataType="ui:RecipeEditor">
+                                    <StackPanel IsVisible="{Binding !Adjusted}">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                <TextBlock Text="Rezeptur je Portion" Theme="{StaticResource FieldLabel}" Margin="0"/>
+                                                <Border Theme="{StaticResource Badge}" ToolTip.Tip="Es gilt das Rezept aus dem Katalog.">
+                                                    <TextBlock Text="Katalog" Theme="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="AdjustRecipe"
+                                                    ToolTip.Tip="Für diese Prüfung anpassen&#10;Gilt nur in dieser Prüfung, der Katalog bleibt unverändert.">
+                                                <PathIcon Data="{StaticResource EditIcon}" Width="14" Height="14"/>
+                                            </Button>
+                                            <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Margin="0" Click="EditCatalog"
+                                                    ToolTip.Tip="Im Katalog bearbeiten&#10;Ändert das Rezept für alle Prüfungen.">
+                                                <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
+                                            </Button>
+                                        </Grid>
+                                        <ItemsControl ItemsSource="{Binding Uses}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="ui:RecipeUse">
+                                                    <StackPanel Margin="0,0,0,8">
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                                                            <TextBlock Grid.Column="1" Text="{Binding Amount}" Theme="{StaticResource Number}" Margin="16,0,0,0"/>
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding HasNote}"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                    <Border IsVisible="{Binding Adjusted}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
+                                        <StackPanel>
+                                            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                                                <TextBlock Text="Rezeptur für diese Prüfung" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                <Border Grid.Column="1" Theme="{StaticResource BadgeInfo}" Margin="8,0,0,0"
+                                                        ToolTip.Tip="Gilt nur in dieser Prüfung, der Katalog bleibt unverändert.">
+                                                    <TextBlock Text="Nur diese Prüfung" Theme="{StaticResource BadgeText}"/>
+                                                </Border>
+                                            </Grid>
+                                            <ItemsControl ItemsSource="{Binding Rows}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="ui:CaseRecipeRow">
+                                                        <StackPanel Margin="0,0,0,10">
+                                                            <Grid ColumnDefinitions="*,Auto">
+                                                                <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+                                                                <Button Grid.Column="1" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Zutat entfernen" Click="RemoveRecipeLine">
+                                                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                                                </Button>
+                                                            </Grid>
+                                                            <Grid ColumnDefinitions="96,Auto,*" Margin="0,4,0,0">
+                                                                <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}" Classes.invalid="{Binding AmountInvalid}"/>
+                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
+                                                                          Width="120" Margin="6,0,0,0"/>
+                                                                <TextBlock Grid.Column="2" Text="{Binding CatalogValue}" Theme="{StaticResource Muted}" FontSize="12"
+                                                                           Margin="10,0,0,0" IsVisible="{Binding Differs}"/>
+                                                            </Grid>
+                                                            <TextBlock Text="{Binding Note}" Theme="{StaticResource Muted}" Margin="0,2,0,0" IsVisible="{Binding HasNote}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <TextBlock Text="Ohne gültige Zutat bleibt die zuletzt gespeicherte Rezeptur in Kraft." Theme="{StaticResource Muted}"
+                                                       FontSize="12" Margin="0,0,0,8" IsVisible="{Binding Emptied}"/>
+                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                <Button Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine" ToolTip.Tip="Zutat hinzufügen">
+                                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                                </Button>
+                                                <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="PromoteRecipe"
+                                                        ToolTip.Tip="In den Katalog übernehmen&#10;Macht diese Rezeptur zum Katalogrezept für alle Prüfungen.">
+                                                    <PathIcon Data="{StaticResource PromoteIcon}" Width="14" Height="14"/>
+                                                </Button>
+                                                <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Margin="0" Foreground="{DynamicResource DangerBrush}" Click="ResetRecipe"
+                                                        ToolTip.Tip="Auf Katalog zurücksetzen&#10;Verwirft die Rezeptur dieser Prüfung, danach gilt das Katalogrezept.">
+                                                    <PathIcon Data="{StaticResource ResetIcon}" Width="14" Height="14"/>
+                                                </Button>
+                                            </Grid>
+                                            <TextBlock Text="Katalogrezept seit der Anpassung geändert" Theme="{StaticResource Muted}" Margin="0,10,0,0" IsVisible="{Binding Stale}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="{Binding Detail.Note}" Theme="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" IsVisible="{Binding Detail.HasNote}"/>
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </Grid>

@@ -65,6 +65,19 @@ public sealed class Session : Observable
     public event Action<string, Action<string>>? ProductRequested;
 
     public void NewProduct(string name, Action<string> created) => ProductRequested?.Invoke(name, created);
+    public event Action<string, List<RecipeLine>?>? ProductEditRequested;
+
+    // With a recipe the catalog form opens prefilled with it, ready to be saved.
+    public void EditProduct(string productId, List<RecipeLine>? recipe = null) => ProductEditRequested?.Invoke(productId, recipe);
+
+    // The Kalkulation takes it on its next result and selects that product.
+    public string? WantedProduct { get; set; }
+
+    public void OpenProduct(string productId)
+    {
+        WantedProduct = productId;
+        Go(Tab.Calc);
+    }
     public event Action<Case>? CaseOpened;
     public event Action<Tab>? TabRequested;
     public event Action<string>? InvoiceRequested;

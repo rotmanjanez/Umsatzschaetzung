@@ -20,6 +20,7 @@ public sealed class AssortmentRow(string productId) : Observable
     public string Price { get => price; set => Set(ref price, value); }
     public int VatIndex { get => vatIndex; set => Set(ref vatIndex, value); }
     public bool PriceMissing { get => priceMissing; set => Set(ref priceMissing, value); }
+    public bool Adjusted { get; init; }
 }
 
 public sealed record ProductDraft(string Typed)
@@ -123,6 +124,7 @@ public partial class ProductsView : Screen
             Price = p.GrossPrice > 0 ? Input.Edit(Format.Cents(p.GrossPrice)) : "",
             VatIndex = Math.Max(0, Array.IndexOf(CaseModel.VatValues, p.Vat)),
             PriceMissing = p.GrossPrice <= 0,
+            Adjusted = p.Recipe is not null,
         };
         row.PropertyChanged += (_, e) => Edited(row, e.PropertyName);
         return row;
@@ -252,6 +254,11 @@ public partial class ProductsView : Screen
             Load();
             if (read.Unknown.Count > 0) Session.Fail("Nicht im Katalog: " + string.Join(", ", read.Unknown));
         });
+    }
+
+    void ShowRecipe(object? sender, RoutedEventArgs e)
+    {
+        if ((sender as Control)?.DataContext is AssortmentRow row) Session.OpenProduct(row.ProductId);
     }
 
     void RemoveFromAssortment(object? sender, RoutedEventArgs e)
