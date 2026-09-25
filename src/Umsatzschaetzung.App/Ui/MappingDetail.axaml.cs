@@ -29,8 +29,6 @@ public sealed class SnippetRow(Invoice invoice, int line) : Observable
 
     public Invoice Invoice { get; } = invoice;
     public int Line { get; } = line;
-    public string Number => Invoice.Number;
-    public string Date { get; } = Format.Date(invoice.Date);
     public Bitmap? Scan { get; private set; }
     public string Excerpt { get; private set; } = "";
     public bool Loading => loading;

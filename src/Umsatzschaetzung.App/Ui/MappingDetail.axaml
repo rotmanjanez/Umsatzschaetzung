@@ -149,20 +149,6 @@
                         <DataGrid ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Snippets}" IsReadOnly="True"
                                   Margin="0,8,0,0">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Rechnung" Width="110">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:SnippetRow">
-                                            <TextBlock Classes="cell" Text="{Binding Number}" ToolTip.Tip="{Binding Number}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Datum" Width="96">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate x:DataType="ui:SnippetRow">
-                                            <TextBlock Classes="cell" Text="{Binding Date}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Auszug" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:SnippetRow">
@@ -172,7 +158,7 @@
                                                     <TextBlock Text="Auszug wird geladen …" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <TextBlock Text="Kein Auszug verfügbar" Theme="{StaticResource Muted}" VerticalAlignment="Center" IsVisible="{Binding Missing}"/>
-                                                <Image Source="{Binding Scan}" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding HasScan}"/>
+                                                <Image Source="{Binding Scan}" Cursor="Hand" ToolTip.Tip="Rechnung öffnen" Tapped="OpenInvoice" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding HasScan}"/>
                                                 <SelectableTextBlock Text="{Binding Excerpt}" FontFamily="{StaticResource MonoFont}" FontSize="11" TextWrapping="Wrap" IsVisible="{Binding HasExcerpt}"/>
                                             </Panel>
                                         </DataTemplate>
