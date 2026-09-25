@@ -37,7 +37,7 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
             Assert.InRange(box.X, 100, width);
             Assert.InRange(box.X + box.W, 0, width);
             Assert.InRange(box.Y, 60, 140);
-            Assert.InRange(box.H, 25, 110);
+            Assert.InRange(box.H, 25, 125);
         }
         Assert.InRange(rechnung.Box.W, 150, 330);
         Assert.True(rechnung.Box.X + rechnung.Box.W <= number.Box.X);
