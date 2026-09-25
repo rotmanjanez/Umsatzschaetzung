@@ -6,7 +6,7 @@ import '@fontsource/sora/600.css';
 import '@fontsource/sora/700.css';
 
 const docs = 'https://docs.umsatzschaetzung.amtstools.de/';
-const guide = docs + 'guide/';
+const guide = docs + 'dev/guide/';
 const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest/download/';
 ---
 
@@ -24,14 +24,14 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
           <h1><span class="scanline"><span class="scan">Scannen</span></span> statt <span class="type" data-word="abtippen"><i class="out">abtippen</i></span><span class="dot">.</span></h1>
           <p>Computergestützte Ausbeutekalkulation für Papier- und Digitalrechnungen.</p>
           <div class="acts">
-            <a href={release + 'umsatzschaetzung-win-x64.msi'} data-guide={guide + 'install-windows/'}>Für Windows</a>
-            <a href={release + 'umsatzschaetzung-osx-arm64.dmg'} data-guide={guide + 'install-macos/'}>Für macOS</a>
+            <a href={release + 'umsatzschaetzung-win-x64.msi'} data-os="windows">Für Windows</a>
+            <a href={release + 'umsatzschaetzung-osx-arm64.dmg'} data-os="macos">Für macOS</a>
             <a class="doc" href={docs}>Dokumentation</a>
           </div>
-          <p class="guide" hidden>
-            Zum ersten Mal hier? Die <a href={guide}>Beispielprüfung</a> führt von der
-            Installation bis zum fertigen Bericht.
-          </p>
+          <div class="guide" hidden>
+            <p>Zum ersten Mal hier? Die Beispielprüfung führt von der Installation bis zum fertigen Bericht.</p>
+            <a href={guide}>Zur Anleitung →</a>
+          </div>
         </div>
         <div class="mark">
           <svg viewBox="0 0 256 256" aria-hidden="true">
@@ -70,9 +70,10 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
   .acts a:hover { background: var(--blue); }
   .acts a.doc { background: none; color: #1c1b19; padding: 0; border-bottom: 2px solid #1c1b19; }
   .acts a.doc:hover { background: none; color: var(--blue); border-color: var(--blue); }
-  .guide { margin: 24px 0 0; max-width: 44ch; font-size: 15px; color: #6b6862; animation: rise 0.4s ease-out; }
-  .guide a { color: #1c1b19; font-weight: 600; }
-  .guide a:hover { color: var(--blue); }
+  .guide { margin: 32px 0 0; padding: 20px 24px; max-width: 44ch; background: #fff; border-left: 4px solid var(--blue); animation: rise 0.4s ease-out; }
+  .guide p { margin: 0 0 16px; }
+  .guide a { display: inline-block; text-decoration: none; font-weight: 600; background: var(--blue); color: #fff; padding: 14px 24px; transition: background-color 0.15s; }
+  .guide a:hover { background: #1c1b19; }
   a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
   footer { margin-top: 72px; font-size: 15px; display: flex; gap: 24px; }
   footer a { color: #6b6862; transition: color 0.15s; }
@@ -101,10 +102,12 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
 
 <script>
   const hint = document.querySelector('.guide');
-  for (const link of document.querySelectorAll('.acts a[data-guide]')) {
+  const doc = document.querySelector('.acts a.doc');
+  for (const link of document.querySelectorAll('.acts a[data-os]')) {
     link.addEventListener('click', () => {
-      hint.querySelector('a').href = link.dataset.guide;
+      hint.querySelector('a').search = 'os=' + link.dataset.os;
       hint.hidden = false;
+      doc.hidden = true;
     });
   }
 
