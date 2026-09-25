@@ -45,7 +45,7 @@ public partial class App : Application
             Fatal(desktop, CrashLog.Describe(ex), "Start fehlgeschlagen", false);
             return;
         }
-        var instance = InstanceLock.Acquire(config.Store);
+        var instance = InstanceLock.Acquire(AppData.Dir);
         owned.Add(instance);
         if (instance.Held)
         {

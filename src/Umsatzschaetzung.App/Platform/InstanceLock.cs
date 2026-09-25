@@ -2,8 +2,8 @@ namespace Umsatzschaetzung.App.Platform;
 
 // Zwei Fenster auf einem Speicher sperren sich nicht aus, SQLite verträgt das. Aber
 // jedes hält seinen eigenen Stand der Regeln im Kopf und überschreibt am Ende den des
-// anderen, ohne es zu merken. Die Sperrdatei liegt beim Speicher, damit auch ein
-// zweiter Benutzer auf einer gemeinsamen Freigabe gewarnt wird. Ein harter Abbruch
+// anderen, ohne es zu merken. Die Sperrdatei liegt je Benutzer im lokalen Programmordner:
+// Auf einer gemeinsamen Freigabe arbeiten mehrere Personen gleichzeitig. Ein harter Abbruch
 // hinterlässt allenfalls die Datei, nie die Sperre: die gibt das Betriebssystem frei.
 sealed class InstanceLock : IDisposable
 {
