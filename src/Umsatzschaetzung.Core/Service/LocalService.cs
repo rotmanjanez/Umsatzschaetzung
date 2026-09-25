@@ -319,6 +319,16 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return c;
     });
 
+    // A line mapped by article number under the old name is asked again under the new one.
+    public Task<Case> UnifySuppliers(string caseId, List<string> invoiceIds, CancellationToken ct) => Guard(ct, () =>
+    {
+        var c = LoadCase(caseId);
+        if (!Suppliers.Unify(c, invoiceIds.ToHashSet())) return c;
+        c.MappedAt = 0;
+        SaveCase(c);
+        return c;
+    });
+
     public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
         var (rep, _, rahmen) = Compute(LoadCase(caseId));

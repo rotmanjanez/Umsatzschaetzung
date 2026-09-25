@@ -34,6 +34,7 @@ public interface IService
     Task<AssortmentImport> ReadAssortment(byte[] data, CancellationToken ct);                                               // POST /assortment/read   the products of the CSV with their price, nothing is saved; resp.Unknown names the rows no product matched
     Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct);   // POST /cases/{id}/mappings/suggest   caseId "" suggests without a Gewerbe filter
     Task<Case> MapCase(string caseId, CancellationToken ct);                                                                // POST /cases/{id}/mappings/run       maps every open line the matcher is sure about
+    Task<Case> UnifySuppliers(string caseId, List<string> invoiceIds, CancellationToken ct);                                // POST /cases/{id}/suppliers/unify    renames only the given invoices, see Suppliers.Unify
 
     Task<CalcResp> Calculate(string caseId, CancellationToken ct);                                                          // POST /cases/{id}/calc
     Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct);                                           // POST /cases/{id}/report

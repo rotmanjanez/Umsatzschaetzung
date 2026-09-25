@@ -122,6 +122,7 @@ public sealed class CaseTests : IDisposable
         { "Calculate", (s, ct) => s.Calculate("fall-x", ct) },
         { "RenderReport", (s, ct) => s.RenderReport("fall-x", false, ct) },
         { "MapCase", (s, ct) => s.MapCase("fall-x", ct) },
+        { "UnifySuppliers", (s, ct) => s.UnifySuppliers("fall-x", [], ct) },
         { "ExportInvoice", (s, ct) => s.ExportInvoice("fall-x", "re-x", ct) },
         { "DeleteInvoice", (s, ct) => s.DeleteInvoice("fall-x", "re-x", ct) },
         { "InvoiceSource", (s, ct) => s.InvoiceSource("fall-x", "re-x", ct) },
@@ -287,6 +288,7 @@ public sealed class CaseTests : IDisposable
         { "Calculate", (s, ct) => s.Calculate(Vorlage.Id, ct) },
         { "SuggestMapping", (s, ct) => s.SuggestMapping("", new InvoiceLine { Name = "Pils" }, null, ct) },
         { "MapCase", (s, ct) => s.MapCase(Vorlage.Id, ct) },
+        { "UnifySuppliers", (s, ct) => s.UnifySuppliers(Vorlage.Id, [], ct) },
         { "VerifyInvoice", (s, ct) => s.VerifyInvoice(new VerifyReq(Vorlage.Id, new Invoice(), Intent.Store, null, null), ct) },
     };
 

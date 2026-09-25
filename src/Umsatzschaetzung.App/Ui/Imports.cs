@@ -23,6 +23,7 @@ public sealed class ImportJob(string caseId, string label) : Observable
 
     public int Stored { get; set; }
     public int Drafts { get; set; }
+    public List<string> Imported { get; } = [];
     public List<string> Failed { get; } = [];
 
     public int Total { get => total; set { if (Set(ref total, value)) { Raise(nameof(Count)); Raise(nameof(Detail)); } } }
@@ -144,8 +145,24 @@ public sealed class Imports
             job.Progress.EndFile();
             job.Done++;
         }
+        if (job.Imported.Count > 0) await Unify(job);
         job.Running = false;
         Finish(job);
+    }
+
+    async Task Unify(ImportJob job)
+    {
+        try
+        {
+            Adopt(job, await session.Service.UnifySuppliers(job.CaseId, job.Imported, job.Ct));
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (ServiceError ex)
+        {
+            job.Failed.Add("Lieferanten zusammenführen: " + ex.Message);
+        }
     }
 
     Task<OcrResp>? Read(ImportJob job, PickedFile file) =>
@@ -160,6 +177,7 @@ public sealed class Imports
         if (!parsed.NeedsOcr)
         {
             Adopt(job, parsed.Case);
+            job.Imported.Add(parsed.Invoice.Id);
             job.Stored++;
             return;
         }
@@ -168,6 +186,7 @@ public sealed class Imports
         job.Progress.Begin(ImportStage.Verify);
         var v = await session.Service.VerifyInvoice(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data, ocr.Pages), job.Ct);
         Adopt(job, v.Case);
+        job.Imported.Add(v.Invoice.Id);
         if (v.Accepted)
         {
             job.Stored++;
