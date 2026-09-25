@@ -61,10 +61,20 @@ public sealed class TextClassifier : IDisposable
         InitModel(path, sessionOptions);
     }
 
-    public Angle[] GetAngles(SKBitmap[] partImgs, bool doAngle, bool mostAngle, bool preserveAspectRatio = false)
+    public Angle[] GetAngles(SKBitmap[] partImgs, bool doAngle, bool mostAngle, bool preserveAspectRatio = false, int maxCrops = 0)
     {
         var angles = new Angle[partImgs.Length];
-        if (doAngle)
+        if (doAngle && maxCrops > 0 && partImgs.Length > maxCrops)
+        {
+            var longest = Enumerable.Range(0, partImgs.Length)
+                .OrderByDescending(i => partImgs[i].Width / (float)partImgs[i].Height)
+                .Take(maxCrops)
+                .ToHashSet();
+            Parallel.For(0, partImgs.Length, i => angles[i] = longest.Contains(i)
+                ? GetAngle(partImgs[i], preserveAspectRatio)
+                : new Angle { Index = -1 });
+        }
+        else if (doAngle)
         {
             Parallel.For(0, partImgs.Length, i => angles[i] = GetAngle(partImgs[i], preserveAspectRatio));
 

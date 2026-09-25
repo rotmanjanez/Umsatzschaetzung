@@ -162,6 +162,13 @@ public sealed record RapidOcrOptions
     /// </summary>
     public bool ClsPreserveAspectRatio { get; init; }
 
+    /// <summary>
+    /// When &gt; 0, only this many crops, the longest for their height, go to the classifier;
+    /// the rest report <see cref="TextBlock.AngleIndex"/> -1. Enough where the verdict only
+    /// votes on the turn of the whole page.
+    /// </summary>
+    public int ClsMaxCrops { get; init; }
+
     public float BoxScoreThresh { get; init; }
     public float BoxThresh { get; init; }
     public float UnClipRatio { get; init; }

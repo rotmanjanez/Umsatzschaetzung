@@ -120,7 +120,7 @@ public sealed class RapidOcr : IDisposable
             options.DoAngle, options.MostAngle,
             options.ReturnWordBox, options.ReturnSingleCharBox,
             options.TextScore, options.ClsThresh, options.ClsRotate,
-            options.RotateTallCrops, options.SplitStackedCrops, options.ClsPreserveAspectRatio);
+            options.RotateTallCrops, options.SplitStackedCrops, options.ClsPreserveAspectRatio, options.ClsMaxCrops);
     }
 
     /// <summary>
@@ -291,7 +291,7 @@ public sealed class RapidOcr : IDisposable
     private OcrResult DetectOnce(in DetectorInput input, float boxScoreThresh,
         float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
         bool returnWordBox, bool returnSingleCharBox, float textScore, float clsThresh,
-        bool clsRotate, bool rotateTall, bool splitStacked, bool clsPreserveAspectRatio)
+        bool clsRotate, bool rotateTall, bool splitStacked, bool clsPreserveAspectRatio, int clsMaxCrops)
     {
         SKBitmap src = input.Bitmap;
 
@@ -318,7 +318,7 @@ public sealed class RapidOcr : IDisposable
         }
 
         // step: angleNet getAngles
-        Angle[] angles = _textClassifier.GetAngles(partImages, doAngle, mostAngle, clsPreserveAspectRatio);
+        Angle[] angles = _textClassifier.GetAngles(partImages, doAngle, mostAngle, clsPreserveAspectRatio, clsMaxCrops);
 
         // Rotate partImgs only if the classifier is confident enough (Python <c>cls_thresh</c>).
         // Without this gate, low-confidence flips wrongly invert clean upright text and the

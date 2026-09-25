@@ -31,7 +31,8 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // reads the classifier's votes and turns the whole page, which is the only turn a German
     // invoice needs. What is left of a tall box is a stack: a unit column printed tightly
     // enough that the detector joined three "kg" into one box, which no line reader can read.
-    // It is cut back into lines before it is read.
+    // It is cut back into lines before it is read. The vote is left to the longest lines, which
+    // the classifier gets right; the short ones only cost it time.
     static readonly RapidOcrOptions Options = RapidOcrOptions.PPOCRv6 with
     {
         ReturnWordBox = true,
@@ -40,6 +41,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         ClsRotate = false,
         RotateTallCrops = false,
         SplitStackedCrops = true,
+        ClsMaxCrops = 32,
     };
 
     public static string Detector => Accelerator.Available ? "WebGPU" : "CPU";
@@ -166,7 +168,8 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         {
             var box = Bounds(block.BoxPoints);
             if (box.H > box.W) tall++; else wide++;
-            if (block.AngleIndex == 1) flipped++; else upright++;
+            if (block.AngleIndex == 1) flipped++;
+            else if (block.AngleIndex == 0) upright++;
         }
         return (tall > wide, flipped > upright) switch
         {

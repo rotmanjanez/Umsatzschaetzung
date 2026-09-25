@@ -75,6 +75,15 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
+    public void ACappedClassifierLeavesTheShorterLinesWithoutAVerdict()
+    {
+        var blocks = models.Read(true, OcrModels.App with { ClsMaxCrops = 1 }).TextBlocks;
+
+        Assert.Single(blocks, b => b.AngleIndex == 1);
+        Assert.All(blocks, b => Assert.Contains(b.AngleIndex, new[] { 1, -1 }));
+    }
+
+    [Fact]
     public void AnUprightPageReadsTheSameWhetherCropsMayBeTurnedOrNot()
     {
         var app = models.Read(false, OcrModels.App).TextBlocks;
