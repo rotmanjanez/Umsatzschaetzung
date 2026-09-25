@@ -54,7 +54,7 @@ public sealed class CaseTests : IDisposable
         Assert.StartsWith("fall-", neu.Id);
         Assert.NotEqual(default, neu.CreatedAt);
         Assert.Equal(neu.CreatedAt, neu.UpdatedAt);
-        Assert.Contains(await svc.ListCases(ct), c => c.Id == neu.Id);
+        Assert.Contains((await svc.ListCases(ct)).Cases, c => c.Id == neu.Id);
     }
 
     [Fact]
@@ -73,11 +73,11 @@ public sealed class CaseTests : IDisposable
     {
         var a = await svc.PutCase(Vorlage.Blank("A"), ct);
         var b = await svc.PutCase(Vorlage.Blank("B"), ct);
-        Assert.Equal(new[] { a.Id, b.Id }.Order(), (await svc.ListCases(ct)).Select(c => c.Id).Order());
+        Assert.Equal(new[] { a.Id, b.Id }.Order(), (await svc.ListCases(ct)).Cases.Select(c => c.Id).Order());
 
         await svc.DeleteCase(a.Id, ct);
 
-        Assert.Equal([b.Id], (await svc.ListCases(ct)).Select(c => c.Id));
+        Assert.Equal([b.Id], (await svc.ListCases(ct)).Cases.Select(c => c.Id));
         var e = await Assert.ThrowsAsync<ServiceError>(() => svc.GetCase(a.Id, ct));
         Assert.Equal(ErrorCode.NotFound, e.Code);
     }
@@ -198,7 +198,7 @@ public sealed class CaseTests : IDisposable
     {
         var e = await Assert.ThrowsAsync<ServiceError>(() => svc.ImportCase("kaputt.db", data, false, ct));
         Assert.Equal(ErrorCode.Invalid, e.Code);
-        Assert.Empty(await svc.ListCases(ct));
+        Assert.Empty((await svc.ListCases(ct)).Cases);
     }
 
     [Fact]
@@ -300,7 +300,7 @@ public sealed class CaseTests : IDisposable
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => run(svc, new CancellationToken(true)));
 
         Assert.True(before == (await svc.Rules(ct)).Version, call);
-        Assert.Equal([Vorlage.Id], (await svc.ListCases(ct)).Select(c => c.Id));
+        Assert.Equal([Vorlage.Id], (await svc.ListCases(ct)).Cases.Select(c => c.Id));
         Assert.Single((await svc.GetCase(Vorlage.Id, ct)).Invoices);
     }
 }

@@ -108,24 +108,31 @@ public sealed partial class CaseStore(string dir)
     static string InvoiceKey(string caseId, string invoiceId) =>
         ValidId(invoiceId) ? invoiceId : throw new CaseInvalidException($"ungültige ID \"{caseId}\"/\"{invoiceId}\"");
 
-    public List<Case> List() => Guarded<List<Case>>(() =>
+    // A file that is no case hides none of the others; it is named instead.
+    public (List<Case> Cases, List<string> Unreadable) List() => Guarded<(List<Case>, List<string>)>(() =>
     {
-        if (!Directory.Exists(dir)) return [];
+        if (!Directory.Exists(dir)) return ([], []);
         var cases = new List<Case>();
+        var unreadable = new List<string>();
         foreach (var path in Directory.EnumerateFiles(dir, "*.db"))
         {
-            if (Path.GetFileName(path).StartsWith('.')) continue;
+            var name = Path.GetFileName(path);
+            if (name.StartsWith('.')) continue;
             try
             {
                 using var db = Reader(path);
                 cases.Add(Read(db));
             }
-            catch (CaseInvalidException) { }
+            catch (CaseInvalidException)
+            {
+                unreadable.Add(name);
+            }
         }
-        return cases
+        unreadable.Sort(StringComparer.Ordinal);
+        return (cases
             .OrderByDescending(s => s.UpdatedAt)
             .ThenBy(s => s.Id, StringComparer.Ordinal)
-            .ToList();
+            .ToList(), unreadable);
     });
 
     public Case Load(string id) => Guarded(() =>

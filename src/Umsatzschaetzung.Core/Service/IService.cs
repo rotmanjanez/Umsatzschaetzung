@@ -15,7 +15,7 @@ public interface IService
     Task<List<SammlungInfo>> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct);                             // POST   /richtsatz/import   liest die PDF und ersetzt die Sammlung ihres Jahres
     Task<List<SammlungInfo>> DeleteSammlung(int year, CancellationToken ct);                                                // DELETE /richtsatz/{year}   eine mitgelieferte Sammlung kehrt beim nächsten Start zurück
 
-    Task<List<Case>> ListCases(CancellationToken ct);                                                                       // GET    /cases
+    Task<CasesResp> ListCases(CancellationToken ct);                                                                        // GET    /cases
     Task<Case> GetCase(string caseId, CancellationToken ct);                                                                // GET    /cases/{id}
     Task<Case> PutCase(Case kase, CancellationToken ct);                                                                    // PUT    /cases/{id}
     Task DeleteCase(string caseId, CancellationToken ct);                                                                   // DELETE /cases/{id}

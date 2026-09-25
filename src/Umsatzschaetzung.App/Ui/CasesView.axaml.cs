@@ -63,7 +63,8 @@ public partial class CasesView : Screen
 
     Task Reload() => Session.Run(async () =>
     {
-        var cases = await Session.Service.ListCases(Ct);
+        var (cases, unreadable) = await Session.Service.ListCases(Ct);
+        if (unreadable.Count > 0) Session.Fail("Keine lesbare Prüfung, nicht angezeigt: " + string.Join(", ", unreadable));
         model.Set(cases.Select(c => new CaseRow(c, Format.Period(c.PeriodFrom, c.PeriodTo), Format.Day(c.UpdatedAt), c.Invoices.Count)).ToList());
     });
 

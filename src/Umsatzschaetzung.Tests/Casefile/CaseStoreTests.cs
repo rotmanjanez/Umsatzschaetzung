@@ -75,24 +75,24 @@ public class CaseStoreTests
             store.Save(c);
         }
 
-        Assert.Equal(["c", "a", "b"], store.List().Select(c => c.Id));
+        Assert.Equal(["c", "a", "b"], store.List().Cases.Select(c => c.Id));
     }
 
     [Fact]
     public void ListSkipsHiddenFilesAndIsEmptyWithoutADirectory()
     {
         using var tmp = new TempDir();
-        Assert.Empty(new CaseStore(tmp.Sub("fehlt")).List());
+        Assert.Empty(new CaseStore(tmp.Sub("fehlt")).List().Cases);
 
         var store = new CaseStore(tmp.Path);
         store.Save(Cases.Minimal("fall-1"));
         File.Copy(tmp.Sub("fall-1.db"), tmp.Sub(".halb.db"));
 
-        Assert.Equal(["fall-1"], store.List().Select(c => c.Id));
+        Assert.Equal(["fall-1"], store.List().Cases.Select(c => c.Id));
     }
 
     [Fact]
-    public void ListSkipsFilesThatAreNotACaseAndLeavesThemUntouched()
+    public void ListNamesTheFileThatIsNotACase()
     {
         using var tmp = new TempDir();
         var store = new CaseStore(tmp.Path);
@@ -100,7 +100,9 @@ public class CaseStoreTests
         File.WriteAllText(tmp.Sub("kaputt.db"), "kein SQLite");
         File.WriteAllBytes(tmp.Sub("leer.db"), []);
 
-        Assert.Equal(["fall-1"], store.List().Select(c => c.Id));
+        var (cases, unreadable) = store.List();
+        Assert.Equal(["fall-1"], cases.Select(c => c.Id));
+        Assert.Equal(["kaputt.db", "leer.db"], unreadable);
         Assert.Equal(0, new FileInfo(tmp.Sub("leer.db")).Length);
         Assert.Throws<CaseInvalidException>(() => store.Load("leer"));
     }
@@ -123,7 +125,7 @@ public class CaseStoreTests
         store.Save(Cases.Minimal("fall-2"));
         store.Delete("fall-1");
 
-        Assert.Equal(["fall-2"], store.List().Select(c => c.Id));
+        Assert.Equal(["fall-2"], store.List().Cases.Select(c => c.Id));
         Assert.False(File.Exists(tmp.Sub("fall-1.db")));
         Assert.Throws<CaseNotFoundException>(() => store.Load("fall-1"));
     }
@@ -289,7 +291,7 @@ public class CaseStoreTests
         store.Save(c);
 
         Cases.Same(c, store.Load("fall-1"));
-        Assert.Equal(c.Label, Assert.Single(store.List()).Label);
+        Assert.Equal(c.Label, Assert.Single(store.List().Cases).Label);
     }
 
     [Fact]

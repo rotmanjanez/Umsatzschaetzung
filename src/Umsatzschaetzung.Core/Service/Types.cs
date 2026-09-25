@@ -5,6 +5,9 @@ namespace Umsatzschaetzung.Service;
 
 public sealed record StatusResp(long RulesVersion, DateTimeOffset RulesDate, string AppVersion, string? Problem);
 
+// Files in the case folder that hold no case, by name; the cases are listed without them.
+public sealed record CasesResp(List<Case> Cases, List<string> Unreadable);
+
 public sealed record ParseResp(Invoice Invoice, List<int> UnmappedLines, bool NeedsOcr, Case? Case);
 
 public sealed record OcrResp(string InvoiceId, List<OcrPage> Pages, Invoice Draft);

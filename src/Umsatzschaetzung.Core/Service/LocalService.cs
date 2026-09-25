@@ -73,7 +73,11 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return rules.DeleteSammlung(year);
     });
 
-    public Task<List<Case>> ListCases(CancellationToken ct) => Guard(ct, cases.List);
+    public Task<CasesResp> ListCases(CancellationToken ct) => Guard(ct, () =>
+    {
+        var (list, unreadable) = cases.List();
+        return new CasesResp(list, unreadable);
+    });
 
     public Task<Case> GetCase(string caseId, CancellationToken ct) => Guard(ct, () => LoadCase(caseId));
 
