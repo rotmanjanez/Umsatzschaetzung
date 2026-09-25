@@ -121,7 +121,7 @@ public static class Deskew
         using var canvas = new SKCanvas(turned);
         canvas.Clear(SKColors.White);
         canvas.Concat(map);
-        using var image = SKImage.FromBitmap(page);
+        using var image = SKImage.FromPixels(page.PeekPixels());
         canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None));
         return turned;
     }

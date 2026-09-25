@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using SkiaSharp;
 
 namespace Umsatzschaetzung.Service;
@@ -25,17 +24,14 @@ public static class Deink
         var keep = Strokes(depth, w, h, marked, floor);
         if (!keep.Contains(true)) return null;
 
-        var buffer = new byte[w * h * 4];
-        for (var i = 0; i < keep.Length; i++)
-        {
-            var v = keep[i] ? grey[i] : (byte)255;
-            buffer[i * 4] = v;
-            buffer[i * 4 + 1] = v;
-            buffer[i * 4 + 2] = v;
-            buffer[i * 4 + 3] = 255;
-        }
         var clean = new SKBitmap(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul));
-        Marshal.Copy(buffer, 0, clean.GetPixels(), buffer.Length);
+        using (var target = clean.PeekPixels())
+        {
+            var pixels = target.GetPixelSpan<uint>();
+            for (var i = 0; i < keep.Length; i++)
+                pixels[i] = 0xFF000000u | (keep[i] ? grey[i] : 255u) * 0x010101u;
+        }
+        clean.NotifyPixelsChanged();
         return clean;
     }
 

@@ -10,12 +10,12 @@ static class Ink
 
     public static byte[] Grey(SKBitmap page, int w, int h)
     {
+        var same = page.Width == w && page.Height == h;
         var info = new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul);
-        using var small = (page.Width == w && page.Height == h
-                ? page.Copy(SKColorType.Bgra8888)
-                : page.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None)))
-            ?? throw new InvalidOperationException("Das Seitenbild konnte nicht umgewandelt werden.");
-        var pixels = small.GetPixelSpan();
+        using var small = same && page.ColorType == SKColorType.Bgra8888 && page.RowBytes == w * 4 ? null
+            : (same ? page.Copy(SKColorType.Bgra8888) : page.Resize(info, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None)))
+              ?? throw new InvalidOperationException("Das Seitenbild konnte nicht umgewandelt werden.");
+        var pixels = (small ?? page).GetPixelSpan();
         var grey = new byte[w * h];
         for (var i = 0; i < grey.Length; i++)
             grey[i] = (byte)((pixels[i * 4 + 2] * 77 + pixels[i * 4 + 1] * 151 + pixels[i * 4] * 28) >> 8);
