@@ -8,6 +8,7 @@ theme:
   language: de
   font: false
   custom_dir: overrides
+  favicon: assets/favicon.svg
   features:
     - navigation.sections
     - navigation.indexes
