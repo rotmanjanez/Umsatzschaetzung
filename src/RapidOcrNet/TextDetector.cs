@@ -177,6 +177,9 @@ public sealed class TextDetector : IDisposable
     {
         const float maxSideThresh = 3.0f; // Long Edge Threshold
         var rsBoxes = new List<TextBox>();
+        // The dilation grows a box by a detector pixel a side and unclip multiplies that; on a
+        // shrunk input the pixel is larger than a source pixel, so the excess comes off again.
+        float shrink = (1 + unClipRatio) * MathF.Max(0, 1 - MathF.Min(s.ScaleWidth, s.ScaleHeight));
 
         // Data preparation
         ReadOnlySpan<float> predData;
@@ -237,7 +240,7 @@ public sealed class TextDetector : IDisposable
                 continue;
             }
 
-            SKPoint[]? clipBox = Unclip(minBox, unClipRatio);
+            SKPoint[]? clipBox = Unclip(minBox, unClipRatio, shrink);
             if (clipBox is null)
             {
                 continue;
@@ -503,7 +506,7 @@ public sealed class TextDetector : IDisposable
         return 0;
     }
 
-    private static SKPoint[]? Unclip(SKPoint[] box, float unclipRatio)
+    private static SKPoint[]? Unclip(SKPoint[] box, float unclipRatio, float shrink)
     {
         SKPoint[] points = GeometryExtensions.MinimumAreaRectangle(box);
         GeometryExtensions.GetSize(points, out float width, out float height);
@@ -526,7 +529,7 @@ public sealed class TextDetector : IDisposable
 
         float area = MathF.Abs(SignedPolygonArea(box));
         double length = LengthOfPoints(box);
-        double distance = area * unclipRatio / length;
+        double distance = area * unclipRatio / length - shrink;
 
         var co = new ClipperOffset();
         co.AddPath(theClipperPts, JoinType.Round, EndType.Polygon);

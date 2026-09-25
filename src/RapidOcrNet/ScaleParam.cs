@@ -87,7 +87,9 @@ public sealed record ScaleParam
     /// <param name="src">Source bitmap.</param>
     /// <param name="limitSideLen">Target short-side length. Default 736 matches Python's
     /// <c>config.yaml: Det.limit_side_len: 736</c>.</param>
-    public static ScaleParam GetAdaptiveScaleParam(SKBitmap src, int limitSideLen = 736)
+    /// <param name="maxPixels">When &gt; 0, scale **down** so the detector input holds at most
+    /// this many pixels. An area rather than a side keeps a long receipt at a page's resolution.</param>
+    public static ScaleParam GetAdaptiveScaleParam(SKBitmap src, int limitSideLen = 736, int maxPixels = 0)
     {
         int srcWidth = src.Width;
         int srcHeight = src.Height;
@@ -97,6 +99,12 @@ public sealed record ScaleParam
         if (limitSideLen > 0 && minWh < limitSideLen)
         {
             ratio = limitSideLen / (float)minWh;
+        }
+
+        float pixels = (float)srcWidth * srcHeight * ratio * ratio;
+        if (maxPixels > 0 && pixels > maxPixels)
+        {
+            ratio *= MathF.Sqrt(maxPixels / pixels);
         }
 
         int dstWidth = (int)(srcWidth * ratio);

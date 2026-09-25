@@ -19,6 +19,10 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // The detector's long-side cap; boxes come back in source pixels regardless.
     public const int MaxImageDimension = 4000;
 
+    // The detector finds lines as well at a third of an A4 page's 300 dpi pixels and takes a
+    // third of the time; the lines are still cut from the full page.
+    const int DetectorPixels = 2_600_000;
+
     // Nothing below the page is ever turned. The direction classifier votes and turns nothing
     // itself: on a line of two glyphs it is as confident as on a sentence and wrong often enough
     // that a "kg" comes back upside down, reads as "ER" and is dropped for scoring below
@@ -32,6 +36,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     {
         ReturnWordBox = true,
         MaxSideLen = MaxImageDimension,
+        DetMaxPixels = DetectorPixels,
         ClsRotate = false,
         RotateTallCrops = false,
         SplitStackedCrops = true,

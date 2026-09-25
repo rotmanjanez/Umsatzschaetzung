@@ -47,4 +47,18 @@ public class ScaleParamTests
         Assert.Equal(736, scale.DstHeight);
         Assert.InRange(scale.DstWidth, 700 * 736 / 260 - 16, 700 * 736 / 260 + 16);
     }
+
+    [Theory]
+    [InlineData(2480, 3508, 2_600_000, 1344, 1920)]
+    [InlineData(4960, 7016, 2_600_000, 1344, 1920)]
+    [InlineData(800, 6000, 2_600_000, 576, 4416)]
+    [InlineData(1240, 1754, 2_600_000, 1248, 1760)]
+    public void APixelCapShrinksOnlyWhatHoldsMoreAndKeepsTheAspect(int width, int height, int cap, int w, int h)
+    {
+        using var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8));
+
+        var scale = ScaleParam.GetAdaptiveScaleParam(bitmap, 736, cap);
+
+        Assert.Equal((w, h), (scale.DstWidth, scale.DstHeight));
+    }
 }

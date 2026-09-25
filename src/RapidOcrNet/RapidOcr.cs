@@ -212,7 +212,7 @@ public sealed class RapidOcr : IDisposable
             {
                 // Python-style: scale short side up to LimitSideLen (default 736),
                 // matching rapidocr-python's Det.limit_type="min" config.
-                scale = ScaleParam.GetAdaptiveScaleParam(letterboxed, options.LimitSideLen);
+                scale = ScaleParam.GetAdaptiveScaleParam(letterboxed, options.LimitSideLen, options.DetMaxPixels);
             }
         }
         catch

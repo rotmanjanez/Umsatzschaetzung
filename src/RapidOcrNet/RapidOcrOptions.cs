@@ -93,6 +93,13 @@ public sealed record RapidOcrOptions
     /// </summary>
     public int LimitSideLen { get; init; }
 
+    /// <summary>
+    /// Upper bound on the pixels the detector sees, 0 for none. Unlike <see cref="MaxSideLen"/>
+    /// it shrinks only the detector's input: boxes come back in source pixels and the crops
+    /// are still cut from the full image.
+    /// </summary>
+    public int DetMaxPixels { get; init; }
+
     /// <summary>Upper bound on the longer side of the source image (Python <c>max_side_len</c>).</summary>
     public int MaxSideLen { get; init; }
 
