@@ -205,18 +205,31 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         };
     }
 
-    // Types into a search box and takes the entry of its drop-down that reads `item`.
+    // Clicks into a search box, types and clicks the entry of its drop-down that reads `item`,
+    // with the pointer as a person would; the box has to have taken it.
     static void Choose(AutoCompleteBox box, string text, string item)
     {
-        box.Focus();
-        box.GetVisualDescendants().OfType<TextBox>().First().Text = text;
+        Press(box);
+        Settle();
+        if (text != "") box.GetVisualDescendants().OfType<TextBox>().First().Text = text;
         Settle();
         var popup = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child
             ?? throw new InvalidOperationException("no drop-down below the search box");
         var entry = popup.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item)
             ?? throw new InvalidOperationException("not offered: " + item);
-        box.SelectedItem = entry.DataContext;
-        box.IsDropDownOpen = false;
+        Press(entry);
+        Settle();
+        if (box.SelectedItem != entry.DataContext || box.IsDropDownOpen)
+            throw new InvalidOperationException("the search box did not take " + item);
+    }
+
+    static void Press(Visual visual)
+    {
+        var top = TopLevel.GetTopLevel(visual) ?? throw new InvalidOperationException("not shown: " + visual.GetType().Name);
+        var at = visual.TranslatePoint(new Point(visual.Bounds.Width / 2, visual.Bounds.Height / 2), top)
+            ?? throw new InvalidOperationException("not placed: " + visual.GetType().Name);
+        top.MouseDown(at, MouseButton.Left);
+        top.MouseUp(at, MouseButton.Left);
     }
 
     void Shot(Window window, ShotStep step)

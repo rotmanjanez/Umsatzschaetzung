@@ -7,7 +7,6 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
-using Avalonia.VisualTree;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -69,19 +68,25 @@ public sealed class GewerbeBox : AutoCompleteBox
         SetCurrentValue(IsDropDownOpenProperty, true);
     }
 
+    // A click into the list would take the focus from the text field and close the list
+    // before the entry is chosen.
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        if (e.NameScope.Find<ItemsControl>("PART_SelectingItemsControl") is not { } list) return;
+        list.Focusable = false;
+        list.ContainerPrepared += (_, c) => c.Container.Focusable = false;
+    }
+
     protected override void OnLostFocus(FocusChangedEventArgs e)
     {
         base.OnLostFocus(e);
-        if (InDropDown(TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement())) return;
         var text = Text?.Trim() ?? "";
         if (text == "") Commit("");
         else if (SelectedItem is Gewerbezweig g && text == Label(g)) return;
         else if (Filter(text).Take(2).ToList() is [var only]) Commit(only.Kennzahl);
         Show(Kennzahl);
     }
-
-    bool InDropDown(IInputElement? focused) =>
-        focused is Visual v && this.GetVisualDescendants().OfType<Popup>().Any(p => p.Child?.IsVisualAncestorOf(v) == true);
 
     void Commit(string kennzahl)
     {
