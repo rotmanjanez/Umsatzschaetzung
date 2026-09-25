@@ -338,6 +338,7 @@ public class RuleStoreTests
 
         var e = Assert.Throws<StoreUnavailableException>(() => Open(tmp));
         Assert.IsType<SchemaTooNewException>(e.InnerException);
+        Assert.Equal("Die Datenbank stammt von einer neueren Version der Software. (Schema 999, diese Version kennt bis Schema 1)", e.Message);
         Assert.Equal(999, Sql.UserVersion(tmp.Sub("rules.db")));
     }
 

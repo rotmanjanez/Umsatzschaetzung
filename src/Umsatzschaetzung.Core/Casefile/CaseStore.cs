@@ -681,7 +681,7 @@ public sealed partial class CaseStore(string dir)
             }
             catch (SchemaTooNewException e)
             {
-                throw new CaseInvalidException("Falldatei " + e.Message, e);
+                throw new CaseInvalidException("Die Falldatei " + e.Message, e);
             }
         }
         return Connect(path, mode);

@@ -6,7 +6,7 @@ namespace Umsatzschaetzung;
 public sealed class StoreUnavailableException(string message, Exception? inner = null) : Exception(message, inner);
 
 public sealed class SchemaTooNewException(int found, int known)
-    : Exception($"stammt aus einer neueren Programmversion (Schema {found}, unterstützt wird {known})");
+    : Exception($"stammt von einer neueren Version der Software. (Schema {found}, diese Version kennt bis Schema {known})");
 
 // Der Index eines Schrittes ist die Version, auf die er hebt: Schritte werden angehängt,
 // nie geändert. PRAGMA user_version steht im Dateikopf und wandert daher mit der Datei mit.

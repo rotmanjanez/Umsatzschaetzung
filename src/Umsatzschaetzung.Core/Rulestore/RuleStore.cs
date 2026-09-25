@@ -719,7 +719,11 @@ public sealed class RuleStore
         {
             return body();
         }
-        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException or SchemaTooNewException)
+        catch (SchemaTooNewException e)
+        {
+            throw new StoreUnavailableException("Die Datenbank " + e.Message, e);
+        }
+        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
         {
             throw new StoreUnavailableException("Datenbank: " + e.Message, e);
         }
