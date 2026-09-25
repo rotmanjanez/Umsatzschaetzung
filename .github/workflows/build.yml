@@ -36,6 +36,17 @@ jobs:
       - run: dotnet build
       - run: dotnet test --no-build
 
+  msi-upgrade:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet tool install --global wix --version 6.0.2
+      - run: pwsh packaging/windows/test-upgrade.ps1
+
   msi:
     needs: test
     strategy:
@@ -138,6 +149,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: packaging/windows/policy
       - uses: actions/download-artifact@v7
         with:
           pattern: umsatzschätzung-*
@@ -152,6 +166,9 @@ jobs:
             -exec cp {} release/ \;
           test -n "$(find release -name '*.msi' -print -quit)" || { echo "no msi in artifacts:"; find artifacts -type f; exit 1; }
           test -n "$(find release -name '*.dmg' -print -quit)" || { echo "no dmg in artifacts:"; find artifacts -type f; exit 1; }
+          # Python sets the UTF-8 flag on the umlaut names; Info-ZIP does not, and Explorer garbles them.
+          python3 -c 'import sys, zipfile, pathlib; root = pathlib.Path(sys.argv[1]); z = zipfile.ZipFile(sys.argv[2], "w", zipfile.ZIP_DEFLATED); [z.write(f, f.relative_to(root)) for f in sorted(root.rglob("*")) if f.is_file()]; z.close()' \
+            packaging/windows/policy release/umsatzschaetzung-policy.zip
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -l release
 
