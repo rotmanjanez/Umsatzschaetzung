@@ -49,7 +49,7 @@ Stunde. Am Ende steht
 im Fenster, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht
 anstehen:
 
-![Das Importfenster am Ende: 103 Rechnungen übernommen, 3 zur Durchsicht](img/rechnungen-import.png)
+![Das Importfenster am Ende: 105 Rechnungen übernommen, 1 zur Durchsicht](img/rechnungen-import.png)
 
 Den Dialog mit **Schließen** beenden. Jede Rechnung steht dann mit Lieferant,
 Nummer, Datum und Nettobetrag in der Liste. Die erste Spalte zeigt den Status:
@@ -58,18 +58,17 @@ Nummer, Datum und Nettobetrag in der Liste. Die erste Spalte zeigt den Status:
 - **Durchsicht offen**: Etwas passt nicht zusammen. Die Rechnung muss
   durchgesehen werden.
 
-Über der Liste steht die Bilanz: `3 offen, 103 automatisch, 0 manuell`.
+Über der Liste steht die Bilanz: `1 offen, 105 automatisch, 0 manuell`.
 
-![Die Rechnungsliste nach dem Import, die drei offenen Rechnungen oben](img/rechnungen-liste.png)
+![Die Rechnungsliste nach dem Import, die offene Rechnung oben](img/rechnungen-liste.png)
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `3 offen, 103 automatisch, 0 manuell` steht
-    - die drei obersten Rechnungen **Durchsicht offen** tragen: eine ohne
-      Lieferant, eine von der Metzgerei Hofmann, eine vom Weingut Sommer
+    - über der Liste `1 offen, 105 automatisch, 0 manuell` steht
+    - die oberste Rechnung, TK25-1583 ohne Lieferant, **Durchsicht offen** trägt
 
 !!! nachlesen "Zum Nachlesen"
     Welche Dateiformate das Programm liest, was es aus einem Scan holt und
     woran ein guter Scan zu erkennen ist, steht unter
     [Rechnungen importieren](../rechnungen.md).
 
-[Weiter: 1. Rechnungen korrigieren <span>Die drei offenen Rechnungen durchsehen</span>](korrektur.md){ .us-next }
+[Weiter: 1. Rechnungen korrigieren <span>Die offene Rechnung durchsehen</span>](korrektur.md){ .us-next }

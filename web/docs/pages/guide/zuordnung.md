@@ -69,10 +69,10 @@ die Zeile darunter rechnet vor:
 | Frühkartoffeln festkochend 12,5 kg | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500` | **Zuordnen** |
 | Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt) | `1800`{.copy} eintragen | **Zuordnen** |
 | Petersilie glatt, Bund | | | offen lassen |
-| Pommes frites 7/7 blanchiert, 4 x | **Pommes frites** (schon gewählt) | `10000`{.copy} eintragen | **Zuordnen** |
+| Pommes frites 7/7 blanchiert, 4 | **Pommes frites** (schon gewählt) | `10000`{.copy} eintragen | **Zuordnen** |
 
-Bei den Pommes hat der Scan die Packungsangabe abgeschnitten, aus „4 × 2,5 kg“
-wurde „4 x“. Was im Karton ist, zeigt der Beleg-Ausschnitt unten oder die
+Bei den Pommes ist die Packungsangabe in die gelöschte Zeile gerutscht, aus
+„4 × 2,5 kg“ wurde „4“. Was im Karton ist, zeigt der Beleg-Ausschnitt unten oder die
 gleichlautende Position des anderen Tiefkühllieferanten: 4 × 2,5 kg, also
 10.000 g.
 
@@ -87,7 +87,7 @@ Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `1 offen` steht.
 ![Nur die Petersilie ist noch offen](img/zuordnung-fertig.png)
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `1 offen, 149 automatisch, 4 manuell` steht
+    - über der Liste `1 offen, 114 automatisch, 4 manuell` steht
     - nur noch die Petersilie **Offen** ist
 
 !!! nachlesen "Zum Nachlesen"
