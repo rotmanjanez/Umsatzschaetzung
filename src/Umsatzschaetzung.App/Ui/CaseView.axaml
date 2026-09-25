@@ -79,33 +79,32 @@
                 <StackPanel MaxWidth="960" HorizontalAlignment="Left" Margin="0,0,0,24">
                     <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
                     <TextBox x:Name="LabelBox" Text="{Binding Label, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Zeitraum" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
-                    <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
+                    <Grid Width="440" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Von *" Theme="{StaticResource FieldLabel}"/>
+                            <TextBlock Text="Zeitraum von *" Theme="{StaticResource FieldLabel}"/>
                             <ui:DateBox x:Name="FromBox" Text="{Binding From, Mode=TwoWay}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Bis *" Theme="{StaticResource FieldLabel}"/>
+                            <TextBlock Text="Zeitraum bis *" Theme="{StaticResource FieldLabel}"/>
                             <ui:DateBox x:Name="ToBox" Text="{Binding To, Mode=TwoWay}"/>
                         </StackPanel>
                     </Grid>
                     <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
-                    <Grid ColumnDefinitions="*,16,*" Margin="0,0,0,4">
+                    <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="NameBox" Text="{Binding Name, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
+                    <Grid Width="440" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="NameBox" Text="{Binding Name, Mode=TwoWay}"/>
-                            <TextBlock Text="PAB-Nr." Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="PabBox" Text="{Binding Pab, Mode=TwoWay}"/>
+                            <TextBlock Text="Steuernummer *" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="TaxNumberBox" Text="{Binding TaxNumber, Mode=TwoWay}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Steuernummer" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TaxNumberBox" Text="{Binding TaxNumber, Mode=TwoWay}"/>
-                            <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
-                            <ui:GewerbeBox x:Name="GewerbeBox" Choices="{Binding Gewerbezweige}" Kennzahl="{Binding Gewerbe, Mode=TwoWay}"
-                                           Classes.invalid="{Binding GewerbeInvalid}"/>
+                            <TextBlock Text="PAB-Nr. *" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="PabBox" Text="{Binding Pab, Mode=TwoWay}"/>
                         </StackPanel>
                     </Grid>
+                    <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
+                    <ui:GewerbeBox x:Name="GewerbeBox" Choices="{Binding Gewerbezweige}" Kennzahl="{Binding Gewerbe, Mode=TwoWay}"
+                                   Classes.invalid="{Binding GewerbeInvalid}" Width="440" HorizontalAlignment="Left"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
