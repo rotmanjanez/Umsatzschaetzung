@@ -13,14 +13,14 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed class InvoiceRow(Invoice invoice)
 {
-    public Invoice Invoice { get; } = invoice;
-    public string Id => Invoice.Id;
-    public string Supplier => Invoice.SupplierName;
-    public string Number => Invoice.Number;
-    public string Date => Format.Date(Invoice.Date);
-    public string NetTotal => Format.Cents(Invoice.NetTotal);
-    public string FileName => Invoice.FileName;
-    public Checked State => Checks.Of(Invoice);
+    public Invoice Invoice { get; set; } = invoice;
+    public string Id { get; } = invoice.Id;
+    public string Supplier { get; } = invoice.SupplierName;
+    public string Number { get; } = invoice.Number;
+    public string Date { get; } = Format.Date(invoice.Date);
+    public string NetTotal { get; } = Format.Cents(invoice.NetTotal);
+    public string FileName { get; } = invoice.FileName;
+    public Checked State { get; } = Checks.Of(invoice);
     public bool IsAutomatic => State == Checked.Automatic;
     public bool IsManual => State == Checked.Manual;
     public bool IsPending => State == Checked.Pending;
@@ -33,8 +33,12 @@ public sealed class InvoiceRow(Invoice invoice)
 
     // What the three sortable columns sort by: the review still to be done comes first.
     public int Rank => State == Checked.Pending ? 0 : State == Checked.Manual ? 1 : 2;
-    public DateOnly Sort => Invoice.Date ?? DateOnly.MinValue;
-    public long Net => Invoice.NetTotal;
+    public DateOnly Sort { get; } = invoice.Date ?? DateOnly.MinValue;
+    public long Net { get; } = invoice.NetTotal;
+
+    public bool Shows(InvoiceRow other) =>
+        (Supplier, Number, Date, NetTotal, FileName, State, Sort, Net)
+        == (other.Supplier, other.Number, other.Date, other.NetTotal, other.FileName, other.State, other.Sort, other.Net);
 }
 
 public sealed class InvoicesModel : Observable
@@ -122,12 +126,25 @@ public partial class InvoicesView : Screen
         if (!IsActive || refreshing) return;
         refreshing = true;
         var selected = (List.SelectedItem as InvoiceRow)?.Id;
-        model.Invoices.Clear();
-        if (Session.Case is { } k)
-            foreach (var inv in k.Invoices) model.Invoices.Add(new InvoiceRow(inv));
+        Merge(Session.Case?.Invoices ?? []);
         model.Counted();
         List.SelectedItem = model.Invoices.FirstOrDefault(r => r.Id == selected);
         refreshing = false;
+    }
+
+    // Rows are changed one by one instead of all at once: a reset of the list scrolls it back to the top.
+    void Merge(List<Invoice> invoices)
+    {
+        var fresh = new Dictionary<string, InvoiceRow>();
+        foreach (var inv in invoices) fresh[inv.Id] = new InvoiceRow(inv);
+        var rows = model.Invoices;
+        for (var i = rows.Count - 1; i >= 0; i--)
+        {
+            if (!fresh.Remove(rows[i].Id, out var row)) rows.RemoveAt(i);
+            else if (row.Shows(rows[i])) rows[i].Invoice = row.Invoice;
+            else rows[i] = row;
+        }
+        foreach (var row in fresh.Values) rows.Add(row);
     }
 
     void RowOpened(object? sender, TappedEventArgs e)
