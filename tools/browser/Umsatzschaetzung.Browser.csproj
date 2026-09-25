@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Umsatzschaetzung.Browser</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WasmBuildNative>true</WasmBuildNative>
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
+    <PackageReference Include="Avalonia.Browser" Version="12.1.2" />
+    <EmbeddedResource Include="../../fixtures/dataset/2025/spirituosen/2025-10-01_RE2503135.xml" LogicalName="rechnung.xml" />
+  </ItemGroup>
+</Project>
