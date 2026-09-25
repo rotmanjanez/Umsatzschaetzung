@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using SkiaSharp;
 
 namespace Umsatzschaetzung.Service;
@@ -18,56 +19,106 @@ public static class Deink
         int w = Math.Max((int)(page.Width * scale), 1), h = Math.Max((int)(page.Height * scale), 1);
         var grey = Ink.Grey(page, w, h);
         var depth = Ink.Depth(grey, w, h);
-        var marked = Ink.Otsu(depth);
-        var floor = (byte)(Ink.Median(depth, Ink.Otsu(depth, marked)) / 2);
+        var histogram = Ink.Histogram(depth);
+        var marked = Ink.Otsu(histogram);
+        var floor = (byte)(Ink.Median(histogram, Ink.Otsu(histogram, marked)) / 2);
 
-        var keep = Strokes(depth, w, h, marked, floor);
-        if (!keep.Contains(true)) return null;
+        var strokes = new Strokes(depth, w, h, marked, floor);
+        if (!strokes.Any) return null;
 
         var clean = new SKBitmap(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Premul));
-        using (var target = clean.PeekPixels())
+        Parallel.For(0, h, y =>
         {
-            var pixels = target.GetPixelSpan<uint>();
-            for (var i = 0; i < keep.Length; i++)
-                pixels[i] = 0xFF000000u | (keep[i] ? grey[i] : 255u) * 0x010101u;
-        }
+            var row = clean.GetPixelSpan().Slice(y * w * 4, w * 4);
+            var pixels = MemoryMarshal.Cast<byte, uint>(row);
+            pixels.Fill(0xFFFFFFFFu);
+            foreach (var (from, to) in strokes.Kept(y))
+                for (var x = from; x < to; x++)
+                    pixels[x] = 0xFF000000u | grey[y * w + x] * 0x010101u;
+        });
         clean.NotifyPixelsChanged();
         return clean;
     }
 
-    static bool[] Strokes(byte[] depth, int w, int h, byte marked, byte floor)
+    // The marks of a row as runs, joined to the runs of the row above that touch them, even
+    // at a corner. A stroke is a set of joined runs and reaches if any of them does.
+    sealed class Strokes
     {
-        var keep = new bool[depth.Length];
-        var seen = new bool[depth.Length];
-        var stack = new Stack<int>();
-        var stroke = new List<int>();
-        for (var start = 0; start < depth.Length; start++)
+        readonly int[] first;
+        readonly int[] from, to, parent;
+        readonly bool[] reaches;
+
+        public bool Any { get; }
+
+        public Strokes(byte[] depth, int w, int h, byte marked, byte floor)
         {
-            if (seen[start] || depth[start] <= marked) continue;
-            stroke.Clear();
-            stack.Push(start);
-            seen[start] = true;
-            var reaches = false;
-            while (stack.Count > 0)
+            var rows = new (int From, int To, bool Reaches)[h][];
+            Parallel.For(0, h, y => rows[y] = Runs(depth.AsSpan(y * w, w), marked, floor));
+
+            first = new int[h + 1];
+            for (var y = 0; y < h; y++) first[y + 1] = first[y] + rows[y].Length;
+            var count = first[h];
+            from = new int[count];
+            to = new int[count];
+            parent = new int[count];
+            reaches = new bool[count];
+            for (var y = 0; y < h; y++)
+                for (var i = 0; i < rows[y].Length; i++)
+                {
+                    var at = first[y] + i;
+                    (from[at], to[at], reaches[at]) = rows[y][i];
+                    parent[at] = at;
+                }
+
+            for (var y = 1; y < h; y++)
             {
-                var at = stack.Pop();
-                stroke.Add(at);
-                if (depth[at] >= floor) reaches = true;
-                int x = at % w, y = at / w;
-                for (var dy = -1; dy <= 1; dy++)
-                    for (var dx = -1; dx <= 1; dx++)
-                    {
-                        int nx = x + dx, ny = y + dy;
-                        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
-                        var next = ny * w + nx;
-                        if (seen[next] || depth[next] <= marked) continue;
-                        seen[next] = true;
-                        stack.Push(next);
-                    }
+                int above = first[y - 1], end = first[y];
+                for (var at = first[y]; at < first[y + 1]; at++)
+                {
+                    while (above < end && to[above] < from[at]) above++;
+                    for (var up = above; up < end && from[up] <= to[at]; up++) Join(at, up);
+                }
             }
-            if (!reaches) continue;
-            foreach (var at in stroke) keep[at] = true;
+
+            var any = false;
+            for (var at = 0; at < count; at++)
+                if (reaches[at]) reaches[Root(at)] = any = true;
+            for (var at = 0; at < count; at++) reaches[at] = reaches[Root(at)];
+            Any = any;
         }
-        return keep;
+
+        public IEnumerable<(int From, int To)> Kept(int y)
+        {
+            for (var at = first[y]; at < first[y + 1]; at++)
+                if (reaches[at]) yield return (from[at], to[at]);
+        }
+
+        static (int, int, bool)[] Runs(ReadOnlySpan<byte> row, byte marked, byte floor)
+        {
+            var runs = new List<(int, int, bool)>();
+            for (var x = 0; x < row.Length; x++)
+            {
+                if (row[x] <= marked) continue;
+                var start = x;
+                var reaches = false;
+                for (; x < row.Length && row[x] > marked; x++)
+                    if (row[x] >= floor) reaches = true;
+                runs.Add((start, x, reaches));
+            }
+            return [.. runs];
+        }
+
+        void Join(int a, int b)
+        {
+            a = Root(a);
+            b = Root(b);
+            if (a != b) parent[Math.Max(a, b)] = Math.Min(a, b);
+        }
+
+        int Root(int at)
+        {
+            while (parent[at] != at) at = parent[at] = parent[parent[at]];
+            return at;
+        }
     }
 }

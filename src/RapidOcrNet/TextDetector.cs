@@ -94,7 +94,7 @@ public sealed class TextDetector : IDisposable
         }
         else
         {
-            using var srcResize = src.Resize(new SKSizeI(scale.DstWidth, scale.DstHeight), OcrUtils.NetworkSampling);
+            using var srcResize = Bands.Resize(src, src.Info.WithSize(scale.DstWidth, scale.DstHeight), OcrUtils.NetworkSampling);
             inputTensors = OcrUtils.SubtractMeanNormalize(srcResize, _meanValues, _normValues);
         }
 

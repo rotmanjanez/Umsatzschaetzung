@@ -69,14 +69,14 @@ internal static class OcrUtils
         int plane = rows * cols;
 
         var inputTensor = new DenseTensor<float>([1, 3, rows, cols]);
-        Span<float> data = inputTensor.Buffer.Span;
-        ReadOnlySpan<byte> span = src.GetPixelSpan();
+        Memory<float> buffer = inputTensor.Buffer;
 
         if (src.Info.ColorType == SKColorType.Gray8)
         {
-            for (int r = 0; r < rows; ++r)
+            Parallel.For(0, rows, r =>
             {
-                ReadOnlySpan<byte> row = span.Slice(r * rowBytes, cols);
+                Span<float> data = buffer.Span;
+                ReadOnlySpan<byte> row = src.GetPixelSpan().Slice(r * rowBytes, cols);
                 for (int ch = 0; ch < 3; ++ch)
                 {
                     float mean = meanVals[ch], norm = normVals[ch];
@@ -86,13 +86,14 @@ internal static class OcrUtils
                         dst[c] = (row[c] - mean) * norm;
                     }
                 }
-            }
+            });
         }
         else if (src.Info.ColorType == SKColorType.Bgra8888)
         {
-            for (int r = 0; r < rows; ++r)
+            Parallel.For(0, rows, r =>
             {
-                ReadOnlySpan<byte> row = span.Slice(r * rowBytes, cols * 4);
+                Span<float> data = buffer.Span;
+                ReadOnlySpan<byte> row = src.GetPixelSpan().Slice(r * rowBytes, cols * 4);
                 for (int ch = 0; ch < 3; ++ch)
                 {
                     float mean = meanVals[ch], norm = normVals[ch];
@@ -102,7 +103,7 @@ internal static class OcrUtils
                         dst[c] = (row[c * 4 + ch] - mean) * norm;
                     }
                 }
-            }
+            });
         }
         else
         {
@@ -155,7 +156,7 @@ internal static class OcrUtils
             return src;
         }
 
-        var resized = src.Resize(new SKSizeI(dstW, dstH), NetworkSampling);
+        var resized = Bands.Resize(src, src.Info.WithSize(dstW, dstH), NetworkSampling);
         owned = true;
         return resized;
     }

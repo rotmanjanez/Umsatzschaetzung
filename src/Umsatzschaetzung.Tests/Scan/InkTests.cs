@@ -55,28 +55,28 @@ public class InkTests
     public void OtsuSplitsTwoLevels()
     {
         byte[] values = [.. Enumerable.Repeat((byte)10, 100), .. Enumerable.Repeat((byte)200, 30)];
-        Assert.InRange(Ink.Otsu(values), 10, 199);
+        Assert.InRange(Ink.Otsu(Ink.Histogram(values)), 10, 199);
     }
 
     [Fact]
     public void OtsuOnlyWeighsValuesAboveTheGivenLevel()
     {
         byte[] values = [.. Enumerable.Repeat((byte)0, 1000), .. Enumerable.Repeat((byte)60, 50), .. Enumerable.Repeat((byte)200, 50)];
-        Assert.InRange(Ink.Otsu(values, 0), 60, 199);
+        Assert.InRange(Ink.Otsu(Ink.Histogram(values), 0), 60, 199);
     }
 
     [Fact]
     public void OtsuOfNothingOrOneLevelIsZero()
     {
-        Assert.Equal(0, Ink.Otsu([]));
-        Assert.Equal(0, Ink.Otsu([7, 7, 7]));
-        Assert.Equal(0, Ink.Otsu([7, 7, 7], 7));
+        Assert.Equal(0, Ink.Otsu(Ink.Histogram([])));
+        Assert.Equal(0, Ink.Otsu(Ink.Histogram([7, 7, 7])));
+        Assert.Equal(0, Ink.Otsu(Ink.Histogram([7, 7, 7]), 7));
     }
 
     [Fact]
     public void MedianCountsOnlyValuesAboveTheLevel()
     {
-        Assert.Equal(30, Ink.Median([0, 0, 0, 0, 10, 30, 50], 0));
-        Assert.Equal(255, Ink.Median([1, 2, 3], 3));
+        Assert.Equal(30, Ink.Median(Ink.Histogram([0, 0, 0, 0, 10, 30, 50]), 0));
+        Assert.Equal(255, Ink.Median(Ink.Histogram([1, 2, 3]), 3));
     }
 }

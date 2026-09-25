@@ -42,15 +42,18 @@ public static class Deskew
 
     static double Sharpest(byte[] ink, int w, int h)
     {
+        var marks = Marks(ink, w, h);
         double lo = -Limit, hi = Limit, best = 0, top = double.MinValue;
+        var scores = new double[Steps];
         for (var round = 0; round < Rounds; round++)
         {
             var step = (hi - lo) / (Steps - 1);
+            Parallel.For(0, Steps, i => scores[i] = Peakedness(marks, w, h, lo + step * i));
             top = double.MinValue;
             for (var i = 0; i < Steps; i++)
             {
                 var angle = lo + step * i;
-                var score = Peakedness(ink, w, h, angle);
+                var score = scores[i];
                 // A page without bands scores the same at every angle and stays as it is.
                 if (score < top || score == top && Math.Abs(angle) >= Math.Abs(best)) continue;
                 top = score;
@@ -62,8 +65,23 @@ public static class Deskew
         return best;
     }
 
+    static (int[] X, int[] Y) Marks(byte[] ink, int w, int h)
+    {
+        var count = 0;
+        foreach (var v in ink) count += v;
+        int[] xs = new int[count], ys = new int[count];
+        for (int y = 0, at = 0; y < h; y++)
+            for (var x = 0; x < w; x++)
+            {
+                if (ink[y * w + x] == 0) continue;
+                xs[at] = x;
+                ys[at++] = y;
+            }
+        return (xs, ys);
+    }
+
     // Straight text piles into sharp bands and the row profile spikes; a lean smears it.
-    static double Peakedness(byte[] ink, int w, int h, double degrees)
+    static double Peakedness((int[] X, int[] Y) marks, int w, int h, double degrees)
     {
         var slope = Math.Tan(Radians(degrees));
         var whole = new int[w];
@@ -78,16 +96,12 @@ public static class Deskew
             if (whole[x] > high) high = whole[x];
         }
         var profile = new float[h + (high - low) + 2];
-        for (var y = 0; y < h; y++)
+        for (var i = 0; i < marks.X.Length; i++)
         {
-            var row = y * w;
-            for (var x = 0; x < w; x++)
-            {
-                if (ink[row + x] == 0) continue;
-                var at = y + whole[x] - low;
-                profile[at] += 1 - part[x];
-                profile[at + 1] += part[x];
-            }
+            var x = marks.X[i];
+            var at = marks.Y[i] + whole[x] - low;
+            profile[at] += 1 - part[x];
+            profile[at + 1] += part[x];
         }
         double mean = 0;
         foreach (var v in profile) mean += v;
@@ -103,7 +117,7 @@ public static class Deskew
         var w = Math.Max((int)(page.Width * scale), 1);
         var h = Math.Max((int)(page.Height * scale), 1);
         var depth = Ink.Depth(Ink.Grey(page, w, h), w, h);
-        var cut = Ink.Otsu(depth);
+        var cut = Ink.Otsu(Ink.Histogram(depth));
 
         int x0 = (int)(w * Margin), y0 = (int)(h * Margin);
         int cw = Math.Max(w - 2 * x0, 1), ch = Math.Max(h - 2 * y0, 1);
