@@ -17,6 +17,21 @@
     <Property Id="STOREPATH" Secure="yes" />
     <Property Id="STORESCOPE" Value="local" />
     <Property Id="CASEDIR" Secure="yes" />
+
+    <!-- Ein Update entfernt die alte Version samt ihrer Registry-Werte. AppSearch liest sie
+         vorher zurück; übergebene Eigenschaften und die Wahl im Dialog gehen vor. -->
+    <Property Id="PRIORSTORE">
+      <RegistrySearch Root="HKLM" Key="SOFTWARE\Umsatzschätzung" Name="Store" Type="raw" />
+    </Property>
+    <Property Id="PRIORCASEDIR">
+      <RegistrySearch Root="HKLM" Key="SOFTWARE\Umsatzschätzung" Name="CaseDir" Type="raw" />
+    </Property>
+    <SetProperty Id="LOCALSTORE" Value="[CommonAppDataFolder]Umsatzschätzung\store" Before="AppSearch" Sequence="both" />
+    <SetProperty Id="STORE" Value="[PRIORSTORE]" After="AppSearch" Sequence="both" Condition="NOT STORE AND PRIORSTORE" />
+    <SetProperty Id="CASEDIR" Value="[PRIORCASEDIR]" After="AppSearch" Sequence="both" Condition="NOT CASEDIR AND PRIORCASEDIR" />
+    <SetProperty Id="STORELOCAL" Value="1" After="SetSTORE" Sequence="both" Condition="NOT STORELOCAL AND PRIORSTORE AND STORE ~= LOCALSTORE" />
+    <SetProperty Id="STORESCOPE" Value="share" After="SetSTORE" Sequence="ui" Condition="STORE AND NOT (STORE ~= LOCALSTORE)" />
+    <SetProperty Id="STOREPATH" Value="[STORE]" After="SetSTORE" Sequence="ui" Condition="NOT STOREPATH AND STORE AND NOT (STORE ~= LOCALSTORE)" />
     <Icon Id="Umsatzschaetzung.exe" SourceFile="$(var.Dist)/umsatzschätzung.exe" />
     <Property Id="ARPPRODUCTICON" Value="Umsatzschaetzung.exe" />
     <Property Id="WEBVIEW2">
