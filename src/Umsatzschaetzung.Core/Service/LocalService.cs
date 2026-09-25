@@ -14,7 +14,7 @@ using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Service;
 
-public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion) : IService, IDisposable
+public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion, Readings? readings = null) : IService, IDisposable
 {
     const int AutoMapMinConfidence = 80;
     const int PreviewDpi = 150;
@@ -153,14 +153,22 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     public Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(ct, async () =>
     {
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
-        var pages = await Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
-        var draft = await Extractor.InvoiceAsync(tagger, pages, ct);
+        var (pages, draft) = await Read(fileName, data, ct);
         draft.Id = NewId("re-");
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
         await MapLines(draft, Gewerbe(caseId), false, ct);
         return new OcrResp(draft.Id, pages, draft);
     });
+
+    async Task<(List<OcrPage>, Invoice)> Read(string fileName, byte[] data, CancellationToken ct)
+    {
+        if (readings?.Find(data) is { } known) return (known.Pages, known.Draft);
+        var pages = await Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
+        var draft = await Extractor.InvoiceAsync(tagger, pages, ct);
+        readings?.Keep(data, new OcrResp("", pages, draft));
+        return (pages, draft);
+    }
 
     public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(ct, async () =>
     {

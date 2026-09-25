@@ -4,11 +4,13 @@
 //
 //   dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]
 //                                          [--width PT] [--height PT] [--scale N] [--pad PT]
+//                                          [--readings DIR]
 //
 //   --out     target folder for the images (default: next to the script)
 //   --rules   rule set as JSON (default: the app's own seeded rule set)
 //   --width   window width, --height window height (default: as the app opens it)
 //   --scale   pixels per point (default 2), --pad padding around a crop (default 16)
+//   --readings folder of recorded readings: a scan read once is replayed on every later run
 using System.Globalization;
 using Avalonia;
 using Avalonia.Headless;
@@ -43,7 +45,8 @@ var work = Directory.CreateTempSubdirectory("umsatzschätzung-headless-");
 var service = new LocalService(
     new RuleStore(Path.Combine(work.FullName, "store"), seed),
     new CaseStore(Path.Combine(work.FullName, "cases")),
-    new RapidOcr(), new Tagger(), new PdfiumPages(), null, "headless");
+    new RapidOcr(), new Tagger(), new PdfiumPages(), null, "headless",
+    options.TryGetValue("readings", out var readings) ? new Readings(readings) : null);
 
 AppBuilder.Configure<App>()
     .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
@@ -76,6 +79,6 @@ static int Usage(string problem)
 {
     Console.Error.WriteLine(problem);
     Console.Error.WriteLine("dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]"
-        + " [--width PT] [--height PT] [--scale N] [--pad PT]");
+        + " [--width PT] [--height PT] [--scale N] [--pad PT] [--readings DIR]");
     return 2;
 }

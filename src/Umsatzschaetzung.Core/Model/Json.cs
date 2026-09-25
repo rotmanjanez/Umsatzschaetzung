@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.Json.Serialization;
 using Umsatzschaetzung.Richtsatz;
+using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.Model;
 
@@ -15,6 +16,7 @@ namespace Umsatzschaetzung.Model;
 [JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(Invoice))]
 [JsonSerializable(typeof(Sammlung))]
+[JsonSerializable(typeof(OcrResp))]
 public sealed partial class ModelJsonContext : JsonSerializerContext
 {
 }

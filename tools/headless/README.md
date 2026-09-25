@@ -12,6 +12,12 @@ the switches. Same run, same bytes: if an image changes, the interface changed.
     --width   window width, --height window height (default: as the app opens it)
     --scale   pixels per point (default 2)
     --pad     padding around a crop (default 16)
+    --readings folder of recorded readings (default: none, every scan is read)
+
+With `--readings` a scan is read once and its reading, the words, the correction and the
+tagged draft, is kept under the hash of its bytes and the readers. Later runs replay it
+instead of reading the page again, so the images no longer depend on how fast or how
+exactly the machine reads. The `shots` job keeps that folder in the Actions cache.
 
 Files named in a script live where they live: absolute, or relative to the working
 directory.

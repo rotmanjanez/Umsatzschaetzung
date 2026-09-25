@@ -45,6 +45,15 @@ jobs:
         run: |
           curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
           unzip -q beispiel.zip -d beispiel-rechnungen
+      - name: Key the recorded readings
+        id: code
+        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v6
+        id: readings
+        with:
+          path: readings
+          key: ${{ steps.code.outputs.key }}
+          restore-keys: ${{ steps.code.outputs.key }}
       - name: Take screenshots of the interface
         run: |
           for script in web/docs/shots/*.jsonl; do
@@ -52,8 +61,13 @@ jobs:
             out=shots-out/img
             [ -d "web/docs/pages/$name" ] && out="shots-out/$name/img"
             dotnet run --project tools/headless -- "$script" \
-              --width 1320 --height 860 --out "$out"
+              --width 1320 --height 860 --out "$out" --readings readings
           done
+      - uses: actions/cache/save@v6
+        if: always() && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
+        with:
+          path: readings
+          key: ${{ steps.code.outputs.key }}-${{ hashFiles('readings/*.json') }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:

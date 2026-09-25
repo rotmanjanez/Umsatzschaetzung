@@ -26,13 +26,13 @@ public class Host : IDisposable
 
     readonly TempDir dir = new();
 
-    public Host(IOcr? ocr = null, IPdfPages? pdf = null, IPdfPrinter? printer = null)
+    public Host(IOcr? ocr = null, IPdfPages? pdf = null, IPdfPrinter? printer = null, Readings? readings = null)
     {
         Directory.CreateDirectory(Sub("store"));
         File.Copy(Seeded.Value, Path.Combine(Sub("store"), "rules.db"));
         Store = new RuleStore(Sub("store"), TestData.Seed());
         Cases = new CaseStore(Sub("cases"));
-        Service = new LocalService(Store, Cases, ocr, Tagger, pdf, printer, "test");
+        Service = new LocalService(Store, Cases, ocr, Tagger, pdf, printer, "test", readings);
     }
 
     public RuleStore Store { get; }
