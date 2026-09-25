@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Umsatzschaetzung.Model;
 
@@ -271,8 +272,11 @@ public partial class RulesView : Screen
     public static readonly string[] RecipeUnits = ["GRM", "KGM", "MLT", "LTR", "H87"];
     public const string PortionUnit = "H87";
 
+    const int IngredientPage = 0, GewerbePage = 3;
+
     readonly RulesModel model = new();
-    bool loading, saving;
+    readonly Autosave ingredientSave, gewerbeSave;
+    bool loading, saving, filling;
     Action<string>? productCreated;
     (string Id, List<RecipeLine>? Recipe)? wanted;
 
@@ -288,6 +292,9 @@ public partial class RulesView : Screen
 
     protected override int Page => Tabs.SelectedIndex;
 
+    // Products and yield rules still wait for their save button, so typing there is undone in the field.
+    public bool TypingFirst => Tabs.SelectedIndex is 1 or 2;
+
     public RulesView(Session session) : base(session)
     {
         InitializeComponent();
@@ -300,6 +307,27 @@ public partial class RulesView : Screen
         IngredientGrid.ItemsSource = IngredientSearch.View;
         ProductGrid.ItemsSource = ProductSearch.View;
         ScopeGrid.ItemsSource = YieldSearch.View;
+        ingredientSave = new Autosave(SaveIngredient);
+        gewerbeSave = new Autosave(SaveGewerbe);
+        model.Ingredients.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(IngredientForm.Name) or nameof(IngredientForm.Aliases)
+                or nameof(IngredientForm.Piece) or nameof(IngredientForm.PieceUnitIndex)) Edited(ingredientSave);
+        };
+        // A new category is saved once its name is complete, not letter by letter.
+        model.Ingredients.Category.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(CategoryPicker.Selected) && !model.Ingredients.Category.Creating) Edited(ingredientSave);
+        };
+        model.Gewerbe.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(GewerbeForm.Kennzahl) or nameof(GewerbeForm.Name)) Edited(gewerbeSave);
+        };
+    }
+
+    void Edited(Autosave save)
+    {
+        if (!filling) save.Schedule();
     }
 
     protected override async void OnEnter()
@@ -308,7 +336,12 @@ public partial class RulesView : Screen
         await Session.LoadRules(Ct);
     }
 
-    protected override void OnLeave() => Session.RulesChanged -= Rebuild;
+    protected override void OnLeave()
+    {
+        Session.RulesChanged -= Rebuild;
+        _ = ingredientSave.Now();
+        _ = gewerbeSave.Now();
+    }
 
     void Rebuild()
     {
@@ -340,9 +373,16 @@ public partial class RulesView : Screen
         GewerbeGrid.SelectedItem = model.Gewerbe.Items.FirstOrDefault(g => g.Zweig.Id == model.Gewerbe.CurrentId);
 
         loading = false;
-        if (GewerbeGrid.SelectedItem is GewerbeItem gi) LoadGewerbe(gi.Zweig);
-        else if (model.Gewerbe.CurrentId is not null) model.Gewerbe.Active = false;
-        if (IngredientGrid.SelectedItem is IngredientItem ii) LoadIngredient(ii.Ingredient); else model.Ingredients.Active = false;
+        if (!gewerbeSave.Busy)
+        {
+            if (GewerbeGrid.SelectedItem is GewerbeItem gi) LoadGewerbe(gi.Zweig);
+            else if (model.Gewerbe.CurrentId is not null) model.Gewerbe.Active = false;
+        }
+        if (!ingredientSave.Busy)
+        {
+            if (IngredientGrid.SelectedItem is IngredientItem ii) LoadIngredient(ii.Ingredient);
+            else model.Ingredients.Active = false;
+        }
         if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product);
         else if (model.Products.CurrentId is not null) model.Products.Active = false;
         if (ScopeGrid.SelectedItem is ScopeItem si) ShowScope(si, model.Yields.CurrentId); else model.Yields.Active = false;
@@ -354,6 +394,8 @@ public partial class RulesView : Screen
     public async Task Move(bool back)
     {
         if (!IsActive) return;
+        await ingredientSave.Now();
+        await gewerbeSave.Now();
         if ((back ? await History.Undo() : await History.Redo()) is not { } place) return;
         Tabs.SelectedIndex = place.Page;
         EntityForm form = place.Page switch
@@ -387,17 +429,22 @@ public partial class RulesView : Screen
             "„" + form.Title + "“ wird dauerhaft aus den Regeln entfernt. Bereits erstellte Berichte bleiben unverändert.",
             noun + " löschen");
         if (!confirmed) return;
+        if (form == model.Ingredients) ingredientSave.Cancel();
+        if (form == model.Gewerbe) gewerbeSave.Cancel();
         if (await Session.Delete(entity, id, At(id), Ct)) form.CurrentId = null;
     }
 
     void IngredientSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (!loading && IngredientGrid.SelectedItem is IngredientItem item) LoadIngredient(item.Ingredient);
+        if (loading || IngredientGrid.SelectedItem is not IngredientItem item) return;
+        _ = ingredientSave.Now();
+        LoadIngredient(item.Ingredient);
     }
 
     void LoadIngredient(Ingredient i)
     {
         var f = model.Ingredients;
+        filling = true;
         f.CurrentId = i.Id;
         f.Existing = f.Active = true;
         f.Title = i.Name;
@@ -405,11 +452,14 @@ public partial class RulesView : Screen
         f.Aliases = string.Join(Environment.NewLine, i.Aliases);
         f.LoadPiece(i.Piece, Session.Rules is { } rs ? Scale.Of(rs, i.Id) : null);
         f.Category.Load(Session.Categories(), i.CategoryId);
+        filling = false;
     }
 
     void NewIngredient(object? sender, RoutedEventArgs e)
     {
+        _ = ingredientSave.Now();
         var f = model.Ingredients;
+        filling = true;
         IngredientGrid.SelectedItem = null;
         f.CurrentId = null;
         f.Existing = false;
@@ -418,32 +468,46 @@ public partial class RulesView : Screen
         f.Name = f.Aliases = "";
         f.LoadPiece(null, null);
         f.Category.Load(Session.Categories(), null);
+        filling = false;
     }
 
-    async void SaveIngredient(object? sender, RoutedEventArgs e)
+    void CategoryNamed(object? sender, RoutedEventArgs e)
+    {
+        if (!model.Ingredients.Category.Creating) return;
+        ingredientSave.Schedule();
+        _ = ingredientSave.Now();
+    }
+
+    void CategoryNameKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter) CategoryNamed(sender, e);
+    }
+
+    // The form is read before the first await, so a save started by picking another entry takes the one left.
+    async Task SaveIngredient()
     {
         var f = model.Ingredients;
         var weight = Input.Int(f.Piece);
         f.NameInvalid = f.Name.Trim() == "";
         f.PieceInvalid = f.Piece.Trim() != "" && weight is not > 0;
-        if (f.NameInvalid || f.PieceInvalid)
-        {
-            Session.Fail(Missing(f.NameInvalid ? "Name" : null, f.PieceInvalid ? "Stückgewicht (größer als 0)" : null));
-            return;
-        }
+        f.Category.Invalid = f.Category.Creating && f.Category.NewName.Trim() == "";
+        if (f.NameInvalid || f.PieceInvalid || f.Category.Invalid) return;
         var id = f.CurrentId ?? Session.NewId("ingredient");
+        var at = new Place(History, IngredientPage, id);
         var data = new Ingredient
         {
             Id = id, Name = f.Name.Trim(), Aliases = AliasLines(f.Aliases),
             Piece = weight is { } w ? new Piece(w, IngredientForm.PieceUnits[f.PieceUnitIndex]) : null,
         };
-        await Compose(async () =>
-        {
-            if (await CategoryId(f.Category, At(id)) is not { } categoryId) return;
-            data.CategoryId = categoryId;
-            f.CurrentId = id;
-            await Session.Put(data, At(id), Ct);
-        });
+        f.CurrentId = id;
+        if (await CategoryId(f.Category, at) is not { } categoryId) return;
+        data.CategoryId = categoryId;
+        if (!await Session.Put(data, at, CancellationToken.None) || f.CurrentId != id) return;
+        filling = true;
+        f.Existing = true;
+        f.Title = data.Name;
+        if (f.Category.Creating) f.Category.Load(Session.Categories(), categoryId);
+        filling = false;
     }
 
     static List<string> AliasLines(string text) =>
@@ -596,7 +660,7 @@ public partial class RulesView : Screen
         if (Session.Categories().Find(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) is { } existing)
             return existing.Id;
         var id = Session.NewId("category");
-        return await Session.Put(new Category { Id = id, Name = name }, at, Ct) ? id : null;
+        return await Session.Put(new Category { Id = id, Name = name }, at, CancellationToken.None) ? id : null;
     }
 
     List<ScopeItem> YieldScopes(RuleSet rs)
@@ -738,46 +802,49 @@ public partial class RulesView : Screen
 
     void GewerbeSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (!loading && GewerbeGrid.SelectedItem is GewerbeItem item) LoadGewerbe(item.Zweig);
+        if (loading || GewerbeGrid.SelectedItem is not GewerbeItem item) return;
+        _ = gewerbeSave.Now();
+        LoadGewerbe(item.Zweig);
     }
 
     void LoadGewerbe(Gewerbezweig g)
     {
         var f = model.Gewerbe;
+        filling = true;
         f.CurrentId = g.Id;
         f.Existing = f.Active = true;
         f.Title = g.Kennzahl + " " + g.Name;
         f.Kennzahl = g.Kennzahl;
         f.Name = g.Name;
+        filling = false;
     }
 
     void NewGewerbe(object? sender, RoutedEventArgs e)
     {
+        _ = gewerbeSave.Now();
         var f = model.Gewerbe;
+        filling = true;
         GewerbeGrid.SelectedItem = null;
         f.CurrentId = null;
         f.Existing = false;
         f.Active = true;
         f.Title = "Neue Gewerbekennzahl";
         f.Kennzahl = f.Name = "";
+        filling = false;
     }
 
-    async void SaveGewerbe(object? sender, RoutedEventArgs e)
+    async Task SaveGewerbe()
     {
         var f = model.Gewerbe;
         var data = new Gewerbezweig { Id = f.CurrentId ?? Session.NewId("gewerbe"), Kennzahl = f.Kennzahl.Trim(), Name = f.Name.Trim() };
         var taken = Session.Gewerbezweige().Exists(g => g.Kennzahl == data.Kennzahl && g.Id != data.Id);
         f.KennzahlInvalid = !Gewerbe.Kennzahl(data.Kennzahl) || taken;
         f.NameInvalid = data.Name == "";
-        if (f.KennzahlInvalid || f.NameInvalid)
-        {
-            Session.Fail(Missing(
-                f.KennzahlInvalid ? taken ? "Kennzahl (gibt es schon)" : "Kennzahl (etwa 56101.0)" : null,
-                f.NameInvalid ? "Bezeichnung" : null));
-            return;
-        }
+        if (f.KennzahlInvalid || f.NameInvalid) return;
         f.CurrentId = data.Id;
-        await Session.Put(data, At(data.Id), Ct);
+        if (!await Session.Put(data, new Place(History, GewerbePage, data.Id), CancellationToken.None) || f.CurrentId != data.Id) return;
+        f.Existing = true;
+        f.Title = data.Kennzahl + " " + data.Name;
     }
 
     async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig);

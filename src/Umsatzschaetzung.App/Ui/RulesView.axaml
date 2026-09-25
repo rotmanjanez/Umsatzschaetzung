@@ -75,12 +75,10 @@
                                     <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
                                               DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"/>
                                     <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
-                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
+                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"
+                                             LostFocus="CategoryNamed" KeyDown="CategoryNameKey"/>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveIngredient">
-                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
-                                    </Button>
                                     <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteIngredient" IsVisible="{Binding Existing}">
                                         <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                     </Button>
@@ -363,9 +361,6 @@
                                 <TextBlock Text="Die Kennzahlen stehen in der Prüfung zur Wahl. Kategorien grenzen ihre Zutaten über den Anfang der Kennzahl ein, etwa „561“ für alle Gaststätten."
                                            Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveGewerbe">
-                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
-                                    </Button>
                                     <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteGewerbe" IsVisible="{Binding Existing}">
                                         <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                     </Button>
