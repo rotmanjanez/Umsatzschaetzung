@@ -18,6 +18,7 @@ public class RuleStoreTests
         Products = Sorted(rs.Products),
         YieldRules = Sorted(rs.YieldRules),
         Gewerbezweige = Sorted(rs.Gewerbezweige),
+        Templates = Sorted(rs.Templates),
     });
 
     static Dictionary<string, T> Sorted<T>(Dictionary<string, T> d) =>
@@ -75,7 +76,7 @@ public class RuleStoreTests
         Assert.Equal(0, merged.Products["prod.korn.2cl"].Meta.Rev);
     }
 
-    public static TheoryData<string> Kinds => ["category", "ingredient", "mapping", "product", "yield_rule", "gewerbe"];
+    public static TheoryData<string> Kinds => ["category", "ingredient", "mapping", "product", "yield_rule", "gewerbe", "template"];
 
     static IRuleEntity Full(string kind) => kind switch
     {
@@ -92,6 +93,7 @@ public class RuleStoreTests
             Recipe = [new() { IngredientId = "ing.b", Amount = 250, Unit = "MLT" }, new() { IngredientId = "ing.a", Amount = 250, Unit = "MLT" }, new() { ProductId = "prod.x", Amount = 2, Unit = "H87" }],
         },
         "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "56101.0", Name = "Gast-, Speise- und Schankwirtschaften", Meta = Stamped() },
+        "template" => new ReportTemplate { Id = "e", Name = "Kurz & knapp", Source = "<h1>{{ case.label }}</h1>\n", Default = true, Meta = Stamped() },
         _ => new YieldRule
         {
             Id = "e", Name = "Schwund", CategoryId = "cat.x", IngredientId = "ing.y", Deduction = 1_000, Default = true,
@@ -106,6 +108,7 @@ public class RuleStoreTests
         "mapping" => new ArticleMapping { Id = "e", IngredientId = "i" },
         "product" => new Product { Id = "e", Name = "n" },
         "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "k", Name = "n" },
+        "template" => new ReportTemplate { Id = "e", Name = "n" },
         _ => new YieldRule { Id = "e", Name = "n" },
     };
 
@@ -123,6 +126,7 @@ public class RuleStoreTests
         ArticleMapping => Entity.Mapping,
         Product => Entity.Product,
         Gewerbezweig => Entity.Gewerbezweig,
+        ReportTemplate => Entity.Template,
         _ => Entity.YieldRule,
     };
 
@@ -330,6 +334,47 @@ public class RuleStoreTests
     }
 
     [Fact]
+    public void AnUntouchedTemplateFollowsTheSeedAnEditedOneKeepsItsOwn()
+    {
+        using var tmp = new TempDir();
+        var seed = TestData.Seed();
+        seed.Put(new ReportTemplate { Id = "tpl.a", Name = "A", Source = "alt", Default = true });
+        seed.Put(new ReportTemplate { Id = "tpl.b", Name = "B", Source = "alt" });
+        new RuleStore(tmp.Path, seed);
+        Sql.Exec(tmp.Sub("rules.db"), "UPDATE template SET source = 'eigen', rev = 1 WHERE id = 'tpl.b'");
+        seed.Templates["tpl.a"].Source = seed.Templates["tpl.b"].Source = "neu";
+
+        var templates = new RuleStore(tmp.Path, seed).Load().Templates;
+
+        Assert.Equal(("neu", "eigen"), (templates["tpl.a"].Source, templates["tpl.b"].Source));
+    }
+
+    [Fact]
+    public void ANewDefaultTemplateTakesTheDefaultFromTheOld()
+    {
+        using var tmp = new TempDir();
+        var store = Open(tmp);
+        store.Save(new ReportTemplate { Id = "tpl.a", Name = "A", Default = true });
+
+        var rs = store.Save(new ReportTemplate { Id = "tpl.b", Name = "B", Default = true });
+
+        Assert.Equal(["tpl.b"], rs.Templates.Values.Where(t => t.Default).Select(t => t.Id));
+        Assert.Equal("tpl.b", rs.Template(null)!.Id);
+        Assert.Equal("tpl.a", rs.Template("tpl.a")!.Id);
+        Assert.Equal("tpl.b", rs.Template("tpl.gelöscht")!.Id);
+    }
+
+    [Fact]
+    public void TheShippedSeedCarriesTheReportAsItsDefaultTemplate()
+    {
+        var t = RuleStore.Seed().Template(null);
+
+        Assert.NotNull(t);
+        Assert.Equal(Umsatzschaetzung.Reports.Html.BuiltinId, t.Id);
+        Assert.Equal(File.ReadAllText(Path.Combine(TestData.Repo, "src/Umsatzschaetzung.Core/Reports/bericht.html")), t.Source);
+    }
+
+    [Fact]
     public void AStoreFromANewerProgramIsUnavailable()
     {
         using var tmp = new TempDir();
@@ -473,6 +518,7 @@ public class RuleStoreTests
             .. seed.Products.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.YieldRules.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.Gewerbezweige.Select(e => (e.Key, (IRuleEntity)e.Value)),
+            .. seed.Templates.Select(e => (e.Key, (IRuleEntity)e.Value)),
         ];
 
         Assert.NotEmpty(all);

@@ -1,0 +1,1922 @@
+{
+  "type": "object",
+  "properties": {
+    "case": {
+      "description": "Die Prüfung, wie sie gespeichert ist, mit allen Rechnungen und Zeilen.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "periodFrom": {
+          "type": "string",
+          "format": "date"
+        },
+        "periodTo": {
+          "type": "string",
+          "format": "date"
+        },
+        "taxpayer": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "taxNumber": {
+              "type": "string"
+            },
+            "pabNumber": {
+              "type": "string"
+            },
+            "gewerbe": {
+              "type": "string"
+            }
+          }
+        },
+        "declared": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vat": {
+                "type": "integer"
+              },
+              "net": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ingredientId": {
+                "type": "string"
+              },
+              "opening": {
+                "type": "integer"
+              },
+              "closing": {
+                "type": "integer"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "invoices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "ubl",
+                  "cii",
+                  "zugferd",
+                  "scan"
+                ]
+              },
+              "fileName": {
+                "type": "string"
+              },
+              "supplierName": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              },
+              "date": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "netTotal": {
+                "type": "integer"
+              },
+              "grossTotal": {
+                "type": "integer"
+              },
+              "statedNet": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "statedGross": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "lines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "no": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "sellerArticleId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "gtin": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "integer"
+                    },
+                    "unitCode": {
+                      "type": "string"
+                    },
+                    "unitPrice": {
+                      "type": "integer"
+                    },
+                    "priceBaseQty": {
+                      "type": "integer"
+                    },
+                    "lineNet": {
+                      "type": "integer"
+                    },
+                    "vat": {
+                      "type": "integer"
+                    },
+                    "mappingId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              },
+              "verification": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "auto": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": {
+                "type": "string"
+              },
+              "grossPrice": {
+                "type": "integer"
+              },
+              "vat": {
+                "type": "integer"
+              },
+              "recipe": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ingredientId": {
+                      "type": "string"
+                    },
+                    "productId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "amount": {
+                      "type": "integer"
+                    },
+                    "unit": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "recipeBasis": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "yields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ingredientId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "categoryId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "yieldRuleId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pinned": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": {
+                "type": "string"
+              },
+              "portions": {
+                "type": "integer"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "noRevenue": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "templateId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mappedAt": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "rules": {
+      "description": "Die Regeln, mit denen gerechnet wurde; Rezepturen so, wie diese Prüfung sie anpasst.",
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer"
+        },
+        "categories": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "gewerbe": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "gebinde": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sparte": {
+                "enum": [
+                  "unbestimmt",
+                  "getraenke",
+                  "speisen",
+                  "handelsware"
+                ]
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ingredients": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "categoryId": {
+                "type": "string"
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "piece": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "unit": {
+                    "enum": [
+                      "ml",
+                      "g",
+                      "piece"
+                    ]
+                  }
+                },
+                "required": [
+                  "amount",
+                  "unit"
+                ]
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "supplierName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "supplierArticleId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gtin": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "observed": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unitCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ingredientId": {
+                "type": "string"
+              },
+              "factor": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "confirmed": {
+                "type": "boolean"
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "products": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "recipe": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/properties/case/properties/products/items/properties/recipe/items"
+                }
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "yieldRules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "categoryId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ingredientId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "deduction": {
+                "type": "integer"
+              },
+              "default": {
+                "type": "boolean"
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "gewerbezweige": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kennzahl": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "templates": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "default": {
+                "type": "boolean"
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "report": {
+      "description": "Das Ergebnis der Kalkulation.",
+      "type": "object",
+      "properties": {
+        "caseId": {
+          "type": "string"
+        },
+        "computedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "totals": {
+          "type": "object",
+          "properties": {
+            "calculatedRevenueNet": {
+              "type": "integer"
+            },
+            "purchases": {
+              "type": "integer"
+            },
+            "costOfGoods": {
+              "type": "integer"
+            },
+            "stockChange": {
+              "type": "integer"
+            },
+            "sellableCost": {
+              "type": "integer"
+            },
+            "allocatedCost": {
+              "type": "integer"
+            },
+            "shrinkageCost": {
+              "type": "integer"
+            },
+            "unallocatedCost": {
+              "type": "integer"
+            },
+            "pricedCost": {
+              "type": "integer"
+            },
+            "pricedPortions": {
+              "type": "integer"
+            },
+            "grossProfit": {
+              "type": "integer"
+            },
+            "markup": {
+              "type": "integer"
+            },
+            "estimatedCost": {
+              "type": "integer"
+            },
+            "estimatedRevenueNet": {
+              "type": "integer"
+            },
+            "revenueNet": {
+              "type": "integer"
+            },
+            "portions": {
+              "type": "integer"
+            },
+            "unmappedCost": {
+              "type": "integer"
+            },
+            "unusedCost": {
+              "type": "integer"
+            },
+            "noRevenueCost": {
+              "type": "integer"
+            },
+            "depositCharged": {
+              "type": "integer"
+            },
+            "depositRefunded": {
+              "type": "integer"
+            },
+            "excludedShare": {
+              "type": "integer"
+            }
+          }
+        },
+        "ingredients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ingredientId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "unit": {
+                "enum": [
+                  "ml",
+                  "g",
+                  "piece"
+                ]
+              },
+              "purchases": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "invoiceId": {
+                      "type": "string"
+                    },
+                    "invoice": {
+                      "type": "string"
+                    },
+                    "lineNo": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "integer"
+                    },
+                    "unitCode": {
+                      "type": "string"
+                    },
+                    "unit": {
+                      "enum": [
+                        "ml",
+                        "g",
+                        "piece"
+                      ]
+                    },
+                    "factor": {
+                      "type": "integer"
+                    },
+                    "per": {
+                      "type": "integer"
+                    },
+                    "source": {
+                      "enum": [
+                        "table",
+                        "manual",
+                        "pack",
+                        "piece"
+                      ]
+                    },
+                    "qty": {
+                      "type": "integer"
+                    },
+                    "net": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "opening": {
+                "type": "integer"
+              },
+              "closing": {
+                "type": "integer"
+              },
+              "bought": {
+                "type": "integer"
+              },
+              "cost": {
+                "type": "integer"
+              },
+              "used": {
+                "type": "integer"
+              },
+              "usedCost": {
+                "type": "integer"
+              },
+              "yield": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "categoryId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "ingredientId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "deduction": {
+                    "type": "integer"
+                  },
+                  "default": {
+                    "type": "boolean"
+                  },
+                  "meta": {
+                    "$ref": "#/properties/rules/properties/yieldRules/additionalProperties/properties/meta"
+                  }
+                }
+              },
+              "yieldRate": {
+                "type": "integer"
+              },
+              "sellable": {
+                "type": "integer"
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "productId": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "portions": {
+                      "type": "integer"
+                    },
+                    "perPortion": {
+                      "type": "integer"
+                    },
+                    "qty": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "leftover": {
+                "type": "integer"
+              },
+              "binding": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "binding": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pinReason": {
+                "type": "string"
+              },
+              "sparte": {
+                "enum": [
+                  "unbestimmt",
+                  "getraenke",
+                  "speisen",
+                  "handelsware"
+                ]
+              },
+              "portions": {
+                "type": "integer"
+              },
+              "costPerPortion": {
+                "type": "integer"
+              },
+              "costOfGoods": {
+                "type": "integer"
+              },
+              "pinned": {
+                "type": "boolean"
+              },
+              "grossPrice": {
+                "type": "integer"
+              },
+              "vat": {
+                "type": "integer"
+              },
+              "unitNet": {
+                "type": "integer"
+              },
+              "revenueNet": {
+                "type": "integer"
+              },
+              "markup": {
+                "type": "integer"
+              },
+              "priceMissing": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "markups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sparte": {
+                "enum": [
+                  "unbestimmt",
+                  "getraenke",
+                  "speisen",
+                  "handelsware"
+                ]
+              },
+              "portions": {
+                "type": "integer"
+              },
+              "costOfGoods": {
+                "type": "integer"
+              },
+              "revenueNet": {
+                "type": "integer"
+              },
+              "grossProfit": {
+                "type": "integer"
+              },
+              "markup": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "unmapped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invoiceId": {
+                "type": "string"
+              },
+              "lineNo": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "lineNet": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "unused": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "invoiceId": {
+                "type": "string"
+              },
+              "lineNo": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "lineNet": {
+                "type": "integer"
+              },
+              "ingredientId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "deposits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/report/properties/unused/items"
+          }
+        },
+        "noRevenue": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/report/properties/unused/items"
+          }
+        },
+        "estimated": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "enum": [
+                  "preis",
+                  "rest",
+                  "rezeptur"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "invoice": {
+                "type": "string"
+              },
+              "date": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "unit": {
+                "enum": [
+                  "ml",
+                  "g",
+                  "piece"
+                ]
+              },
+              "qty": {
+                "type": "integer"
+              },
+              "basis": {
+                "enum": [
+                  "unbestimmt",
+                  "getraenke",
+                  "speisen",
+                  "handelsware"
+                ]
+              },
+              "cost": {
+                "type": "integer"
+              },
+              "markup": {
+                "type": "integer"
+              },
+              "revenueNet": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "component": {
+                "type": "integer"
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "productId": {
+                      "type": "string"
+                    },
+                    "portions": {
+                      "type": "integer"
+                    },
+                    "pinned": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "binding": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "leftover": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ingredientId": {
+                      "type": "string"
+                    },
+                    "qty": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "grid": {
+                "type": "integer"
+              },
+              "states": {
+                "type": "integer"
+              },
+              "approximate": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "lineNo": {
+                "type": "integer"
+              },
+              "field": {
+                "enum": [
+                  "quantity",
+                  "unit",
+                  "name",
+                  "articleId",
+                  "unitPrice",
+                  "lineNet",
+                  "vat",
+                  "invoiceNumber",
+                  "invoiceDate",
+                  "supplier",
+                  "netTotal",
+                  "grossTotal",
+                  "numberLabel",
+                  "dateLabel",
+                  "netLabel",
+                  "grossLabel",
+                  "vatLabel",
+                  "otherLabel",
+                  "cell",
+                  null
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "included": {
+      "description": "Rechnungen mit den Zeilen, die in den Wareneinsatz eingehen, nach Datum und Nummer.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/properties/case/properties/invoices/items/properties/lines/items"
+            }
+          }
+        },
+        "required": [
+          "number",
+          "fileName",
+          "date",
+          "lines"
+        ]
+      }
+    },
+    "revenue": {
+      "description": "Umsatz vor und nach Prüfung je Steuersatz; die letzte Zeile (total) ist die Summe.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vat": {
+            "type": "integer"
+          },
+          "declared": {
+            "type": "integer"
+          },
+          "calculated": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "boolean"
+          },
+          "difference": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vat",
+          "declared",
+          "calculated",
+          "total"
+        ]
+      }
+    },
+    "invoiceCount": {
+      "description": "Anzahl der Rechnungen in included.",
+      "type": "integer"
+    },
+    "includedNet": {
+      "description": "Wareneinsatz samt Bestandsveränderung, in Cent.",
+      "type": "integer"
+    },
+    "excluded": {
+      "description": "Einkauf ohne Zuordnung oder ohne Umsatz, in Cent.",
+      "type": "integer"
+    },
+    "estimated": {
+      "description": "Über den Aufschlagsatz geschätzter Umsatz, getrennt nach Herkunft.",
+      "type": "object",
+      "properties": {
+        "products": {
+          "type": "object",
+          "properties": {
+            "rows": {
+              "type": "array",
+              "items": {
+                "$ref": "#/properties/report/properties/estimated/items"
+              }
+            },
+            "cost": {
+              "type": "integer"
+            },
+            "revenueNet": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "rows",
+            "cost",
+            "revenueNet"
+          ]
+        },
+        "leftover": {
+          "type": "object",
+          "properties": {
+            "rows": {
+              "$ref": "#/properties/estimated/properties/products/properties/rows"
+            },
+            "cost": {
+              "type": "integer"
+            },
+            "revenueNet": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "rows",
+            "cost",
+            "revenueNet"
+          ]
+        },
+        "lines": {
+          "type": "object",
+          "properties": {
+            "rows": {
+              "$ref": "#/properties/estimated/properties/products/properties/rows"
+            },
+            "cost": {
+              "type": "integer"
+            },
+            "revenueNet": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "rows",
+            "cost",
+            "revenueNet"
+          ]
+        }
+      },
+      "required": [
+        "products",
+        "leftover",
+        "lines"
+      ]
+    },
+    "calculation": {
+      "description": "Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sparte": {
+            "enum": [
+              "unbestimmt",
+              "getraenke",
+              "speisen",
+              "handelsware",
+              null
+            ]
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/properties/report/properties/products/items"
+            }
+          },
+          "cost": {
+            "type": "integer"
+          },
+          "markup": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sparte",
+          "rows",
+          "cost",
+          "markup"
+        ]
+      }
+    },
+    "rahmen": {
+      "description": "Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "jahr": {
+          "type": "integer"
+        },
+        "klasse": {
+          "type": "string"
+        },
+        "stufe": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "aufschlag": {
+          "type": "object",
+          "properties": {
+            "von": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "bis": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "mittel": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "von",
+            "bis",
+            "mittel"
+          ]
+        },
+        "von": {
+          "type": "integer"
+        },
+        "bis": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jahr",
+        "klasse",
+        "stufe",
+        "aufschlag"
+      ]
+    },
+    "lage": {
+      "description": "Lage des kalkulierten Aufschlagsatzes zum Rahmen.",
+      "enum": [
+        "unter",
+        "im",
+        "über",
+        null
+      ]
+    },
+    "anyYields": {
+      "description": "Ob irgendeine Zutat eine Ertragsregel trägt.",
+      "type": "boolean"
+    },
+    "gewerbe": {
+      "description": "Die Gewerbekennzahl der Prüfung aus den Regeln.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kennzahl": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "meta": {
+          "$ref": "#/properties/rules/properties/gewerbezweige/additionalProperties/properties/meta"
+        }
+      }
+    },
+    "richtsatz": {
+      "description": "Die verwendete Richtsatzsammlung mit der ganzen Gewerbeklasse der Prüfung und den Pauschbeträgen.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "jahr": {
+          "type": "integer"
+        },
+        "quelle": {
+          "type": "string"
+        },
+        "importedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "klasse": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "zusatz": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kennzahlen": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "staffeln": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "stufe": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "von": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "bis": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "sätze": {
+                    "type": "object",
+                    "properties": {
+                      "aufschlag": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "von": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "bis": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "mittel": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "von",
+                          "bis",
+                          "mittel"
+                        ]
+                      },
+                      "rohgewinnI": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "von": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "bis": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "mittel": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "von",
+                          "bis",
+                          "mittel"
+                        ]
+                      },
+                      "rohgewinnII": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "von": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "bis": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "mittel": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "von",
+                          "bis",
+                          "mittel"
+                        ]
+                      },
+                      "halbreingewinn": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "von": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "bis": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "mittel": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "von",
+                          "bis",
+                          "mittel"
+                        ]
+                      },
+                      "reingewinn": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "von": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "bis": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "mittel": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "von",
+                          "bis",
+                          "mittel"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "aufschlag",
+                      "rohgewinnI",
+                      "rohgewinnII",
+                      "halbreingewinn",
+                      "reingewinn"
+                    ]
+                  }
+                },
+                "required": [
+                  "stufe",
+                  "von",
+                  "bis",
+                  "sätze"
+                ]
+              }
+            },
+            "bemerkung": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "seite": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "zusatz",
+            "kennzahlen",
+            "staffeln",
+            "bemerkung",
+            "seite"
+          ]
+        },
+        "pauschbeträge": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "von": {
+                "type": "string",
+                "format": "date"
+              },
+              "bis": {
+                "type": "string",
+                "format": "date"
+              },
+              "gewerbezweig": {
+                "type": "string"
+              },
+              "ermäßigt": {
+                "type": "integer"
+              },
+              "voll": {
+                "type": "integer"
+              },
+              "gesamt": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "von",
+              "bis",
+              "gewerbezweig",
+              "ermäßigt",
+              "voll",
+              "gesamt"
+            ]
+          }
+        }
+      },
+      "required": [
+        "jahr",
+        "quelle",
+        "importedAt",
+        "klasse",
+        "pauschbeträge"
+      ]
+    },
+    "suppliers": {
+      "description": "Je Lieferant Anzahl und Summe aller Rechnungen der Prüfung, in Cent.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "invoices": {
+            "type": "integer"
+          },
+          "net": {
+            "type": "integer"
+          },
+          "gross": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "invoices",
+          "net",
+          "gross"
+        ]
+      }
+    },
+    "marks": {
+      "description": "Kopf- und Fußzeilen, die ins PDF gestempelt werden.",
+      "type": "object",
+      "properties": {
+        "topLeft": {
+          "type": "string"
+        },
+        "topRight": {
+          "type": "string"
+        },
+        "footer": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "topLeft",
+        "topRight",
+        "footer"
+      ]
+    },
+    "template": {
+      "description": "Die Vorlage, aus der dieser Bericht entsteht.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "periodDays": {
+      "description": "Tage im Prüfungszeitraum, beide Enden eingeschlossen.",
+      "type": "integer"
+    },
+    "generatedAt": {
+      "description": "Zeitpunkt, zu dem der Bericht erzeugt wurde.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "appVersion": {
+      "description": "Version des Programms.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case",
+    "rules",
+    "report",
+    "included",
+    "revenue",
+    "estimated",
+    "calculation",
+    "suppliers",
+    "marks",
+    "template"
+  ]
+}

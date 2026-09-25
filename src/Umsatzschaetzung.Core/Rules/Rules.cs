@@ -19,6 +19,7 @@ public static class RuleCheck
         foreach (var (id, e) in rs.Gewerbezweige)
             if (!kennzahlen.Add(ValidateGewerbezweig(Keyed(id, e)).Kennzahl))
                 throw new RulesException($"Gewerbekennzahl {e.Kennzahl} gibt es schon");
+        foreach (var (id, e) in rs.Templates) ValidateTemplate(rs, Keyed(id, e));
     }
 
     // Names of the entries that would dangle if this entity were deleted.
@@ -170,5 +171,20 @@ public static class RuleCheck
             throw new RulesException($"Ausbeuteregel: Kategorie \"{category}\" existiert nicht");
         if (e.Deduction is < 0 or > Bp.Full)
             throw new RulesException("Ausbeuteregel: Abzug muss zwischen 0 und 100 % liegen");
+    }
+
+    static void ValidateTemplate(RuleSet rs, ReportTemplate e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Vorlage: Name darf nicht leer sein");
+        if (e.Default && rs.Templates.Values.FirstOrDefault(o => o.Id != e.Id && o.Default) is { } other)
+            throw new RulesException($"Vorlage \"{e.Name}\": Standard ist bereits \"{other.Name}\"");
+        try
+        {
+            Reports.Template.Check(e.Source);
+        }
+        catch (Reports.TemplateError x)
+        {
+            throw new RulesException($"Vorlage \"{e.Name}\": {x.Message}", x);
+        }
     }
 }

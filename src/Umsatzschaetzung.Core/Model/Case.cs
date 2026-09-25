@@ -66,6 +66,8 @@ public sealed class Case
     public List<PinnedPortions> Pinned { get; set; } = [];
     // Zutaten, die in diesem Betrieb keinen Umsatz bringen, etwa Reinigungsmittel.
     public List<string> NoRevenue { get; set; } = [];
+    // Leer heißt: die Standardvorlage der Regeln.
+    public string? TemplateId { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long MappedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

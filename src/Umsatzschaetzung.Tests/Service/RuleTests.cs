@@ -35,6 +35,30 @@ public sealed class RuleTests : IDisposable
         Assert.Equal(3, (await svc.Status(ct)).RulesVersion);
     }
 
+    [Fact]
+    public async Task ATemplateThatDoesNotParseIsRefused()
+    {
+        var e = await Assert.ThrowsAsync<ServiceError>(() =>
+            svc.SaveRule(new ReportTemplate { Id = "tpl.kaputt", Name = "Kaputt", Source = "{% if case %}offen" }, ct));
+
+        Assert.Equal(ErrorCode.Invalid, e.Code);
+        Assert.Contains("endif", e.Message);
+    }
+
+    [Fact]
+    public async Task ANewDefaultTemplateReplacesTheOldAndTheDefaultCannotBeDeleted()
+    {
+        await svc.SaveRule(new ReportTemplate { Id = "tpl.a", Name = "A", Default = true }, ct);
+        var rs = await svc.SaveRule(new ReportTemplate { Id = "tpl.b", Name = "B", Default = true }, ct);
+
+        Assert.Equal(["tpl.b"], rs.Templates.Values.Where(t => t.Default).Select(t => t.Id));
+        var unset = await Assert.ThrowsAsync<ServiceError>(() => svc.SaveRule(new ReportTemplate { Id = "tpl.b", Name = "B" }, ct));
+        Assert.Equal(ErrorCode.Conflict, unset.Code);
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.DeleteRule(Entity.Template, "tpl.b", ct));
+        Assert.Equal(ErrorCode.Conflict, e.Code);
+        Assert.DoesNotContain("tpl.a", (await svc.DeleteRule(Entity.Template, "tpl.a", ct)).Templates.Keys);
+    }
+
     public static TheoryData<string, IRuleEntity> Dangling => new()
     {
         { "an ingredient in a missing category", new Ingredient { Id = "ing.kaputt", Name = "Kaputt", CategoryId = "cat.fehlt" } },

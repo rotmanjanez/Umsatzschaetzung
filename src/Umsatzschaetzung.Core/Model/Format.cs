@@ -21,6 +21,7 @@ public static class Format
         Entity.Mapping => "Zuordnung",
         Entity.Product => "Produkt",
         Entity.Gewerbezweig => "Gewerbekennzahl",
+        Entity.Template => "Vorlage",
         _ => "Ausbeuteregel",
     };
 

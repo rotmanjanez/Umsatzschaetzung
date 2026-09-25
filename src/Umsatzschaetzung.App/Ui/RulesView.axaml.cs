@@ -79,6 +79,12 @@ public sealed class GewerbeItem(Gewerbezweig zweig)
     public string Search => Kennzahl + " " + Name;
 }
 
+public sealed class TemplateItem(ReportTemplate template)
+{
+    public ReportTemplate Template { get; } = template;
+    public string Label => Template.Default ? Template.Name + " (Standard)" : Template.Name;
+}
+
 // A row of the left column: the category (or ingredient) whose rules are the alternatives a Prüfung picks from.
 public sealed class ScopeItem(string id, bool ingredient, string label, List<YieldRule> rules)
 {
@@ -229,6 +235,17 @@ public sealed class GewerbeForm : EntityForm<GewerbeItem>
     public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
 }
 
+public sealed class TemplateForm : EntityForm<TemplateItem>
+{
+    string name = "", source = "";
+    bool isDefault, nameInvalid;
+
+    public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
+    public string Source { get => source; set => Set(ref source, value); }
+    public bool IsDefault { get => isDefault; set => Set(ref isDefault, value); }
+    public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
+}
+
 public sealed class YieldForm : EntityForm<ScopeItem>
 {
     public ObservableCollection<YieldRow> Rules { get; } = [];
@@ -241,6 +258,7 @@ public sealed class RulesModel
     public ProductForm Products { get; } = new();
     public YieldForm Yields { get; } = new();
     public GewerbeForm Gewerbe { get; } = new();
+    public TemplateForm Templates { get; } = new();
 }
 
 public partial class RulesView : Screen
@@ -248,7 +266,7 @@ public partial class RulesView : Screen
     public static readonly string[] RecipeUnits = ["GRM", "KGM", "MLT", "LTR", "H87"];
     public const string PortionUnit = "H87";
 
-    const int IngredientPage = 0, GewerbePage = 3;
+    const int IngredientPage = 0, GewerbePage = 3, TemplatePage = 4;
 
     readonly RulesModel model = new();
     readonly Autosave ingredientSave, gewerbeSave;
@@ -261,6 +279,7 @@ public partial class RulesView : Screen
         1 => Help.Rules + "#produkte",
         2 => Help.Rules + "#ertragsregeln",
         3 => Help.Rules + "#gewerbe",
+        4 => Help.Rules,
         _ => Help.Rules + "#zutaten",
     };
 
@@ -268,8 +287,8 @@ public partial class RulesView : Screen
 
     protected override int Page => Tabs.SelectedIndex;
 
-    // Products still wait for their save button, so typing there is undone in the field.
-    public bool TypingFirst => Tabs.SelectedIndex is 1;
+    // Products and templates still wait for their save button, so typing there is undone in the field.
+    public bool TypingFirst => Tabs.SelectedIndex is 1 or 4;
 
     public RulesView(Session session) : base(session)
     {
@@ -280,6 +299,7 @@ public partial class RulesView : Screen
         YieldSearch.Attach(model.Yields.Items, s => s.Search);
         GewerbeSearch.Attach(model.Gewerbe.Items, g => g.Search);
         GewerbeGrid.ItemsSource = GewerbeSearch.View;
+        TemplateGrid.ItemsSource = model.Templates.Items;
         IngredientGrid.ItemsSource = IngredientSearch.View;
         ProductGrid.ItemsSource = ProductSearch.View;
         ScopeGrid.ItemsSource = YieldSearch.View;
@@ -350,6 +370,10 @@ public partial class RulesView : Screen
         foreach (var g in Session.Gewerbezweige()) model.Gewerbe.Items.Add(new GewerbeItem(g));
         GewerbeGrid.SelectedItem = model.Gewerbe.Items.FirstOrDefault(g => g.Zweig.Id == model.Gewerbe.CurrentId);
 
+        model.Templates.Items.Clear();
+        foreach (var t in Templates(rs)) model.Templates.Items.Add(new TemplateItem(t));
+        TemplateGrid.SelectedItem = model.Templates.Items.FirstOrDefault(t => t.Template.Id == model.Templates.CurrentId);
+
         loading = false;
         if (!gewerbeSave.Busy)
         {
@@ -364,6 +388,8 @@ public partial class RulesView : Screen
         if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product);
         else if (model.Products.CurrentId is not null) model.Products.Active = false;
         if (ScopeGrid.SelectedItem is ScopeItem si) ShowScope(si); else model.Yields.Active = false;
+        if (TemplateGrid.SelectedItem is TemplateItem ti) LoadTemplate(ti.Template);
+        else if (model.Templates.CurrentId is not null) model.Templates.Active = false;
         if (wanted is { } w) EditProduct(w.Id, w.Recipe);
         wanted = null;
     }
@@ -382,6 +408,7 @@ public partial class RulesView : Screen
             1 => model.Products,
             2 => model.Yields,
             3 => model.Gewerbe,
+            4 => model.Templates,
             _ => model.Ingredients,
         };
         form.CurrentId = place.Item;
@@ -392,6 +419,7 @@ public partial class RulesView : Screen
             1 => ((Control)ProductGrid, ProductGrid.SelectedItem),
             2 => (RuleList, model.Yields.Rules.FirstOrDefault(r => r.Id == place.Item)),
             3 => (GewerbeGrid, GewerbeGrid.SelectedItem),
+            4 => (TemplateGrid, TemplateGrid.SelectedItem),
             _ => (IngredientGrid, IngredientGrid.SelectedItem),
         };
         Reveal.Row(list, item);
@@ -807,4 +835,61 @@ public partial class RulesView : Screen
     }
 
     async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig);
+
+    public static List<ReportTemplate> Templates(RuleSet rs) =>
+        [.. rs.Templates.Values.OrderByDescending(t => t.Default).ThenBy(t => t.Name, StringComparer.CurrentCulture)];
+
+    void TemplateSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (loading || TemplateGrid.SelectedItem is not TemplateItem item) return;
+        LoadTemplate(item.Template);
+    }
+
+    void LoadTemplate(ReportTemplate t)
+    {
+        var f = model.Templates;
+        f.CurrentId = t.Id;
+        f.Existing = f.Active = true;
+        f.Title = t.Name;
+        f.Name = t.Name;
+        f.Source = t.Source;
+        f.IsDefault = t.Default;
+    }
+
+    void NewTemplate(object? sender, RoutedEventArgs e)
+    {
+        var from = Session.Rules?.Template(null);
+        var f = model.Templates;
+        TemplateGrid.SelectedItem = null;
+        f.CurrentId = null;
+        f.Existing = false;
+        f.Active = true;
+        f.Title = "Neue Vorlage";
+        f.Name = from is null ? "" : "Kopie von " + from.Name;
+        f.Source = from?.Source ?? "";
+        f.IsDefault = false;
+    }
+
+    async void SaveTemplate(object? sender, RoutedEventArgs e)
+    {
+        var f = model.Templates;
+        var id = f.CurrentId ?? Session.NewId("tpl");
+        var data = new ReportTemplate { Id = id, Name = f.Name.Trim(), Source = f.Source, Default = f.IsDefault };
+        f.NameInvalid = data.Name == "";
+        if (f.NameInvalid)
+        {
+            Session.Fail(Missing("Name"));
+            return;
+        }
+        f.CurrentId = id;
+        if (!await Session.Put(data, new Place(History, TemplatePage, id), CancellationToken.None))
+        {
+            if (!f.Existing) f.CurrentId = null;
+            return;
+        }
+        f.Existing = true;
+        f.Title = data.Name;
+    }
+
+    async void DeleteTemplate(object? sender, RoutedEventArgs e) => await Delete(model.Templates, Entity.Template);
 }

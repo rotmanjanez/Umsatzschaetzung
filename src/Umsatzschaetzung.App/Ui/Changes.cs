@@ -103,6 +103,7 @@ public sealed class RuleChange(Session session, Entity kind, string id, IRuleEnt
         Product => Entity.Product,
         YieldRule => Entity.YieldRule,
         Gewerbezweig => Entity.Gewerbezweig,
+        ReportTemplate => Entity.Template,
         _ => throw new ArgumentException("unbekannte Regel " + e.GetType().Name),
     };
 

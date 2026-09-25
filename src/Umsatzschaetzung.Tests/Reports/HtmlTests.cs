@@ -109,4 +109,51 @@ public class HtmlTests
         Assert.DoesNotContain("<script", html, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("<img", html, StringComparison.OrdinalIgnoreCase);
     }
+
+    static RuleSet WithTemplates(params ReportTemplate[] templates)
+    {
+        var rs = TestData.Seed();
+        foreach (var t in templates) rs.Put(t);
+        return rs;
+    }
+
+    [Fact]
+    public void TheCaseChoosesItsTemplateAndFallsBackToTheDefault()
+    {
+        var rs = WithTemplates(
+            new ReportTemplate { Id = "tpl.a", Name = "A", Source = "A {{ template.id }}", Default = true },
+            new ReportTemplate { Id = "tpl.b", Name = "B", Source = "B {{ template.name }}" });
+        var kase = Vorlage.Load();
+
+        Assert.Equal("A tpl.a", Html.Render(kase, rs, Report, null));
+        kase.TemplateId = "tpl.b";
+        Assert.Equal("B B", Html.Render(kase, rs, Report, null));
+        kase.TemplateId = "tpl.gelöscht";
+        Assert.Equal("A tpl.a", Html.Render(kase, rs, Report, null));
+    }
+
+    [Fact]
+    public void RulesWithoutTemplatesRenderTheShippedReport() =>
+        Assert.Contains("Umsätze vor und nach Betriebsprüfung", Html.Render(Kase, Rules, Report, null));
+
+    [Fact]
+    public void TheTemplateSeesMoreThanTheShippedReportUses()
+    {
+        var rs = WithTemplates(new ReportTemplate
+        {
+            Id = "tpl.x", Name = "X", Default = true,
+            Source = "{{ periodDays }}|{{ appVersion }}|{{ marks.topRight }}|{{ richtsatz.jahr }}|{{ richtsatz.klasse.staffeln[0].sätze.rohgewinnI.mittel }}"
+                + "|{% for s in suppliers %}{{ s.name }}:{{ s.invoices }};{% endfor %}",
+        });
+        var kase = Vorlage.Load();
+        kase.Taxpayer.Gewerbe = "56101.0";
+        var sammlung = Sammlung(2023);
+        var info = new SammlungInfo(2023, sammlung.Klassen.Count, "rs-2023.pdf", DateTimeOffset.UnixEpoch);
+
+        var parts = Html.Render(kase, rs, Report, null, sammlung, info, "1.2.3").Split('|');
+
+        Assert.Equal((kase.PeriodTo.DayNumber - kase.PeriodFrom.DayNumber + 1).ToString(), parts[0]);
+        Assert.Equal(("1.2.3", Format.Period(kase.PeriodFrom, kase.PeriodTo), "2023", "72"), (parts[1], parts[2], parts[3], parts[4]));
+        Assert.Equal(string.Concat(kase.Invoices.GroupBy(i => i.SupplierName).OrderBy(g => g.Key, StringComparer.Ordinal).Select(g => $"{g.Key}:{g.Count()};")), parts[5]);
+    }
 }

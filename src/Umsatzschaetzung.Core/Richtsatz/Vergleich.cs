@@ -29,6 +29,18 @@ public static class Vergleich
     // Gewerbeklasse, gibt es keinen eindeutigen Rahmen und damit keinen Vergleich.
     public static Rahmen? Aufschlag(Sammlung? s, string? kennzahl, long umsatz)
     {
+        if (s is null || Klasse(s, kennzahl) is not { } hit) return null;
+        foreach (var st in hit.Staffeln)
+        {
+            if (st.Von is { } von && umsatz <= von) continue;
+            if (st.Bis is { } bis && umsatz > bis) continue;
+            if (st.Sätze.Aufschlag is { } satz) return new Rahmen(s.Year, hit.Name, st.Stufe, satz);
+        }
+        return null;
+    }
+
+    public static Klasse? Klasse(Sammlung? s, string? kennzahl)
+    {
         if (s is null || string.IsNullOrEmpty(kennzahl)) return null;
         Klasse? hit = null;
         foreach (var k in s.Klassen)
@@ -37,13 +49,6 @@ public static class Vergleich
             if (hit is not null && hit != k) return null;
             hit = k;
         }
-        if (hit is null) return null;
-        foreach (var st in hit.Staffeln)
-        {
-            if (st.Von is { } von && umsatz <= von) continue;
-            if (st.Bis is { } bis && umsatz > bis) continue;
-            if (st.Sätze.Aufschlag is { } satz) return new Rahmen(s.Year, hit.Name, st.Stufe, satz);
-        }
-        return null;
+        return hit;
     }
 }

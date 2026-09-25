@@ -17,6 +17,7 @@ Prüfung zusätzlich für sich anpassen, siehe
 | Produkte mit Rezept | **Regeln → Produkte** |
 | Ertragsregeln | **Regeln → Ertragsregeln** |
 | Gewerbekennzahlen | **Regeln → Gewerbe** |
+| Berichtsvorlagen | **Regeln → Vorlagen**, siehe [Verwaltete Installation](verwaltung.md#berichtsvorlagen) |
 | Zuordnungen | in der Prüfung unter [Zuordnung](zuordnung.md) |
 
 ## Zutaten { #zutaten }

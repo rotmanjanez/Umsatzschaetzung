@@ -128,11 +128,18 @@ public class TemplateTests
     public void NestedPathsResolve(string source) => Assert.Equal("unten", Render(source));
 
     [Theory]
+    [InlineData("{{ zeilen[0] }}", "a")]
+    [InlineData("{{ zeilen[1] }}", "b")]
+    public void AListIsIndexedByNumber(string source, string expected) => Assert.Equal(expected, Render(source));
+
+    [Theory]
     [InlineData("{{ fehlt }}")]
     [InlineData("{{ tief.fehlt }}")]
     [InlineData("{{ titel.x }}")]
     [InlineData("{{ tief[fehlt] }}")]
     [InlineData("{{ tief[schluessel }}")]
+    [InlineData("{{ zeilen[2] }}")]
+    [InlineData("{{ tief[0] }}")]
     [InlineData("{{ fehlt | cents }}")]
     [InlineData("{% if fehlt %}{% endif %}")]
     [InlineData("{% for x in fehlt %}{% endfor %}")]

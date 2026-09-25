@@ -9,6 +9,15 @@
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
             <TextBlock Text="{Binding Saved}" Theme="{StaticResource Muted}" IsVisible="{Binding ShowSaved}"
                        VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis" MaxWidth="320"/>
+            <ComboBox x:Name="TemplatePicker" ItemsSource="{Binding Templates}" SelectedItem="{Binding Template, Mode=TwoWay}"
+                      ToolTip.Tip="Vorlage" MinWidth="180" MaxWidth="320" Margin="0,0,8,0" VerticalAlignment="Center"
+                      IsVisible="{Binding ShowTemplates}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="ui:TemplateChoice">
+                        <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <Button Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Als PDF speichern" Click="SavePdf" IsEnabled="{Binding CanSave}">
                 <Panel>
                     <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Busy}"/>

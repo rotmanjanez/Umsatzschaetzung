@@ -122,3 +122,8 @@ gesetzten Wert:
 Die Werte heißen `Store` und `CaseDir`. Sie werden beim Start gelesen, eine
 Änderung wirkt ab dem nächsten Start.
 
+## Berichtsvorlagen { #berichtsvorlagen }
+
+Der Bericht entsteht aus einer HTML-Vorlage, die mit den Regeln in der
+Regel-Datenbank liegt. Wer den Bericht an eine eigene Form anpassen will, findet
+Aufbau und Datenmodell unter [Berichtsvorlagen](vorlagen.md).

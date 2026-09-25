@@ -8,6 +8,12 @@ public sealed class TemplateError(string message) : Exception(message);
 
 public static class Template
 {
+    public static void Check(string source)
+    {
+        var i = 0;
+        Parse(source.ReplaceLineEndings("\n"), ref i, [], out _);
+    }
+
     public static string Render(string source, JsonObject data)
     {
         var i = 0;
@@ -125,22 +131,27 @@ public static class Template
         return b.ToString();
     }
 
-    static readonly Dictionary<string, Func<JsonNode?, JsonNode?[], string>> Filters = new()
+    sealed record Filter(string Usage, string Help, Func<JsonNode?, JsonNode?[], string> Apply);
+
+    static readonly Dictionary<string, Filter> Filters = new()
     {
-        ["date"] = (n, _) => Format.Date(DateOnly.Parse(Print(n))),
-        ["day"] = (n, _) => Format.Day(DateTimeOffset.Parse(Print(n))),
-        ["sparte"] = (n, _) => Print(n) switch { "getraenke" => "Getränke", "speisen" => "Speisen", "handelsware" => "Handelsware", _ => "Übrige" },
-        ["cents"] = (n, _) => Format.Cents(Number(n)),
-        ["bp"] = (n, _) => Format.Bp(Number(n)),
-        ["portions"] = (n, _) => Format.Portions(Number(n)),
-        ["group"] = (n, _) => Format.Group(Number(n)),
-        ["milli"] = (n, _) => Format.Milli(Number(n)),
-        ["micro"] = (n, _) => Format.Micro(Number(n)),
-        ["qty"] = (n, a) => Format.Qty(Number(n), Enum<Unit>(a[0])),
-        ["quantity"] = (n, a) => Format.Quantity(Number(n), Print(a[0])),
-        ["price"] = (n, a) => Format.UnitPrice(Number(n), Number(a[0]), Print(a[1])),
-        ["unitname"] = (n, _) => Units.Label(Print(n)),
+        ["date"] = new("date", "Datum JJJJ-MM-TT als TT.MM.JJJJ", (n, _) => Format.Date(DateOnly.Parse(Print(n)))),
+        ["day"] = new("day", "Zeitpunkt als Tag TT.MM.JJJJ", (n, _) => Format.Day(DateTimeOffset.Parse(Print(n)))),
+        ["sparte"] = new("sparte", "Sparte als Wort: Getränke, Speisen, Handelsware, Übrige", (n, _) => Print(n) switch { "getraenke" => "Getränke", "speisen" => "Speisen", "handelsware" => "Handelsware", _ => "Übrige" }),
+        ["cents"] = new("cents", "Cent als Euro mit zwei Nachkommastellen", (n, _) => Format.Cents(Number(n))),
+        ["bp"] = new("bp", "Basispunkte als Prozent", (n, _) => Format.Bp(Number(n))),
+        ["portions"] = new("portions", "Anzahl mit „Portion“ oder „Portionen“", (n, _) => Format.Portions(Number(n))),
+        ["group"] = new("group", "Ganzzahl mit Tausenderpunkten", (n, _) => Format.Group(Number(n))),
+        ["milli"] = new("milli", "Tausendstel als Dezimalzahl", (n, _) => Format.Milli(Number(n))),
+        ["micro"] = new("micro", "Millionstel als Dezimalzahl", (n, _) => Format.Micro(Number(n))),
+        ["qty"] = new("qty:einheit", "Menge in der Rezepteinheit (g, ml, Stück), ab 1000 in kg oder l", (n, a) => Format.Qty(Number(n), Enum<Unit>(a[0]))),
+        ["quantity"] = new("quantity:einheitencode", "Rechnungsmenge mit Einheitencode (UN/ECE Rec 20)", (n, a) => Format.Quantity(Number(n), Print(a[0]))),
+        ["price"] = new("price:preisbasis:einheitencode", "Einzelpreis je Preisbasis und Einheit", (n, a) => Format.UnitPrice(Number(n), Number(a[0]), Print(a[1]))),
+        ["unitname"] = new("unitname", "Einheitencode als Bezeichnung", (n, _) => Units.Label(Print(n))),
     };
+
+    public static IEnumerable<(string Usage, string Help)> FilterHelp =>
+        Filters.Values.OrderBy(f => f.Usage, StringComparer.Ordinal).Select(f => (f.Usage, f.Help));
 
     static T Enum<T>(JsonNode? n) where T : struct =>
         System.Enum.TryParse<T>(Print(n), true, out var v) ? v : throw new TemplateError($"{Print(n)} ist keine {typeof(T).Name}");
@@ -182,7 +193,7 @@ public static class Template
                 case Value v:
                     var value = Resolve(v.Path, root, scope);
                     foreach (var (name, args) in v.Filters)
-                        value = JsonValue.Create(Filters[name](value, [.. args.Select(a => Resolve(a, root, scope))]));
+                        value = JsonValue.Create(Filters[name].Apply(value, [.. args.Select(a => Resolve(a, root, scope))]));
                     b.Append(Esc(Print(value)));
                     break;
                 case For f:
@@ -214,7 +225,7 @@ public static class Template
         var first = true;
         foreach (var (step, indexed) in Steps(path))
         {
-            var key = indexed ? Print(Resolve(step, root, scope)) : step;
+            var key = !indexed || step.All(char.IsAsciiDigit) ? step : Print(Resolve(step, root, scope));
             if (first)
             {
                 first = false;
@@ -225,8 +236,12 @@ public static class Template
                 if (!root.TryGetPropertyValue(key, out node)) throw new TemplateError($"unbekannt: {path}");
                 continue;
             }
-            if (node is not JsonObject o || !o.TryGetPropertyValue(key, out node))
-                throw new TemplateError($"unbekannt: {path}");
+            node = node switch
+            {
+                JsonObject o when o.TryGetPropertyValue(key, out var value) => value,
+                JsonArray a when int.TryParse(key, out var at) && at >= 0 && at < a.Count => a[at],
+                _ => throw new TemplateError($"unbekannt: {path}"),
+            };
         }
         return node;
     }

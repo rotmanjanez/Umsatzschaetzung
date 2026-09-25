@@ -37,6 +37,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             .Concat(rs.Products.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.YieldRules.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.Gewerbezweige.Values.Select(e => e.Meta.ChangedAt))
+            .Concat(rs.Templates.Values.Select(e => e.Meta.ChangedAt))
             .DefaultIfEmpty(default)
             .Max();
 
@@ -45,6 +46,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     public Task<RuleSet> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(ct, () =>
     {
         var rs = rules.Load();
+        if (rule is ReportTemplate { Default: false } && rs.Find(Entity.Template, rule.Id) is ReportTemplate { Default: true })
+            throw new ServiceError(ErrorCode.Conflict, "Eine Vorlage bleibt Standard, bis eine andere zum Standard wird");
+        if (rule is ReportTemplate { Default: true })
+            foreach (var t in rs.Templates.Values) t.Default = false;
         rs.Put(rule);
         RuleCheck.Validate(rs);
         return rules.Save(rule);
@@ -54,6 +59,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     {
         var rs = rules.Load();
         if (rs.Find(kind, id) is null) throw new ServiceError(ErrorCode.NotFound, $"{Format.EntityName(kind)} \u201e{id}\u201c");
+        if (rs.Find(kind, id) is ReportTemplate { Default: true })
+            throw new ServiceError(ErrorCode.Conflict, "Die Standardvorlage lässt sich nicht löschen; erst eine andere zum Standard machen");
         if (RuleCheck.Users(rs, kind, id) is { Count: > 0 } users)
             throw new ServiceError(ErrorCode.Conflict, $"{Format.EntityName(kind)} wird noch verwendet von: {string.Join(", ", users)}");
         return rules.Delete(kind, id);
@@ -331,21 +338,21 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
 
     public Task<CalcResp> Calculate(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
-        var (rep, _, rahmen) = Compute(LoadCase(caseId));
+        var (rep, _, rahmen, _) = Compute(LoadCase(caseId));
         return new CalcResp(rep, rahmen);
     });
 
     public Task<ReportResp> RenderReport(string caseId, bool pdf, CancellationToken ct) => Guard(ct, async () =>
     {
         var c = LoadCase(caseId);
-        var (rep, rs, rahmen) = Compute(c);
-        var html = Html.Render(c, rs, rep, rahmen);
+        var (rep, rs, rahmen, sammlung) = Compute(c);
+        var html = Html.Render(c, rs, rep, rahmen, sammlung?.Sammlung, sammlung?.Info, appVersion);
         if (!pdf) return new ReportResp(html, null, null);
         if (printer is null) throw new ServiceError(ErrorCode.Unsupported, "PDF-Ausgabe nicht verfügbar");
         return new ReportResp(html, PdfMarks.Stamp(await printer.Print(html, ct), Html.Marks(c, rep)), FileName(c.Label, "pdf"));
     });
 
-    (Model.Report Report, RuleSet Rules, Rahmen? Rahmen) Compute(Case c)
+    (Model.Report Report, RuleSet Rules, Rahmen? Rahmen, (Sammlung Sammlung, SammlungInfo Info)? Sammlung) Compute(Case c)
     {
         var rs = rules.Load();
         Model.Report rep;
@@ -357,7 +364,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         {
             throw new ServiceError(ErrorCode.Invalid, "Kalkulation: " + e.Message, inner: e);
         }
-        var rahmen = Vergleich.Aufschlag(Sammlung(c.PeriodTo.Year), c.Taxpayer.Gewerbe, rep.Totals.RevenueNet);
+        var sammlung = Sammlung(c.PeriodTo.Year);
+        var rahmen = Vergleich.Aufschlag(sammlung?.Sammlung, c.Taxpayer.Gewerbe, rep.Totals.RevenueNet);
         // Verglichen wird der Satz des Betriebs, nicht der einer Sparte: die Sammlung staffelt
         // den Aufschlag nach Gewerbeklasse, nicht nach Getränken und Speisen.
         if (rahmen is not null && rahmen.Lage(rep.Totals.Markup) is var lage && lage != Rahmenlage.Im)
@@ -367,16 +375,16 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
                 Message = $"Rohgewinnaufschlag {Format.Bp(rep.Totals.Markup)} liegt {(lage == Rahmenlage.Unter ? "unter" : "über")} dem Rahmensatz "
                     + $"{rahmen.Von} bis {rahmen.Bis} v.H. der Richtsatzsammlung {rahmen.Jahr} für „{rahmen.Klasse}“",
             });
-        return (rep, rs, rahmen);
+        return (rep, rs, rahmen, sammlung);
     }
 
     // Die Sammlung des Prüfungsjahres, sonst die jüngste davor.
-    Sammlung? Sammlung(int year)
+    (Sammlung Sammlung, SammlungInfo Info)? Sammlung(int year)
     {
-        var found = -1;
+        SammlungInfo? found = null;
         foreach (var i in rules.Sammlungen())
-            if (i.Year <= year && i.Year > found) found = i.Year;
-        return found < 0 ? null : rules.Sammlung(found);
+            if (i.Year <= year && i.Year > (found?.Year ?? -1)) found = i;
+        return found is not null && rules.Sammlung(found.Year) is { } s ? (s, found) : null;
     }
 
     Case LoadCase(string id)

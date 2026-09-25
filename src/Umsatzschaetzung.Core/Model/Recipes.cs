@@ -24,6 +24,8 @@ public static class Recipes
             Mappings = rs.Mappings,
             Products = products,
             YieldRules = rs.YieldRules,
+            Gewerbezweige = rs.Gewerbezweige,
+            Templates = rs.Templates,
         };
     }
 

@@ -31,7 +31,8 @@ public sealed partial class CaseStore(string dir)
             name TEXT NOT NULL, tax_number TEXT NOT NULL, pab_number TEXT NOT NULL, gewerbe TEXT NOT NULL,
             created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
             -- Stand der Regeln, gegen den die offenen Positionen zuletzt geprüft wurden.
-            mapped_at INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID;
+            mapped_at INTEGER NOT NULL DEFAULT 0,
+            template_id TEXT) WITHOUT ROWID;
         CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
         CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
         CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL,
@@ -325,11 +326,12 @@ public sealed partial class CaseStore(string dir)
 
     static void Write(SqliteConnection db, SqliteTransaction tx, Case c)
     {
-        Exec(db, tx, "INSERT INTO kase(id, label, period_from, period_to, name, tax_number, pab_number, gewerbe, created_at, updated_at, mapped_at) "
-            + "VALUES(@id, @label, @from, @to, @name, @tax, @pab, @gewerbe, @created, @updated, @mapped)",
+        Exec(db, tx, "INSERT INTO kase(id, label, period_from, period_to, name, tax_number, pab_number, gewerbe, created_at, updated_at, mapped_at, template_id) "
+            + "VALUES(@id, @label, @from, @to, @name, @tax, @pab, @gewerbe, @created, @updated, @mapped, @template)",
             ("@id", c.Id), ("@label", c.Label), ("@from", Day(c.PeriodFrom)), ("@to", Day(c.PeriodTo)),
             ("@name", c.Taxpayer.Name), ("@tax", c.Taxpayer.TaxNumber), ("@pab", c.Taxpayer.PabNumber),
-            ("@gewerbe", c.Taxpayer.Gewerbe), ("@created", Stamp(c.CreatedAt)), ("@updated", Stamp(c.UpdatedAt)), ("@mapped", c.MappedAt));
+            ("@gewerbe", c.Taxpayer.Gewerbe), ("@created", Stamp(c.CreatedAt)), ("@updated", Stamp(c.UpdatedAt)), ("@mapped", c.MappedAt),
+            ("@template", c.TemplateId));
 
         for (var i = 0; i < c.Declared.Count; i++)
             Exec(db, tx, "INSERT INTO declared(vat, ord, net) VALUES(@vat, @ord, @net)",
@@ -454,7 +456,7 @@ public sealed partial class CaseStore(string dir)
     static Case ReadCase(SqliteConnection db)
     {
         using var cmd = Command(db, null, "SELECT id, label, period_from, period_to, name, tax_number, pab_number, "
-            + "gewerbe, created_at, updated_at, mapped_at FROM kase");
+            + "gewerbe, created_at, updated_at, mapped_at, template_id FROM kase");
         using var r = cmd.ExecuteReader();
         if (!r.Read()) throw new CaseInvalidException("Falldatei enthält keinen Fall");
         return new Case
@@ -470,6 +472,7 @@ public sealed partial class CaseStore(string dir)
             CreatedAt = When(r, 8),
             UpdatedAt = When(r, 9),
             MappedAt = r.GetInt64(10),
+            TemplateId = Str(r, 11),
         };
     }
 

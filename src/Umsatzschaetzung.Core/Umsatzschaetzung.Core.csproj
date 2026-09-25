@@ -26,10 +26,54 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Reports/bericht.html" LogicalName="bericht.html" />
-    <EmbeddedResource Include="Rulestore/seed.json" LogicalName="seed.json" />
     <EmbeddedResource Include="../../data/units.json" LogicalName="units.json" />
     <EmbeddedResource Include="../../data/richtsatz/*.json" LogicalName="richtsatz/%(Filename).json" />
   </ItemGroup>
+  <!-- The report template lives as plain HTML beside the code; the seed that ships carries it
+       as its default template, JSON-encoded here on every build so the two cannot drift. -->
+  <UsingTask TaskName="SeedTemplate" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Seed ParameterType="System.String" Required="true" />
+      <Template ParameterType="System.String" Required="true" />
+      <Output ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var seed = System.IO.File.ReadAllText(Seed).TrimEnd();
+        var html = System.IO.File.ReadAllText(Template).Replace("\r\n", "\n");
+        var b = new System.Text.StringBuilder(html.Length + 256);
+        foreach (var c in html)
+        {
+            switch (c)
+            {
+                case '"': b.Append("\\\""); break;
+                case '\\': b.Append("\\\\"); break;
+                case '\n': b.Append("\\n"); break;
+                case '\t': b.Append("\\t"); break;
+                default:
+                    if (c < ' ') b.Append("\\u").Append(((int)c).ToString("x4"));
+                    else b.Append(c);
+                    break;
+            }
+        }
+        var templates = ",\n\"templates\": {\n\"tpl.bericht\": {\"name\":\"Bericht\",\"default\":true,\"source\":\"" + b + "\"}\n}\n}\n";
+        var merged = seed.Substring(0, seed.Length - 1).TrimEnd() + templates;
+        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Output));
+        if (!System.IO.File.Exists(Output) || System.IO.File.ReadAllText(Output) != merged)
+            System.IO.File.WriteAllText(Output, merged);
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="SeedTemplate" BeforeTargets="PrepareResources" Inputs="Rulestore/seed.json;Reports/bericht.html" Outputs="$(IntermediateOutputPath)seed.json">
+    <SeedTemplate Seed="Rulestore/seed.json" Template="Reports/bericht.html" Output="$(IntermediateOutputPath)seed.json" />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(IntermediateOutputPath)seed.json" LogicalName="seed.json" />
+    <UpToDateCheckInput Include="Rulestore/seed.json;Reports/bericht.html" />
+  </ItemGroup>
+
   <!-- The models are not in the repo: they are fetched from their own releases, verified
        and declared as content. See Models.targets. -->
   <Import Project="../../Models.targets" />

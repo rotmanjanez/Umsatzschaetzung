@@ -73,6 +73,11 @@ public sealed class RuleStore
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
+        CREATE TABLE template(
+            id TEXT PRIMARY KEY, name TEXT NOT NULL, source TEXT NOT NULL, is_default INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            deleted_at TEXT) WITHOUT ROWID;
+
         CREATE INDEX synonym_begriff ON synonym(begriff);
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
         """,
@@ -132,6 +137,7 @@ public sealed class RuleStore
         Complete(rs.Products, stamp);
         Complete(rs.YieldRules, stamp);
         Complete(rs.Gewerbezweige, stamp);
+        Complete(rs.Templates, stamp);
         return rs;
     }
 
@@ -220,6 +226,7 @@ public sealed class RuleStore
         Entity.Mapping => "mapping",
         Entity.Product => "product",
         Entity.Gewerbezweig => "gewerbe",
+        Entity.Template => "template",
         _ => "yield_rule",
     };
 
@@ -304,6 +311,16 @@ public sealed class RuleStore
                     + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@kennzahl", x.Kennzahl), ("@name", x.Name)));
+                break;
+
+            case ReportTemplate x:
+                if (x.Default) Exec(db, tx, "UPDATE template SET is_default = 0 WHERE id <> @id", ("@id", x.Id));
+                Exec(db, tx, "INSERT INTO template(id, name, source, is_default, valid_from, valid_to, changed_at, rev) "
+                    + "VALUES(@id, @name, @source, @default, @from, @to, @changed, @rev) "
+                    + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, source = excluded.source, is_default = excluded.is_default, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
+                    + "rev = excluded.rev, deleted_at = NULL",
+                    Meta(x, ("@name", x.Name), ("@source", x.Source), ("@default", x.Default)));
                 break;
 
             default:
@@ -396,6 +413,12 @@ public sealed class RuleStore
         Rows(db, tx, "SELECT id, kennzahl, name, valid_from, valid_to, changed_at, rev FROM gewerbe WHERE deleted_at IS NULL",
             r => rs.Put(new Gewerbezweig { Id = r.GetString(0), Kennzahl = r.GetString(1), Name = r.GetString(2), Meta = ReadMeta(r, 3) }));
 
+        Rows(db, tx, "SELECT id, name, source, is_default, valid_from, valid_to, changed_at, rev FROM template WHERE deleted_at IS NULL",
+            r => rs.Put(new ReportTemplate
+            {
+                Id = r.GetString(0), Name = r.GetString(1), Source = r.GetString(2), Default = r.GetBoolean(3), Meta = ReadMeta(r, 4),
+            }));
+
         return rs;
     }
 
@@ -432,8 +455,8 @@ public sealed class RuleStore
                     ("@id", e.Id), ("@amount", p.Amount), ("@unit", Units.Code(p.Unit)));
     }
 
-    // Rows nobody has edited since they were seeded (rev 0) follow the seed's aliases, Gebinde and
-    // yield rule names: what the matcher learns from ships with an update, not only with a new store.
+    // Rows nobody has edited since they were seeded (rev 0) follow the seed's aliases, Gebinde,
+    // yield rule names and templates: what ships with an update reaches a store that already exists.
     static void SeedUntouched(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
         foreach (var e in seed.Ingredients.Values)
@@ -445,6 +468,9 @@ public sealed class RuleStore
         foreach (var y in seed.YieldRules.Values)
             Exec(db, tx, "UPDATE yield_rule SET name = @name, deduction = @deduction WHERE id = @id AND rev = 0 AND deleted_at IS NULL",
                 ("@id", y.Id), ("@name", y.Name), ("@deduction", y.Deduction));
+        foreach (var t in seed.Templates.Values)
+            Exec(db, tx, "UPDATE template SET name = @name, source = @source WHERE id = @id AND rev = 0 AND deleted_at IS NULL",
+                ("@id", t.Id), ("@name", t.Name), ("@source", t.Source));
     }
 
     static void PutGebinde(SqliteConnection db, SqliteTransaction tx, Category c)
@@ -655,7 +681,7 @@ public sealed class RuleStore
 
     static IEnumerable<IRuleEntity> Entities(RuleSet rs) =>
         rs.Categories.Values.Concat<IRuleEntity>(rs.Ingredients.Values).Concat(rs.Mappings.Values).Concat(rs.Products.Values).Concat(rs.YieldRules.Values)
-            .Concat(rs.Gewerbezweige.Values);
+            .Concat(rs.Gewerbezweige.Values).Concat(rs.Templates.Values);
 
     static Entity Kind(IRuleEntity e) => e switch
     {
@@ -665,6 +691,7 @@ public sealed class RuleStore
         Product => Entity.Product,
         YieldRule => Entity.YieldRule,
         Gewerbezweig => Entity.Gewerbezweig,
+        ReportTemplate => Entity.Template,
         _ => throw new ArgumentException(e.GetType().Name),
     };
 

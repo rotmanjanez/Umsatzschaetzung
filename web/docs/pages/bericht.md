@@ -42,6 +42,12 @@ Der Anhang belegt, woher die Zahlen kommen:
 - **F: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer
   Aufstellung.
 
+## Vorlage
+
+Der Bericht entsteht aus der Standardvorlage der [Regeln](regeln.md). Gibt es
+mehrere Vorlagen, wählt die Auswahl über der Vorschau eine andere für diese
+Prüfung.
+
 ## Als PDF speichern
 
 Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht ab, wo

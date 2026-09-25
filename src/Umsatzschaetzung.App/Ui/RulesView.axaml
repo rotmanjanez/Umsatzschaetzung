@@ -313,6 +313,60 @@
                     </Grid>
                 </Grid>
             </TabItem>
+
+            <TabItem Header="Vorlagen">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30*" MinWidth="220"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="70*" MinWidth="320"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Theme="{StaticResource Panel}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8">
+                                <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Neu" Click="NewTemplate">
+                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                </Button>
+                                <TextBlock/>
+                            </DockPanel>
+                            <ListBox x:Name="TemplateGrid" SelectionChanged="TemplateSelected" BorderThickness="0" Background="Transparent"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="ui:TemplateItem">
+                                        <TextBlock Text="{Binding Label}" Margin="4,6" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Label}"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </Border>
+                    <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                    <Grid Grid.Column="2" DataContext="{Binding Templates}" x:DataType="ui:TemplateForm">
+                        <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
+                                   Text="Links eine Vorlage auswählen, um sie zu bearbeiten – oder mit „Neu“ eine Kopie der Standardvorlage anlegen."/>
+                        <DockPanel Margin="8,0,16,16" IsVisible="{Binding Active}">
+                            <StackPanel DockPanel.Dock="Top">
+                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="TemplateName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
+                                <CheckBox Content="Standard" IsChecked="{Binding IsDefault, Mode=TwoWay}" Margin="0,8,0,0"/>
+                            </StackPanel>
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
+                                <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveTemplate">
+                                    <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
+                                </Button>
+                                <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteTemplate" IsVisible="{Binding Existing}">
+                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                </Button>
+                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Vorlage" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="TemplateSource" Text="{Binding Source, Mode=TwoWay}" AcceptsReturn="True" AcceptsTab="True"
+                                     TextWrapping="NoWrap" FontFamily="{StaticResource MonoFont}" FontSize="12"
+                                     VerticalAlignment="Stretch" VerticalContentAlignment="Top"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        </DockPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
         </TabControl>
     </DockPanel>
 </ui:Screen>

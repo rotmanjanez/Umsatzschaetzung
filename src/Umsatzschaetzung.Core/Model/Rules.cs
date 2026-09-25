@@ -11,6 +11,7 @@ public enum Entity
     [JsonStringEnumMemberName("product")] Product,
     [JsonStringEnumMemberName("yield_rule")] YieldRule,
     [JsonStringEnumMemberName("gewerbe")] Gewerbezweig,
+    [JsonStringEnumMemberName("template")] Template,
 }
 
 // Die Sparte trennt den Rohgewinnaufschlag einer Gaststätte, wie ihn die Prüfung erwartet:
@@ -231,6 +232,17 @@ public sealed class YieldRule : IRuleEntity
     public Meta Meta { get; set; } = new();
 }
 
+// Die Vorlage, aus der ein Bericht entsteht. Eine ist der Standard; eine Prüfung kann eine andere wählen.
+public sealed class ReportTemplate : IRuleEntity
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Source { get; set; } = "";
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Default { get; set; }
+    public Meta Meta { get; set; } = new();
+}
+
 public sealed class RuleSet
 {
     public long Version { get; set; }
@@ -240,6 +252,10 @@ public sealed class RuleSet
     public Dictionary<string, Product> Products { get; set; } = [];
     public Dictionary<string, YieldRule> YieldRules { get; set; } = [];
     public Dictionary<string, Gewerbezweig> Gewerbezweige { get; set; } = [];
+    public Dictionary<string, ReportTemplate> Templates { get; set; } = [];
+
+    public ReportTemplate? Template(string? id) =>
+        (id is not null ? Templates.GetValueOrDefault(id) : null) ?? Templates.Values.FirstOrDefault(t => t.Default);
 
     public IRuleEntity? Find(Entity entity, string id) => entity switch
     {
@@ -249,6 +265,7 @@ public sealed class RuleSet
         Entity.Product => Products.GetValueOrDefault(id),
         Entity.YieldRule => YieldRules.GetValueOrDefault(id),
         Entity.Gewerbezweig => Gewerbezweige.GetValueOrDefault(id),
+        Entity.Template => Templates.GetValueOrDefault(id),
         _ => null,
     };
 
@@ -262,6 +279,7 @@ public sealed class RuleSet
             case Product x: Products[x.Id] = x; break;
             case YieldRule x: YieldRules[x.Id] = x; break;
             case Gewerbezweig x: Gewerbezweige[x.Id] = x; break;
+            case ReportTemplate x: Templates[x.Id] = x; break;
         }
     }
 }
