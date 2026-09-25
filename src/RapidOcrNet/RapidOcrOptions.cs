@@ -169,6 +169,11 @@ public sealed record RapidOcrOptions
     /// </summary>
     public int ClsMaxCrops { get; init; }
 
+    /// <summary>
+    /// Share of a line's height each crop is widened by above and below its box.
+    /// </summary>
+    public float CropPadding { get; init; }
+
     public float BoxScoreThresh { get; init; }
     public float BoxThresh { get; init; }
     public float UnClipRatio { get; init; }

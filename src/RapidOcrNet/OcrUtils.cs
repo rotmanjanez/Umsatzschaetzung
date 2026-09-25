@@ -256,7 +256,7 @@ internal static class OcrUtils
     /// allocated bitmaps are disposed before the exception propagates.
     /// </summary>
     public static SKBitmap[] GetPartImages(SKBitmap src, IReadOnlyList<TextBox>? textBoxes,
-        bool rotateTall = true)
+        bool rotateTall = true, float padding = 0)
     {
         if (textBoxes is null || textBoxes.Count == 0)
         {
@@ -269,7 +269,7 @@ internal static class OcrUtils
         {
             for (int i = 0; i < textBoxes.Count; ++i)
             {
-                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, rotateTall);
+                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, out _, rotateTall, padding);
                 produced = i + 1;
             }
 
@@ -290,7 +290,7 @@ internal static class OcrUtils
     /// bookkeeping for later word-box inverse mapping. Same exception-safety contract.
     /// </summary>
     public static (SKBitmap[] PartImages, CropContext[] Contexts) GetPartImagesWithContext(SKBitmap src,
-        IReadOnlyList<TextBox>? textBoxes, bool rotateTall = true)
+        IReadOnlyList<TextBox>? textBoxes, bool rotateTall = true, float padding = 0)
     {
         if (textBoxes is null || textBoxes.Count == 0)
         {
@@ -304,7 +304,7 @@ internal static class OcrUtils
         {
             for (int i = 0; i < textBoxes.Count; ++i)
             {
-                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, out contexts[i], rotateTall);
+                images[i] = GetRotateCropImage(src, textBoxes[i].BoxPoints, out contexts[i], rotateTall, padding);
                 produced = i + 1;
             }
 
@@ -458,15 +458,19 @@ internal static class OcrUtils
         return GetRotateCropImage(src, box, out _, rotateTall);
     }
 
+    /// <summary>
+    /// <paramref name="padding"/> widens a line across its run, as a share of its height on
+    /// either side: a box a few pixels off its line otherwise cuts the tail of a comma, which
+    /// then reads as a point.
+    /// </summary>
     public static SKBitmap GetRotateCropImage(SKBitmap src, SKPointI[] box, out CropContext context,
-        bool rotateTall = true)
+        bool rotateTall = true, float padding = 0)
     {
         System.Diagnostics.Debug.Assert(box.Length == 4);
 
-        SKPointI b0 = box[0];
-        SKPointI b1 = box[1];
-        SKPointI b2 = box[2];
-        SKPointI b3 = box[3];
+        var (b0, b1, b2, b3) = padding > 0 && IsRun(box)
+            ? Across(box[0], box[1], box[2], box[3], padding, src.Width, src.Height)
+            : (box[0], box[1], box[2], box[3]);
 
         // NOTE: must be independent `if`s (not `if/else if`) — a monotonically-decreasing
         // sequence would otherwise update `left` every iteration and never touch `right`,
@@ -585,6 +589,33 @@ internal static class OcrUtils
         }
 
         return partImg;
+    }
+
+    /// <summary>A box wider along its run than across it: a line, not a stack or a single glyph.</summary>
+    public static bool IsRun(SKPointI[] box) =>
+        Square(box[1].X - box[0].X, box[1].Y - box[0].Y) > Square(box[3].X - box[0].X, box[3].Y - box[0].Y);
+
+    /// <summary>
+    /// Takes back what <see cref="GetRotateCropImage(SKBitmap, SKPointI[], out CropContext, bool, float)"/>
+    /// spared around a line from a box read in its crop, so words keep the height of their line.
+    /// </summary>
+    public static void Unpad(SKPointI[] box, float padding)
+    {
+        (box[0], box[1], box[2], box[3]) = Across(box[0], box[1], box[2], box[3], -padding / (1 + 2 * padding), int.MaxValue, int.MaxValue);
+    }
+
+    static int Square(int x, int y) => x * x + y * y;
+
+    static (SKPointI, SKPointI, SKPointI, SKPointI) Across(SKPointI b0, SKPointI b1, SKPointI b2, SKPointI b3,
+        float share, int width, int height)
+    {
+        float dx = (b3.X - b0.X + b2.X - b1.X) / 2f * share;
+        float dy = (b3.Y - b0.Y + b2.Y - b1.Y) / 2f * share;
+
+        SKPointI Move(SKPointI p, int side) => new(
+            Math.Clamp((int)MathF.Round(p.X + side * dx), 0, width - 1),
+            Math.Clamp((int)MathF.Round(p.Y + side * dy), 0, height - 1));
+        return (Move(b0, -1), Move(b1, -1), Move(b2, 1), Move(b3, 1));
     }
 
     public static SKBitmap BitmapRotateClockWise180(SKBitmap src)

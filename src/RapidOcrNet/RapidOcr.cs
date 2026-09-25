@@ -317,11 +317,11 @@ public sealed class RapidOcr : IDisposable
         CropContext[] cropContexts;
         if (returnWordBox)
         {
-            (partImages, cropContexts) = OcrUtils.GetPartImagesWithContext(src, textBoxes, rotateTall);
+            (partImages, cropContexts) = OcrUtils.GetPartImagesWithContext(src, textBoxes, rotateTall, options.CropPadding);
         }
         else
         {
-            partImages = OcrUtils.GetPartImages(src, textBoxes, rotateTall);
+            partImages = OcrUtils.GetPartImages(src, textBoxes, rotateTall, options.CropPadding);
             cropContexts = [];
         }
 
@@ -394,8 +394,10 @@ public sealed class RapidOcr : IDisposable
                 if (wordResults is not null)
                 {
                     // Map word polygons back to original space, as the boxes were.
+                    var padded = options.CropPadding > 0 && OcrUtils.IsRun(textBox.BoxPoints);
                     for (int w = 0; w < wordResults.Length; w++)
                     {
+                        if (padded) OcrUtils.Unpad(wordResults[w].BoxPoints, options.CropPadding);
                         input.MapToOriginal(wordResults[w].BoxPoints);
                     }
                 }

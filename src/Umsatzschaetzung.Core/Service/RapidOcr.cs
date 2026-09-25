@@ -34,9 +34,12 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // invoice needs. What is left of a tall box is a stack: a unit column printed tightly
     // enough that the detector joined three "kg" into one box, which no line reader can read.
     // It is cut back into lines before it is read. The vote is left to the longest lines, which
-    // the classifier gets right; the short ones only cost it time.
+    // the classifier gets right; the short ones only cost it time. A line is read with a tenth
+    // of its height to spare above and below: the detector's box moves by a few pixels with the
+    // pixels it is shown, and a comma whose tail it cuts reads as a point.
     static readonly RapidOcrOptions Options = RapidOcrOptions.PPOCRv6 with
     {
+        CropPadding = 0.1f,
         ReturnWordBox = true,
         MaxSideLen = MaxImageDimension,
         DetMaxPixels = DetectorPixels,
