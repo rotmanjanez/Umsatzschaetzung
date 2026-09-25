@@ -289,22 +289,29 @@ public static class Assemble
         public double Conf;
     }
 
-    // Labels claim first, then role and confidence; the first page with any run decides.
-    // tools/eval/README.md has the full order.
+    // Labels claim first, on whichever page: a number read off the edge of the letterhead is
+    // a guess, the one beside "Rechnungsnummer:" on page 2 is not. Without a label, role and
+    // confidence decide and the first page with any run does. tools/eval/README.md has the
+    // full order.
     static (int Page, Run Run)? HeaderValue(IReadOnlyList<List<TaggedWord>> tagged, Field field)
     {
-        var hasLabel = LabelOf.TryGetValue(field, out var label);
+        if (LabelOf.TryGetValue(field, out var label))
+            for (var p = 0; p < tagged.Count; p++)
+            {
+                var rows = Group(tagged[p]);
+                var runs = Runs(rows, field);
+                if (runs.Count > 0 && Keyed(rows, runs, label, Extent(tagged[p])) is { } keyed) return (p, keyed);
+            }
+
         var role = ValueRole.TryGetValue(field, out var r) ? (Role?)r : null;
         var longest = field == Field.Supplier;
         for (var p = 0; p < tagged.Count; p++)
         {
-            var rows = Group(tagged[p]);
-            var runs = Runs(rows, field);
+            var runs = Runs(Group(tagged[p]), field);
             if (runs.Count == 0) continue;
-            var pick = hasLabel ? Keyed(rows, runs, label, Extent(tagged[p])) : null;
-            if (pick is null)
-                foreach (var run in runs)
-                    if (pick is null || Better(run, pick, role, longest)) pick = run;
+            Run? pick = null;
+            foreach (var run in runs)
+                if (pick is null || Better(run, pick, role, longest)) pick = run;
             return (p, pick!);
         }
         return null;

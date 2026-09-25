@@ -179,6 +179,20 @@ public class AssembleTests
         Assert.Equal("48211", Read(TwoNumbers(labelled: false)).Invoice.Number);
 
     [Fact]
+    public void ALabelledNumberOnALaterPageBeatsAnUnlabelledOneOnTheFirst()
+    {
+        var letterhead = new Sheet().Line(Role.Header, 0.9f, (1800, "RE25T-1:", Field.InvoiceNumber));
+        var details = new Sheet().Line(Role.Header, 0.6f, (50, "Rechnungsnummer:", Field.NumberLabel), (250, "RE2500933", Field.InvoiceNumber));
+        Assert.Equal("RE2500933", Read(letterhead, details).Invoice.Number);
+    }
+
+    [Fact]
+    public void WithoutALabelTheFirstPageWithANumberDecides() =>
+        Assert.Equal("RE25T-1:", Read(
+            new Sheet().Line(Role.Header, 0.6f, (1800, "RE25T-1:", Field.InvoiceNumber)),
+            new Sheet().Line(Role.Header, 0.9f, (250, "RE2500933", Field.InvoiceNumber))).Invoice.Number);
+
+    [Fact]
     public void ALabelClaimsTheValueDirectlyBeneathIt()
     {
         var (inv, _) = Read(new Sheet()

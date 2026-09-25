@@ -49,8 +49,10 @@ or customer number ahead of the invoice number, a per-line "EUR" ahead of the to
 2. **Otherwise by role and confidence.** A run in the expected row role first (`header`,
    or `total` for the totals), then highest mean `conf`, then — for the supplier, which has
    no label — the longest run, then reading order.
-3. Either way the first page with any run decides, so a letterhead on page 1 beats a
-   footer on page 3.
+3. A run its label claims wins on whichever page it stands, so the number beside
+   "Rechnungsnummer:" on page 2 beats one read off the edge of the letterhead on page 1.
+   Otherwise the first page with any run decides, so a letterhead on page 1 beats a footer
+   on page 3.
 
 A run is the block of consecutive rows carrying the field, so a wrapped supplier name
 stays one value. Two things end it early: a row that opens a key of its own, and a gap
