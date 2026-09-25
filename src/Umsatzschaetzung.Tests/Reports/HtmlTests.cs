@@ -83,4 +83,30 @@ public class HtmlTests
         Assert.Contains("Bar &lt;script&gt;", html);
         Assert.Contains("Müller &amp; &quot;Söhne&quot;", html);
     }
+
+    [Fact]
+    public void WhatTheCaseSaysIsNeverReadAsTemplate()
+    {
+        var kase = Vorlage.Load();
+        kase.Label = "{{ case.taxpayer.taxNumber }}";
+        kase.Taxpayer.Name = "{% for r in rules %}console.log(){% endfor %}";
+
+        var html = Html.Render(kase, Rules, Calculation.Run(kase, Rules), null);
+
+        Assert.Contains("{{ case.taxpayer.taxNumber }}", html);
+        Assert.Contains("{% for r in rules %}console.log(){% endfor %}", html);
+    }
+
+    [Fact]
+    public void AScriptInTheCaseStaysText()
+    {
+        var kase = Vorlage.Load();
+        kase.Taxpayer.Name = "<script src=\"http://example.com/x.js\"></script><img src=x onerror=alert(1)>";
+
+        var html = Html.Render(kase, Rules, Calculation.Run(kase, Rules), null);
+
+        Assert.Contains("&lt;script src=&quot;http://example.com/x.js&quot;&gt;&lt;/script&gt;&lt;img src=x onerror=alert(1)&gt;", html);
+        Assert.DoesNotContain("<script", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("<img", html, StringComparison.OrdinalIgnoreCase);
+    }
 }

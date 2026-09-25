@@ -340,7 +340,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var c = LoadCase(caseId);
         var (rep, rs, rahmen) = Compute(c);
         var html = Html.Render(c, rs, rep, rahmen);
-        if (!pdf) return new ReportResp(html, null, FileName(c.Label, "html"));
+        if (!pdf) return new ReportResp(html, null, null);
         if (printer is null) throw new ServiceError(ErrorCode.Unsupported, "PDF-Ausgabe nicht verfügbar");
         return new ReportResp(html, PdfMarks.Stamp(await printer.Print(html, ct), Html.Marks(c, rep)), FileName(c.Label, "pdf"));
     });

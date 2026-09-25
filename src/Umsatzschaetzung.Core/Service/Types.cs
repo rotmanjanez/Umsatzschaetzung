@@ -35,6 +35,6 @@ public sealed record MappingCandidate(ArticleMapping Mapping, int Confidence, Or
 // entsteht erst im Bedienteil.
 public sealed record CalcResp(Report Report, Rahmen? Rahmen);
 
-public sealed record ReportResp(string Html, byte[]? Pdf, string FileName);
+public sealed record ReportResp(string Html, byte[]? Pdf, string? FileName);
 
 public sealed record ExportResp(byte[] Data, string FileName);

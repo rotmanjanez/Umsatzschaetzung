@@ -76,13 +76,13 @@ public partial class ReportView : Screen
         await Session.Run(async () =>
         {
             var resp = await Session.Service.RenderReport(caseId, true, Ct);
-            if (resp.Pdf is null)
+            if (resp is not { Pdf: { } pdf, FileName: { } file })
             {
                 Session.Fail("PDF konnte nicht erstellt werden");
                 return;
             }
             model.Busy = false;
-            if (await Session.SaveFile(resp.FileName, resp.Pdf, Session.PdfFilter) is { } name)
+            if (await Session.SaveFile(file, pdf, Session.PdfFilter) is { } name)
                 model.Saved = "Gespeichert: " + name;
         });
         model.Busy = false;

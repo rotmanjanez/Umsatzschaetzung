@@ -101,7 +101,7 @@ public sealed class CalculateTests : IDisposable
         Assert.Contains("<h1>2 Rohgewinnaufschlag</h1>", report.Html);
         Assert.Contains("405,76 %", report.Html);
         Assert.Null(report.Pdf);
-        Assert.EndsWith(".html", report.FileName);
+        Assert.Null(report.FileName);
         Assert.Null(printer.Html);
     }
 
