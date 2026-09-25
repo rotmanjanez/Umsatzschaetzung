@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Reports;
 using Umsatzschaetzung.Service;
@@ -54,21 +55,13 @@ public partial class ReportView : Screen
 
     async Task ShowHtml(string html)
     {
-        var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        void Completed(object? sender, WebViewNavigationCompletedEventArgs e) => done.TrySetResult(e.IsSuccess);
-        Web.NavigationCompleted += Completed;
         try
         {
-            Web.NavigateToString(html, null!);
-            model.Note = await done.Task.WaitAsync(TimeSpan.FromSeconds(20), Ct) ? "" : Unavailable;
+            model.Note = await Web.Show(html, TimeSpan.FromSeconds(20), Ct) ? "" : Unavailable;
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
             model.Note = Unavailable;
-        }
-        finally
-        {
-            Web.NavigationCompleted -= Completed;
         }
     }
 
