@@ -383,12 +383,15 @@ public sealed class Session : Observable
     public string IngredientName(string id) =>
         Rules is not null && Rules.Ingredients.TryGetValue(id, out var i) ? i.Name : "";
 
-    public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi)
+    public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi) =>
+        await ReadFiles(await PickPaths(filter, multi));
+
+    public async Task<List<string>> PickPaths(IReadOnlyList<FilePickerFileType> filter, bool multi)
     {
-        if (Picked is { } answer) return await ReadFiles(answer());
+        if (Picked is { } answer) return [.. answer()];
         if (Owner?.StorageProvider is not { } storage) return [];
         var picked = await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter });
-        return await ReadFiles(picked.Select(f => f.TryGetLocalPath()).OfType<string>());
+        return [.. picked.Select(f => f.TryGetLocalPath()).OfType<string>()];
     }
 
     public async Task<List<PickedFile>> ReadFiles(IEnumerable<string> paths)

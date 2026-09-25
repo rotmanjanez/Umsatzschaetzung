@@ -16,7 +16,7 @@ public sealed class ImportJob(string caseId, string label) : Observable
 
     public string CaseId { get; } = caseId;
     public string Label { get; } = label;
-    public Queue<PickedFile> Queue { get; } = new();
+    public Queue<string> Queue { get; } = new();
     public CancellationToken Ct => cts.Token;
 
     public ImportProgress Progress { get; } = new();
@@ -74,7 +74,7 @@ public sealed class Imports
 
     public ObservableCollection<ImportJob> Jobs { get; } = [];
 
-    public void Add(string caseId, string label, List<PickedFile> files)
+    public void Add(string caseId, string label, List<string> files)
     {
         if (files.Count == 0) return;
         var job = Jobs.FirstOrDefault(j => j.CaseId == caseId && !j.Ct.IsCancellationRequested);
@@ -116,23 +116,24 @@ public sealed class Imports
     ImportJob? Next() => Jobs.FirstOrDefault(j => !j.Ct.IsCancellationRequested && j.Queue.Count > 0);
 
     // Scans further down the queue are read while the one before them is stored: the
-    // reader overlaps one page on the accelerator with another on the cores. The case is
-    // still written one file at a time, in the order the files were picked.
+    // reader overlaps one page on the accelerator with another on the cores, and a file
+    // still in the cloud downloads meanwhile. The case is still written one file at a
+    // time, in the order the files were picked.
     const int Ahead = 4;
 
     async Task Run(ImportJob job)
     {
         job.Running = true;
-        var reading = new Queue<(PickedFile File, Task<OcrResp>? Ocr)>();
+        var reading = new Queue<(string Name, Task<(PickedFile File, Task<OcrResp>? Ocr)> Read)>();
         while (!job.Ct.IsCancellationRequested)
         {
-            while (reading.Count <= Ahead && job.Queue.TryDequeue(out var next)) reading.Enqueue((next, Read(job, next)));
+            while (reading.Count <= Ahead && job.Queue.TryDequeue(out var next)) reading.Enqueue((Path.GetFileName(next), Read(job, next)));
             if (!reading.TryDequeue(out var item)) break;
-            var file = item.File;
-            job.File = file.Name;
+            job.File = item.Name;
             try
             {
-                await Import(job, file, item.Ocr);
+                var (file, ocr) = await item.Read;
+                await Import(job, file, ocr);
             }
             catch (OperationCanceledException)
             {
@@ -140,7 +141,11 @@ public sealed class Imports
             }
             catch (ServiceError ex)
             {
-                job.Failed.Add(file.Name + ": " + ex.Message);
+                job.Failed.Add(item.Name + ": " + ex.Message);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                job.Failed.Add(item.Name + ": Datei konnte nicht gelesen werden");
             }
             job.Progress.EndFile();
             job.Done++;
@@ -165,10 +170,13 @@ public sealed class Imports
         }
     }
 
-    Task<OcrResp>? Read(ImportJob job, PickedFile file) =>
-        InvoiceParser.Detect(file.Data) is Kind.Pdf or Kind.Image
+    async Task<(PickedFile File, Task<OcrResp>? Ocr)> Read(ImportJob job, string path)
+    {
+        var file = new PickedFile(Path.GetFileName(path), await File.ReadAllBytesAsync(path, job.Ct));
+        return (file, InvoiceParser.Detect(file.Data) is Kind.Pdf or Kind.Image
             ? session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct)
-            : null;
+            : null);
+    }
 
     async Task Import(ImportJob job, PickedFile file, Task<OcrResp>? reading)
     {

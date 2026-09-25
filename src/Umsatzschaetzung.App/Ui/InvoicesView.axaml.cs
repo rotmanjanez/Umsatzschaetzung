@@ -227,7 +227,7 @@ public partial class InvoicesView : Screen
 
     async void AddFiles(object? sender, RoutedEventArgs e)
     {
-        StartImport(await Session.PickFiles(Session.InvoiceFilter, true));
+        StartImport(await Session.PickPaths(Session.InvoiceFilter, true));
     }
 
     void DragOverFiles(object? sender, DragEventArgs e)
@@ -244,11 +244,11 @@ public partial class InvoicesView : Screen
     {
         model.Dragging = false;
         if (e.DataTransfer.TryGetFiles() is not { } items) return;
-        StartImport(await Session.ReadFiles(items.Select(f => f.TryGetLocalPath()).OfType<string>()));
+        StartImport([.. items.Select(f => f.TryGetLocalPath()).OfType<string>()]);
     }
 
-    void StartImport(List<PickedFile> files)
+    void StartImport(List<string> paths)
     {
-        if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, files);
+        if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, paths);
     }
 }
