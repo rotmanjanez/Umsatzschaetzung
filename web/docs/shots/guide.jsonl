@@ -132,6 +132,32 @@
 { "do": "wait", "rounds": 2 }
 { "do": "shot", "name": "sortiment-liste", "at": { "text": "Produkt", "up": "DataGrid" }, "clip": "DataGridRow", "trim": { "top": 5, "bottom": 465 } }
 
+// Kalkulation: the raw schnitzel meat to pork, what brings no revenue out of the estimate
+{ "do": "tab", "header": "4. Kalkulation" }
+{ "do": "wait", "rounds": 8 }
+{ "do": "tab", "header": "Übrige Einkäufe" }
+{ "do": "wait", "rounds": 4 }
+{ "do": "select", "at": { "starts": "Schweineschnitzel natur" } }
+{ "do": "wait", "rounds": 8 }
+{ "do": "click", "at": { "text": "Manuell zuordnen" } }
+{ "do": "wait", "rounds": 2 }
+{ "do": "choose", "at": { "type": "IngredientBox" }, "text": "Schweinefleisch", "item": "Schweinefleisch" }
+{ "do": "focus" }
+{ "do": "wait", "rounds": 2 }
+{ "do": "shot", "name": "kalkulation-schnitzel", "at": { "name": "MappingPane" } }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "click", "at": { "starts": "Servietten 1/4 Falz", "up": "DataGridRow" } }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "starts": "CO2-Flasche", "up": "DataGridRow" } }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "starts": "Handspülmittel Konzentrat", "up": "DataGridRow" } }
+{ "do": "wait", "rounds": 4 }
+{ "do": "click", "at": { "starts": "Versandkostenpauschale", "up": "DataGridRow" } }
+{ "do": "wait", "rounds": 4 }
+{ "do": "shot", "name": "kalkulation-ohne-umsatz", "at": { "name": "OmittedGrid", "up": "Grid" }, "trim": { "top": -40 } }
+
 // Danach: back in the list, the case is there to reopen
 { "do": "click", "at": { "name": "BackButton" } }
 { "do": "deselect", "at": { "text": "Bezeichnung", "up": "DataGrid" } }

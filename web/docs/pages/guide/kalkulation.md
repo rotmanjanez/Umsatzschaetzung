@@ -24,15 +24,19 @@ den Listen, sie gleichen sich über die Zeit aus.
 
 ### Das Schnitzel
 
-In **Nicht Teil der Ermittlung des Aufschlagsatzes** fällt **Schweineschnitzel
-natur, ausgelöst** auf, mit fast 3.500 € netto. Das Programm hat es als
-**Schnitzel, paniert, je Stück** zugeordnet, als fertig paniertes Schnitzel.
-Das Gasthaus kauft das Fleisch aber roh und paniert selbst; im Sortiment steht
-**Schnitzel mit Pommes**, und dessen Rezept rechnet mit Schweinefleisch.
+In **Nicht Teil der Ermittlung des Aufschlagsatzes** steht ganz oben
+**Schweineschnitzel natur, ausgelöst**, mit fast 3.500 € netto. Das Programm
+hat es als **Schnitzel, paniert, je Stück** zugeordnet, als fertig paniertes
+Schnitzel. Das Gasthaus kauft das Fleisch aber roh, 427 kg im Jahr, und
+paniert selbst; im Sortiment steht **Schnitzel mit Pommes**, und dessen Rezept
+rechnet mit Schweinefleisch.
 
-Die Zeile anklicken, **Manuell zuordnen**, als Zutat `Schweinefleisch` wählen
-und **Zuordnen**. Die Position verschwindet aus der Liste und zählt ab jetzt
-zum Schnitzel.
+Die Zeile anklicken, **Manuell zuordnen**, als Zutat `Schweinefleisch`{.copy}
+wählen und **Zuordnen**:
+
+![Das Schnitzel wird Schweinefleisch zugeordnet](img/kalkulation-schnitzel.png)
+
+Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.
 
 Die automatische Zuordnung liegt meistens richtig, aber nicht immer. Darum am
 Ende immer prüfen, ob alles zusammenpasst: Ein großer Betrag in dieser Liste
@@ -42,25 +46,33 @@ verdient einen zweiten Blick.
 
 In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht
 verkauft. Bleiben sie dort, schätzt das Programm auch auf sie einen Umsatz
-über den Rohgewinnaufschlagsatz. Bei diesen Positionen auf das Symbol am
+über den Rohgewinnaufschlagsatz. Bei diesen Positionen auf das Kreuz am
 Zeilenende klicken (**… bringt in diesem Betrieb keinen Umsatz**):
 
-1. **Frittieröl pflanzlich 10 l**
-2. **Servietten 1/4 Falz 33 x 33 cm weiß 1000 St.**
-3. **CO2-Flasche 10 kg Füllung**
-4. **Klarspüler 10 l**
+1. **Servietten 1/4 Falz 33 × 33 cm weiß 1000 St.**
+2. **CO2-Flasche 10 kg Füllung**
+3. **Handspülmittel Konzentrat 5 l**
+4. **Versandkostenpauschale**
 
 Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position.
-Alle Positionen derselben Zutat wandern mit: Mit dem Frittieröl geht alles,
-was als **Pflanzenöl** zugeordnet ist, mit dem ersten Klarspüler auch der
-zweite. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie
-wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder
-zurück.
+Alle Positionen derselben Zutat wandern mit: mit den Servietten auch
+Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der
+Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale die
+Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der
+Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort
+nimmt die Festlegung wieder zurück.
+
+![Was keinen Umsatz bringt, steht unter „Nicht in der Umsatzschätzung“](img/kalkulation-ohne-umsatz.png)
+
+Übrig bleiben in der oberen Liste knapp 3.900 €, 5,86 % der Einkäufe:
+Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
 !!! geschafft "Geschafft, wenn …"
     - **Schweineschnitzel natur** nicht mehr in den Listen steht
-    - Frittieröl, Servietten, CO2 und Klarspüler unter **Nicht in der
-      Umsatzschätzung** stehen
+    - Servietten, CO2, Handspülmittel und Versandkostenpauschale unter
+      **Nicht in der Umsatzschätzung** stehen
+    - neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `3.909,85 €
+      (5,86 % der Einkäufe)` steht
 
 ## Ertragsregeln
 

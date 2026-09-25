@@ -86,7 +86,16 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         _ => throw new ArgumentException("unknown window: " + which),
     };
 
+    // A row a list has scrolled out of sight is scrolled into view and looked for again.
     static Visual Find(Visual root, Target target)
+    {
+        var hit = Hits(root, target).FirstOrDefault();
+        if (hit is null && Reveal(root, target)) hit = Hits(root, target).FirstOrDefault();
+        if (hit is null) throw new InvalidOperationException("not found: " + target);
+        return target.Up is { } up ? Up(hit, up) : hit;
+    }
+
+    static IEnumerable<Visual> Hits(Visual root, Target target)
     {
         var hits = root.GetVisualDescendants().Where(v => v.IsEffectivelyVisible);
         if (target.Name is { } name) hits = hits.Where(v => (v as StyledElement)?.Name == name);
@@ -94,8 +103,23 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
         if (target.Starts is { } starts) hits = hits.Where(v => Label(v)?.StartsWith(starts, StringComparison.Ordinal) == true);
         if (target.Type is { } type) hits = hits.Where(v => v.GetType().Name == type);
         if (target.Tip is { } tip) hits = hits.Where(v => v is Control c && ToolTip.GetTip(c) as string == tip);
-        var hit = hits.FirstOrDefault() ?? throw new InvalidOperationException("not found: " + target);
-        return target.Up is { } up ? Up(hit, up) : hit;
+        return hits;
+    }
+
+    static bool Reveal(Visual root, Target target)
+    {
+        if (target.Text is null && target.Starts is null) return false;
+        bool Matches(string? s) => s is not null && (target.Text is { } t ? s == t : s.StartsWith(target.Starts!, StringComparison.Ordinal));
+        foreach (var grid in root.GetVisualDescendants().OfType<DataGrid>().Where(g => g.IsEffectivelyVisible))
+        {
+            var row = grid.ItemsSource?.Cast<object>().FirstOrDefault(item => item.GetType().GetProperties()
+                .Any(p => p.PropertyType == typeof(string) && p.GetIndexParameters().Length == 0 && Matches(p.GetValue(item) as string)));
+            if (row is null) continue;
+            grid.ScrollIntoView(row, null);
+            Settle();
+            return true;
+        }
+        return false;
     }
 
     static Visual Up(Visual inner, string type) =>

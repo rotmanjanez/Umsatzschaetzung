@@ -65,6 +65,9 @@ with a twist at the end), `tip` the tooltip (for buttons that only show an icon)
 
     { "text": "Lieferant", "up": "DataGrid" }
 
+A `text` or `starts` that nothing on screen shows is looked for in the rows of the
+lists: the row that holds it is scrolled into view, and the search runs again.
+
 A `shot` crops to `at`. `trim` shrinks that frame beforehand (`{ "top": 16 }`),
 `clip` pulls the bottom edge onto the last element of a type inside it
 (`"DataGridRow"`, so that no empty rows come along).
