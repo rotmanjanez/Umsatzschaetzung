@@ -23,6 +23,8 @@ public class ParseTests
     [InlineData("12,50-", -1250)]
     [InlineData("0,005", 1)]
     [InlineData("0,004", 0)]
+    [InlineData("229, 26", 22926)]
+    [InlineData(". -29,70", -2970)]
     public void MoneyReadsGermanSeparatorsToCents(string text, long cents) =>
         Assert.Equal(cents, Parse.Number(text, Parse.ScaleCents));
 
@@ -35,6 +37,8 @@ public class ParseTests
     [InlineData("1.2345", 1_235)]
     [InlineData("134 Stk", 134_000)]
     [InlineData("0,5 kg", 500)]
+    [InlineData("28, 130", 28_130)]
+    [InlineData(". -9", -9_000)]
     public void AThreeDigitGroupAfterADotIsThousandsAndAfterACommaDecimals(string text, long milli) =>
         Assert.Equal(milli, Parse.Number(text, Parse.ScaleMilli));
 

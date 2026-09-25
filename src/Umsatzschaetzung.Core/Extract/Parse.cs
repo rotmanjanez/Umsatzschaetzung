@@ -30,10 +30,17 @@ public static class Parse
             || (groups.Length == 2 && groups[^1].Length != 3);
     }
 
+    // A comma the scan set apart from its decimals ("229, 26") is still their comma.
+    static readonly Regex ApartDecimals = new(@"(?<=\d[,;:])\s+(?=\d{2,3}(?!\d))");
+
+    // A table rule or a speck before the sign reads as a mark of its own: ". -9" is minus nine.
+    static readonly char[] Specks = ['.', '·', '•', ',', ';', ':', ' '];
+
     public static long Number(string s, int scale)
     {
         var t = s.Trim().Replace('\u00a0', ' ');
-        t = Currency.Replace(t, "").Trim();
+        t = Currency.Replace(t, "").Trim().TrimStart(Specks);
+        t = ApartDecimals.Replace(t, "");
         var neg = t.StartsWith('-') || t.EndsWith('-');
         t = t.Trim('-').Trim();
         var hit = NumberRx.Match(t);

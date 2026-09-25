@@ -361,7 +361,7 @@ public sealed class Table
     static string At(Column c, int row) => c.Body.FirstOrDefault(x => x.Words[0].Row == row)?.Text ?? "";
 
     // Name text ends where a key opens: GTIN, article number or lot are not the name.
-    static readonly Regex KeyWord = new(@"^(GTIN|EAN|Art(ikel)?[.\-]*(Nr|nummer|kennung)|Charge|Lot|MHD)\b", RegexOptions.IgnoreCase);
+    static readonly Regex KeyWord = new(@"^(GTIN|EAN|[AÄ]rt(ikel)?[.\-]*(Nr|nummer|kennung)|Charge|Lot|MHD)\b", RegexOptions.IgnoreCase);
     static readonly char[] Bullets = ['•', '·', '-', '–', '*', '.', ','];
 
     static string NameText(Cell cell)
@@ -391,8 +391,9 @@ public sealed class Table
                     var meaning = cell.Column?.Meaning;
                     if (meaning is null && cell.Column is not null && cell.Column.Decided) continue;
                     var field = meaning ?? Field.Name;
-                    // A wrap row carrying a key is a note ("Schema der Artikelkennung: 0160").
-                    if (field == Field.Name && cell.Words.Any(w => KeyWord.IsMatch(w.Word.Text))) continue;
+                    // A wrap row carrying a key is a note ("Schema der Artikelkennung: 0160"), in
+                    // whichever column it lands: its number is no price the row lost.
+                    if (cell.Words.Any(w => KeyWord.IsMatch(w.Word.Text))) continue;
                     var text = field == Field.Name ? NameText(cell) : cell.Text;
                     if (text == "") continue;
                     if (field == Field.Name && current.TryGetValue(field, out var name))

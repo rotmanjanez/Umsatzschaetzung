@@ -189,6 +189,16 @@ public class TableTests
     }
 
     [Fact]
+    public void AKeyedNoteInThePriceColumnFillsNoPriceTheItemLost()
+    {
+        var items = Items(Headed()
+            .Cells(Role.LineItem, (100, "2"), (300, "Tomaten"), (900, "7,00"))
+            .Cells(Role.LineWrap, (300, "Ärtikelkennung: 4067700010208"), (700, "Schema der Artikelkennung: 0160")));
+        Assert.Equal("Tomaten", items[0][Field.Name].Text);
+        Assert.False(items[0].ContainsKey(Field.UnitPrice));
+    }
+
+    [Fact]
     public void AWrapRowInAColumnDecidedToMeanNothingIsDropped()
     {
         var items = Items(Headed()
