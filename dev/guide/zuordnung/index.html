@@ -475,6 +475,8 @@
       
         
       
+        
+      
     
     
     
@@ -559,6 +561,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../verwaltung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Verwaltete Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -574,6 +599,8 @@
   
     
     
+      
+        
       
         
       
@@ -614,6 +641,29 @@
             Hilfe
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Häufige Fragen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1163,6 +1213,8 @@ Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für
 fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was
 es nicht wusste.</p>
 <h2 id="die-liste">Die Liste</h2>
+<div class="us-side">
+<div>
 <p>Auf <strong>2. Zuordnung</strong> wechseln. Links stehen alle Artikel der Prüfung, jeder
 einmal, auch wenn er auf 25 Rechnungen vorkommt. Die erste Spalte ist der
 Status:</p>
@@ -1172,11 +1224,14 @@ Status:</p>
 <li><strong>Automatisch</strong>: Das Programm hat zugeordnet, niemand hat es bestätigt.</li>
 <li><strong>Manuell</strong>: Ein Mensch hat die Zuordnung gewählt oder bestätigt.</li>
 </ul>
+</div>
 <p><img alt="Der Reiter „2. Zuordnung“ nach dem Import, sechs Positionen offen" src="../img/zuordnung-liste.png" /></p>
+</div>
 <h2 id="eine-position-ansehen">Eine Position ansehen</h2>
+<div class="us-side">
+<div>
 <p>Die Zeile <strong>2022 Domina trocken 0,75 l</strong> anklicken. Rechts erscheint alles,
 was zu diesem Artikel bekannt ist:</p>
-<p><img alt="Die Position 2022 Domina mit den Vorschlägen des Programms" src="../img/zuordnung-position.png" /></p>
 <ul>
 <li><strong>Aus der Rechnung</strong>: Name, Lieferant, Artikelnummer und die Gesamtmenge
   über alle Rechnungen, hier 158 Flaschen in 6 Positionen.</li>
@@ -1191,22 +1246,37 @@ was zu diesem Artikel bekannt ist:</p>
 <li><strong>Belege</strong>: die Rechnungszeilen, aus denen der Artikel stammt, als
   Ausschnitt des Scans.</li>
 </ul>
+</div>
+<p><img alt="Die Position 2022 Domina mit den Vorschlägen des Programms" src="../img/zuordnung-position.png" /></p>
+</div>
+<div class="us-side">
+<div>
 <p>Ein Domina ist ein fränkischer Rotwein. Den Vorschlag <strong>Rotwein × 750 ml</strong>
 anklicken und <strong>Zuordnen</strong>. Rechts oben bestätigt ein grüner Hinweis die
 Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen
 Zuordnungen, und die Bilanz zeigt <code>5 offen</code>.</p>
-<p><img alt="Die Bestätigung nach dem Zuordnen" src="../img/zuordnung-zugeordnet.png" /></p>
+</div>
+<p><img alt="Die Bestätigung nach dem Zuordnen" src="../img/zuordnung-zugeordnet.png" width="428" /></p>
+</div>
 <h2 id="die-ubrigen-offenen-positionen">Die übrigen offenen Positionen</h2>
+<div class="us-side">
+<div>
 <p>Nach demselben Muster die anderen fünf. Bei zweien ist die Zutat klar, das
 Programm zeigt sie als <strong>Exakter Treffer</strong>, aber der Faktor fehlt: Aus
 „Karton“ oder „Bund“ lässt sich nicht lesen, wie viel drin ist. Das Feld
 <strong>Faktor</strong> ist dann mit einem Stern markiert, und darunter steht die Frage,
 die zu beantworten ist:</p>
-<p><img alt="Die Kaffeesahne: Zutat klar, Faktor fehlt" src="../img/zuordnung-faktor-fehlt.png" /></p>
+</div>
+<p><img alt="Die Kaffeesahne: Zutat klar, Faktor fehlt" src="../img/zuordnung-faktor-fehlt.png" width="630" /></p>
+</div>
+<div class="us-side">
+<div>
 <p>Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. <code class="copy">1800</code> eintragen,
 die Zeile darunter rechnet vor:</p>
-<p><img alt="Der Faktor ist eingetragen" src="../img/zuordnung-faktor.png" /></p>
+</div>
+<p><img alt="Der Faktor ist eingetragen" src="../img/zuordnung-faktor.png" width="630" /></p>
+</div>
 <table>
 <thead>
 <tr>
@@ -1231,9 +1301,9 @@ die Zeile darunter rechnet vor:</p>
 </tr>
 <tr>
 <td>Leberkäse am Stück, ungebacken</td>
-<td><strong>Leberkäse</strong> (schon gewählt)</td>
-<td><code class="copy">1000</code> eintragen</td>
-<td><strong>Zuordnen</strong></td>
+<td></td>
+<td></td>
+<td>offen lassen</td>
 </tr>
 <tr>
 <td>Putenbrustfilet frisch</td>
@@ -1249,24 +1319,24 @@ die Zeile darunter rechnet vor:</p>
 </tr>
 </tbody>
 </table>
-<p>Beim Leberkäse hat der Scan die Einheit verlesen: Auf dem Beleg steht „kg“,
-gelesen wurde „K8“. Ein „K8“ Leberkäse ist also ein Kilogramm, 1.000 g.</p>
+<p>Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen. Ohne verlässliche
+Einheit gibt es keinen verlässlichen Faktor, die Position bleibt offen.</p>
 <p>Beim Putenbrustfilet schlägt das Programm als <strong>Exakter Treffer</strong>
 <strong>Hähnchenfleisch</strong> vor. Das ist falsch: Pute ist kein Hähnchen, die richtige
 Zutat <strong>Putenfleisch</strong> steht mit 90 % darunter. Ein exakter Treffer verdient
 also trotzdem einen Blick.</p>
-<p>Die Petersilie bleibt offen. Nicht jede Position muss zugeordnet sein: Was
+<p>Leberkäse und Petersilie bleiben offen. Nicht jede Position muss zugeordnet sein: Was
 offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter
 <strong>Nicht in der Umsatzschätzung</strong> auf, damit es nicht unbemerkt verloren geht.
 Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht
 fällt, ist offen lassen die ehrlichere Antwort.</p>
-<p>Mit jeder Zuordnung zählt die Bilanz herunter, bis dort <code>1 offen</code> steht.</p>
-<p><img alt="Nur die Petersilie ist noch offen" src="../img/zuordnung-fertig.png" /></p>
+<p>Mit jeder Zuordnung zählt die Bilanz herunter, bis dort <code>2 offen</code> steht.</p>
+<p><img alt="Nur Leberkäse und Petersilie sind noch offen" src="../img/zuordnung-fertig.png" width="610" /></p>
 <div class="admonition geschafft">
 <p class="admonition-title">Geschafft, wenn …</p>
 <ul>
-<li>über der Liste <code>1 offen, 116 automatisch, 5 manuell</code> steht</li>
-<li>nur noch die Petersilie <strong>Offen</strong> ist</li>
+<li>über der Liste <code>2 offen, 116 automatisch, 4 manuell</code> steht</li>
+<li>nur noch Leberkäse und Petersilie <strong>Offen</strong> sind</li>
 </ul>
 </div>
 <div class="admonition nachlesen">

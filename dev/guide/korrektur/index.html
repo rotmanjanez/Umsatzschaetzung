@@ -475,6 +475,8 @@
       
         
       
+        
+      
     
     
     
@@ -559,6 +561,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../verwaltung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Verwaltete Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -574,6 +599,8 @@
   
     
     
+      
+        
       
         
       
@@ -614,6 +641,29 @@
             Hilfe
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Häufige Fragen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1181,22 +1231,27 @@
 <h1 id="rechnungen-korrigieren">Rechnungen korrigieren</h1>
 <p class="us-steps"><a href="../start/">Prüfung</a><span class="here">1. Rechnungen</span><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
+<div class="us-side">
+<div>
 <p>Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
 Programm rechnet deshalb jede Rechnung nach: Menge mal Einzelpreis muss den
 Zeilenbetrag ergeben, die Zeilen den Nettobetrag, Netto und Steuer den
 Bruttobetrag. Was nicht aufgeht oder unvollständig ist, steht mit
 <strong>Durchsicht offen</strong> ganz oben in der Liste. Im Beispiel ist das eine
 Rechnung, an der gleich mehreres schiefgegangen ist:</p>
+</div>
 <p><img alt="Eine Rechnung mit „Durchsicht offen“" src="../img/rechnungen-liste.png" /></p>
+</div>
 <p>Was das Programm nicht zusammenbringt, ist markiert: Das Feld ist orange
 hinterlegt, und auf dem Beleg ist dieselbe Stelle orange umrandet. Wer mit der
 Maus auf das Feld zeigt, sieht den Grund, etwa „Einheit fehlt“.</p>
 <h2 id="die-rechnung-tk25-1583">Die Rechnung TK25-1583</h2>
+<div class="us-side">
+<div>
 <p>Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit
 dem Symbol <strong>Öffnen</strong> rechts in der Zeile). Sie öffnet sich in einem eigenen
 Fenster: links die gelesenen Werte, rechts der Beleg. Quer über der Tabelle
 liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:</p>
-<p><img alt="Die Rechnung TK25-1583 nach dem Import" src="../img/korrektur-tk.png" /></p>
 <ul>
 <li>„Summe der Positionen 821,80 € weicht vom Nettobetrag 842,80 € ab“: Es fehlt
   eine Zeile.</li>
@@ -1204,13 +1259,20 @@ liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:</p>
   Die Steuersätze fehlen.</li>
 </ul>
 <p>Dazu ist der Lieferant nur halb gelesen: <code>FROSTW</code>.</p>
+</div>
+<p><img alt="Die Rechnung TK25-1583 nach dem Import" src="../img/korrektur-tk.png" /></p>
+</div>
 <h3 id="die-fehlende-zeile">Die fehlende Zeile</h3>
+<div class="us-side">
+<div>
 <p>Auf dem Beleg stehen acht Positionen, in den gelesenen Werten nur sieben. Die
 letzte liegt unter dem Stempel und ist beim Lesen verloren gegangen:</p>
-<p><img alt="Der Beleg: Position 8 unter dem Stempel" src="../img/korrektur-tk-beleg.png" /></p>
 <p>Dort steht <em>Thermobox Leihgebühr je Woche</em>, 6 Stk zu 3,50 €, zusammen 21,00 €.
 Das Plus unter den Positionen (<strong>Zeile hinzufügen</strong>) legt eine leere Zeile an.
 Mit einem Doppelklick (oder F2) wird eine Zelle bearbeitbar; eintragen:</p>
+</div>
+<p><img alt="Der Beleg: Position 8 unter dem Stempel" src="../img/korrektur-tk-beleg.png" width="690" /></p>
+</div>
 <table>
 <thead>
 <tr>
@@ -1236,13 +1298,17 @@ Mit einem Doppelklick (oder F2) wird eine Zelle bearbeitbar; eintragen:</p>
 <p>Die Summe der Positionen stimmt jetzt mit dem Nettobetrag überein, der erste
 Hinweis ist verschwunden.</p>
 <h3 id="die-steuersatze">Die Steuersätze</h3>
+<div class="us-side">
+<div>
 <p>Bleibt der zweite Hinweis: Netto geht auf, Brutto aber nicht. Laut Beleg sind
 es 912,12 €, aus den Positionen nur 842,80 €. Die Differenz ist genau die
 Umsatzsteuer: Alle Zeilen stehen auf 0 %, denn der Beleg druckt den Satz nicht
 in eine eigene Spalte, sondern klein unter jeden Artikel („MwSt. 7 %“).</p>
 <p>In der Spalte <strong>USt</strong> für die Lebensmittel <code class="copy">7</code> eintragen, für Trockeneis und
 Thermobox <code class="copy">19</code>. Danach ergeben auch die Positionen 912,12 €.</p>
-<p><img alt="Die korrigierte Rechnung: beide Summen gleich" src="../img/korrektur-tk-fertig.png" /></p>
+</div>
+<p><img alt="Die korrigierte Rechnung: beide Summen gleich" src="../img/korrektur-tk-fertig.png" width="836" /></p>
+</div>
 <h2 id="bestatigen">Bestätigen</h2>
 <p>Mit dem Häkchen oben rechts (<strong>Bestätigen</strong>) die Rechnung als durchgesehen
 markieren; das Fenster schließt sich. In der Rechnungsliste steht sie jetzt mit
