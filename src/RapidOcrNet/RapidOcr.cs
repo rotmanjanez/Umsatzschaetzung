@@ -86,17 +86,18 @@ public sealed class RapidOcr : IDisposable
     /// <summary>
     /// Initialize using a model set with separate session options for the detector, whose
     /// single large input suits an accelerator, and for the classifier and recognizer.
-    /// <paramref name="detectorLock"/> serializes detector runs across instances sharing
+    /// <paramref name="acceleratedRecognizer"/> reads the widest lines beside the cores.
+    /// <paramref name="acceleratorLock"/> serializes accelerator runs across instances sharing
     /// that accelerator.
     /// </summary>
-    public void InitModels(RapidOcrModelSet models, SessionOptions detector, SessionOptions op, object? detectorLock = null)
+    public void InitModels(RapidOcrModelSet models, SessionOptions detector, SessionOptions op, object? acceleratorLock = null, SessionOptions? acceleratedRecognizer = null)
     {
         ArgumentNullException.ThrowIfNull(models);
 
-        _textDetector.RunLock = detectorLock;
+        _textDetector.RunLock = acceleratorLock;
         _textDetector.InitModel(models.DetModelPath, models.DetMean, models.DetStd, detector);
         _textClassifier.InitModel(models.ClsModelPath, op);
-        _textRecognizer.InitModel(models.RecModelPath, models.KeysPath, op);
+        _textRecognizer.InitModel(models.RecModelPath, models.KeysPath, op, acceleratedRecognizer, acceleratorLock);
     }
 
     public OcrResult Detect(string path, RapidOcrOptions options)

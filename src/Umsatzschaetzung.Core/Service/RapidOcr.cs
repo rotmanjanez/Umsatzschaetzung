@@ -12,7 +12,8 @@ namespace Umsatzschaetzung.Service;
 // carry and is slower for it. The two normalise differently, so the detector's mean and
 // deviation travel with its path. Threads is the detector's on the CPU, per instance: one page
 // at a time wants every core, a corpus run with a page per core wants one each. The crops
-// are read one per core, each on a single thread.
+// are read one per core, each on a single thread, and the widest beside them on the
+// accelerator, which is idle once the page's lines are found.
 public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
 {
     public const string Name = "RapidOcrNet/PP-OCRv6-det-small+PP-OCRv5-latin-rec";
@@ -232,9 +233,10 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         {
             using var detector = gpu ? Accelerator.Session(threads) : Engine.GetDefaultSessionOptions(threads);
             using var reader = Engine.GetDefaultSessionOptions(1);
+            using var acceleratedReader = gpu ? Accelerator.Session(1) : null;
             // An idle detector thread spinning for work takes its core from the crops read beside it.
             detector.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");
-            if (gpu) lock (Accelerator.Gate) engine.InitModels(Models, detector, reader, Accelerator.Gate);
+            if (gpu) lock (Accelerator.Gate) engine.InitModels(Models, detector, reader, Accelerator.Gate, acceleratedReader);
             else engine.InitModels(Models, detector, reader);
         }
         catch (OnnxRuntimeException) when (gpu)

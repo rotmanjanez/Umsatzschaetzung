@@ -3,6 +3,7 @@
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/CrnnNet.cs
 
+using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
@@ -19,10 +20,17 @@ public sealed class TextRecognizer : IDisposable
     //private const int RecBatchNum = 6;
 
     private InferenceSession _crnnNet = null!;
+    private InferenceSession? _accelerated;
+    private object? _acceleratorLock;
+    private volatile bool _acceleratorFailed;
     private string[] _keys = null!;
     private string _inputName = null!;
 
-    public void InitModel(string path, string keysPath, SessionOptions op)
+    /// <summary>
+    /// <paramref name="accelerated"/> reads beside the cores, one run at a time under
+    /// <paramref name="acceleratorLock"/>; a run that fails there is read on the cores.
+    /// </summary>
+    public void InitModel(string path, string keysPath, SessionOptions op, SessionOptions? accelerated = null, object? acceleratorLock = null)
     {
         if (!File.Exists(path))
         {
@@ -35,6 +43,8 @@ public sealed class TextRecognizer : IDisposable
         }
 
         _crnnNet = new InferenceSession(path, op);
+        if (accelerated is not null) _accelerated = new InferenceSession(path, accelerated);
+        _acceleratorLock = acceleratorLock;
         _inputName = _crnnNet.InputMetadata.Keys.First();
         _keys = InitKeys(keysPath);
     }
@@ -73,13 +83,67 @@ public sealed class TextRecognizer : IDisposable
         // per-image, tight-fit recognizer call (which the model evidently was
         // re-tuned for) while still recording CTC column indices.
         // A crop is too small a run to spread over cores; the crops are spread instead, and
-        // the session is best given one intra-op thread.
+        // the session is best given one intra-op thread. A line costs its width, so the cores
+        // take the narrowest and the accelerator, whose fixed cost per run is highest, the
+        // widest; without an accelerator the widest go first, so none is left for last on one
+        // core while the others idle.
         var textLines = new TextLine[partImgs.Length];
-        Parallel.For(0, partImgs.Length, i => textLines[i] = GetTextLine(partImgs[i]));
+        var widestFirst = Enumerable.Range(0, partImgs.Length).OrderByDescending(i => partImgs[i].Width / (float)partImgs[i].Height).ToArray();
+        if (_accelerated is null || _acceleratorFailed)
+        {
+            Parallel.ForEach(Partitioner.Create(widestFirst, EnumerablePartitionerOptions.NoBuffering), i => textLines[i] = GetTextLine(partImgs[i]));
+            return textLines;
+        }
+
+        var gate = new Lock();
+        int widest = 0, narrowest = widestFirst.Length - 1;
+        int Next(bool wide)
+        {
+            lock (gate) return widest > narrowest ? -1 : wide ? widestFirst[widest++] : widestFirst[narrowest--];
+        }
+        var accelerator = Task.Run(() =>
+        {
+            for (int i; (i = Next(wide: true)) >= 0;) textLines[i] = GetAcceleratedTextLine(partImgs[i]);
+        });
+        Parallel.For(0, Environment.ProcessorCount, _ =>
+        {
+            for (int i; (i = Next(wide: false)) >= 0;) textLines[i] = GetTextLine(partImgs[i]);
+        });
+        accelerator.Wait();
         return textLines;
     }
 
+    private TextLine GetAcceleratedTextLine(SKBitmap src)
+    {
+        if (!_acceleratorFailed)
+        {
+            try
+            {
+                return GetTextLine(src, _accelerated!, _acceleratorLock ?? _accelerated!);
+            }
+            catch (OnnxRuntimeException)
+            {
+                _acceleratorFailed = true;
+            }
+        }
+        return GetTextLine(src);
+    }
+
     public TextLine GetTextLine(SKBitmap src)
+    {
+        try
+        {
+            return GetTextLine(src, _crnnNet, runLock: null);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex.Message + ex.StackTrace);
+        }
+
+        return new TextLine();
+    }
+
+    private TextLine GetTextLine(SKBitmap src, InferenceSession session, object? runLock)
     {
         var sw = ValueStopwatch.StartNew();
         float scale = CrnnDstHeight / (float)src.Height;
@@ -105,22 +169,16 @@ public sealed class TextRecognizer : IDisposable
             NamedOnnxValue.CreateFromTensor(_inputName, inputTensors)
         ];
 
-        try
+        IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results;
+        if (runLock is null) results = session.Run(inputs);
+        else lock (runLock) results = session.Run(inputs);
+        using (results)
         {
-            using (IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = _crnnNet.Run(inputs))
-            {
-                var result = results[0];
-                var tl = ScoreToTextLine(result.AsTensor<float>());
-                tl.Time = (float)sw.ElapsedMilliseconds;
-                return tl;
-            }
+            var result = results[0];
+            var tl = ScoreToTextLine(result.AsTensor<float>());
+            tl.Time = (float)sw.ElapsedMilliseconds;
+            return tl;
         }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine(ex.Message + ex.StackTrace);
-        }
-
-        return new TextLine() { Time = (float)sw.ElapsedMilliseconds };
     }
 
     private TextLine ScoreToTextLine(Tensor<float> srcData)
@@ -259,5 +317,6 @@ public sealed class TextRecognizer : IDisposable
     public void Dispose()
     {
         _crnnNet.Dispose();
+        _accelerated?.Dispose();
     }
 }
