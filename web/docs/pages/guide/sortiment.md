@@ -18,13 +18,13 @@ und -Export:
 
 ![Die Kopfzeile des Sortiments](img/sortiment-kopf.png)
 
-In das Suchfeld `Bier 0,5` tippen. Darunter erscheint eine Liste passender
+In das Suchfeld `Bier 0,5`{.copy} tippen. Darunter erscheint eine Liste passender
 Produkte aus dem Katalog; **Bier 0,5 l vom Fass** anklicken. Das Produkt steht
 jetzt im Sortiment, noch mit dem Hinweis **Preis fehlt**:
 
 ![Das erste Produkt, noch ohne Preis](img/sortiment-erstes.png)
 
-In das Feld **Bruttopreis** `4,60` eintragen, also den Preis auf der Karte,
+In das Feld **Bruttopreis** `4,60`{.copy} eintragen, also den Preis auf der Karte,
 mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.
 
 ## Der Rest per Tabelle

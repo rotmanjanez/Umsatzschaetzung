@@ -30,7 +30,7 @@ die Menge der Zeile zeigt auf dem Beleg blau umrandet, woher der Wert stammt:
 ![Auf dem Beleg steht „17 Fl“](img/korrektur-ws-beleg.png)
 
 Dort steht `17 Fl`. Mit einem Doppelklick auf die Einheit (oder F2) wird die
-Zelle bearbeitbar; `Flasche` eintragen.
+Zelle bearbeitbar; `Flasche`{.copy} eintragen.
 
 ![Alle vier Weine in Flaschen](img/korrektur-ws-fertig.png)
 
@@ -51,7 +51,7 @@ zeigt ihn auf dem Beleg:
 
 ![Auf dem Beleg steht 8,75, nicht 8,76](img/korrektur-0561-beleg.png)
 
-Den falsch gelesenen Einzelpreis `8,76` auf `8,75` korrigieren. Die Zeile geht
+Den falsch gelesenen Einzelpreis `8,76` auf `8,75`{.copy} korrigieren. Die Zeile geht
 auf, das Häkchen ist wieder frei.
 
 Mit dem Häkchen bestätigen.
@@ -82,8 +82,8 @@ läuft quer darüber:
 
 Zum Korrigieren die Werte in der Zeile mit dem Betrag vervollständigen:
 
-1. **Einheit**: `Stück`
-2. **Position**: `Thermobox Leihgebühr je Woche`, am einfachsten aus der Zeile
+1. **Einheit**: `Stück`{.copy}
+2. **Position**: `Thermobox Leihgebühr je Woche`{.copy}, am einfachsten aus der Zeile
    mit 0,00 € kopiert
 3. Die Zeile mit 0,00 € mit dem Papierkorb rechts löschen.
 
@@ -95,7 +95,7 @@ Zum Korrigieren die Werte in der Zeile mit dem Betrag vervollständigen:
     Die markierte Zelle kopiert ++cmd+c++, ++cmd+v++ fügt sie in eine andere
     markierte Zelle ein.
 
-Dann oben den **Lieferanten** eintragen: `Frostwerk Tiefkühl-Service GmbH`.
+Dann oben den **Lieferanten** eintragen: `Frostwerk Tiefkühl-Service GmbH`{.copy}.
 
 ![Der Lieferant ist eingetragen](img/korrektur-tk-zusammengefuehrt.png)
 
@@ -107,8 +107,8 @@ Brutto aber nicht. Laut Beleg sind es 912,12 €, aus den Positionen nur
 0 %, denn der Beleg druckt den Satz nicht in eine eigene Spalte, sondern klein
 unter jeden Artikel („MwSt. 7 %“).
 
-In der Spalte **USt** für die Lebensmittel `7` eintragen, für Trockeneis und
-Thermobox `19`. Danach ergeben auch die Positionen 912,12 €.
+In der Spalte **USt** für die Lebensmittel `7`{.copy} eintragen, für Trockeneis und
+Thermobox `19`{.copy}. Danach ergeben auch die Positionen 912,12 €.
 
 ![Die korrigierte Rechnung: beide Summen gleich](img/korrektur-tk-fertig.png)
 

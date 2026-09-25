@@ -59,7 +59,7 @@ die zu beantworten ist:
 ![Die Kaffeesahne: Zutat klar, Faktor fehlt](img/zuordnung-faktor-fehlt.png)
 
 Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
-1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen,
+1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800`{.copy} eintragen,
 die Zeile darunter rechnet vor:
 
 ![Der Faktor ist eingetragen](img/zuordnung-faktor.png)
@@ -67,9 +67,9 @@ die Zeile darunter rechnet vor:
 | Position | Vorschlag wählen | Faktor | Dann |
 |---|---|---|---|
 | Frühkartoffeln festkochend 12,5 kg | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500` | **Zuordnen** |
-| Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt) | `1800` eintragen | **Zuordnen** |
+| Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt) | `1800`{.copy} eintragen | **Zuordnen** |
 | Petersilie glatt, Bund | | | offen lassen |
-| Pommes frites 7/7 blanchiert, 4 x | **Pommes frites** (schon gewählt) | `10000` eintragen | **Zuordnen** |
+| Pommes frites 7/7 blanchiert, 4 x | **Pommes frites** (schon gewählt) | `10000`{.copy} eintragen | **Zuordnen** |
 
 Bei den Pommes hat der Scan die Packungsangabe abgeschnitten, aus „4 × 2,5 kg“
 wurde „4 x“. Was im Karton ist, zeigt der Beleg-Ausschnitt unten oder die

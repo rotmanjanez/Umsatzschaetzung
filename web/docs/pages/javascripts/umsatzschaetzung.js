@@ -29,8 +29,8 @@
   }
 
   if (location.pathname.includes("/guide/")) {
-    for (const code of document.querySelectorAll(".md-typeset td > code:only-child")) {
-      if (code.parentElement.textContent.trim() !== code.textContent) continue;
+    for (const code of document.querySelectorAll(".md-typeset td > code:only-child, .md-typeset code.copy")) {
+      if (!code.classList.contains("copy") && code.parentElement.textContent.trim() !== code.textContent) continue;
       const button = document.createElement("button");
       button.className = "us-copy";
       button.title = "In Zwischenablage kopieren";
