@@ -330,15 +330,12 @@ public partial class RulesView : Screen
         if (!filling) save.Schedule();
     }
 
-    protected override async void OnEnter()
-    {
-        Session.RulesChanged += Rebuild;
-        await Session.LoadRules(Ct);
-    }
+    protected override async void OnEnter() => await LoadRules();
+
+    protected override void Render(RuleSet rules) => Rebuild();
 
     protected override void OnLeave()
     {
-        Session.RulesChanged -= Rebuild;
         _ = ingredientSave.Now();
         _ = gewerbeSave.Now();
     }

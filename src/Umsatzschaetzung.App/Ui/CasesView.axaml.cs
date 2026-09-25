@@ -52,14 +52,11 @@ public partial class CasesView : Screen
 
     protected override async void OnEnter()
     {
-        Session.RulesChanged += ShowGewerbe;
         _ = Reload();
-        await Session.LoadRules(Ct);
+        await LoadRules();
     }
 
-    protected override void OnLeave() => Session.RulesChanged -= ShowGewerbe;
-
-    void ShowGewerbe() => NewGewerbe.Choices = Session.Gewerbezweige();
+    protected override void Render(RuleSet rules) => NewGewerbe.Choices = Session.Gewerbezweige();
 
     Task Reload() => Session.Run(async () =>
     {

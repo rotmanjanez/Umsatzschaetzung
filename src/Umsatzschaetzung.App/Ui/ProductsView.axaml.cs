@@ -85,14 +85,15 @@ public partial class ProductsView : Screen
     protected override async void OnEnter()
     {
         if (Session.Case is null) return;
-        Session.RulesChanged += RulesChanged;
-        await Session.LoadRules(Ct);
-        if (Session.Case is null || Session.Rules is null || !IsActive) return;
-        Load();
-        if (Revealing() is { } id) Reveal.Row(ProductGrid, model.Rows.FirstOrDefault(r => r.ProductId == id));
+        await LoadRules();
+        if (IsActive && Revealing() is { } id) Reveal.Row(ProductGrid, model.Rows.FirstOrDefault(r => r.ProductId == id));
     }
 
-    void RulesChanged() => model.Catalog = Session.Products();
+    protected override void Render(RuleSet rules)
+    {
+        model.Catalog = Session.Products();
+        Load();
+    }
 
     void Load()
     {
@@ -107,7 +108,6 @@ public partial class ProductsView : Screen
 
     protected override void OnLeave()
     {
-        Session.RulesChanged -= RulesChanged;
         timer.Stop();
         if (Session.Case is not null) _ = Session.SaveCase(At(edited), CancellationToken.None);
     }

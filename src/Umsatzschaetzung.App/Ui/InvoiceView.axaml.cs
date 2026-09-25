@@ -305,6 +305,8 @@ public partial class InvoiceView : Screen
     // Worth keeping around once the user leaves it: edits on their way, or a review still to be done.
     public bool Keep => model.Dirty || model.State == Checked.Pending;
 
+    protected override void Render(RuleSet rules) { }
+
     protected override async void OnEnter()
     {
         if (!checkedOnce)

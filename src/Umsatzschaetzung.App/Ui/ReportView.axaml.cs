@@ -37,6 +37,8 @@ public partial class ReportView : Screen
 
     protected override void OnEnter() => Load();
 
+    protected override void Render(RuleSet rules) => Load();
+
     async void Load()
     {
         if (Session.Case is null) return;

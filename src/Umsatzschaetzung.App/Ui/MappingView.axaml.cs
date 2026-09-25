@@ -52,6 +52,8 @@ public partial class MappingView : Screen
 
     protected override void OnEnter() => Reload(catchUp: true);
 
+    protected override void Render(RuleSet rules) => _ = Refresh();
+
     // Mappings the service made on its own, at import, on verification or in the
     // catch-up below, are in the store but not yet in this session's rules; the list
     // can only name them after a reload.

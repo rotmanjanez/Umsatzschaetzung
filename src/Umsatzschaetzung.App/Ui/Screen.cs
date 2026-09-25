@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -33,6 +34,7 @@ public abstract class Screen : UserControl
         if (cts is not null) return;
         reveal = item;
         cts = new CancellationTokenSource();
+        Session.RulesChanged += Redraw;
         OnEnter();
     }
 
@@ -47,6 +49,7 @@ public abstract class Screen : UserControl
     public void Leave()
     {
         if (cts is null) return;
+        Session.RulesChanged -= Redraw;
         OnLeave();
         cts.Cancel();
         cts.Dispose();
@@ -54,6 +57,21 @@ public abstract class Screen : UserControl
     }
 
     protected virtual void OnEnter() { }
+
+    // Everything a screen shows of the rules is drawn here and nowhere else: once they are loaded on
+    // entering, and again after every change, in whichever window it was made.
+    protected abstract void Render(RuleSet rules);
+
+    // Should the store be out of reach, the screen is drawn from the rules last known.
+    protected async Task LoadRules()
+    {
+        if (!await Session.LoadRules(Ct) && IsActive) Redraw();
+    }
+
+    void Redraw()
+    {
+        if (Session.Rules is { } rules) Render(rules);
+    }
 
     protected virtual void OnLeave() { }
 }

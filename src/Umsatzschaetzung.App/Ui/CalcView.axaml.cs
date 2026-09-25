@@ -69,7 +69,7 @@ public partial class CalcView : Screen
     readonly HashSet<string> promoting = [];
     int generation;
     bool filling, choosing;
-    string edited = "";
+    string edited = "", revealing = "";
     (Case Case, RuleSet Rules, RuleSet Catalog, Report Report, List<ProductRow> Sold)? shown;
 
     public CalcView(Session session) : base(session)
@@ -84,12 +84,14 @@ public partial class CalcView : Screen
     protected override async void OnEnter()
     {
         if (!model.Slow) DispatcherTimer.RunOnce(() => model.Slow = true, TimeSpan.FromMilliseconds(250));
-        var item = Revealing() ?? "";
-        if (item.StartsWith(ProductItem)) Session.WantedProduct = item[ProductItem.Length..];
-        if (Session.Case is null) return;
-        await Session.LoadRules(Ct);
-        if (Session.Case is not { } kase || Session.Rules is not { } rs || !IsActive) return;
-        Session.RulesChanged += RulesChanged;
+        revealing = Revealing() ?? "";
+        if (revealing.StartsWith(ProductItem)) Session.WantedProduct = revealing[ProductItem.Length..];
+        if (Session.Case is not null) await LoadRules();
+    }
+
+    protected override async void Render(RuleSet rs)
+    {
+        if (Session.Case is not { } kase) return;
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         IngredientBox.SetSimilar(this, Session.SimilarIngredients);
         Mapping.Refresh();
@@ -100,6 +102,13 @@ public partial class CalcView : Screen
             return;
         }
         ShowYields(kase, rs);
+        if (Promote(kase, rs))
+        {
+            Schedule(0);
+            return;
+        }
+        var item = revealing;
+        revealing = "";
         await Recalculate(kase, rs);
         if (IsActive) Show(item);
     }
@@ -123,16 +132,13 @@ public partial class CalcView : Screen
 
     protected override void OnLeave()
     {
-        Session.RulesChanged -= RulesChanged;
         if (!timer.IsEnabled) return;
         timer.Stop();
         _ = Session.SaveCase(At(edited), CancellationToken.None);
     }
 
-    void RulesChanged()
+    bool Promote(Case kase, RuleSet rs)
     {
-        if (Session.Case is not { } kase || Session.Rules is not { } rs || !model.HasResult) return;
-        IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         var promoted = kase.Products.Where(cp => promoting.Contains(cp.ProductId) && cp.Recipe is { } own
             && rs.Products.TryGetValue(cp.ProductId, out var p) && Recipes.Same(own, Recipes.Flat(rs, p))).ToList();
         foreach (var cp in promoted)
@@ -141,15 +147,10 @@ public partial class CalcView : Screen
             Drop(cp);
             edited = ProductItem + cp.ProductId;
         }
-        if (promoted.Count > 0) Schedule(0);
-        else _ = Recalculate(kase, rs);
+        return promoted.Count > 0;
     }
 
-    async void Reassigned()
-    {
-        await Session.LoadRules(Ct);
-        if (Session.Case is { } kase && Session.Rules is { } rs && IsActive) await Recalculate(kase, rs);
-    }
+    async void Reassigned() => await LoadRules();
 
     static void Drop(CaseProduct cp)
     {

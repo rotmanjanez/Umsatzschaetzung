@@ -12,14 +12,23 @@ public sealed class StockRow : Observable
     string opening = "0", closing = "0";
     int unitIndex;
 
-    public StockRow(List<Ingredient> options) => Options = options;
+    List<Ingredient> options;
 
-    public List<Ingredient> Options { get; }
+    public StockRow(List<Ingredient> options) => this.options = options;
+
+    public List<Ingredient> Options { get => options; private set => Set(ref options, value); }
     public List<string> Units { get; } = [.. RulesView.RecipeUnits.Select(Model.Units.Label)];
     public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
     public int UnitIndex { get => unitIndex; set => Set(ref unitIndex, value); }
     public string Opening { get => opening; set => Set(ref opening, value); }
     public string Closing { get => closing; set => Set(ref closing, value); }
+
+    public void Offer(List<Ingredient> ingredients)
+    {
+        var id = ingredient?.Id;
+        Options = ingredients;
+        Ingredient = ingredients.Find(i => i.Id == id);
+    }
 }
 
 public sealed class CaseModel : Observable
@@ -54,6 +63,12 @@ public sealed class CaseModel : Observable
     public string Declared7 { get => declared[1]; set => Set(ref declared[1], value); }
     public string Declared0 { get => declared[2]; set => Set(ref declared[2], value); }
     public ObservableCollection<StockRow> Stock { get; } = [];
+
+    public void Offer(List<Gewerbezweig> zweige, List<Ingredient> ingredients)
+    {
+        Gewerbezweige = zweige;
+        foreach (var row in Stock) row.Offer(ingredients);
+    }
 
     static string Declared(Case k, long vat) =>
         k.Declared.FindLast(d => d.Vat == vat) is { } d ? Format.Cents(d.Net) : "";
@@ -161,9 +176,8 @@ public partial class CaseView : Screen
 
     protected override async void OnEnter()
     {
-        Session.RulesChanged += ShowGewerbe;
         if (Session.Case is null) return;
-        await Session.LoadRules(Ct);
+        await LoadRules();
         if (Session.Case is null || !IsActive) return;
         loading = true;
         model.Load(Session);
@@ -171,11 +185,15 @@ public partial class CaseView : Screen
         if (Revealing() is { } item) Reveal.Flash(this.FindControl<Control>(item + "Box"));
     }
 
-    void ShowGewerbe() => model.Gewerbezweige = Session.Gewerbezweige();
+    protected override void Render(RuleSet rules)
+    {
+        loading = true;
+        model.Offer(Session.Gewerbezweige(), Session.Ingredients());
+        loading = false;
+    }
 
     protected override void OnLeave()
     {
-        Session.RulesChanged -= ShowGewerbe;
         timer.Stop();
         _ = Save(CancellationToken.None);
     }

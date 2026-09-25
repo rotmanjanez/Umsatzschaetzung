@@ -107,6 +107,8 @@ public partial class InvoicesView : Screen
 
     static string Text(InvoiceRow r) => r.Supplier + " " + r.Number + " " + r.Date + " " + r.NetTotal + " " + r.FileName + " " + r.StateText;
 
+    protected override void Render(RuleSet rules) { }
+
     protected override void OnEnter()
     {
         Refresh();
