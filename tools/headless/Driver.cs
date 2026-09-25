@@ -14,8 +14,10 @@ namespace Umsatzschaetzung.Headless;
 
 // Drives the real interface headlessly: every step hits the same controls a
 // person would. What is shown is up to the script.
-public sealed class Driver(Shell shell, int scale, double pad, string outDir)
+public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, string outDir)
 {
+    Shell shell = launch(false);
+
     // The rules open in a window of their own, not owned by the shell, and ask from there.
     readonly List<Window> opened = Track();
 
@@ -71,6 +73,9 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
                 break;
             case ChooseStep s:
                 Choose((AutoCompleteBox)Find(window, s.At), s.Text, s.Item);
+                break;
+            case RestartStep:
+                Restart();
                 break;
             case WaitStep s:
                 for (var i = 1; i < s.Rounds; i++) Settle();
@@ -218,6 +223,25 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
 
     static IEnumerable<string> Files(string path) =>
         Directory.Exists(path) ? Directory.EnumerateFiles(path).Order() : [path];
+
+    // The app is quit with the case open, the rule store deleted, and the case opened again.
+    void Restart()
+    {
+        var id = shell.Session.Case?.Id;
+        Close();
+        shell = launch(true);
+        if (id is null) return;
+        var kase = shell.Session.Service.GetCase(id, CancellationToken.None);
+        while (!kase.IsCompleted) Settle();
+        shell.Session.Open(kase.Result);
+    }
+
+    public void Close()
+    {
+        shell.Close();
+        Settle();
+        (shell.Session.Service as IDisposable)?.Dispose();
+    }
 
     void Pick(List<string> paths)
     {

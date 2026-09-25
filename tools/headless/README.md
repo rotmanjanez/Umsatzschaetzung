@@ -56,6 +56,7 @@ window above the main window) and waits afterwards until the interface has settl
 | `tab`      | `header` | switches to the tab with this caption |
 | `import`   | `files` | imports these files, or every file of a folder named here, into the open case and waits for them |
 | `wait`     | `rounds?` | waits further rounds, in case one is not enough |
+| `restart`  | | quits the app, deletes the rule store, starts it again on the same cases and opens the case that was open |
 
 `at` looks for a control: `name` is the `x:Name` from the XAML, `text` the visible
 caption, `starts` the beginning of one (for a long row that the scan may have read

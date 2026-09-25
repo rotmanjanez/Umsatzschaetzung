@@ -42,11 +42,7 @@ var seed = options.TryGetValue("rules", out var rules)
     : RuleStore.Seed();
 
 var work = Directory.CreateTempSubdirectory("umsatzschätzung-headless-");
-var service = new LocalService(
-    new RuleStore(Path.Combine(work.FullName, "store"), seed),
-    new CaseStore(Path.Combine(work.FullName, "cases")),
-    new RapidOcr(), new Tagger(), new PdfiumPages(), null, "headless",
-    options.TryGetValue("readings", out var readings) ? new Readings(readings) : null);
+var store = Path.Combine(work.FullName, "store");
 
 AppBuilder.Configure<App>()
     .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
@@ -54,23 +50,34 @@ AppBuilder.Configure<App>()
     .WithInterFont()
     .SetupWithoutStarting();
 
-var shell = new Shell(service);
-if (Number("width") is { } width) shell.Width = width;
-if (Number("height") is { } height) shell.Height = height;
-shell.Show();
-Driver.Settle();
-
-var driver = new Driver(shell, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir);
+var driver = new Driver(Launch, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir);
 try
 {
     foreach (var step in steps) driver.Run(step);
 }
 finally
 {
-    shell.Close();
+    driver.Close();
     Directory.Delete(work.FullName, true);
 }
 return 0;
+
+// A restart forgets the rule store, as if it had been deleted, and keeps the cases.
+Shell Launch(bool forget)
+{
+    if (forget) Directory.Delete(store, true);
+    var service = new LocalService(
+        new RuleStore(store, seed),
+        new CaseStore(Path.Combine(work.FullName, "cases")),
+        new RapidOcr(), new Tagger(), new PdfiumPages(), null, "headless",
+        options.TryGetValue("readings", out var readings) ? new Readings(readings) : null);
+    var shell = new Shell(service);
+    if (Number("width") is { } width) shell.Width = width;
+    if (Number("height") is { } height) shell.Height = height;
+    shell.Show();
+    Driver.Settle();
+    return shell;
+}
 
 double? Number(string name) =>
     options.TryGetValue(name, out var text) ? double.Parse(text, CultureInfo.InvariantCulture) : null;

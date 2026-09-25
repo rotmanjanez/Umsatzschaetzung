@@ -16,6 +16,31 @@ public sealed class MappingModel : Observable
     public bool NoInvoices { get => noInvoices; set => Set(ref noInvoices, value); }
     public bool Mapping { get => mapping; set => Set(ref mapping, value); }
 
+    (Case?, RuleSet?) caughtUp;
+    Task running = Task.CompletedTask;
+
+    // What the matcher is sure about it maps on its own; the list then shows the rest.
+    // A run a visit left may still be finishing its line; the next visit waits for it.
+    public async Task MapOpen(Session session, CancellationToken ct)
+    {
+        while (!running.IsCompleted) await running;
+        if (ct.IsCancellationRequested || session.Case is not { } k || session.Rules is not { } rs || !Groups.Any(g => g.IsPending)
+            || caughtUp == (k, rs) || k.MappedAt == rs.Version) return;
+        running = Map(session, k, ct);
+        await running;
+    }
+
+    async Task Map(Session session, Case k, CancellationToken ct)
+    {
+        Mapping = true;
+        Case? mapped = null;
+        await session.Run(async () => mapped = await session.Service.MapCase(k.Id, ct));
+        Mapping = false;
+        if (mapped is null || session.Case != k || !await session.LoadRules(ct)) return;
+        session.SetCase(mapped);
+        caughtUp = (session.Case, session.Rules);
+    }
+
     public void Counted()
     {
         int Count(Checked state) => Groups.Count(g => g.State == state);
@@ -34,12 +59,12 @@ public partial class MappingView : Screen
     readonly MappingModel model = new();
     bool refreshing;
     int refreshes;
-    (Case?, RuleSet?) caughtUp;
 
     public MappingView(Session session) : base(session)
     {
         InitializeComponent();
         DataContext = model;
+        model.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(MappingModel.Mapping)) Detail.Blocked = model.Mapping; };
         Detail.Attach(session, () => Ct, key => At(key));
         Detail.Assigned += _ => MapOpen();
         var view = Search.Attach(model.Groups, g => g.Search);
@@ -70,19 +95,7 @@ public partial class MappingView : Screen
         Session.Case is { } k && k.Invoices.SelectMany(i => i.Lines)
             .Any(l => !string.IsNullOrEmpty(l.MappingId) && Session.Rules?.Mappings.ContainsKey(l.MappingId) != true);
 
-    // What the matcher is sure about it maps on its own; the list then shows the rest.
-    async void MapOpen()
-    {
-        if (Session.Case is not { } k || Session.Rules is not { } rs || model.Mapping || !model.Groups.Any(g => g.IsPending)
-            || caughtUp == (k, rs) || k.MappedAt == rs.Version) return;
-        Detail.Blocked = model.Mapping = true;
-        Case? mapped = null;
-        await Session.Run(async () => mapped = await Session.Service.MapCase(k.Id, Ct));
-        Detail.Blocked = model.Mapping = false;
-        if (mapped is null || Session.Case != k || !await Session.LoadRules(Ct)) return;
-        Session.SetCase(mapped);
-        caughtUp = (Session.Case, Session.Rules);
-    }
+    async void MapOpen() => await model.MapOpen(Session, Ct);
 
     // The open position stays open, and its detail untouched unless the refresh changed its mapping.
     // One that changed state moved away in the list, so the next open position takes its place;
