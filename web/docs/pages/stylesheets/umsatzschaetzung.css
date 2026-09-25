@@ -253,6 +253,38 @@
   opacity: .85;
 }
 
+.md-typeset .us-paths {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: .8rem;
+  margin: 1.6rem 0 2rem;
+}
+
+.md-typeset .us-paths a {
+  padding: .9rem 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: .4rem;
+  color: var(--md-default-fg-color--light);
+  font-size: .9em;
+  transition: border-color .15s;
+}
+
+.md-typeset .us-paths a:first-child {
+  border-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .us-paths a:hover,
+.md-typeset .us-paths a:focus {
+  border-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .us-paths b {
+  display: block;
+  margin-bottom: .3rem;
+  color: var(--md-accent-fg-color);
+  font-size: 1.1em;
+}
+
 .md-typeset .admonition.geschafft {
   border-color: var(--us-green);
 }
@@ -385,4 +417,62 @@ html[data-us-os="macos"] .md-typeset .md-button.us-os-macos,
 .md-typeset .us-copy:hover,
 .md-typeset .us-copy:focus-visible {
   color: var(--md-accent-fg-color);
+}
+
+.md-typeset details.frage {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  font-size: .8rem;
+}
+
+.md-typeset h2 + details.frage {
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-typeset .frage > summary {
+  margin: 0;
+  padding: .7rem 2rem .7rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--md-default-fg-color);
+  font-weight: 600;
+}
+
+.md-typeset .frage > summary::before {
+  display: none;
+}
+
+.md-typeset .frage > summary::after {
+  right: 0;
+  top: .75rem;
+  background-color: var(--md-default-fg-color--lighter);
+}
+
+.md-typeset .frage > summary:hover,
+.md-typeset .frage[open] > summary {
+  color: var(--md-accent-fg-color);
+}
+
+.md-typeset .frage[open] > summary::after {
+  background-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .frage > summary:focus-visible {
+  outline-offset: .2rem;
+}
+
+.md-typeset .frage > :last-child {
+  margin-bottom: .9rem;
+}
+
+.md-typeset .frage > p {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0;
+  color: var(--md-default-fg-color--light);
 }

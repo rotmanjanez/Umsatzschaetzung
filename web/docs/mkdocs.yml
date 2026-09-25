@@ -60,7 +60,9 @@ nav:
   - Grundlagen:
       - Regeln: regeln.md
       - Import und Export: import-export.md
+      - Verwaltete Installation: verwaltung.md
   - Hilfe:
+      - Häufige Fragen: faq.md
       - CSV-Dateien: hilfe/csv.md
   - Beispielprüfung:
       - guide/index.md
