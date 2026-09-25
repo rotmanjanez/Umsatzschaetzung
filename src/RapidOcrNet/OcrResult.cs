@@ -122,6 +122,9 @@ public sealed class TextBlock : ITextBox
 public sealed class OcrResult
 {
     public required TextBlock[] TextBlocks { get; init; }
+
+    /// <summary>Every line found, read or not, in the source's pixels.</summary>
+    public IReadOnlyList<TextBox> Boxes { get; init; } = [];
     public float DbNetTime { get; init; }
     public float DetectTime { get; init; }
     public required string StrRes { get; init; }

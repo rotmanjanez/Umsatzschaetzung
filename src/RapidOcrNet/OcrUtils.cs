@@ -118,7 +118,8 @@ internal static class OcrUtils
     /// <paramref name="maxSideLen"/> (Python <c>reduce_max_side</c>), then upscale if
     /// the shorter side is below <paramref name="minSideLen"/> (Python
     /// <c>increase_min_side</c>). Dst dimensions are rounded to the nearest /32.
-    /// Returns the source unchanged if both bounds are non-positive or already met.
+    /// Returns the source unchanged if both bounds are non-positive or already met: the
+    /// detector's own resize rounds to the stride, so a page is not resampled only for it.
     /// </summary>
     public static SKBitmap ResizeImageWithinBounds(SKBitmap src, int minSideLen, int maxSideLen, out bool owned)
     {
@@ -146,15 +147,15 @@ internal static class OcrUtils
             dstH = (int)(dstH * ratio);
         }
 
-        // Round to nearest /32 to satisfy the detector's stride.
-        dstW = RoundToMultiple32(dstW);
-        dstH = RoundToMultiple32(dstH);
-
         if (dstW == srcW && dstH == srcH)
         {
             owned = false;
             return src;
         }
+
+        // Round to nearest /32 to satisfy the detector's stride.
+        dstW = RoundToMultiple32(dstW);
+        dstH = RoundToMultiple32(dstH);
 
         var resized = Bands.Resize(src, src.Info.WithSize(dstW, dstH), NetworkSampling);
         owned = true;

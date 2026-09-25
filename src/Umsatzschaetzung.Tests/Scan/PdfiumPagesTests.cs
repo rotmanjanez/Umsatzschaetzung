@@ -38,6 +38,29 @@ public class PdfiumPagesTests
             }
     }
 
+    // A scanner's page: one image of 300 x 400 pixels filling a page of 720 x 960 points.
+    static byte[] ScannedAt30Dpi()
+    {
+        using var scan = Sheets.Blank(300, 400);
+        using var image = SKImage.FromBitmap(scan);
+        using var stream = new MemoryStream();
+        using (var document = SKDocument.CreatePdf(stream))
+        {
+            var canvas = document.BeginPage(720, 960);
+            canvas.DrawImage(image, SKRect.Create(720, 960));
+            document.EndPage();
+        }
+        return stream.ToArray();
+    }
+
+    [Theory]
+    [InlineData(300, 300, 400)]
+    [InlineData(18, 180, 240)]
+    public async Task AScannedPageRendersNoLargerThanItsScan(int dpi, int w, int h)
+    {
+        Assert.Equal([(w, h)], await Sizes(pdf.Rasterize(ScannedAt30Dpi(), dpi, TestContext.Current.CancellationToken)));
+    }
+
     [Fact]
     public async Task APageRendersOnItsOwn()
     {

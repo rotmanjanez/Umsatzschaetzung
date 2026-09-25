@@ -120,12 +120,21 @@ public sealed class RapidOcr : IDisposable
     public OcrResult Detect(SKBitmap originSrc, RapidOcrOptions options, Predicate<TextBlock[]>? read = null)
     {
         using var input = PrepareDetectorInput(originSrc, options);
-        return DetectOnce(input,
-            options.BoxScoreThresh, options.BoxThresh, options.UnClipRatio,
-            options.DoAngle, options.MostAngle,
-            options.ReturnWordBox, options.ReturnSingleCharBox,
-            options.TextScore, options.ClsThresh, options.ClsRotate,
-            options.RotateTallCrops, options.SplitStackedCrops, options.ClsPreserveAspectRatio, options.ClsMaxCrops, read);
+        var textBoxes = _textDetector.GetTextBoxes(input.Bitmap, input.Scale, options.BoxScoreThresh, options.BoxThresh, options.UnClipRatio) ?? [];
+        if (options.SplitStackedCrops) textBoxes = OcrUtils.SplitStackedBoxes(input.Bitmap, textBoxes);
+        return ReadBoxes(input, textBoxes, options, read);
+    }
+
+    /// <summary>
+    /// Reads lines found before, in the page's own pixels, the way <see cref="Detect(SKBitmap, RapidOcrOptions, Predicate{TextBlock[]}?)"/>
+    /// reads the lines it finds: a page turned once it was detected is read in its lines,
+    /// turned with it, instead of being detected again.
+    /// </summary>
+    public OcrResult Read(SKBitmap page, IEnumerable<TextBox> boxes, RapidOcrOptions options)
+    {
+        using var input = new DetectorInput(page, new ScaleParam(page.Width, page.Height, page.Width, page.Height),
+            0, 0, 1, 1, page.Width, page.Height, null, null, null);
+        return ReadBoxes(input, TextDetector.SortBoxesInReadingOrder([.. boxes]), options, null);
     }
 
     /// <summary>
@@ -293,21 +302,14 @@ public sealed class RapidOcr : IDisposable
         }
     }
 
-    private OcrResult DetectOnce(in DetectorInput input, float boxScoreThresh,
-        float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
-        bool returnWordBox, bool returnSingleCharBox, float textScore, float clsThresh,
-        bool clsRotate, bool rotateTall, bool splitStacked, bool clsPreserveAspectRatio, int clsMaxCrops,
+    private OcrResult ReadBoxes(in DetectorInput input, IReadOnlyList<TextBox> textBoxes, RapidOcrOptions options,
         Predicate<TextBlock[]>? read)
     {
         SKBitmap src = input.Bitmap;
+        var (returnWordBox, returnSingleCharBox, rotateTall) = (options.ReturnWordBox, options.ReturnSingleCharBox, options.RotateTallCrops);
+        var (textScore, clsThresh, clsRotate) = (options.TextScore, options.ClsThresh, options.ClsRotate);
 
-        // Start detect
         var sw = ValueStopwatch.StartNew();
-
-        // step: dbNet getTextBoxes
-        var textBoxes = _textDetector.GetTextBoxes(src, input.Scale, boxScoreThresh, boxThresh, unClipRatio) ?? [];
-        if (splitStacked) textBoxes = OcrUtils.SplitStackedBoxes(src, textBoxes);
-        var dbNetTime = sw.ElapsedMilliseconds;
 
         // getPartImages: capture crop bookkeeping when word boxes are requested.
         // Both overloads now dispose partial results internally if a crop throws midway.
@@ -324,7 +326,7 @@ public sealed class RapidOcr : IDisposable
         }
 
         // step: angleNet getAngles
-        Angle[] angles = _textClassifier.GetAngles(partImages, doAngle, mostAngle, clsPreserveAspectRatio, clsMaxCrops);
+        Angle[] angles = _textClassifier.GetAngles(partImages, options.DoAngle, options.MostAngle, options.ClsPreserveAspectRatio, options.ClsMaxCrops);
 
         // Rotate partImgs only if the classifier is confident enough (Python <c>cls_thresh</c>).
         // Without this gate, low-confidence flips wrongly invert clean upright text and the
@@ -346,9 +348,14 @@ public sealed class RapidOcr : IDisposable
             original.Dispose();
         }
 
+        foreach (var textBox in textBoxes)
+        {
+            input.MapToOriginal(textBox.BoxPoints);
+        }
+
         if (read is not null)
         {
-            var unread = Unread(input, textBoxes, angles);
+            var unread = Unread(textBoxes, angles);
             if (!read(unread))
             {
                 foreach (var bmp in partImages)
@@ -356,7 +363,7 @@ public sealed class RapidOcr : IDisposable
                     bmp.Dispose();
                 }
 
-                return new OcrResult { TextBlocks = unread, StrRes = string.Empty };
+                return new OcrResult { TextBlocks = unread, Boxes = textBoxes, StrRes = string.Empty };
             }
         }
 
@@ -386,15 +393,13 @@ public sealed class RapidOcr : IDisposable
 
                 if (wordResults is not null)
                 {
-                    // Map word polygons back to original space, same as BoxPoints below.
+                    // Map word polygons back to original space, as the boxes were.
                     for (int w = 0; w < wordResults.Length; w++)
                     {
                         input.MapToOriginal(wordResults[w].BoxPoints);
                     }
                 }
             }
-
-            input.MapToOriginal(textBox.BoxPoints);
 
             textBlocks[i] = new TextBlock
             {
@@ -467,22 +472,20 @@ public sealed class RapidOcr : IDisposable
         return new OcrResult
         {
             TextBlocks = textBlocks,
-            DbNetTime = (float)dbNetTime,
+            Boxes = textBoxes,
             DetectTime = (float)fullDetectTime,
             StrRes = strRes.ToString()
         };
     }
 
-    private static TextBlock[] Unread(in DetectorInput input, IReadOnlyList<TextBox> textBoxes, Angle[] angles)
+    private static TextBlock[] Unread(IReadOnlyList<TextBox> textBoxes, Angle[] angles)
     {
         var blocks = new TextBlock[textBoxes.Count];
         for (int i = 0; i < blocks.Length; i++)
         {
-            var points = (SKPointI[])textBoxes[i].BoxPoints.Clone();
-            input.MapToOriginal(points);
             blocks[i] = new TextBlock
             {
-                BoxPoints = points,
+                BoxPoints = textBoxes[i].BoxPoints,
                 BoxScore = textBoxes[i].Score,
                 AngleIndex = angles[i].Index,
                 AngleScore = angles[i].Score,

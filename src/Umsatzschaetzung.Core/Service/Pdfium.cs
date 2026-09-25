@@ -25,6 +25,7 @@ internal static class Pdfium
     }
 
     public const int ObjPath = 2;
+    public const int ObjImage = 3;
     public const int ObjForm = 5;
 
     [DllImport(Lib)] public static extern void FPDF_InitLibrary();
@@ -55,6 +56,7 @@ internal static class Pdfium
     [DllImport(Lib)] public static extern nint FPDFPage_GetObject(nint page, int index);
     [DllImport(Lib)] public static extern int FPDFPageObj_GetType(nint obj);
     [DllImport(Lib)] public static extern int FPDFPageObj_GetBounds(nint obj, out float left, out float bottom, out float right, out float top);
+    [DllImport(Lib)] public static extern int FPDFImageObj_GetImagePixelSize(nint obj, out uint width, out uint height);
     [DllImport(Lib)] public static extern int FPDFFormObj_CountObjects(nint obj);
     [DllImport(Lib)] public static extern nint FPDFFormObj_GetObject(nint obj, uint index);
 

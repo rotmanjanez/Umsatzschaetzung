@@ -285,7 +285,7 @@ public sealed class TextDetector : IDisposable
     /// </summary>
     private const int LineSortYThreshold = 10;
 
-    private static List<TextBox> SortBoxesInReadingOrder(List<TextBox> boxes)
+    internal static List<TextBox> SortBoxesInReadingOrder(List<TextBox> boxes)
     {
         if (boxes.Count < 2)
         {

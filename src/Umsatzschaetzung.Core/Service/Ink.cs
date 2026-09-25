@@ -46,15 +46,15 @@ static class Ink
             }
         });
 
-        var x0 = new int[w];
-        var x1 = new int[w];
-        var tx = new double[w];
+        // Across first, once per row of cells; each pixel row then only blends the two it lies between.
+        var paper = new double[gy * w];
         for (var x = 0; x < w; x++)
         {
             var fx = Math.Clamp((x + 0.5) / cw - 0.5, 0, gx - 1.0);
-            x0[x] = (int)fx;
-            x1[x] = Math.Min(x0[x] + 1, gx - 1);
-            tx[x] = fx - x0[x];
+            int x0 = (int)fx, x1 = Math.Min(x0 + 1, gx - 1);
+            var tx = fx - x0;
+            for (var cy = 0; cy < gy; cy++)
+                paper[cy * w + x] = cell[cy * gx + x0] * (1 - tx) + cell[cy * gx + x1] * tx;
         }
 
         var depth = new byte[w * h];
@@ -63,15 +63,11 @@ static class Ink
             var fy = Math.Clamp((y + 0.5) / ch - 0.5, 0, gy - 1.0);
             int y0 = (int)fy, y1 = Math.Min(y0 + 1, gy - 1);
             var ty = fy - y0;
-            var above = cell.AsSpan(y0 * gx, gx);
-            var below = cell.AsSpan(y1 * gx, gx);
+            var above = paper.AsSpan(y0 * w, w);
+            var below = paper.AsSpan(y1 * w, w);
             var row = y * w;
             for (var x = 0; x < w; x++)
-            {
-                var top = above[x0[x]] * (1 - tx[x]) + above[x1[x]] * tx[x];
-                var bottom = below[x0[x]] * (1 - tx[x]) + below[x1[x]] * tx[x];
-                depth[row + x] = (byte)Math.Clamp(top * (1 - ty) + bottom * ty - grey[row + x], 0, 255);
-            }
+                depth[row + x] = (byte)Math.Clamp(above[x] * (1 - ty) + below[x] * ty - grey[row + x], 0, 255);
         });
         return depth;
     }

@@ -102,9 +102,11 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     }, ct);
 
     // Show-through goes first, on the original pixels, so it cannot vote on the lean; then
-    // the page is straightened and read. A sideways or upside-down page is turned and read
-    // again, since the boxes of the first pass sit in the turned frame. The page carries no
-    // image: the correction renders it again from the document when it is looked at.
+    // the page is straightened and read. An upside-down page is turned and its lines are read
+    // again where the turn takes them: it was straightened before it was turned. A sideways
+    // page only shows its lean once its lines run across, so it is straightened again and,
+    // if that moves it, detected again. The page carries no image: the correction renders it
+    // again from the document when it is looked at.
     OcrPage Recognize(SKBitmap decoded)
     {
         using var cleaned = Deink.Apply(decoded);
@@ -117,11 +119,26 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         if (turn == 0) turn = Turn(first);
         if (turn == 0) return Page(page, first, correction);
         using var turned = Rotate(page, turn);
-        using var settled = Deskew.Apply(turned, out var settle);
-        var upright = settled ?? turned;
+        var settle = 0.0;
+        using var settled = turn == 180 ? null : Deskew.Apply(turned, out settle);
         correction.Turn = turn;
         correction.Settle = settle;
-        return Page(upright, Read(upright), correction);
+        return settled is null
+            ? Page(turned, Read(turned, Turned(first.Boxes, page, turn)), correction)
+            : Page(settled, Read(settled), correction);
+    }
+
+    // The lines where the turn takes them, their corners renumbered to start at the top left again.
+    static IEnumerable<TextBox> Turned(IReadOnlyList<TextBox> boxes, SKBitmap page, int degrees)
+    {
+        var map = Turning(new SKSizeI(page.Width, page.Height), degrees).Map;
+        var quarters = degrees / 90;
+        return boxes.Select(box => new TextBox
+        {
+            Score = box.Score,
+            BoxPoints = [.. Enumerable.Range(0, 4).Select(i => map.MapPoint(box.BoxPoints[(i + 4 - quarters) % 4]))
+                .Select(p => new SKPointI((int)MathF.Round(p.X), (int)MathF.Round(p.Y)))],
+        });
     }
 
     static OcrPage Page(SKBitmap page, OcrResult result, Correction correction) =>
@@ -132,16 +149,20 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // recognised on the cores while the next is detected. A detector that fails on the
     // accelerator, at load or on a page, is replaced by one on the CPU and the page read
     // again; the failed engine may still be reading another page and is kept until the end.
-    OcrResult Read(SKBitmap page, Predicate<TextBlock[]>? read = null)
+    OcrResult Read(SKBitmap page, Predicate<TextBlock[]>? read = null) => Run(engine => engine.Detect(page, Options, read));
+
+    OcrResult Read(SKBitmap page, IEnumerable<TextBox> lines) => Run(engine => engine.Read(page, lines, Options));
+
+    OcrResult Run(Func<Engine, OcrResult> read)
     {
         var current = Current();
         try
         {
-            return current.Detect(page, Options, read);
+            return read(current);
         }
         catch (OnnxRuntimeException) when (accelerated)
         {
-            return Replace(current).Detect(page, Options, read);
+            return read(Replace(current));
         }
     }
 

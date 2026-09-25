@@ -67,7 +67,8 @@ public class OcrUtilsTests
     [Theory]
     [InlineData(96, 64)]
     [InlineData(640, 480)]
-    public void ABitmapWithinBoundsOnTheStrideIsReturnedAsIs(int width, int height)
+    [InlineData(100, 64)]
+    public void ABitmapWithinBoundsIsReturnedAsIs(int width, int height)
     {
         using var bitmap = Images.Blank(width, height);
         var bounded = OcrUtils.ResizeImageWithinBounds(bitmap, 30, 2000, out var owned);
@@ -78,8 +79,6 @@ public class OcrUtilsTests
     [Theory]
     [InlineData(4000, 3000, 30, 2000, 1984, 1504)]
     [InlineData(300, 20, 30, 2000, 448, 32)]
-    [InlineData(100, 64, 30, 2000, 96, 64)]
-    [InlineData(5000, 100, 0, 0, 4992, 96)]
     public void BoundsScaleTheImageAndRoundBothSidesToTheStride(int width, int height, int min, int max, int w, int h)
     {
         using var bitmap = Images.Blank(width, height);

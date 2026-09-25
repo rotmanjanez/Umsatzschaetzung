@@ -72,7 +72,7 @@ public sealed class PdfiumPages : IPdfPages
                     var height = Pdfium.FPDF_GetPageHeightF(page);
                     if (width <= 0 || height <= 0) throw new InvalidDataException("pdf: Seite ohne Abmessung");
 
-                    var (w, h) = PdfRaster.Target(width, height, dpi / PointsPerInch);
+                    var (w, h) = PdfRaster.Target(width, height, Math.Min(dpi / PointsPerInch, Scanned(page, width, height)));
                     var bitmap = new SKBitmap(new SKImageInfo(w, h, SKColorType.Bgra8888, SKAlphaType.Opaque));
                     try
                     {
@@ -102,6 +102,17 @@ public sealed class PdfiumPages : IPdfPages
                     Pdfium.FPDF_ClosePage(page);
                 }
             }
+        }
+
+        // A page that is one scanned image holds no more detail than the image's pixels; drawn
+        // larger it only grows. Any other page renders at any resolution.
+        static double Scanned(nint page, float width, float height)
+        {
+            if (Pdfium.FPDFPage_CountObjects(page) != 1) return double.MaxValue;
+            var image = Pdfium.FPDFPage_GetObject(page, 0);
+            return Pdfium.FPDFPageObj_GetType(image) == Pdfium.ObjImage && Pdfium.FPDFImageObj_GetImagePixelSize(image, out var w, out var h) != 0
+                ? Math.Max(w, h) / (double)Math.Max(width, height)
+                : double.MaxValue;
         }
 
         public void Dispose()
