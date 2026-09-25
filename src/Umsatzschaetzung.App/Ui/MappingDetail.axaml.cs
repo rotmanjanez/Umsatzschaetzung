@@ -49,7 +49,7 @@ public sealed class SnippetRow(Invoice invoice, int line) : Observable
 public sealed class MappingDetailModel : Observable
 {
     bool hasSelection, loading, mapping, manual, currentAuto;
-    string title = "", supplier = "", article = "", total = "", factor = "", current = "";
+    string title = "", supplier = "", total = "", factor = "", current = "";
     string assigned = "", prefilled = "";
     Ingredient? ingredient;
     List<Ingredient> ingredients = [];
@@ -95,8 +95,6 @@ public sealed class MappingDetailModel : Observable
     public bool CanAssign => !mapping && (manual || Candidates.Any(c => c.Selected));
     public string Title { get => title; set => Set(ref title, value); }
     public string Supplier { get => supplier; set => Set(ref supplier, value); }
-    public string Article { get => article; set { if (Set(ref article, value)) Raise(nameof(HasArticle)); } }
-    public bool HasArticle => article != "";
     public string Total { get => total; set => Set(ref total, value); }
     public string Current { get => current; set { if (Set(ref current, value)) Raise(nameof(HasCurrent)); } }
     public bool HasCurrent => current != "";
@@ -320,7 +318,6 @@ public partial class MappingDetail : UserControl
         }
         model.Title = g.Name;
         model.Supplier = g.Supplier;
-        model.Article = g.Article ?? "";
         var total = Format.Quantity(g.Quantity, g.Unit);
         model.Total = g.Lines.Count == 1 ? total : total + " in " + g.Lines.Count + " Positionen";
         model.Current = g.MappingId is null || Session.Rules is null ? ""
@@ -382,7 +379,7 @@ public partial class MappingDetail : UserControl
         if (Session.Rules is not { } rs || Session.Case is not { } k) return [];
         var used = UsedIn(k, Recipes.Effective(k, rs));
         return candidates.Select(c => new CandidateRow(c, Names.Candidate(rs, c.Mapping), c.Mapping.Id != "" && c.Mapping.Id == current,
-            used.GetValueOrDefault(c.Mapping.IngredientId, ""))).ToList();
+            used.GetValueOrDefault(c.Mapping.IngredientId, ""))).Take(4).ToList();
     }
 
     static Dictionary<string, string> UsedIn(Case k, RuleSet rs) =>

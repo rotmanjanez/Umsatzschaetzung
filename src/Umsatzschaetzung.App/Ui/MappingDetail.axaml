@@ -39,11 +39,16 @@
             <Setter Property="LetterSpacing" Value="0.8"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-        <Style Selector="Border.invoice StackPanel.origin">
+        <Style Selector="StackPanel.origin.invoice, Border.invoice StackPanel.origin">
             <Setter Property="TextElement.Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
         </Style>
-        <Style Selector="Border.rules StackPanel.origin">
+        <Style Selector="StackPanel.origin.rules">
             <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
+        </Style>
+        <Style Selector="Border.divider">
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="0,12"/>
+            <Setter Property="Background" Value="{DynamicResource SoftBorderBrush}"/>
         </Style>
     </UserControl.Styles>
     <DockPanel>
@@ -55,26 +60,19 @@
         <TextBlock Text="Keine Position gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoSelection}"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding HasSelection}">
             <StackPanel Margin="0,0,14,0">
-                <Border Classes="source invoice">
-                    <StackPanel>
-                        <StackPanel Classes="origin">
-                            <PathIcon Data="{StaticResource DocumentIcon}"/>
-                            <TextBlock Text="AUS DER RECHNUNG"/>
-                        </StackPanel>
-                        <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
-                            <TextBlock Text="Lieferant" Theme="{StaticResource KeyLabel}"/>
-                            <TextBlock Grid.Column="1" Text="{Binding Supplier}" Theme="{StaticResource KeyValue}"/>
-                            <TextBlock Grid.Row="1" Text="Artikel" Theme="{StaticResource KeyLabel}" IsVisible="{Binding HasArticle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Article}" Theme="{StaticResource KeyValue}" FontFamily="{StaticResource MonoFont}" IsVisible="{Binding HasArticle}"/>
-                            <TextBlock Grid.Row="2" Text="Menge" Theme="{StaticResource KeyLabel}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Total}" Theme="{StaticResource KeyValue}"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
                 <Border Classes="source rules">
                     <StackPanel>
-                        <StackPanel Classes="origin">
+                        <StackPanel Classes="origin invoice">
+                            <PathIcon Data="{StaticResource DocumentIcon}"/>
+                            <TextBlock Text="{Binding Supplier}"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Text="Menge" Theme="{StaticResource KeyLabel}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Total}" Theme="{StaticResource KeyValue}"/>
+                        </Grid>
+                        <Border Classes="divider"/>
+                        <StackPanel Classes="origin rules">
                             <PathIcon Data="{StaticResource RulesIcon}"/>
                             <TextBlock Text="AUS DEN REGELN"/>
                         </StackPanel>
