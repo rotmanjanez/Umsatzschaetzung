@@ -190,10 +190,7 @@
     "yr.bier.fass": {
       "id": "yr.bier.fass",
       "name": "Fassbier Standard",
-      "shrinkage": 300,
-      "ownUse": 0,
-      "staff": 100,
-      "free": 100,
+      "deduction": 500,
       "default": true,
       "meta": {
         "validFrom": "2024-01-01",
@@ -205,10 +202,7 @@
     "yr.bier.flasche": {
       "id": "yr.bier.flasche",
       "name": "Flaschenbier Standard",
-      "shrinkage": 0,
-      "ownUse": 0,
-      "staff": 100,
-      "free": 0,
+      "deduction": 100,
       "default": true,
       "meta": {
         "validFrom": "2024-01-01",
@@ -220,10 +214,7 @@
     "yr.spirituosen": {
       "id": "yr.spirituosen",
       "name": "Spirituosen Standard",
-      "shrinkage": 200,
-      "ownUse": 100,
-      "staff": 0,
-      "free": 0,
+      "deduction": 300,
       "default": true,
       "meta": {
         "validFrom": "2024-01-01",

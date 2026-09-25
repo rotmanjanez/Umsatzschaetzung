@@ -324,10 +324,8 @@ ol.warnings li { margin-bottom: 0.3em; }
         <thead>
           <tr>
             <th class="wide">Zutat</th>
-            <th class="num">Schwund</th>
-            <th class="num">Eigenverbrauch</th>
-            <th class="num">Personal</th>
-            <th class="num">Freiabgabe</th>
+            <th>Ertragsregel</th>
+            <th class="num">Abzug</th>
             <th class="num">Ausbeute</th>
           </tr>
         </thead>
@@ -336,10 +334,8 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% if i.yield %}
           <tr>
             <td>{{ i.name }}</td>
-            <td class="num">{{ i.yield.shrinkage | bp }}</td>
-            <td class="num">{{ i.yield.ownUse | bp }}</td>
-            <td class="num">{{ i.yield.staff | bp }}</td>
-            <td class="num">{{ i.yield.free | bp }}</td>
+            <td>{{ i.yield.name }}</td>
+            <td class="num">{{ i.yield.deduction | bp }}</td>
             <td class="num">{{ i.yieldRate | bp }}</td>
           </tr>
           {% endif %}
@@ -347,7 +343,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         </tbody>
       </table>
       {% else %}
-      <p class="empty">Keine Ertragssätze hinterlegt.</p>
+      <p class="empty">Keine Ertragsregel angewandt.</p>
       {% endif %}
     </section>
 

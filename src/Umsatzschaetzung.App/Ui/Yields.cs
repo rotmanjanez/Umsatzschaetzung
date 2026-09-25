@@ -2,10 +2,13 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed class RuleOption(YieldRule rule, string text)
+public sealed class RuleOption(YieldRule? rule)
 {
-    public YieldRule Rule { get; } = rule;
-    public string Text { get; } = text;
+    public static readonly RuleOption None = new(null);
+
+    public YieldRule? Rule { get; } = rule;
+    public string Text => Rule is null ? "Kein Abzug" : Rule.Default ? Rule.Name + " (Standard)" : Rule.Name;
+    public string Deduction => Format.Bp(Rule?.Deduction ?? 0);
 }
 
 public sealed class YieldKindGroup(string kind, List<YieldGroupRow> rows)
@@ -22,7 +25,7 @@ public sealed class YieldGroupRow : Observable
     {
         Choice = choice;
         Label = label;
-        Options = rules.Select(r => new RuleOption(r, r.Name)).ToList();
+        Options = [RuleOption.None, .. rules.Select(r => new RuleOption(r))];
     }
 
     public YieldChoice Choice { get; }
@@ -47,11 +50,11 @@ public static class Yields
             if (ing.CategoryId != "" && seen.Add(ing.CategoryId))
             {
                 var forCategory = rules.Where(r => string.IsNullOrEmpty(r.IngredientId) && r.CategoryId == ing.CategoryId).ToList();
-                if (forCategory.Count > 1)
+                if (forCategory.Count > 0)
                     byCategory.Add(new YieldGroupRow(new YieldChoice { CategoryId = ing.CategoryId }, categoryName(ing.CategoryId), forCategory));
             }
             var forIngredient = rules.Where(r => r.IngredientId == ing.Id).ToList();
-            if (forIngredient.Count > 1)
+            if (forIngredient.Count > 0)
                 byIngredient.Add(new YieldGroupRow(new YieldChoice { IngredientId = ing.Id }, ing.Name, forIngredient));
         }
         List<YieldKindGroup> groups = [];
@@ -64,7 +67,7 @@ public static class Yields
     public static List<YieldChoice> Choices(IEnumerable<YieldKindGroup> groups) => groups
         .SelectMany(g => g.Rows)
         .Where(r => r.Selected is not null)
-        .Select(r => new YieldChoice { IngredientId = r.Choice.IngredientId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule.Id })
+        .Select(r => new YieldChoice { IngredientId = r.Choice.IngredientId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule?.Id ?? "" })
         .ToList();
 
     static List<YieldGroupRow> Sorted(List<YieldGroupRow> rows) =>
@@ -89,9 +92,10 @@ public static class Yields
         foreach (var y in k.Yields)
         {
             if (y.IngredientId != row.Choice.IngredientId || y.CategoryId != row.Choice.CategoryId) continue;
-            var option = row.Options.Find(o => o.Rule.Id == y.YieldRuleId);
+            if (y.YieldRuleId == "") return RuleOption.None;
+            var option = row.Options.Find(o => o.Rule?.Id == y.YieldRuleId);
             if (option is not null) return option;
         }
-        return row.Options.Find(o => o.Rule.Default) ?? row.Options[0];
+        return row.Options.Find(o => o.Rule is { Default: true }) ?? RuleOption.None;
     }
 }

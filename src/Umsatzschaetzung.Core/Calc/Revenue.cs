@@ -242,8 +242,8 @@ internal static class Revenue
                 output.Add(new Flag { Code = "usage-negative", Message = $"Verbrauch von „{name}“ ist negativ (Endbestand größer als Anfangsbestand + Einkauf)" });
         }
         foreach (var y in c.Yields)
-            if (!rs.YieldRules.ContainsKey(y.YieldRuleId))
-                output.Add(new Flag { Code = "yield-choice-unknown", Message = $"Gewählte Ertragsregel \"{y.YieldRuleId}\" existiert nicht, es gilt die Standardregel" });
+            if (y.YieldRuleId != "" && !rs.YieldRules.ContainsKey(y.YieldRuleId))
+                output.Add(new Flag { Code = "yield-choice-unknown", Message = $"Gewählte Ertragsregel \"{y.YieldRuleId}\" existiert nicht mehr, es gilt die Standardregel" });
         var overdrawn = new List<string>(Calculation.OverdrawnPins(c, rs, uses));
         overdrawn.Sort(StringComparer.Ordinal);
         foreach (var id in overdrawn)

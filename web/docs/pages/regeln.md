@@ -63,19 +63,20 @@ Preise stehen nicht hier. Sie gehören zum Betrieb und werden im
 
 ## Ertragsregeln { #ertragsregeln }
 
-Nicht alles, was eingekauft wird, wird verkauft. Eine Ertragsregel sagt, wie
-viel Prozent abgehen, getrennt nach:
+Nicht alles, was eingekauft wird, wird verkauft. Eine Ertragsregel hat einen
+Namen und einen Abzug in Prozent, etwa „Ausschankverlust“ mit 2 %. Der Name
+sagt, wofür der Abzug steht: Schwund, Eigenverbrauch, Personalverpflegung,
+Freirunden, Bruch oder Verderb.
 
-- **Schwund**: Schank-, Zuschnitt-, Brat- und Garverlust
-- **Eigenverbrauch** des Inhabers und seiner Familie
-- **Personal**: Personalverpflegung
-- **Freigetränke**: Freirunden, Bruch und Verderb
+Links stehen alle Kategorien und Zutaten, rechts die Regeln der gewählten als
+Tabelle. Eine neue Regel wird in die leere letzte Zeile geschrieben und ist
+gespeichert, sobald Name und Abzug stehen. Änderungen an bestehenden Zeilen
+speichern sich ebenso von selbst.
 
-Eine Regel gilt für eine Kategorie oder eine einzelne Zutat; die Regel der
-Zutat geht vor. Für dieselbe Kategorie kann es mehrere Regeln geben, etwa
-„Fassbier Standard“ und „Fassbier Altanlage“. Eine davon ist die
-**Standardregel** und gilt, solange in der Prüfung nichts anderes
-[gewählt](kalkulation.md#ertragsregeln) ist.
+Eine Regel je Kategorie oder Zutat kann **Standard** sein. Sie gilt, solange in
+der Prüfung nichts anderes [gewählt](kalkulation.md#ertragsregeln) ist; die
+Standardregel der Zutat geht der ihrer Kategorie vor. Ohne Standardregel wird
+nichts abgezogen.
 
 Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des
 Prüfungsjahres. Weicht ein Betrieb belegbar ab, bekommt er keine freie

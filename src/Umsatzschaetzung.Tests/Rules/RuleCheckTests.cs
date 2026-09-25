@@ -13,7 +13,7 @@ public class RuleCheckTests
         rs.Put(new Ingredient { Id = "ing.salz", Name = "Salz" });
         rs.Put(new ArticleMapping { Id = "map.pils", SupplierArticleId = "31090", IngredientId = "ing.pils", Factor = 50000 });
         rs.Put(new Product { Id = "prod.pils", Name = "Pils 0,3", Recipe = [new() { IngredientId = "ing.pils", Amount = 300, Unit = "MLT" }] });
-        rs.Put(new YieldRule { Id = "yr.bier", Name = "Bier", CategoryId = "cat.bier", Shrinkage = 300, Default = true });
+        rs.Put(new YieldRule { Id = "yr.bier", Name = "Bier", CategoryId = "cat.bier", Deduction = 300, Default = true });
         return rs;
     }
 
@@ -397,58 +397,44 @@ public class RuleCheckTests
     }
 
     [Theory]
-    [InlineData(-1, 0, 0, 0)]
-    [InlineData(0, -1, 0, 0)]
-    [InlineData(0, 0, -1, 0)]
-    [InlineData(0, 0, 0, -1)]
-    public void AYieldShareMayNotBeNegative(long shrinkage, long ownUse, long staff, long free)
+    [InlineData(-1, false)]
+    [InlineData(0, true)]
+    [InlineData(10000, true)]
+    [InlineData(10001, false)]
+    public void TheDeductionLiesBetweenNoneAndAHundredPercent(long deduction, bool ok)
     {
         var rs = Valid();
-        rs.Put(new YieldRule { Id = "yr.x", Name = "X", IngredientId = "ing.salz", Shrinkage = shrinkage, OwnUse = ownUse, Staff = staff, Free = free });
-
-        Assert.Contains("nicht negativ", Rejected(rs));
-    }
-
-    [Theory]
-    [InlineData(2500, 2500, 2500, 2500, true)]
-    [InlineData(2500, 2500, 2500, 2501, false)]
-    [InlineData(10001, 0, 0, 0, false)]
-    [InlineData(0, 0, 0, 0, true)]
-    public void TheYieldSharesMayAddUpToAHundredPercentAtMost(long shrinkage, long ownUse, long staff, long free, bool ok)
-    {
-        var rs = Valid();
-        rs.Put(new YieldRule { Id = "yr.x", Name = "X", IngredientId = "ing.salz", Shrinkage = shrinkage, OwnUse = ownUse, Staff = staff, Free = free });
+        rs.Put(new YieldRule { Id = "yr.x", Name = "X", IngredientId = "ing.salz", Deduction = deduction });
 
         if (ok) RuleCheck.Validate(rs);
-        else Assert.Contains("100 %", Rejected(rs));
+        else Assert.Contains("zwischen 0 und 100 %", Rejected(rs));
     }
 
     [Fact]
-    public void ACategoryHasOneOpenDefaultYieldRule()
+    public void ACategoryHasOneDefaultYieldRule()
     {
         var rs = Valid();
         rs.Put(new YieldRule { Id = "yr.zweit", Name = "Zweite", CategoryId = "cat.bier", Default = true });
 
-        Assert.Contains("für die Kategorie ist bereits", Rejected(rs));
+        Assert.Contains("Standard ist bereits", Rejected(rs));
     }
 
     [Fact]
-    public void AnIngredientHasOneOpenDefaultYieldRule()
+    public void AnIngredientHasOneDefaultYieldRule()
     {
         var rs = Valid();
         rs.Put(new YieldRule { Id = "yr.a", Name = "A", IngredientId = "ing.pils", Default = true });
-        rs.Put(new YieldRule { Id = "yr.b", Name = "B", IngredientId = "ing.pils", CategoryId = "cat.bier", Default = true });
+        rs.Put(new YieldRule { Id = "yr.b", Name = "B", IngredientId = "ing.pils", Default = true });
 
-        Assert.Contains("für die Zutat ist bereits", Rejected(rs));
+        Assert.Contains("Standard ist bereits", Rejected(rs));
     }
 
     [Fact]
-    public void DefaultsThatDoNotCollidePass()
+    public void DefaultsOfDifferentScopesPass()
     {
         var rs = Valid();
-        rs.Put(new YieldRule { Id = "yr.alt", Name = "Alt", CategoryId = "cat.bier", Default = true, Meta = new Meta { ValidTo = new DateOnly(2024, 1, 1) } });
         rs.Put(new YieldRule { Id = "yr.nicht", Name = "Kein Standard", CategoryId = "cat.bier" });
-        rs.Put(new YieldRule { Id = "yr.pils", Name = "Pils", IngredientId = "ing.pils", CategoryId = "cat.bier", Default = true });
+        rs.Put(new YieldRule { Id = "yr.pils", Name = "Pils", IngredientId = "ing.pils", Default = true });
         rs.Put(new YieldRule { Id = "yr.salz", Name = "Salz", IngredientId = "ing.salz", Default = true });
 
         RuleCheck.Validate(rs);

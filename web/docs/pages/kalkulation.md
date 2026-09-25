@@ -8,7 +8,7 @@ Verkauf, Zutat für Zutat.
 
 <ol class="us-flow">
 <li><b>Einkauf</b> Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit der Rezepte: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit <a href="../pruefung/#bestand">Bestand</a> zählt nur, was verbraucht wurde.</li>
-<li><b>Verkaufsfähige Menge</b> Davon ab gehen Schankverlust, Eigenverbrauch, Personalverpflegung und Freirunden, so wie es die gewählte Ertragsregel vorsieht.</li>
+<li><b>Verkaufsfähige Menge</b> Davon ab geht der Abzug der gewählten Ertragsregel, etwa für Schankverlust oder Bruch.</li>
 <li><b>Portionen</b> Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt, nach deren Rezepten.</li>
 <li><b>Umsatz</b> Portionen mal Preis, netto gerechnet. Aus diesen Portionen folgt der Rohgewinnaufschlagsatz.</li>
 <li><b>Geschätzter Umsatz</b> Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Zutaten ohne Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.</li>
@@ -70,9 +70,10 @@ Die Seite zeigt:
 ## Ertragsregeln { #ertragsregeln }
 
 Auf der Seite **Ertragsregeln** stehen die Zutaten und Kategorien der Prüfung, für
-die es mehr als eine [Ertragsregel](regeln.md#ertragsregeln) gibt. Ohne Wahl
-gilt die Standardregel. Hat der Betrieb etwa eine alte Schankanlage mit
-belegbar höherem Verlust, wird hier die passende Regel gewählt.
+die es eine [Ertragsregel](regeln.md#ertragsregeln) gibt. Voreingestellt ist
+die Standardregel, gibt es keine, **Kein Abzug**. Hat der Betrieb etwa eine alte
+Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt;
+die Wahl einer Zutat geht der ihrer Kategorie vor.
 
 Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug hat
 einen Namen, und der Bericht nennt ihn. Fehlt eine passende Regel, wird sie

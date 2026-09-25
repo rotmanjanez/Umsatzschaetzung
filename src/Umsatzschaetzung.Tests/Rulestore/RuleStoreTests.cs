@@ -94,7 +94,7 @@ public class RuleStoreTests
         "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "56101.0", Name = "Gast-, Speise- und Schankwirtschaften", Meta = Stamped() },
         _ => new YieldRule
         {
-            Id = "e", Name = "Schwund", CategoryId = "cat.x", IngredientId = "ing.y", Shrinkage = 1, OwnUse = 2, Staff = 3, Free = 4, Default = true,
+            Id = "e", Name = "Schwund", CategoryId = "cat.x", IngredientId = "ing.y", Deduction = 1_000, Default = true,
             Meta = Stamped(),
         },
     };
@@ -313,6 +313,20 @@ public class RuleStoreTests
         Assert.Equal(schema, Sql.UserVersion(file));
         Assert.Equal(1, rs.Version);
         Assert.Equal(Dump(rs), Dump(Open(tmp).Load()));
+    }
+
+    [Fact]
+    public void AnUntouchedYieldRuleFollowsTheSeedAnEditedOneKeepsItsOwn()
+    {
+        using var tmp = new TempDir();
+        Open(tmp);
+        Sql.Exec(tmp.Sub("rules.db"), "UPDATE yield_rule SET name = 'Alt – 5 % Alt', deduction = 1 WHERE id = 'yr.bier.fass';"
+            + "UPDATE yield_rule SET name = 'Eigen', deduction = 2, rev = 1 WHERE id = 'yr.spirituosen'");
+
+        var rules = Open(tmp).Load().YieldRules;
+
+        Assert.Equal((TestData.Seed().YieldRules["yr.bier.fass"].Name, 500L), (rules["yr.bier.fass"].Name, rules["yr.bier.fass"].Deduction));
+        Assert.Equal(("Eigen", 2L), (rules["yr.spirituosen"].Name, rules["yr.spirituosen"].Deduction));
     }
 
     [Fact]

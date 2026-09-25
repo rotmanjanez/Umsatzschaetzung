@@ -76,11 +76,10 @@ Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
 ## Ertragsregeln
 
-Auf der Seite **Ertragsregeln** stehen die Regeln der Kategorien und Zutaten,
-die in der Prüfung vorkommen und für die es mehr als eine Regel gibt:
-Schankverlust, Eigenverbrauch, Personalverpflegung und Freirunden. Je Zutat oder
+Auf der Seite **Ertragsregeln** stehen die Kategorien und Zutaten der Prüfung,
+für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch. Je Zutat oder
 Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort
-neu. Für das Beispiel bleiben die Standardregeln.
+neu. Für das Beispiel bleiben die Voreinstellungen.
 
 ## Rezeptur anpassen
 

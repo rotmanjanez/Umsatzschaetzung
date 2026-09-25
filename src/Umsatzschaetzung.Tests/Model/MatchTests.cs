@@ -112,9 +112,8 @@ public class MatchTests
         rs.Put(ing);
         rs.Put(new YieldRule { Id = "y.cat", CategoryId = "cat.bier" });
         rs.Put(new YieldRule { Id = "y.cat.default", CategoryId = "cat.bier", Default = true });
-        rs.Put(new YieldRule { Id = "y.ing.b", IngredientId = "ing.bier" });
-        rs.Put(new YieldRule { Id = "y.ing.a", IngredientId = "ing.bier" });
-        rs.Put(new YieldRule { Id = "y.old", IngredientId = "ing.bier", Default = true, Meta = new() { ValidTo = new DateOnly(2025, 1, 1) } });
+        rs.Put(new YieldRule { Id = "y.ing", IngredientId = "ing.bier" });
+        rs.Put(new YieldRule { Id = "y.ing.default", IngredientId = "ing.bier", Default = true });
         rs.Put(new YieldRule { Id = "y.other", CategoryId = "cat.wein", Default = true });
         return (rs, ing);
     }
@@ -123,8 +122,8 @@ public class MatchTests
     public void TheCaseChoiceForTheIngredientComesFirst()
     {
         var (rs, ing) = Yields();
-        var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { IngredientId = "ing.bier", YieldRuleId = "y.cat.default" });
-        Assert.Equal(("y.cat.default", true), Match.YieldRule(c, rs, ing) is { } r ? (r.Rule.Id, r.Chosen) : default);
+        var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { IngredientId = "ing.bier", YieldRuleId = "y.ing" });
+        Assert.Equal("y.ing", Match.YieldRule(c, rs, ing)?.Id);
     }
 
     [Fact]
@@ -132,25 +131,25 @@ public class MatchTests
     {
         var (rs, ing) = Yields();
         var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { IngredientId = "ing.bier", YieldRuleId = "weg" });
-        Assert.Equal(("y.cat", true), Match.YieldRule(c, rs, ing) is { } r ? (r.Rule.Id, r.Chosen) : default);
+        Assert.Equal("y.cat", Match.YieldRule(c, rs, ing)?.Id);
     }
 
     [Fact]
-    public void WithoutAChoiceTheIngredientsFirstValidRuleApplies()
+    public void AnEmptyChoiceMeansNoDeductionDespiteADefault()
     {
         var (rs, ing) = Yields();
-        Assert.Equal(("y.ing.a", false), Match.YieldRule(Kase(), rs, ing) is { } r ? (r.Rule.Id, r.Chosen) : default);
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { IngredientId = "ing.bier", YieldRuleId = "" }), rs, ing));
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { CategoryId = "cat.bier", YieldRuleId = "" }), rs, ing));
     }
 
     [Fact]
-    public void ThenTheCategoryDefault()
+    public void WithoutAChoiceTheIngredientsDefaultAppliesThenTheCategorys()
     {
         var (rs, ing) = Yields();
-        rs.YieldRules.Remove("y.ing.a");
-        rs.YieldRules.Remove("y.ing.b");
-        Assert.Equal("y.cat.default", Match.YieldRule(Kase(), rs, ing)?.Rule.Id);
+        Assert.Equal("y.ing.default", Match.YieldRule(Kase(), rs, ing)?.Id);
+        rs.YieldRules.Remove("y.ing.default");
+        Assert.Equal("y.cat.default", Match.YieldRule(Kase(), rs, ing)?.Id);
         rs.YieldRules.Remove("y.cat.default");
-        rs.YieldRules.Remove("y.cat");
         Assert.Null(Match.YieldRule(Kase(), rs, ing));
     }
 }

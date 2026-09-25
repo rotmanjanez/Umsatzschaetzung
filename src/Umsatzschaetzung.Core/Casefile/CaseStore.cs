@@ -777,7 +777,6 @@ public sealed partial class CaseStore(string dir)
         }
         foreach (var y in c.Yields)
         {
-            if (string.IsNullOrEmpty(y.YieldRuleId)) throw new CaseInvalidException("Ertragsregel-Wahl ohne Regel");
             if (string.IsNullOrEmpty(y.IngredientId) == string.IsNullOrEmpty(y.CategoryId))
                 throw new CaseInvalidException($"Ertragsregel-Wahl \"{y.YieldRuleId}\": entweder Zutat oder Kategorie angeben");
         }

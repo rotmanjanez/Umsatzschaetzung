@@ -180,32 +180,24 @@ public static class Match
         return name != "" && ArticleName.Canonical(m.Name) == name;
     }
 
-    public static (YieldRule Rule, bool Chosen)? YieldRule(Case c, RuleSet rs, Ingredient ing)
+    // The Prüfung's choice first, the ingredient's before its category's; an empty choice is "no deduction".
+    // Without a choice the default of the ingredient, then of its category.
+    public static YieldRule? YieldRule(Case c, RuleSet rs, Ingredient ing)
     {
-        var byCategory = "";
+        string? byIngredient = null, byCategory = null;
         foreach (var y in c.Yields)
         {
-            if (y.IngredientId == ing.Id && rs.YieldRules.TryGetValue(y.YieldRuleId, out var r)) return (r, true);
-            if (string.IsNullOrEmpty(y.IngredientId) && !string.IsNullOrEmpty(y.CategoryId) && y.CategoryId == ing.CategoryId)
+            if (y.IngredientId == ing.Id) byIngredient = y.YieldRuleId;
+            else if (string.IsNullOrEmpty(y.IngredientId) && !string.IsNullOrEmpty(y.CategoryId) && y.CategoryId == ing.CategoryId)
                 byCategory = y.YieldRuleId;
         }
-        if (rs.YieldRules.TryGetValue(byCategory, out var rc)) return (rc, true);
-
-        List<YieldRule> forIngredient = [], forCategory = [];
-        foreach (var id in rs.YieldRules.Keys.Order(StringComparer.Ordinal))
+        foreach (var chosen in new[] { byIngredient, byCategory })
         {
-            var r = rs.YieldRules[id];
-            if (!r.Meta.ValidOn(c.PeriodTo)) continue;
-            if (r.IngredientId == ing.Id) forIngredient.Add(r);
-            else if (string.IsNullOrEmpty(r.IngredientId) && !string.IsNullOrEmpty(r.CategoryId) && r.CategoryId == ing.CategoryId)
-                forCategory.Add(r);
+            if (chosen == "") return null;
+            if (chosen is not null && rs.YieldRules.TryGetValue(chosen, out var r)) return r;
         }
-        foreach (var set in new[] { forIngredient, forCategory })
-        {
-            if (set.Find(r => r.Default) is { } d) return (d, false);
-            if (set.Count > 0) return (set[0], false);
-        }
-        return null;
+        return rs.YieldRules.Values.FirstOrDefault(r => r.Default && r.IngredientId == ing.Id)
+            ?? rs.YieldRules.Values.FirstOrDefault(r => r.Default && string.IsNullOrEmpty(r.IngredientId) && r.CategoryId == ing.CategoryId);
     }
 }
 
@@ -233,10 +225,7 @@ public sealed class YieldRule : IRuleEntity
     public string Name { get; set; } = "";
     public string? CategoryId { get; set; }
     public string? IngredientId { get; set; }
-    public long Shrinkage { get; set; }
-    public long OwnUse { get; set; }
-    public long Staff { get; set; }
-    public long Free { get; set; }
+    public long Deduction { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Default { get; set; }
     public Meta Meta { get; set; } = new();

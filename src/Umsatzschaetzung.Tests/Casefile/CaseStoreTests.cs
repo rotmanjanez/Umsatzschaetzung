@@ -226,7 +226,6 @@ public class CaseStoreTests
         { "recipe line with unknown unit", c => c.Products = [new() { ProductId = "p", Vat = 1900, Recipe = [new() { IngredientId = "i", Amount = 1, Unit = "XYZ" }] }] },
         { "invoice without id", c => c.Invoices = [new() { Id = "" }] },
         { "invoice twice", c => c.Invoices = [new() { Id = "re-1" }, new() { Id = "re-1" }] },
-        { "yield choice without rule", c => c.Yields = [new() { IngredientId = "i", YieldRuleId = "" }] },
         { "yield choice with neither target", c => c.Yields = [new() { YieldRuleId = "y" }] },
         { "yield choice with both targets", c => c.Yields = [new() { IngredientId = "i", CategoryId = "c", YieldRuleId = "y" }] },
         { "no creation time", c => c.CreatedAt = default },

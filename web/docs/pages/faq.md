@@ -116,11 +116,12 @@
     nachgetragen ist.
     → [Sortiment](kalkulation.md#sortiment)
 
-??? frage "Bei den Ertragsregeln steht „Ohne hinterlegten Abzug“."
+??? frage "Bei den Ertragsregeln steht „Kein Abzug“."
 
-    Für diese Zutat oder Kategorie gibt es keine Ertragsregel, es wird also
-    nichts abgezogen, auch kein Schankverlust. Eine Regel wird unter **Regeln →
-    Ertragsregeln** angelegt und gilt dann für jede Prüfung.
+    Für diese Zutat oder Kategorie ist keine Ertragsregel gewählt und keine
+    Standardregel hinterlegt, es wird also nichts abgezogen, auch kein
+    Schankverlust. Eine Regel wird unter **Regeln → Ertragsregeln** angelegt und
+    steht dann in jeder Prüfung zur Wahl.
     → [Ertragsregeln](regeln.md#ertragsregeln)
 
 ??? frage "Kann ich einen Schwund von 8 % direkt eintragen?"

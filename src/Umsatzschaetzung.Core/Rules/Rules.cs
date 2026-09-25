@@ -161,24 +161,14 @@ public static class RuleCheck
         var ingredient = e.IngredientId ?? "";
         if (category == "" && ingredient == "")
             throw new RulesException("Ausbeuteregel: Kategorie oder Zutat erforderlich");
-        if (e.Default && e.Meta.ValidTo is null)
-        {
-            foreach (var (id, o) in rs.YieldRules)
-            {
-                if (id == e.Id || !o.Default || o.Meta?.ValidTo is not null) continue;
-                if (ingredient != "" && (o.IngredientId ?? "") == ingredient)
-                    throw new RulesException($"Ausbeuteregel \"{e.Name}\": für die Zutat ist bereits \"{o.Name}\" Standard");
-                if (ingredient == "" && string.IsNullOrEmpty(o.IngredientId) && (o.CategoryId ?? "") == category)
-                    throw new RulesException($"Ausbeuteregel \"{e.Name}\": für die Kategorie ist bereits \"{o.Name}\" Standard");
-            }
-        }
+        if (e.Default && rs.YieldRules.Values.FirstOrDefault(o => o.Id != e.Id && o.Default
+                && (o.IngredientId ?? "") == ingredient && (ingredient != "" || (o.CategoryId ?? "") == category)) is { } other)
+            throw new RulesException($"Ausbeuteregel \"{e.Name}\": Standard ist bereits \"{other.Name}\"");
         if (ingredient != "" && !rs.Ingredients.ContainsKey(ingredient))
             throw new RulesException($"Ausbeuteregel: Zutat \"{ingredient}\" existiert nicht");
         if (category != "" && !rs.Categories.ContainsKey(category))
             throw new RulesException($"Ausbeuteregel: Kategorie \"{category}\" existiert nicht");
-        if (e.Shrinkage < 0 || e.OwnUse < 0 || e.Staff < 0 || e.Free < 0)
-            throw new RulesException("Ausbeuteregel: Anteile dürfen nicht negativ sein");
-        if (e.Shrinkage + e.OwnUse + e.Staff + e.Free > Bp.Full)
-            throw new RulesException("Ausbeuteregel: Summe der Anteile darf 100 % nicht überschreiten");
+        if (e.Deduction is < 0 or > Bp.Full)
+            throw new RulesException("Ausbeuteregel: Abzug muss zwischen 0 und 100 % liegen");
     }
 }

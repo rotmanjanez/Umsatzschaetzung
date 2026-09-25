@@ -48,8 +48,7 @@ public sealed class RuleStore
 
         CREATE TABLE yield_rule(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT, ingredient_id TEXT,
-            shrinkage INTEGER NOT NULL, own_use INTEGER NOT NULL, staff INTEGER NOT NULL, free INTEGER NOT NULL,
-            is_default INTEGER NOT NULL,
+            deduction INTEGER NOT NULL, is_default INTEGER NOT NULL,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
@@ -69,14 +68,13 @@ public sealed class RuleStore
             gewerbezweig TEXT NOT NULL, ermaessigt INTEGER NOT NULL, voll INTEGER NOT NULL, gesamt INTEGER NOT NULL,
             PRIMARY KEY(year, ord)) WITHOUT ROWID;
 
-        CREATE INDEX synonym_begriff ON synonym(begriff);
-        CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
-        """,
-        """
         CREATE TABLE gewerbe(
             id TEXT PRIMARY KEY, kennzahl TEXT NOT NULL, name TEXT NOT NULL,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
+
+        CREATE INDEX synonym_begriff ON synonym(begriff);
+        CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
         """,
     ];
 
@@ -288,18 +286,15 @@ public sealed class RuleStore
                 break;
 
             case YieldRule x:
-                Exec(db, tx, "INSERT INTO yield_rule(id, name, category_id, ingredient_id, shrinkage, own_use, staff, "
-                    + "free, is_default, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @category, @ingredient, @shrinkage, @own, @staff, @free, @default, "
-                    + "@from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO yield_rule(id, name, category_id, ingredient_id, deduction, is_default, "
+                    + "valid_from, valid_to, changed_at, rev) "
+                    + "VALUES(@id, @name, @category, @ingredient, @deduction, @default, @from, @to, @changed, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
-                    + "ingredient_id = excluded.ingredient_id, shrinkage = excluded.shrinkage, own_use = excluded.own_use, "
-                    + "staff = excluded.staff, free = excluded.free, is_default = excluded.is_default, "
+                    + "ingredient_id = excluded.ingredient_id, deduction = excluded.deduction, is_default = excluded.is_default, "
                     + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@category", x.CategoryId), ("@ingredient", x.IngredientId),
-                        ("@shrinkage", x.Shrinkage), ("@own", x.OwnUse), ("@staff", x.Staff), ("@free", x.Free),
-                        ("@default", x.Default)));
+                        ("@deduction", x.Deduction), ("@default", x.Default)));
                 break;
 
             case Gewerbezweig x:
@@ -390,13 +385,12 @@ public sealed class RuleStore
                 Recipe = recipes.GetValueOrDefault(r.GetString(0), []),
             }));
 
-        Rows(db, tx, "SELECT id, name, category_id, ingredient_id, shrinkage, own_use, staff, free, is_default, "
+        Rows(db, tx, "SELECT id, name, category_id, ingredient_id, deduction, is_default, "
             + "valid_from, valid_to, changed_at, rev FROM yield_rule WHERE deleted_at IS NULL",
             r => rs.Put(new YieldRule
             {
                 Id = r.GetString(0), Name = r.GetString(1), CategoryId = Str(r, 2), IngredientId = Str(r, 3),
-                Shrinkage = r.GetInt64(4), OwnUse = r.GetInt64(5), Staff = r.GetInt64(6), Free = r.GetInt64(7),
-                Default = r.GetBoolean(8), Meta = ReadMeta(r, 9),
+                Deduction = r.GetInt64(4), Default = r.GetBoolean(5), Meta = ReadMeta(r, 6),
             }));
 
         Rows(db, tx, "SELECT id, kennzahl, name, valid_from, valid_to, changed_at, rev FROM gewerbe WHERE deleted_at IS NULL",
@@ -438,8 +432,8 @@ public sealed class RuleStore
                     ("@id", e.Id), ("@amount", p.Amount), ("@unit", Units.Code(p.Unit)));
     }
 
-    // Rows nobody has edited since they were seeded (rev 0) follow the seed's aliases and
-    // Gebinde: what the matcher learns from ships with an update, not only with a new store.
+    // Rows nobody has edited since they were seeded (rev 0) follow the seed's aliases, Gebinde and
+    // yield rule names: what the matcher learns from ships with an update, not only with a new store.
     static void SeedUntouched(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
         foreach (var e in seed.Ingredients.Values)
@@ -448,6 +442,9 @@ public sealed class RuleStore
         foreach (var c in seed.Categories.Values)
             if (Scalar(db, tx, "SELECT 1 FROM category WHERE id = @id AND rev = 0 AND deleted_at IS NULL", ("@id", c.Id)) is not null)
                 PutGebinde(db, tx, c);
+        foreach (var y in seed.YieldRules.Values)
+            Exec(db, tx, "UPDATE yield_rule SET name = @name, deduction = @deduction WHERE id = @id AND rev = 0 AND deleted_at IS NULL",
+                ("@id", y.Id), ("@name", y.Name), ("@deduction", y.Deduction));
     }
 
     static void PutGebinde(SqliteConnection db, SqliteTransaction tx, Category c)

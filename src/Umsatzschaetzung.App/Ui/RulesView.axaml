@@ -195,23 +195,23 @@
             <TabItem Header="Ertragsregeln">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="28*" MinWidth="200"/>
+                        <ColumnDefinition Width="34*" MinWidth="220"/>
                         <ColumnDefinition Width="6"/>
-                        <ColumnDefinition Width="30*" MinWidth="200"/>
-                        <ColumnDefinition Width="6"/>
-                        <ColumnDefinition Width="42*" MinWidth="260"/>
+                        <ColumnDefinition Width="66*" MinWidth="320"/>
                     </Grid.ColumnDefinitions>
                     <Border Theme="{StaticResource Panel}">
                         <DockPanel>
-                            <DockPanel DockPanel.Dock="Top" Margin="8">
-                                <ui:SearchBox x:Name="YieldSearch" Width="NaN"/>
-                            </DockPanel>
+                            <ui:SearchBox x:Name="YieldSearch" DockPanel.Dock="Top" Width="NaN" Margin="8"/>
                             <Grid>
                                 <ListBox x:Name="ScopeGrid" SelectionChanged="ScopeSelected" BorderThickness="0" Background="Transparent"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="ui:ScopeItem">
-                                            <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}" Margin="4,6"/>
+                                            <Grid ColumnDefinitions="*,Auto" Margin="4,6">
+                                                <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Hint}" Theme="{StaticResource Muted}" FontSize="12"
+                                                           VerticalAlignment="Center" Margin="8,0,0,0"/>
+                                            </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -220,95 +220,38 @@
                         </DockPanel>
                     </Border>
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <Border Grid.Column="2" Theme="{StaticResource Panel}" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
-                        <DockPanel>
-                            <DockPanel DockPanel.Dock="Top" Margin="8">
-                                <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" ToolTip.Tip="Neu" Click="NewYield">
-                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
-                                </Button>
-                                <TextBlock Text="{Binding ScopeTitle}" Theme="{StaticResource FieldLabel}" VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis" Margin="2,0,0,0"/>
-                            </DockPanel>
-                            <ListBox x:Name="RuleGrid" SelectionChanged="YieldSelected" ItemsSource="{Binding Rules}"
-                                     BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="ui:YieldItem">
-                                        <Grid ColumnDefinitions="*,Auto" Margin="4,6">
-                                            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Standard}" Theme="{StaticResource Muted}" FontSize="12"
-                                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </DockPanel>
-                    </Border>
-                    <GridSplitter Grid.Column="3" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
-                    <Grid Grid.Column="4" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
+                    <Grid Grid.Column="2" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
                         <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
-                                   Text="Links eine Ertragsregel auswählen, um sie zu bearbeiten – oder mit „Neu“ eine neue anlegen."/>
+                                   Text="Links eine Kategorie oder Zutat auswählen, um ihre Ertragsregeln zu bearbeiten."/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <StackPanel Margin="8,0,16,16">
                                 <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
-                                    </StackPanel>
-                                    <CheckBox Grid.Column="2" Content="Standardregel" IsChecked="{Binding IsDefault}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                                <Grid ColumnDefinitions="*,12,96,24,80,40" Margin="0,0,0,4">
+                                    <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBlock Grid.Column="2" Text="Abzug" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBlock Grid.Column="4" Text="Standard" Theme="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
                                 </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="140"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Gilt für *" Theme="{StaticResource FieldLabel}"/>
-                                        <ComboBox SelectedIndex="{Binding ScopeIndex}" HorizontalAlignment="Stretch">
-                                            <ComboBoxItem Content="Kategorie"/>
-                                            <ComboBoxItem Content="Zutat"/>
-                                        </ComboBox>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="{Binding ScopeKind}" Theme="{StaticResource FieldLabel}"/>
-                                        <StackPanel IsVisible="{Binding !ScopeIsIngredient}">
-                                            <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
-                                                      DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch" Classes.invalid="{Binding ScopeInvalid}"/>
-                                            <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
-                                                     IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"/>
-                                        </StackPanel>
-                                        <ui:IngredientBox Choices="{Binding IngredientOptions}" SelectedItem="{Binding Ingredient, Mode=TwoWay}"
-                                                          IsVisible="{Binding ScopeIsIngredient}" Classes.invalid="{Binding ScopeInvalid}" HorizontalAlignment="Stretch"/>
-                                    </StackPanel>
-                                </Grid>
-                                <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,14,0,0" HorizontalAlignment="Left">
-                                    <TextBlock Text="Schwund *" Theme="{StaticResource KeyLabel}"/>
-                                    <TextBox Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding Shrinkage, Mode=TwoWay}" Classes.invalid="{Binding ShrinkageInvalid}"/>
-                                    <TextBlock Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Text="Eigenverbrauch *" Theme="{StaticResource KeyLabel}"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding OwnUse, Mode=TwoWay}" Classes.invalid="{Binding OwnUseInvalid}"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Text="Personal *" Theme="{StaticResource KeyLabel}"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding Staff, Mode=TwoWay}" Classes.invalid="{Binding StaffInvalid}"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Text="Freigetränke *" Theme="{StaticResource KeyLabel}"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Theme="{StaticResource NumberBox}" Width="88" Margin="0,0,0,6" Text="{Binding Free, Mode=TwoWay}" Classes.invalid="{Binding FreeInvalid}"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,6" VerticalAlignment="Center"/>
-                                </Grid>
-                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveYield">
-                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
-                                    </Button>
-                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteYield" IsVisible="{Binding Existing}">
-                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
-                                    </Button>
-                                </StackPanel>
+                                <ItemsControl x:Name="RuleList" ItemsSource="{Binding Rules}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="ui:YieldRow">
+                                            <Grid ColumnDefinitions="*,12,96,24,80,40" Margin="0,0,0,6">
+                                                <TextBox x:Name="RuleName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"
+                                                         PlaceholderText="{Binding Placeholder}" LostFocus="YieldRowLeft"/>
+                                                <TextBox x:Name="RuleDeduction" Grid.Column="2" Theme="{StaticResource NumberBox}" Text="{Binding Deduction, Mode=TwoWay}"
+                                                         Classes.invalid="{Binding DeductionInvalid}" LostFocus="YieldRowLeft"/>
+                                                <TextBlock Grid.Column="3" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                <CheckBox Grid.Column="4" IsChecked="{Binding IsDefault}" HorizontalAlignment="Center"
+                                                          ToolTip.Tip="Gilt, solange die Prüfung nichts anderes wählt"/>
+                                                <Button Grid.Column="5" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteYield"
+                                                        IsVisible="{Binding Existing}" HorizontalAlignment="Right">
+                                                    <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Die Standardregel gilt, solange die Prüfung unter Kalkulation › Ertragsregeln nichts anderes wählt. Ohne Standardregel wird nichts abgezogen."
+                                           Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
