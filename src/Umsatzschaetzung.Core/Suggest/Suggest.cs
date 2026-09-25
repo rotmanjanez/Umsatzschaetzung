@@ -4,8 +4,8 @@ namespace Umsatzschaetzung.Suggest;
 
 public sealed record Suggestion(ArticleMapping Mapping, int Confidence, OriginKind Kind);
 
-// Embedding a text costs a model run. The ingredient list changes rarely and suppliers
-// repeat their wordings, so what was embedded once is kept.
+// Embedding the whole catalog costs a model run per wording, so the index's vectors are kept.
+// Only the index's: an invoice line is looked up but never written, so nothing of a case reaches the shared cache.
 public interface IEmbeddingCache
 {
     Dictionary<string, float[]> Read(string model, IReadOnlyCollection<string> texts);
@@ -46,7 +46,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
     {
         var hit = Match.Mapping(rs, supplier, date, line);
         Index(rs, gewerbe);
-        var query = Embed([Normal(line.Name)])[0];
+        var query = Embed([Normal(line.Name)], keep: false)[0];
         var best = new Dictionary<string, double>(StringComparer.Ordinal);
         for (var i = 0; i < owner.Length; i++)
         {
@@ -148,7 +148,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
             for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
             var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
-            var embedded = fresh.Zip(Embed(fresh)).ToDictionary(StringComparer.Ordinal);
+            var embedded = fresh.Zip(Embed(fresh, keep: true)).ToDictionary(StringComparer.Ordinal);
             var next = new float[texts.Count * Encoder.Width];
             for (var i = 0; i < texts.Count; i++)
             {
@@ -166,7 +166,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         indexedGewerbe = gewerbe;
     }
 
-    float[][] Embed(IReadOnlyList<string> texts)
+    float[][] Embed(IReadOnlyList<string> texts, bool keep)
     {
         var want = texts.Distinct(StringComparer.Ordinal).ToList();
         var known = cache?.Read(Encoder.Name, want) ?? [];
@@ -175,7 +175,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         {
             var fresh = encoder.Embed(missing);
             for (var i = 0; i < missing.Count; i++) known[missing[i]] = fresh[i];
-            cache?.Write(Encoder.Name, [.. missing.Select((t, i) => (t, fresh[i]))]);
+            if (keep) cache?.Write(Encoder.Name, [.. missing.Select((t, i) => (t, fresh[i]))]);
         }
         return [.. texts.Select(t => known[t])];
     }

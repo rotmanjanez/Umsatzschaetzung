@@ -66,6 +66,9 @@ public sealed class Case
     public List<PinnedPortions> Pinned { get; set; } = [];
     // Zutaten, die in diesem Betrieb keinen Umsatz bringen, etwa Reinigungsmittel.
     public List<string> NoRevenue { get; set; } = [];
+    // Was das Programm beim Einlesen selbst zugeordnet hat. Es bleibt bei der Prüfung, bis eine
+    // Person es bestätigt und es damit in die gemeinsamen Regeln kommt.
+    public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
     // Leer heißt: die Standardvorlage der Regeln.
     public string? TemplateId { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]

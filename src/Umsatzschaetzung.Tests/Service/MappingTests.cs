@@ -76,7 +76,7 @@ public class MappingTests(MatcherHost host)
     }
 
     [Fact]
-    public async Task MapCaseMapsWhatTheMatcherIsSureAboutAndSavesIt()
+    public async Task MapCaseMapsWhatTheMatcherIsSureAboutIntoTheCase()
     {
         var kase = Vorlage.Blank("Nachzügler", "56101.0");
         kase.Invoices =
@@ -99,9 +99,10 @@ public class MappingTests(MatcherHost host)
         var guessed = caughtUp.Invoices[0].Lines[1].MappingId;
         Assert.False(string.IsNullOrEmpty(guessed));
         Assert.Matches("^map-", guessed);
-        Assert.Equal((false, "ing.bier.fass"), ((await svc.Rules(ct)).Mappings[guessed] is var m ? (m.Confirmed, m.IngredientId) : default));
+        Assert.False((await svc.Rules(ct)).Mappings.ContainsKey(guessed));
         var saved = await svc.GetCase(late.Id, ct);
         Assert.Equal(["map.zwickl", guessed], saved.Invoices[0].Lines.Select(l => l.MappingId));
+        Assert.Equal((false, "ing.bier.fass"), saved.Mappings[guessed!] is var m ? (m.Confirmed, m.IngredientId) : default);
     }
 
     [Fact]

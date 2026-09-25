@@ -55,6 +55,8 @@ public class RuleStoreTests
         Assert.Equal(1, saved.Version);
         Assert.Equal(1, korn.Meta.Rev);
         Assert.Equal(1, saved.Products["prod.korn.4cl"].Meta.Rev);
+        Assert.Equal(Environment.UserName, saved.Products["prod.korn.4cl"].Meta.ChangedBy);
+        Assert.Null(saved.Products["prod.korn.2cl"].Meta.ChangedBy);
         Assert.Equal(new DateOnly(2024, 6, 30), saved.Products["prod.korn.4cl"].Meta.ValidTo);
         Assert.Equal(Dump(saved), Dump(store.Load()));
     }

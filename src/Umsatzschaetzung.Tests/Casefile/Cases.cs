@@ -67,10 +67,16 @@ static class Cases
                 [
                     new() { No = 2, Name = "Doppelkorn 0,7 l", SellerArticleId = "55120", Gtin = "4001234567890", Quantity = 20000, UnitCode = "XBO",
                         UnitPrice = 9200000, PriceBaseQty = 1000, LineNet = 18400, Vat = 1900, MappingId = "map.korn07" },
-                    new() { No = 1, Name = "Pils Fass 50 l", Quantity = -12000, UnitCode = "", UnitPrice = 0, PriceBaseQty = 0, LineNet = -111000, Vat = 0 },
+                    new() { No = 1, Name = "Pils Fass 50 l", Quantity = -12000, UnitCode = "", UnitPrice = 0, PriceBaseQty = 0, LineNet = -111000, Vat = 0,
+                        MappingId = "map-pils" },
                 ],
             },
         ];
+        c.Mappings = new()
+        {
+            ["map-pils"] = new() { Id = "map-pils", SupplierName = "Rheinland", SupplierArticleId = "31090", Gtin = "4001234567891", Name = "Pils Fass",
+                Observed = "Pils Fass 50 l", UnitCode = "XKG", IngredientId = "ing.bier.fass", Factor = 50000 },
+        };
         return c;
     }
 
@@ -108,6 +114,9 @@ static class Cases
         Assert.Equal(expected.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)),
             actual.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)));
         Assert.Equal(expected.NoRevenue.Order(StringComparer.Ordinal), actual.NoRevenue);
+        Assert.Equal(
+            expected.Mappings.OrderBy(m => m.Key, StringComparer.Ordinal).Select(m => (m.Key, Json.Serialize(m.Value))),
+            actual.Mappings.Select(m => (m.Key, Json.Serialize(m.Value))));
         Assert.Equal(expected.TemplateId, actual.TemplateId);
         Assert.Equal(expected.Pinned.Select(p => (p.ProductId, p.Portions, p.Reason)),
             actual.Pinned.Select(p => (p.ProductId, p.Portions, p.Reason)));

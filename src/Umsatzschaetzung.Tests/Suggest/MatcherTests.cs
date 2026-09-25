@@ -81,7 +81,7 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
     }
 
     [Fact]
-    public void TheSameLineOnTheSameRulesRanksTheSameWithoutEmbeddingAgain()
+    public void TheSameLineOnTheSameRulesRanksTheSameWithoutReindexing()
     {
         var rs = f.Rules();
         var first = Suggest("Fassbier Pils, Keg 50 l", "XKG", rs);
@@ -89,6 +89,19 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
         var again = Suggest("Fassbier Pils, Keg 50 l", "XKG", rs);
         Assert.Equal(first, again, (a, b) => (a.Mapping.IngredientId, a.Mapping.Factor, a.Confidence, a.Kind) == (b.Mapping.IngredientId, b.Mapping.Factor, b.Confidence, b.Kind));
         Assert.Equal(writes, f.Cache.Writes);
+    }
+
+    [Fact]
+    public void OnlyTheCatalogAndConfirmedWordingsReachTheCache()
+    {
+        var cache = new MemoryCache();
+        using var matcher = new Matcher(cache);
+        var automatic = new ArticleMapping { Id = "map.auto", SupplierName = Rheinland, Observed = "Maerzen hell, Keg 30 l", IngredientId = "ing.bier.fass" };
+        var rs = f.Rules(Zwickl, automatic);
+        matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Lieferung an Gasthaus Huber, Hauptstr. 3", UnitCode = "H87" });
+
+        Assert.Empty(cache.Read(Encoder.Name, ["Lieferung an Gasthaus Huber, Hauptstr. 3", "Maerzen hell, Keg 30 l"]));
+        Assert.Equal(2, cache.Read(Encoder.Name, [rs.Ingredients["ing.korn"].Name, "Zwickl naturtrueb, Keg 30 l"]).Count);
     }
 
     [Fact]

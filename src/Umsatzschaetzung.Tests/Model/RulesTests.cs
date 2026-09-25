@@ -59,4 +59,24 @@ public class RulesTests
 
     [Fact]
     public void ACategoryWithoutGewerbeCoversEveryOne() => Assert.True(new Category().Covers("47710.0"));
+
+    [Fact]
+    public void ACaseAddsItsMappingsButTheRulesWinAndAnUnknownWareDrops()
+    {
+        var rs = TestData.Seed();
+        var own = new Dictionary<string, ArticleMapping>
+        {
+            ["map.fass50"] = new() { Id = "map.fass50", IngredientId = "ing.korn" },
+            ["map-auto"] = new() { Id = "map-auto", Observed = "Pils Fass 50 l", IngredientId = "ing.bier.fass" },
+            ["map-fremd"] = new() { Id = "map-fremd", IngredientId = "ing.gibt.es.nicht" },
+        };
+
+        var merged = rs.With(own);
+
+        Assert.Equal(rs.Mappings["map.fass50"].IngredientId, merged.Mappings["map.fass50"].IngredientId);
+        Assert.Same(own["map-auto"], merged.Mappings["map-auto"]);
+        Assert.False(merged.Mappings.ContainsKey("map-fremd"));
+        Assert.False(rs.Mappings.ContainsKey("map-auto"));
+        Assert.Same(rs, rs.With(new Dictionary<string, ArticleMapping>()));
+    }
 }

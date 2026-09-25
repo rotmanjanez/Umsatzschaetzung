@@ -1,12 +1,13 @@
 namespace Umsatzschaetzung.Model;
 
 // Die Rezeptur der Prüfung geht der des Katalogs vor, Teilrezepte werden zu Zutaten
-// aufgelöst. Beides geschieht einmal am Eingang der Kalkulation; alles dahinter liest
-// flache Rezepte aus rs.Products.
+// aufgelöst, und die Zuordnungen der Prüfung kommen zu denen der Regeln. Das geschieht einmal
+// am Eingang der Kalkulation; alles dahinter liest flache Rezepte aus rs.Products.
 public static class Recipes
 {
     public static RuleSet Effective(Case c, RuleSet rs)
     {
+        rs = rs.With(c.Mappings);
         Dictionary<string, Product>? products = null;
         foreach (var (id, p) in rs.Products)
         {

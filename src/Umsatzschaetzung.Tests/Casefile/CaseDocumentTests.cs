@@ -116,6 +116,36 @@ public class CaseDocumentTests
     }
 
     [Fact]
+    public void APurgeDropsTheMappingsNoLineUsesAnyMore()
+    {
+        using var tmp = new TempDir();
+        var store = Store(tmp);
+        var c = Cases.Full("fall-1");
+        c.Mappings["map-alt"] = new() { Id = "map-alt", IngredientId = "ing.korn" };
+        store.Save(c);
+
+        store.Purge();
+
+        Assert.Equal(["map-pils"], store.Load("fall-1").Mappings.Keys);
+    }
+
+    [Fact]
+    public void APurgedDocumentLeavesNoBytesInTheFile()
+    {
+        using var tmp = new TempDir();
+        var store = Store(tmp);
+        var scan = System.Text.Encoding.ASCII.GetBytes("GEHEIMER-SCAN-" + new string('x', 8192));
+        store.SaveFile("fall-1", "re-1", "a.pdf", scan);
+        var c = Cases.Full("fall-1");
+        c.Invoices.RemoveAll(i => i.Id == "re-1");
+        store.Save(c);
+
+        store.Purge();
+
+        Assert.Equal(-1, File.ReadAllBytes(tmp.Sub("fall-1.db")).AsSpan().IndexOf(scan.AsSpan(0, 32)));
+    }
+
+    [Fact]
     public void APurgeSkipsAFileThatIsNoCase()
     {
         using var tmp = new TempDir();

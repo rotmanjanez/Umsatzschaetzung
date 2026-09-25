@@ -20,6 +20,10 @@ Artikel der Prüfung in der Liste links, mit ihrem Stand in der ersten Spalte:
 
 Die offenen Positionen stehen oben, die automatischen darunter.
 
+Eine automatische Zuordnung bleibt bei der Prüfung. Erst wenn ein Mensch sie
+bestätigt oder wählt, kommt sie in die [Regeln](regeln.md) und gilt auch in
+anderen Prüfungen.
+
 Wird eine Rechnung nachträglich geändert, prüft das Programm die Zuordnung ihrer
 Positionen neu: Eine Position, deren Artikelnummer oder Einheit nicht mehr zur
 Regel passt, wird erneut zugeordnet; eine automatische Zuordnung gilt nur für

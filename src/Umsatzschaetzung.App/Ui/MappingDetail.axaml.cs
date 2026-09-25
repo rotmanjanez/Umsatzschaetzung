@@ -321,7 +321,7 @@ public partial class MappingDetail : UserControl
         var total = Format.Quantity(g.Quantity, g.Unit);
         model.Total = g.Lines.Count == 1 ? total : total + " in " + g.Lines.Count + " Positionen";
         model.Current = g.MappingId is null || Session.Rules is null ? ""
-            : Names.Mapping(Session.Rules, g.MappingId) + " · " + g.StateText.ToLowerInvariant();
+            : Names.Mapping(Session.Rules.With(Session.Case.Mappings), g.MappingId) + " · " + g.StateText.ToLowerInvariant();
         model.CurrentAuto = g.IsAutomatic;
         model.HasSelection = true;
         model.Loading = true;

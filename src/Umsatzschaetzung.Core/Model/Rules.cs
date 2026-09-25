@@ -34,6 +34,7 @@ public sealed class Meta
     public DateOnly? ValidFrom { get; set; }
     public DateOnly? ValidTo { get; set; }
     public DateTimeOffset ChangedAt { get; set; }
+    public string? ChangedBy { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long Rev { get; set; }
 
@@ -253,6 +254,32 @@ public sealed class RuleSet
     public Dictionary<string, YieldRule> YieldRules { get; set; } = [];
     public Dictionary<string, Gewerbezweig> Gewerbezweige { get; set; } = [];
     public Dictionary<string, ReportTemplate> Templates { get; set; } = [];
+
+    // Die Zuordnungen einer Prüfung ergänzen die der Regeln; unter derselben ID gilt die Regel,
+    // und eine, deren Zutat es hier nicht gibt, fällt weg.
+    public RuleSet With(IReadOnlyDictionary<string, ArticleMapping>? own)
+    {
+        if (own is null) return this;
+        Dictionary<string, ArticleMapping>? mappings = null;
+        foreach (var (id, m) in own)
+        {
+            if (Mappings.ContainsKey(id) || !Ingredients.ContainsKey(m.IngredientId)) continue;
+            mappings ??= new Dictionary<string, ArticleMapping>(Mappings);
+            mappings[id] = m;
+        }
+        if (mappings is null) return this;
+        return new RuleSet
+        {
+            Version = Version,
+            Categories = Categories,
+            Ingredients = Ingredients,
+            Mappings = mappings,
+            Products = Products,
+            YieldRules = YieldRules,
+            Gewerbezweige = Gewerbezweige,
+            Templates = Templates,
+        };
+    }
 
     public ReportTemplate? Template(string? id) =>
         (id is not null ? Templates.GetValueOrDefault(id) : null) ?? Templates.Values.FirstOrDefault(t => t.Default);

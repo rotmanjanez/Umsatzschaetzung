@@ -129,6 +129,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `yields` | Liste von [YieldChoice](#m-yieldchoice) |
 | `pinned` | Liste von [PinnedPortions](#m-pinnedportions) |
 | `noRevenue` | Liste von Text |
+| `mappings` | ID → [ArticleMapping](#m-articlemapping) |
 | `templateId` | Text? |
 | `mappedAt` | Zahl |
 | `createdAt` | Zeitpunkt |
@@ -324,6 +325,22 @@ mit der installierten Version überein. Als JSON Schema:
 | `portions` | Zahl |
 | `reason` | Text |
 
+### ArticleMapping { #m-articlemapping }
+
+| Feld | Typ |
+|---|---|
+| `id` | Text |
+| `supplierName` | Text? |
+| `supplierArticleId` | Text? |
+| `gtin` | Text? |
+| `name` | Text? |
+| `observed` | Text? |
+| `unitCode` | Text? |
+| `ingredientId` | Text |
+| `factor` | Zahl? |
+| `confirmed` | ja/nein |
+| `meta` | [Meta](#m-meta) |
+
 ### Category { #m-category }
 
 | Feld | Typ |
@@ -344,22 +361,6 @@ mit der installierten Version überein. Als JSON Schema:
 | `categoryId` | Text |
 | `aliases` | Liste von Text |
 | `piece` | [Piece](#m-piece)? |
-| `meta` | [Meta](#m-meta) |
-
-### ArticleMapping { #m-articlemapping }
-
-| Feld | Typ |
-|---|---|
-| `id` | Text |
-| `supplierName` | Text? |
-| `supplierArticleId` | Text? |
-| `gtin` | Text? |
-| `name` | Text? |
-| `observed` | Text? |
-| `unitCode` | Text? |
-| `ingredientId` | Text |
-| `factor` | Zahl? |
-| `confirmed` | ja/nein |
 | `meta` | [Meta](#m-meta) |
 
 ### Product { #m-product }
@@ -566,6 +567,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `validFrom` | Datum? |
 | `validTo` | Datum? |
 | `changedAt` | Zeitpunkt |
+| `changedBy` | Text? |
 | `rev` | Zahl |
 
 ### Klasse { #m-klasse }

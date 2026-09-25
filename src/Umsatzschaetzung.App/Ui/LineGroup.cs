@@ -32,6 +32,7 @@ public sealed class LineGroup
     {
         var groups = new Dictionary<string, LineGroup>();
         if (c is null) return [];
+        rs = rs?.With(c.Mappings);
         for (var i = 0; i < c.Invoices.Count; i++)
         {
             var inv = c.Invoices[i];

@@ -21,7 +21,7 @@ public sealed class RuleStore
 
         CREATE TABLE category(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, sparte TEXT,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
         CREATE TABLE category_gewerbe(category_id TEXT NOT NULL, ord INTEGER NOT NULL, kennzahl TEXT NOT NULL,
             PRIMARY KEY(category_id, ord)) WITHOUT ROWID;
@@ -30,18 +30,18 @@ public sealed class RuleStore
 
         CREATE TABLE ingredient(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT, aliases TEXT, piece_amount INTEGER, piece_unit TEXT) WITHOUT ROWID;
 
         CREATE TABLE mapping(
             id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT, name TEXT,
             observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER, confirmed INTEGER NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
         CREATE TABLE product(
             id TEXT PRIMARY KEY, name TEXT NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
         CREATE TABLE recipe_line(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
             sub_product_id TEXT, amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
@@ -49,7 +49,7 @@ public sealed class RuleStore
         CREATE TABLE yield_rule(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT, ingredient_id TEXT,
             deduction INTEGER NOT NULL, is_default INTEGER NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
         CREATE TABLE sammlung(year INTEGER PRIMARY KEY, quelle TEXT NOT NULL, imported_at TEXT NOT NULL) WITHOUT ROWID;
@@ -70,12 +70,12 @@ public sealed class RuleStore
 
         CREATE TABLE gewerbe(
             id TEXT PRIMARY KEY, kennzahl TEXT NOT NULL, name TEXT NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
         CREATE TABLE template(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, source TEXT NOT NULL, is_default INTEGER NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
         CREATE INDEX synonym_begriff ON synonym(begriff);
@@ -161,6 +161,7 @@ public sealed class RuleStore
         using var db = Open();
         using var tx = db.BeginTransaction(deferred: false);
         e.Meta.Rev = Bump(db, tx);
+        e.Meta.ChangedBy = Environment.UserName;
         Put(db, tx, e);
         var rs = Read(db, tx);
         tx.Commit();
@@ -172,8 +173,8 @@ public sealed class RuleStore
         using var db = Open();
         using var tx = db.BeginTransaction(deferred: false);
         Bump(db, tx);
-        Exec(db, tx, $"UPDATE {Table(kind)} SET deleted_at = @now WHERE id = @id",
-            ("@id", id), ("@now", Stamp(Clock.Now())));
+        Exec(db, tx, $"UPDATE {Table(kind)} SET deleted_at = @now, changed_by = @by WHERE id = @id",
+            ("@id", id), ("@now", Stamp(Clock.Now())), ("@by", Environment.UserName));
         var rs = Read(db, tx);
         tx.Commit();
         return rs;
@@ -235,11 +236,11 @@ public sealed class RuleStore
         switch (e)
         {
             case Category x:
-                Exec(db, tx, "INSERT INTO category(id, name, sparte, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @sparte, @from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO category(id, name, sparte, valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @name, @sparte, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, sparte = excluded.sparte, "
                     + "valid_from = excluded.valid_from, "
-                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, rev = excluded.rev, deleted_at = NULL",
+                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@sparte", SparteName(x.Sparte))));
                 Exec(db, tx, "DELETE FROM category_gewerbe WHERE category_id = @id", ("@id", x.Id));
                 for (var i = 0; i < x.Gewerbe.Count; i++)
@@ -250,11 +251,11 @@ public sealed class RuleStore
 
             case Ingredient x:
                 Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, aliases, piece_amount, piece_unit, "
-                    + "valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @category, @aliases, @piece, @pieceUnit, @from, @to, @changed, @rev) "
+                    + "valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @name, @category, @aliases, @piece, @pieceUnit, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
                     + "aliases = excluded.aliases, piece_amount = excluded.piece_amount, piece_unit = excluded.piece_unit, "
-                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@category", x.CategoryId),
                         ("@aliases", x.Aliases.Count == 0 ? null : string.Join("\n", x.Aliases)),
@@ -263,24 +264,24 @@ public sealed class RuleStore
 
             case ArticleMapping x:
                 Exec(db, tx, "INSERT INTO mapping(id, supplier_name, supplier_article_id, gtin, name, observed, "
-                    + "unit_code, ingredient_id, factor, confirmed, valid_from, valid_to, changed_at, rev) "
+                    + "unit_code, ingredient_id, factor, confirmed, valid_from, valid_to, changed_at, changed_by, rev) "
                     + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor, @confirmed, "
-                    + "@from, @to, @changed, @rev) "
+                    + "@from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET supplier_name = excluded.supplier_name, "
                     + "supplier_article_id = excluded.supplier_article_id, gtin = excluded.gtin, name = excluded.name, "
                     + "observed = excluded.observed, unit_code = excluded.unit_code, ingredient_id = excluded.ingredient_id, "
                     + "factor = excluded.factor, confirmed = excluded.confirmed, valid_from = excluded.valid_from, "
-                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, rev = excluded.rev, deleted_at = NULL",
+                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@supplier", x.SupplierName), ("@article", x.SupplierArticleId), ("@gtin", x.Gtin),
                         ("@name", x.Name), ("@observed", x.Observed), ("@unit", x.UnitCode),
                         ("@ingredient", x.IngredientId), ("@factor", x.Factor), ("@confirmed", x.Confirmed)));
                 break;
 
             case Product x:
-                Exec(db, tx, "INSERT INTO product(id, name, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO product(id, name, valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @name, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, valid_from = excluded.valid_from, "
-                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, rev = excluded.rev, deleted_at = NULL",
+                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name)));
                 Exec(db, tx, "DELETE FROM recipe_line WHERE product_id = @id", ("@id", x.Id));
                 for (var i = 0; i < x.Recipe.Count; i++)
@@ -294,31 +295,31 @@ public sealed class RuleStore
 
             case YieldRule x:
                 Exec(db, tx, "INSERT INTO yield_rule(id, name, category_id, ingredient_id, deduction, is_default, "
-                    + "valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @category, @ingredient, @deduction, @default, @from, @to, @changed, @rev) "
+                    + "valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @name, @category, @ingredient, @deduction, @default, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
                     + "ingredient_id = excluded.ingredient_id, deduction = excluded.deduction, is_default = excluded.is_default, "
-                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@category", x.CategoryId), ("@ingredient", x.IngredientId),
                         ("@deduction", x.Deduction), ("@default", x.Default)));
                 break;
 
             case Gewerbezweig x:
-                Exec(db, tx, "INSERT INTO gewerbe(id, kennzahl, name, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @kennzahl, @name, @from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO gewerbe(id, kennzahl, name, valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @kennzahl, @name, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET kennzahl = excluded.kennzahl, name = excluded.name, "
-                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@kennzahl", x.Kennzahl), ("@name", x.Name)));
                 break;
 
             case ReportTemplate x:
                 if (x.Default) Exec(db, tx, "UPDATE template SET is_default = 0 WHERE id <> @id", ("@id", x.Id));
-                Exec(db, tx, "INSERT INTO template(id, name, source, is_default, valid_from, valid_to, changed_at, rev) "
-                    + "VALUES(@id, @name, @source, @default, @from, @to, @changed, @rev) "
+                Exec(db, tx, "INSERT INTO template(id, name, source, is_default, valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @name, @source, @default, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, source = excluded.source, is_default = excluded.is_default, "
-                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@source", x.Source), ("@default", x.Default)));
                 break;
@@ -334,6 +335,7 @@ public sealed class RuleStore
         ("@from", e.Meta.ValidFrom is { } f ? Day(f) : null),
         ("@to", e.Meta.ValidTo is { } t ? Day(t) : null),
         ("@changed", Stamp(e.Meta.ChangedAt)),
+        ("@by", e.Meta.ChangedBy),
         ("@rev", e.Meta.Rev),
         .. own,
     ];
@@ -343,7 +345,8 @@ public sealed class RuleStore
         ValidFrom = Date(r, i),
         ValidTo = Date(r, i + 1),
         ChangedAt = When(r, i + 2),
-        Rev = r.GetInt64(i + 3),
+        ChangedBy = Str(r, i + 3),
+        Rev = r.GetInt64(i + 4),
     };
 
     static RuleSet Read(SqliteConnection db, SqliteTransaction? tx)
@@ -362,26 +365,26 @@ public sealed class RuleStore
             if (!gebinde.TryGetValue(r.GetString(0), out var list)) gebinde[r.GetString(0)] = list = [];
             list.Add(r.GetString(1));
         });
-        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, rev, sparte FROM category WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, changed_by, rev, sparte FROM category WHERE deleted_at IS NULL",
             r => rs.Put(new Category
             {
                 Id = r.GetString(0), Name = r.GetString(1), Meta = ReadMeta(r, 2),
                 Gewerbe = gewerbe.GetValueOrDefault(r.GetString(0), []),
                 Gebinde = gebinde.GetValueOrDefault(r.GetString(0), []),
-                Sparte = ReadSparte(r, 6),
+                Sparte = ReadSparte(r, 7),
             }));
 
-        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, rev, aliases, piece_amount, piece_unit "
+        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, changed_by, rev, aliases, piece_amount, piece_unit "
             + "FROM ingredient WHERE deleted_at IS NULL",
             r => rs.Put(new Ingredient
             {
                 Id = r.GetString(0), Name = r.GetString(1), CategoryId = r.GetString(2), Meta = ReadMeta(r, 3),
-                Aliases = [.. (Str(r, 7) ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries)],
-                Piece = ReadPiece(r, 8),
+                Aliases = [.. (Str(r, 8) ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries)],
+                Piece = ReadPiece(r, 9),
             }));
 
         Rows(db, tx, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, "
-            + "factor, confirmed, valid_from, valid_to, changed_at, rev FROM mapping WHERE deleted_at IS NULL",
+            + "factor, confirmed, valid_from, valid_to, changed_at, changed_by, rev FROM mapping WHERE deleted_at IS NULL",
             r => rs.Put(new ArticleMapping
             {
                 Id = r.GetString(0), SupplierName = Str(r, 1), SupplierArticleId = Str(r, 2), Gtin = Str(r, 3),
@@ -395,7 +398,7 @@ public sealed class RuleStore
             if (!recipes.TryGetValue(r.GetString(0), out var list)) recipes[r.GetString(0)] = list = [];
             list.Add(new RecipeLine { IngredientId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3), ProductId = Str(r, 4) });
         });
-        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, rev FROM product WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, changed_by, rev FROM product WHERE deleted_at IS NULL",
             r => rs.Put(new Product
             {
                 Id = r.GetString(0), Name = r.GetString(1), Meta = ReadMeta(r, 2),
@@ -403,17 +406,17 @@ public sealed class RuleStore
             }));
 
         Rows(db, tx, "SELECT id, name, category_id, ingredient_id, deduction, is_default, "
-            + "valid_from, valid_to, changed_at, rev FROM yield_rule WHERE deleted_at IS NULL",
+            + "valid_from, valid_to, changed_at, changed_by, rev FROM yield_rule WHERE deleted_at IS NULL",
             r => rs.Put(new YieldRule
             {
                 Id = r.GetString(0), Name = r.GetString(1), CategoryId = Str(r, 2), IngredientId = Str(r, 3),
                 Deduction = r.GetInt64(4), Default = r.GetBoolean(5), Meta = ReadMeta(r, 6),
             }));
 
-        Rows(db, tx, "SELECT id, kennzahl, name, valid_from, valid_to, changed_at, rev FROM gewerbe WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, kennzahl, name, valid_from, valid_to, changed_at, changed_by, rev FROM gewerbe WHERE deleted_at IS NULL",
             r => rs.Put(new Gewerbezweig { Id = r.GetString(0), Kennzahl = r.GetString(1), Name = r.GetString(2), Meta = ReadMeta(r, 3) }));
 
-        Rows(db, tx, "SELECT id, name, source, is_default, valid_from, valid_to, changed_at, rev FROM template WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, source, is_default, valid_from, valid_to, changed_at, changed_by, rev FROM template WHERE deleted_at IS NULL",
             r => rs.Put(new ReportTemplate
             {
                 Id = r.GetString(0), Name = r.GetString(1), Source = r.GetString(2), Default = r.GetBoolean(3), Meta = ReadMeta(r, 4),

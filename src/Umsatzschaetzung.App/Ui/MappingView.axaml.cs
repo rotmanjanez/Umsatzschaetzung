@@ -92,8 +92,8 @@ public partial class MappingView : Screen
     }
 
     bool Stale() =>
-        Session.Case is { } k && k.Invoices.SelectMany(i => i.Lines)
-            .Any(l => !string.IsNullOrEmpty(l.MappingId) && Session.Rules?.Mappings.ContainsKey(l.MappingId) != true);
+        Session.Case is { } k && Session.Rules?.With(k.Mappings) is var rs && k.Invoices.SelectMany(i => i.Lines)
+            .Any(l => !string.IsNullOrEmpty(l.MappingId) && rs?.Mappings.ContainsKey(l.MappingId) != true);
 
     async void MapOpen() => await model.MapOpen(Session, Ct);
 

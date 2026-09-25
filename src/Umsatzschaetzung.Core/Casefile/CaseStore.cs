@@ -89,6 +89,9 @@ public sealed partial class CaseStore(string dir)
             amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
         -- Ob eine Ware Umsatz bringt, entscheidet der Betrieb je Zutat.
         CREATE TABLE no_revenue(ingredient_id TEXT PRIMARY KEY) WITHOUT ROWID;
+        -- Was das Programm selbst zugeordnet hat. Was eine Person bestätigt, steht in den Regeln.
+        CREATE TABLE case_mapping(id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT,
+            name TEXT, observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER) WITHOUT ROWID;
         """,
     ];
 
@@ -96,7 +99,7 @@ public sealed partial class CaseStore(string dir)
         ["reading_line_flag", "reading_page_flag", "reading_cell", "reading_line", "reading_header", "reading_word", "reading_page"];
 
     static readonly string[] CaseTables =
-        ["kase", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "no_revenue", "invoice", "invoice_line"];
+        ["kase", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "no_revenue", "case_mapping", "invoice", "invoice_line"];
 
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
@@ -280,6 +283,8 @@ public sealed partial class CaseStore(string dir)
             using var cmd = Command(db, tx, $"DELETE FROM {t} WHERE invoice_id NOT IN (SELECT id FROM invoice)");
             dropped += cmd.ExecuteNonQuery();
         }
+        using (var cmd = Command(db, tx, "DELETE FROM case_mapping WHERE id NOT IN (SELECT mapping_id FROM invoice_line WHERE mapping_id IS NOT NULL)"))
+            dropped += cmd.ExecuteNonQuery();
         tx.Commit();
         return dropped;
     }
@@ -372,6 +377,12 @@ public sealed partial class CaseStore(string dir)
         foreach (var id in c.NoRevenue)
             Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(ingredient_id) VALUES(@id)", ("@id", id));
 
+        foreach (var (id, m) in c.Mappings)
+            Exec(db, tx, "INSERT INTO case_mapping(id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, factor) "
+                + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor)",
+                ("@id", id), ("@supplier", m.SupplierName), ("@article", m.SupplierArticleId), ("@gtin", m.Gtin), ("@name", m.Name),
+                ("@observed", m.Observed), ("@unit", m.UnitCode), ("@ingredient", m.IngredientId), ("@factor", m.Factor));
+
         for (var i = 0; i < c.Invoices.Count; i++)
         {
             var inv = c.Invoices[i];
@@ -423,6 +434,13 @@ public sealed partial class CaseStore(string dir)
                     ProductId = r.GetString(0), Portions = r.GetInt64(1), Reason = r.GetString(2),
                 }));
             ReadRows(db, "SELECT ingredient_id FROM no_revenue ORDER BY ingredient_id", r => c.NoRevenue.Add(r.GetString(0)));
+            ReadRows(db, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, factor "
+                + "FROM case_mapping ORDER BY id",
+                r => c.Mappings[r.GetString(0)] = new ArticleMapping
+                {
+                    Id = r.GetString(0), SupplierName = Str(r, 1), SupplierArticleId = Str(r, 2), Gtin = Str(r, 3), Name = Str(r, 4),
+                    Observed = Str(r, 5), UnitCode = Str(r, 6), IngredientId = r.GetString(7), Factor = Num(r, 8),
+                });
 
             var lines = ReadLines(db);
             ReadRows(db, "SELECT id, source, file_name, supplier_name, number, date, currency, net_total, gross_total, "
@@ -700,6 +718,7 @@ public sealed partial class CaseStore(string dir)
             DefaultTimeout = 10,
         }.ToString());
         db.Open();
+        Exec(db, null, "PRAGMA secure_delete = ON");
         return db;
     }
 

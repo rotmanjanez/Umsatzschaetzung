@@ -134,7 +134,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var inv = c.Invoices.Find(i => i.Id == invoiceId)
             ?? throw new ServiceError(ErrorCode.NotFound, $"Rechnung \"{invoiceId}\" nicht gefunden");
         var label = inv.Number != "" ? inv.Number : inv.FileName;
-        return new ExportResp(Csv.Invoice(c, inv, rules.Load()), FileName(c.Label + " " + label, "csv"));
+        return new ExportResp(Csv.Invoice(c, inv, rules.Load().With(c.Mappings)), FileName(c.Label + " " + label, "csv"));
     });
 
     public Task<ExportResp> ExportAssortment(string caseId, CancellationToken ct) => Guard(ct, () =>
@@ -155,11 +155,12 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             case Kind.Unknown:
                 throw new ServiceError(ErrorCode.Unsupported, $"Dateiformat von \"{fileName}\" nicht erkannt");
         }
-        var gewerbe = caseId == "" ? "" : LoadCase(caseId).Taxpayer.Gewerbe;
+        var kase = caseId == "" ? null : LoadCase(caseId);
+        var own = kase?.Mappings ?? [];
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = NewId("re-");
-        var (_, unmapped) = await MapLines(inv, gewerbe, true, ct);
-        var c = caseId == "" ? null : Attach(caseId, inv, fileName, data);
+        var (_, unmapped) = await MapLines(inv, kase?.Taxpayer.Gewerbe ?? "", true, own, ct);
+        var c = kase is null ? null : Attach(caseId, inv, fileName, data, own);
         return new ParseResp(inv, unmapped, false, c);
     });
 
@@ -170,7 +171,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         draft.Id = NewId("re-");
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
-        await MapLines(draft, Gewerbe(caseId), false, ct);
+        var kase = Find(caseId);
+        await MapLines(draft, kase?.Taxpayer.Gewerbe ?? "", false, kase?.Mappings ?? [], ct);
         return new OcrResp(draft.Id, pages, draft);
     });
 
@@ -212,12 +214,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             _ => false,
         };
         var store = confirm || req.Intent is Intent.Store or Intent.Auto;
-        var gewerbe = store ? LoadCase(req.CaseId).Taxpayer.Gewerbe : Gewerbe(req.CaseId);
-        await MapLines(inv, gewerbe, confirm, ct);
+        var kase = store ? LoadCase(req.CaseId) : Find(req.CaseId);
+        var own = kase?.Mappings ?? [];
+        await MapLines(inv, kase?.Taxpayer.Gewerbe ?? "", confirm, own, ct);
         var resp = new VerifyResp(inv, flags, blocked, false, null);
         if (!store) return resp;
         inv.Verification = confirm ? new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto } : null;
-        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], req.Reading);
+        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], own, req.Reading);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
@@ -306,7 +309,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () =>
     {
         var c = Find(caseId);
-        return matcher.Suggest(rules.Load(), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today())
+        return matcher.Suggest(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today())
             .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList();
     });
 
@@ -319,7 +322,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var rs = rules.Load();
         if (c.MappedAt == rs.Version) return c;
         var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
-        foreach (var inv in c.Invoices) rs = (await MapLines(inv, c.Taxpayer.Gewerbe, true, ct)).Rules;
+        foreach (var inv in c.Invoices) rs = (await MapLines(inv, c.Taxpayer.Gewerbe, true, c.Mappings, ct)).Rules;
         c.MappedAt = rs.Version;
         if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) SaveCase(c);
         else cases.SaveMappedAt(c.Id, c.MappedAt);
@@ -402,9 +405,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         cases.Save(c, add);
     }
 
-    Case Attach(string caseId, Invoice inv, string fileName, byte[] data, List<OcrPage>? reading = null)
+    Case Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> own, List<OcrPage>? reading = null)
     {
         var c = LoadCase(caseId);
+        foreach (var (id, m) in own) c.Mappings[id] = m;
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
@@ -413,8 +417,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         return c;
     }
 
-    string Gewerbe(string caseId) => Find(caseId)?.Taxpayer.Gewerbe ?? "";
-
     Case? Find(string caseId)
     {
         if (caseId == "") return null;
@@ -422,22 +424,24 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         catch (CaseNotFoundException) { return null; }
     }
 
-    async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, string gewerbe, bool ask, CancellationToken ct)
+    // What the matcher decides on its own stays with the case in own; only a person's confirmation
+    // puts a mapping into the shared rules.
+    async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, string gewerbe, bool ask, Dictionary<string, ArticleMapping> own, CancellationToken ct)
     {
-        var rs = rules.Load();
+        var rs = rules.Load().With(own);
         var unmapped = new List<int>();
         foreach (var l in inv.Lines)
         {
             if (!string.IsNullOrEmpty(l.MappingId)
                 && !(rs.Mappings.TryGetValue(l.MappingId, out var m) && Match.Fits(m, inv.SupplierName, inv.Date ?? Today(), l)))
                 l.MappingId = null;
-            if (string.IsNullOrEmpty(l.MappingId)) rs = await MapLine(rs, gewerbe, inv, l, ask, ct);
+            if (string.IsNullOrEmpty(l.MappingId)) rs = await MapLine(rs, gewerbe, inv, l, ask, own, ct);
             if (string.IsNullOrEmpty(l.MappingId)) unmapped.Add((int)l.No);
         }
         return (rs, unmapped);
     }
 
-    async Task<RuleSet> MapLine(RuleSet rs, string gewerbe, Invoice inv, InvoiceLine l, bool ask, CancellationToken ct)
+    async Task<RuleSet> MapLine(RuleSet rs, string gewerbe, Invoice inv, InvoiceLine l, bool ask, Dictionary<string, ArticleMapping> own, CancellationToken ct)
     {
         if (Match.Mapping(rs, inv.SupplierName, inv.Date ?? Today(), l) is { } hit)
         {
@@ -456,17 +460,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         if (sg.Confidence < AutoMapMinConfidence) return rs;
         var m = sg.Mapping;
         m.Id = NewId("map-");
-        m.Meta = new Meta { ChangedAt = Clock.Now() };
         rs.Mappings[m.Id] = m;
         try
         {
             RuleCheck.Validate(rs);
-            rs = rules.Save(m);
         }
-        catch (Exception e) when (e is RulesException or StoreUnavailableException)
+        catch (RulesException)
         {
-            return rules.Load();
+            rs.Mappings.Remove(m.Id);
+            return rs;
         }
+        own[m.Id] = m;
         l.MappingId = m.Id;
         return rs;
     }

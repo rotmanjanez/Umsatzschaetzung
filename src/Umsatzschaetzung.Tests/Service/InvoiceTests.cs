@@ -199,7 +199,7 @@ public class InvoiceTests(MatcherHost host)
     }
 
     [Fact]
-    public async Task AnUnknownCaseLearnsNoRule()
+    public async Task AnAutomaticMappingStaysWithTheCaseAndLeavesTheRulesAlone()
     {
         static Invoice Keg()
         {
@@ -214,8 +214,11 @@ public class InvoiceTests(MatcherHost host)
         Assert.Equal(before, (await svc.Rules(ct)).Version);
 
         var learnt = await svc.VerifyInvoice(new VerifyReq((await NewCase()).Id, Keg(), Intent.Auto, null, null), ct);
-        Assert.StartsWith("map-", learnt.Invoice.Lines[0].MappingId);
-        Assert.Equal(before + 1, (await svc.Rules(ct)).Version);
+        var id = learnt.Invoice.Lines[0].MappingId!;
+        Assert.StartsWith("map-", id);
+        Assert.Equal(before, (await svc.Rules(ct)).Version);
+        Assert.False((await svc.Rules(ct)).Mappings.ContainsKey(id));
+        Assert.Equal("Pils vom Fass 30 l Keg", (await svc.GetCase(learnt.Case!.Id, ct)).Mappings[id].Observed);
     }
 
     [Fact]

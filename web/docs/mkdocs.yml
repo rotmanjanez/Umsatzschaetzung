@@ -64,6 +64,7 @@ nav:
       - Regeln: regeln.md
       - Import und Export: import-export.md
       - Verwaltete Installation: verwaltung.md
+      - Sicherheit und Datenschutz: datenschutz.md
   - Hilfe:
       - Häufige Fragen: faq.md
       - CSV-Dateien: hilfe/csv.md

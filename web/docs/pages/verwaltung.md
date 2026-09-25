@@ -127,3 +127,7 @@ Die Werte heißen `Store` und `CaseDir`. Sie werden beim Start gelesen, eine
 Der Bericht entsteht aus einer HTML-Vorlage, die mit den Regeln in der
 Regel-Datenbank liegt. Wer den Bericht an eine eigene Form anpassen will, findet
 Aufbau und Datenmodell unter [Berichtsvorlagen](vorlagen.md).
+
+## Sicherheit und Datenschutz
+
+Siehe [Sicherheit und Datenschutz](datenschutz.md).
