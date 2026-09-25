@@ -25,10 +25,15 @@ public partial class App : Application
         Cells.Register();
     }
 
+    // A browser has no windows: its host composes the service and gets the program as one view.
+    public static Func<IService>? SingleViewService { get; set; }
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             Start(desktop);
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime single && SingleViewService is { } service)
+            single.MainView = new ShellView(service());
         base.OnFrameworkInitializationCompleted();
     }
 

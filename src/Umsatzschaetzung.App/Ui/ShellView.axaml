@@ -1,8 +1,7 @@
-<Window x:Class="Umsatzschaetzung.App.Ui.Shell"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Umsatzschätzung" Width="1320" Height="860" MinWidth="960" MinHeight="600"
-        WindowStartupLocation="CenterScreen">
+<UserControl x:Class="Umsatzschaetzung.App.Ui.ShellView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource WindowBackgroundBrush}">
     <DockPanel>
         <Menu x:Name="MenuBar" DockPanel.Dock="Top" IsVisible="False">
             <MenuItem Header="_Hilfe">
@@ -51,4 +50,4 @@
             </DockPanel>
         </Grid>
     </DockPanel>
-</Window>
+</UserControl>

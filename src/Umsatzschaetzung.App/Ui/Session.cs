@@ -47,7 +47,7 @@ public sealed class Session : Observable
     public History History { get; }
     public History RulesHistory { get; }
 
-    // Session has no visual of its own; Shell assigns itself so the file pickers have a parent.
+    // Session has no visual of its own; the shell hands it its top level so the file pickers have a parent.
     public TopLevel? Owner { get; set; }
 
     // Answers the next file dialog in place of the person, where there is none to show.
@@ -328,7 +328,7 @@ public sealed class Session : Observable
     }
 
     // Every window that edits shows the same badge while a write takes long.
-    public void Indicate(Window window, Border badge, TextBlock text)
+    public void Indicate(Control window, Border badge, TextBlock text)
     {
         void Changed(object? sender, PropertyChangedEventArgs e)
         {
@@ -343,7 +343,7 @@ public sealed class Session : Observable
                 : null);
         }
         PropertyChanged += Changed;
-        window.Closed += (_, _) => PropertyChanged -= Changed;
+        if (window is Window closable) closable.Closed += (_, _) => PropertyChanged -= Changed;
     }
 
     sealed class Write(object? key, Func<Task> work)

@@ -92,7 +92,7 @@ public sealed class History(Session session)
 
     // The platform's undo and redo keys, taken before any control sees them. Where a page saves only
     // on request, a text field keeps the keys while it has typing of its own to take back.
-    public static void Keys(Window window, Func<bool, Task> move, Func<bool>? textFirst = null)
+    public static void Keys(TopLevel window, Func<bool, Task> move, Func<bool>? textFirst = null)
     {
         void Pressed(object? sender, KeyEventArgs e)
         {

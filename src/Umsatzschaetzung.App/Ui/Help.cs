@@ -33,12 +33,12 @@ public static class Help
         }
     }
 
-    public static void OnF1(Window window, Func<string> topic)
+    public static void OnF1(TopLevel window, Func<string> topic)
     {
         void Pressed(object? sender, KeyEventArgs e)
         {
             if (e.Key != Key.F1) return;
-            Open(window, topic());
+            Open(window as Window, topic());
             e.Handled = true;
         }
         window.AddHandler(InputElement.KeyDownEvent, Pressed, RoutingStrategies.Tunnel);

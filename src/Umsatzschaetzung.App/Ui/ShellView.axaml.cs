@@ -7,7 +7,8 @@ using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public partial class Shell : Window
+// The whole program on one surface: a window on the desktop, the page in a browser.
+public partial class ShellView : UserControl
 {
     readonly Session session;
     readonly CasesView cases;
@@ -17,10 +18,10 @@ public partial class Shell : Window
     RulesWindow? rules;
     bool moving;
 
-    public Shell(IService service)
+    public ShellView(IService service)
     {
         InitializeComponent();
-        session = new Session(service) { Owner = this };
+        session = new Session(service);
         session.Imports.Jobs.CollectionChanged += ImportsChanged;
         cases = new CasesView(session);
         CasesHost.Content = cases;
@@ -41,52 +42,48 @@ public partial class Shell : Window
         session.ProductRequested += (name, created) => ShowRules().NewProduct(name, created);
         session.ProductEditRequested += (id, recipe) => ShowRules().EditProduct(id, recipe);
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
-        Activated += (_, _) => session.ActiveWindow = this;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
         session.Indicate(this, SaveBadge, SaveText);
-        if (OperatingSystem.IsMacOS()) NativeMenu.SetMenu(this, HelpMenu());
-        else MenuBar.IsVisible = true;
-        Help.OnF1(this, () => current?.Topic ?? Help.Start);
-        History.Keys(this, Move);
+        MenuBar.IsVisible = !OperatingSystem.IsMacOS();
         Loaded += async (_, _) =>
         {
+            var top = TopLevel.GetTopLevel(this)!;
+            session.Owner = top;
+            Help.OnF1(top, () => Topic);
+            History.Keys(top, Move);
             Show(cases);
             await session.LoadStatus(CancellationToken.None);
             await session.LoadRules(CancellationToken.None);
-        };
-        Closing += async (_, e) =>
-        {
-            current?.Leave();
-            current = null;
-            if (session.Saved.IsCompleted) return;
-            e.Cancel = true;
-            await session.Saved;
-            Close();
-        };
-        Closed += (_, _) =>
-        {
-            session.Imports.CancelAll();
-            rules?.Close();
         };
     }
 
     internal Session Session => session;
 
-    // Windows zeigt die Menüleiste im Fenster, macOS erwartet sie oben am Bildschirm.
-    NativeMenu HelpMenu()
+    public event Action<string>? Titled;
+
+    public string Topic => current?.Topic ?? Help.Start;
+
+    Window? Host => TopLevel.GetTopLevel(this) as Window;
+
+    // What is still being written; the window waits for it before it closes.
+    public Task Leave()
     {
-        var here = new NativeMenuItem("Hilfe zu dieser Seite") { Gesture = new KeyGesture(Key.F1) };
-        here.Click += (_, _) => Help.Open(this, current?.Topic ?? Help.Start);
-        var manual = new NativeMenuItem("Handbuch");
-        manual.Click += (_, _) => Help.Open(this, Help.Start);
-        return new NativeMenu { Items = { new NativeMenuItem("Hilfe") { Menu = new NativeMenu { Items = { here, manual } } } } };
+        current?.Leave();
+        current = null;
+        return session.Saved;
     }
 
-    void ShowHelp(object? sender, RoutedEventArgs e) => Help.Open(this, current?.Topic ?? Help.Start);
+    public void Closed()
+    {
+        session.Imports.CancelAll();
+        rules?.Close();
+    }
 
-    void ShowManual(object? sender, RoutedEventArgs e) => Help.Open(this, Help.Start);
+    void ShowHelp(object? sender, RoutedEventArgs e) => Help.Open(Host, Topic);
 
-    void ShowAbout(object? sender, RoutedEventArgs e) => App.ShowAbout(this);
+    void ShowManual(object? sender, RoutedEventArgs e) => Help.Open(Host, Help.Start);
+
+    void ShowAbout(object? sender, RoutedEventArgs e) => App.ShowAbout(Host);
 
     void ImportsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
@@ -96,7 +93,8 @@ public partial class Shell : Window
         {
             var window = new ImportWindow(job);
             imports[job] = window;
-            window.Show(this);
+            if (Host is { } host) window.Show(host);
+            else window.Show();
         }
     }
 
@@ -167,7 +165,7 @@ public partial class Shell : Window
         session.CloseCase();
         CaseUi.IsVisible = false;
         CasesHost.IsVisible = true;
-        Title = "Umsatzschätzung";
+        Titled?.Invoke("Umsatzschätzung");
         Show(cases);
     }
 
@@ -176,14 +174,14 @@ public partial class Shell : Window
         if (session.Case is null) return;
         CaseLabel.Text = session.Case.Label;
         CasePeriod.Text = session.Period;
-        Title = "Umsatzschätzung: " + session.Case.Label;
+        Titled?.Invoke("Umsatzschätzung: " + session.Case.Label);
     }
 
     void DismissError(object? sender, RoutedEventArgs e) => session.Error = "";
 
     void RefreshError()
     {
-        var error = session.ErrorWindow is { } owner && owner != this ? "" : session.Error;
+        var error = session.ErrorWindow is { } owner && owner != Host ? "" : session.Error;
         var text = error != "" ? error : session.Status?.Problem ?? "";
         ErrorText.Text = text;
         ErrorBanner.IsVisible = text != "";
