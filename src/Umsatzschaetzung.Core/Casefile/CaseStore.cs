@@ -114,17 +114,13 @@ public sealed partial class CaseStore(string dir)
         var cases = new List<Case>();
         foreach (var path in Directory.EnumerateFiles(dir, "*.db"))
         {
-            var name = Path.GetFileName(path);
-            if (name.StartsWith('.')) continue;
+            if (Path.GetFileName(path).StartsWith('.')) continue;
             try
             {
                 using var db = Reader(path);
                 cases.Add(Read(db));
             }
-            catch (CaseInvalidException e)
-            {
-                throw new CaseInvalidException($"Fall {name}: {e.Message}", e);
-            }
+            catch (CaseInvalidException) { }
         }
         return cases
             .OrderByDescending(s => s.UpdatedAt)
@@ -646,6 +642,7 @@ public sealed partial class CaseStore(string dir)
         }
         if (from == Migrations.Length) return db;
         db.Dispose();
+        if (from == 0 && mode == SqliteOpenMode.ReadOnly) throw new CaseInvalidException("Falldatei enthält keinen Fall");
         if (from > 0 && from < Migrations.Length) File.Copy(path, $"{path}.v{from}.bak", true);
         using (var writer = Connect(path, SqliteOpenMode.ReadWriteCreate))
         {

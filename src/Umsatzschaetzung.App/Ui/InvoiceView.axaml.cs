@@ -478,12 +478,12 @@ public partial class InvoiceView : Screen
 
     // Whether a flag blocks is the service's call: on open the reading's own flags are only drawn,
     // and the first check that comes back decides.
-    void ApplyFlags(List<Flag> all, bool blocked = false)
+    void ApplyFlags(List<Flag> all, bool? blocked = null)
     {
         flags = all;
         model.SetHeaderFlags(all.Where(f => f.LineNo == 0));
         foreach (var row in model.Lines) row.SetFlags(all.Where(f => f.LineNo == row.Line.No && f.LineNo != 0));
-        model.Valid = !blocked;
+        if (blocked is { } b) model.Valid = !b;
         RenderFlagged();
     }
 

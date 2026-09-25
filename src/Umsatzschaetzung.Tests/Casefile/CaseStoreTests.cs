@@ -92,15 +92,17 @@ public class CaseStoreTests
     }
 
     [Fact]
-    public void ListNamesTheFileThatIsNotACase()
+    public void ListSkipsFilesThatAreNotACaseAndLeavesThemUntouched()
     {
         using var tmp = new TempDir();
         var store = new CaseStore(tmp.Path);
         store.Save(Cases.Minimal("fall-1"));
         File.WriteAllText(tmp.Sub("kaputt.db"), "kein SQLite");
+        File.WriteAllBytes(tmp.Sub("leer.db"), []);
 
-        var e = Assert.Throws<CaseInvalidException>(store.List);
-        Assert.Contains("kaputt.db", e.Message);
+        Assert.Equal(["fall-1"], store.List().Select(c => c.Id));
+        Assert.Equal(0, new FileInfo(tmp.Sub("leer.db")).Length);
+        Assert.Throws<CaseInvalidException>(() => store.Load("leer"));
     }
 
     [Fact]
