@@ -2,82 +2,86 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/bericht/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/import-export/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/regeln/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-macos/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-windows/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/kalkulation/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/korrektur/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/rechnungen/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/start/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
     </url>
     <url>
          <loc>https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/</loc>
-         <lastmod>2026-09-24</lastmod>
+         <lastmod>2026-09-25</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.umsatzschaetzung.amtstools.de/dev/hilfe/csv/</loc>
+         <lastmod>2026-09-25</lastmod>
     </url>
 </urlset>
