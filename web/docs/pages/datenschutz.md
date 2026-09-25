@@ -10,12 +10,17 @@ beschrieben.
 |---|---|---|
 | `Dokumente\Umsatzschätzung` | eine Datei je Prüfung: Rechnungen, Scans, Name, Steuernummer, PAB-Nummer, Kalkulation | die Person |
 | Ordner der Regel-Datenbank | `rules.db`, `embeddings.db`, `snapshots\` | alle, die ihn teilen |
-| `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll | die Person |
+| `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `pages\` mit dem gerade angezeigten Bericht | die Person |
 
 Eine Prüfung unterliegt dem Abgabengeheimnis. Sie verlässt den Rechner nur,
 wenn jemand sie [weitergibt](import-export.md#prufung-weitergeben), dann als
 vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe
 [Verwaltete Installation](verwaltung.md).
+
+Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt
+und danach gelöscht; was ein Absturz dort zurücklässt, löscht der nächste
+Start. Das Fehlerprotokoll `crash.log` kann Dateinamen und Text aus Rechnungen
+enthalten; auch es löscht der nächste Start.
 
 ## Die gemeinsame Regel-Datenbank { #regel-datenbank }
 
@@ -45,6 +50,8 @@ zugelassene Wege für weitergegebene Prüfungen.
 
 - **Prüfung:** Löschen entfernt die Datei. Kopien in Sicherungen folgen deren
   Fristen.
+- **Bericht:** Die Datei in `pages\` wird nach dem Anzeigen gelöscht, nicht
+  überschrieben.
 - **Rechnung:** Sie bleibt bis zum nächsten Programmstart, damit sich das
   Löschen zurücknehmen lässt, und wird dann aus der Datei entfernt und
   überschrieben.
@@ -82,8 +89,10 @@ wird in GitHub Actions aus dem getaggten Stand gebaut und getestet.
 - **Modelle:** Jede Modelldatei ist mit einer SHA-256-Prüfsumme im Quellcode
   festgelegt. Weicht sie ab, bricht der Build ab.
 - **Signatur:** Programm und Installationspaket sind mit einem selbst
-  ausgestellten Zertifikat signiert. Es liegt als `publisher.cer` bei und wird
-  per Gruppenrichtlinie als vertrauenswürdiger Herausgeber verteilt. Der
+  ausgestellten Zertifikat signiert. Es liegt als `publisher.cer` bei. Damit
+  Windows der Signatur vertraut, wird es per Gruppenrichtlinie sowohl unter
+  *Vertrauenswürdige Stammzertifizierungsstellen* als auch unter
+  *Vertrauenswürdige Herausgeber* verteilt. Der
   Schlüssel liegt passwortgeschützt in den Secrets des GitHub-Repositorys, nicht
   in einem Hardware-Sicherheitsmodul.
 - **Nachweise:** Jede Version enthält Prüfsummen, eine Stückliste (CycloneDX)

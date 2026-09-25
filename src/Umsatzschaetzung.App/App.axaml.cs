@@ -141,7 +141,12 @@ public partial class App : Application
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
         var cases = new CaseStore(config.CaseDir);
-        if (purge) cases.Purge();
+        if (purge)
+        {
+            cases.Purge();
+            WebPages.Clear(WebPages.Folder);
+            CrashLog.Clear();
+        }
         var service = new LocalService(rules, cases, ocr, tagger, pdf, printer, Release.Version);
         owned.Add(service);
         return service;

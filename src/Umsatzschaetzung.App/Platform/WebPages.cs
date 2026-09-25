@@ -74,6 +74,17 @@ static partial class WebPages
         }
     }
 
+    // A crash while a page is shown leaves its file, and with it the case's data, behind.
+    internal static void Clear(string dir)
+    {
+        if (!Directory.Exists(dir)) return;
+        foreach (var file in Directory.EnumerateFiles(dir, "*.html"))
+        {
+            try { File.Delete(file); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+        }
+    }
+
     public static async Task<bool> Show(this IHtmlView view, string html, TimeSpan timeout, CancellationToken ct)
     {
         Directory.CreateDirectory(Folder);

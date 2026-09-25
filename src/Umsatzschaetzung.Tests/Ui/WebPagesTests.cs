@@ -10,6 +10,19 @@ public class WebPagesTests
     const string Doctype = "<!DOCTYPE html>";
 
     [Fact]
+    public void ClearingRemovesThePagesACrashLeftBehind()
+    {
+        using var tmp = new TempDir();
+        File.WriteAllText(tmp.Sub("a.html"), "<p>Zum Fass GmbH</p>");
+        File.WriteAllText(tmp.Sub("notiz.txt"), "bleibt");
+
+        WebPages.Clear(tmp.Path);
+        WebPages.Clear(tmp.Sub("fehlt"));
+
+        Assert.Equal(["notiz.txt"], Directory.EnumerateFiles(tmp.Path).Select(Path.GetFileName));
+    }
+
+    [Fact]
     public void ThePolicyForbidsScriptAndEveryRequest()
     {
         Assert.Contains("default-src 'none'", WebPages.Policy);

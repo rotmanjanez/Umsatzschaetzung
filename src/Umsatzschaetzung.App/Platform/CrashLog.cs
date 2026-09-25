@@ -22,6 +22,13 @@ static class CrashLog
         return (ex?.Message ?? detail) + (written ? $"\n\nDetails: {Path}" : "");
     }
 
+    // What it records may name a case, so it lasts only until the next start.
+    internal static void Clear()
+    {
+        try { File.Delete(Path); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+    }
+
     internal static bool Write(string detail)
     {
         try
