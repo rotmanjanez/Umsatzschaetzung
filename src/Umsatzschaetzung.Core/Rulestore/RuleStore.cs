@@ -72,6 +72,12 @@ public sealed class RuleStore
         CREATE INDEX synonym_begriff ON synonym(begriff);
         CREATE INDEX klasse_kennzahl_wert ON klasse_kennzahl(kennzahl);
         """,
+        """
+        CREATE TABLE gewerbe(
+            id TEXT PRIMARY KEY, kennzahl TEXT NOT NULL, name TEXT NOT NULL,
+            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, rev INTEGER NOT NULL,
+            deleted_at TEXT) WITHOUT ROWID;
+        """,
     ];
 
     static readonly string[] SammlungTables =
@@ -127,6 +133,7 @@ public sealed class RuleStore
         Complete(rs.Mappings, stamp);
         Complete(rs.Products, stamp);
         Complete(rs.YieldRules, stamp);
+        Complete(rs.Gewerbezweige, stamp);
         return rs;
     }
 
@@ -214,6 +221,7 @@ public sealed class RuleStore
         Entity.Ingredient => "ingredient",
         Entity.Mapping => "mapping",
         Entity.Product => "product",
+        Entity.Gewerbezweig => "gewerbe",
         _ => "yield_rule",
     };
 
@@ -292,6 +300,15 @@ public sealed class RuleStore
                     Meta(x, ("@name", x.Name), ("@category", x.CategoryId), ("@ingredient", x.IngredientId),
                         ("@shrinkage", x.Shrinkage), ("@own", x.OwnUse), ("@staff", x.Staff), ("@free", x.Free),
                         ("@default", x.Default)));
+                break;
+
+            case Gewerbezweig x:
+                Exec(db, tx, "INSERT INTO gewerbe(id, kennzahl, name, valid_from, valid_to, changed_at, rev) "
+                    + "VALUES(@id, @kennzahl, @name, @from, @to, @changed, @rev) "
+                    + "ON CONFLICT(id) DO UPDATE SET kennzahl = excluded.kennzahl, name = excluded.name, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, "
+                    + "rev = excluded.rev, deleted_at = NULL",
+                    Meta(x, ("@kennzahl", x.Kennzahl), ("@name", x.Name)));
                 break;
 
             default:
@@ -381,6 +398,9 @@ public sealed class RuleStore
                 Shrinkage = r.GetInt64(4), OwnUse = r.GetInt64(5), Staff = r.GetInt64(6), Free = r.GetInt64(7),
                 Default = r.GetBoolean(8), Meta = ReadMeta(r, 9),
             }));
+
+        Rows(db, tx, "SELECT id, kennzahl, name, valid_from, valid_to, changed_at, rev FROM gewerbe WHERE deleted_at IS NULL",
+            r => rs.Put(new Gewerbezweig { Id = r.GetString(0), Kennzahl = r.GetString(1), Name = r.GetString(2), Meta = ReadMeta(r, 3) }));
 
         return rs;
     }
@@ -637,7 +657,8 @@ public sealed class RuleStore
     }
 
     static IEnumerable<IRuleEntity> Entities(RuleSet rs) =>
-        rs.Categories.Values.Concat<IRuleEntity>(rs.Ingredients.Values).Concat(rs.Mappings.Values).Concat(rs.Products.Values).Concat(rs.YieldRules.Values);
+        rs.Categories.Values.Concat<IRuleEntity>(rs.Ingredients.Values).Concat(rs.Mappings.Values).Concat(rs.Products.Values).Concat(rs.YieldRules.Values)
+            .Concat(rs.Gewerbezweige.Values);
 
     static Entity Kind(IRuleEntity e) => e switch
     {
@@ -646,6 +667,7 @@ public sealed class RuleStore
         ArticleMapping => Entity.Mapping,
         Product => Entity.Product,
         YieldRule => Entity.YieldRule,
+        Gewerbezweig => Entity.Gewerbezweig,
         _ => throw new ArgumentException(e.GetType().Name),
     };
 

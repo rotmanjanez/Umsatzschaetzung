@@ -1,3 +1,6 @@
+using System.Runtime.Versioning;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -10,10 +13,18 @@ namespace Umsatzschaetzung.Tests.Ui;
 // exactly what the headless platform cannot show.
 public class ReportViewTests
 {
+    // Installed per machine the program sits in Program Files, where the user may not write, and
+    // WebView2 keeps its data next to the program unless told otherwise.
     [Fact]
-    public void TheBerichtTabShowsTheBericht()
+    public void TheBerichtTabShowsTheBerichtOfAnInstalledProgram()
     {
-        if (!OperatingSystem.IsWindows()) Assert.Skip("the bericht tab crashes on Windows");
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Skip("the bericht tab crashes on Windows");
+            return;
+        }
+        using var installed = new ReadOnlyDir();
+        Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", Path.Combine(installed.Path, "umsatzschätzung.exe.WebView2"));
         Exception? failure = null;
         (bool Ready, string Note, string Error) seen = default;
         var ui = new Thread(() =>
@@ -21,11 +32,12 @@ public class ReportViewTests
             try { seen = Show(); }
             catch (Exception e) { failure = e; }
         });
-        if (OperatingSystem.IsWindows()) ui.SetApartmentState(ApartmentState.STA);
+        ui.SetApartmentState(ApartmentState.STA);
         ui.Start();
         ui.Join();
+        Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", null);
 
-        if (failure is not null) throw new Xunit.Sdk.XunitException("the bericht tab failed: " + failure);
+        if (failure is not null) throw new Xunit.Sdk.XunitException("the bericht tab crashed: " + failure);
         Assert.Equal("", seen.Error);
         Assert.Equal("", seen.Note);
         Assert.True(seen.Ready);
@@ -36,8 +48,6 @@ public class ReportViewTests
         using var host = new Host();
         var kase = host.PutVorlage().GetAwaiter().GetResult();
         AppBuilder.Configure<App.App>().UsePlatformDetect().WithInterFont().SetupWithoutStarting();
-        Exception? thrown = null;
-        Dispatcher.UIThread.UnhandledException += (_, e) => { thrown = e.Exception; e.Handled = true; };
 
         var shell = new Shell(host.Service);
         using var done = new CancellationTokenSource(TimeSpan.FromSeconds(90));
@@ -54,12 +64,41 @@ public class ReportViewTests
             };
         });
         shell.Show();
-        Dispatcher.UIThread.MainLoop(done.Token);
-        var error = shell.Session.Error;
-        shell.Close();
+        try
+        {
+            Dispatcher.UIThread.MainLoop(done.Token);
+        }
+        finally
+        {
+            shell.Close();
+        }
 
-        if (thrown is not null) throw thrown;
         Assert.NotNull(model);
-        return (model.Ready, model.Note, error);
+        return (model.Ready, model.Note, shell.Session.Error);
+    }
+
+    [SupportedOSPlatform("windows")]
+    sealed class ReadOnlyDir : IDisposable
+    {
+        readonly DirectoryInfo dir = Directory.CreateTempSubdirectory("umsatzschätzung-programme-");
+        readonly FileSystemAccessRule deny = new(WindowsIdentity.GetCurrent().User!,
+            FileSystemRights.CreateDirectories | FileSystemRights.CreateFiles, AccessControlType.Deny);
+
+        public ReadOnlyDir()
+        {
+            var acl = dir.GetAccessControl();
+            acl.AddAccessRule(deny);
+            dir.SetAccessControl(acl);
+        }
+
+        public string Path => dir.FullName;
+
+        public void Dispose()
+        {
+            var acl = dir.GetAccessControl();
+            acl.RemoveAccessRule(deny);
+            dir.SetAccessControl(acl);
+            dir.Delete(true);
+        }
     }
 }

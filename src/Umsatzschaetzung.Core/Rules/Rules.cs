@@ -15,6 +15,10 @@ public static class RuleCheck
         ValidateNesting(rs);
         ValidateScales(rs);
         foreach (var (id, e) in rs.YieldRules) ValidateYieldRule(rs, Keyed(id, e));
+        HashSet<string> kennzahlen = [];
+        foreach (var (id, e) in rs.Gewerbezweige)
+            if (!kennzahlen.Add(ValidateGewerbezweig(Keyed(id, e)).Kennzahl))
+                throw new RulesException($"Gewerbekennzahl {e.Kennzahl} gibt es schon");
     }
 
     // Names of the entries that would dangle if this entity were deleted.
@@ -58,6 +62,13 @@ public static class RuleCheck
         foreach (var u in e.Gebinde)
             if (Units.Lookup(u) is not { Container: true } info || info.Code != u)
                 throw new RulesException($"Kategorie \"{e.Name}\": \"{u}\" ist kein Packmittelcode");
+    }
+
+    static Gewerbezweig ValidateGewerbezweig(Gewerbezweig e)
+    {
+        if (!Gewerbe.Kennzahl(e.Kennzahl)) throw new RulesException($"Gewerbekennzahl \"{e.Kennzahl}\" ist ungültig");
+        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException($"Gewerbekennzahl {e.Kennzahl}: Bezeichnung darf nicht leer sein");
+        return e;
     }
 
     static void ValidateIngredient(RuleSet rs, Ingredient e)

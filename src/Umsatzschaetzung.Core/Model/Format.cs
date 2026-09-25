@@ -20,6 +20,7 @@ public static class Format
         Entity.Ingredient => "Zutat",
         Entity.Mapping => "Zuordnung",
         Entity.Product => "Produkt",
+        Entity.Gewerbezweig => "Gewerbekennzahl",
         _ => "Ausbeuteregel",
     };
 

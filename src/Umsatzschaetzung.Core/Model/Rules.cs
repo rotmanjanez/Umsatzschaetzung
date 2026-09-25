@@ -10,6 +10,7 @@ public enum Entity
     [JsonStringEnumMemberName("mapping")] Mapping,
     [JsonStringEnumMemberName("product")] Product,
     [JsonStringEnumMemberName("yield_rule")] YieldRule,
+    [JsonStringEnumMemberName("gewerbe")] Gewerbezweig,
 }
 
 // Die Sparte trennt den Rohgewinnaufschlag einer Gaststätte, wie ihn die Prüfung erwartet:
@@ -67,6 +68,16 @@ public sealed class Category : IRuleEntity
 
     public bool Contradicts(IReadOnlySet<string> containers) =>
         Gebinde.Count > 0 && containers.Count > 0 && !Gebinde.Exists(containers.Contains);
+}
+
+// Eine Gewerbekennzahl, die eine Prüfung wählen kann. Kategorien grenzen ihre Zutaten per
+// Präfix auf Kennzahlen ein; eine Kennzahl, die keine kennt, ließe der Zuordnung nichts übrig.
+public sealed class Gewerbezweig : IRuleEntity
+{
+    public string Id { get; set; } = "";
+    public string Kennzahl { get; set; } = "";
+    public string Name { get; set; } = "";
+    public Meta Meta { get; set; } = new();
 }
 
 public sealed class Ingredient : IRuleEntity
@@ -239,6 +250,7 @@ public sealed class RuleSet
     public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
     public Dictionary<string, Product> Products { get; set; } = [];
     public Dictionary<string, YieldRule> YieldRules { get; set; } = [];
+    public Dictionary<string, Gewerbezweig> Gewerbezweige { get; set; } = [];
 
     public IRuleEntity? Find(Entity entity, string id) => entity switch
     {
@@ -247,6 +259,7 @@ public sealed class RuleSet
         Entity.Mapping => Mappings.GetValueOrDefault(id),
         Entity.Product => Products.GetValueOrDefault(id),
         Entity.YieldRule => YieldRules.GetValueOrDefault(id),
+        Entity.Gewerbezweig => Gewerbezweige.GetValueOrDefault(id),
         _ => null,
     };
 
@@ -259,6 +272,7 @@ public sealed class RuleSet
             case ArticleMapping x: Mappings[x.Id] = x; break;
             case Product x: Products[x.Id] = x; break;
             case YieldRule x: YieldRules[x.Id] = x; break;
+            case Gewerbezweig x: Gewerbezweige[x.Id] = x; break;
         }
     }
 }

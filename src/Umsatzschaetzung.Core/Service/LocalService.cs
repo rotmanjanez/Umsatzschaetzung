@@ -35,6 +35,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
             .Concat(rs.Mappings.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.Products.Values.Select(e => e.Meta.ChangedAt))
             .Concat(rs.YieldRules.Values.Select(e => e.Meta.ChangedAt))
+            .Concat(rs.Gewerbezweige.Values.Select(e => e.Meta.ChangedAt))
             .DefaultIfEmpty(default)
             .Max();
 
