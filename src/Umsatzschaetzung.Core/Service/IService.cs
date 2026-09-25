@@ -25,7 +25,7 @@ public interface IService
     Task<ParseResp> ParseInvoice(string caseId, string fileName, byte[] data, CancellationToken ct);                        // POST /cases/{id}/invoices/parse   persists the invoice; resp.Case is the saved case
     Task<OcrResp> OcrInvoice(string caseId, string fileName, byte[] data, CancellationToken ct);                            // POST /cases/{id}/invoices/ocr     draft only, nothing is saved
     Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct);                                                    // POST /cases/{id}/invoices/{inv}/verify   see Intent
-    Task<Case> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct);                                        // DELETE /cases/{id}/invoices/{inv}   drops the invoice and its stored file, resp is the saved case
+    Task<Case> DeleteInvoice(string caseId, string invoiceId, CancellationToken ct);                                        // DELETE /cases/{id}/invoices/{inv}   drops the invoice, its stored file stays until CaseStore.Purge, resp is the saved case
     Task<ExportResp> ExportInvoice(string caseId, string invoiceId, CancellationToken ct);                                  // GET  /cases/{id}/invoices/{inv}/export   the read invoice as CSV
     Task<InvoiceSourceResp> InvoiceSource(string caseId, string invoiceId, CancellationToken ct);                           // GET  /cases/{id}/invoices/{inv}/source
     Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct);                         // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading, images rendered again

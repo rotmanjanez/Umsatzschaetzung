@@ -15,6 +15,7 @@ public partial class Shell : Window
     readonly Dictionary<ImportJob, ImportWindow> imports = [];
     Screen? current;
     RulesWindow? rules;
+    bool moving;
 
     public Shell(IService service)
     {
@@ -46,6 +47,7 @@ public partial class Shell : Window
         if (OperatingSystem.IsMacOS()) NativeMenu.SetMenu(this, HelpMenu());
         else MenuBar.IsVisible = true;
         Help.OnF1(this, () => current?.Topic ?? Help.Start);
+        History.Keys(this, Move);
         Loaded += async (_, _) =>
         {
             Show(cases);
@@ -119,6 +121,26 @@ public partial class Shell : Window
         current?.Leave();
         current = screen;
         screen.Enter();
+    }
+
+    // The page hands over what is still being typed first, it is the newest change. The page the
+    // step was made on then opens afresh, with the item marked and a refusal still showing.
+    async Task Move(bool back)
+    {
+        var history = session.History;
+        if (!CaseUi.IsVisible || moving || !(back ? history.CanUndo : history.CanRedo)) return;
+        moving = true;
+        var tab = Tabs.SelectedIndex;
+        current?.Leave();
+        current = null;
+        var place = back ? await history.Undo() : await history.Redo();
+        moving = false;
+        if (!CaseUi.IsVisible) return;
+        if (place is not null) tab = place.Page;
+        current?.Leave();
+        current = screens[tab];
+        current.Enter(place?.Item);
+        Tabs.SelectedIndex = tab;
     }
 
     void TabChanged(object? sender, SelectionChangedEventArgs e)

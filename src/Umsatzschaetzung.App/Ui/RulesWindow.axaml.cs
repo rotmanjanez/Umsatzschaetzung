@@ -17,6 +17,7 @@ public partial class RulesWindow : Window
         Body.Content = view;
         view.Enter();
         Help.OnF1(this, () => view.Topic);
+        History.Keys(this, view.Move, textFirst: true);
         session.Anchor(this, ErrorBanner, ErrorText);
         session.Indicate(this, SaveBadge, SaveText);
         Closed += (_, _) => view.Leave();

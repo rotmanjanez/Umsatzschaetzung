@@ -209,8 +209,10 @@ public partial class InvoiceView : Screen
     readonly InvoiceModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
     readonly Action<Case> onSaved;
+    readonly History history;
     List<OcrPage> pages;
     Invoice invoice;
+    string recorded;
     List<Flag> flags = [];
     int currentPage = -1;
     int edits;
@@ -222,7 +224,9 @@ public partial class InvoiceView : Screen
     {
         InitializeComponent();
         this.onSaved = onSaved;
+        history = new History(session);
         invoice = Copy(stored);
+        recorded = Snapshot(invoice);
         pages = ocr?.Pages ?? [];
         DataContext = model;
         model.PropertyChanged += HeaderEdited;
@@ -295,6 +299,8 @@ public partial class InvoiceView : Screen
     }
 
     public string Id => invoice.Id;
+
+    protected override History History => history;
 
     // Worth keeping around once the user leaves it: edits on their way, or a review still to be done.
     public bool Keep => model.Dirty || model.State == Checked.Pending;
@@ -429,7 +435,83 @@ public partial class InvoiceView : Screen
 
     // Every edit is stored as it settles, one write after the other so an older one never lands
     // last. Storing takes back an earlier review; only accepting marks the invoice as reviewed.
-    Task Store() => stored = StoreAfter(stored);
+    Task Store()
+    {
+        Record();
+        return stored = StoreAfter(stored);
+    }
+
+    // What the person changed, apart from the totals and the review the service decides on.
+    static string Snapshot(Invoice inv)
+    {
+        var (verification, net, gross) = (inv.Verification, inv.NetTotal, inv.GrossTotal);
+        (inv.Verification, inv.NetTotal, inv.GrossTotal) = (null, 0, 0);
+        var json = Json.Serialize(inv);
+        (inv.Verification, inv.NetTotal, inv.GrossTotal) = (verification, net, gross);
+        return json;
+    }
+
+    void Record()
+    {
+        var now = Snapshot(Current());
+        if (now == recorded) return;
+        var item = Touched(Json.Deserialize<Invoice>(recorded), invoice);
+        History.Record(At(item), new InvoiceChange(this, recorded, now));
+        recorded = now;
+    }
+
+    const string LineItem = "line:";
+
+    // The first value that differs, for undoing the change to point at it.
+    static string Touched(Invoice was, Invoice now)
+    {
+        if (was.SupplierName != now.SupplierName) return nameof(SupplierBox);
+        if (was.Number != now.Number) return nameof(NumberBox);
+        if (was.Date != now.Date) return nameof(DateBox);
+        if (was.StatedNet != now.StatedNet || was.StatedGross != now.StatedGross) return nameof(Totals);
+        for (var i = 0; i < Math.Max(was.Lines.Count, now.Lines.Count); i++)
+            if (i >= was.Lines.Count || i >= now.Lines.Count || Json.Serialize(was.Lines[i]) != Json.Serialize(now.Lines[i]))
+                return LineItem + i;
+        return "";
+    }
+
+    public async Task Move(bool back)
+    {
+        if (!IsActive) return;
+        Lines.CommitEdit(DataGridEditingUnit.Row, true);
+        Totals.CommitEdit(DataGridEditingUnit.Row, true);
+        if (timer.IsEnabled)
+        {
+            timer.Stop();
+            _ = Store();
+        }
+        if ((back ? await History.Undo() : await History.Redo()) is not { } place) return;
+        if (place.Item.StartsWith(LineItem))
+            Reveal.Row(Lines, model.Lines.ElementAtOrDefault(int.Parse(place.Item[LineItem.Length..])));
+        else if (place.Item != "") Reveal.Flash(this.FindControl<Control>(place.Item));
+    }
+
+    // The review and the totals stay as the service last had them; storing sets both anew.
+    Task<bool> Restore(string snapshot)
+    {
+        var inv = Json.Deserialize<Invoice>(snapshot);
+        (inv.Verification, inv.NetTotal, inv.GrossTotal) = (invoice.Verification, invoice.NetTotal, invoice.GrossTotal);
+        invoice = inv;
+        recorded = snapshot;
+        Load();
+        ApplyFlags(flags);
+        Schedule();
+        return Task.FromResult(true);
+    }
+
+    sealed class InvoiceChange(InvoiceView view, string before, string after) : IChange
+    {
+        string After { get; } = after;
+        public object Target => view;
+        public IChange Then(IChange later) => new InvoiceChange(view, before, ((InvoiceChange)later).After);
+        public string? Stale(bool back) => null;
+        public Task<bool> Apply(bool back) => view.Restore(back ? before : After);
+    }
 
     async Task StoreAfter(Task prior)
     {
@@ -472,6 +554,7 @@ public partial class InvoiceView : Screen
     void Apply(VerifyResp v)
     {
         invoice = Copy(v.Invoice);
+        recorded = Snapshot(invoice);
         Load();
         ApplyFlags(v.Flags, v.Blocked);
     }

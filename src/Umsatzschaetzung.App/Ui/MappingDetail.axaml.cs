@@ -267,6 +267,7 @@ public partial class MappingDetail : UserControl
     readonly MappingDetailModel model = new();
     Session? session;
     Func<CancellationToken> ct = () => new CancellationToken(true);
+    Func<string, Place>? at;
     int suggestSeq;
 
     public MappingDetail()
@@ -284,11 +285,15 @@ public partial class MappingDetail : UserControl
     Session Session => session ?? throw new InvalidOperationException("MappingDetail is not attached");
     CancellationToken Ct => ct();
 
-    public void Attach(Session s, Func<CancellationToken> token)
+    // The page it sits on says where an assignment was made; the group's key names the item.
+    public void Attach(Session s, Func<CancellationToken> token, Func<string, Place> place)
     {
         session = s;
         ct = token;
+        at = place;
     }
+
+    Place At(LineGroup g) => (at ?? throw new InvalidOperationException("MappingDetail is not attached"))(g.Key);
 
     public void Refresh()
     {
@@ -404,7 +409,7 @@ public partial class MappingDetail : UserControl
         {
             if (model.Candidates.FirstOrDefault(c => c.Selected) is not { } chosen || !ReadFactor(g, out var packed, out var piece)) return;
             var suggested = chosen.Candidate.Mapping;
-            if (!await Weigh(suggested.IngredientId, piece)) return;
+            if (!await Weigh(g, suggested.IngredientId, piece)) return;
             if (suggested.Id == "" || !suggested.Confirmed || model.ShowFactor && suggested.Factor != packed)
             {
                 if (suggested.Id == "")
@@ -414,7 +419,7 @@ public partial class MappingDetail : UserControl
                 }
                 if (model.ShowFactor) suggested.Factor = packed;
                 suggested.Confirmed = true;
-                if (!await Session.Put(suggested, Ct)) return;
+                if (!await Session.Put(suggested, At(g), Ct)) return;
             }
             await AssignId(g, suggested.Id, Names.Candidate(Session.Rules!, suggested));
             return;
@@ -424,7 +429,7 @@ public partial class MappingDetail : UserControl
             Session.Fail("Bitte eine Zutat wählen.");
             return;
         }
-        if (!ReadFactor(g, out var factor, out var weight) || !await Weigh(model.Ingredient.Id, weight)) return;
+        if (!ReadFactor(g, out var factor, out var weight) || !await Weigh(g, model.Ingredient.Id, weight)) return;
         var mapping = new ArticleMapping
         {
             Id = g.MappingId ?? Session.NewId("map"),
@@ -437,7 +442,7 @@ public partial class MappingDetail : UserControl
             Factor = factor,
             Confirmed = true,
         };
-        if (await Session.Put(mapping, Ct)) await AssignId(g, mapping.Id, Names.Candidate(Session.Rules!, mapping));
+        if (await Session.Put(mapping, At(g), Ct)) await AssignId(g, mapping.Id, Names.Candidate(Session.Rules!, mapping));
     }
 
     bool ReadFactor(LineGroup g, out long? factor, out Piece? piece)
@@ -447,18 +452,18 @@ public partial class MappingDetail : UserControl
         return false;
     }
 
-    async Task<bool> Weigh(string ingredientId, Piece? piece)
+    async Task<bool> Weigh(LineGroup g, string ingredientId, Piece? piece)
     {
         if (piece is null) return true;
         if (Session.Rules?.Ingredients.GetValueOrDefault(ingredientId) is not { } i) return false;
-        return await Session.Put(new Ingredient { Id = i.Id, Name = i.Name, CategoryId = i.CategoryId, Aliases = [.. i.Aliases], Piece = piece }, Ct);
+        return await Session.Put(new Ingredient { Id = i.Id, Name = i.Name, CategoryId = i.CategoryId, Aliases = [.. i.Aliases], Piece = piece }, At(g), Ct);
     }
 
     async Task AssignId(LineGroup g, string mappingId, string label)
     {
         if (Session.Case is null || mappingId == "") return;
         foreach (var (inv, line) in g.Lines) Session.Case.Invoices[inv].Lines[line].MappingId = mappingId;
-        if (!await Session.SaveCase(Ct)) return;
+        if (!await Session.SaveCase(At(g), Ct)) return;
         model.Assigned = "„" + g.Name + "“ ist jetzt " + label + " zugeordnet.";
         Assigned?.Invoke(g);
     }

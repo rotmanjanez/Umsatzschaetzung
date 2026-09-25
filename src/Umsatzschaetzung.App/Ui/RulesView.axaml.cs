@@ -284,6 +284,10 @@ public partial class RulesView : Screen
         _ => Help.Rules + "#zutaten",
     };
 
+    protected override History History => Session.RulesHistory;
+
+    protected override int Page => Tabs.SelectedIndex;
+
     public RulesView(Session session) : base(session)
     {
         InitializeComponent();
@@ -346,6 +350,32 @@ public partial class RulesView : Screen
         wanted = null;
     }
 
+    // The rules are rebuilt from the store once the step is written; the tab it was made on shows its entry.
+    public async Task Move(bool back)
+    {
+        if (!IsActive) return;
+        if ((back ? await History.Undo() : await History.Redo()) is not { } place) return;
+        Tabs.SelectedIndex = place.Page;
+        EntityForm form = place.Page switch
+        {
+            1 => model.Products,
+            2 => model.Yields,
+            3 => model.Gewerbe,
+            _ => model.Ingredients,
+        };
+        form.CurrentId = place.Item;
+        Rebuild();
+        if (form.CurrentId != place.Item) return;
+        var (list, item) = place.Page switch
+        {
+            1 => ((Control)ProductGrid, ProductGrid.SelectedItem),
+            2 => (RuleGrid, RuleGrid.SelectedItem),
+            3 => (GewerbeGrid, GewerbeGrid.SelectedItem),
+            _ => (IngredientGrid, IngredientGrid.SelectedItem),
+        };
+        Reveal.Row(list, item);
+    }
+
     static string Missing(params string?[] fields) =>
         "Bitte prüfen: " + string.Join(", ", fields.OfType<string>()) + ".";
 
@@ -357,7 +387,7 @@ public partial class RulesView : Screen
             "„" + form.Title + "“ wird dauerhaft aus den Regeln entfernt. Bereits erstellte Berichte bleiben unverändert.",
             noun + " löschen");
         if (!confirmed) return;
-        if (await Session.Delete(entity, id, Ct)) form.CurrentId = null;
+        if (await Session.Delete(entity, id, At(id), Ct)) form.CurrentId = null;
     }
 
     void IngredientSelected(object? sender, SelectionChangedEventArgs e)
@@ -409,10 +439,10 @@ public partial class RulesView : Screen
         };
         await Compose(async () =>
         {
-            if (await CategoryId(f.Category) is not { } categoryId) return;
+            if (await CategoryId(f.Category, At(id)) is not { } categoryId) return;
             data.CategoryId = categoryId;
             f.CurrentId = id;
-            await Session.Put(data, Ct);
+            await Session.Put(data, At(id), Ct);
         });
     }
 
@@ -528,7 +558,7 @@ public partial class RulesView : Screen
         }
         var isNew = f.CurrentId is null;
         f.CurrentId = id;
-        if (await Session.Put(data, Ct) && isNew && productCreated is { } created)
+        if (await Session.Put(data, At(id), Ct) && isNew && productCreated is { } created)
         {
             productCreated = null;
             created(id);
@@ -553,7 +583,7 @@ public partial class RulesView : Screen
     }
 
     // "" when no category is wanted, the id otherwise, null when the picker is not usable.
-    async Task<string?> CategoryId(CategoryPicker picker)
+    async Task<string?> CategoryId(CategoryPicker picker, Place at)
     {
         if (!picker.Creating) return picker.Selected?.Id ?? "";
         var name = picker.NewName.Trim();
@@ -566,7 +596,7 @@ public partial class RulesView : Screen
         if (Session.Categories().Find(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) is { } existing)
             return existing.Id;
         var id = Session.NewId("category");
-        return await Session.Put(new Category { Id = id, Name = name }, Ct) ? id : null;
+        return await Session.Put(new Category { Id = id, Name = name }, at, Ct) ? id : null;
     }
 
     List<ScopeItem> YieldScopes(RuleSet rs)
@@ -696,11 +726,11 @@ public partial class RulesView : Screen
         {
             if (!f.ScopeIsIngredient)
             {
-                if (await CategoryId(f.Category) is not { } categoryId) return;
+                if (await CategoryId(f.Category, At(id)) is not { } categoryId) return;
                 data.CategoryId = categoryId == "" ? null : categoryId;
             }
             f.CurrentId = id;
-            await Session.Put(data, Ct);
+            await Session.Put(data, At(id), Ct);
         });
     }
 
@@ -747,7 +777,7 @@ public partial class RulesView : Screen
             return;
         }
         f.CurrentId = data.Id;
-        await Session.Put(data, Ct);
+        await Session.Put(data, At(data.Id), Ct);
     }
 
     async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig);

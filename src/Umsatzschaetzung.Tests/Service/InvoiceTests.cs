@@ -97,7 +97,7 @@ public class InvoiceTests(MatcherHost host)
     }
 
     [Fact]
-    public async Task DeletingAnInvoiceRemovesItsStoredFile()
+    public async Task ADeletedInvoiceComesBackWithItsFileUntilThePurge()
     {
         var kase = await NewCase();
         var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", Zugferd, ct);
@@ -106,6 +106,13 @@ public class InvoiceTests(MatcherHost host)
 
         Assert.Empty(after.Invoices);
         Assert.Empty((await svc.GetCase(kase.Id, ct)).Invoices);
+        after.Invoices.Add(parsed.Invoice);
+        await svc.PutCase(after, ct);
+        Assert.Equal("zugferd.pdf", host.Cases.LoadFile(kase.Id, parsed.Invoice.Id).Name);
+
+        await svc.DeleteInvoice(kase.Id, parsed.Invoice.Id, ct);
+        host.Cases.Purge();
+
         var e = await Assert.ThrowsAsync<ServiceError>(() => svc.InvoiceSource(kase.Id, parsed.Invoice.Id, ct));
         Assert.Equal(ErrorCode.NotFound, e.Code);
     }

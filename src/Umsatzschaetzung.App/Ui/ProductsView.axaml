@@ -45,7 +45,7 @@
             <StackPanel Margin="0,0,0,24">
                 <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding EmptyAssortment}"
                            Text="Noch keine Produkte im Sortiment."/>
-                <DataGrid ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" IsVisible="{Binding !EmptyAssortment}">
+                <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" IsVisible="{Binding !EmptyAssortment}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Produkt" Width="320" MinWidth="120" SortMemberPath="Name">
                             <DataGridTemplateColumn.CellTemplate>

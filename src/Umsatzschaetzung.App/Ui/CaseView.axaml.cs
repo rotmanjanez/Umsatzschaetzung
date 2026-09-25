@@ -133,20 +133,24 @@ public partial class CaseView : Screen
 {
     public override string Topic => Help.Case;
 
+    protected override int Page => (int)Tab.Case;
+
     readonly CaseModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(600) };
     bool loading;
+    string changing = "", edited = "";
 
     public CaseView(Session session) : base(session)
     {
         InitializeComponent();
         DataContext = model;
-        model.Changed += Edited;
+        model.PropertyChanged += (_, e) => changing = e.PropertyName!;
+        model.Changed += () => Edited(changing);
         model.Stock.CollectionChanged += (_, e) =>
         {
             if (e.NewItems is not null)
-                foreach (StockRow row in e.NewItems) row.Changed += Edited;
-            Edited();
+                foreach (StockRow row in e.NewItems) row.Changed += () => Edited(nameof(CaseModel.Stock));
+            Edited(nameof(CaseModel.Stock));
         };
         timer.Tick += (_, _) =>
         {
@@ -164,6 +168,7 @@ public partial class CaseView : Screen
         loading = true;
         model.Load(Session);
         loading = false;
+        if (Revealing() is { } item) Reveal.Flash(this.FindControl<Control>(item + "Box"));
     }
 
     void ShowGewerbe() => model.Gewerbezweige = Session.Gewerbezweige();
@@ -175,9 +180,10 @@ public partial class CaseView : Screen
         _ = Save(CancellationToken.None);
     }
 
-    void Edited()
+    void Edited(string property)
     {
         if (loading) return;
+        edited = property;
         timer.Stop();
         timer.Start();
     }
@@ -186,7 +192,7 @@ public partial class CaseView : Screen
     {
         var kase = Session.Case;
         if (kase is null || !model.Collect(kase)) return;
-        if (!await Session.SaveCase(ct) && !ct.IsCancellationRequested)
+        if (!await Session.SaveCase(At(edited), ct) && !ct.IsCancellationRequested)
             Session.Fail("Änderungen an der Prüfung konnten nicht gespeichert werden");
     }
 

@@ -175,7 +175,8 @@ public sealed partial class CaseStore(string dir)
         return 0;
     });
 
-    // Der Fall wandert als eine Datei: die Kopie ist in sich abgeschlossen und trägt die Belege mit.
+    // Der Fall wandert als eine Datei: die Kopie ist in sich abgeschlossen und trägt die Belege mit,
+    // gelöschte nicht.
     public byte[] Export(string id) => Guarded(() =>
     {
         var path = PathOf(id);
@@ -184,6 +185,8 @@ public sealed partial class CaseStore(string dir)
         try
         {
             using (var db = Reader(path)) Exec(db, null, "VACUUM INTO @path", ("@path", temp));
+            using (var copy = Connect(temp, SqliteOpenMode.ReadWrite))
+                if (DropDeleted(copy) > 0) Exec(copy, null, "VACUUM");
             return File.ReadAllBytes(temp);
         }
         finally
@@ -242,17 +245,36 @@ public sealed partial class CaseStore(string dir)
             + "ON CONFLICT(invoice_id) DO UPDATE SET name = excluded.name, data = excluded.data",
             ("@id", key), ("@name", name), ("@data", data));
 
-    public void DeleteFile(string caseId, string invoiceId) => Guarded(() =>
+    // Ein gelöschter Beleg bleibt mit seiner Lesung liegen, bis das Programm das nächste Mal
+    // startet: so lange lässt sich das Löschen zurücknehmen. Eine unlesbare Datei hält den Start nicht auf.
+    public void Purge() => Guarded(() =>
     {
-        var key = InvoiceKey(caseId, invoiceId);
-        if (!File.Exists(PathOf(caseId))) return 0;
-        using var db = Writer(caseId);
-        using var tx = db.BeginTransaction(deferred: false);
-        Exec(db, tx, "DELETE FROM document WHERE invoice_id = @id", ("@id", key));
-        DropReading(db, tx, key);
-        tx.Commit();
+        if (!Directory.Exists(dir)) return 0;
+        foreach (var path in Directory.EnumerateFiles(dir, "*.db"))
+        {
+            if (Path.GetFileName(path).StartsWith('.')) continue;
+            try
+            {
+                using var db = Open(path, SqliteOpenMode.ReadWrite);
+                DropDeleted(db);
+            }
+            catch (Exception e) when (e is CaseInvalidException or SqliteException) { }
+        }
         return 0;
     });
+
+    static int DropDeleted(SqliteConnection db)
+    {
+        using var tx = db.BeginTransaction(deferred: false);
+        var dropped = 0;
+        foreach (var t in (string[])["document", .. ReadingTables])
+        {
+            using var cmd = Command(db, tx, $"DELETE FROM {t} WHERE invoice_id NOT IN (SELECT id FROM invoice)");
+            dropped += cmd.ExecuteNonQuery();
+        }
+        tx.Commit();
+        return dropped;
+    }
 
     public void SaveMappedAt(string caseId, long version) => Guarded(() =>
     {

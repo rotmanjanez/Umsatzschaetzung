@@ -18,9 +18,9 @@
 { "do": "shot", "name": "pruefung-kopf", "at": { "name": "CaseLabel", "up": "DockPanel" }, "trim": { "bottom": -56 } }
 { "do": "shot", "name": "pruefung-leer", "at": { "text": "Erklärte Umsätze, netto in €", "up": "TabControl" }, "trim": { "top": 16 } }
 
-{ "do": "type", "at": { "name": "Declared19" }, "text": "196.418,00" }
+{ "do": "type", "at": { "name": "Declared19Box" }, "text": "196.418,00" }
 { "do": "focus" }
-{ "do": "shot", "name": "erklaerte-umsaetze", "at": { "name": "Declared19", "up": "Grid" }, "trim": { "top": -30 } }
+{ "do": "shot", "name": "erklaerte-umsaetze", "at": { "name": "Declared19Box", "up": "Grid" }, "trim": { "top": -30 } }
 
 // Rechnungen: the whole year at once, three scans do not add up
 { "do": "tab", "header": "1. Rechnungen" }

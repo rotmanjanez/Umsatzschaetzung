@@ -50,10 +50,12 @@ public partial class ProductsView : Screen
 {
     public override string Topic => Help.Products;
 
+    protected override int Page => (int)Tab.Products;
+
     readonly ProductsModel model = new();
     readonly DispatcherTimer timer = new();
     int generation;
-    string dismissedCase = "";
+    string dismissedCase = "", edited = "";
     HashSet<string> dismissed = [];
 
     public ProductsView(Session session) : base(session)
@@ -87,6 +89,7 @@ public partial class ProductsView : Screen
         await Session.LoadRules(Ct);
         if (Session.Case is null || Session.Rules is null || !IsActive) return;
         Load();
+        if (Revealing() is { } id) Reveal.Row(ProductGrid, model.Rows.FirstOrDefault(r => r.ProductId == id));
     }
 
     void RulesChanged() => model.Catalog = Session.Products();
@@ -106,7 +109,7 @@ public partial class ProductsView : Screen
     {
         Session.RulesChanged -= RulesChanged;
         timer.Stop();
-        if (Session.Case is not null) _ = Session.SaveCase(CancellationToken.None);
+        if (Session.Case is not null) _ = Session.SaveCase(At(edited), CancellationToken.None);
     }
 
     void Schedule(int delayMs)
@@ -136,7 +139,7 @@ public partial class ProductsView : Screen
         var g = ++generation;
         var withInvoices = kase.Invoices.Count > 0;
         model.Suggesting = withInvoices;
-        if (await Session.SaveCase(Ct) && withInvoices && g == generation) await Session.Run(async () =>
+        if (await Session.SaveCase(At(edited), Ct) && withInvoices && g == generation) await Session.Run(async () =>
         {
             var sold = await Assortment.Calculate(Session, kase, rs, Ct);
             if (sold is null || g != generation) return;
@@ -151,6 +154,7 @@ public partial class ProductsView : Screen
     void Edited(AssortmentRow row, string? property)
     {
         if (Session.Case is null) return;
+        edited = row.ProductId;
         switch (property)
         {
             case nameof(AssortmentRow.Price):
@@ -188,6 +192,7 @@ public partial class ProductsView : Screen
         while (at < model.Rows.Count && StringComparer.CurrentCulture.Compare(model.Rows[at].Name, row.Name) < 0) at++;
         model.Rows.Insert(at, row);
         model.Suggestions.Clear();
+        edited = productId;
         Schedule(0);
     }
 
@@ -220,7 +225,7 @@ public partial class ProductsView : Screen
     async void ExportCsv(object? sender, RoutedEventArgs e)
     {
         timer.Stop();
-        if (Session.Case is null || !await Session.SaveCase(Ct) || Session.Case is not { } kase) return;
+        if (Session.Case is null || !await Session.SaveCase(At(edited), Ct) || Session.Case is not { } kase) return;
         await Session.Run(async () =>
         {
             var resp = await Session.Service.ExportAssortment(kase.Id, Ct);
@@ -248,6 +253,7 @@ public partial class ProductsView : Screen
                 if (!listed.TryGetValue(p.ProductId, out var l)) kase.Products.Add(p);
                 else if (take.Contains(p.ProductId)) (l.GrossPrice, l.Vat) = (p.GrossPrice, p.Vat);
             }
+            edited = "";
             Load();
             if (read.Unknown.Count > 0) Session.Fail("Nicht im Katalog: " + string.Join(", ", read.Unknown));
         });
@@ -263,6 +269,7 @@ public partial class ProductsView : Screen
         if ((sender as Control)?.DataContext is not AssortmentRow row || Session.Case is null) return;
         Session.Case.Products.RemoveAll(p => p.ProductId == row.ProductId);
         model.Rows.Remove(row);
+        edited = row.ProductId;
         Schedule(0);
     }
 }

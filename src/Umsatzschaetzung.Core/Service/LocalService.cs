@@ -202,7 +202,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         if (i < 0) throw new ServiceError(ErrorCode.NotFound, $"Rechnung \"{invoiceId}\" nicht im Fall \"{caseId}\"");
         c.Invoices.RemoveAt(i);
         SaveCase(c);
-        cases.DeleteFile(caseId, invoiceId);
         return c;
     });
 

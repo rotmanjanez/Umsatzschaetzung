@@ -118,6 +118,26 @@ public class CaseTransferTests
     }
 
     [Fact]
+    public void AnExportLeavesOutTheDocumentOfADeletedInvoice()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Sub("a"));
+        var c = Cases.Full("fall-1");
+        store.Save(c);
+        store.SaveFile("fall-1", "re-1", "rheinland.pdf", [1, 2, 3]);
+        store.SaveFile("fall-1", "re-2", "scan.jpg", [4, 5, 6]);
+        c.Invoices.RemoveAll(i => i.Id == "re-2");
+        store.Save(c);
+
+        var to = new CaseStore(tmp.Sub("b"));
+        to.Import(store.Export("fall-1"), false);
+
+        Cases.HoldsFile(to, "fall-1", "re-1", "rheinland.pdf", [1, 2, 3]);
+        Assert.Throws<CaseNotFoundException>(() => to.LoadFile("fall-1", "re-2"));
+        Assert.Equal("scan.jpg", store.LoadFile("fall-1", "re-2").Name);
+    }
+
+    [Fact]
     public void ExportLeavesNoTemporaryFileBehind()
     {
         using var tmp = new TempDir();

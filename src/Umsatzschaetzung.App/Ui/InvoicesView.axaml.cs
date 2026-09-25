@@ -78,6 +78,8 @@ public partial class InvoicesView : Screen
 {
     public override string Topic => Help.Invoices;
 
+    protected override int Page => (int)Tab.Invoices;
+
     readonly InvoicesModel model = new();
     readonly Dictionary<string, InvoiceView> editors = [];
     readonly Dictionary<string, InvoiceWindow> windows = [];
@@ -101,7 +103,11 @@ public partial class InvoicesView : Screen
 
     static string Text(InvoiceRow r) => r.Supplier + " " + r.Number + " " + r.Date + " " + r.NetTotal + " " + r.FileName + " " + r.StateText;
 
-    protected override void OnEnter() => Refresh();
+    protected override void OnEnter()
+    {
+        Refresh();
+        if (Revealing() is { } id) Reveal.Row(List, model.Invoices.FirstOrDefault(r => r.Id == id));
+    }
 
     void CaseClosed()
     {
@@ -182,15 +188,14 @@ public partial class InvoicesView : Screen
     {
         if ((sender as Control)?.DataContext is not InvoiceRow row || Session.Case is not { } k) return;
         var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
-            "Die Rechnung „" + row.Supplier + " · " + row.Number + "“ wird mit dem Beleg unwiderruflich gelöscht.",
+            "Die Rechnung „" + row.Supplier + " · " + row.Number + "“ wird mit dem Beleg gelöscht. "
+                + "Rückgängig machen lässt sich das, bis das Programm beendet wird.",
             "Rechnung löschen");
-        if (!answer) return;
-        await Session.Run(async () =>
-        {
-            var resp = await Session.Service.DeleteInvoice(k.Id, row.Id, Ct);
-            Forget(row.Id);
-            Session.SetCase(resp);
-        });
+        if (!answer || Session.Case != k) return;
+        k.Invoices.RemoveAll(i => i.Id == row.Id);
+        Forget(row.Id);
+        Refresh();
+        await Session.SaveCase(At(row.Id), Ct);
     }
 
     void Forget(string id)

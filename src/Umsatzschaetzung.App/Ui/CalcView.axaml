@@ -227,12 +227,12 @@
                     </Grid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Ertragsregeln" IsVisible="{Binding HasYields}">
+            <TabItem x:Name="YieldsPage" Header="Ertragsregeln" IsVisible="{Binding HasYields}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl Margin="0,16,16,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Übrige Einkäufe">
+            <TabItem x:Name="ExcludedPage" Header="Übrige Einkäufe">
                 <DockPanel DataContext="{Binding Exclusions}" x:DataType="ui:ExclusionModel" Margin="0,16,0,0">
                     <TextBlock DockPanel.Dock="Bottom" Text="{Binding Deposit}" Theme="{StaticResource Muted}" Margin="0,12,0,0" IsVisible="{Binding HasDeposit}" TextWrapping="Wrap"/>
                     <TextBlock DockPanel.Dock="Top" Text="Keine: alle Einkäufe gehen in die Ermittlung des Aufschlagsatzes ein." Theme="{StaticResource Muted}"

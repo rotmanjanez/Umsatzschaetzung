@@ -33,12 +33,19 @@ public sealed class Session : Observable
     Task? draining;
     SaveState saveState;
     string error = "";
+    Dictionary<string, string> recorded = [];
 
     public Session(IService service)
     {
         Service = service;
         Imports = new Imports(this);
+        History = new History(this);
+        RulesHistory = new History(this);
     }
+
+    // The main window keeps what was changed there, on the case and on the rules; the rules window keeps its own.
+    public History History { get; }
+    public History RulesHistory { get; }
 
     // Session has no visual of its own; Shell assigns itself so the file pickers have a parent.
     public TopLevel? Owner { get; set; }
@@ -162,19 +169,24 @@ public sealed class Session : Observable
 
     public void Open(Case kase)
     {
+        History.Clear();
         SetCase(kase);
         CaseOpened?.Invoke(kase);
     }
 
+    // A case the service hands back is taken as it is, not as a change of this window.
     public void SetCase(Case kase)
     {
         Case = kase;
+        recorded = CaseParts.Of(kase);
         CaseChanged?.Invoke();
     }
 
     public void CloseCase()
     {
         Case = null;
+        recorded = [];
+        History.Clear();
         CaseClosed?.Invoke();
     }
 
@@ -188,22 +200,62 @@ public sealed class Session : Observable
 
     public Task Saved => draining ?? Task.CompletedTask;
 
-    public Task<bool> SaveCase(CancellationToken ct)
+    // What changed on the case since it was last recorded is recorded where it was made.
+    public Task<bool> SaveCase(Place at, CancellationToken ct)
     {
         if (Case is not { } kase) return Task.FromResult(false);
-        return Enqueue(kase, async () =>
+        var now = CaseParts.Of(kase);
+        if (CaseChange.Between(this, recorded, now) is { } change) at.History.Record(at, change);
+        recorded = now;
+        return Store(kase, ct);
+    }
+
+    // Undo and redo put the case back without that being a change of its own.
+    public Task<bool> Restore(Case kase)
+    {
+        SetCase(kase);
+        return Store(kase, CancellationToken.None);
+    }
+
+    Task<bool> Store(Case kase, CancellationToken ct) =>
+        Enqueue(kase, async () =>
         {
             var saved = await Service.PutCase(Json.Copy(kase), CancellationToken.None);
             kase.CreatedAt = saved.CreatedAt;
             kase.UpdatedAt = saved.UpdatedAt;
-            if (Case == kase) SetCase(kase);
+            if (Case == kase) CaseChanged?.Invoke();
         }, ct);
+
+    public async Task<bool> Put(IRuleEntity data, Place at, CancellationToken ct)
+    {
+        var kind = RuleChange.KindOf(data);
+        var before = Rules?.Find(kind, data.Id) is { } old ? Json.Copy(old) : null;
+        data.Meta = new Meta { ChangedAt = Clock.Now() };
+        var after = Json.Copy(data);
+        if (!await Store(data, ct)) return false;
+        at.History.Record(at, new RuleChange(this, kind, data.Id, before, after));
+        return true;
     }
 
-    public Task<bool> Put(IRuleEntity data, CancellationToken ct)
+    public async Task<bool> Delete(Entity entity, string id, Place at, CancellationToken ct)
     {
-        data.Meta = new Meta { ChangedAt = Clock.Now() };
-        return Enqueue((data.GetType(), data.Id), async () =>
+        var before = Rules?.Find(entity, id) is { } old ? Json.Copy(old) : null;
+        if (!await Drop(entity, id, ct)) return false;
+        at.History.Record(at, new RuleChange(this, entity, id, before, null));
+        return true;
+    }
+
+    // Undo and redo put a rule back as it was, or take it away again, without that being a change of its own.
+    public Task<bool> Restore(Entity entity, string id, IRuleEntity? rule)
+    {
+        if (rule is null) return Drop(entity, id, CancellationToken.None);
+        var data = Json.Copy(rule);
+        data.Meta.ChangedAt = Clock.Now();
+        return Store(data, CancellationToken.None);
+    }
+
+    Task<bool> Store(IRuleEntity data, CancellationToken ct) =>
+        Enqueue((data.GetType(), data.Id), async () =>
         {
             try
             {
@@ -217,9 +269,8 @@ public sealed class Session : Observable
             RulesChanged?.Invoke();
             await LoadStatus(CancellationToken.None);
         }, ct);
-    }
 
-    public Task<bool> Delete(Entity entity, string id, CancellationToken ct) =>
+    Task<bool> Drop(Entity entity, string id, CancellationToken ct) =>
         Enqueue(null, async () =>
         {
             Rules = await Service.DeleteRule(entity, id, CancellationToken.None);

@@ -29,6 +29,8 @@ public partial class MappingView : Screen
 {
     public override string Topic => Help.Mapping;
 
+    protected override int Page => (int)Tab.Mapping;
+
     readonly MappingModel model = new();
     bool refreshing;
     int refreshes;
@@ -38,7 +40,7 @@ public partial class MappingView : Screen
     {
         InitializeComponent();
         DataContext = model;
-        Detail.Attach(session, () => Ct);
+        Detail.Attach(session, () => Ct, key => At(key));
         Detail.Assigned += _ => MapOpen();
         var view = Search.Attach(model.Groups, g => g.Search);
         view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(LineGroup.Rank)));
@@ -55,8 +57,10 @@ public partial class MappingView : Screen
     // can only name them after a reload.
     async void Reload(bool catchUp = false)
     {
+        var item = Revealing();
         if (Stale() && !await Session.LoadRules(Ct)) return;
         await Refresh();
+        if (item is not null) Reveal.Row(Groups, model.Groups.FirstOrDefault(g => g.Key == item));
         if (catchUp) MapOpen();
     }
 

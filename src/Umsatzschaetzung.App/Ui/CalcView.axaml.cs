@@ -60,11 +60,16 @@ public partial class CalcView : Screen
 {
     public override string Topic => Help.Calc;
 
+    protected override int Page => (int)Tab.Calc;
+
+    const string ProductItem = "product:", YieldItem = "yield:", RevenueItem = "revenue:", GroupItem = "group:";
+
     readonly CalcModel model = new();
     readonly DispatcherTimer timer = new();
     readonly HashSet<string> promoting = [];
     int generation;
     bool filling, choosing;
+    string edited = "";
     (Case Case, RuleSet Rules, RuleSet Catalog, Report Report, List<ProductRow> Sold)? shown;
 
     public CalcView(Session session) : base(session)
@@ -72,13 +77,15 @@ public partial class CalcView : Screen
         InitializeComponent();
         DataContext = model;
         timer.Tick += (_, _) => _ = Flush();
-        Mapping.Attach(session, () => Ct);
+        Mapping.Attach(session, () => Ct, key => At(GroupItem + key));
         Mapping.Assigned += _ => Reassigned();
     }
 
     protected override async void OnEnter()
     {
         if (!model.Slow) DispatcherTimer.RunOnce(() => model.Slow = true, TimeSpan.FromMilliseconds(250));
+        var item = Revealing() ?? "";
+        if (item.StartsWith(ProductItem)) Session.WantedProduct = item[ProductItem.Length..];
         if (Session.Case is null) return;
         await Session.LoadRules(Ct);
         if (Session.Case is not { } kase || Session.Rules is not { } rs || !IsActive) return;
@@ -94,6 +101,24 @@ public partial class CalcView : Screen
         }
         ShowYields(kase, rs);
         await Recalculate(kase, rs);
+        if (IsActive) Show(item);
+    }
+
+    // The product an undo came back to is picked in the result; the others are looked up here.
+    void Show(string item)
+    {
+        if (item.StartsWith(YieldItem))
+        {
+            Pages.SelectedItem = YieldsPage;
+            if (model.Yields.SelectMany(g => g.Rows).FirstOrDefault(r => r.Label == item[YieldItem.Length..]) is { } row) Reveal.Flash(this, row);
+            return;
+        }
+        var ex = model.Exclusions;
+        var excluded = ex.Unused.Concat(ex.Omitted).FirstOrDefault(r =>
+            item == RevenueItem + r.IngredientId || item == GroupItem + r.Group.Key);
+        if (excluded is null) return;
+        Pages.SelectedItem = ExcludedPage;
+        Reveal.Row(excluded.Why == Exclusion.Unused ? UnusedGrid : OmittedGrid, excluded);
     }
 
     protected override void OnLeave()
@@ -101,7 +126,7 @@ public partial class CalcView : Screen
         Session.RulesChanged -= RulesChanged;
         if (!timer.IsEnabled) return;
         timer.Stop();
-        _ = Session.SaveCase(CancellationToken.None);
+        _ = Session.SaveCase(At(edited), CancellationToken.None);
     }
 
     void RulesChanged()
@@ -114,6 +139,7 @@ public partial class CalcView : Screen
         {
             promoting.Remove(cp.ProductId);
             Drop(cp);
+            edited = ProductItem + cp.ProductId;
         }
         if (promoted.Count > 0) Schedule(0);
         else _ = Recalculate(kase, rs);
@@ -141,7 +167,7 @@ public partial class CalcView : Screen
     async Task Flush()
     {
         timer.Stop();
-        if (!await Session.SaveCase(CancellationToken.None))
+        if (!await Session.SaveCase(At(edited), CancellationToken.None))
         {
             Session.Fail("Rezeptur konnte nicht gespeichert werden");
             return;
@@ -163,16 +189,16 @@ public partial class CalcView : Screen
         model.Yields.Clear();
         foreach (var group in Yields.Groups(kase, rs, Session.Ingredients(), Session.CategoryName))
         {
-            foreach (var row in group.Rows) row.Changed += YieldChosen;
+            foreach (var row in group.Rows) row.Changed += () => YieldChosen(row);
             model.Yields.Add(group);
         }
     }
 
-    async void YieldChosen()
+    async void YieldChosen(YieldGroupRow row)
     {
         if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
         kase.Yields = Yields.Choices(model.Yields);
-        if (!await Session.SaveCase(CancellationToken.None))
+        if (!await Session.SaveCase(At(YieldItem + row.Label), CancellationToken.None))
         {
             Session.Fail("Ertragsregel konnte nicht gespeichert werden");
             return;
@@ -207,6 +233,7 @@ public partial class CalcView : Screen
         {
             Pages.SelectedItem = PortionsPage;
             ProductGrid.ScrollIntoView(item, null);
+            Reveal.Flash(ProductGrid, item);
         }
         var vat = VatRow.Of(kase, r);
         model.Revenue.Clear();
@@ -251,8 +278,12 @@ public partial class CalcView : Screen
     async void ToggleRevenue(object? sender, RoutedEventArgs e)
     {
         if ((sender as Control)?.DataContext is not ExcludedRow { IngredientId: { } id } || Session.Case is not { } kase) return;
-        if (!kase.NoRevenue.Remove(id)) kase.NoRevenue.Add(id);
-        if (!await Session.SaveCase(CancellationToken.None))
+        if (!kase.NoRevenue.Remove(id))
+        {
+            kase.NoRevenue.Add(id);
+            kase.NoRevenue.Sort(StringComparer.Ordinal);
+        }
+        if (!await Session.SaveCase(At(RevenueItem + id), CancellationToken.None))
         {
             Session.Fail("Festlegung konnte nicht gespeichert werden");
             return;
@@ -333,6 +364,7 @@ public partial class CalcView : Screen
         editor.Compare(s.Catalog, CatalogRecipe(s.Catalog, editor.ProductId));
         if (lines.Count == 0 || Recipes.Same(lines, own)) return;
         cp.Recipe = lines;
+        edited = ProductItem + cp.ProductId;
         Schedule(600);
     }
 
@@ -342,6 +374,7 @@ public partial class CalcView : Screen
             || !s.Catalog.Products.TryGetValue(editor.ProductId, out var p)) return;
         cp.Recipe = [.. Recipes.Flat(s.Catalog, p).Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })];
         cp.RecipeBasis = p.Meta.Rev;
+        edited = ProductItem + cp.ProductId;
         ProductSelected(null, null);
         Schedule(0);
     }
@@ -355,6 +388,7 @@ public partial class CalcView : Screen
         if (!confirmed || Listed(editor.ProductId) is not { } cp) return;
         promoting.Remove(cp.ProductId);
         Drop(cp);
+        edited = ProductItem + cp.ProductId;
         ProductSelected(null, null);
         Schedule(0);
     }

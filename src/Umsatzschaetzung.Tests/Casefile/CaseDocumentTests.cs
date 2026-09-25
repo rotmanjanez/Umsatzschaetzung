@@ -93,7 +93,7 @@ public class CaseDocumentTests
     }
 
     [Fact]
-    public void DeletingTheDocumentDropsItAndItsReadingButNotTheOthers()
+    public void ADeletedInvoiceKeepsItsDocumentUntilThePurge()
     {
         using var tmp = new TempDir();
         var store = Store(tmp);
@@ -101,8 +101,13 @@ public class CaseDocumentTests
         store.SaveReading("fall-1", "re-1", [Page()]);
         store.SaveFile("fall-1", "re-2", "b.pdf", [2]);
         store.SaveReading("fall-1", "re-2", [Page()]);
+        var c = Cases.Full("fall-1");
+        c.Invoices.RemoveAll(i => i.Id == "re-1");
+        store.Save(c);
 
-        store.DeleteFile("fall-1", "re-1");
+        Assert.Equal("a.pdf", store.LoadFile("fall-1", "re-1").Name);
+
+        store.Purge();
 
         Assert.Throws<CaseNotFoundException>(() => store.LoadFile("fall-1", "re-1"));
         Assert.Null(store.LoadReading("fall-1", "re-1"));
@@ -111,13 +116,26 @@ public class CaseDocumentTests
     }
 
     [Fact]
-    public void DeletingADocumentOfAMissingCaseDoesNothing()
+    public void APurgeSkipsAFileThatIsNoCase()
     {
         using var tmp = new TempDir();
-        var store = new CaseStore(tmp.Path);
-        store.DeleteFile("fall-1", "re-1");
+        var store = Store(tmp);
+        File.WriteAllText(tmp.Sub("kaputt.db"), "keine Datenbank");
+        store.SaveFile("fall-1", "re-9", "a.pdf", [1]);
 
-        Assert.Empty(Directory.EnumerateFileSystemEntries(tmp.Path));
+        store.Purge();
+
+        Assert.Throws<CaseNotFoundException>(() => store.LoadFile("fall-1", "re-9"));
+        Assert.Equal("keine Datenbank", File.ReadAllText(tmp.Sub("kaputt.db")));
+    }
+
+    [Fact]
+    public void APurgeOfAMissingFolderDoesNothing()
+    {
+        using var tmp = new TempDir();
+        new CaseStore(tmp.Sub("fehlt")).Purge();
+
+        Assert.False(Directory.Exists(tmp.Sub("fehlt")));
     }
 
     [Fact]
@@ -154,7 +172,6 @@ public class CaseDocumentTests
 
         Assert.Throws<CaseInvalidException>(() => store.SaveFile("fall-1", invoiceId, "a.pdf", [1]));
         Assert.Throws<CaseInvalidException>(() => store.LoadFile("fall-1", invoiceId));
-        Assert.Throws<CaseInvalidException>(() => store.DeleteFile("fall-1", invoiceId));
         Assert.Throws<CaseInvalidException>(() => store.LoadReading("fall-1", invoiceId));
         var c = Cases.Full("fall-1");
         c.Invoices[0].Id = invoiceId;

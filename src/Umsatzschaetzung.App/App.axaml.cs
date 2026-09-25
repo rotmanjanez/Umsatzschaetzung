@@ -81,7 +81,8 @@ public partial class App : Application
         IService service;
         try
         {
-            service = CreateService(config);
+            // A second instance leaves deleted invoices alone: the first can still take their deletion back.
+            service = CreateService(config, purge: !show);
         }
         catch (StoreUnavailableException ex)
         {
@@ -127,7 +128,7 @@ public partial class App : Application
         if (show) window.Show();
     }
 
-    IService CreateService(Config config)
+    IService CreateService(Config config, bool purge)
     {
         Directory.CreateDirectory(AppData.Dir);
         var rules = new RuleStore(config.Store, RuleStore.Seed());
@@ -139,7 +140,9 @@ public partial class App : Application
         var pdf = new PdfiumPages();
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
-        var service = new LocalService(rules, new CaseStore(config.CaseDir), ocr, tagger, pdf, printer, Release.Version);
+        var cases = new CaseStore(config.CaseDir);
+        if (purge) cases.Purge();
+        var service = new LocalService(rules, cases, ocr, tagger, pdf, printer, Release.Version);
         owned.Add(service);
         return service;
     }

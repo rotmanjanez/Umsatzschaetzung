@@ -31,6 +31,18 @@
         <Style Selector="AutoCompleteBox.invalid /template/ TextBox#PART_TextBox">
             <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
         </Style>
+        <Style Selector=":is(Control).revealed">
+            <Style.Animations>
+                <Animation Duration="0:0:0.3" IterationCount="4" PlaybackDirection="Alternate">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="1"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="0.3"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
