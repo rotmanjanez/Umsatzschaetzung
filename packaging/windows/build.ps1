@@ -97,6 +97,8 @@ if ($LASTEXITCODE -ne 0) { throw "wix failed" }
 Sign (Get-ChildItem $out -Filter *.msi).FullName
 
 if ($SignArgs.Count -gt 0) { Copy-Item (Join-Path $PSScriptRoot "publisher.cer") $out }
+dotnet run (Join-Path $PSScriptRoot "..\sbom.cs") -- $Arch $Version (Join-Path $out "umsatzschaetzung-$Arch.cdx.json")
+if ($LASTEXITCODE -ne 0) { throw "sbom failed" }
 
 @(Get-ChildItem $out -File -Exclude *.wixpdb) | ForEach-Object {
     "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash, $_.Name

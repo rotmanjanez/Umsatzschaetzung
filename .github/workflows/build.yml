@@ -91,6 +91,7 @@ jobs:
           path: |
             dist/msi/*.msi
             dist/msi/publisher.cer
+            dist/msi/*.cdx.json
             dist/msi/SHA256SUMS.txt
 
   dmg:
@@ -140,6 +141,7 @@ jobs:
           name: umsatzschätzung-osx-arm64-dmg
           path: |
             dist/dmg/*.dmg
+            dist/dmg/*.cdx.json
             dist/dmg/SHA256SUMS.txt
 
   release:
@@ -148,6 +150,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -162,7 +167,7 @@ jobs:
       - name: collect assets
         run: |
           mkdir release
-          find artifacts -type f \( -name '*.msi' -o -name '*.dmg' -o -name 'publisher.cer' \) \
+          find artifacts -type f \( -name '*.msi' -o -name '*.dmg' -o -name '*.cdx.json' -o -name 'publisher.cer' \) \
             -exec cp {} release/ \;
           test -n "$(find release -name '*.msi' -print -quit)" || { echo "no msi in artifacts:"; find artifacts -type f; exit 1; }
           test -n "$(find release -name '*.dmg' -print -quit)" || { echo "no dmg in artifacts:"; find artifacts -type f; exit 1; }
@@ -171,6 +176,19 @@ jobs:
             packaging/windows/policy release/umsatzschaetzung-policy.zip
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -l release
+
+      - uses: actions/attest@v4
+        with:
+          subject-path: release/umsatzschaetzung-win-x64.msi
+          sbom-path: release/umsatzschaetzung-win-x64.cdx.json
+      - uses: actions/attest@v4
+        with:
+          subject-path: release/umsatzschaetzung-win-arm64.msi
+          sbom-path: release/umsatzschaetzung-win-arm64.cdx.json
+      - uses: actions/attest@v4
+        with:
+          subject-path: release/umsatzschaetzung-osx-arm64.dmg
+          sbom-path: release/umsatzschaetzung-osx-arm64.cdx.json
 
       - name: publish release
         env:

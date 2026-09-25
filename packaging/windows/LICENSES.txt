@@ -55,6 +55,10 @@ GottBERT (Textencoder); beide Ausgangsmodelle stehen unter MIT.
 https://github.com/jpWang/LiLT/blob/main/LICENSE
 https://huggingface.co/TUM/GottBERT_base_last
 
+==== Zuordnungsmodell unter models/zuordnung (MIT) ====
+Die mitgelieferten Gewichte sind ein Fine-Tuning von GottBERT (MIT).
+https://huggingface.co/GottBERT/GottBERT_base_last
+
 ==== SkiaSharp (MIT), Skia (BSD-3-Clause) ====
 https://github.com/mono/SkiaSharp/blob/main/LICENSE.md
 https://github.com/google/skia/blob/main/LICENSE

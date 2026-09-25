@@ -1,0 +1,103 @@
+{
+  "application": {
+    "type": "application", "name": "Umsatzschätzung",
+    "purl": "pkg:github/rotmanjanez/Umsatzschaetzung",
+    "supplier": { "name": "Janez Rotman", "url": ["https://umsatzschaetzung.amtstools.de"] },
+    "licenses": [{ "license": { "id": "EUPL-1.2" } }],
+    "externalReferences": [{ "type": "vcs", "url": "https://github.com/rotmanjanez/Umsatzschaetzung" },
+                           { "type": "website", "url": "https://umsatzschaetzung.amtstools.de" }]
+  },
+  "licenses": {
+    "Avalonia.Angle.Windows.Natives": "BSD-3-Clause",
+    "Clipper2": "BSL-1.0",
+    "Microsoft.ML.OnnxRuntime": "MIT",
+    "Microsoft.ML.OnnxRuntime.Managed": "MIT",
+    "Microsoft.ML.OnnxRuntime.EP.WebGpu": "MIT"
+  },
+  "embedded": {
+    "Avalonia.Fonts.Inter": [
+      { "type": "data", "name": "Inter", "licenses": [{ "license": { "id": "OFL-1.1" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://github.com/rsms/inter" }] }
+    ],
+    "Avalonia.Angle.Windows.Natives": [
+      { "type": "library", "name": "ANGLE", "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://chromium.googlesource.com/angle/angle" }] }
+    ],
+    "Avalonia.Controls.WebView": [
+      { "type": "library", "name": "Microsoft Edge WebView2 SDK", "rids": ["win-x64", "win-arm64"],
+        "licenses": [{ "license": { "name": "Microsoft Software License Terms", "url": "https://www.nuget.org/packages/Microsoft.Web.WebView2/License" } }],
+        "externalReferences": [{ "type": "website", "url": "https://www.nuget.org/packages/Microsoft.Web.WebView2" }] }
+    ],
+    "HarfBuzzSharp": [
+      { "type": "library", "name": "HarfBuzz", "licenses": [{ "license": { "id": "MIT" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://github.com/harfbuzz/harfbuzz" }] }
+    ],
+    "SkiaSharp": [
+      { "type": "library", "name": "Skia", "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://skia.googlesource.com/skia" }] }
+    ],
+    "SQLitePCLRaw.lib.e_sqlite3": [
+      { "type": "library", "name": "SQLite", "licenses": [{ "license": { "name": "Public Domain", "url": "https://www.sqlite.org/copyright.html" } }],
+        "externalReferences": [{ "type": "website", "url": "https://www.sqlite.org" }] }
+    ],
+    "bblanchon.PDFium.Win32": [
+      { "type": "library", "name": "PDFium", "version": "155.0.8057", "licenses": [{ "expression": "BSD-3-Clause AND Apache-2.0" }],
+        "externalReferences": [{ "type": "vcs", "url": "https://pdfium.googlesource.com/pdfium" },
+                               { "type": "distribution", "url": "https://github.com/bblanchon/pdfium-binaries" }] }
+    ],
+    "bblanchon.PDFium.macOS": [
+      { "type": "library", "name": "PDFium", "version": "155.0.8057", "licenses": [{ "expression": "BSD-3-Clause AND Apache-2.0" }],
+        "externalReferences": [{ "type": "vcs", "url": "https://pdfium.googlesource.com/pdfium" },
+                               { "type": "distribution", "url": "https://github.com/bblanchon/pdfium-binaries" }] }
+    ],
+    "Microsoft.ML.OnnxRuntime.EP.WebGpu": [
+      { "type": "library", "name": "Dawn", "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://dawn.googlesource.com/dawn" }] },
+      { "type": "library", "name": "Abseil", "licenses": [{ "license": { "id": "Apache-2.0" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://github.com/abseil/abseil-cpp" }] },
+      { "type": "library", "name": "DirectX Shader Compiler", "rids": ["win-x64", "win-arm64"], "licenses": [{ "license": { "id": "NCSA" } }],
+        "externalReferences": [{ "type": "vcs", "url": "https://github.com/microsoft/DirectXShaderCompiler" }] }
+    ]
+  },
+  "projects": {
+    "Umsatzschaetzung.Core": {
+      "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
+    },
+    "RapidOcrNet": {
+      "type": "library", "version": "3.0.0-umsatzschaetzung",
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "description": "Vendored under src/RapidOcrNet and modified; the modified files carry a notice.",
+      "pedigree": {
+        "ancestors": [{ "type": "library", "name": "RapidOcrNet", "version": "590d44b2efc7ecbef446c36bb6359ebbfcffeb50",
+                        "purl": "pkg:github/BobLd/RapidOcrNet@590d44b2efc7ecbef446c36bb6359ebbfcffeb50",
+                        "licenses": [{ "license": { "id": "Apache-2.0" } }] }],
+        "notes": "Source copied from the upstream commit and changed in place."
+      }
+    }
+  },
+  "models": {
+    "belegtagger": {
+      "name": "belegtagger", "description": "Field tagger for scanned invoices, per-channel int8.",
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "pedigree": { "ancestors": [
+        { "type": "machine-learning-model", "name": "lilt-roberta-en-base", "purl": "pkg:huggingface/SCUT-DLVCLab/lilt-roberta-en-base", "licenses": [{ "license": { "id": "MIT" } }] },
+        { "type": "machine-learning-model", "name": "GottBERT_base_last", "purl": "pkg:huggingface/GottBERT/GottBERT_base_last", "licenses": [{ "license": { "id": "MIT" } }] } ] }
+    },
+    "zuordnung": {
+      "name": "zuordnung", "description": "Bi-encoder mapping invoice lines to ingredients, int8.",
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "pedigree": { "ancestors": [
+        { "type": "machine-learning-model", "name": "GottBERT_base_last", "purl": "pkg:huggingface/GottBERT/GottBERT_base_last", "licenses": [{ "license": { "id": "MIT" } }] } ] }
+    },
+    "v6": {
+      "name": "PP-OCRv6 det small", "description": "PaddleOCR text detector.",
+      "supplier": { "name": "PaddlePaddle", "url": ["https://github.com/PaddlePaddle/PaddleOCR"] },
+      "licenses": [{ "license": { "id": "Apache-2.0" } }]
+    },
+    "v5": {
+      "name": "PP-OCRv5 latin", "version": "5.0", "description": "PaddleOCR latin recogniser, PP-LCNet text line orientation classifier and dictionary, as packaged by RapidOcrNet.",
+      "supplier": { "name": "PaddlePaddle", "url": ["https://github.com/PaddlePaddle/PaddleOCR"] },
+      "licenses": [{ "license": { "id": "Apache-2.0" } }]
+    }
+  }
+}

@@ -111,5 +111,7 @@ if [ "$identity" != "-" ]; then
     notarise "$dmg"
 fi
 
+"$dotnet" run "$root/packaging/sbom.cs" -- "$arch" "$version" "$out/umsatzschaetzung-$arch.cdx.json"
+
 cd "$out"
 shasum -a 256 -- * | tee SHA256SUMS.txt
