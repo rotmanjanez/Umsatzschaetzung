@@ -8,5 +8,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
+    <ProjectReference Include="../../src/Umsatzschaetzung.Documents/Umsatzschaetzung.Documents.csproj" />
   </ItemGroup>
 </Project>

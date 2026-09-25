@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Umsatzschaetzung</RootNamespace>
+    <ModelSet>ocr</ModelSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
+    <ProjectReference Include="../RapidOcrNet/RapidOcrNet.csproj" />
+    <PackageReference Include="bblanchon.PDFium.macOS" Version="155.0.8057" />
+    <PackageReference Include="bblanchon.PDFium.Win32" Version="155.0.8057" />
+    <PackageReference Include="bblanchon.PDFium.Linux" Version="155.0.8057" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1" />
+    <!-- Pinned with Umsatzschaetzung.Inference: one runtime in the process. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
+    <!-- The detector's GPU: a plugin beside the pinned runtime, DirectX 12 on Windows and
+         Metal on macOS. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.EP.WebGpu" Version="0.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="corpus-ocr" />
+    <InternalsVisibleTo Include="eval" />
+    <InternalsVisibleTo Include="richtsatz" />
+    <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />
+  </ItemGroup>
+  <Import Project="../../Models.targets" />
+</Project>

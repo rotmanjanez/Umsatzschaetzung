@@ -14,20 +14,24 @@
   <ItemGroup>
     <ModelFile Include="belegtagger.int8.onnx;vocab.json;merges.txt;byte_to_unicode.json;spec.json">
       <Dir>belegtagger</Dir>
+      <Set>text</Set>
       <Release>belegtagger-v2.0.0</Release>
     </ModelFile>
     <ModelFile Include="zuordnung.int8.onnx;calibration.json">
       <Dir>zuordnung</Dir>
+      <Set>text</Set>
       <Release>zuordnung-v0.1.2</Release>
     </ModelFile>
     <ModelFile Include="PP-OCRv6_det_small.onnx">
       <Dir>v6</Dir>
+      <Set>ocr</Set>
       <Release>ppocr-v6.0.0</Release>
     </ModelFile>
     <!-- The classifier, recogniser and dictionary of the vendored RapidOcrNet, from the
          commit src/RapidOcrNet was copied from. -->
     <ModelFile Include="ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx;latin_PP-OCRv5_rec_mobile_infer.onnx;ppocrv5_latin_dict.txt">
       <Dir>v5</Dir>
+      <Set>ocr</Set>
       <Release>rapidocrnet-3.0.0</Release>
     </ModelFile>
 
@@ -51,8 +55,11 @@
     <ModelCacheDir Condition="'$(ModelCacheDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.LocalApplicationData))/umsatzschaetzung/models</ModelCacheDir>
   </PropertyGroup>
 
+  <!-- Each project that imports this names its set: the text models go with
+       Umsatzschaetzung.Inference, the reader's with Umsatzschaetzung.Documents. -->
   <Target Name="FetchModels" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
+      <ModelFile Remove="@(ModelFile)" Condition="'%(ModelFile.Set)' != '$(ModelSet)'" />
       <ModelFile>
         <Path>$(ModelCacheDir)/%(ModelFile.Release)/%(ModelFile.Dir)/%(ModelFile.Identity)</Path>
         <Url Condition="'%(ModelFile.Url)' == ''">$(ModelRepository)/%(ModelFile.Release)/%(ModelFile.Identity)</Url>

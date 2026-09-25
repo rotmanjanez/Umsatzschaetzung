@@ -15,7 +15,7 @@ public class MatcherExactTests
         var cache = new FixedCache().Apart([.. rs.Ingredients.Values.Select(i => Matcher.Normal(i.Name))]).Apart(Matcher.Normal(line.Name));
         foreach (var m in rs.Mappings.Values)
             if (Matcher.Wording(m) is { } w) cache.Apart(Matcher.Normal(w));
-        using var matcher = new Matcher(cache);
+        var matcher = new Matcher(Encoders.Shipped, cache);
         var s = matcher.Suggest(rs, "", supplier, line);
         Assert.All(s.Skip(1), x => Assert.Equal(OriginKind.Encoder, x.Kind));
         Assert.All(s.Where(x => x.Kind == OriginKind.Encoder), x => Assert.InRange(x.Confidence, 20, 99));

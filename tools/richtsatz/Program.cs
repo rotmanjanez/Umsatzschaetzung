@@ -34,7 +34,7 @@ foreach (var path in pdfs)
 {
     try
     {
-        var sammlung = Richtsätze.Read(File.ReadAllBytes(path));
+        var sammlung = Richtsätze.Read(Sheets.Read(File.ReadAllBytes(path)));
         sammlungen.Add(sammlung);
         if (gewerbeSeed is not null && seedDir is null) continue;
         var target = seedDir is null

@@ -63,6 +63,12 @@
     "Umsatzschaetzung.Core": {
       "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
     },
+    "Umsatzschaetzung.Documents": {
+      "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
+    },
+    "Umsatzschaetzung.Inference": {
+      "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
+    },
     "RapidOcrNet": {
       "type": "library", "version": "3.0.0-umsatzschaetzung",
       "licenses": [{ "license": { "id": "Apache-2.0" } }],

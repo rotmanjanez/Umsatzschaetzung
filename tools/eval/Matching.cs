@@ -30,7 +30,8 @@ public static class Matching
     public static int Run(string labels, string detail, string show)
     {
         var rs = RuleStore.Seed();
-        using var matcher = new Matcher();
+        using var encoder = new Suggest.Encoder();
+        var matcher = new Matcher(encoder);
         var expected = Expectations(rs);
         var nonGoods = rs.Ingredients.Values.Where(i => i.CategoryId == NonGoodsCategory)
             .Select(i => i.Id).ToHashSet(StringComparer.Ordinal);

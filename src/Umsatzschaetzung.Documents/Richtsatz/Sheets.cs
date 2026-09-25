@@ -4,21 +4,7 @@ using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.Richtsatz;
 
-// Page geometry with y growing downwards, so that reading order is ascending.
-readonly record struct Word(string Text, double X0, double X1, double Top, double Bottom, double Baseline, double Size)
-{
-    public double Xc => (X0 + X1) / 2;
-}
-
-readonly record struct Rule(double X0, double X1, double Top, double Bottom)
-{
-    public double Width => X1 - X0;
-    public double Height => Bottom - Top;
-}
-
-sealed record Sheet(int Number, double Width, double Height, List<Word> Words, List<Rule> Rules);
-
-static class Sheets
+public static class Sheets
 {
     public static List<Sheet> Read(byte[] pdf)
     {

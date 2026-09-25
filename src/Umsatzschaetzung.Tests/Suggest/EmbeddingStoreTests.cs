@@ -14,7 +14,7 @@ public sealed class EmbeddingStoreTests : IDisposable
 
     static float[] V(float seed)
     {
-        var v = new float[Encoder.Width];
+        var v = new float[IEncoder.Width];
         for (var i = 0; i < v.Length; i++) v[i] = seed + i * 1e-3f;
         return v;
     }
@@ -98,9 +98,8 @@ public sealed class EmbeddingStoreTests : IDisposable
         store.Write(Model, [("Ware", Vec.At(1)), ("Pils", Vec.At(0.9))]);
         var rs = new RuleSet();
         rs.Put(new Ingredient { Id = "ing.pils", Name = "Pils" });
-        using var m = new Matcher(store);
+        var m = new Matcher(Encoders.Shipped, store);
         var only = Assert.Single(m.Suggest(rs, "", null, new InvoiceLine { Name = "Ware" }));
-        using var calibration = new Encoder();
-        Assert.Equal(("ing.pils", calibration.Confidence(0.9f)), (only.Mapping.IngredientId, only.Confidence));
+        Assert.Equal(("ing.pils", Encoders.Shipped.Confidence(0.9f)), (only.Mapping.IngredientId, only.Confidence));
     }
 }

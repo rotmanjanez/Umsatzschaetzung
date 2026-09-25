@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
+    <ProjectReference Include="../../src/Umsatzschaetzung.Documents/Umsatzschaetzung.Documents.csproj" />
+    <ProjectReference Include="../../src/Umsatzschaetzung.Inference/Umsatzschaetzung.Inference.csproj" />
     <Compile Include="../ocr/Dump.cs" Link="Dump.cs" />
   </ItemGroup>
 </Project>

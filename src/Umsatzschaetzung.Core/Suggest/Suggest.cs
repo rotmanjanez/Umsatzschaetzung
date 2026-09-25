@@ -12,13 +12,23 @@ public interface IEmbeddingCache
     void Write(string model, IReadOnlyList<(string Text, float[] Vec)> rows);
 }
 
-public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
+// Turns article wordings into vectors whose dot product says how alike they read.
+public interface IEncoder
+{
+    const int Width = 768;
+
+    string Model { get; }
+    float[][] Embed(IReadOnlyList<string> texts);
+    int Confidence(double cos);
+}
+
+// Without an encoder only an exact hit is known.
+public sealed class Matcher(IEncoder? encoder, IEmbeddingCache? cache = null)
 {
     const int Candidates = 5;
     const int Floor = 20;
     const double Mismatch = 0.1;
 
-    readonly Encoder encoder = new();
     readonly Lock gate = new();
 
     // Load() hands out a fresh RuleSet every call, so the version is the key: one
@@ -33,8 +43,6 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
     string[] wording = [];
     float[] vectors = [];
 
-    public void Dispose() => encoder.Dispose();
-
     // An exact hit leads, and the encoder's alternatives follow it: revising a mapped
     // line needs them as much as an open line does.
     public List<Suggestion> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line, DateOnly? date = null)
@@ -45,8 +53,9 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
     List<Suggestion> Rank(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line, DateOnly date)
     {
         var hit = Match.Mapping(rs, supplier, date, line);
-        Index(rs, gewerbe);
-        var query = Embed([Normal(line.Name)], keep: false)[0];
+        if (encoder is not { } e) return hit is null ? [] : [new Suggestion(hit, 100, OriginKind.Exact)];
+        Index(e, rs, gewerbe);
+        var query = Embed(e, [Normal(line.Name)], keep: false)[0];
         var best = new Dictionary<string, double>(StringComparer.Ordinal);
         for (var i = 0; i < owner.Length; i++)
         {
@@ -68,7 +77,7 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             .OrderByDescending(s => s.Value)
             .ThenBy(s => s.Key, StringComparer.Ordinal)
             .Take(Candidates)
-            .Select(s => (Confidence: encoder.Confidence(s.Value), Ingredient: rs.Ingredients[s.Key]))
+            .Select(s => (Confidence: e.Confidence(s.Value), Ingredient: rs.Ingredients[s.Key]))
             .Where(c => c.Confidence >= Floor)
             .Select(c => new Suggestion(
                 Mapping(supplier, line, c.Ingredient.Id, Packed(rs, c.Ingredient, line.UnitCode, pack)),
@@ -93,16 +102,16 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
 
     double Dot(float[] query, int entry)
     {
-        var at = entry * Encoder.Width;
+        var at = entry * IEncoder.Width;
         var sum = 0.0;
-        for (var i = 0; i < Encoder.Width; i++) sum += query[i] * vectors[at + i];
+        for (var i = 0; i < IEncoder.Width; i++) sum += query[i] * vectors[at + i];
         return sum;
     }
 
     // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never
     // offered Blondierpulver. Every name a ware is known under is its own entry — the
     // ingredient is whichever of its wordings comes closest, not their average.
-    void Index(RuleSet rs, string gewerbe)
+    void Index(IEncoder e, RuleSet rs, string gewerbe)
     {
         if (indexed == rs.Version && indexedGewerbe == gewerbe) return;
         var covered = rs.Ingredients.Values
@@ -148,12 +157,12 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
             var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
             for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
             var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
-            var embedded = fresh.Zip(Embed(fresh, keep: true)).ToDictionary(StringComparer.Ordinal);
-            var next = new float[texts.Count * Encoder.Width];
+            var embedded = fresh.Zip(Embed(e, fresh, keep: true)).ToDictionary(StringComparer.Ordinal);
+            var next = new float[texts.Count * IEncoder.Width];
             for (var i = 0; i < texts.Count; i++)
             {
-                var into = next.AsSpan(i * Encoder.Width, Encoder.Width);
-                if (prior.TryGetValue(texts[i], out var at)) vectors.AsSpan(at * Encoder.Width, Encoder.Width).CopyTo(into);
+                var into = next.AsSpan(i * IEncoder.Width, IEncoder.Width);
+                if (prior.TryGetValue(texts[i], out var at)) vectors.AsSpan(at * IEncoder.Width, IEncoder.Width).CopyTo(into);
                 else embedded[texts[i]].CopyTo(into);
             }
             vectors = next;
@@ -166,16 +175,16 @@ public sealed class Matcher(IEmbeddingCache? cache = null) : IDisposable
         indexedGewerbe = gewerbe;
     }
 
-    float[][] Embed(IReadOnlyList<string> texts, bool keep)
+    float[][] Embed(IEncoder e, IReadOnlyList<string> texts, bool keep)
     {
         var want = texts.Distinct(StringComparer.Ordinal).ToList();
-        var known = cache?.Read(Encoder.Name, want) ?? [];
+        var known = cache?.Read(e.Model, want) ?? [];
         var missing = want.FindAll(t => !known.ContainsKey(t));
         if (missing.Count > 0)
         {
-            var fresh = encoder.Embed(missing);
+            var fresh = e.Embed(missing);
             for (var i = 0; i < missing.Count; i++) known[missing[i]] = fresh[i];
-            if (keep) cache?.Write(Encoder.Name, [.. missing.Select((t, i) => (t, fresh[i]))]);
+            if (keep) cache?.Write(e.Model, [.. missing.Select((t, i) => (t, fresh[i]))]);
         }
         return [.. texts.Select(t => known[t])];
     }

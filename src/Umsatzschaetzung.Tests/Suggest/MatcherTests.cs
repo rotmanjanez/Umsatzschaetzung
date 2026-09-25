@@ -3,7 +3,7 @@ using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Tests.Suggest;
 
-public sealed class MatcherFixture : IDisposable
+public sealed class MatcherFixture
 {
     long version = 1_000_000;
 
@@ -13,7 +13,7 @@ public sealed class MatcherFixture : IDisposable
 
     public MatcherFixture()
     {
-        Matcher = new Matcher(Cache);
+        Matcher = new Matcher(Encoders.Shipped, Cache);
         Seed = Rules();
     }
 
@@ -25,8 +25,6 @@ public sealed class MatcherFixture : IDisposable
         rs.Version = Interlocked.Increment(ref version);
         return rs;
     }
-
-    public void Dispose() => Matcher.Dispose();
 }
 
 // The ranking the shipped encoder produces on the fixture rule set.
@@ -95,7 +93,7 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
     public void OnlyTheCatalogAndConfirmedWordingsReachTheCache()
     {
         var cache = new MemoryCache();
-        using var matcher = new Matcher(cache);
+        var matcher = new Matcher(Encoders.Shipped, cache);
         var automatic = new ArticleMapping { Id = "map.auto", SupplierName = Rheinland, Observed = "Maerzen hell, Keg 30 l", IngredientId = "ing.bier.fass" };
         var rs = f.Rules(Zwickl, automatic);
         matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Lieferung an Gasthaus Huber, Hauptstr. 3", UnitCode = "H87" });

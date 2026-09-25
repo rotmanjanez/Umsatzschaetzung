@@ -3,23 +3,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Umsatzschaetzung</RootNamespace>
   </PropertyGroup>
+  <!-- Plain .NET and SQLite: pixels, PDFs and models are handed in from
+       Umsatzschaetzung.Documents and Umsatzschaetzung.Inference. -->
   <ItemGroup>
-    <PackageReference Include="bblanchon.PDFium.macOS" Version="155.0.8057" />
-    <PackageReference Include="bblanchon.PDFium.Win32" Version="155.0.8057" />
-    <PackageReference Include="bblanchon.PDFium.Linux" Version="155.0.8057" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
-    <!-- Pinned: the tagger's weights are per-channel int8, which ORT only reads back
-         correctly from 1.27 on. A transitive bump would change which CPU kernel runs and
-         would not show up in any diff here. -->
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
-    <!-- The detector's GPU: a plugin beside the pinned runtime, DirectX 12 on Windows and
-         Metal on macOS. -->
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.EP.WebGpu" Version="0.3.0" />
-    <ProjectReference Include="../RapidOcrNet/RapidOcrNet.csproj" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Umsatzschaetzung.Documents" />
+    <InternalsVisibleTo Include="Umsatzschaetzung.Inference" />
     <InternalsVisibleTo Include="ocr-check" />
     <InternalsVisibleTo Include="richtsatz" />
     <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />
@@ -73,8 +64,4 @@
     <EmbeddedResource Include="$(IntermediateOutputPath)seed.json" LogicalName="seed.json" />
     <UpToDateCheckInput Include="Rulestore/seed.json;Reports/bericht.html" />
   </ItemGroup>
-
-  <!-- The models are not in the repo: they are fetched from their own releases, verified
-       and declared as content. See Models.targets. -->
-  <Import Project="../../Models.targets" />
 </Project>

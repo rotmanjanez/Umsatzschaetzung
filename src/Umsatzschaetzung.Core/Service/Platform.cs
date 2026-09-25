@@ -1,40 +1,35 @@
-using SkiaSharp;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Reports;
+using Umsatzschaetzung.Richtsatz;
 
 namespace Umsatzschaetzung.Service;
 
-// The page comes back encoded in the frame its boxes sit in: as delivered when it was read
-// as delivered, otherwise cleaned, straightened or turned.
-public interface IOcr
+// Everything that needs a page's pixels or a PDF's insides. Pictures come in the frame the
+// reading's boxes sit in, turned and straightened as it was.
+public interface IDocuments
 {
-    Task<OcrPage> Recognize(byte[] image, CancellationToken ct);
-    Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct);
+    // Names what reads the pages; a kept reading is only replayed for the same reader.
+    string Reader { get; }
 
-    // A cut of a page read as it is, nothing straightened or turned; boxes in the cut's pixels.
-    Task<List<OcrWord>> Read(Raster crop, CancellationToken ct);
-}
+    Task<List<OcrPage>> Read(string fileName, byte[] data, CancellationToken ct);
 
-public interface IPdfPages
-{
-    Task<SKBitmap> Page(byte[] pdf, int index, int dpi, CancellationToken ct);
-    IAsyncEnumerable<SKBitmap> Rasterize(byte[] pdf, int dpi, CancellationToken ct);
+    // Regions of a read page, read again on their own; boxes in the frame of the reading.
+    Task<List<List<OcrWord>>> Reread(byte[] data, OcrPage reading, int page, IReadOnlyList<Box> regions, CancellationToken ct);
+
+    // The pages as the reading saw them, as many as it has.
+    IAsyncEnumerable<Raster> Pages(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
+
+    // Every page at a resolution for looking at, turned as the reading turned it.
+    IAsyncEnumerable<Raster> Preview(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
+
+    Task<Raster?> Cut(byte[] data, int page, Correction correction, Box region, CancellationToken ct);
+
+    List<Sheet> Sheets(byte[] pdf);
+
+    byte[] Stamp(byte[] pdf, PageMarks marks);
 }
 
 public interface IPdfPrinter
 {
     Task<byte[]> Print(string html, CancellationToken ct);
-}
-
-public static class PdfRaster
-{
-    // A scan wrapped one point per pixel reports A4 as 3307 x 4677 points, so 300 dpi would
-    // render 10333 px wide: a 600 MB bitmap with no more detail than the scan inside it.
-    public static (int Width, int Height) Target(double width, double height, double scale)
-    {
-        var longest = Math.Max(width, height) * scale;
-        if (longest > RapidOcr.MaxImageDimension) scale *= RapidOcr.MaxImageDimension / longest;
-        return (Round(width * scale), Round(height * scale));
-    }
-
-    static int Round(double v) => Math.Max(1, (int)Math.Round(v));
 }

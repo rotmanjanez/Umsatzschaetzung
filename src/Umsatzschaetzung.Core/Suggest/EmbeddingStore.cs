@@ -37,7 +37,7 @@ public sealed class EmbeddingStore : IEmbeddingCache
         foreach (var t in texts)
         {
             text.Value = t;
-            if (cmd.ExecuteScalar() is byte[] { Length: Encoder.Width * 4 } blob)
+            if (cmd.ExecuteScalar() is byte[] { Length: IEncoder.Width * 4 } blob)
                 found[t] = MemoryMarshal.Cast<byte, float>(blob).ToArray();
         }
         return found;

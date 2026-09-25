@@ -2,6 +2,7 @@ using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.Service;
+using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Tests.Service;
@@ -11,6 +12,7 @@ namespace Umsatzschaetzung.Tests.Service;
 public class Host : IDisposable
 {
     static readonly Tagger Tagger = new();
+    static readonly Encoder Encoder = new();
 
     // Seeding the shipped Richtsatzsammlungen costs most of a store; a copy of a seeded one is cheap.
     static readonly Lazy<string> Seeded = new(() =>
@@ -32,7 +34,7 @@ public class Host : IDisposable
         File.Copy(Seeded.Value, Path.Combine(Sub("store"), "rules.db"));
         Store = new RuleStore(Sub("store"), TestData.Seed());
         Cases = new CaseStore(Sub("cases"));
-        Service = new LocalService(Store, Cases, ocr, Tagger, pdf, printer, "test", readings);
+        Service = new LocalService(Store, Cases, new Documents(ocr, pdf), Tagger, Encoder, printer, "test", readings);
     }
 
     public RuleStore Store { get; }

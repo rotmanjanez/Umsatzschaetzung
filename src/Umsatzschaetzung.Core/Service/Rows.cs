@@ -1,4 +1,3 @@
-using SkiaSharp;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Service;
@@ -9,7 +8,7 @@ public static class Rows
 
     // The row of the item table the line was read from, across the width of the table, in the
     // frame of the reading.
-    public static (int Page, SKRectI Box)? Of(List<OcrPage> pages, int index, string name)
+    public static (int Page, Box Box)? Of(List<OcrPage> pages, int index, string name)
     {
         var read = pages.SelectMany((p, i) => p.Lines.Select(l => (Page: i, Line: l))).ToList();
         var at = Pick(read.Count, index, i => read[i].Line.Parsed.Name == name);
@@ -17,9 +16,8 @@ public static class Rows
         var (page, line) = read[at];
         var table = pages[page].Lines.SelectMany(l => l.Cells.Values).Select(c => c.Box).ToList();
         var row = line.Cells.Values.Select(c => c.Box).ToList();
-        return (page, new SKRectI(
-            table.Min(b => b.X) - Pad, row.Min(b => b.Y) - Pad,
-            table.Max(b => b.X + b.W) + Pad, row.Max(b => b.Y + b.H) + Pad));
+        var (left, top) = (table.Min(b => b.X) - Pad, row.Min(b => b.Y) - Pad);
+        return (page, new Box(left, top, table.Max(b => b.X + b.W) + Pad - left, row.Max(b => b.Y + b.H) + Pad - top));
     }
 
     // The same position first, as the lines were stored in document order; a name elsewhere when

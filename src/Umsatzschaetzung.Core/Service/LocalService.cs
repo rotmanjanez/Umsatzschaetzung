@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using SkiaSharp;
 using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Extract;
@@ -15,14 +14,13 @@ using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Service;
 
-public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Tagger tagger, IPdfPages? pdf, IPdfPrinter? printer, string appVersion, Readings? readings = null) : IService, IDisposable
+public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? documents, ITagger? tagger, IEncoder? encoder, IPdfPrinter? printer, string appVersion, Readings? readings = null) : IService
 {
     const int AutoMapMinConfidence = 80;
-    const int PreviewDpi = 150;
 
-    readonly Matcher matcher = new(new EmbeddingStore(rules.Dir));
+    readonly Matcher matcher = new(encoder, new EmbeddingStore(rules.Dir));
 
-    public void Dispose() => matcher.Dispose();
+    IDocuments Documents => documents ?? throw new ServiceError(ErrorCode.Unsupported, "Belege lassen sich hier nicht lesen");
 
     public Task<StatusResp> Status(CancellationToken ct) => Guard(ct, () =>
     {
@@ -71,7 +69,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     public Task<List<SammlungInfo>> ImportSammlung(string fileName, byte[] pdf, CancellationToken ct) => Guard(ct, () =>
     {
         if (pdf.Length == 0) throw new ServiceError(ErrorCode.Invalid, "Leere Datei");
-        return rules.ImportSammlung(Richtsätze.Read(pdf), fileName);
+        return rules.ImportSammlung(Richtsätze.Read(Documents.Sheets(pdf)), fileName);
     });
 
     public Task<List<SammlungInfo>> DeleteSammlung(int year, CancellationToken ct) => Guard(ct, () =>
@@ -179,24 +177,11 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     async Task<(List<OcrPage>, Invoice)> Read(string fileName, byte[] data, CancellationToken ct)
     {
         if (readings?.Find(data) is { } known) return (known.Pages, known.Draft);
-        var pages = await Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
-        var draft = await Extractor.InvoiceAsync(tagger, pages, ct, (at, regions, ct) => Reread(data, pages[at], at, regions, ct));
+        if (documents is null || tagger is null) throw new ServiceError(ErrorCode.Unsupported, "Texterkennung nicht verfügbar");
+        var pages = await documents.Read(fileName, data, ct);
+        var draft = await Extractor.InvoiceAsync(tagger, pages, ct, (at, regions, ct) => documents.Reread(data, pages[at], at, regions, ct));
         readings?.Keep(data, new OcrResp("", pages, draft));
         return (pages, draft);
-    }
-
-    async Task<List<List<OcrWord>>> Reread(byte[] data, OcrPage reading, int at, IReadOnlyList<Box> regions, CancellationToken ct)
-    {
-        using var page = await Scan.Page(pdf, data, at, Scan.Dpi, ct);
-        var read = new List<List<OcrWord>>(regions.Count);
-        foreach (var r in regions)
-        {
-            var words = Scan.Cut(page, reading.Correction, new SKRectI(r.X, r.Y, r.X + r.W, r.Y + r.H)) is { } crop
-                ? await ocr!.Read(crop, ct)
-                : [];
-            read.Add([.. words.Select(w => new OcrWord { Text = w.Text, Box = w.Box with { X = w.Box.X + r.X, Y = w.Box.Y + r.Y }, Confidence = w.Confidence })]);
-        }
-        return read;
     }
 
     public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(ct, async () =>
@@ -248,19 +233,12 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         }
         if (InvoiceParser.Detect(data) is not (Kind.Image or Kind.Pdf or Kind.Zugferd))
             return new InvoiceSourceResp(name, [new SourcePage(null, Encoding.UTF8.GetString(data))]);
-        var read = cases.LoadReading(caseId, invoiceId);
+        var read = cases.LoadReading(caseId, invoiceId)?.Select(p => p.Correction).ToList() ?? [];
         var pages = new List<SourcePage>();
-        await foreach (var page in Scan.Pages(pdf, data, PreviewDpi, ct))
-            using (page)
-            {
-                var c = read?.ElementAtOrDefault(pages.Count) is { } r ? Unscaled(r.Correction) : new Correction();
-                pages.Add(new SourcePage(await Task.Run(() => Scan.Upright(page, c), ct), null));
-            }
+        await foreach (var image in Documents.Preview(data, read, ct))
+            pages.Add(new SourcePage(image, null));
         return new InvoiceSourceResp(name, pages);
     });
-
-    // The preview keeps its own resolution; the turns do not depend on it.
-    static Correction Unscaled(Correction c) => new() { Skew = c.Skew, Turn = c.Turn, Settle = c.Settle };
 
     public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, async () =>
     {
@@ -274,21 +252,15 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         {
             return new InvoiceReadingResp([]);
         }
-        if (InvoiceParser.Detect(data) is var kind && (kind is Kind.Image || kind is Kind.Pdf && pdf is not null))
+        if (documents is not null && InvoiceParser.Detect(data) is Kind.Image or Kind.Pdf)
         {
             var i = 0;
-            await foreach (var image in Scan.Pages(pdf, data, Scan.Dpi, ct))
-                using (image)
-                {
-                    if (i >= pages.Count) break;
-                    var page = pages[i++];
-                    page.Image = await Task.Run(() => Scan.Upright(image, page.Correction), ct);
-                }
+            await foreach (var image in documents.Pages(data, [.. pages.Select(p => p.Correction)], ct))
+                pages[i++].Image = image;
         }
         return new InvoiceReadingResp(pages);
     });
 
-    // The page is rendered once and only the row is drawn from it, the correction included.
     public Task<Raster?> InvoiceSnippet(string caseId, string invoiceId, int line, string name, CancellationToken ct) => Guard<Raster?>(ct, async () =>
     {
         if (cases.LoadReading(caseId, invoiceId) is not { } pages || Rows.Of(pages, line, name) is not (var at, var box)) return null;
@@ -301,8 +273,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         {
             return null;
         }
-        using var page = await Scan.Page(pdf, data, at, Scan.Dpi, ct);
-        return Scan.Cut(page, pages[at].Correction, box);
+        return await Documents.Cut(data, at, pages[at].Correction, box, ct);
     });
 
     // A line asked about on its own carries no invoice date; the end of the audit period stands in.
@@ -352,7 +323,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
         var html = Html.Render(c, rs, rep, rahmen, sammlung?.Sammlung, sammlung?.Info, appVersion);
         if (!pdf) return new ReportResp(html, null, null);
         if (printer is null) throw new ServiceError(ErrorCode.Unsupported, "PDF-Ausgabe nicht verfügbar");
-        return new ReportResp(html, PdfMarks.Stamp(await printer.Print(html, ct), Html.Marks(c, rep)), FileName(c.Label, "pdf"));
+        return new ReportResp(html, Documents.Stamp(await printer.Print(html, ct), Html.Marks(c, rep)), FileName(c.Label, "pdf"));
     });
 
     (Model.Report Report, RuleSet Rules, Rahmen? Rahmen, (Sammlung Sammlung, SammlungInfo Info)? Sammlung) Compute(Case c)

@@ -5,30 +5,13 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Tagging;
 
-// In the order of ROLES in tools/train/schema.py: the order is part of the model contract.
-public enum Role
-{
-    Header,
-    ColumnHeader,
-    LineItem,
-    LineWrap,
-    Continuation,
-    Total,
-    Footer,
-    Group,
-    Carry,
-}
-
-// Conf is the winning class's softmax probability; Col the model's column index inside an
-// item table, 0 outside one; CellStart marks the first word of a table cell.
-public sealed record TaggedWord(OcrWord Word, Field? Field, Role Role, int Row, float Conf = 1f,
-    int Col = 0, bool CellStart = false);
-
 // LiLT layout stream with GottBERT as its text side, int8 ONNX. One page of OCR words in;
 // per word a class, a column and a cell start, per row a role. docs/models.md §2.
-public sealed class Tagger : IDisposable
+public sealed class Tagger : ITagger, IDisposable
 {
     public const string Name = "belegtagger-2.0.0/int8";
+
+    public string Model => Name;
 
     // STRUCT_LABELS in tools/train/schema.py: the word head's classes, in order.
     static readonly Field?[] Classes =

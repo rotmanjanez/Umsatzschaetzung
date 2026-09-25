@@ -8,6 +8,7 @@ using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.Service;
+using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.App;
@@ -137,7 +138,8 @@ public partial class App : Application
         _ = ocr.Warm();
         var tagger = new Tagger();
         owned.Add(tagger);
-        var pdf = new PdfiumPages();
+        var encoder = new Encoder();
+        owned.Add(encoder);
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);
         var cases = new CaseStore(config.CaseDir);
@@ -147,8 +149,6 @@ public partial class App : Application
             WebPages.Clear(WebPages.Folder);
             CrashLog.Clear();
         }
-        var service = new LocalService(rules, cases, ocr, tagger, pdf, printer, Release.Version);
-        owned.Add(service);
-        return service;
+        return new LocalService(rules, cases, new Documents(ocr, new PdfiumPages()), tagger, encoder, printer, Release.Version);
     }
 }

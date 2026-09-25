@@ -38,8 +38,8 @@ public sealed class ReadingsTests : IDisposable
     [Fact]
     public async Task TheSameDocumentIsReadOnceAndReplayedAsReadAcrossServices()
     {
-        using var first = new Host(ocr, readings: new Readings(dir.Path));
-        using var second = new Host(ocr, readings: new Readings(dir.Path));
+        using var first = new Host(ocr, readings: new Readings(dir.Path, "test"));
+        using var second = new Host(ocr, readings: new Readings(dir.Path, "test"));
 
         var read = await first.Service.OcrInvoice("", "scan.png", Png, ct);
         var replayed = await second.Service.OcrInvoice("", "kopie.png", Png, ct);
@@ -54,7 +54,7 @@ public sealed class ReadingsTests : IDisposable
     [Fact]
     public async Task AnotherDocumentIsRead()
     {
-        using var host = new Host(ocr, readings: new Readings(dir.Path));
+        using var host = new Host(ocr, readings: new Readings(dir.Path, "test"));
 
         await host.Service.OcrInvoice("", "a.png", Png, ct);
         await host.Service.OcrInvoice("", "b.png", [.. Png, 4], ct);

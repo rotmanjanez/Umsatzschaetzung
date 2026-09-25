@@ -32,7 +32,7 @@ public class EncoderTests(EncoderFixture f) : IClassFixture<EncoderFixture>
             using var doc = JsonDocument.Parse(l);
             var want = doc.RootElement.GetProperty("embedding").EnumerateArray().Select(v => v.GetSingle()).ToArray();
             var got = f.Encoder.Embed([doc.RootElement.GetProperty("text").GetString()!])[0];
-            Assert.Equal(Encoder.Width, got.Length);
+            Assert.Equal(IEncoder.Width, got.Length);
             worst = Math.Min(worst, Vec.Dot(want, got));
             lines++;
         }

@@ -9,10 +9,12 @@ namespace Umsatzschaetzung.Suggest;
 // so the similarity of two wordings is the dot product of their vectors. Its text side
 // is the tagger's, down to the vocabulary, so the tokenizer is read from the tagger's
 // model directory.
-public sealed class Encoder : IDisposable
+public sealed class Encoder : IEncoder, IDisposable
 {
     public const string Name = "zuordnung-0.1.2/int8";
-    public const int Width = 768;
+    const int Width = IEncoder.Width;
+
+    public string Model => Name;
 
     // An article wording is a handful of words; 48 tokens hold the longest of them whole.
     const int MaxLen = 48;

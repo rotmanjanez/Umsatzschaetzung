@@ -4,9 +4,8 @@ namespace Umsatzschaetzung.Richtsatz;
 
 public static partial class Richtsätze
 {
-    public static Sammlung Read(byte[] pdf)
+    public static Sammlung Read(List<Sheet> sheets)
     {
-        var sheets = Sheets.Read(pdf);
         var klassen = new List<Klasse>();
         var synonyme = new List<Synonym>();
         var pauschbeträge = new List<Pauschbetrag>();

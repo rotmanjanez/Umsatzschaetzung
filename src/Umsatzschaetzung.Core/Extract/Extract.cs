@@ -5,7 +5,7 @@ namespace Umsatzschaetzung.Extract;
 
 public static class Extractor
 {
-    public static async Task<Invoice> InvoiceAsync(Tagger tagger, List<OcrPage> pages, CancellationToken ct, Reread? reread = null)
+    public static async Task<Invoice> InvoiceAsync(ITagger tagger, List<OcrPage> pages, CancellationToken ct, Reread? reread = null)
     {
         var inv = await Task.Run(() =>
         {

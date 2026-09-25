@@ -148,12 +148,12 @@ public class RichtsätzeTests
 
     [Fact]
     public void BytesThatAreNoPdfAreRefused() =>
-        Assert.Throws<InvalidDataException>(() => Richtsätze.Read([1, 2, 3]));
+        Assert.Throws<InvalidDataException>(() => Sheets.Read([1, 2, 3]));
 
     [Fact]
     public void APdfWithoutARichtsatzTableIsRefused()
     {
-        var e = Assert.Throws<InvalidDataException>(() => Richtsätze.Read(File.ReadAllBytes(TestData.File("zugferd.pdf"))));
+        var e = Assert.Throws<InvalidDataException>(() => Richtsätze.Read(Sheets.Read(File.ReadAllBytes(TestData.File("zugferd.pdf")))));
         Assert.Contains("keine Gewerbeklassen", e.Message);
     }
 }

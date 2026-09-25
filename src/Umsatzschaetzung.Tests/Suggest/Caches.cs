@@ -54,11 +54,16 @@ sealed class FixedCache : IEmbeddingCache
         Assert.Fail("the encoder ran for " + string.Join(", ", rows.Select(r => $"\"{r.Text}\"")));
 }
 
+static class Encoders
+{
+    public static readonly Encoder Shipped = new();
+}
+
 static class Vec
 {
     public static float[] At(double cos)
     {
-        var v = new float[Encoder.Width];
+        var v = new float[IEncoder.Width];
         v[0] = (float)cos;
         v[1] = (float)Math.Sqrt(1 - cos * cos);
         return v;
@@ -66,7 +71,7 @@ static class Vec
 
     public static float[] Axis(int k)
     {
-        var v = new float[Encoder.Width];
+        var v = new float[IEncoder.Width];
         v[k] = 1;
         return v;
     }

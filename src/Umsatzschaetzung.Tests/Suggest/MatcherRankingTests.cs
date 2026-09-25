@@ -9,11 +9,7 @@ public class MatcherRankingTests
     const string Line = "Ware";
     const string Supplier = "Rheinland Getränke Fachgroßhandel GmbH";
 
-    static int Confidence(double cos)
-    {
-        using var e = new Encoder();
-        return e.Confidence((float)cos);
-    }
+    static int Confidence(double cos) => Encoders.Shipped.Confidence((float)cos);
 
     static Ingredient Ing(string id, string name, string category = "") => new() { Id = id, Name = name, CategoryId = category };
 
@@ -26,7 +22,7 @@ public class MatcherRankingTests
 
     static List<Suggestion> Suggest(FixedCache cache, RuleSet rs, string gewerbe = "", string? supplier = null, InvoiceLine? line = null)
     {
-        using var m = new Matcher(cache.Query(line?.Name ?? Line));
+        var m = new Matcher(Encoders.Shipped, cache.Query(line?.Name ?? Line));
         return m.Suggest(rs, gewerbe, supplier, line ?? new InvoiceLine { Name = Line });
     }
 
@@ -68,7 +64,7 @@ public class MatcherRankingTests
     {
         var cache = new FixedCache().At("Zweite", 0.8).At("Erste", 0.8).Query(Line);
         var rs = Rules(Ing("ing.z", "Erste"), Ing("ing.a", "Zweite"), Ing("ing.m", "Erste"));
-        using var m = new Matcher(cache);
+        var m = new Matcher(Encoders.Shipped, cache);
         var first = m.Suggest(rs, "", null, new InvoiceLine { Name = Line });
         var again = m.Suggest(rs, "", null, new InvoiceLine { Name = Line });
         Assert.Equal(["ing.a", "ing.m", "ing.z"], Ids(first));
@@ -113,7 +109,7 @@ public class MatcherRankingTests
             new Category { Id = "cat.spirituosen", Name = "Spirituosen", Gewerbe = ["561"] },
             Ing("ing.korn", "Korn", "cat.spirituosen"),
             Ing("ing.bier", "Bier"));
-        using var m = new Matcher(new FixedCache().At("Korn", 0.9).At("Bier", 0.8).Query(Line));
+        var m = new Matcher(Encoders.Shipped, new FixedCache().At("Korn", 0.9).At("Bier", 0.8).Query(Line));
         var line = new InvoiceLine { Name = Line };
         Assert.Equal(["ing.korn", "ing.bier"], Ids(m.Suggest(rs, "56101.0", null, line)));
         Assert.Equal(["ing.bier"], Ids(m.Suggest(rs, "96021.0", null, line)));
@@ -137,7 +133,7 @@ public class MatcherRankingTests
         var old = Ing("ing.alt", "Alt");
         old.Meta.ValidTo = new DateOnly(2020, 1, 1);
         var rs = Rules(old, Ing("ing.b", "B"));
-        using var m = new Matcher(new FixedCache().At("Alt", 0.9).At("B", 0.5).Query(Line));
+        var m = new Matcher(Encoders.Shipped, new FixedCache().At("Alt", 0.9).At("B", 0.5).Query(Line));
         var line = new InvoiceLine { Name = Line };
 
         Assert.Equal(["ing.alt", "ing.b"], Ids(m.Suggest(rs, "", null, line, new DateOnly(2019, 6, 1))));
@@ -171,7 +167,7 @@ public class MatcherRankingTests
     public void AnUpperCaseLineIsLookedUpInTitleCase()
     {
         var cache = new FixedCache().At("Fassbier", 0.9).Query("Fassbier Pils, Keg 50 L");
-        using var m = new Matcher(cache);
+        var m = new Matcher(Encoders.Shipped, cache);
         var s = m.Suggest(Rules(Ing("ing.fass", "Fassbier")), "", null, new InvoiceLine { Name = "FASSBIER PILS, KEG 50 L" });
         Assert.Equal(["ing.fass"], Ids(s));
         Assert.Equal("FASSBIER PILS, KEG 50 L", s[0].Mapping.Observed);
@@ -262,7 +258,7 @@ public class MatcherRankingTests
     public void ThePackagingDecidesBetweenWaresTheWordsCannotTellApart(string name, string unit, string want)
     {
         var cache = new FixedCache().At("Fassbier", 0.9).At("Flaschenbier", 0.9).Query(name);
-        using var m = new Matcher(cache);
+        var m = new Matcher(Encoders.Shipped, cache);
         var s = m.Suggest(Beer(), "", null, new InvoiceLine { Name = name, UnitCode = unit });
         Assert.Equal(want, s[0].Mapping.IngredientId);
         Assert.Equal(Confidence(0.9), s[0].Confidence);
@@ -272,7 +268,7 @@ public class MatcherRankingTests
     public void WithoutAContainerThePackagingSaysNothing()
     {
         var cache = new FixedCache().At("Fassbier", 0.8).At("Flaschenbier", 0.9).Query("Pils 0,33 l");
-        using var m = new Matcher(cache);
+        var m = new Matcher(Encoders.Shipped, cache);
         var s = m.Suggest(Beer(), "", null, new InvoiceLine { Name = "Pils 0,33 l", UnitCode = "H87" });
         Assert.Equal([Confidence(0.9), Confidence(0.8)], s.Select(x => x.Confidence));
     }

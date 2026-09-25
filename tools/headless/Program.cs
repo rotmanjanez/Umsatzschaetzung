@@ -21,6 +21,7 @@ using Umsatzschaetzung.Headless;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.Service;
+using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
 
 var options = new Dictionary<string, string>();
@@ -66,11 +67,12 @@ return 0;
 Shell Launch(bool forget)
 {
     if (forget) Directory.Delete(store, true);
+    var documents = new Documents(new RapidOcr(), new PdfiumPages());
     var service = new LocalService(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
-        new RapidOcr(), new Tagger(), new PdfiumPages(), null, "headless",
-        options.TryGetValue("readings", out var readings) ? new Readings(readings) : null);
+        documents, new Tagger(), new Encoder(), null, "headless",
+        options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
     if (Number("width") is { } width) shell.Width = width;
     if (Number("height") is { } height) shell.Height = height;
