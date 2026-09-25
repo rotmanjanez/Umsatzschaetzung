@@ -44,6 +44,19 @@ public class ScanTests
         public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.FromResult<List<OcrWord>>([]);
     }
 
+    sealed class Held : IOcr
+    {
+        public TaskCompletionSource<OcrPage> First { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public int Started { get; private set; }
+
+        public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => throw new NotSupportedException();
+
+        public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) =>
+            ++Started == 1 ? First.Task : Task.FromResult(new OcrPage { Width = page.Width });
+
+        public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.FromResult<List<OcrWord>>([]);
+    }
+
     sealed class Pages(int count) : IPdfPages
     {
         public int Produced { get; private set; }
@@ -88,6 +101,16 @@ public class ScanTests
         Assert.Equal(200, pdf.Dpi);
         Assert.All(reader.Pages, p => Assert.Equal(IntPtr.Zero, p.Handle));
         Assert.DoesNotContain(true, reader.Alive);
+    }
+
+    [Fact]
+    public async Task TheNextPageIsReadWhileTheOneBeforeIsStillBeingRead()
+    {
+        var ocr = new Held();
+        var reading = Reader.Read(ocr, new Pages(2), "scan.pdf", Pdf, Reader.Dpi, Ct);
+        Assert.True(SpinWait.SpinUntil(() => ocr.Started == 2, TimeSpan.FromSeconds(5)));
+        ocr.First.SetResult(new OcrPage { Width = 10 });
+        Assert.Equal([10, 11], (await reading).Select(p => p.Width));
     }
 
     [Fact]

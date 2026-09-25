@@ -111,8 +111,9 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         using var straightened = Deskew.Apply(read, out var skew);
         var page = straightened ?? read;
         var correction = new Correction { Scale = (double)read.Width / decoded.Width, Skew = skew };
-        var first = Read(page);
-        var turn = Turn(first);
+        var turn = 0;
+        var first = Read(page, blocks => (turn = Settled(blocks)) == 0);
+        if (turn == 0) turn = Turn(first);
         if (turn == 0) return Page(page, first, correction);
         using var turned = Rotate(page, turn);
         using var settled = Deskew.Apply(turned, out var settle);
@@ -130,16 +131,16 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // recognised on the cores while the next is detected. A detector that fails on the
     // accelerator, at load or on a page, is replaced by one on the CPU and the page read
     // again; the failed engine may still be reading another page and is kept until the end.
-    OcrResult Read(SKBitmap page)
+    OcrResult Read(SKBitmap page, Predicate<TextBlock[]>? read = null)
     {
         var current = Current();
         try
         {
-            return current.Detect(page, Options);
+            return current.Detect(page, Options, read);
         }
         catch (OnnxRuntimeException) when (accelerated)
         {
-            return Replace(current).Detect(page, Options);
+            return Replace(current).Detect(page, Options, read);
         }
     }
 
@@ -183,19 +184,46 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         int tall = 0, wide = 0, flipped = 0, upright = 0;
         foreach (var block in result.TextBlocks)
         {
-            var box = Bounds(block.BoxPoints);
-            if (box.H > box.W) tall++; else wide++;
+            if (Tall(block)) tall++; else wide++;
             if (block.AngleIndex == 1) flipped++;
             else if (block.AngleIndex == 0) upright++;
         }
-        return (tall > wide, flipped > upright) switch
+        return Turn(tall > wide, flipped > upright);
+    }
+
+    // The turn Turn will find, known before a crop is read: the reader drops only crops the
+    // classifier did not call upside down, and a turn that holds however many of those it
+    // drops spares reading a page that is about to be turned and read again.
+    static int Settled(TextBlock[] blocks)
+    {
+        int tallKept = 0, wideKept = 0, tall = 0, wide = 0, upright = 0;
+        foreach (var block in blocks)
+        {
+            var kept = block.AngleIndex == 1;
+            if (Tall(block)) { tall++; if (kept) tallKept++; }
+            else { wide++; if (kept) wideKept++; }
+            if (block.AngleIndex == 0) upright++;
+        }
+        var flipped = tallKept + wideKept;
+        bool? quarter = tallKept > wide ? true : tall <= wideKept ? false : null;
+        bool? flip = flipped > upright ? true : flipped == 0 ? false : null;
+        return quarter is { } q && flip is { } f ? Turn(q, f) : 0;
+    }
+
+    static bool Tall(TextBlock block)
+    {
+        var box = Bounds(block.BoxPoints);
+        return box.H > box.W;
+    }
+
+    static int Turn(bool quarter, bool flipped) =>
+        (quarter, flipped) switch
         {
             (true, true) => 270,
             (true, false) => 90,
             (false, true) => 180,
             _ => 0,
         };
-    }
 
     Engine Open(bool gpu)
     {

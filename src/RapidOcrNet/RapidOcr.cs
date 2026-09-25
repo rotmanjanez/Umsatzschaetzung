@@ -112,7 +112,11 @@ public sealed class RapidOcr : IDisposable
         }
     }
 
-    public OcrResult Detect(SKBitmap originSrc, RapidOcrOptions options)
+    /// <summary>
+    /// <paramref name="read"/> is shown the boxes and their classified angles before any crop
+    /// is read; returning false skips recognition and returns those blocks unread.
+    /// </summary>
+    public OcrResult Detect(SKBitmap originSrc, RapidOcrOptions options, Predicate<TextBlock[]>? read = null)
     {
         using var input = PrepareDetectorInput(originSrc, options);
         return DetectOnce(input,
@@ -120,7 +124,7 @@ public sealed class RapidOcr : IDisposable
             options.DoAngle, options.MostAngle,
             options.ReturnWordBox, options.ReturnSingleCharBox,
             options.TextScore, options.ClsThresh, options.ClsRotate,
-            options.RotateTallCrops, options.SplitStackedCrops, options.ClsPreserveAspectRatio, options.ClsMaxCrops);
+            options.RotateTallCrops, options.SplitStackedCrops, options.ClsPreserveAspectRatio, options.ClsMaxCrops, read);
     }
 
     /// <summary>
@@ -291,7 +295,8 @@ public sealed class RapidOcr : IDisposable
     private OcrResult DetectOnce(in DetectorInput input, float boxScoreThresh,
         float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
         bool returnWordBox, bool returnSingleCharBox, float textScore, float clsThresh,
-        bool clsRotate, bool rotateTall, bool splitStacked, bool clsPreserveAspectRatio, int clsMaxCrops)
+        bool clsRotate, bool rotateTall, bool splitStacked, bool clsPreserveAspectRatio, int clsMaxCrops,
+        Predicate<TextBlock[]>? read)
     {
         SKBitmap src = input.Bitmap;
 
@@ -338,6 +343,20 @@ public sealed class RapidOcr : IDisposable
             var original = partImages[i];
             partImages[i] = OcrUtils.BitmapRotateClockWise180(original);
             original.Dispose();
+        }
+
+        if (read is not null)
+        {
+            var unread = Unread(input, textBoxes, angles);
+            if (!read(unread))
+            {
+                foreach (var bmp in partImages)
+                {
+                    bmp.Dispose();
+                }
+
+                return new OcrResult { TextBlocks = unread, StrRes = string.Empty };
+            }
         }
 
         // step: crnnNet getTextLines
@@ -451,6 +470,28 @@ public sealed class RapidOcr : IDisposable
             DetectTime = (float)fullDetectTime,
             StrRes = strRes.ToString()
         };
+    }
+
+    private static TextBlock[] Unread(in DetectorInput input, IReadOnlyList<TextBox> textBoxes, Angle[] angles)
+    {
+        var blocks = new TextBlock[textBoxes.Count];
+        for (int i = 0; i < blocks.Length; i++)
+        {
+            var points = (SKPointI[])textBoxes[i].BoxPoints.Clone();
+            input.MapToOriginal(points);
+            blocks[i] = new TextBlock
+            {
+                BoxPoints = points,
+                BoxScore = textBoxes[i].Score,
+                AngleIndex = angles[i].Index,
+                AngleScore = angles[i].Score,
+                Text = string.Empty,
+                Chars = null,
+                CharScores = null,
+            };
+        }
+
+        return blocks;
     }
 
     /// <summary>
