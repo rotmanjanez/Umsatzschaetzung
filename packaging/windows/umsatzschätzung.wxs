@@ -41,11 +41,7 @@
             Message="Die Microsoft Edge WebView2 Runtime ist nicht installiert. Sie ist Bestandteil von Windows 11 und wird unter Windows 10 von der IT verteilt." />
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Umsatzschätzung">
-        <Directory Id="ModelFolder" Name="models">
-          <Directory Id="ModelBelegtaggerFolder" Name="belegtagger" />
-        </Directory>
-      </Directory>
+      <Directory Id="INSTALLFOLDER" Name="Umsatzschätzung" />
     </StandardDirectory>
     <StandardDirectory Id="ProgramMenuFolder" />
     <StandardDirectory Id="CommonAppDataFolder">
@@ -73,14 +69,6 @@
       </Component>
     </ComponentGroup>
 
-    <ComponentGroup Id="Model" Directory="ModelFolder">
-      <Component Id="RegistryModel">
-        <RegistryKey Root="HKLM" Key="SOFTWARE\Umsatzschätzung">
-          <RegistryValue Name="ModelDir" Type="string" Value="[ModelFolder]" KeyPath="yes" />
-        </RegistryKey>
-      </Component>
-    </ComponentGroup>
-
     <!-- Der gemeinsame Ordner einer Freigabe gehört der IT; nur den Ordner auf diesem
          Rechner legt das Paket an und öffnet ihn für die Gruppe der Anwender. -->
     <ComponentGroup Id="LocalStore" Directory="StoreFolder">
@@ -93,7 +81,6 @@
 
     <Feature Id="Main" Title="Umsatzschätzung" Level="1">
       <ComponentGroupRef Id="App" />
-      <ComponentGroupRef Id="Model" />
       <ComponentGroupRef Id="LocalStore" />
     </Feature>
 
