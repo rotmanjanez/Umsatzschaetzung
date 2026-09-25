@@ -19,7 +19,7 @@ Status:
 - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
-![Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen](img/zuordnung-liste.png)
+![Der Reiter „2. Zuordnung“ nach dem Import, sechs Positionen offen](img/zuordnung-liste.png)
 
 ## Eine Position ansehen
 
@@ -32,7 +32,7 @@ was zu diesem Artikel bekannt ist:
   über alle Rechnungen, hier 158 Flaschen in 6 Positionen.
 - **Aus den Regeln**: die Vorschläge des Programms mit einer Sicherheit in
   Prozent. Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich
-  aber nicht sicher, und Rotwein steht mit 51 % gleich dahinter. Genau
+  aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau
   deshalb ist die Position offen geblieben.
 - **Faktor**: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die
   Rechnung in Flaschen. Der Faktor sagt, wie viel in einem Gebinde steckt,
@@ -44,13 +44,13 @@ was zu diesem Artikel bekannt ist:
 Ein Domina ist ein fränkischer Rotwein. Den Vorschlag **Rotwein × 750 ml**
 anklicken und **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die
 Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen
-Zuordnungen, und die Bilanz zeigt `4 offen`.
+Zuordnungen, und die Bilanz zeigt `5 offen`.
 
 ![Die Bestätigung nach dem Zuordnen](img/zuordnung-zugeordnet.png)
 
 ## Die übrigen offenen Positionen
 
-Nach demselben Muster die anderen vier. Bei zweien ist die Zutat klar, das
+Nach demselben Muster die anderen fünf. Bei zweien ist die Zutat klar, das
 Programm zeigt sie als **Exakter Treffer**, aber der Faktor fehlt: Aus
 „Karton“ oder „Bund“ lässt sich nicht lesen, wie viel drin ist. Das Feld
 **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage,
@@ -68,13 +68,17 @@ die Zeile darunter rechnet vor:
 |---|---|---|---|
 | Frühkartoffeln festkochend 12,5 kg | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500` | **Zuordnen** |
 | Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt) | `1800`{.copy} eintragen | **Zuordnen** |
+| Leberkäse am Stück, ungebacken | **Leberkäse** (schon gewählt) | `1000`{.copy} eintragen | **Zuordnen** |
+| Putenbrustfilet frisch | **Putenfleisch** wählen | | **Zuordnen** |
 | Petersilie glatt, Bund | | | offen lassen |
-| Pommes frites 7/7 blanchiert, 4 | **Pommes frites** (schon gewählt) | `10000`{.copy} eintragen | **Zuordnen** |
 
-Bei den Pommes ist die Packungsangabe in die gelöschte Zeile gerutscht, aus
-„4 × 2,5 kg“ wurde „4“. Was im Karton ist, zeigt der Beleg-Ausschnitt unten oder die
-gleichlautende Position des anderen Tiefkühllieferanten: 4 × 2,5 kg, also
-10.000 g.
+Beim Leberkäse hat der Scan die Einheit verlesen: Auf dem Beleg steht „kg“,
+gelesen wurde „K8“. Ein „K8“ Leberkäse ist also ein Kilogramm, 1.000 g.
+
+Beim Putenbrustfilet schlägt das Programm als **Exakter Treffer**
+**Hähnchenfleisch** vor. Das ist falsch: Pute ist kein Hähnchen, die richtige
+Zutat **Putenfleisch** steht mit 90 % darunter. Ein exakter Treffer verdient
+also trotzdem einen Blick.
 
 Die Petersilie bleibt offen. Nicht jede Position muss zugeordnet sein: Was
 offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter
@@ -87,7 +91,7 @@ Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `1 offen` steht.
 ![Nur die Petersilie ist noch offen](img/zuordnung-fertig.png)
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `1 offen, 114 automatisch, 4 manuell` steht
+    - über der Liste `1 offen, 116 automatisch, 5 manuell` steht
     - nur noch die Petersilie **Offen** ist
 
 !!! nachlesen "Zum Nachlesen"

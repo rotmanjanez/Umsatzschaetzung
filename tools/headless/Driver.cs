@@ -206,7 +206,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     }
 
     // Clicks into a search box, types and clicks the entry of its drop-down that reads `item`,
-    // with the pointer as a person would; the box has to have taken it.
+    // with the pointer as a person would; the box has to have taken it, or taken and cleared it.
     static void Choose(AutoCompleteBox box, string text, string item)
     {
         Press(box);
@@ -219,7 +219,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
             ?? throw new InvalidOperationException("not offered: " + item);
         Press(entry);
         Settle();
-        if (box.SelectedItem != entry.DataContext || box.IsDropDownOpen)
+        if (box.IsDropDownOpen || box.SelectedItem is { } taken && taken != entry.DataContext)
             throw new InvalidOperationException("the search box did not take " + item);
     }
 

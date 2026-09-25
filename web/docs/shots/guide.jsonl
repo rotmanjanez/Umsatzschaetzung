@@ -98,6 +98,22 @@
 { "do": "click", "at": { "text": "Zuordnen" } }
 { "do": "wait", "rounds": 8 }
 
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Leberkäse am Stück" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "type", "at": { "name": "FactorBox" }, "text": "1000" }
+{ "do": "focus" }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Putenbrustfilet frisch" } }
+{ "do": "wait", "rounds": 20 }
+{ "do": "click", "at": { "text": "Putenfleisch" } }
+{ "do": "wait", "rounds": 2 }
+{ "do": "click", "at": { "text": "Zuordnen" } }
+{ "do": "wait", "rounds": 8 }
+
 { "do": "deselect", "at": { "name": "Groups" } }
 { "do": "shot", "name": "zuordnung-fertig", "at": { "starts": "1 offen", "up": "DockPanel" } }
 
