@@ -5,27 +5,32 @@ namespace Umsatzschaetzung.Extract;
 // Regions of one page read again, each as the words found in it, in the frame of the reading.
 public delegate Task<List<List<OcrWord>>> Reread(int page, IReadOnlyList<Box> regions, CancellationToken ct);
 
-// An amount the detector drew no box around, where three of the four cells around it say where
-// it was printed: the column above and below gives its width, the row beside it its height.
-// What is read there is kept only if the row then adds up.
+// An amount or unit the detector drew no box around, where three of the four cells around it
+// say where it was printed: the column above and below gives its width, the row beside it its
+// height. A read amount is kept only if the row then adds up, a read unit only if it is the
+// unit of the column around it.
 public static class Gaps
 {
-    static readonly Field[] Amounts = [Field.Quantity, Field.UnitPrice, Field.LineNet];
+    static readonly Field[] Cells = [Field.Quantity, Field.Unit, Field.UnitPrice, Field.LineNet];
 
     public static async Task Fill(List<OcrPage> pages, Reread reread, CancellationToken ct)
     {
         for (var p = 0; p < pages.Count; p++)
         {
             var lines = pages[p].Lines;
-            var gaps = new List<(OcrLine Line, Field Field, Box Box)>();
+            var gaps = new List<(int Line, Field Field, Box Box)>();
             for (var i = 0; i < lines.Count; i++)
-                foreach (var f in Amounts)
+                foreach (var f in Cells)
                     if (!lines[i].Cells.ContainsKey(f) && Estimate(lines, i, f) is { } box)
-                        gaps.Add((lines[i], f, box));
+                        gaps.Add((i, f, box));
             if (gaps.Count == 0) continue;
             var read = await reread(p, [.. gaps.Select(g => g.Box)], ct);
-            foreach (var line in gaps.Zip(read).GroupBy(x => x.First.Line))
-                Accept(line.Key, [.. line.Where(x => x.Second.Count > 0).Select(x => (x.First.Field, Join(x.Second)))]);
+            foreach (var line in gaps.Zip(read).Where(x => x.Second.Count > 0).GroupBy(x => x.First.Line))
+            {
+                foreach (var unit in line.Where(x => x.First.Field == Field.Unit))
+                    AcceptUnit(lines, line.Key, Join(unit.Second));
+                Accept(lines[line.Key], [.. line.Where(x => x.First.Field != Field.Unit).Select(x => (x.First.Field, Join(x.Second)))]);
+            }
         }
     }
 
@@ -71,6 +76,19 @@ public static class Gaps
         if (InvoiceMath.LineNet(quantity, price, l.PriceBaseQty) != net) return false;
         (l.Quantity, l.UnitPrice, l.LineNet) = (quantity, price, net);
         foreach (var (field, word) in kept) line.Cells[field] = word;
+        return true;
+    }
+
+    public static bool AcceptUnit(IReadOnlyList<OcrLine> lines, int index, OcrWord word)
+    {
+        var code = Parse.UnitCode(word.Text);
+        if (Units.Lookup(code) is null) return false;
+        var column = new[] { index - 1, index + 1 }
+            .Where(i => i >= 0 && i < lines.Count && lines[i].Cells.ContainsKey(Field.Unit))
+            .Select(i => lines[i].Parsed.UnitCode).ToList();
+        if (column.Count == 0 || column.Any(c => c != code)) return false;
+        lines[index].Parsed.UnitCode = code;
+        lines[index].Cells[Field.Unit] = word;
         return true;
     }
 

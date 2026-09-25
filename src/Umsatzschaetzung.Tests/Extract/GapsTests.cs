@@ -12,6 +12,7 @@ public class GapsTests
     {
         [Field.Name] = (100, 400),
         [Field.Quantity] = (600, 60),
+        [Field.Unit] = (670, 30),
         [Field.UnitPrice] = (800, 100),
         [Field.LineNet] = (1000, 100),
     };
@@ -20,16 +21,17 @@ public class GapsTests
 
     static Box Printed(int row, Field field) => new(Columns[field].X, 100 + row * Pitch, Columns[field].W, Height);
 
-    // Three rows of 3 × 1,50 = 4,50, less the cells the detector missed.
+    // Three rows of 3 Fl × 1,50 = 4,50, less the cells the detector missed.
     static List<OcrLine> Table(params (int Row, Field Field)[] missing)
     {
         var lines = new List<OcrLine>();
         for (var row = 0; row < 3; row++)
         {
-            var line = new OcrLine { Parsed = new InvoiceLine { Quantity = 3000, UnitPrice = 1_500_000, LineNet = 450, PriceBaseQty = 1000 } };
-            foreach (var (field, text) in new[] { (Field.Name, "Semmel"), (Field.Quantity, "3"), (Field.UnitPrice, "1,50"), (Field.LineNet, "4,50") })
+            var line = new OcrLine { Parsed = new InvoiceLine { Quantity = 3000, UnitCode = "XBO", UnitPrice = 1_500_000, LineNet = 450, PriceBaseQty = 1000 } };
+            foreach (var (field, text) in new[] { (Field.Name, "Semmel"), (Field.Quantity, "3"), (Field.Unit, "Fl"), (Field.UnitPrice, "1,50"), (Field.LineNet, "4,50") })
                 if (!missing.Contains((row, field))) line.Cells[field] = new OcrWord { Text = text, Box = Printed(row, field) };
             if (missing.Contains((row, Field.LineNet))) line.Parsed.LineNet = 0;
+            if (missing.Contains((row, Field.Unit))) line.Parsed.UnitCode = "";
             lines.Add(line);
         }
         return lines;
@@ -140,5 +142,34 @@ public class GapsTests
     {
         var (_, asked) = await Filled(Table((2, Field.LineNet)), "4,50");
         Assert.Empty(asked);
+    }
+
+    // The row cannot check a unit; the column around it does.
+    [Fact]
+    public async Task ALostUnitReadAgainIsKeptWhereTheColumnSaysTheSame()
+    {
+        var (page, asked) = await Filled(Table((1, Field.Unit)), "F1");
+        Assert.True(Covers(Assert.Single(asked), Printed(1, Field.Unit)));
+        Assert.Equal("XBO", page.Lines[1].Parsed.UnitCode);
+        Assert.Equal("F1", page.Lines[1].Cells[Field.Unit].Text);
+    }
+
+    [Theory]
+    [InlineData("kg")]
+    [InlineData("F")]
+    public async Task AUnitReadAgainThatIsNotTheColumnsIsDropped(string read)
+    {
+        var (page, _) = await Filled(Table((1, Field.Unit)), read);
+        Assert.Equal("", page.Lines[1].Parsed.UnitCode);
+        Assert.False(page.Lines[1].Cells.ContainsKey(Field.Unit));
+    }
+
+    [Fact]
+    public async Task AColumnThatDisagreesKeepsTheUnitOut()
+    {
+        var lines = Table((1, Field.Unit));
+        lines[2].Parsed.UnitCode = "KGM";
+        var (page, _) = await Filled(lines, "F1");
+        Assert.Equal("", page.Lines[1].Parsed.UnitCode);
     }
 }

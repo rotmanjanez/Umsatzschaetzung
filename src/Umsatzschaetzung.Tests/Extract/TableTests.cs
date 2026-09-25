@@ -235,6 +235,28 @@ public class TableTests
     }
 
     [Fact]
+    public void AQuantityAndUnitInOneCellGetABoxEach()
+    {
+        var item = Items(Headed().Cells(Role.LineItem, (100, "15 Stk"), (300, "Tomaten"), (900, "7,00")))[0];
+        var (quantity, unit) = (item[Field.Quantity].Box, item[Field.Unit].Box);
+        Assert.Equal(100, quantity.X);
+        Assert.True(quantity.X + quantity.W <= unit.X);
+        Assert.Equal(158, unit.X + unit.W);
+    }
+
+    // "17 Fl" with the l lost: the F is no unit, but it is not the quantity either.
+    [Theory]
+    [InlineData("17F")]
+    [InlineData("17 F")]
+    public void AUnitCutShortLeavesTheQuantityItsOwnBox(string cell)
+    {
+        var item = Items(Headed().Cells(Role.LineItem, (100, cell), (300, "Tomaten"), (900, "7,00")))[0];
+        Assert.Equal("17", item[Field.Quantity].Text);
+        Assert.True(item[Field.Quantity].Box.W <= 20);
+        Assert.DoesNotContain(Field.Unit, item.Keys);
+    }
+
+    [Fact]
     public void AQuantityAndUnitInTheUnitColumnAreSplitToo()
     {
         var item = Items(Headed().Cells(Role.LineItem, (200, "15 Stk"), (300, "Tomaten"), (900, "7,00")))[0];

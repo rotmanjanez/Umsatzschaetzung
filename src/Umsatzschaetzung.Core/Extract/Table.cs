@@ -441,7 +441,10 @@ public sealed class Table
         return left.Length > 0 && char.IsAsciiDigit(left[^1]) ? left + text : had + " " + text;
     }
 
-    // "15 Stk" or "6Fl" as one cell, in whichever of the two columns it landed.
+    // "15 Stk" or "6Fl" as one cell, in whichever of the two columns it landed. Each part gets
+    // its share of the box, so the unit column is where the units are printed. One or two
+    // letters that are no unit are one cut short ("17F" for "17 Fl"): they go, and the quantity
+    // keeps its own box, for the gap beside it. A longer word stays with the quantity.
     static readonly Regex TrailingUnit = new(@"^\s*[-\d.,]+\s*(\p{L}\S*)\s*$");
 
     static void Units(Dictionary<Field, OcrWord> cells)
@@ -449,9 +452,25 @@ public sealed class Table
         var (have, lack) = cells.ContainsKey(Field.Unit) ? (Field.Unit, Field.Quantity) : (Field.Quantity, Field.Unit);
         if (cells.ContainsKey(lack) || !cells.TryGetValue(have, out var both)) return;
         var m = TrailingUnit.Match(both.Text);
-        if (!m.Success || Model.Units.Lookup(Parse.UnitCode(m.Groups[1].Value)) is null) return;
-        cells[Field.Unit] = new OcrWord { Text = m.Groups[1].Value, Box = both.Box };
-        cells[Field.Quantity] = new OcrWord { Text = both.Text[..m.Groups[1].Index].Trim(), Box = both.Box };
+        if (!m.Success) return;
+        var unit = m.Groups[1];
+        var number = both.Text[..unit.Index].TrimEnd();
+        var quantity = new OcrWord { Text = number.Trim(), Box = Slice(both, 0, number.Length), Confidence = both.Confidence };
+        if (Model.Units.Lookup(Parse.UnitCode(unit.Value)) is null)
+        {
+            if (have == Field.Quantity && unit.Length <= 2) cells[Field.Quantity] = quantity;
+            return;
+        }
+        cells[Field.Unit] = new OcrWord { Text = unit.Value, Box = Slice(both, unit.Index, both.Text.Length), Confidence = both.Confidence };
+        cells[Field.Quantity] = quantity;
+    }
+
+    static Box Slice(OcrWord word, int from, int to)
+    {
+        var b = word.Box;
+        var length = Math.Max(word.Text.Length, 1);
+        var x0 = b.X + b.W * from / length;
+        return b with { X = x0, W = b.X + b.W * to / length - x0 };
     }
 
     public string DescribeRows(List<TaggedWord> page)
