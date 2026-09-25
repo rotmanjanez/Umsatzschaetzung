@@ -121,18 +121,16 @@ ol.warnings li { margin-bottom: 0.3em; }
         <thead>
           <tr>
             <th class="wide">Sparte</th>
-            <th class="num">Portionen</th>
-            <th class="num">Einsatz der Portionen</th>
-            <th class="num">Umsatz netto</th>
-            <th class="num">Rohgewinn</th>
-            <th class="num">Rohgewinnaufschlagsatz</th>
+            <th class="num">Wareneinsatz</th>
+            <th class="num">Umsatz netto*</th>
+            <th class="num">Rohgewinn*</th>
+            <th class="num">Rohgewinnaufschlagsatz*</th>
           </tr>
         </thead>
         <tbody>
           {% for m in report.markups %}
           <tr>
             <td>{{ m.sparte | sparte }}</td>
-            <td class="num">{{ m.portions | portions }}</td>
             <td class="num">{{ m.costOfGoods | cents }}</td>
             <td class="num">{{ m.revenueNet | cents }}</td>
             <td class="num">{{ m.grossProfit | cents }}</td>
@@ -141,7 +139,6 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
           <tr class="total">
             <td>Gesamt</td>
-            <td class="num">{{ report.totals.pricedPortions | portions }}</td>
             <td class="num">{{ report.totals.pricedCost | cents }}</td>
             <td class="num">{{ report.totals.calculatedRevenueNet | cents }}</td>
             <td class="num">{{ report.totals.grossProfit | cents }}</td>
@@ -149,43 +146,42 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </tbody>
       </table>
-      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang E).</p>
+      <p class="note">* geschätzt über die aus dem Wareneinsatz abgeleiteten Portionen (Anhang D); Wareneinsatz belegt durch die Eingangsrechnungen (Anhang A).</p>
+      <p class="note">Ermittelt an den Produkten mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang E).</p>
       {% if rahmen %}
       <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohgewinnaufschlagsatz {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}
 
-      <h2>Kalkulation je Produkt</h2>
+      <h2>Rohgewinnaufschlagsatzschätzung je Produkt</h2>
       {% for g in calculation %}
       <table>
         <thead>
           <tr>
             <th class="wide">{% if g.sparte %}{{ g.sparte | sparte }}{% else %}Produkt{% endif %}</th>
-            <th class="num">Portionen</th>
-            <th class="num">Einsatz je Portion</th>
+            <th class="num">Wareneinsatz*</th>
             <th class="num">Nettopreis</th>
-            <th class="num">Rohgewinnaufschlagsatz</th>
+            <th class="num">Rohgewinnaufschlagsatz*</th>
           </tr>
         </thead>
         <tbody>
           {% for p in g.rows %}
           <tr>
             <td>{{ p.name }}</td>
-            <td class="num">{{ p.portions | group }}</td>
-            <td class="num">{{ p.costPerPortion | cents }}</td>
+            <td class="num">{{ p.costOfGoods | cents }}</td>
             <td class="num">{{ p.unitNet | cents }}</td>
             <td class="num">{% if p.costOfGoods %}{{ p.markup | bp }}{% endif %}</td>
           </tr>
           {% endfor %}
           <tr class="total">
             <td>Summe</td>
-            <td class="num">{{ g.portions | group }}</td>
-            <td colspan="2" class="num">Gewichteter Rohgewinnaufschlagsatz</td>
+            <td class="num">{{ g.cost | cents }}</td>
+            <td></td>
             <td class="num">{{ g.markup | bp }}</td>
           </tr>
         </tbody>
       </table>
       {% endfor %}
-      <p class="note">Einsatz je Portion aus Rezeptur (Anhang B) und Wareneinsatz der Zutaten (Anhang C), Nettopreis aus Bruttopreis und USt (Anhang B).</p>
+      <p class="note">Wareneinsatz je Produkt aus Portionen (Anhang D) und Einsatz je Portion nach Rezeptur (Anhang B) und Wareneinsatz der Zutaten (Anhang C), Nettopreis aus Bruttopreis und USt (Anhang B). * geschätzt: Wareneinsatz nach den angesetzten Portionen und Rezepturen, der Rohgewinnaufschlagsatz daraus, in der Summe nach dem Wareneinsatz gewichtet.</p>
     </section>
 
     <section>

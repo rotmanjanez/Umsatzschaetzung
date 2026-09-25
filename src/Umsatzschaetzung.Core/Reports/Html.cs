@@ -53,16 +53,16 @@ public static class Html
     {
         var j = ReportJson.Default;
         var priced = r.Products.FindAll(p => p.Portions > 0 && !p.PriceMissing);
-        JsonObject Group(Sparte? sparte, List<ProductRow> rows, long portions, long markup) => new()
+        JsonObject Group(Sparte? sparte, List<ProductRow> rows, long cost, long markup) => new()
         {
             ["sparte"] = sparte is { } s ? JsonSerializer.SerializeToNode(s, j.Sparte) : null,
             ["rows"] = JsonSerializer.SerializeToNode(rows, j.ListProductRow),
-            ["portions"] = portions,
+            ["cost"] = cost,
             ["markup"] = markup,
         };
         if (r.Markups.Count == 0)
-            return [Group(null, priced, r.Totals.PricedPortions, r.Totals.Markup)];
-        return [.. r.Markups.Select(m => Group(m.Sparte, priced.FindAll(p => p.Sparte == m.Sparte), m.Portions, m.Markup))];
+            return [Group(null, priced, r.Totals.PricedCost, r.Totals.Markup)];
+        return [.. r.Markups.Select(m => Group(m.Sparte, priced.FindAll(p => p.Sparte == m.Sparte), m.CostOfGoods, m.Markup))];
     }
 
     public static PageMarks Marks(Case c, Model.Report r) => new(
