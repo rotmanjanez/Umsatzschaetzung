@@ -79,7 +79,8 @@ public partial class MappingView : Screen
     }
 
     // The open position stays open, and its detail untouched unless the refresh changed its mapping.
-    // One that changed state moved away in the list, so the next open position takes its place.
+    // One that changed state moved away in the list, so the next open position takes its place;
+    // the hint about what was just assigned stays until another position is picked.
     async Task Refresh()
     {
         var at = ++refreshes;
@@ -93,25 +94,25 @@ public partial class MappingView : Screen
         model.Groups.Clear();
         foreach (var g in groups) model.Groups.Add(g);
         var again = kept is null ? null : model.Groups.FirstOrDefault(g => g.Key == kept.Key);
-        if (again is not null && again.State != kept!.State)
-            again = ((DataGridCollectionView)Groups.ItemsSource).Cast<LineGroup>().FirstOrDefault(g => g.IsPending);
-        else if (again is not null && again.MappingId == kept!.MappingId) Groups.SelectedItem = again;
+        var moved = again is not null && again.State != kept!.State;
+        if (moved) again = ((DataGridCollectionView)Groups.ItemsSource).Cast<LineGroup>().FirstOrDefault(g => g.IsPending);
+        if (again is not null) Groups.SelectedItem = again;
         refreshing = false;
         model.NoInvoices = Session.Case?.Invoices.Count == 0;
         model.Counted();
         if (again is null)
         {
-            Detail.Reset();
+            Detail.Show(null);
             return;
         }
-        if (Groups.SelectedItem != again) Groups.SelectedItem = again;
+        if (moved || again.MappingId != kept!.MappingId) Detail.Show(again);
         Groups.ScrollIntoView(again, null);
         if (focused) Groups.Focus();
     }
 
     void GroupSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (!refreshing) Detail.Show(Groups.SelectedItem as LineGroup);
+        if (!refreshing) Detail.Pick(Groups.SelectedItem as LineGroup);
     }
 
     void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);

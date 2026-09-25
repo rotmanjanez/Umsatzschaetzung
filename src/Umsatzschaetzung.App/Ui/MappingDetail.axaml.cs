@@ -297,16 +297,15 @@ public partial class MappingDetail : UserControl
         model.Ingredients = Session.Ingredients();
     }
 
-    public void Reset()
+    public void Pick(LineGroup? g)
     {
-        model.Assigned = "";
-        Show(null);
+        if (g?.Key != Group?.Key) model.Assigned = "";
+        Show(g);
     }
 
     public async void Show(LineGroup? g)
     {
         var seq = ++suggestSeq;
-        if (g?.Key != Group?.Key) model.Assigned = "";
         Group = g;
         model.SetCandidates([]);
         model.ClearSnippets();
