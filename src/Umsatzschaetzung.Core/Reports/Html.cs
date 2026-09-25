@@ -95,10 +95,7 @@ public static class Html
             ["calculation"] = Calculation(r),
             ["rahmen"] = rahmen is null ? null : JsonSerializer.SerializeToNode(rahmen, j.Rahmen),
             ["lage"] = rahmen is null ? null : JsonSerializer.SerializeToNode(rahmen.Lage(s.Markup), j.Rahmenlage),
-            ["anyBinding"] = r.Ingredients.Exists(i => i.Binding),
             ["anyYields"] = r.Ingredients.Exists(i => i.Yield is not null),
-            ["anyEstimated"] = r.Ingredients.Exists(i => i.Estimated),
-            ["anyApproximate"] = r.Allocations.Exists(a => a.Approximate),
         };
         return Template.Render(Resource("bericht.html"), data);
     }

@@ -29,17 +29,17 @@ Der Anhang belegt, woher die Zahlen kommen:
 
 - **A: Eingangspositionen**: jede Rechnungszeile, die eingegangen ist.
 - **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und
-  Steuersatz. Für die Prüfung angepasste Rezepte sind als **abweichend vom
-  Katalog** gekennzeichnet, mit dem Stand des Katalogrezepts; das
-  Katalogrezept steht grau darunter.
-- **C: Warenfluss und Ausbeute**: je Zutat vom Einkauf über die Abzüge bis zu
-  dem, was verkauft oder übrig geblieben ist, dazu die angewandte Ertragsregel.
-  In der Prüfung gewählte Regeln sind als solche vermerkt.
-- **D: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen ohne Portion
+  Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet
+  sind.
+- **C: Ausbeute**: je Zutat, wie viel vom Einkauf verkaufsfähig ist, dazu die
+  angewandte Ertragsregel.
+- **D: Portionen je Zutat**: je Zutat die Produkte, in die die verkaufsfähige
+  Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.
+- **E: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen ohne Portion
   und Preis, jede mit dem Satz, der für sie gilt. Es gilt der Satz der
   Sparte; hat die Sparte keinen, der Gesamtsatz. Auf die Steuersätze verteilt
   sich der geschätzte Umsatz wie der kalkulierte Umsatz derselben Sparte.
-- **E: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer
+- **F: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer
   Aufstellung.
 
 ## Als PDF speichern

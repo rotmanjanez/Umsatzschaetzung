@@ -1,6 +1,5 @@
 using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Model;
-using Umsatzschaetzung.Reports;
 
 namespace Umsatzschaetzung.Tests.Calc;
 
@@ -32,11 +31,9 @@ public class PieceWeightTests
         var gurke = Assert.Single(r.Ingredients);
         var p = Assert.Single(gurke.Purchases);
         Assert.Equal((400L, FactorSource.Piece, 2_000L), (p.Factor, p.Source, p.Qty));
-        Assert.True(gurke.Estimated);
         Assert.Empty(r.Unmapped);
         var flag = Assert.Single(r.Warnings, w => w.Code == "piece_weight");
         Assert.Contains("1 Stk Gurken ≈ 400 g (Richtwert der Zutat)", flag.Message);
-        Assert.Contains("<sup>≈</sup>", Html.Render(Kase(), Rules(new Piece(400, Unit.G)), r, null));
     }
 
     [Fact]

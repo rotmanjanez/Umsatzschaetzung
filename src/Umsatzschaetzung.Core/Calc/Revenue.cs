@@ -143,7 +143,7 @@ internal static class Revenue
         }];
     }
 
-    internal static Report Run(Case c, RuleSet rs, RuleSet catalog, Dictionary<string, Unit?> bases, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses, List<UnusedLine> unused)
+    internal static Report Run(Case c, RuleSet rs, Dictionary<string, Unit?> bases, List<Allocation> allocs, SortedDictionary<string, IngredientUse> uses, List<UnusedLine> unused)
     {
         var byProduct = new Dictionary<string, ProductAllocation>();
         foreach (var a in allocs)
@@ -177,10 +177,6 @@ internal static class Revenue
                 GrossPrice = cp.GrossPrice,
                 Vat = cp.Vat,
                 PriceMissing = PriceMissing(cp),
-                RecipeAdjusted = cp.Recipe is not null,
-                RecipeBasis = cp.RecipeBasis,
-                RecipeStale = Recipes.Stale(cp, catalog),
-                CatalogRecipe = cp.Recipe is null ? [] : Recipes.Flat(catalog, catalog.Products[pid]),
             };
             if (hasPortions)
             {

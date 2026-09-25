@@ -167,13 +167,21 @@ public sealed class Purchase
     public long Net { get; set; }
 }
 
+public sealed class IngredientProduct
+{
+    public string ProductId { get; set; } = "";
+    public string Name { get; set; } = "";
+    public long Portions { get; set; }
+    public long PerPortion { get; set; }
+    public long Qty => Portions * PerPortion;
+}
+
 public sealed class IngredientRow
 {
     public string IngredientId { get; set; } = "";
     public string Name { get; set; } = "";
     public Unit Unit { get; set; }
     public List<Purchase> Purchases { get; set; } = [];
-    public bool Estimated => Purchases.Exists(p => p.Source == FactorSource.Piece);
     public long Opening { get; set; }
     public long Closing { get; set; }
     public long Bought { get; set; }
@@ -181,9 +189,9 @@ public sealed class IngredientRow
     public long Used { get; set; }
     public long UsedCost { get; set; }
     public YieldRule? Yield { get; set; }
-    public bool YieldChosen { get; set; }
     public long YieldRate { get; set; }
     public long Sellable { get; set; }
+    public List<IngredientProduct> Products { get; set; } = [];
     public long Leftover { get; set; }
     public bool Binding { get; set; }
 }
@@ -228,10 +236,6 @@ public sealed class ProductRow
     public long RevenueNet { get; set; }
     public long Markup => Rohaufschlag.Of(RevenueNet, CostOfGoods);
     public bool PriceMissing { get; set; }
-    public bool RecipeAdjusted { get; set; }
-    public long RecipeBasis { get; set; }
-    public bool RecipeStale { get; set; }
-    public List<RecipeLine> CatalogRecipe { get; set; } = [];
 }
 
 public sealed class Report

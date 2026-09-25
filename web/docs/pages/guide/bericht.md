@@ -15,8 +15,9 @@ wird:
    196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
 2. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
    Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
-3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt und der
-   Warenfluss je Zutat, damit jede Zahl des Berichts nachvollziehbar bleibt.
+3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute
+   und die Portionen je Zutat, damit jede Zahl des Berichts nachvollziehbar
+   bleibt.
 
 ## Als PDF speichern
 

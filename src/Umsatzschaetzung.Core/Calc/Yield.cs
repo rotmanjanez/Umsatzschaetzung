@@ -11,8 +11,8 @@ internal static class Yield
             var u = uses[id];
             if (!rs.Ingredients.TryGetValue(id, out var ing))
                 throw new InvalidOperationException($"yield: unknown ingredient \"{id}\"");
-            if (Match.YieldRule(c, rs, ing) is var (rule, chosen))
-                (u.Yield, u.YieldChosen) = (rule, chosen);
+            if (Match.YieldRule(c, rs, ing) is var (rule, _))
+                u.Yield = rule;
             u.YieldRate = u.Yield is { } y ? Bp.Full - y.Shrinkage - y.OwnUse - y.Staff - y.Free : Bp.Full;
             u.Sellable = u.Used * u.YieldRate / Bp.Full;
         }

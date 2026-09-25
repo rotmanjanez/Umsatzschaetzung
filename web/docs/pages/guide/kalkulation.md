@@ -90,8 +90,7 @@ derselben Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei
 jeder Änderung sofort neu; unter **Portionen** steht beim Produkt **angepasst**,
 auf **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.
 
-Der Bericht kennzeichnet das Produkt als **abweichend vom Katalog** und druckt
-das Katalogrezept grau darunter.
+Der Bericht druckt das angepasste Rezept so, wie es gerechnet ist.
 
 Unten stehen zwei Schaltflächen:
 

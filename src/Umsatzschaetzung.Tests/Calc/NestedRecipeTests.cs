@@ -92,20 +92,6 @@ public class NestedRecipeTests
     }
 
     [Fact]
-    public void TheCatalogRecipeBesideAnAdjustmentIsFlat()
-    {
-        var rules = Nested();
-        var c = Selling(Set);
-        c.Products[0].Recipe = [Line("ing.bier.fass", 500, "MLT")];
-        c.Products[0].RecipeBasis = rules.Products[Set].Meta.Rev;
-
-        var row = Calculation.Run(c, rules).Products.Single(p => p.ProductId == Set);
-
-        Assert.True(row.RecipeAdjusted);
-        Assert.Equal([("ing.bier.fass", 600L, "MLT"), ("ing.korn", 20L, "MLT")], Lines(row.CatalogRecipe));
-    }
-
-    [Fact]
     public void TheListNamesAPartInPortions()
     {
         var rules = Nested();

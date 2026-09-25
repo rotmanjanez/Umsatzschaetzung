@@ -95,6 +95,14 @@ public class CalculationTests
     }
 
     [Fact]
+    public void TheSellableAmountGoesIntoProductsOrTheRest()
+    {
+        Assert.Contains(Report.Ingredients, i => i.Products.Count > 1);
+        foreach (var i in Report.Ingredients.Where(i => i.Products.Count > 0))
+            Assert.Equal(i.Sellable, i.Products.Sum(p => p.Qty) + i.Leftover);
+    }
+
+    [Fact]
     public void TheCalculationIsRepeatable()
     {
         var again = Calculation.Run(Vorlage.Load(), TestData.Seed());

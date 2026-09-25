@@ -112,7 +112,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
         </tbody>
       </table>
-      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Anhang D).</p>
+      <p class="note">Alle Beträge netto. Der Umsatz nach BP enthält {{ report.totals.estimatedRevenueNet | cents }}, die über den Rohgewinnaufschlagsatz geschätzt sind (Anhang E).</p>
     </section>
 
     <section>
@@ -149,7 +149,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </tbody>
       </table>
-      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang D).</p>
+      <p class="note">Ermittelt an den Portionen mit Preis. Produkte ohne Preis, nicht zugeteilte Ware und Eingangspositionen ohne Rezeptur oder Faktor tragen den Satz ihrer Sparte, sonst den Gesamtsatz (Anhang E).</p>
       {% if rahmen %}
       <p class="note">Richtsatzsammlung {{ rahmen.jahr }}, „{{ rahmen.klasse }}“: Rohgewinnaufschlagsatz {{ rahmen.von }} bis {{ rahmen.bis }} % (Mittel {{ rahmen.aufschlag.mittel }} %), kalkuliert {% if lage == "unter" %}unter dem Rahmen{% else %}{% if lage == "über" %}über dem Rahmen{% else %}im Rahmen{% endif %}{% endif %}.</p>
       {% endif %}
@@ -169,7 +169,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         <tbody>
           {% for p in g.rows %}
           <tr>
-            <td>{{ p.name }}{% if p.pinned %}<br><span class="note">Portionen vorgegeben.</span>{% endif %}</td>
+            <td>{{ p.name }}</td>
             <td class="num">{{ p.portions | group }}</td>
             <td class="num">{{ p.costPerPortion | cents }}</td>
             <td class="num">{{ p.unitNet | cents }}</td>
@@ -246,9 +246,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% for p in report.products %}
           <tr>
             <td>{{ p.name }}</td>
-            <td class="list">{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}{% if p.recipeAdjusted %}
-              <div class="note">Rezeptur laut Prüfung, abweichend vom Katalog (Änderungsnummer {{ p.recipeBasis }}{% if p.recipeStale %}, seither geändert{% endif %})</div>
-              <div class="note">Katalog: {% for l in p.catalogRecipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</div>{% endif %}</td>
+            <td class="list">{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</td>
             <td>{{ p.sparte | sparte }}</td>
             <td class="num">{{ p.costPerPortion | cents }}</td>
             <td class="num">{% if not p.priceMissing %}{{ p.grossPrice | cents }}{% endif %}</td>
@@ -261,7 +259,7 @@ ol.warnings li { margin-bottom: 0.3em; }
     </section>
 
     <section>
-      <h1>Anhang C: Warenfluss und Ausbeute</h1>
+      <h1>Anhang C: Ausbeute</h1>
       {% if report.ingredients %}
       {% if case.inventory %}
       <table>
@@ -275,13 +273,12 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="num">Wareneinsatz</th>
             <th class="num">Ausbeute</th>
             <th class="num">Verkaufsfähig</th>
-            <th class="num">Rest</th>
           </tr>
         </thead>
         <tbody>
           {% for i in report.ingredients %}
           <tr>
-            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}{% if i.estimated %}<sup>≈</sup>{% endif %}</td>
+            <td>{{ i.name }}</td>
             <td class="num">{{ i.opening | qty:i.unit }}</td>
             <td class="num">{{ i.bought | qty:i.unit }}</td>
             <td class="num">{{ i.closing | qty:i.unit }}</td>
@@ -289,7 +286,6 @@ ol.warnings li { margin-bottom: 0.3em; }
             <td class="num">{{ i.usedCost | cents }}</td>
             <td class="num">{{ i.yieldRate | bp }}</td>
             <td class="num">{{ i.sellable | qty:i.unit }}</td>
-            <td class="num">{{ i.leftover | qty:i.unit }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -303,18 +299,16 @@ ol.warnings li { margin-bottom: 0.3em; }
             <th class="num">Wareneinsatz</th>
             <th class="num">Ausbeute</th>
             <th class="num">Verkaufsfähig</th>
-            <th class="num">Rest</th>
           </tr>
         </thead>
         <tbody>
           {% for i in report.ingredients %}
           <tr>
-            <td>{{ i.name }}{% if i.binding %}<sup>*</sup>{% endif %}{% if i.estimated %}<sup>≈</sup>{% endif %}</td>
+            <td>{{ i.name }}</td>
             <td class="num">{{ i.bought | qty:i.unit }}</td>
             <td class="num">{{ i.usedCost | cents }}</td>
             <td class="num">{{ i.yieldRate | bp }}</td>
             <td class="num">{{ i.sellable | qty:i.unit }}</td>
-            <td class="num">{{ i.leftover | qty:i.unit }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -322,15 +316,6 @@ ol.warnings li { margin-bottom: 0.3em; }
       {% endif %}
       {% else %}
       <p class="empty">Keine Zutaten im Regelwerk.</p>
-      {% endif %}
-      {% if anyBinding %}
-      <p class="note">* Diese Zutat ist vollständig verbraucht und begrenzt die Portionszahl.</p>
-      {% endif %}
-      {% if anyEstimated %}
-      <p class="note">≈ Der Einkauf ist teilweise in Stück berechnet und über den Richtwert der Zutat je Stück umgerechnet<span class="hinweise">, siehe Hinweise</span>.</p>
-      {% endif %}
-      {% if anyApproximate %}
-      <p class="note">Die Zuteilung wurde für einen Teil der Zutaten näherungsweise bestimmt.</p>
       {% endif %}
 
       <h2>Ertragssätze</h2>
@@ -350,7 +335,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% for i in report.ingredients %}
           {% if i.yield %}
           <tr>
-            <td>{{ i.name }}{% if i.yieldChosen %}<br><span class="note">In der Prüfung gewählt.</span>{% endif %}</td>
+            <td>{{ i.name }}</td>
             <td class="num">{{ i.yield.shrinkage | bp }}</td>
             <td class="num">{{ i.yield.ownUse | bp }}</td>
             <td class="num">{{ i.yield.staff | bp }}</td>
@@ -367,7 +352,53 @@ ol.warnings li { margin-bottom: 0.3em; }
     </section>
 
     <section>
-      <h1>Anhang D: Umsatz über den Rohgewinnaufschlagsatz</h1>
+      <h1>Anhang D: Portionen je Zutat</h1>
+      {% if report.ingredients %}
+      <table class="lines">
+        <thead>
+          <tr>
+            <th>Zutat</th>
+            <th class="wrap">Produkt</th>
+            <th class="num">Portionen</th>
+            <th class="num">Je Portion</th>
+            <th class="num">Menge</th>
+          </tr>
+        </thead>
+        {% for i in report.ingredients %}
+        <tbody>
+          <tr>
+            <td class="ref">{{ i.name }}</td>
+            <td class="wrap">Verkaufsfähig</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ i.sellable | qty:i.unit }}</td>
+          </tr>
+          {% for p in i.products %}
+          <tr>
+            <td class="ref">{{ i.name }}</td>
+            <td class="wrap">{{ p.name }}</td>
+            <td class="num">{{ p.portions | group }}</td>
+            <td class="num">{{ p.perPortion | qty:i.unit }}</td>
+            <td class="num">{{ p.qty | qty:i.unit }}</td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <td class="ref">{{ i.name }}</td>
+            <td class="wrap">Rest</td>
+            <td></td>
+            <td></td>
+            <td class="num">{{ i.leftover | qty:i.unit }}</td>
+          </tr>
+        </tbody>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p class="empty">Keine Zutaten im Regelwerk.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h1>Anhang E: Umsatz über den Rohgewinnaufschlagsatz</h1>
 
       <h2>Produkte ohne Preis</h2>
       {% if estimated.products.rows %}
@@ -499,7 +530,7 @@ ol.warnings li { margin-bottom: 0.3em; }
     </section>
 
     <section>
-      <h1>Anhang E: Kennzahlen</h1>
+      <h1>Anhang F: Kennzahlen</h1>
       <table class="ledger">
         <tbody>
           <tr>

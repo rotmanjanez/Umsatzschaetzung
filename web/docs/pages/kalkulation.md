@@ -101,13 +101,12 @@ gespeichert, entfällt die Anpassung, und das Produkt steht wieder auf
 
 Die Prüfung merkt sich, von welchem Stand des Katalogrezepts sie abgeschrieben
 hat. Ändert sich das Katalogrezept danach, wird nichts übernommen; beim
-Produkt und im Bericht steht **Katalogrezept seit der Anpassung geändert**, und
+Produkt steht **Katalogrezept seit der Anpassung geändert**, und
 die Prüferin entscheidet, ob die Anpassung bleibt oder zurückgesetzt wird.
 
 Anders als bei den Ertragsregeln wird hier ein freier Wert in die Prüfung
-eingetragen. Nachprüfbar bleibt er durch den Bericht, der das Produkt als
-**abweichend vom Katalog** mit dem Stand des Katalogrezepts führt. Ist
-ein Rezept für jeden Betrieb falsch, gehört die Korrektur in den Katalog; weicht
+eingetragen. Nachprüfbar bleibt er durch den Bericht, der das Rezept so
+führt, wie es gerechnet ist. Ist ein Rezept für jeden Betrieb falsch, gehört die Korrektur in den Katalog; weicht
 nur dieser Betrieb belegbar ab, etwa mit größeren Portionen oder einem anderen
 Salat, in die Prüfung.
 
@@ -117,7 +116,7 @@ Diese Seite zeigt, was eingekauft wurde, aber nicht über Rezeptur und Preis in
 den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
 
 **Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den
-Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang D), sie verändern den
+Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang E), sie verändern den
 Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des
 Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
 in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine

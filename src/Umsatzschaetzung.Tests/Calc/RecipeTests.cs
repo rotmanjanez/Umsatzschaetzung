@@ -50,8 +50,6 @@ public class RecipeTests
         var c = Vorlage.Load();
 
         Assert.Same(Rules, Recipes.Effective(c, Rules));
-        Assert.False(Row(Catalog).RecipeAdjusted);
-        Assert.Empty(Row(Catalog).CatalogRecipe);
     }
 
     [Fact]
@@ -82,32 +80,13 @@ public class RecipeTests
     }
 
     [Fact]
-    public void TheProductRowSaysTheRecipeIsTheCasesOwn()
-    {
-        var rules = TestData.Seed();
-        rules.Products[Flasche].Meta.Rev = 7;
-        var c = Adjusted("ing.bier.flasche", 500);
-        c.Products.Single(p => p.ProductId == Flasche).RecipeBasis = 5;
-
-        var row = Row(Calculation.Run(c, rules));
-
-        Assert.True(row.RecipeAdjusted);
-        Assert.True(row.RecipeStale);
-        Assert.Equal(5L, row.RecipeBasis);
-        var line = Assert.Single(row.CatalogRecipe);
-        Assert.Equal(("ing.bier.flasche", 330L), (line.IngredientId, line.Amount));
-    }
-
-    [Fact]
-    public void TheReportPrintsTheCasesRecipeAndTheCatalogsBeneath()
+    public void TheReportPrintsTheCasesRecipe()
     {
         var c = Adjusted("ing.bier.flasche", 500);
 
         var html = Html.Render(c, Rules, Calculation.Run(c, Rules), null);
 
         Assert.Contains("<span>500 Milliliter Flaschenbier Pils 0,33 l</span>", html);
-        Assert.Contains("abweichend vom Katalog (Änderungsnummer 0)</div>", html);
-        Assert.Contains("Katalog: <span>330 Milliliter Flaschenbier Pils 0,33 l</span>", html);
-        Assert.DoesNotContain("seither geändert", html);
+        Assert.DoesNotContain("<span>330 Milliliter Flaschenbier Pils 0,33 l</span>", html);
     }
 }

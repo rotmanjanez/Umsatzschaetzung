@@ -14,7 +14,6 @@ internal sealed class IngredientUse
     public long Closing { get; set; }
     public List<Purchase> Purchases { get; } = [];
     public YieldRule? Yield { get; set; }
-    public bool YieldChosen { get; set; }
     public long YieldRate { get; set; }
 }
 
@@ -27,7 +26,7 @@ public static class Calculation
         var (uses, ex, flags) = Normalize.Run(c, rs, bases);
         Yield.Run(c, rs, uses);
         var allocs = Allocate(c, rs, uses);
-        var rep = Revenue.Run(c, rs, catalog, bases, allocs, uses, ex.Unused);
+        var rep = Revenue.Run(c, rs, bases, allocs, uses, ex.Unused);
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Deposits = ex.Deposits;
@@ -49,13 +48,28 @@ public static class Calculation
     static List<IngredientRow> IngredientRows(RuleSet rs, Dictionary<string, Unit?> bases, SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
     {
         var leftover = new Dictionary<string, long>();
+        var products = new Dictionary<string, List<IngredientProduct>>();
         HashSet<string> binding = [];
         foreach (var a in allocs)
         {
             foreach (var l in a.Leftover)
                 leftover[l.IngredientId] = leftover.GetValueOrDefault(l.IngredientId) + l.Qty;
             binding.UnionWith(a.Binding);
+            foreach (var pp in a.Products)
+            {
+                if (pp.Portions == 0) continue;
+                var p = rs.Products[pp.ProductId];
+                foreach (var r in p.Recipe)
+                {
+                    if (!products.TryGetValue(r.IngredientId, out var list)) products[r.IngredientId] = list = [];
+                    var amount = Scale.ToBase(r.Amount, r.Unit);
+                    if (list.Find(x => x.ProductId == pp.ProductId) is { } same) same.PerPortion += amount;
+                    else list.Add(new IngredientProduct { ProductId = pp.ProductId, Name = p.Name, Portions = pp.Portions, PerPortion = amount });
+                }
+            }
         }
+        foreach (var list in products.Values)
+            list.Sort((x, y) => y.Qty.CompareTo(x.Qty));
         var rows = new List<IngredientRow>(uses.Count);
         foreach (var id in uses.Keys)
         {
@@ -73,9 +87,9 @@ public static class Calculation
                 Used = u.Used,
                 UsedCost = u.UsedCost,
                 Yield = u.Yield,
-                YieldChosen = u.YieldChosen,
                 YieldRate = u.YieldRate,
                 Sellable = u.Sellable,
+                Products = products.GetValueOrDefault(id) ?? [],
                 Leftover = leftover.GetValueOrDefault(id),
                 Binding = binding.Contains(id),
             });
