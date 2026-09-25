@@ -184,6 +184,8 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         {
             using var detector = gpu ? Accelerator.Session(threads) : Engine.GetDefaultSessionOptions(threads);
             using var reader = Engine.GetDefaultSessionOptions(1);
+            // An idle detector thread spinning for work takes its core from the crops read beside it.
+            detector.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");
             if (gpu) lock (Accelerator.Gate) engine.InitModels(Models, detector, reader, Accelerator.Gate);
             else engine.InitModels(Models, detector, reader);
         }
