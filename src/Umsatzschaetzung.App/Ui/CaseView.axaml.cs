@@ -28,7 +28,6 @@ public sealed class CaseModel : Observable
 
     string label = "", from = "", to = "", name = "", taxNumber = "", pab = "", gewerbe = "";
     readonly string[] declared = ["", "", ""];
-    bool noInvoices;
     List<Gewerbezweig> gewerbezweige = [];
 
     public string Label { get => label; set => Set(ref label, value); }
@@ -54,7 +53,6 @@ public sealed class CaseModel : Observable
     public string Declared19 { get => declared[0]; set => Set(ref declared[0], value); }
     public string Declared7 { get => declared[1]; set => Set(ref declared[1], value); }
     public string Declared0 { get => declared[2]; set => Set(ref declared[2], value); }
-    public bool NoInvoices { get => noInvoices; private set => Set(ref noInvoices, value); }
     public ObservableCollection<StockRow> Stock { get; } = [];
 
     static string Declared(Case k, long vat) =>
@@ -71,7 +69,6 @@ public sealed class CaseModel : Observable
         Pab = k.Taxpayer.PabNumber;
         Gewerbezweige = session.Gewerbezweige();
         Gewerbe = k.Taxpayer.Gewerbe;
-        NoInvoices = k.Invoices.Count == 0;
         Declared19 = Input.Edit(Declared(k, 1900));
         Declared7 = Input.Edit(Declared(k, 700));
         Declared0 = Input.Edit(Declared(k, 0));
@@ -192,8 +189,6 @@ public partial class CaseView : Screen
         if (!await Session.SaveCase(ct) && !ct.IsCancellationRequested)
             Session.Fail("Änderungen an der Prüfung konnten nicht gespeichert werden");
     }
-
-    void GoInvoices(object? sender, RoutedEventArgs e) => Session.Go(Tab.Invoices);
 
     void AddStock(object? sender, RoutedEventArgs e) => model.Stock.Add(new StockRow(Session.Ingredients()));
 

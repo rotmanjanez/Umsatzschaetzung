@@ -8,19 +8,6 @@
     <DockPanel>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="0,0,16,0">
-                <Border Theme="{StaticResource Card}" IsVisible="{Binding NoInvoices}" MaxWidth="960" HorizontalAlignment="Left">
-                    <DockPanel>
-                        <Button DockPanel.Dock="Right" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Zu den Rechnungen" VerticalAlignment="Center" Margin="16,0,0,0" Click="GoInvoices">
-                            <PathIcon Data="{StaticResource ForwardIcon}" Width="14" Height="14"/>
-                        </Button>
-                        <StackPanel>
-                            <TextBlock Text="Nächster Schritt: Rechnungen" Theme="{StaticResource SectionHeader}"/>
-                            <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
-                                       Text="Zuordnung und Kalkulation entstehen aus den Rechnungen des Zeitraums. Angaben auf dieser Seite können jederzeit nachgetragen werden."/>
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
-
                 <Border Theme="{StaticResource SectionRule}"/>
                 <TextBlock Text="Erklärte Umsätze, netto in €" Theme="{StaticResource SectionHeader}"/>
                 <Grid Margin="0,0,0,24" ColumnDefinitions="*,16,*,16,*" MaxWidth="960" HorizontalAlignment="Left">
