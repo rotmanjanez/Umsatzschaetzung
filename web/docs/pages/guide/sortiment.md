@@ -35,10 +35,17 @@ Tabelle: [sortiment-gasthaus.csv](sortiment-gasthaus.csv){ download="sortiment-g
 Herunterladen, dann auf das linke Symbol der Kopfzeile (**CSV importieren**)
 klicken und die Datei auswählen.
 
+<div class="us-side" markdown>
+<div markdown>
+
 Die Produkte werden über ihren Namen im Katalog gefunden und mit Preis und
 Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste:
 
+</div>
+
 ![Das Sortiment nach dem CSV-Import](img/sortiment-liste.png)
+
+</div>
 
 !!! geschafft "Geschafft, wenn …"
     - 28 Produkte in der Liste stehen

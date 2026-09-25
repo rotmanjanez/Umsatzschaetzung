@@ -2,17 +2,25 @@
 
 <p class="us-steps"><span class="here">Prüfung</span><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
+<div class="us-side" markdown>
+<div markdown>
+
 Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was
 dazugehört. Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim
 ersten Mal ist sie leer.
 
+</div>
+
 ![Die leere Liste der Prüfungen mit dem Knopf „Neue Prüfung“](img/neue-pruefung-knopf.png)
+
+</div>
 
 ## Die Eckdaten
 
-**Neue Prüfung** öffnet das Formular.
+<div class="us-side" markdown>
+<div markdown>
 
-![Das leere Formular für eine neue Prüfung](img/neue-pruefung.png)
+**Neue Prüfung** öffnet das Formular.
 
 Einzutragen sind:
 
@@ -30,6 +38,12 @@ Gewerbekennzahl bleibt leer.
 
 **Anlegen** öffnet die Prüfung.
 
+</div>
+
+![Das leere Formular für eine neue Prüfung](img/neue-pruefung.png){ width="552" }
+
+</div>
+
 ## So sieht eine geöffnete Prüfung aus
 
 ![Die Kopfzeile einer geöffneten Prüfung mit den sechs Reitern](img/pruefung-kopf.png)
@@ -44,13 +58,23 @@ Start wieder in der Liste.
 
 ## Erklärte Umsätze
 
-Nach dem Anlegen ist der Reiter **Prüfung** geöffnet:
+<div class="us-side" markdown>
+<div markdown>
 
-![Der Reiter „Prüfung“ direkt nach dem Anlegen](img/pruefung-leer.png)
+Nach dem Anlegen ist der Reiter **Prüfung** geöffnet:
 
 Er sammelt alles, was nicht aus den Rechnungen kommt. Für den Bericht wird
 davon eines gebraucht: der Umsatz, den der Betrieb erklärt hat. Unter
 **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
+
+</div>
+
+![Der Reiter „Prüfung“ direkt nach dem Anlegen](img/pruefung-leer.png)
+
+</div>
+
+<div class="us-side" markdown>
+<div markdown>
 
 | Feld | Wert |
 |---|---|
@@ -58,10 +82,14 @@ davon eines gebraucht: der Umsatz, den der Betrieb erklärt hat. Unter
 | Umsatz zu 7 % | leer lassen |
 | Umsatz zu 0 % | leer lassen |
 
-![Die erklärten Umsätze des Gasthauses](img/erklaerte-umsaetze.png)
-
 Das Gasthaus hat alles zu 19 % erklärt. Die übrigen Abschnitte des Reiters
 bleiben für das Beispiel leer.
+
+</div>
+
+![Die erklärten Umsätze des Gasthauses](img/erklaerte-umsaetze.png){ width="336" }
+
+</div>
 
 !!! geschafft "Geschafft, wenn …"
     - oben **Gasthaus Zur Linde, Bp 2025** steht und der Reiter **Prüfung** offen ist

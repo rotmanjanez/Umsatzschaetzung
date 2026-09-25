@@ -3,7 +3,7 @@
 Die Startseite listet alle Prüfungen aud die das Program zugriff hat. Ein Klick auf eine Zeile
 öffnet sie. Über `Neue Prüfung` kann eine neue Prüfung in der Datenbank angelegt werden.
 
-![Filtern, Regeln, Importieren und Neue Prüfung über der Liste](img/pruefungen-leiste.png)
+![Filtern, Regeln, Importieren und Neue Prüfung über der Liste](img/pruefungen-leiste.png){ width="621" }
 
 In der Prüfung liegen ihre Rechnungen und Belege und die Entscheidungen zu
 diesem Betrieb: Zuordnung der Rechnungszeilen, Verkaufspreise, gewählte
@@ -36,7 +36,14 @@ wollen. Genaueres unter [Import und Export](import-export.md).
 
 ## Löschen
 
+<div class="us-side" markdown>
+<div markdown>
+
 Das Papierkorbsymbol am Ende der Zeile löscht eine Prüfung mitsamt Rechnungen und Belegen.
 Löschen kann i.d.R. nicht rückgängig gemacht werden.
 
+</div>
+
 ![Die Rückfrage vor dem Löschen](img/pruefungen-loeschen.png)
+
+</div>

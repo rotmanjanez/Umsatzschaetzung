@@ -2,6 +2,9 @@
 
 <p class="us-steps"><a href="../start/">Prüfung</a><span class="here">1. Rechnungen</span><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
+<div class="us-side" markdown>
+<div markdown>
+
 Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
 Programm rechnet deshalb jede Rechnung nach: Menge mal Einzelpreis muss den
 Zeilenbetrag ergeben, die Zeilen den Nettobetrag, Netto und Steuer den
@@ -9,7 +12,11 @@ Bruttobetrag. Was nicht aufgeht oder unvollständig ist, steht mit
 **Durchsicht offen** ganz oben in der Liste. Im Beispiel ist das eine
 Rechnung, an der gleich mehreres schiefgegangen ist:
 
+</div>
+
 ![Eine Rechnung mit „Durchsicht offen“](img/rechnungen-liste.png)
+
+</div>
 
 Was das Programm nicht zusammenbringt, ist markiert: Das Feld ist orange
 hinterlegt, und auf dem Beleg ist dieselbe Stelle orange umrandet. Wer mit der
@@ -17,12 +24,13 @@ Maus auf das Feld zeigt, sieht den Grund, etwa „Einheit fehlt“.
 
 ## Die Rechnung TK25-1583
 
+<div class="us-side" markdown>
+<div markdown>
+
 Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit
 dem Symbol **Öffnen** rechts in der Zeile). Sie öffnet sich in einem eigenen
 Fenster: links die gelesenen Werte, rechts der Beleg. Quer über der Tabelle
 liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:
-
-![Die Rechnung TK25-1583 nach dem Import](img/korrektur-tk.png)
 
 - „Summe der Positionen 821,80 € weicht vom Nettobetrag 842,80 € ab“: Es fehlt
   eine Zeile.
@@ -31,16 +39,29 @@ liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:
 
 Dazu ist der Lieferant nur halb gelesen: `FROSTW`.
 
+</div>
+
+![Die Rechnung TK25-1583 nach dem Import](img/korrektur-tk.png)
+
+</div>
+
 ### Die fehlende Zeile
+
+<div class="us-side" markdown>
+<div markdown>
 
 Auf dem Beleg stehen acht Positionen, in den gelesenen Werten nur sieben. Die
 letzte liegt unter dem Stempel und ist beim Lesen verloren gegangen:
 
-![Der Beleg: Position 8 unter dem Stempel](img/korrektur-tk-beleg.png)
-
 Dort steht *Thermobox Leihgebühr je Woche*, 6 Stk zu 3,50 €, zusammen 21,00 €.
 Das Plus unter den Positionen (**Zeile hinzufügen**) legt eine leere Zeile an.
 Mit einem Doppelklick (oder F2) wird eine Zelle bearbeitbar; eintragen:
+
+</div>
+
+![Der Beleg: Position 8 unter dem Stempel](img/korrektur-tk-beleg.png){ width="690" }
+
+</div>
 
 | Menge | Einheit | Position | Einzelpreis | Netto |
 |---|---|---|---|---|
@@ -55,6 +76,9 @@ Hinweis ist verschwunden.
 
 ### Die Steuersätze
 
+<div class="us-side" markdown>
+<div markdown>
+
 Bleibt der zweite Hinweis: Netto geht auf, Brutto aber nicht. Laut Beleg sind
 es 912,12 €, aus den Positionen nur 842,80 €. Die Differenz ist genau die
 Umsatzsteuer: Alle Zeilen stehen auf 0 %, denn der Beleg druckt den Satz nicht
@@ -63,7 +87,11 @@ in eine eigene Spalte, sondern klein unter jeden Artikel („MwSt. 7 %“).
 In der Spalte **USt** für die Lebensmittel `7`{.copy} eintragen, für Trockeneis und
 Thermobox `19`{.copy}. Danach ergeben auch die Positionen 912,12 €.
 
-![Die korrigierte Rechnung: beide Summen gleich](img/korrektur-tk-fertig.png)
+</div>
+
+![Die korrigierte Rechnung: beide Summen gleich](img/korrektur-tk-fertig.png){ width="836" }
+
+</div>
 
 ## Bestätigen
 

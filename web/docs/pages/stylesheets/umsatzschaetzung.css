@@ -380,9 +380,38 @@ html[data-us-os="macos"] .md-typeset .md-button.us-os-macos,
 }
 
 .md-typeset img {
+  max-width: min(100%, 30rem);
+  height: auto;
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: .3rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+}
+
+.md-typeset img.us-wide {
+  max-width: 100%;
+}
+
+.md-typeset .us-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  margin: 1em 0;
+}
+
+.md-typeset .us-side > *,
+.md-typeset .us-side > div > :first-child {
+  margin-top: 0;
+}
+
+.md-typeset .us-side > div > :last-child {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 44.9375em) {
+  .md-typeset .us-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .md-typeset table.us-values code {

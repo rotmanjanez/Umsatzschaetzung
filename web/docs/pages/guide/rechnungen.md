@@ -20,12 +20,19 @@ mit 106 Dateien, eine je Rechnung.
 
 ## Hinzufügen
 
-In der Prüfung auf **1. Rechnungen** wechseln.
+<div class="us-side" markdown>
+<div markdown>
 
-![Der noch leere Reiter „1. Rechnungen“](img/rechnungen-leer.png)
+In der Prüfung auf **1. Rechnungen** wechseln.
 
 Das Symbol oben rechts (**Rechnungen hinzufügen**) öffnet die Dateiauswahl. In den entpackten Ordner
 gehen, alle Dateien markieren und **Öffnen**.
+
+</div>
+
+![Der noch leere Reiter „1. Rechnungen“](img/rechnungen-leer.png)
+
+</div>
 
 !!! windows "Unter Windows"
     Alle Dateien markiert ++ctrl+a++.
@@ -38,6 +45,9 @@ ziehen.
 
 ## Warten
 
+<div class="us-side" markdown>
+<div markdown>
+
 Das Programm liest jetzt jede Datei einzeln. Ein Scan ist zunächst nur ein
 Bild; das Programm erkennt darauf Lieferant, Nummer, Datum und jede einzelne
 Position und rechnet das Ergebnis gegen die Summen des Belegs. Geht die
@@ -49,7 +59,14 @@ Stunde. Am Ende steht
 im Fenster, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht
 anstehen:
 
-![Das Importfenster am Ende: 105 Rechnungen übernommen, 1 zur Durchsicht](img/rechnungen-import.png)
+</div>
+
+![Das Importfenster am Ende: 105 Rechnungen übernommen, 1 zur Durchsicht](img/rechnungen-import.png){ width="440" }
+
+</div>
+
+<div class="us-side" markdown>
+<div markdown>
 
 Den Dialog mit **Schließen** beenden. Jede Rechnung steht dann mit Lieferant,
 Nummer, Datum und Nettobetrag in der Liste. Die erste Spalte zeigt den Status:
@@ -60,7 +77,11 @@ Nummer, Datum und Nettobetrag in der Liste. Die erste Spalte zeigt den Status:
 
 Über der Liste steht die Bilanz: `1 offen, 105 automatisch, 0 manuell`.
 
+</div>
+
 ![Die Rechnungsliste nach dem Import, die offene Rechnung oben](img/rechnungen-liste.png)
+
+</div>
 
 !!! geschafft "Geschafft, wenn …"
     - über der Liste `1 offen, 105 automatisch, 0 manuell` steht

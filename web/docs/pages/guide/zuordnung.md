@@ -10,6 +10,9 @@ es nicht wusste.
 
 ## Die Liste
 
+<div class="us-side" markdown>
+<div markdown>
+
 Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder
 einmal, auch wenn er auf 25 Rechnungen vorkommt. Die erste Spalte ist der
 Status:
@@ -19,14 +22,19 @@ Status:
 - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
+</div>
+
 ![Der Reiter „2. Zuordnung“ nach dem Import, sechs Positionen offen](img/zuordnung-liste.png)
+
+</div>
 
 ## Eine Position ansehen
 
+<div class="us-side" markdown>
+<div markdown>
+
 Die Zeile **2022 Domina trocken 0,75 l** anklicken. Rechts erscheint alles,
 was zu diesem Artikel bekannt ist:
-
-![Die Position 2022 Domina mit den Vorschlägen des Programms](img/zuordnung-position.png)
 
 - **Aus der Rechnung**: Name, Lieferant, Artikelnummer und die Gesamtmenge
   über alle Rechnungen, hier 158 Flaschen in 6 Positionen.
@@ -41,14 +49,30 @@ was zu diesem Artikel bekannt ist:
 - **Belege**: die Rechnungszeilen, aus denen der Artikel stammt, als
   Ausschnitt des Scans.
 
+</div>
+
+![Die Position 2022 Domina mit den Vorschlägen des Programms](img/zuordnung-position.png)
+
+</div>
+
+<div class="us-side" markdown>
+<div markdown>
+
 Ein Domina ist ein fränkischer Rotwein. Den Vorschlag **Rotwein × 750 ml**
 anklicken und **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die
 Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen
 Zuordnungen, und die Bilanz zeigt `5 offen`.
 
-![Die Bestätigung nach dem Zuordnen](img/zuordnung-zugeordnet.png)
+</div>
+
+![Die Bestätigung nach dem Zuordnen](img/zuordnung-zugeordnet.png){ width="428" }
+
+</div>
 
 ## Die übrigen offenen Positionen
+
+<div class="us-side" markdown>
+<div markdown>
 
 Nach demselben Muster die anderen fünf. Bei zweien ist die Zutat klar, das
 Programm zeigt sie als **Exakter Treffer**, aber der Faktor fehlt: Aus
@@ -56,43 +80,54 @@ Programm zeigt sie als **Exakter Treffer**, aber der Faktor fehlt: Aus
 **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage,
 die zu beantworten ist:
 
-![Die Kaffeesahne: Zutat klar, Faktor fehlt](img/zuordnung-faktor-fehlt.png)
+</div>
+
+![Die Kaffeesahne: Zutat klar, Faktor fehlt](img/zuordnung-faktor-fehlt.png){ width="630" }
+
+</div>
+
+<div class="us-side" markdown>
+<div markdown>
 
 Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800`{.copy} eintragen,
 die Zeile darunter rechnet vor:
 
-![Der Faktor ist eingetragen](img/zuordnung-faktor.png)
+</div>
+
+![Der Faktor ist eingetragen](img/zuordnung-faktor.png){ width="630" }
+
+</div>
 
 | Position | Vorschlag wählen | Faktor | Dann |
 |---|---|---|---|
 | Frühkartoffeln festkochend 12,5 kg | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500` | **Zuordnen** |
 | Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt) | `1800`{.copy} eintragen | **Zuordnen** |
-| Leberkäse am Stück, ungebacken | **Leberkäse** (schon gewählt) | `1000`{.copy} eintragen | **Zuordnen** |
+| Leberkäse am Stück, ungebacken | | | offen lassen |
 | Putenbrustfilet frisch | **Putenfleisch** wählen | | **Zuordnen** |
 | Petersilie glatt, Bund | | | offen lassen |
 
-Beim Leberkäse hat der Scan die Einheit verlesen: Auf dem Beleg steht „kg“,
-gelesen wurde „K8“. Ein „K8“ Leberkäse ist also ein Kilogramm, 1.000 g.
+Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen. Ohne verlässliche
+Einheit gibt es keinen verlässlichen Faktor, die Position bleibt offen.
 
 Beim Putenbrustfilet schlägt das Programm als **Exakter Treffer**
 **Hähnchenfleisch** vor. Das ist falsch: Pute ist kein Hähnchen, die richtige
 Zutat **Putenfleisch** steht mit 90 % darunter. Ein exakter Treffer verdient
 also trotzdem einen Blick.
 
-Die Petersilie bleibt offen. Nicht jede Position muss zugeordnet sein: Was
+Leberkäse und Petersilie bleiben offen. Nicht jede Position muss zugeordnet sein: Was
 offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter
 **Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht.
 Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht
 fällt, ist offen lassen die ehrlichere Antwort.
 
-Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `1 offen` steht.
+Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `2 offen` steht.
 
-![Nur die Petersilie ist noch offen](img/zuordnung-fertig.png)
+![Nur Leberkäse und Petersilie sind noch offen](img/zuordnung-fertig.png){ width="610" }
 
 !!! geschafft "Geschafft, wenn …"
-    - über der Liste `1 offen, 116 automatisch, 5 manuell` steht
-    - nur noch die Petersilie **Offen** ist
+    - über der Liste `2 offen, 116 automatisch, 4 manuell` steht
+    - nur noch Leberkäse und Petersilie **Offen** sind
 
 !!! nachlesen "Zum Nachlesen"
     Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit
