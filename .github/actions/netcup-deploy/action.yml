@@ -1,5 +1,5 @@
 name: netcup-deploy
-description: Ship a built directory into a netcup document root over SSH.
+description: Ship a built directory into an existing netcup document root over SSH.
 
 inputs:
   source:
@@ -10,7 +10,9 @@ inputs:
     required: true
   user:
     required: true
-  password:
+  key:
+    required: true
+  known-hosts:
     required: true
 
 runs:
@@ -18,30 +20,31 @@ runs:
   steps:
     - shell: bash
       env:
-        SSH_PW: ${{ inputs.password }}
-        SSH_HOST: ${{ inputs.host }}
-        SSH_USER: ${{ inputs.user }}
+        SSH_KEY: ${{ inputs.key }}
+        SSH_KNOWN_HOSTS: ${{ inputs.known-hosts }}
+        SSH_TARGET: ${{ inputs.user }}@${{ inputs.host }}
         DEPLOY_PATH: ${{ inputs.deploy-path }}
         SOURCE: ${{ inputs.source }}
       run: |
         set -euo pipefail
 
-        if ! command -v sshpass >/dev/null 2>&1; then
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-        fi
+        case "$DEPLOY_PATH" in
+          ''|/*|*..*) echo "refusing deploy path '$DEPLOY_PATH'" >&2; exit 1 ;;
+        esac
 
-        mkdir -p ~/.ssh
-        ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+        mkdir -p -m 700 ~/.ssh
+        printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        SSH_OPTS=(-i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes)
 
-        tar -czf /tmp/deploy.tar.gz --exclude='./.git' -C "$SOURCE" .
-
-        ARCHIVE="/tmp/deploy-$(date +%s)-$$.tar.gz"
-        sshpass -p "$SSH_PW" scp /tmp/deploy.tar.gz "${SSH_USER}@${SSH_HOST}:${ARCHIVE}"
-        sshpass -p "$SSH_PW" ssh "${SSH_USER}@${SSH_HOST}" "
+        STAGE="$(dirname "$DEPLOY_PATH")/.deploy-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        tar -czf - --exclude='./.git' -C "$SOURCE" . | ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
           set -e
-          mkdir -p ${DEPLOY_PATH}
-          rm -rf ${DEPLOY_PATH}/* ${DEPLOY_PATH}/.htaccess
-          tar -xzf ${ARCHIVE} -C ${DEPLOY_PATH}
-          rm ${ARCHIVE}
+          [ -d '$DEPLOY_PATH' ] || { echo 'missing $DEPLOY_PATH' >&2; exit 1; }
+          rm -rf '$STAGE' && mkdir -p '$STAGE/new' '$STAGE/old'
+          tar -xzf - -C '$STAGE/new'
+          find '$DEPLOY_PATH' -mindepth 1 -maxdepth 1 -exec mv -t '$STAGE/old' {} +
+          find '$STAGE/new' -mindepth 1 -maxdepth 1 -exec mv -t '$DEPLOY_PATH' {} +
+          rm -rf '$STAGE'
         "

@@ -28,7 +28,8 @@ jobs:
           deploy-path: ${{ vars.LANDING_DEPLOY_PATH }}
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PW }}
+          key: ${{ secrets.SSH_KEY }}
+          known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
   shots:
     runs-on: macos-latest
@@ -133,4 +134,5 @@ jobs:
           deploy-path: ${{ vars.DOCS_DEPLOY_PATH }}
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PW }}
+          key: ${{ secrets.SSH_KEY }}
+          known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
