@@ -16,6 +16,7 @@ Prüfung zusätzlich für sich anpassen, siehe
 | Zutaten | **Regeln → Zutaten** |
 | Produkte mit Rezept | **Regeln → Produkte** |
 | Ertragsregeln | **Regeln → Ertragsregeln** |
+| Gewerbekennzahlen | **Regeln → Gewerbe** |
 | Zuordnungen | in der Prüfung unter [Zuordnung](zuordnung.md) |
 
 ## Zutaten { #zutaten }
@@ -80,3 +81,16 @@ Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des
 Prüfungsjahres. Weicht ein Betrieb belegbar ab, bekommt er keine freie
 Prozentzahl, sondern eine eigene Regel mit sprechendem Namen. So steht im
 Bericht nicht nur der Satz, sondern auch, warum er gilt.
+
+## Gewerbe { #gewerbe }
+
+Die Liste der Gewerbekennzahlen, die eine Prüfung wählen kann, jede mit ihrer
+Bezeichnung aus der Richtsatzsammlung, etwa `56101.0` Gast-, Speise- und
+Schankwirtschaften. Mitgeliefert sind alle Kennzahlen der beiliegenden
+Sammlungen. Eine fehlende lässt sich mit **Neu** anlegen, eine Bezeichnung
+ändern oder eine Kennzahl löschen, die im Betrieb nie vorkommt.
+
+Die Kennzahl entscheidet, welche Zutaten die [Zuordnung](zuordnung.md)
+vorschlägt: Kategorien gelten nur für Kennzahlen, die mit einem ihrer Präfixe
+beginnen, etwa `561` für alle Gaststätten. Eine Prüfung übernimmt deshalb nur
+Kennzahlen aus dieser Liste.

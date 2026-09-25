@@ -16,6 +16,17 @@ namespace Umsatzschaetzung.Headless;
 // person would. What is shown is up to the script.
 public sealed class Driver(Shell shell, int scale, double pad, string outDir)
 {
+    // The rules open in a window of their own, not owned by the shell, and ask from there.
+    readonly List<Window> opened = Track();
+
+    static List<Window> Track()
+    {
+        List<Window> opened = [];
+        Avalonia.Controls.Window.WindowOpenedEvent.AddClassHandler<Window>((w, _) => opened.Add(w));
+        Avalonia.Controls.Window.WindowClosedEvent.AddClassHandler<Window>((w, _) => opened.Remove(w));
+        return opened;
+    }
+
     public void Run(Step step)
     {
         var window = Window(step.Window);
@@ -71,7 +82,7 @@ public sealed class Driver(Shell shell, int scale, double pad, string outDir)
     Window Window(string? which) => which switch
     {
         null => shell,
-        "dialog" => shell.OwnedWindows.LastOrDefault() ?? throw new InvalidOperationException("no window above the main window"),
+        "dialog" => opened.LastOrDefault(w => w != shell) ?? throw new InvalidOperationException("no window above the main window"),
         _ => throw new ArgumentException("unknown window: " + which),
     };
 

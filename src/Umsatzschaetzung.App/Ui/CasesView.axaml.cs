@@ -43,13 +43,23 @@ public partial class CasesView : Screen
         Search.Attach(model.Cases, r => r.Case.Label + " " + r.Period + " " + r.Case.Taxpayer.Name);
         Grid.ItemsSource = Search.View;
         Grid.AddHandler(PointerReleasedEvent, RowClicked, RoutingStrategies.Bubble);
-        fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab, NewGewerbe];
+        fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab];
         foreach (var field in fields) field.TextChanged += (s, _) => ((TextBox)s!).Classes.Set("invalid", false);
+        NewGewerbe.PropertyChanged += (_, e) => { if (e.Property == GewerbeBox.KennzahlProperty) NewGewerbe.Classes.Set("invalid", false); };
     }
 
     void ShowRules(object? sender, RoutedEventArgs e) => Session.ShowRules();
 
-    protected override void OnEnter() => _ = Reload();
+    protected override async void OnEnter()
+    {
+        Session.RulesChanged += ShowGewerbe;
+        _ = Reload();
+        await Session.LoadRules(Ct);
+    }
+
+    protected override void OnLeave() => Session.RulesChanged -= ShowGewerbe;
+
+    void ShowGewerbe() => NewGewerbe.Choices = Session.Gewerbezweige();
 
     Task Reload() => Session.Run(async () =>
     {
@@ -60,6 +70,7 @@ public partial class CasesView : Screen
     void StartNew(object? sender, RoutedEventArgs e)
     {
         foreach (var field in fields) field.Classes.Set("invalid", false);
+        NewGewerbe.Classes.Set("invalid", false);
         model.Creating = true;
         NewLabel.Focus();
     }
@@ -76,12 +87,12 @@ public partial class CasesView : Screen
             Name = (NewName.Text ?? "").Trim(),
             TaxNumber = (NewTaxNumber.Text ?? "").Trim(),
             PabNumber = (NewPab.Text ?? "").Trim(),
-            Gewerbe = (NewGewerbe.Text ?? "").Trim(),
+            Gewerbe = NewGewerbe.Kennzahl,
         };
 
         var problems = new List<string>();
-        TextBox? first = null;
-        void Check(TextBox field, bool ok, string name)
+        Control? first = null;
+        void Check(Control field, bool ok, string name)
         {
             field.Classes.Set("invalid", !ok);
             if (ok) return;
@@ -96,7 +107,7 @@ public partial class CasesView : Screen
         Check(NewName, taxpayer.Name != "", "Name");
         Check(NewTaxNumber, taxpayer.TaxNumber != "", "Steuernummer");
         Check(NewPab, taxpayer.PabNumber != "", "PaB-Nr.");
-        Check(NewGewerbe, taxpayer.Gewerbe == "" || Gewerbe.Kennzahl(taxpayer.Gewerbe), "Gewerbekennzahl");
+        Check(NewGewerbe, taxpayer.Gewerbe == "" || Session.KnownGewerbe(taxpayer.Gewerbe), "Gewerbekennzahl (aus der Liste wählen)");
         if (problems.Count > 0)
         {
             Session.Fail("Bitte prüfen: " + string.Join(", ", problems) + ".");
@@ -110,7 +121,7 @@ public partial class CasesView : Screen
             var resp = await Session.Service.PutCase(kase, Ct);
             model.Creating = false;
             NewLabel.Text = NewFrom.Text = NewTo.Text = "";
-            NewName.Text = NewTaxNumber.Text = NewPab.Text = NewGewerbe.Text = "";
+            NewName.Text = NewTaxNumber.Text = NewPab.Text = NewGewerbe.Kennzahl = "";
             Session.Open(resp);
         });
     }

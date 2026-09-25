@@ -232,5 +232,15 @@
       },
       "categoryId": "cat.spirituosen"
     }
+  },
+  "gewerbezweige": {
+    "gw.56101.0": {
+      "id": "gw.56101.0",
+      "kennzahl": "56101.0",
+      "name": "Gast-, Speise- und Schankwirtschaften",
+      "meta": {
+        "changedAt": "2024-01-08T09:44:00Z"
+      }
+    }
   }
 }

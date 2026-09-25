@@ -55,7 +55,7 @@
                     </StackPanel>
                 </Grid>
                 <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="NewGewerbe" Width="252" HorizontalAlignment="Left" PlaceholderText="z. B. 56101.0 (Richtsatzsammlung)"/>
+                <ui:GewerbeBox x:Name="NewGewerbe" Width="520" HorizontalAlignment="Left"/>
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                     <Button Content="Anlegen" Theme="{StaticResource PrimaryButton}" Click="Create" Margin="0,0,8,0"/>
                     <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" Click="CancelNew"/>

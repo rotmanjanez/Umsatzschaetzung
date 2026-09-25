@@ -316,6 +316,65 @@
                     </Grid>
                 </Grid>
             </TabItem>
+
+            <TabItem Header="Gewerbe">
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" MinWidth="260"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="62*" MinWidth="260"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Theme="{StaticResource Panel}">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="8">
+                                <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" ToolTip.Tip="Neu" Click="NewGewerbe">
+                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                                </Button>
+                                <ui:SearchBox x:Name="GewerbeSearch" Width="NaN"/>
+                            </DockPanel>
+                            <Grid>
+                                <ListBox x:Name="GewerbeGrid" SelectionChanged="GewerbeSelected" BorderThickness="0" Background="Transparent"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="ui:GewerbeItem">
+                                            <Grid ColumnDefinitions="64,*" Margin="4,6" ToolTip.Tip="{Binding Name}">
+                                                <TextBlock Text="{Binding Kennzahl}" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <ui:NoResults Search="{Binding #GewerbeSearch}"/>
+                            </Grid>
+                        </DockPanel>
+                    </Border>
+                    <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                    <Grid Grid.Column="2" DataContext="{Binding Gewerbe}" x:DataType="ui:GewerbeForm">
+                        <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
+                                   Text="Links eine Gewerbekennzahl auswählen, um sie zu bearbeiten – oder mit „Neu“ eine neue anlegen."/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
+                            <StackPanel Margin="8,0,16,16">
+                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                                <TextBlock Text="Kennzahl *" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="GewerbeKennzahl" Text="{Binding Kennzahl, Mode=TwoWay}" Classes.invalid="{Binding KennzahlInvalid}"
+                                         Width="160" HorizontalAlignment="Left" PlaceholderText="z. B. 56101.0"/>
+                                <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
+                                <TextBox x:Name="GewerbeName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"/>
+                                <TextBlock Text="Die Kennzahlen stehen in der Prüfung zur Wahl. Kategorien grenzen ihre Zutaten über den Anfang der Kennzahl ein, etwa „561“ für alle Gaststätten."
+                                           Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveGewerbe">
+                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteGewerbe" IsVisible="{Binding Existing}">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </TabItem>
         </TabControl>
     </DockPanel>
 </ui:Screen>

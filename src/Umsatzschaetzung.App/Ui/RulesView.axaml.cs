@@ -70,6 +70,14 @@ public sealed class ProductItem(Product product, string recipe)
     public string Tip => Recipe == "" ? Name : Name + "\n" + Recipe;
 }
 
+public sealed class GewerbeItem(Gewerbezweig zweig)
+{
+    public Gewerbezweig Zweig { get; } = zweig;
+    public string Kennzahl => Zweig.Kennzahl;
+    public string Name => Zweig.Name;
+    public string Search => Kennzahl + " " + Name;
+}
+
 public sealed class YieldItem(YieldRule rule)
 {
     public YieldRule Rule { get; } = rule;
@@ -189,6 +197,17 @@ public sealed class ProductForm : EntityForm<ProductItem>
     public ObservableCollection<RecipeRow> Recipe { get; } = [];
 }
 
+public sealed class GewerbeForm : EntityForm<GewerbeItem>
+{
+    string kennzahl = "", name = "";
+    bool kennzahlInvalid, nameInvalid;
+
+    public string Kennzahl { get => kennzahl; set { if (Set(ref kennzahl, value)) KennzahlInvalid = false; } }
+    public string Name { get => name; set { if (Set(ref name, value)) NameInvalid = false; } }
+    public bool KennzahlInvalid { get => kennzahlInvalid; set => Set(ref kennzahlInvalid, value); }
+    public bool NameInvalid { get => nameInvalid; set => Set(ref nameInvalid, value); }
+}
+
 public sealed class YieldForm : EntityForm<ScopeItem>
 {
     public static readonly Ingredient None = new() { Id = "", Name = "keine" };
@@ -244,6 +263,7 @@ public sealed class RulesModel
     public IngredientForm Ingredients { get; } = new();
     public ProductForm Products { get; } = new();
     public YieldForm Yields { get; } = new();
+    public GewerbeForm Gewerbe { get; } = new();
 }
 
 public partial class RulesView : Screen
@@ -260,6 +280,7 @@ public partial class RulesView : Screen
     {
         1 => Help.Rules + "#produkte",
         2 => Help.Rules + "#ertragsregeln",
+        3 => Help.Rules + "#gewerbe",
         _ => Help.Rules + "#zutaten",
     };
 
@@ -270,6 +291,8 @@ public partial class RulesView : Screen
         IngredientSearch.Attach(model.Ingredients.Items, i => i.Search);
         ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
         YieldSearch.Attach(model.Yields.Items, s => s.Search);
+        GewerbeSearch.Attach(model.Gewerbe.Items, g => g.Search);
+        GewerbeGrid.ItemsSource = GewerbeSearch.View;
         IngredientGrid.ItemsSource = IngredientSearch.View;
         ProductGrid.ItemsSource = ProductSearch.View;
         ScopeGrid.ItemsSource = YieldSearch.View;
@@ -308,7 +331,13 @@ public partial class RulesView : Screen
         foreach (var scope in scopes) model.Yields.Items.Add(scope);
         ScopeGrid.SelectedItem = scopes.Find(s => s.Rules.Exists(r => r.Rule.Id == model.Yields.CurrentId)) ?? scopes.FirstOrDefault();
 
+        model.Gewerbe.Items.Clear();
+        foreach (var g in Session.Gewerbezweige()) model.Gewerbe.Items.Add(new GewerbeItem(g));
+        GewerbeGrid.SelectedItem = model.Gewerbe.Items.FirstOrDefault(g => g.Zweig.Id == model.Gewerbe.CurrentId);
+
         loading = false;
+        if (GewerbeGrid.SelectedItem is GewerbeItem gi) LoadGewerbe(gi.Zweig);
+        else if (model.Gewerbe.CurrentId is not null) model.Gewerbe.Active = false;
         if (IngredientGrid.SelectedItem is IngredientItem ii) LoadIngredient(ii.Ingredient); else model.Ingredients.Active = false;
         if (ProductGrid.SelectedItem is ProductItem pi) LoadProduct(pi.Product);
         else if (model.Products.CurrentId is not null) model.Products.Active = false;
@@ -676,4 +705,50 @@ public partial class RulesView : Screen
     }
 
     async void DeleteYield(object? sender, RoutedEventArgs e) => await Delete(model.Yields, Entity.YieldRule);
+
+    void GewerbeSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!loading && GewerbeGrid.SelectedItem is GewerbeItem item) LoadGewerbe(item.Zweig);
+    }
+
+    void LoadGewerbe(Gewerbezweig g)
+    {
+        var f = model.Gewerbe;
+        f.CurrentId = g.Id;
+        f.Existing = f.Active = true;
+        f.Title = g.Kennzahl + " " + g.Name;
+        f.Kennzahl = g.Kennzahl;
+        f.Name = g.Name;
+    }
+
+    void NewGewerbe(object? sender, RoutedEventArgs e)
+    {
+        var f = model.Gewerbe;
+        GewerbeGrid.SelectedItem = null;
+        f.CurrentId = null;
+        f.Existing = false;
+        f.Active = true;
+        f.Title = "Neue Gewerbekennzahl";
+        f.Kennzahl = f.Name = "";
+    }
+
+    async void SaveGewerbe(object? sender, RoutedEventArgs e)
+    {
+        var f = model.Gewerbe;
+        var data = new Gewerbezweig { Id = f.CurrentId ?? Session.NewId("gewerbe"), Kennzahl = f.Kennzahl.Trim(), Name = f.Name.Trim() };
+        var taken = Session.Gewerbezweige().Exists(g => g.Kennzahl == data.Kennzahl && g.Id != data.Id);
+        f.KennzahlInvalid = !Gewerbe.Kennzahl(data.Kennzahl) || taken;
+        f.NameInvalid = data.Name == "";
+        if (f.KennzahlInvalid || f.NameInvalid)
+        {
+            Session.Fail(Missing(
+                f.KennzahlInvalid ? taken ? "Kennzahl (gibt es schon)" : "Kennzahl (etwa 56101.0)" : null,
+                f.NameInvalid ? "Bezeichnung" : null));
+            return;
+        }
+        f.CurrentId = data.Id;
+        await Session.Put(data, Ct);
+    }
+
+    async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig);
 }

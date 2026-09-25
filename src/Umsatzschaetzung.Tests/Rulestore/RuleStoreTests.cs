@@ -17,6 +17,7 @@ public class RuleStoreTests
         Mappings = Sorted(rs.Mappings),
         Products = Sorted(rs.Products),
         YieldRules = Sorted(rs.YieldRules),
+        Gewerbezweige = Sorted(rs.Gewerbezweige),
     });
 
     static Dictionary<string, T> Sorted<T>(Dictionary<string, T> d) =>
@@ -74,7 +75,7 @@ public class RuleStoreTests
         Assert.Equal(0, merged.Products["prod.korn.2cl"].Meta.Rev);
     }
 
-    public static TheoryData<string> Kinds => ["category", "ingredient", "mapping", "product", "yield_rule"];
+    public static TheoryData<string> Kinds => ["category", "ingredient", "mapping", "product", "yield_rule", "gewerbe"];
 
     static IRuleEntity Full(string kind) => kind switch
     {
@@ -90,6 +91,7 @@ public class RuleStoreTests
             Id = "e", Name = "Radler", Meta = Stamped(),
             Recipe = [new() { IngredientId = "ing.b", Amount = 250, Unit = "MLT" }, new() { IngredientId = "ing.a", Amount = 250, Unit = "MLT" }, new() { ProductId = "prod.x", Amount = 2, Unit = "H87" }],
         },
+        "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "56101.0", Name = "Gast-, Speise- und Schankwirtschaften", Meta = Stamped() },
         _ => new YieldRule
         {
             Id = "e", Name = "Schwund", CategoryId = "cat.x", IngredientId = "ing.y", Shrinkage = 1, OwnUse = 2, Staff = 3, Free = 4, Default = true,
@@ -103,6 +105,7 @@ public class RuleStoreTests
         "ingredient" => new Ingredient { Id = "e", Name = "n" },
         "mapping" => new ArticleMapping { Id = "e", IngredientId = "i" },
         "product" => new Product { Id = "e", Name = "n" },
+        "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "k", Name = "n" },
         _ => new YieldRule { Id = "e", Name = "n" },
     };
 
@@ -119,6 +122,7 @@ public class RuleStoreTests
         Ingredient => Entity.Ingredient,
         ArticleMapping => Entity.Mapping,
         Product => Entity.Product,
+        Gewerbezweig => Entity.Gewerbezweig,
         _ => Entity.YieldRule,
     };
 
@@ -199,6 +203,7 @@ public class RuleStoreTests
     [InlineData(Entity.Mapping, "map.korn07")]
     [InlineData(Entity.Product, "prod.pils.03")]
     [InlineData(Entity.YieldRule, "yr.bier.fass")]
+    [InlineData(Entity.Gewerbezweig, "gw.56101.0")]
     public void EachKindCanBeDeletedAndStaysDeletedAcrossTheSeed(Entity kind, string id)
     {
         using var tmp = new TempDir();
@@ -452,12 +457,23 @@ public class RuleStoreTests
             .. seed.Mappings.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.Products.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.YieldRules.Select(e => (e.Key, (IRuleEntity)e.Value)),
+            .. seed.Gewerbezweige.Select(e => (e.Key, (IRuleEntity)e.Value)),
         ];
 
         Assert.NotEmpty(all);
         Assert.All(all, x => Assert.Equal(x.Key, x.E.Id));
         Assert.All(all, x => Assert.NotEqual(default, x.E.Meta.ChangedAt));
         RuleCheck.Validate(seed);
+    }
+
+    [Fact]
+    public void EveryKennzahlOfTheShippedSammlungenIsSeeded()
+    {
+        using var tmp = new TempDir();
+        var store = new RuleStore(tmp.Path, RuleStore.Seed());
+        var listed = store.Sammlungen().SelectMany(i => store.Sammlung(i.Year)!.Klassen).SelectMany(k => k.Kennzahlen).ToHashSet();
+
+        Assert.Equal(listed.Order(), store.Load().Gewerbezweige.Values.Select(g => g.Kennzahl).Order());
     }
 
     [Fact]

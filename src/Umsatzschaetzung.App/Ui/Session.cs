@@ -313,6 +313,12 @@ public sealed class Session : Observable
     public string CategoryName(string? id) =>
         Rules is not null && !string.IsNullOrEmpty(id) && Rules.Categories.TryGetValue(id, out var c) ? c.Name : "";
 
+    public List<Gewerbezweig> Gewerbezweige() =>
+        Rules is null ? [] : Rules.Gewerbezweige.Values.OrderBy(g => g.Kennzahl, StringComparer.Ordinal).ToList();
+
+    public bool KnownGewerbe(string kennzahl) =>
+        Rules is not null && Rules.Gewerbezweige.Values.Any(g => g.Kennzahl == kennzahl);
+
     public List<Ingredient> Ingredients() =>
         Rules is null ? [] : Rules.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
 

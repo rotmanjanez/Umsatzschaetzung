@@ -109,6 +109,31 @@ public class RuleCheckTests
     }
 
     [Theory]
+    [InlineData("561")]
+    [InlineData("56101.0")]
+    public void AGewerbezweigNeedsAValidKennzahlAndAName(string kennzahl)
+    {
+        var rs = Valid();
+        rs.Put(new Gewerbezweig { Id = "gw", Kennzahl = kennzahl, Name = "Gaststätten" });
+        RuleCheck.Validate(rs);
+
+        rs.Gewerbezweige["gw"].Name = " ";
+        Assert.Contains("Bezeichnung", Rejected(rs));
+        rs.Gewerbezweige["gw"] = new Gewerbezweig { Kennzahl = kennzahl + "x", Name = "Gaststätten" };
+        Assert.Contains("ungültig", Rejected(rs));
+    }
+
+    [Fact]
+    public void AKennzahlIsListedOnce()
+    {
+        var rs = Valid();
+        rs.Put(new Gewerbezweig { Id = "a", Kennzahl = "56101.0", Name = "Gaststätten" });
+        rs.Put(new Gewerbezweig { Id = "b", Kennzahl = "56101.0", Name = "Restaurants" });
+
+        Assert.Contains("gibt es schon", Rejected(rs));
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData("561010")]
     [InlineData("56101.")]

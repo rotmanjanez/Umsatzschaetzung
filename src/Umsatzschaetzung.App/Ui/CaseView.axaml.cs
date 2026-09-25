@@ -29,6 +29,7 @@ public sealed class CaseModel : Observable
     string label = "", from = "", to = "", name = "", taxNumber = "", pab = "", gewerbe = "";
     readonly string[] declared = ["", "", ""];
     bool noInvoices;
+    List<Gewerbezweig> gewerbezweige = [];
 
     public string Label { get => label; set => Set(ref label, value); }
     public string From { get => from; set => Set(ref from, value); }
@@ -36,7 +37,20 @@ public sealed class CaseModel : Observable
     public string Name { get => name; set => Set(ref name, value); }
     public string TaxNumber { get => taxNumber; set => Set(ref taxNumber, value); }
     public string Pab { get => pab; set => Set(ref pab, value); }
-    public string Gewerbe { get => gewerbe; set => Set(ref gewerbe, value); }
+    public string Gewerbe { get => gewerbe; set { if (Set(ref gewerbe, value)) Raise(nameof(GewerbeInvalid)); } }
+    public bool GewerbeInvalid => gewerbe != "" && !gewerbezweige.Exists(g => g.Kennzahl == gewerbe);
+
+    // Kein Set: neue Wahlmöglichkeiten sind keine Änderung an der Prüfung.
+    public List<Gewerbezweig> Gewerbezweige
+    {
+        get => gewerbezweige;
+        set
+        {
+            gewerbezweige = value;
+            Raise();
+            Raise(nameof(GewerbeInvalid));
+        }
+    }
     public string Declared19 { get => declared[0]; set => Set(ref declared[0], value); }
     public string Declared7 { get => declared[1]; set => Set(ref declared[1], value); }
     public string Declared0 { get => declared[2]; set => Set(ref declared[2], value); }
@@ -55,6 +69,7 @@ public sealed class CaseModel : Observable
         Name = k.Taxpayer.Name;
         TaxNumber = k.Taxpayer.TaxNumber;
         Pab = k.Taxpayer.PabNumber;
+        Gewerbezweige = session.Gewerbezweige();
         Gewerbe = k.Taxpayer.Gewerbe;
         NoInvoices = k.Invoices.Count == 0;
         Declared19 = Input.Edit(Declared(k, 1900));
@@ -72,8 +87,10 @@ public sealed class CaseModel : Observable
             });
     }
 
+    // Eine unbekannte Kennzahl, die schon in der Prüfung stand, hält das Speichern nicht auf.
     public bool Collect(Case k)
     {
+        var gewerbeOk = !GewerbeInvalid || Gewerbe == k.Taxpayer.Gewerbe;
         k.Label = Label.Trim();
         var from = Input.Date(From);
         var to = Input.Date(To);
@@ -84,11 +101,11 @@ public sealed class CaseModel : Observable
             Name = Name.Trim(),
             TaxNumber = TaxNumber.Trim(),
             PabNumber = Pab.Trim(),
-            Gewerbe = Gewerbe.Trim(),
+            Gewerbe = Gewerbe,
         };
         var valid = k.Label != "" && from is not null && to is not null
             && k.Taxpayer.Name != "" && k.Taxpayer.TaxNumber != "" && k.Taxpayer.PabNumber != ""
-            && (k.Taxpayer.Gewerbe == "" || Model.Gewerbe.Kennzahl(k.Taxpayer.Gewerbe));
+            && gewerbeOk;
         k.Declared = [];
         for (var i = 0; i < declared.Length; i++)
         {
@@ -143,6 +160,7 @@ public partial class CaseView : Screen
 
     protected override async void OnEnter()
     {
+        Session.RulesChanged += ShowGewerbe;
         if (Session.Case is null) return;
         await Session.LoadRules(Ct);
         if (Session.Case is null || !IsActive) return;
@@ -151,8 +169,11 @@ public partial class CaseView : Screen
         loading = false;
     }
 
+    void ShowGewerbe() => model.Gewerbezweige = Session.Gewerbezweige();
+
     protected override void OnLeave()
     {
+        Session.RulesChanged -= ShowGewerbe;
         timer.Stop();
         _ = Save(CancellationToken.None);
     }
