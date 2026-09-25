@@ -267,6 +267,27 @@ public class TableTests
     }
 
     [Fact]
+    public void AUnitCutShortIsTheOneUnitTheOtherRowsPrintThatItOpens()
+    {
+        var items = Items(Headed()
+            .Cells(Role.LineItem, (100, "17F"), (300, "Domina"), (900, "134,30"))
+            .Cells(Role.LineItem, (100, "12"), (200, "Fl"), (300, "Silvaner"), (900, "90,00"))
+            .Cells(Role.LineItem, (100, "6"), (200, "F1"), (300, "Riesling"), (900, "45,00"))
+            .Cells(Role.LineItem, (100, "3"), (200, "Kt"), (300, "Sekt"), (900, "60,00")));
+        Assert.Equal(("17", "Fl"), (items[0][Field.Quantity].Text, items[0][Field.Unit].Text));
+    }
+
+    [Fact]
+    public void AUnitCutShortThatOpensTwoOfTheRowsUnitsStaysOpen()
+    {
+        var items = Items(Headed()
+            .Cells(Role.LineItem, (100, "17F"), (300, "Domina"), (900, "134,30"))
+            .Cells(Role.LineItem, (100, "12"), (200, "Fl"), (300, "Silvaner"), (900, "90,00"))
+            .Cells(Role.LineItem, (100, "1"), (200, "Fass"), (300, "Bier"), (900, "60,00")));
+        Assert.DoesNotContain(Field.Unit, items[0].Keys);
+    }
+
+    [Fact]
     public void AQuantityAndUnitInTheUnitColumnAreSplitToo()
     {
         var item = Items(Headed().Cells(Role.LineItem, (200, "15 Stk"), (300, "Tomaten"), (900, "7,00")))[0];

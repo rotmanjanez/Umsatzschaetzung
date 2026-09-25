@@ -104,6 +104,8 @@ public class ParseTests
     [InlineData("19 dezember 2025", 2025, 12, 19)]
     [InlineData("1. März 2025", 2025, 3, 1)]
     [InlineData("29.02.2024", 2024, 2, 29)]
+    [InlineData("03.07. 2025", 2025, 7, 3)]
+    [InlineData("3. 7. 2025", 2025, 7, 3)]
     public void DatesReadInGermanAndIsoShapes(string text, int y, int m, int d) =>
         Assert.Equal(new DateOnly(y, m, d), Parse.Date(text));
 

@@ -131,7 +131,14 @@ public static class Parse
         return string.Join(" ", tokens);
     }
 
-    public static DateOnly? Date(string s) => Read(s.Trim()) ?? Read(Unconfuse(s.Trim()));
+    // A date the scan broke after a separator ("03.07. 2025") is still one date.
+    static readonly Regex SeparatorSpace = new(@"(?<=\d[.\-/])\s+(?=\d{1,4}(?:[.\-/]|(?!\w)))");
+
+    public static DateOnly? Date(string s)
+    {
+        var t = SeparatorSpace.Replace(s.Trim(), "");
+        return Read(t) ?? Read(Unconfuse(t));
+    }
 
     static DateOnly? Read(string s)
     {

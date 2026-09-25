@@ -381,6 +381,7 @@ public sealed class Table
     void Build(List<(Role Role, List<Cell> Cells)> rows)
     {
         Dictionary<Field, OcrWord>? current = null;
+        var cut = new List<(Dictionary<Field, OcrWord> Item, OcrWord Letters)>();
         foreach (var (role, cells) in rows)
         {
             if (role is Role.LineWrap or Role.Continuation)
@@ -418,8 +419,23 @@ public sealed class Table
                     ? new OcrWord { Text = Join(field, had.Text, text), Box = Rows.Union(had.Box, cell.Box) }
                     : new OcrWord { Text = text, Box = cell.Box };
             }
-            Units(current);
+            if (Units(current) is { } letters) cut.Add((current, letters));
             Items.Add(current);
+        }
+        Complete(cut);
+    }
+
+    // A unit cut short is the one unit the other rows print that it opens: "17F" among "Fl",
+    // however the scan spelled it there ("F1").
+    void Complete(List<(Dictionary<Field, OcrWord> Item, OcrWord Letters)> cut)
+    {
+        foreach (var (item, letters) in cut)
+        {
+            var units = Items.Select(i => i.GetValueOrDefault(Field.Unit)?.Text)
+                .OfType<string>()
+                .Where(u => u.StartsWith(letters.Text, StringComparison.OrdinalIgnoreCase) && Parse.UnitCode(u) != "")
+                .GroupBy(Parse.UnitCode).ToList();
+            if (units.Count == 1) item[Field.Unit] = new OcrWord { Text = units[0].First(), Box = letters.Box, Confidence = letters.Confidence };
         }
     }
 
@@ -444,26 +460,30 @@ public sealed class Table
 
     // "15 Stk" or "6Fl" as one cell, in whichever of the two columns it landed. Each part gets
     // its share of the box, so the unit column is where the units are printed. One or two
-    // letters that are no unit are one cut short ("17F" for "17 Fl"): they go, and the quantity
-    // keeps its own box, for the gap beside it. A longer word stays with the quantity.
+    // letters that are no unit are one cut short ("17F" for "17 Fl"): they leave the quantity,
+    // which keeps its own box for the gap beside it, and come back for the rows to complete.
+    // A longer word stays with the quantity.
     static readonly Regex TrailingUnit = new(@"^\s*[-\d.,]+\s*(\p{L}\S*)\s*$");
 
-    static void Units(Dictionary<Field, OcrWord> cells)
+    static OcrWord? Units(Dictionary<Field, OcrWord> cells)
     {
         var (have, lack) = cells.ContainsKey(Field.Unit) ? (Field.Unit, Field.Quantity) : (Field.Quantity, Field.Unit);
-        if (cells.ContainsKey(lack) || !cells.TryGetValue(have, out var both)) return;
+        if (cells.ContainsKey(lack) || !cells.TryGetValue(have, out var both)) return null;
         var m = TrailingUnit.Match(both.Text);
-        if (!m.Success) return;
+        if (!m.Success) return null;
         var unit = m.Groups[1];
         var number = both.Text[..unit.Index].TrimEnd();
         var quantity = new OcrWord { Text = number.Trim(), Box = Slice(both, 0, number.Length), Confidence = both.Confidence };
+        var letters = new OcrWord { Text = unit.Value, Box = Slice(both, unit.Index, both.Text.Length), Confidence = both.Confidence };
         if (Model.Units.Lookup(Parse.UnitCode(unit.Value)) is null)
         {
-            if (have == Field.Quantity && unit.Length <= 2) cells[Field.Quantity] = quantity;
-            return;
+            if (have != Field.Quantity || unit.Length > 2) return null;
+            cells[Field.Quantity] = quantity;
+            return letters;
         }
-        cells[Field.Unit] = new OcrWord { Text = unit.Value, Box = Slice(both, unit.Index, both.Text.Length), Confidence = both.Confidence };
+        cells[Field.Unit] = letters;
         cells[Field.Quantity] = quantity;
+        return null;
     }
 
     static Box Slice(OcrWord word, int from, int to)
