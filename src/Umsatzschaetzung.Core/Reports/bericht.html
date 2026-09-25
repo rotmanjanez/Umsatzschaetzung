@@ -70,7 +70,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       <dl class="cover-right">
         <dt>Steuernummer</dt>
         <dd>{{ case.taxpayer.taxNumber }}</dd>
-        <dt>PaB-Nr.</dt>
+        <dt>PAB-Nr.</dt>
         <dd>{{ case.taxpayer.pabNumber }}</dd>
         <dt>Datum</dt>
         <dd>{{ report.computedAt | day }}</dd>
@@ -567,7 +567,7 @@ ol.warnings li { margin-bottom: 0.3em; }
     <footer class="stamp">
       <div><span class="note">Steuernummer</span><br>{{ case.taxpayer.taxNumber }}</div>
       <div><span class="note">Name des Steuerpflichtigen</span><br>{{ case.taxpayer.name }}</div>
-      <div><span class="note">PaB-Nr.</span><br>{{ case.taxpayer.pabNumber }}</div>
+      <div><span class="note">PAB-Nr.</span><br>{{ case.taxpayer.pabNumber }}</div>
       <div><span class="note">Datum</span><br>{{ report.computedAt | day }}</div>
     </footer>
   </main>

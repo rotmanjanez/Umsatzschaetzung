@@ -3,7 +3,7 @@
 
 INSERT OR REPLACE INTO kase(id, label, period_from, period_to, name, tax_number, pab_number, gewerbe, created_at, updated_at)
 VALUES('case.bar.2024', 'Schankwirtschaft Zum Alten Fass, Bp 2024', '2024-01-01', '2024-12-31',
-       'Zum Alten Fass Gastronomie GmbH', '214/5711/0832', 'PaB 2024/0417', '',
+       'Zum Alten Fass Gastronomie GmbH', '214/5711/0832', 'PAB 2024/0417', '',
        '2024-05-02T08:00:00.0000000+00:00', '2024-05-02T08:00:00.0000000+00:00');
 
 INSERT INTO inventory(ord, ingredient_id, opening, closing, unit) VALUES

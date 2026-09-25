@@ -12,7 +12,7 @@ Prüfung in der Liste. Der Zeitraum entscheidet, welche Rechnungen in die
 Kalkulation eingehen: Eine Rechnung mit Datum außerhalb bleibt in der Prüfung,
 zählt aber nicht zum Wareneinsatz.
 
-Name, Steuernummer und PaB-Nr. des Steuerpflichtigen stehen nur im Kopf des
+Name, Steuernummer und PAB-Nr. des Steuerpflichtigen stehen nur im Kopf des
 Berichts.
 
 Die **Gewerbekennzahl** der Richtsatzsammlung, etwa `56101.0` für eine

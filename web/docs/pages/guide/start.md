@@ -23,7 +23,7 @@ Einzutragen sind:
 | Zeitraum bis | `31.12.2025` |
 | Name | `Gasthaus Zur Linde, Inh. Renate Vogel e.K.` |
 | Steuernummer | `203/128/40507` |
-| PaB-Nr. | `PaB 2025/0417` |
+| PAB-Nr. | `PAB 2025/0417` |
 
 Der Zeitraum entscheidet, welche Rechnungen in die Kalkulation eingehen. Die
 Gewerbekennzahl bleibt leer.

@@ -704,7 +704,7 @@ public sealed partial class CaseStore(string dir)
         if (string.IsNullOrWhiteSpace(c.Label)) throw new CaseInvalidException("Bezeichnung darf nicht leer sein");
         if (string.IsNullOrWhiteSpace(c.Taxpayer.Name)) throw new CaseInvalidException("Name des Steuerpflichtigen darf nicht leer sein");
         if (string.IsNullOrWhiteSpace(c.Taxpayer.TaxNumber)) throw new CaseInvalidException("Steuernummer darf nicht leer sein");
-        if (string.IsNullOrWhiteSpace(c.Taxpayer.PabNumber)) throw new CaseInvalidException("PaB-Nr. darf nicht leer sein");
+        if (string.IsNullOrWhiteSpace(c.Taxpayer.PabNumber)) throw new CaseInvalidException("PAB-Nr. darf nicht leer sein");
         if (c.PeriodFrom == default || c.PeriodTo == default)
             throw new CaseInvalidException("Zeitraum muss Daten der Form JJJJ-MM-TT enthalten");
         if (c.PeriodTo < c.PeriodFrom) throw new CaseInvalidException("Zeitraum: Ende liegt vor dem Beginn");

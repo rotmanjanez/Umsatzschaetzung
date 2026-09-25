@@ -71,7 +71,7 @@ public static class Html
         [
             "Steuernummer " + c.Taxpayer.TaxNumber,
             "Name des Steuerpflichtigen " + c.Taxpayer.Name,
-            "PaB-Nr. " + c.Taxpayer.PabNumber,
+            "PAB-Nr. " + c.Taxpayer.PabNumber,
             "Datum " + Format.Day(r.ComputedAt),
         ]);
 

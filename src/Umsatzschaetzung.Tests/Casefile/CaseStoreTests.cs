@@ -207,7 +207,7 @@ public class CaseStoreTests
         { "blank label", c => c.Label = " " },
         { "blank taxpayer", c => c.Taxpayer.Name = "" },
         { "blank tax number", c => c.Taxpayer.TaxNumber = "\t" },
-        { "blank PaB number", c => c.Taxpayer.PabNumber = "" },
+        { "blank PAB number", c => c.Taxpayer.PabNumber = "" },
         { "no period start", c => c.PeriodFrom = default },
         { "no period end", c => c.PeriodTo = default },
         { "period ends before it starts", c => c.PeriodTo = c.PeriodFrom.AddDays(-1) },

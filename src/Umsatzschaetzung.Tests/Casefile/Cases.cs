@@ -22,7 +22,7 @@ static class Cases
     public static Case Full(string id)
     {
         var c = Minimal(id, "Schankwirtschaft „Zum Fass“ – Bp 2024 🍺");
-        c.Taxpayer = new Taxpayer { Name = "Zum Fass GmbH", TaxNumber = "214/5711/0832", PabNumber = "PaB 2024/0417", Gewerbe = "56101.0" };
+        c.Taxpayer = new Taxpayer { Name = "Zum Fass GmbH", TaxNumber = "214/5711/0832", PabNumber = "PAB 2024/0417", Gewerbe = "56101.0" };
         c.CreatedAt = new DateTimeOffset(2024, 5, 2, 8, 0, 0, 123, TimeSpan.FromHours(2));
         c.UpdatedAt = new DateTimeOffset(2025, 1, 31, 23, 59, 59, TimeSpan.FromHours(-5));
         c.Declared = [new() { Vat = 1900, Net = 733595 }, new() { Vat = 0, Net = 0 }, new() { Vat = 700, Net = 12 }];

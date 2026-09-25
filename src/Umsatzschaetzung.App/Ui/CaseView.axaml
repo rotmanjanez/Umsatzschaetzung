@@ -108,7 +108,7 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
                             <TextBox Text="{Binding Name, Mode=TwoWay}"/>
-                            <TextBlock Text="PaB-Nr." Theme="{StaticResource FieldLabel}"/>
+                            <TextBlock Text="PAB-Nr." Theme="{StaticResource FieldLabel}"/>
                             <TextBox Text="{Binding Pab, Mode=TwoWay}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">

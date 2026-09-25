@@ -106,7 +106,7 @@ public partial class CasesView : Screen
         if (from is { } f && to is { } t && t < f) Check(NewTo.Box, false, "Zeitraum bis (liegt vor dem Beginn)");
         Check(NewName, taxpayer.Name != "", "Name");
         Check(NewTaxNumber, taxpayer.TaxNumber != "", "Steuernummer");
-        Check(NewPab, taxpayer.PabNumber != "", "PaB-Nr.");
+        Check(NewPab, taxpayer.PabNumber != "", "PAB-Nr.");
         Check(NewGewerbe, taxpayer.Gewerbe == "" || Session.KnownGewerbe(taxpayer.Gewerbe), "Gewerbekennzahl (aus der Liste wählen)");
         if (problems.Count > 0)
         {
