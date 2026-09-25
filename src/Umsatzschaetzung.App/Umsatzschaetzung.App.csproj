@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="headless" />
+    <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />
   </ItemGroup>
 
   <ItemGroup>

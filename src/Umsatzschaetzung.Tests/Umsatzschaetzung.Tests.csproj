@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="4.0.1" />
     <ProjectReference Include="../Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
+    <ProjectReference Include="../Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
     <Content Include="data/**" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="Xunit" />
   </ItemGroup>
