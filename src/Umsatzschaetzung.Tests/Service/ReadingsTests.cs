@@ -31,6 +31,8 @@ public sealed class ReadingsTests : IDisposable
         }
 
         public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => throw new NotSupportedException();
+
+        public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.FromResult<List<OcrWord>>([]);
     }
 
     [Fact]

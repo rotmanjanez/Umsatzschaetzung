@@ -5,18 +5,22 @@ namespace Umsatzschaetzung.Extract;
 
 public static class Extractor
 {
-    public static Task<Invoice> InvoiceAsync(Tagger tagger, List<OcrPage> pages, CancellationToken ct) => Task.Run(() =>
+    public static async Task<Invoice> InvoiceAsync(Tagger tagger, List<OcrPage> pages, CancellationToken ct, Reread? reread = null)
     {
-        var tagged = new List<List<TaggedWord>>(pages.Count);
-        foreach (var p in pages)
+        var inv = await Task.Run(() =>
         {
-            ct.ThrowIfCancellationRequested();
-            tagged.Add(tagger.Tag(p.Words, p.Width, p.Height));
-        }
-        var inv = Assemble.Invoice(tagged, pages);
+            var tagged = new List<List<TaggedWord>>(pages.Count);
+            foreach (var p in pages)
+            {
+                ct.ThrowIfCancellationRequested();
+                tagged.Add(tagger.Tag(p.Words, p.Width, p.Height));
+            }
+            return Assemble.Invoice(tagged, pages);
+        }, ct);
+        if (reread is not null) await Gaps.Fill(pages, reread, ct);
         Distribute(pages, Check.Invoice(inv));
         return inv;
-    }, ct);
+    }
 
     static void Distribute(List<OcrPage> pages, List<Flag> flags)
     {

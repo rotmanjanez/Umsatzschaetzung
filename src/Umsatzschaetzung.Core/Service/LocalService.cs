@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using SkiaSharp;
 using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Extract;
@@ -166,9 +167,23 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IOcr? ocr, Ta
     {
         if (readings?.Find(data) is { } known) return (known.Pages, known.Draft);
         var pages = await Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
-        var draft = await Extractor.InvoiceAsync(tagger, pages, ct);
+        var draft = await Extractor.InvoiceAsync(tagger, pages, ct, (at, regions, ct) => Reread(data, pages[at], at, regions, ct));
         readings?.Keep(data, new OcrResp("", pages, draft));
         return (pages, draft);
+    }
+
+    async Task<List<List<OcrWord>>> Reread(byte[] data, OcrPage reading, int at, IReadOnlyList<Box> regions, CancellationToken ct)
+    {
+        using var page = await Scan.Page(pdf, data, at, Scan.Dpi, ct);
+        var read = new List<List<OcrWord>>(regions.Count);
+        foreach (var r in regions)
+        {
+            var words = Scan.Cut(page, reading.Correction, new SKRectI(r.X, r.Y, r.X + r.W, r.Y + r.H)) is { } crop
+                ? await ocr!.Read(crop, ct)
+                : [];
+            read.Add([.. words.Select(w => new OcrWord { Text = w.Text, Box = w.Box with { X = w.Box.X + r.X, Y = w.Box.Y + r.Y }, Confidence = w.Confidence })]);
+        }
+        return read;
     }
 
     public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(ct, async () =>

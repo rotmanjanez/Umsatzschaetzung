@@ -22,6 +22,19 @@ public class RepairTests
         return line;
     }
 
+    static InvoiceLine Fixed(string quantity, string price, string net)
+    {
+        var line = new InvoiceLine
+        {
+            Quantity = Parse.Number(quantity, Parse.ScaleMilli),
+            UnitPrice = Parse.Number(price, Parse.ScaleMicro),
+            LineNet = Parse.Number(net, Parse.ScaleCents),
+            PriceBaseQty = 1000,
+        };
+        Assemble.Repair(line, quantity, price, net);
+        return line;
+    }
+
     [Theory]
     [InlineData("5.450", 5_450_000, 12_000_000, 6540, 5450)]
     [InlineData("5,450", 5_450_000, 12_000_000, 6540, 5450)]
@@ -187,5 +200,63 @@ public class RepairTests
         var line = new InvoiceLine { Quantity = 3000, UnitPrice = 0, PriceBaseQty = 100_000, LineNet = 1290 };
         Assemble.Repair(line);
         Assert.Equal(430_000_000, line.UnitPrice);
+    }
+
+    [Theory]
+    [InlineData("3", "1,50", "14,50", 3000, 1_500_000, 450)]
+    [InlineData("2", "18,40", "16,80", 2000, 8_400_000, 1680)]
+    [InlineData("13", "1,50", "4,50", 3000, 1_500_000, 450)]
+    [InlineData("2", "12.345,00", "4.690,00", 2000, 2_345_000_000, 469_000)]
+    [InlineData("2", "1.234,00", "468,00", 2000, 234_000_000, 46_800)]
+    public void AStrayLeadingDigitIsTakenOff(string quantity, string price, string net, long q, long p, long n)
+    {
+        var line = Fixed(quantity, price, net);
+        Assert.Equal((q, p, n), (line.Quantity, line.UnitPrice, line.LineNet));
+    }
+
+    [Theory]
+    [InlineData("121", "0,50", "6,00", 12_000, 500_000, 600)]
+    [InlineData("4", "2,505", "10,00", 4000, 2_500_000, 1000)]
+    public void AStrayTrailingDigitIsTakenOff(string quantity, string price, string net, long q, long p, long n)
+    {
+        var line = Fixed(quantity, price, net);
+        Assert.Equal((q, p, n), (line.Quantity, line.UnitPrice, line.LineNet));
+    }
+
+    [Theory]
+    [InlineData("-3", "1,50", "4,50")]
+    [InlineData("3", "-1,50", "4,50")]
+    [InlineData("3", "1,50", "-4,50")]
+    public void AStrayMinusOnOneCellIsTakenOff(string quantity, string price, string net)
+    {
+        var line = Fixed(quantity, price, net);
+        Assert.Equal((3000, 1_500_000, 450), (line.Quantity, line.UnitPrice, line.LineNet));
+    }
+
+    // 2 × 2,10 reads 14,20: a stray 1 before the net (4,20) or a 2 read for a 7 in the price (7,10).
+    [Theory]
+    [InlineData("2", "2,10", "14,20")]
+    [InlineData("12", "0,60", "1,20")]
+    public void AStrayDigitThatAConfusionExplainsAsWellLeavesTheRowAsRead(string quantity, string price, string net) =>
+        AsRead(quantity, price, net);
+
+    // Dropping any one of three minus signs would add up.
+    [Fact]
+    public void AMinusIsNotDroppedWhereItIsNotAlone() => AsRead("-3", "-1,50", "-4,50");
+
+    [Theory]
+    [InlineData("3", "1,50", "4,50-")]
+    [InlineData("-3", "1,50", "4,60")]
+    [InlineData("105", "1,00", "5,00")]
+    [InlineData("3", "1,50", "14,60")]
+    public void OnlyOneEditIsEverMade(string quantity, string price, string net) =>
+        AsRead(quantity, price, net);
+
+    static void AsRead(string quantity, string price, string net)
+    {
+        var line = Fixed(quantity, price, net);
+        Assert.Equal(
+            (Parse.Number(quantity, Parse.ScaleMilli), Parse.Number(price, Parse.ScaleMicro), Parse.Number(net, Parse.ScaleCents)),
+            (line.Quantity, line.UnitPrice, line.LineNet));
     }
 }

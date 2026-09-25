@@ -40,6 +40,8 @@ public class ScanTests
             onPage?.Invoke(Pages.Count);
             return Task.FromResult(new OcrPage { Width = page.Width, Height = page.Height });
         }
+
+        public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.FromResult<List<OcrWord>>([]);
     }
 
     sealed class Pages(int count) : IPdfPages

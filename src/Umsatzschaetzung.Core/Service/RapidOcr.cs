@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.EP.WebGpu;
 using RapidOcrNet;
@@ -82,6 +83,22 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     }, ct);
 
     public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => Task.Run(() => Recognize(page), ct);
+
+    public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.Run(() =>
+    {
+        var handle = GCHandle.Alloc(crop.Pixels, GCHandleType.Pinned);
+        try
+        {
+            using var bitmap = new SKBitmap();
+            var info = new SKImageInfo(crop.Width, crop.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+            bitmap.InstallPixels(info, handle.AddrOfPinnedObject(), info.RowBytes);
+            return Words(Read(bitmap));
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }, ct);
 
     // Show-through goes first, on the original pixels, so it cannot vote on the lean; then
     // the page is straightened and read. A sideways or upside-down page is turned and read

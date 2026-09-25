@@ -64,7 +64,7 @@ public static class Assemble
                     Vat = Parse.Number(Parse.Digits(Text(cells, Field.Vat)), Parse.ScaleBp),
                 };
                 Regroup(line, quantity);
-                Repair(line);
+                Repair(line, quantity, Parse.Digits(Text(cells, Field.UnitPrice)), Parse.Digits(Text(cells, Field.LineNet)));
                 inv.Lines.Add(line);
                 pages[p].Lines.Add(new OcrLine { Cells = cells, Parsed = line });
             }
@@ -119,20 +119,23 @@ public static class Assemble
         return map;
     }
 
-    // One misread digit anywhere in the row, put back by the row: quantity times unit price is
-    // the line net. Only where exactly one candidate satisfies it; else the check reports it.
-    public static void Repair(InvoiceLine line)
+    // One misread digit, one stray digit before or after a cell, or one stray minus, put back
+    // by the row: quantity times unit price is the line net. Only where exactly one edit of all
+    // of them satisfies it; else the check reports it.
+    public static void Repair(InvoiceLine line, string quantity = "", string price = "", string net = "")
     {
         if (Restore(line)) return;
         if (line.Quantity == 0 || line.UnitPrice == 0 || line.LineNet == 0) return;
         if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, line.LineNet)) return;
 
+        // Two minus signs are a return; either could be the stray one, so neither is.
+        var lone = (line.Quantity < 0 ? 1 : 0) + (line.UnitPrice < 0 ? 1 : 0) + (line.LineNet < 0 ? 1 : 0) == 1;
         var found = new List<(int Field, long Value)>();
-        foreach (var q in Confusions(line.Quantity))
+        foreach (var q in Candidates(line.Quantity, quantity, Parse.ScaleMilli, lone))
             if (Adds(q, line.UnitPrice, line.PriceBaseQty, line.LineNet)) found.Add((1, q));
-        foreach (var p in Confusions(line.UnitPrice))
+        foreach (var p in Candidates(line.UnitPrice, price, Parse.ScaleMicro, lone))
             if (Adds(line.Quantity, p, line.PriceBaseQty, line.LineNet)) found.Add((2, p));
-        foreach (var n in Confusions(line.LineNet))
+        foreach (var n in Candidates(line.LineNet, net, Parse.ScaleCents, lone))
             if (Adds(line.Quantity, line.UnitPrice, line.PriceBaseQty, n)) found.Add((3, n));
         if (found.Count != 1) return;
 
@@ -141,6 +144,30 @@ public static class Assemble
         else if (field == 2) line.UnitPrice = value;
         else line.LineNet = value;
     }
+
+    static HashSet<long> Candidates(long value, string text, int scale, bool lone)
+    {
+        var seen = Confusions(value);
+        foreach (var edit in Strays(text.Trim(), lone && value < 0))
+            if (Parse.Number(edit, scale) is var v and not 0 && v != value) seen.Add(v);
+        return seen;
+    }
+
+    // A table rule before the amount reads as a 1 or a minus, a mark after it as a digit.
+    static IEnumerable<string> Strays(string text, bool minus)
+    {
+        if (minus && text.StartsWith('-')) yield return text[1..];
+        var first = text.IndexOfAny(Digit);
+        if (first < 0) yield break;
+        var rest = text[(first + 1)..];
+        if (rest.Length > 1 && rest[0] is '.' or ' ' && char.IsAsciiDigit(rest[1])) rest = rest[1..];
+        if (rest.Length > 0 && char.IsAsciiDigit(rest[0]) && !(rest[0] == '0' && rest.Length > 1 && char.IsAsciiDigit(rest[1])))
+            yield return text[..first] + rest;
+        var last = text.LastIndexOfAny(Digit);
+        if (last > first) yield return text[..last] + text[(last + 1)..];
+    }
+
+    static readonly char[] Digit = [.. "0123456789"];
 
     // A cell the scan lost outright comes back from the other two where the division is
     // exact. Never the line net: quantity times price is its definition, not a check.
