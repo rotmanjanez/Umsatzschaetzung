@@ -1,0 +1,97 @@
+// Clicking through a filled case, after guide.jsonl built it: what a person does most, each
+// step timed with --perf. Import is left to the guide and not looked at here.
+
+// Reopen the case from the list, then walk the tabs twice: cold, then warm
+{ "do": "press", "at": { "text": "Gasthaus Zur Linde, Bp 2025" } }
+{ "do": "tab", "header": "1. Rechnungen" }
+{ "do": "tab", "header": "2. Zuordnung" }
+{ "do": "tab", "header": "3. Sortiment" }
+{ "do": "tab", "header": "4. Kalkulation" }
+{ "do": "tab", "header": "Prüfung" }
+{ "do": "tab", "header": "1. Rechnungen" }
+{ "do": "tab", "header": "2. Zuordnung" }
+{ "do": "tab", "header": "3. Sortiment" }
+{ "do": "tab", "header": "4. Kalkulation" }
+{ "do": "tab", "header": "1. Rechnungen" }
+
+// Rechnungen: search as one types, then a few invoices opened, looked at and closed
+{ "do": "type", "at": { "name": "Search" }, "text": "M" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Me" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Met" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Metz" }
+{ "do": "type", "at": { "name": "Search" }, "text": "" }
+{ "do": "open", "number": "2025/0118" }
+{ "do": "close", "window": "dialog" }
+{ "do": "open", "number": "9120065089" }
+{ "do": "close", "window": "dialog" }
+{ "do": "open", "number": "R-25-029" }
+{ "do": "close", "window": "dialog" }
+{ "do": "open", "number": "9120127235" }
+{ "do": "close", "window": "dialog" }
+{ "do": "open", "number": "2025/0525" }
+{ "do": "close", "window": "dialog" }
+
+// Zuordnung: going down the positions one by one, and a search
+{ "do": "tab", "header": "2. Zuordnung" }
+{ "do": "select", "at": { "starts": "2022 Domina" } }
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Frühkartoffeln" } }
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Kaffeesahne" } }
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "Putenbrustfilet frisch" } }
+{ "do": "top", "at": { "name": "Groups" } }
+{ "do": "select", "at": { "starts": "2022 Domina" } }
+{ "do": "deselect", "at": { "name": "Groups" } }
+{ "do": "type", "at": { "name": "Search" }, "text": "K" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Ka" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Kaf" }
+{ "do": "type", "at": { "name": "Search" }, "text": "" }
+
+// Sortiment: prices typed into rows
+{ "do": "tab", "header": "3. Sortiment" }
+{ "do": "type", "at": { "text": "Bier 0,5 l vom Fass", "up": "DataGridRow" }, "text": "4,70" }
+{ "do": "focus" }
+{ "do": "type", "at": { "text": "Bier 0,5 l vom Fass", "up": "DataGridRow" }, "text": "4,80" }
+{ "do": "focus" }
+
+// Kalkulation: its pages, rows picked on each
+{ "do": "tab", "header": "4. Kalkulation" }
+{ "do": "tab", "header": "Portionen" }
+{ "do": "select", "at": { "text": "Bier 0,5 l vom Fass" } }
+{ "do": "tab", "header": "Übrige Einkäufe" }
+{ "do": "select", "at": { "starts": "Servietten 1/4 Falz" } }
+{ "do": "select", "at": { "starts": "CO2-Flasche" } }
+{ "do": "select", "at": { "starts": "Handspülmittel Konzentrat" } }
+{ "do": "tab", "header": "Ergebnis" }
+{ "do": "tab", "header": "Portionen" }
+
+// Prüfung: a declared figure changed
+{ "do": "tab", "header": "Prüfung" }
+{ "do": "type", "at": { "name": "Declared19Box" }, "text": "196.500,00" }
+{ "do": "focus" }
+
+// Regeln: its window, every page, a search as one types
+{ "do": "click", "at": { "tip": "Regeln" } }
+{ "do": "tab", "window": "dialog", "header": "Zutaten" }
+{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "S" }
+{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "Sc" }
+{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "Sch" }
+{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "" }
+{ "do": "tab", "window": "dialog", "header": "Produkte" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "B" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "Bi" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "" }
+{ "do": "tab", "window": "dialog", "header": "Ertragsregeln" }
+{ "do": "tab", "window": "dialog", "header": "Gewerbe" }
+{ "do": "tab", "window": "dialog", "header": "Vorlagen" }
+{ "do": "tab", "window": "dialog", "header": "Zutaten" }
+{ "do": "close", "window": "dialog" }
+
+// Back to the list, a search there
+{ "do": "click", "at": { "name": "BackButton" } }
+{ "do": "type", "at": { "name": "Search" }, "text": "G" }
+{ "do": "type", "at": { "name": "Search" }, "text": "Ga" }
+{ "do": "type", "at": { "name": "Search" }, "text": "" }
+{ "do": "press", "at": { "text": "Gasthaus Zur Linde, Bp 2025" } }
+{ "do": "click", "at": { "name": "BackButton" } }

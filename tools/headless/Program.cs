@@ -11,6 +11,8 @@
 //   --width   window width, --height window height (default: as the app opens it)
 //   --scale   pixels per point (default 2), --pad padding around a crop (default 16)
 //   --readings folder of recorded readings: a scan read once is replayed on every later run
+//   --perf    writes what every step costs as TSV to this file; shots are skipped
+//   --trace   folder for the CPU samples of every step that names a "trace"
 using System.Globalization;
 using Avalonia;
 using Avalonia.Headless;
@@ -25,17 +27,17 @@ using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
 
 var options = new Dictionary<string, string>();
-string? scriptPath = null;
+List<string> scripts = [];
 for (var i = 0; i < args.Length; i++)
 {
-    if (!args[i].StartsWith("--")) { scriptPath = args[i]; continue; }
+    if (!args[i].StartsWith("--")) { scripts.Add(args[i]); continue; }
     if (i + 1 >= args.Length) return Usage("missing value for " + args[i]);
     options[args[i][2..]] = args[++i];
 }
-if (scriptPath is null) return Usage("no script given");
+if (scripts.Count == 0) return Usage("no script given");
 
-var steps = Steps.Load(scriptPath).ToList();
-var outDir = options.GetValueOrDefault("out", Path.GetDirectoryName(Path.GetFullPath(scriptPath))!);
+var steps = scripts.SelectMany(Steps.Load).ToList();
+var outDir = options.GetValueOrDefault("out", Path.GetDirectoryName(Path.GetFullPath(scripts[0]))!);
 Directory.CreateDirectory(outDir);
 
 var seed = options.TryGetValue("rules", out var rules)
@@ -51,7 +53,11 @@ AppBuilder.Configure<App>()
     .WithInterFont()
     .SetupWithoutStarting();
 
-var driver = new Driver(Launch, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir);
+using var perfOut = options.TryGetValue("perf", out var perfPath) ? File.CreateText(perfPath) : null;
+var perf = perfOut is null ? null : new Perf(perfOut);
+perf?.Header();
+var tracing = options.TryGetValue("trace", out var traceDir) ? new Tracing(traceDir) : null;
+var driver = new Driver(Launch, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir, perf, tracing);
 try
 {
     foreach (var step in steps) driver.Run(step);
@@ -88,6 +94,6 @@ static int Usage(string problem)
 {
     Console.Error.WriteLine(problem);
     Console.Error.WriteLine("dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]"
-        + " [--width PT] [--height PT] [--scale N] [--pad PT] [--readings DIR]");
+        + " [--width PT] [--height PT] [--scale N] [--pad PT] [--readings DIR] [--perf FILE] [--trace DIR]");
     return 2;
 }

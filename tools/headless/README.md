@@ -13,6 +13,8 @@ the switches. Same run, same bytes: if an image changes, the interface changed.
     --scale   pixels per point (default 2)
     --pad     padding around a crop (default 16)
     --readings folder of recorded readings (default: none, every scan is read)
+    --perf    writes what every step costs to this TSV file; shots are skipped
+    --trace   folder for the CPU samples of every step that names a `trace`
 
 With `--readings` a scan is read once and its reading, the words, the correction and the
 tagged draft, is kept under the hash of its bytes and the readers. Later runs replay it
@@ -57,6 +59,8 @@ window above the main window) and waits afterwards until the interface has settl
 | `import`   | `files` | imports these files, or every file of a folder named here, into the open case and waits for them |
 | `wait`     | `rounds?` | waits further rounds, in case one is not enough |
 | `restart`  | | quits the app, deletes the rule store, starts it again on the same cases and opens the case that was open |
+| `press`    | `at` | presses and releases the pointer on `at`, as a click on a row that opens it |
+| `close`    | | closes the window, with `"window": "dialog"` the one on top |
 
 `at` looks for a control: `name` is the `x:Name` from the XAML, `text` the visible
 caption, `starts` the beginning of one (for a long row that the scan may have read
@@ -72,3 +76,18 @@ lists: the row that holds it is scrolled into view, and the search runs again.
 A `shot` crops to `at`. `trim` shrinks that frame beforehand (`{ "top": 16 }`),
 `clip` pulls the bottom edge onto the last element of a type inside it
 (`"DataGridRow"`, so that no empty rows come along).
+
+## Timing
+
+Several scripts run one after the other in the same app. With `--perf` every step waits
+until the interface and the pool have been idle for a few rounds, instead of a fixed number
+of rounds, and writes one line: how long the step itself ran, UI jobs and frames, the
+longest of them, the time until the app was quiet again, the CPU of all threads, what was
+allocated and how many gen-0 collections. The driver's own waiting is left out.
+
+    dotnet run -c Release --project tools/headless -- web/docs/shots/guide.jsonl \
+        tools/headless/perf/clickthrough.jsonl --width 1320 --height 860 \
+        --readings /tmp/readings --perf perf.tsv
+
+A step with `"trace": "name"` is sampled into `<trace>/name.nettrace` while it runs, for
+`dotnet-trace convert --format speedscope`.

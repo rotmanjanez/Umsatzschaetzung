@@ -14,8 +14,11 @@ namespace Umsatzschaetzung.Headless;
 
 // Drives the real interface headlessly: every step hits the same controls a
 // person would. What is shown is up to the script.
-public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, string outDir)
+public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, string outDir, Perf? perf = null, Tracing? tracing = null)
 {
+    static Perf? timing;
+    int index;
+
     Shell shell = launch(false);
 
     // The rules open in a window of their own, not owned by the shell, and ask from there.
@@ -32,32 +35,37 @@ public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, stri
     public void Run(Step step)
     {
         var window = Window(step.Window);
+        timing = perf;
+        var at = step.GetType().GetProperty("At")?.GetValue(step) is Target target && step is not ShotStep
+            ? Find(window, target) : null;
+        var trace = step.Trace is { } name ? tracing?.Start(name) : null;
+        perf?.Begin();
         switch (step)
         {
-            case ShotStep s:
+            case ShotStep s when perf is null:
                 Shot(window, s);
                 break;
             case ClickStep s:
-                Click(Find(window, s.At));
+                Click(at!);
                 break;
             case TypeStep s:
-                Set(Editor(Find(window, s.At)), "Text", s.Text);
+                Set(Editor(at!), "Text", s.Text);
                 break;
             case FocusStep s:
                 if (s.At is null) window.FocusManager?.Focus(null);
-                else (Find(window, s.At) as InputElement)?.Focus();
+                else (at as InputElement)?.Focus();
                 break;
             case DeselectStep s:
-                Set(Find(window, s.At), "SelectedItem", null);
+                Set(at!, "SelectedItem", null);
                 break;
             case SelectStep s:
-                Select(Find(window, s.At));
+                Select(at!);
                 break;
             case TopStep s:
-                Top(Find(window, s.At));
+                Top(at!);
                 break;
             case EditStep s:
-                Edit(Find(window, s.At), s.Column, s.Text);
+                Edit(at!, s.Column, s.Text);
                 break;
             case OpenStep s:
                 Open(s.Number);
@@ -72,17 +80,41 @@ public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, stri
                 Pick(s.Files);
                 break;
             case ChooseStep s:
-                Choose((AutoCompleteBox)Find(window, s.At), s.Text, s.Item);
+                Choose((AutoCompleteBox)at!, s.Text, s.Item);
                 break;
             case RestartStep:
                 Restart();
+                break;
+            case PressStep:
+                Press(at!);
+                break;
+            case CloseStep:
+                window.Close();
                 break;
             case WaitStep s:
                 for (var i = 1; i < s.Rounds; i++) Settle();
                 break;
         }
+        perf?.Acted();
         Settle();
+        trace?.Dispose();
+        perf?.End(++index, step.GetType().Name[..^4].ToLowerInvariant(), Describe(step));
+        timing = null;
     }
+
+    static string Describe(Step step) => step switch
+    {
+        TabStep s => s.Header,
+        OpenStep s => s.Number,
+        ImportStep s => string.Join(' ', s.Files),
+        ShotStep s => s.Name,
+        EditStep s => $"{s.Column}={s.Text} @ {Say(s.At)}",
+        TypeStep s => $"{s.Text} @ {Say(s.At)}",
+        ChooseStep s => $"{s.Item} @ {Say(s.At)}",
+        _ => step.GetType().GetProperty("At")?.GetValue(step) is Target t ? Say(t) : "",
+    };
+
+    static string Say(Target t) => t.Name ?? t.Text ?? t.Starts ?? t.Tip ?? t.Type ?? "";
 
     Window Window(string? which) => which switch
     {
@@ -276,6 +308,11 @@ public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, stri
 
     public static void Settle()
     {
+        if (timing is { } perf)
+        {
+            perf.Settle();
+            return;
+        }
         for (var i = 0; i < 25; i++)
         {
             Dispatcher.UIThread.RunJobs();
