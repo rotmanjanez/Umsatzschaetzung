@@ -3,18 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace Umsatzschaetzung.Headless;
 
-// What a step reaches for: a name from the XAML, a visible text, a control
-// type - and optionally the ancestor it actually means.
-public sealed record Target
-{
-    public string? Name { get; init; }
-    public string? Text { get; init; }
-    public string? Starts { get; init; }
-    public string? Type { get; init; }
-    public string? Tip { get; init; }
-    public string? Up { get; init; }
-}
-
 public sealed record Inset
 {
     public double Top { get; init; }
