@@ -182,7 +182,7 @@ public abstract class EntityForm : Observable
 
 public abstract class EntityForm<T> : EntityForm
 {
-    public ObservableCollection<T> Items { get; } = [];
+    public Rows<T> Items { get; } = [];
 }
 
 public sealed class IngredientForm : EntityForm<IngredientItem>
@@ -349,29 +349,23 @@ public partial class RulesView : Screen
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         IngredientBox.SetSimilar(this, Session.SimilarIngredients);
 
-        model.Ingredients.Items.Clear();
-        foreach (var i in ingredients) model.Ingredients.Items.Add(new IngredientItem(i, Session.CategoryName(i.CategoryId)));
+        model.Ingredients.Items.Replace(ingredients.Select(i => new IngredientItem(i, Session.CategoryName(i.CategoryId))));
         IngredientGrid.SelectedItem = model.Ingredients.Items.FirstOrDefault(i => i.Ingredient.Id == model.Ingredients.CurrentId);
 
-        model.Products.Items.Clear();
-        foreach (var p in Session.Products())
-            model.Products.Items.Add(new ProductItem(p, Names.Recipe(rs, p)));
+        model.Products.Items.Replace(Session.Products().Select(p => new ProductItem(p, Names.Recipe(rs, p))));
         ProductGrid.SelectedItem = model.Products.Items.FirstOrDefault(p => p.Product.Id == model.Products.CurrentId);
 
         var scopes = YieldScopes(rs, ingredients);
-        model.Yields.Items.Clear();
-        foreach (var scope in scopes) model.Yields.Items.Add(scope);
+        model.Yields.Items.Replace(scopes);
         var open = model.Yields.Scope;
         ScopeGrid.SelectedItem = scopes.Find(s => s.Rules.Exists(r => r.Id == model.Yields.CurrentId))
             ?? scopes.Find(s => open is not null && s.Id == open.Id && s.Ingredient == open.Ingredient)
             ?? scopes.FirstOrDefault();
 
-        model.Gewerbe.Items.Clear();
-        foreach (var g in Session.Gewerbezweige()) model.Gewerbe.Items.Add(new GewerbeItem(g));
+        model.Gewerbe.Items.Replace(Session.Gewerbezweige().Select(g => new GewerbeItem(g)));
         GewerbeGrid.SelectedItem = model.Gewerbe.Items.FirstOrDefault(g => g.Zweig.Id == model.Gewerbe.CurrentId);
 
-        model.Templates.Items.Clear();
-        foreach (var t in Templates(rs)) model.Templates.Items.Add(new TemplateItem(t));
+        model.Templates.Items.Replace(Templates(rs).Select(t => new TemplateItem(t)));
         TemplateGrid.SelectedItem = model.Templates.Items.FirstOrDefault(t => t.Template.Id == model.Templates.CurrentId);
 
         loading = false;

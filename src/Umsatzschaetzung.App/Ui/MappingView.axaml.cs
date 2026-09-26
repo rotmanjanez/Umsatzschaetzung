@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -11,7 +10,7 @@ public sealed class MappingModel : Observable
     bool noInvoices, mapping;
     string summary = "";
 
-    public ObservableCollection<LineGroup> Groups { get; } = [];
+    public Rows<LineGroup> Groups { get; } = [];
     public string Summary { get => summary; set => Set(ref summary, value); }
     public bool NoInvoices { get => noInvoices; set => Set(ref noInvoices, value); }
     public bool Mapping { get => mapping; set => Set(ref mapping, value); }
@@ -110,8 +109,7 @@ public partial class MappingView : Screen
         var focused = Groups.IsKeyboardFocusWithin;
         Detail.Refresh();
         refreshing = true;
-        model.Groups.Clear();
-        foreach (var g in groups) model.Groups.Add(g);
+        model.Groups.Replace(groups);
         var again = kept is null ? null : model.Groups.FirstOrDefault(g => g.Key == kept.Key);
         var moved = again is not null && again.State != kept!.State;
         if (moved) again = ((DataGridCollectionView)Groups.ItemsSource).Cast<LineGroup>().FirstOrDefault(g => g.IsPending);

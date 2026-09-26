@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -15,7 +14,7 @@ public sealed class CasesModel : Observable
 {
     bool empty = true, creating;
 
-    public ObservableCollection<CaseRow> Cases { get; } = [];
+    public Rows<CaseRow> Cases { get; } = [];
 
     public bool Empty { get => empty; private set { if (Set(ref empty, value)) Raise(nameof(ShowEmpty)); } }
     public bool Creating { get => creating; set { if (Set(ref creating, value)) Raise(nameof(ShowEmpty)); } }
@@ -23,8 +22,7 @@ public sealed class CasesModel : Observable
 
     public void Set(List<CaseRow> rows)
     {
-        Cases.Clear();
-        foreach (var r in rows) Cases.Add(r);
+        Cases.Replace(rows);
         Empty = rows.Count == 0;
     }
 }
