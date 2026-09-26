@@ -283,6 +283,97 @@
             "type": "string"
           }
         },
+        "mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "supplierName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "supplierArticleId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gtin": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "observed": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unitCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "ingredientId": {
+                "type": "string"
+              },
+              "factor": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "confirmed": {
+                "type": "boolean"
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "validFrom": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "validTo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "changedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "rev": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
         "templateId": {
           "type": [
             "string",
@@ -361,6 +452,12 @@
                     "type": "string",
                     "format": "date-time"
                   },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "rev": {
                     "type": "integer"
                   }
@@ -432,6 +529,12 @@
                     "type": "string",
                     "format": "date-time"
                   },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "rev": {
                     "type": "integer"
                   }
@@ -443,86 +546,7 @@
         "mappings": {
           "type": "object",
           "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "supplierName": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "supplierArticleId": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "gtin": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "observed": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "unitCode": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "ingredientId": {
-                "type": "string"
-              },
-              "factor": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "confirmed": {
-                "type": "boolean"
-              },
-              "meta": {
-                "type": "object",
-                "properties": {
-                  "validFrom": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "format": "date"
-                  },
-                  "validTo": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "format": "date"
-                  },
-                  "changedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "rev": {
-                    "type": "integer"
-                  }
-                }
-              }
-            }
+            "$ref": "#/properties/case/properties/mappings/additionalProperties"
           }
         },
         "products": {
@@ -562,6 +586,12 @@
                   "changedAt": {
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "rev": {
                     "type": "integer"
@@ -621,6 +651,12 @@
                     "type": "string",
                     "format": "date-time"
                   },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "rev": {
                     "type": "integer"
                   }
@@ -663,6 +699,12 @@
                   "changedAt": {
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "rev": {
                     "type": "integer"
@@ -709,6 +751,12 @@
                   "changedAt": {
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "changedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "rev": {
                     "type": "integer"

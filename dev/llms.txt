@@ -1,0 +1,44 @@
+# Umsatzschätzung
+
+Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Zutaten zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
+
+## Start
+
+- [Start](https://docs.umsatzschaetzung.amtstools.de/dev/index.md): Überblick und Ablauf einer Prüfung
+
+## Programm
+
+- [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md): Liste der Prüfungen, anlegen, öffnen, löschen, wo eine Prüfung liegt
+- [Prüfung](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/index.md): Eckdaten, Zeitraum, erklärter Umsatz, Bestand und Gewerbekennzahl
+- [Rechnungen importieren](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/index.md): E-Rechnungen und Scans einlesen, Formate, Durchsicht und Korrektur
+- [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md): Rechnungspositionen Zutaten zuordnen, Vorschläge, Sicherheit und Faktor
+- [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md): Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz
+- [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md): Aufbau des Berichts, Hinweise, Richtsatzvergleich und PDF
+
+## Grundlagen
+
+- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Zutaten, Produkte, Rezepte und Ertragsregeln, die für alle Prüfungen gelten
+- [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md): Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV
+- [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md): Für die IT, Datenablage, gemeinsame Regel-Datenbank, unbeaufsichtigte Installation und Gruppenrichtlinien
+- [Sicherheit und Datenschutz](https://docs.umsatzschaetzung.amtstools.de/dev/datenschutz/index.md): Für IT und Datenschutz, wo Daten liegen, Löschung, Netzwerk, Signatur und Modelle
+- [Berichtsvorlagen](https://docs.umsatzschaetzung.amtstools.de/dev/vorlagen/index.md): Für die IT, Berichtsvorlagen anpassen, Aufbau, Daten und Filter
+
+## Hilfe
+
+- [Häufige Fragen](https://docs.umsatzschaetzung.amtstools.de/dev/faq/index.md): Häufige Fragen, nach Arbeitsschritt geordnet
+- [CSV-Dateien](https://docs.umsatzschaetzung.amtstools.de/dev/hilfe/csv/index.md): Was eine CSV-Datei ist und wie man sie öffnet und bearbeitet
+
+## Beispielprüfung
+
+- [Beispielprüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md): Schritt-für-Schritt-Anleitung durch eine vollständige Prüfung eines Gasthauses
+- [macOS](https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-macos/index.md): Voraussetzungen und Installation unter macOS
+- [Windows](https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-windows/index.md): Voraussetzungen und Installation unter Windows
+- [Prüfung anlegen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/start/index.md): Die erste Prüfung anlegen
+- [Importieren](https://docs.umsatzschaetzung.amtstools.de/dev/guide/rechnungen/index.md): Die Beispielrechnungen herunterladen und importieren
+- [Korrigieren](https://docs.umsatzschaetzung.amtstools.de/dev/guide/korrektur/index.md): Falsch gelesene Scans korrigieren
+- [2. Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md): Offene Zuordnungen nachholen und Faktoren ergänzen
+- [3. Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/index.md): Das Sortiment mit Verkaufspreisen anlegen
+- [4. Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kalkulation/index.md): Übrige Einkäufe aufräumen und das Ergebnis prüfen
+- [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md): Vorschau prüfen und den Bericht als PDF speichern
+- [Danach](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md): Was für die nächste eigene Prüfung gut zu wissen ist
+

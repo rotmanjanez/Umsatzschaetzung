@@ -473,6 +473,8 @@
       
         
       
+        
+      
     
     
     
@@ -570,6 +572,29 @@
   
   <span class="md-ellipsis">
     Verwaltete Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datenschutz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sicherheit und Datenschutz
     
   </span>
   
@@ -1428,6 +1453,10 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Liste von Text</td>
 </tr>
 <tr>
+<td><code>mappings</code></td>
+<td>ID → <a href="#m-articlemapping">ArticleMapping</a></td>
+</tr>
+<tr>
 <td><code>templateId</code></td>
 <td>Text?</td>
 </tr>
@@ -2034,6 +2063,61 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 </tbody>
 </table>
+<h3 id="m-articlemapping">ArticleMapping</h3>
+<table>
+<thead>
+<tr>
+<th>Feld</th>
+<th>Typ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>supplierName</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>supplierArticleId</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>gtin</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>observed</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>unitCode</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>ingredientId</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>factor</code></td>
+<td>Zahl?</td>
+</tr>
+<tr>
+<td><code>confirmed</code></td>
+<td>ja/nein</td>
+</tr>
+<tr>
+<td><code>meta</code></td>
+<td><a href="#m-meta">Meta</a></td>
+</tr>
+</tbody>
+</table>
 <h3 id="m-category">Category</h3>
 <table>
 <thead>
@@ -2097,61 +2181,6 @@ mit der installierten Version überein. Als JSON Schema:
 <tr>
 <td><code>piece</code></td>
 <td><a href="#m-piece">Piece</a>?</td>
-</tr>
-<tr>
-<td><code>meta</code></td>
-<td><a href="#m-meta">Meta</a></td>
-</tr>
-</tbody>
-</table>
-<h3 id="m-articlemapping">ArticleMapping</h3>
-<table>
-<thead>
-<tr>
-<th>Feld</th>
-<th>Typ</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>id</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>supplierName</code></td>
-<td>Text?</td>
-</tr>
-<tr>
-<td><code>supplierArticleId</code></td>
-<td>Text?</td>
-</tr>
-<tr>
-<td><code>gtin</code></td>
-<td>Text?</td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td>Text?</td>
-</tr>
-<tr>
-<td><code>observed</code></td>
-<td>Text?</td>
-</tr>
-<tr>
-<td><code>unitCode</code></td>
-<td>Text?</td>
-</tr>
-<tr>
-<td><code>ingredientId</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>factor</code></td>
-<td>Zahl?</td>
-</tr>
-<tr>
-<td><code>confirmed</code></td>
-<td>ja/nein</td>
 </tr>
 <tr>
 <td><code>meta</code></td>
@@ -2832,6 +2861,10 @@ mit der installierten Version überein. Als JSON Schema:
 <tr>
 <td><code>changedAt</code></td>
 <td>Zeitpunkt</td>
+</tr>
+<tr>
+<td><code>changedBy</code></td>
+<td>Text?</td>
 </tr>
 <tr>
 <td><code>rev</code></td>
