@@ -15,6 +15,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Headless;
 using Umsatzschaetzung.App;
+using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Headless;
@@ -73,7 +74,7 @@ Shell Launch(bool forget)
     var service = Services.Local(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
-        "headless",
+        Release.Version,
         documents: documents,
         tagger: new Tagger(),
         ranking: new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes),
