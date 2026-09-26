@@ -30,10 +30,14 @@ public sealed record Inset
 [JsonDerivedType(typeof(KeepStep), "keep")]
 [JsonDerivedType(typeof(PushStep), "push")]
 [JsonDerivedType(typeof(DiffStep), "diff")]
+[JsonDerivedType(typeof(PressStep), "press")]
+[JsonDerivedType(typeof(CloseStep), "close")]
 public abstract record Step
 {
     // "dialog" means the last window opened above the main window.
     public string? Window { get; init; }
+    // With --trace, the step is sampled into <trace>.nettrace there.
+    public string? Trace { get; init; }
 }
 
 public sealed record ShotStep : Step
@@ -128,6 +132,13 @@ public sealed record DiffStep : Step
 {
     public required string To { get; init; }
 }
+
+public sealed record PressStep : Step
+{
+    public required Target At { get; init; }
+}
+
+public sealed record CloseStep : Step;
 
 // One step per line: a line in the diff stays one action, and a script can be
 // composed, filtered and appended to like any other list.
