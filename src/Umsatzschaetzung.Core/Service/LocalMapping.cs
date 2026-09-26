@@ -17,7 +17,7 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
     {
         var c = cases.Find(caseId);
         return matcher.Suggest(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today())
-            .Select(sg => new MappingCandidate(sg.Mapping, sg.Confidence, sg.Kind)).ToList();
+            .Select(sg => new MappingCandidate(Json.Copy(sg.Mapping), sg.Confidence, sg.Kind)).ToList();
     });
 
     // Lines imported before a rule or the model existed, and lines an edit set free,
