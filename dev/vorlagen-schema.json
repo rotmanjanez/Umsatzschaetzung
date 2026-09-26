@@ -255,7 +255,10 @@
                 ]
               },
               "yieldRuleId": {
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           }
@@ -380,6 +383,12 @@
             "null"
           ]
         },
+        "mappedStore": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "mappedAt": {
           "type": "integer"
         },
@@ -397,6 +406,12 @@
       "description": "Die Regeln, mit denen gerechnet wurde; Rezepturen so, wie diese Prüfung sie anpasst.",
       "type": "object",
       "properties": {
+        "store": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "version": {
           "type": "integer"
         },

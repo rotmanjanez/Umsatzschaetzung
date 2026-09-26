@@ -88,30 +88,32 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Case
 
-| Feld         | Typ                                             |
-| ------------ | ----------------------------------------------- |
-| `id`         | Text                                            |
-| `label`      | Text                                            |
-| `periodFrom` | Datum                                           |
-| `periodTo`   | Datum                                           |
-| `taxpayer`   | [Taxpayer](#m-taxpayer)                         |
-| `declared`   | Liste von [DeclaredRevenue](#m-declaredrevenue) |
-| `inventory`  | Liste von [InventoryEntry](#m-inventoryentry)   |
-| `invoices`   | Liste von [Invoice](#m-invoice)                 |
-| `products`   | Liste von [CaseProduct](#m-caseproduct)         |
-| `yields`     | Liste von [YieldChoice](#m-yieldchoice)         |
-| `pinned`     | Liste von [PinnedPortions](#m-pinnedportions)   |
-| `noRevenue`  | Liste von Text                                  |
-| `mappings`   | ID → [ArticleMapping](#m-articlemapping)        |
-| `templateId` | Text?                                           |
-| `mappedAt`   | Zahl                                            |
-| `createdAt`  | Zeitpunkt                                       |
-| `updatedAt`  | Zeitpunkt                                       |
+| Feld          | Typ                                             |
+| ------------- | ----------------------------------------------- |
+| `id`          | Text                                            |
+| `label`       | Text                                            |
+| `periodFrom`  | Datum                                           |
+| `periodTo`    | Datum                                           |
+| `taxpayer`    | [Taxpayer](#m-taxpayer)                         |
+| `declared`    | Liste von [DeclaredRevenue](#m-declaredrevenue) |
+| `inventory`   | Liste von [InventoryEntry](#m-inventoryentry)   |
+| `invoices`    | Liste von [Invoice](#m-invoice)                 |
+| `products`    | Liste von [CaseProduct](#m-caseproduct)         |
+| `yields`      | Liste von [YieldChoice](#m-yieldchoice)         |
+| `pinned`      | Liste von [PinnedPortions](#m-pinnedportions)   |
+| `noRevenue`   | Liste von Text                                  |
+| `mappings`    | ID → [ArticleMapping](#m-articlemapping)        |
+| `templateId`  | Text?                                           |
+| `mappedStore` | Text?                                           |
+| `mappedAt`    | Zahl                                            |
+| `createdAt`   | Zeitpunkt                                       |
+| `updatedAt`   | Zeitpunkt                                       |
 
 ### RuleSet
 
 | Feld            | Typ                                      |
 | --------------- | ---------------------------------------- |
+| `store`         | Text?                                    |
 | `version`       | Zahl                                     |
 | `categories`    | ID → [Category](#m-category)             |
 | `ingredients`   | ID → [Ingredient](#m-ingredient)         |
@@ -288,7 +290,7 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | -------------- | ----- |
 | `ingredientId` | Text? |
 | `categoryId`   | Text? |
-| `yieldRuleId`  | Text  |
+| `yieldRuleId`  | Text? |
 
 ### PinnedPortions
 

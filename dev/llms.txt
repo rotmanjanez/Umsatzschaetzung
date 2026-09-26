@@ -21,6 +21,7 @@ Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Ei
 - [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md): Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV
 - [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md): Für die IT, Datenablage, gemeinsame Regel-Datenbank, unbeaufsichtigte Installation und Gruppenrichtlinien
 - [Sicherheit und Datenschutz](https://docs.umsatzschaetzung.amtstools.de/dev/datenschutz/index.md): Für IT und Datenschutz, wo Daten liegen, Löschung, Netzwerk, Signatur und Modelle
+- [Dateiformate](https://docs.umsatzschaetzung.amtstools.de/dev/dateiformate/index.md): Für die IT, Aufbau von rules.db und der Prüfungsdatei, Maßstäbe der Beträge und Schemaversion
 - [Berichtsvorlagen](https://docs.umsatzschaetzung.amtstools.de/dev/vorlagen/index.md): Für die IT, Berichtsvorlagen anpassen, Aufbau, Daten und Filter
 
 ## Hilfe
