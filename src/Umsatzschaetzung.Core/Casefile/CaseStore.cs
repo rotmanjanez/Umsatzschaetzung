@@ -16,7 +16,7 @@ public sealed class CaseExistsException(string message, List<string> labels) : E
     public List<string> Labels { get; } = labels;
 }
 
-public sealed record Attachment(string InvoiceId, string FileName, byte[] Data, List<OcrPage>? Reading);
+public sealed record Attachment(string InvoiceId, string FileName, byte[] Data, List<OcrPage>? Reading, List<byte[]>? Images = null);
 
 // Ein Fall ist eine Datei: <Bezeichnung>.db trägt den Fall, jeden Beleg und das, was der Scan
 // gelesen hat, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen. Weil der
@@ -64,10 +64,9 @@ public sealed partial class CaseStore(string dir)
             PRIMARY KEY(invoice_id, ord)) WITHOUT ROWID;
         CREATE TABLE document(invoice_id TEXT PRIMARY KEY, name TEXT NOT NULL, data BLOB NOT NULL) WITHOUT ROWID;
 
-        -- Was der Scan aus dem Beleg geholt hat. Das Seitenbild steht nicht dabei: der Beleg
-        -- liegt daneben und wird zum Anzeigen neu gerendert.
+        -- Was der Scan aus dem Beleg geholt hat.
         -- scale, skew, turn und settle sagen, wie die Seite vor dem Lesen aufgerichtet wurde:
-        -- das neu gerenderte Bild wird ebenso gedreht, damit es wieder unter den Kästen liegt.
+        -- ein neu gerendertes Bild wird ebenso gedreht, damit es wieder unter den Kästen liegt.
         CREATE TABLE reading_page(invoice_id TEXT NOT NULL, ord INTEGER NOT NULL,
             width INTEGER NOT NULL, height INTEGER NOT NULL,
             scale REAL NOT NULL DEFAULT 1, skew REAL NOT NULL DEFAULT 0,
@@ -95,6 +94,10 @@ public sealed partial class CaseStore(string dir)
         CREATE TABLE reading_line_flag(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, line INTEGER NOT NULL,
             ord INTEGER NOT NULL, code TEXT NOT NULL, message TEXT NOT NULL, line_no INTEGER NOT NULL, field TEXT,
             PRIMARY KEY(invoice_id, page, line, ord)) WITHOUT ROWID;
+        -- Jede Seite, wie die Lesung sie sah, beim Einlesen klein als JPEG abgelegt: Anzeige und
+        -- Ausschnitte kommen ohne den Beleg aus. Die Zeilen sind groß, darum mit Rowid.
+        CREATE TABLE reading_image(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, data BLOB NOT NULL,
+            PRIMARY KEY(invoice_id, page));
 
         -- Rezeptur nur dieser Prüfung. Ein Produkt ohne Zeilen rechnet mit der des Katalogs.
         CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
@@ -108,7 +111,7 @@ public sealed partial class CaseStore(string dir)
     ];
 
     static readonly string[] ReadingTables =
-        ["reading_line_flag", "reading_page_flag", "reading_cell", "reading_line", "reading_header", "reading_word", "reading_page"];
+        ["reading_image", "reading_line_flag", "reading_page_flag", "reading_cell", "reading_line", "reading_header", "reading_word", "reading_page"];
 
     static readonly string[] CaseTables =
         ["fall", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "no_revenue", "case_mapping", "invoice", "invoice_line"];
@@ -267,6 +270,9 @@ public sealed partial class CaseStore(string dir)
                 {
                     DropReading(db, tx, key);
                     WriteReading(db, tx, key, pages);
+                    for (var p = 0; p < (add.Images?.Count ?? 0); p++)
+                        Exec(db, tx, "INSERT INTO reading_image(invoice_id, page, data) VALUES(@id, @page, @data)",
+                            ("@id", key), ("@page", p), ("@data", add.Images![p]));
                 }
                 tx.Commit();
             }
@@ -411,6 +417,17 @@ public sealed partial class CaseStore(string dir)
         if (Locate(caseId) is not { } path) return null;
         using var db = Reader(path);
         return ReadReading(db, key);
+    });
+
+    public List<byte[]> LoadImages(string caseId, string invoiceId, int? page = null) => Guarded(() =>
+    {
+        var key = InvoiceKey(caseId, invoiceId);
+        List<byte[]> images = [];
+        if (Locate(caseId) is not { } path) return images;
+        using var db = Reader(path);
+        ReadRows(db, "SELECT data FROM reading_image WHERE invoice_id = @id AND (@page IS NULL OR page = @page) ORDER BY page",
+            r => images.Add((byte[])r.GetValue(0)), ("@id", key), ("@page", page));
+        return images;
     });
 
     public (string Name, byte[] Data) LoadFile(string caseId, string invoiceId) => Guarded(() =>

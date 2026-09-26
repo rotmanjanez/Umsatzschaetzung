@@ -38,6 +38,8 @@ CREATE TABLE reading_cell(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, line 
 CREATE TABLE reading_header(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, field TEXT NOT NULL,
     text TEXT NOT NULL, x INTEGER NOT NULL, y INTEGER NOT NULL, w INTEGER NOT NULL, h INTEGER NOT NULL,
     confidence REAL NOT NULL, PRIMARY KEY(invoice_id, page, field)) WITHOUT ROWID;
+CREATE TABLE reading_image(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, data BLOB NOT NULL,
+    PRIMARY KEY(invoice_id, page));
 CREATE TABLE reading_line(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, ord INTEGER NOT NULL,
     no INTEGER NOT NULL, name TEXT NOT NULL, seller_article_id TEXT, gtin TEXT, quantity INTEGER NOT NULL,
     unit_code TEXT NOT NULL, unit_price INTEGER NOT NULL, price_base_qty INTEGER NOT NULL,
