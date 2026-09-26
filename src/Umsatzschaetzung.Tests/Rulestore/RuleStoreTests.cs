@@ -52,9 +52,9 @@ public class RuleStoreTests
 
         var saved = store.Save(korn);
 
-        Assert.Equal(1, saved.Version);
-        Assert.Equal(1, korn.Meta.Rev);
-        Assert.Equal(1, saved.Products["prod.korn.4cl"].Meta.Rev);
+        Assert.True(saved.Version > 0);
+        Assert.Equal(saved.Version, korn.Meta.Rev);
+        Assert.Equal(saved.Version, saved.Products["prod.korn.4cl"].Meta.Rev);
         Assert.Equal(Environment.UserName, saved.Products["prod.korn.4cl"].Meta.ChangedBy);
         Assert.Null(saved.Products["prod.korn.2cl"].Meta.ChangedBy);
         Assert.Equal(new DateOnly(2024, 6, 30), saved.Products["prod.korn.4cl"].Meta.ValidTo);
@@ -68,12 +68,12 @@ public class RuleStoreTests
         var store = Open(tmp);
         var korn = store.Load().Products["prod.korn.4cl"];
         korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
-        store.Save(korn);
-        store.Save(new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" });
+        var first = store.Save(korn).Version;
+        var second = store.Save(new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" }).Version;
         var merged = store.Save(new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", CategoryId = "cat.alkoholfrei" });
 
-        Assert.Equal(3, merged.Version);
-        Assert.Equal((1, 2, 3), (merged.Products["prod.korn.4cl"].Meta.Rev, merged.Categories["cat.alkoholfrei"].Meta.Rev, merged.Ingredients["ing.wasser"].Meta.Rev));
+        Assert.True(first < second && second < merged.Version);
+        Assert.Equal((first, second, merged.Version), (merged.Products["prod.korn.4cl"].Meta.Rev, merged.Categories["cat.alkoholfrei"].Meta.Rev, merged.Ingredients["ing.wasser"].Meta.Rev));
         Assert.NotNull(merged.Products["prod.korn.4cl"].Meta.ValidTo);
         Assert.Equal(0, merged.Products["prod.korn.2cl"].Meta.Rev);
     }
@@ -197,7 +197,7 @@ public class RuleStoreTests
 
         var pruned = store.Delete(Entity.Product, "prod.korn.2cl");
 
-        Assert.Equal(1, pruned.Version);
+        Assert.True(pruned.Version > before.Version);
         Assert.False(pruned.Products.ContainsKey("prod.korn.2cl"));
         Assert.Equal(before.Products.Count - 1, pruned.Products.Count);
         Assert.Equal(Dump(pruned), Dump(store.Load()));
@@ -225,11 +225,11 @@ public class RuleStoreTests
         using var tmp = new TempDir();
         var store = Open(tmp);
         var pils = store.Load().Products["prod.pils.03"];
-        store.Delete(Entity.Product, "prod.pils.03");
+        var deleted = store.Delete(Entity.Product, "prod.pils.03").Version;
 
         var back = store.Save(pils);
 
-        Assert.Equal(2, back.Version);
+        Assert.True(back.Version > deleted);
         Assert.Equal(pils.Recipe.Count, back.Products["prod.pils.03"].Recipe.Count);
     }
 
@@ -240,19 +240,19 @@ public class RuleStoreTests
         var store = Open(tmp);
         var pils = store.Load().Products["prod.pils.03"];
         pils.Name = "Pils klein";
-        store.Save(pils);
+        var saved = store.Save(pils).Version;
 
         var reopened = Open(tmp).Load();
 
         Assert.Equal("Pils klein", reopened.Products["prod.pils.03"].Name);
-        Assert.Equal(1, reopened.Version);
+        Assert.Equal(saved, reopened.Version);
     }
 
     [Fact]
     public void AnEntityNewInTheSeedArrivesOnTheNextStartWithoutABump()
     {
         using var tmp = new TempDir();
-        Open(tmp).Save(new Category { Id = "cat.eigen", Name = "Eigen" });
+        var saved = Open(tmp).Save(new Category { Id = "cat.eigen", Name = "Eigen" }).Version;
         var seed = TestData.Seed();
         seed.Put(new Category { Id = "cat.neu", Name = "Neu" });
 
@@ -260,7 +260,7 @@ public class RuleStoreTests
 
         Assert.True(rs.Categories.ContainsKey("cat.neu"));
         Assert.True(rs.Categories.ContainsKey("cat.eigen"));
-        Assert.Equal(1, rs.Version);
+        Assert.Equal(saved, rs.Version);
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class RuleStoreTests
         using var tmp = new TempDir();
         var store = Open(tmp);
         store.Save(new Ingredient { Id = "ing.gurke", Name = "Gurken" });
-        store.Save(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(55, Unit.G) });
+        var saved = store.Save(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(55, Unit.G) }).Version;
         var seed = TestData.Seed();
         seed.Put(new Ingredient { Id = "ing.gurke", Name = "Gurke", Piece = new(400, Unit.G) });
         seed.Put(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(60, Unit.G) });
@@ -278,7 +278,7 @@ public class RuleStoreTests
 
         Assert.Equal((new Piece(400, Unit.G), "Gurken"), (rs.Ingredients["ing.gurke"].Piece, rs.Ingredients["ing.gurke"].Name));
         Assert.Equal(new Piece(55, Unit.G), rs.Ingredients["ing.ei"].Piece);
-        Assert.Equal(2, rs.Version);
+        Assert.Equal(saved, rs.Version);
     }
 
     [Fact]
@@ -294,21 +294,21 @@ public class RuleStoreTests
             return seed;
         }
         var store = new RuleStore(tmp.Path, Seed(["Fassbier"], ["Pils"], []));
-        store.Save(new Ingredient { Id = "ing.flasche", Name = "Flaschenbier", Aliases = ["Pils", "Hausmarke"] });
+        var saved = store.Save(new Ingredient { Id = "ing.flasche", Name = "Flaschenbier", Aliases = ["Pils", "Hausmarke"] }).Version;
 
         var rs = new RuleStore(tmp.Path, Seed(["Fassbier", "Pils Fass"], ["Pils", "Helles"], ["XKG"])).Load();
 
         Assert.Equal(["Fassbier", "Pils Fass"], rs.Ingredients["ing.fass"].Aliases);
         Assert.Equal(["Pils", "Hausmarke"], rs.Ingredients["ing.flasche"].Aliases);
         Assert.Equal(["XKG"], rs.Categories["cat.fass"].Gebinde);
-        Assert.Equal(1, rs.Version);
+        Assert.Equal(saved, rs.Version);
     }
 
     [Fact]
     public void ReopeningRunsNoMigrationTwice()
     {
         using var tmp = new TempDir();
-        Open(tmp).Save(new Category { Id = "c", Name = "n" });
+        var saved = Open(tmp).Save(new Category { Id = "c", Name = "n" }).Version;
         var file = tmp.Sub("rules.db");
         var schema = Sql.UserVersion(file);
 
@@ -317,7 +317,7 @@ public class RuleStoreTests
 
         Assert.True(schema > 0);
         Assert.Equal(schema, Sql.UserVersion(file));
-        Assert.Equal(1, rs.Version);
+        Assert.Equal(saved, rs.Version);
         Assert.Equal(Dump(rs), Dump(Open(tmp).Load()));
     }
 
@@ -445,7 +445,7 @@ public class RuleStoreTests
         using var tmp = new TempDir();
         var store = Open(tmp);
         store.Save(new Category { Id = "c1", Name = "eins" });
-        store.Delete(Entity.Product, "prod.korn.2cl");
+        var backedUp = store.Delete(Entity.Product, "prod.korn.2cl").Version;
         Open(tmp);
         Open(tmp).Save(new Category { Id = "c2", Name = "nach der Sicherung" });
         File.WriteAllText(tmp.Sub("rules.db"), "kaputt");
@@ -455,12 +455,27 @@ public class RuleStoreTests
 
         Assert.NotNull(restored.Notice);
         Assert.Contains("wiederhergestellt", restored.Notice);
-        Assert.Equal(2, rs.Version);
+        Assert.Equal(backedUp, rs.Version);
         Assert.True(rs.Categories.ContainsKey("c1"));
         Assert.False(rs.Categories.ContainsKey("c2"));
         Assert.False(rs.Products.ContainsKey("prod.korn.2cl"));
         var aside = Assert.Single(Directory.GetFiles(tmp.Path, "rules.db.defekt-*"));
         Assert.Equal("kaputt", File.ReadAllText(aside));
+    }
+
+    [Fact]
+    public void AStoreCopiedBackByHandNeverReissuesAVersion()
+    {
+        using var tmp = new TempDir();
+        var store = Open(tmp);
+        store.Save(new Category { Id = "c1", Name = "eins" });
+        var file = tmp.Sub("rules.db");
+        File.Copy(file, tmp.Sub("kopie.db"));
+        var latest = store.Save(new Category { Id = "c2", Name = "zwei" }).Version;
+        File.Copy(tmp.Sub("kopie.db"), file, overwrite: true);
+        Thread.Sleep(2);
+
+        Assert.True(store.Save(new Category { Id = "c3", Name = "drei" }).Version > latest);
     }
 
     [Fact]

@@ -11,7 +11,7 @@ public sealed class RuleStore
     const int KeptSnapshots = 10;
     const string SammlungPrefix = "richtsatz/";
 
-    // meta hat eine Zeile. version zählt die Regeländerungen und hat mit der Schemaversion
+    // meta hat eine Zeile. version steigt mit jeder Regeländerung und hat mit der Schemaversion
     // nichts zu tun; die steht in user_version. Der Zähler gilt nur zusammen mit store, der
     // Kennung dieser Datenbank; app ist die Programmversion, die sie zuletzt geöffnet hat.
     // Gelöschtes bleibt mit deleted_at stehen, damit ein mitgelieferter Satz nicht beim
@@ -220,9 +220,12 @@ public sealed class RuleStore
         return infos;
     });
 
+    // Mindestens die Unix-Millisekunden: eine von Hand zurückkopierte Datenbank behält ihre Kennung,
+    // und ein reiner Zähler vergäbe Stände, gegen die ein Fall schon geprüft wurde, ein zweites Mal.
     static long Bump(SqliteConnection db, SqliteTransaction tx)
     {
-        using var cmd = Command(db, tx, "UPDATE meta SET version = version + 1 RETURNING version");
+        using var cmd = Command(db, tx, "UPDATE meta SET version = max(version + 1, @now) RETURNING version",
+            ("@now", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
         return (long)cmd.ExecuteScalar()!;
     }
 

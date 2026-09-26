@@ -54,7 +54,9 @@ Weitere Regeln:
 
 `meta` hat genau eine Zeile: `store` ist die Kennung dieser Datenbank und
 ändert sich, wenn sie aus einer Sicherung wiederhergestellt wird. `version`
-zählt jede Änderung an den Regeln und gilt nur zusammen mit `store`. `app`
+steigt mit jeder Änderung an den Regeln, mindestens auf die Unix-Zeit in
+Millisekunden, damit eine von Hand zurückkopierte Datei keinen Stand ein
+zweites Mal vergibt. Es gilt nur zusammen mit `store`. `app`
 ist die Programmversion, die sie zuletzt geöffnet hat.
 
 Jede Regel trägt `valid_from`, `valid_to`, `changed_at`, `changed_by` und

@@ -17,6 +17,10 @@ wenn jemand sie [weitergibt](import-export.md#prufung-weitergeben), dann als
 vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe
 [Verwaltete Installation](verwaltung.md).
 
+Die Datei einer Prüfung heißt wie ihre Bezeichnung. Nennt diese den Betrieb,
+steht der Name auch in Ordneransichten, Sicherungskatalogen und Suchindizes.
+Den Aufbau der Dateien beschreibt [Dateiformate](dateiformate.md).
+
 Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt
 und danach gelöscht; was ein Absturz dort zurücklässt, löscht der nächste
 Start. Das Fehlerprotokoll `crash.log` kann Dateinamen und Text aus Rechnungen

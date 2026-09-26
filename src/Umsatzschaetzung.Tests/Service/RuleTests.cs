@@ -21,18 +21,18 @@ public sealed class RuleTests : IDisposable
         korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
 
         var saved = await svc.SaveRule(korn, ct);
-        Assert.Equal(1, saved.Version);
-        Assert.Equal(1, saved.Products["prod.korn.4cl"].Meta.Rev);
+        Assert.True(saved.Version > 0);
+        Assert.Equal(saved.Version, saved.Products["prod.korn.4cl"].Meta.Rev);
 
         var withCategory = await svc.SaveRule(new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" }, ct);
-        Assert.Equal(2, withCategory.Version);
+        Assert.True(withCategory.Version > saved.Version);
         Assert.Contains("cat.alkoholfrei", withCategory.Categories.Keys);
 
         var merged = await svc.SaveRule(new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", CategoryId = "cat.alkoholfrei" }, ct);
-        Assert.Equal(3, merged.Version);
+        Assert.True(merged.Version > withCategory.Version);
         Assert.Contains("ing.wasser", merged.Ingredients.Keys);
         Assert.NotNull(merged.Products["prod.korn.4cl"].Meta.ValidTo);
-        Assert.Equal(3, (await svc.Status(ct)).RulesVersion);
+        Assert.Equal(merged.Version, (await svc.Status(ct)).RulesVersion);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public sealed class RuleTests : IDisposable
     public async Task DeleteDropsTheEntityAndBumpsTheVersion()
     {
         var pruned = await svc.DeleteRule(Entity.Product, "prod.korn.2cl", ct);
-        Assert.Equal(1, pruned.Version);
+        Assert.True(pruned.Version > 0);
         Assert.DoesNotContain("prod.korn.2cl", pruned.Products.Keys);
         Assert.DoesNotContain("prod.korn.2cl", (await svc.Rules(ct)).Products.Keys);
     }
