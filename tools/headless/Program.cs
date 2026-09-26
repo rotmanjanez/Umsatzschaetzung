@@ -73,8 +73,11 @@ Shell Launch(bool forget)
     var service = Services.Local(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
-        documents, new Tagger(), new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes), null, "headless",
-        options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
+        "headless",
+        documents: documents,
+        tagger: new Tagger(),
+        ranking: new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes),
+        readings: options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
     if (Number("width") is { } width) shell.Width = width;
     if (Number("height") is { } height) shell.Height = height;

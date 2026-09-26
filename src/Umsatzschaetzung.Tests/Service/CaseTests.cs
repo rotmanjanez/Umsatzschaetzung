@@ -20,7 +20,7 @@ public sealed class CaseTests : IDisposable
     public async Task StatusReadsTheSeededRuleSet()
     {
         using var fresh = new TempDir();
-        Services first = Services.Local(new RuleStore(fresh.Sub("store"), TestData.Seed()), new CaseStore(fresh.Sub("cases")), null, null, null, null, "test");
+        Services first = Services.Local(new RuleStore(fresh.Sub("store"), TestData.Seed()), new CaseStore(fresh.Sub("cases")), "test");
         var status = await first.Rules.Status(ct);
         Assert.Equal(0, status.RulesVersion);
         Assert.Null(status.Problem);
@@ -225,7 +225,7 @@ public sealed class CaseTests : IDisposable
     {
         var blocked = host.Sub("blockiert");
         File.WriteAllText(blocked, "keine Ablage");
-        Services broken = Services.Local(host.Store, new CaseStore(blocked), null, null, null, null, "test");
+        Services broken = Services.Local(host.Store, new CaseStore(blocked), "test");
 
         var e = await Assert.ThrowsAsync<ServiceError>(() => broken.Cases.Put(Vorlage.Blank(), ct));
 

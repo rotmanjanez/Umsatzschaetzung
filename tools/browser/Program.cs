@@ -22,7 +22,7 @@ await AppBuilder.Configure<App>().WithInterFont().StartBrowserAppAsync("out");
 // Nothing reads pixels or runs a model here: a case with one e-invoice is set up in memory.
 static async Task<Services> Compose()
 {
-    var service = Services.Local(new RuleStore("/work/rules", RuleStore.Seed()), new CaseStore("/work/cases"), null, null, null, null, "browser");
+    var service = Services.Local(new RuleStore("/work/rules", RuleStore.Seed()), new CaseStore("/work/cases"), "browser");
     var ct = CancellationToken.None;
     var kase = await service.Cases.Put(new Case
     {

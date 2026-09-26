@@ -12,7 +12,8 @@ namespace Umsatzschaetzung.Service;
 // for one of them: `Services.Local(...) with { Mapping = ... }`.
 public sealed record Services(IRules Rules, ISammlungen Sammlungen, ICases Cases, IInvoices Invoices, IAssortment Assortment, IMapping Mapping, IReports Reports)
 {
-    public static Services Local(RuleStore rules, CaseStore cases, IDocuments? documents, ITagger? tagger, IRanking? ranking, IPdfPrinter? printer, string appVersion, Readings? readings = null)
+    public static Services Local(RuleStore rules, CaseStore cases, string appVersion,
+        IDocuments? documents = null, ITagger? tagger = null, IRanking? ranking = null, IPdfPrinter? printer = null, Readings? readings = null)
     {
         var own = new LocalCases(rules, cases);
         var mapping = new LocalMapping(rules, own, ranking);
