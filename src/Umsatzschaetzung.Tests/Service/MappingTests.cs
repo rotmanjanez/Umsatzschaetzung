@@ -55,6 +55,21 @@ public class MappingTests(MatcherHost host)
         Assert.DoesNotContain(sugs.Skip(1), s => s.Mapping.IngredientId == "ing.bier.fass");
     }
 
+    // The rules are shared by whoever asks; an exact hit edited before it is saved must not change them.
+    [Fact]
+    public async Task AnExactHitIsTheCallersToEdit()
+    {
+        var line = new InvoiceLine { Name = Korn.Name, SellerArticleId = "Z-1", UnitCode = "XBO" };
+        var hit = (await svc.SuggestMapping("", line, Rheinland, ct))[0].Mapping;
+        var factor = hit.Factor;
+        hit.Factor = (factor ?? 0) + 1;
+        hit.Meta = new Meta();
+
+        var again = (await svc.SuggestMapping("", line, Rheinland, ct))[0].Mapping;
+        Assert.Equal(factor, again.Factor);
+        Assert.NotEqual(0, again.Meta.Rev);
+    }
+
     static Invoice Zwickl(string articleId) => new()
     {
         Source = Source.Ubl, SupplierName = Rheinland, Number = "R-Z", Date = new DateOnly(2024, 3, 1),
