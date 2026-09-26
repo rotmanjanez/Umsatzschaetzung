@@ -154,6 +154,6 @@ public partial class App : Application
             WebPages.Clear(WebPages.Folder);
             CrashLog.Clear();
         }
-        return new LocalService(rules, cases, new Documents(ocr, new PdfiumPages()), tagger, encoder, printer, Release.Version);
+        return new LocalService(rules, cases, new Documents(ocr, new PdfiumPages()), tagger, new EncoderRanking(encoder, new EmbeddingStore(rules.Dir)), printer, Release.Version);
     }
 }

@@ -71,7 +71,7 @@ Shell Launch(bool forget)
     var service = new LocalService(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
-        documents, new Tagger(), new Encoder(), null, "headless",
+        documents, new Tagger(), new EncoderRanking(new Encoder(), new EmbeddingStore(store)), null, "headless",
         options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
     if (Number("width") is { } width) shell.Width = width;
