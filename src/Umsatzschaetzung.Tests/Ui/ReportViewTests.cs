@@ -1,5 +1,4 @@
 using System.Text;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Umsatzschaetzung.App.Platform;
@@ -20,29 +19,18 @@ public class ReportViewTests
             Assert.Skip("the web view on macOS only runs on the main thread");
             return;
         }
-        Exception? failure = null;
-        (bool Ready, string Note, string Error, bool Large) seen = default;
-        var ui = new Thread(() =>
-        {
-            try { seen = Show(); }
-            catch (Exception e) { failure = e; }
-        });
-        ui.SetApartmentState(ApartmentState.STA);
-        ui.Start();
-        ui.Join();
+        var seen = Desktop.Run(Show);
 
-        if (failure is not null) throw new Xunit.Sdk.XunitException("the bericht tab crashed: " + failure);
         Assert.Equal("", seen.Error);
         Assert.Equal("", seen.Note);
         Assert.True(seen.Ready);
         Assert.True(seen.Large);
     }
 
-    static (bool, string, string, bool) Show()
+    static (bool Ready, string Note, string Error, bool Large) Show()
     {
         using var host = new Host();
         var kase = host.PutVorlage().GetAwaiter().GetResult();
-        AppBuilder.Configure<App.App>().UsePlatformDetect().WithInterFont().SetupWithoutStarting();
 
         var shell = new Shell(host.Service);
         using var done = new CancellationTokenSource(TimeSpan.FromSeconds(90));

@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Umsatzschaetzung.App.Platform;
@@ -50,13 +49,8 @@ public class SandboxTests
             Assert.Skip("the web view on macOS only runs on the main thread");
             return;
         }
-        Seen? seen = null;
-        var ui = new Thread(() => seen = Probe());
-        ui.SetApartmentState(ApartmentState.STA);
-        ui.Start();
-        ui.Join();
+        var seen = Desktop.Run(Probe);
 
-        Assert.NotNull(seen);
         Assert.Null(seen.Failure);
         Assert.True(seen.Loaded);
         Assert.Equal(["/control"], seen.Requests);
@@ -67,8 +61,6 @@ public class SandboxTests
     // silence of every sealed page means something.
     public static Seen Probe()
     {
-        if (Application.Current is null)
-            AppBuilder.Configure<App.App>().UsePlatformDetect().WithInterFont().SetupWithoutStarting();
         using var sink = new Sink();
         using var done = new CancellationTokenSource(TimeSpan.FromSeconds(120));
         var view = new HtmlView();
