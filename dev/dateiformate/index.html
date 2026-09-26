@@ -1357,7 +1357,9 @@ auf die neue hebt. Ein veröffentlichter Schritt wird nie mehr geändert.</p>
 <h2 id="rulesdb">rules.db</h2>
 <p><code>meta</code> hat genau eine Zeile: <code>store</code> ist die Kennung dieser Datenbank und
 ändert sich, wenn sie aus einer Sicherung wiederhergestellt wird. <code>version</code>
-zählt jede Änderung an den Regeln und gilt nur zusammen mit <code>store</code>. <code>app</code>
+steigt mit jeder Änderung an den Regeln, mindestens auf die Unix-Zeit in
+Millisekunden, damit eine von Hand zurückkopierte Datei keinen Stand ein
+zweites Mal vergibt. Es gilt nur zusammen mit <code>store</code>. <code>app</code>
 ist die Programmversion, die sie zuletzt geöffnet hat.</p>
 <p>Jede Regel trägt <code>valid_from</code>, <code>valid_to</code>, <code>changed_at</code>, <code>changed_by</code> und
 <code>rev</code>, den Stand von <code>version</code> bei ihrer letzten Änderung. Gelöschtes bleibt

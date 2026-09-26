@@ -12,6 +12,8 @@ Für IT und Datenschutzbeauftragte. Sicherheitslücken meldet man wie in [SECURI
 
 Eine Prüfung unterliegt dem Abgabengeheimnis. Sie verlässt den Rechner nur, wenn jemand sie [weitergibt](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben), dann als vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md).
 
+Die Datei einer Prüfung heißt wie ihre Bezeichnung. Nennt diese den Betrieb, steht der Name auch in Ordneransichten, Sicherungskatalogen und Suchindizes. Den Aufbau der Dateien beschreibt [Dateiformate](https://docs.umsatzschaetzung.amtstools.de/dev/dateiformate/index.md).
+
 Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt und danach gelöscht; was ein Absturz dort zurücklässt, löscht der nächste Start. Das Fehlerprotokoll `crash.log` kann Dateinamen und Text aus Rechnungen enthalten; auch es löscht der nächste Start.
 
 ## Die gemeinsame Regel-Datenbank

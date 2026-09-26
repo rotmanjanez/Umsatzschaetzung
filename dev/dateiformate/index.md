@@ -37,7 +37,7 @@ Weitere Regeln:
 
 ## rules.db
 
-`meta` hat genau eine Zeile: `store` ist die Kennung dieser Datenbank und ändert sich, wenn sie aus einer Sicherung wiederhergestellt wird. `version` zählt jede Änderung an den Regeln und gilt nur zusammen mit `store`. `app` ist die Programmversion, die sie zuletzt geöffnet hat.
+`meta` hat genau eine Zeile: `store` ist die Kennung dieser Datenbank und ändert sich, wenn sie aus einer Sicherung wiederhergestellt wird. `version` steigt mit jeder Änderung an den Regeln, mindestens auf die Unix-Zeit in Millisekunden, damit eine von Hand zurückkopierte Datei keinen Stand ein zweites Mal vergibt. Es gilt nur zusammen mit `store`. `app` ist die Programmversion, die sie zuletzt geöffnet hat.
 
 Jede Regel trägt `valid_from`, `valid_to`, `changed_at`, `changed_by` und `rev`, den Stand von `version` bei ihrer letzten Änderung. Gelöschtes bleibt mit `deleted_at` stehen, damit eine mitgelieferte Regel nicht beim nächsten Start wiederkommt.
 
