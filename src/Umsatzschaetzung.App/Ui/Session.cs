@@ -33,6 +33,8 @@ public sealed class Session : Observable
     SaveState saveState;
     string error = "";
     Dictionary<string, string> recorded = [];
+    bool stored = true;
+    int stores;
 
     public Session(IService service)
     {
@@ -204,9 +206,10 @@ public sealed class Session : Observable
     {
         if (Case is not { } kase) return Task.FromResult(false);
         var now = CaseParts.Of(kase);
-        if (CaseChange.Between(this, recorded, now) is { } change) at.History.Record(at, change);
+        var change = CaseChange.Between(this, recorded, now);
+        if (change is not null) at.History.Record(at, change);
         recorded = now;
-        return Store(kase, ct);
+        return change is null && stored ? Task.FromResult(true) : Store(kase, ct);
     }
 
     // Undo and redo put the case back without that being a change of its own.
@@ -216,14 +219,26 @@ public sealed class Session : Observable
         return Store(kase, CancellationToken.None);
     }
 
-    Task<bool> Store(Case kase, CancellationToken ct) =>
-        Enqueue(kase, async () =>
+    // Nothing changed since the last write went through: there is nothing to write.
+    Task<bool> Store(Case kase, CancellationToken ct)
+    {
+        var n = ++stores;
+        stored = false;
+        var write = Enqueue(kase, async () =>
         {
             var saved = await Service.PutCase(Json.Copy(kase), CancellationToken.None);
             kase.CreatedAt = saved.CreatedAt;
             kase.UpdatedAt = saved.UpdatedAt;
             if (Case == kase) CaseChanged?.Invoke();
-        }, ct);
+        }, CancellationToken.None);
+        _ = Settled(write, n);
+        return ct.CanBeCanceled ? Outcome(write, ct) : write;
+    }
+
+    async Task Settled(Task<bool> write, int n)
+    {
+        if (await write && n == stores) stored = true;
+    }
 
     public async Task<bool> Put(IRuleEntity data, Place at, CancellationToken ct)
     {
