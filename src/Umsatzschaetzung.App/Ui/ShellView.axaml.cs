@@ -44,7 +44,7 @@ public partial class ShellView : UserControl
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
         session.Indicate(this, SaveBadge, SaveText);
-        MenuBar.IsVisible = !OperatingSystem.IsMacOS();
+        MenuBar.IsVisible = !OperatingSystem.IsMacOS() && !OperatingSystem.IsBrowser();
         Loaded += async (_, _) =>
         {
             var top = TopLevel.GetTopLevel(this)!;
