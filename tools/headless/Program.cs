@@ -51,7 +51,9 @@ AppBuilder.Configure<App>()
     .WithInterFont()
     .SetupWithoutStarting();
 
-var driver = new Driver(Launch, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir);
+var encoder = new Encoder();
+var lesson = new Lesson(store, Path.Combine(work.FullName, "cases"));
+var driver = new Driver(Launch, lesson, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir);
 try
 {
     foreach (var step in steps) driver.Run(step);
@@ -71,7 +73,7 @@ Shell Launch(bool forget)
     var service = new LocalService(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
-        documents, new Tagger(), new EncoderRanking(new Encoder(), new EmbeddingStore(store)), null, "headless",
+        documents, new Tagger(), new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes), null, "headless",
         options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
     if (Number("width") is { } width) shell.Width = width;

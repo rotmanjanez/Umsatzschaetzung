@@ -33,22 +33,22 @@ public static class Targets
         throw new InvalidOperationException("not found: " + target);
     }
 
-    public static Visual? Seek(Visual root, Target target)
+    public static Visual? Seek(Visual root, Target target) => Seek(root, target, out _);
+
+    // Also hands back the control that matched, before `up` led to its ancestor.
+    public static Visual? Seek(Visual root, Target target, out Visual? hit)
     {
-        var hit = Hits(root, target).FirstOrDefault();
+        hit = root.GetVisualDescendants().FirstOrDefault(v => Is(v, target));
         return hit is null ? null : target.Up is { } up ? Up(hit, up) : hit;
     }
 
-    static IEnumerable<Visual> Hits(Visual root, Target target)
-    {
-        var hits = root.GetVisualDescendants().Where(v => v.IsEffectivelyVisible);
-        if (target.Name is { } name) hits = hits.Where(v => (v as StyledElement)?.Name == name);
-        if (target.Text is { } text) hits = hits.Where(v => Label(v) == text);
-        if (target.Starts is { } starts) hits = hits.Where(v => Label(v)?.StartsWith(starts, StringComparison.Ordinal) == true);
-        if (target.Type is { } type) hits = hits.Where(v => v.GetType().Name == type);
-        if (target.Tip is { } tip) hits = hits.Where(v => v is Control c && ToolTip.GetTip(c) as string == tip);
-        return hits;
-    }
+    public static bool Is(Visual v, Target target) =>
+        v.IsEffectivelyVisible
+        && (target.Name is null || (v as StyledElement)?.Name == target.Name)
+        && (target.Text is null || Label(v) == target.Text)
+        && (target.Starts is null || Label(v)?.StartsWith(target.Starts, StringComparison.Ordinal) == true)
+        && (target.Type is null || v.GetType().Name == target.Type)
+        && (target.Tip is null || v is Control c && ToolTip.GetTip(c) as string == target.Tip);
 
     public static bool Reveal(Visual root, Target target)
     {

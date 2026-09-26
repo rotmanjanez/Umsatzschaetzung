@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -14,7 +15,7 @@ namespace Umsatzschaetzung.Headless;
 
 // Drives the real interface headlessly: every step hits the same controls a
 // person would. What is shown is up to the script.
-public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, string outDir)
+public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, double pad, string outDir)
 {
     Shell shell = launch(false);
 
@@ -76,6 +77,15 @@ public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, stri
                 break;
             case RestartStep:
                 Restart();
+                break;
+            case KeepStep s:
+                Keep(s.To);
+                break;
+            case PushStep:
+                lesson.Notes.Push();
+                break;
+            case DiffStep s:
+                lesson.Diff(Path.GetFullPath(s.To));
                 break;
             case WaitStep s:
                 for (var i = 1; i < s.Rounds; i++) Settle();
@@ -186,6 +196,14 @@ public sealed class Driver(Func<bool, Shell> launch, int scale, double pad, stri
         var kase = shell.Session.Service.GetCase(id, CancellationToken.None);
         while (!kase.IsCompleted) Settle();
         shell.Session.Open(kase.Result);
+    }
+
+    // What is still being written is waited for, so the copy holds what the screen shows.
+    void Keep(string to)
+    {
+        var saved = shell.Session.Saved;
+        while (!saved.IsCompleted) Settle();
+        lesson.Keep(Path.GetFullPath(to), shell.Session.Case?.Id);
     }
 
     public void Close()

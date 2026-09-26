@@ -27,6 +27,9 @@ public sealed record Inset
 [JsonDerivedType(typeof(ChooseStep), "choose")]
 [JsonDerivedType(typeof(WaitStep), "wait")]
 [JsonDerivedType(typeof(RestartStep), "restart")]
+[JsonDerivedType(typeof(KeepStep), "keep")]
+[JsonDerivedType(typeof(PushStep), "push")]
+[JsonDerivedType(typeof(DiffStep), "diff")]
 public abstract record Step
 {
     // "dialog" means the last window opened above the main window.
@@ -113,6 +116,18 @@ public sealed record WaitStep : Step
 }
 
 public sealed record RestartStep : Step;
+
+public sealed record KeepStep : Step
+{
+    public required string To { get; init; }
+}
+
+public sealed record PushStep : Step;
+
+public sealed record DiffStep : Step
+{
+    public required string To { get; init; }
+}
 
 // One step per line: a line in the diff stays one action, and a script can be
 // composed, filtered and appended to like any other list.
