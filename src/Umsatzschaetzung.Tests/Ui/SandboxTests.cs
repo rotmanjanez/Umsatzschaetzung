@@ -105,6 +105,7 @@ public class SandboxTests
 
     static async Task<bool> Raw(HtmlView view, string html, CancellationToken ct)
     {
+        await NoNetwork.Ready.WaitAsync(ct);
         Directory.CreateDirectory(WebPages.Folder);
         var file = Path.Combine(WebPages.Folder, $"{Guid.NewGuid():N}.html");
         await File.WriteAllTextAsync(file, html, Encoding.UTF8, ct);

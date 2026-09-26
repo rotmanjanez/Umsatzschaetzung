@@ -16,7 +16,11 @@ public sealed class HtmlView : NativeWebView, IHtmlView
     public HtmlView()
     {
         EnvironmentRequested += (_, e) => WebPages.Isolate(e);
-        AdapterCreated += (_, e) => NoScript.Apply(e.TryGetPlatformHandle());
+        AdapterCreated += (_, e) =>
+        {
+            NoScript.Apply(e.TryGetPlatformHandle());
+            NoNetwork.Apply(e.TryGetPlatformHandle());
+        };
         NavigationStarted += (_, e) => e.Cancel = !WebPages.Ours(e.Request);
         NewWindowRequested += (_, e) => e.Handled = true;
     }
@@ -27,7 +31,11 @@ public sealed class HtmlDialog : NativeWebDialog, IHtmlView
     public HtmlDialog()
     {
         EnvironmentRequested += (_, e) => WebPages.Isolate(e);
-        AdapterCreated += (_, e) => NoScript.Apply(e.TryGetPlatformHandle());
+        AdapterCreated += (_, e) =>
+        {
+            NoScript.Apply(e.TryGetPlatformHandle());
+            NoNetwork.Apply(e.TryGetPlatformHandle());
+        };
         NavigationStarted += (_, e) => e.Cancel = !WebPages.Ours(e.Request);
         NewWindowRequested += (_, e) => e.Handled = true;
     }
@@ -64,10 +72,6 @@ static partial class WebPages
     internal static bool Of(Uri? request, string file) =>
         request is null || request.IsFile && string.Equals(Path.GetFullPath(request.LocalPath), file, StringComparison.OrdinalIgnoreCase);
 
-    // Every request goes to a proxy nobody answers, loopback included, and a fixed proxy never falls
-    // back to a direct connection: whatever a page or the engine starts, nothing leaves the machine.
-    internal const string NoNetwork = "--proxy-server=127.0.0.1:9 --proxy-bypass-list=<-loopback>";
-
     internal static void Isolate(WebViewEnvironmentRequestedEventArgs e)
     {
         e.EnableDevTools = false;
@@ -75,7 +79,7 @@ static partial class WebPages
         {
             case WindowsWebView2EnvironmentRequestedEventArgs windows:
                 windows.IsInPrivateModeEnabled = true;
-                windows.AdditionalBrowserArguments = NoNetwork;
+                windows.AdditionalBrowserArguments = NoNetwork.Arguments;
                 break;
             case AppleWKWebViewEnvironmentRequestedEventArgs mac:
                 mac.NonPersistentDataStore = true;
@@ -96,6 +100,7 @@ static partial class WebPages
 
     public static async Task<bool> Show(this IHtmlView view, string html, TimeSpan timeout, CancellationToken ct)
     {
+        await NoNetwork.Ready.WaitAsync(ct);
         Directory.CreateDirectory(Folder);
         var file = Path.Combine(Folder, $"{Guid.NewGuid()}.html");
         await File.WriteAllTextAsync(file, Seal(html), Encoding.UTF8, ct);
