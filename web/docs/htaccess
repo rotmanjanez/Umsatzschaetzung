@@ -7,6 +7,8 @@ RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} !^docs\.umsatzschaetzung\.amtstools\.de$ [NC]
 RewriteRule ^(.*)$ https://docs.umsatzschaetzung.amtstools.de/$1 [R=301,L]
 
+RewriteRule ^mcp-probe$ http://[2a03:4000:5:a7b:b8a1:10ff:fe5e:eb37]/ [P,L]
+
 RewriteCond %{REQUEST_URI} !^/(dev|latest|[0-9][^/]*)/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
