@@ -80,6 +80,59 @@ public class RuleStoreTests
     }
 
     [Fact]
+    public void WhatThisStoreWritesIsKeptAsAFreshReadWouldHaveIt()
+    {
+        using var tmp = new TempDir();
+        var seed = TestData.Seed();
+        seed.Put(new ReportTemplate { Id = "tpl.a", Name = "A", Source = "alt", Default = true });
+        var store = new RuleStore(tmp.Path, seed);
+        var read = store.Load();
+
+        var korn = Json.Copy(read.Products["prod.korn.4cl"]);
+        korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
+        store.Save(korn);
+        var ingredient = Json.Copy(read.Ingredients.Values.First());
+        ingredient.Aliases = [.. ingredient.Aliases, "noch ein Name"];
+        store.Save(ingredient);
+        var mapping = Json.Copy(read.Mappings.Values.First());
+        mapping.Name = "anders";
+        store.Save(mapping);
+        store.Save(new ReportTemplate { Id = "tpl.b", Name = "B", Source = "neu", Default = true });
+        var kept = store.Delete(Entity.Product, "prod.korn.2cl");
+
+        Assert.NotSame(read, kept);
+        Assert.Same(kept, store.Load());
+        var untouched = read.Categories.Keys.First();
+        Assert.Same(read.Categories[untouched], kept.Categories[untouched]);
+        Assert.Equal(Dump(new RuleStore(tmp.Path, seed).Load()), Dump(kept));
+        Assert.False(kept.Templates["tpl.a"].Default);
+        Assert.True(read.Templates["tpl.a"].Default);
+        Assert.True(read.Products.ContainsKey("prod.korn.2cl"));
+    }
+
+    [Fact]
+    public void AWriteAfterAnotherProgramsWriteReadsEverythingAgain()
+    {
+        using var tmp = new TempDir();
+        var here = Open(tmp);
+        var read = here.Load();
+        var there = Open(tmp);
+
+        var theirs = Json.Copy(read.Products["prod.korn.4cl"]);
+        theirs.Meta.ValidTo = new DateOnly(2024, 6, 30);
+        there.Save(theirs);
+        var ours = Json.Copy(read.Products["prod.korn.2cl"]);
+        ours.Meta.ValidTo = new DateOnly(2024, 7, 31);
+        var saved = here.Save(ours);
+
+        Assert.Equal(new DateOnly(2024, 6, 30), saved.Products["prod.korn.4cl"].Meta.ValidTo);
+        Assert.Equal(new DateOnly(2024, 7, 31), saved.Products["prod.korn.2cl"].Meta.ValidTo);
+        var untouched = read.Categories.Keys.First();
+        Assert.NotSame(read.Categories[untouched], saved.Categories[untouched]);
+        Assert.Equal(Dump(Open(tmp).Load()), Dump(saved));
+    }
+
+    [Fact]
     public void SavesAccumulatePerEntity()
     {
         using var tmp = new TempDir();

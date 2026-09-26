@@ -157,43 +157,100 @@ public sealed class RuleStore
         }
     }
 
-    // Another program may write the same store; its revision tells whether the set read last still holds.
+    // Another program may write the same store; its version tells whether the set kept still holds.
     // Everyone asking gets that same set, so what is to be changed is changed on a copy.
     public RuleSet Load() => Guarded(() =>
     {
         using var db = Open();
-        if (loaded is { } rs)
-        {
-            using var cmd = Command(db, null, "SELECT store, version FROM meta");
-            using var r = cmd.ExecuteReader();
-            if (r.Read() && r.GetString(0) == rs.Store && r.GetInt64(1) == rs.Version) return rs;
-        }
-        return loaded = Read(db, null);
+        return Current(db, null) ?? (loaded = Read(db, null));
     });
 
+    // The write holds the store from its first statement: the set kept is brought along only when
+    // it was still the store's before the write; if someone else wrote since, all is read again.
     public RuleSet Save(IRuleEntity e) => Guarded(() =>
     {
         using var db = Open();
         using var tx = db.BeginTransaction(deferred: false);
+        var current = Current(db, tx);
         e.Meta.Rev = Bump(db, tx);
         e.Meta.ChangedBy = Environment.UserName;
         Put(db, tx, e);
-        var rs = Read(db, tx);
+        var rs = current is null ? Read(db, tx) : Changed(current, e.Meta.Rev, next => Keep(next, Json.Copy(e)));
         tx.Commit();
-        return rs;
+        return loaded = rs;
     });
 
     public RuleSet Delete(Entity kind, string id) => Guarded(() =>
     {
         using var db = Open();
         using var tx = db.BeginTransaction(deferred: false);
-        Bump(db, tx);
+        var current = Current(db, tx);
+        var version = Bump(db, tx);
         Exec(db, tx, $"UPDATE {Table(kind)} SET deleted_at = @now, changed_by = @by WHERE id = @id",
             ("@id", id), ("@now", Stamp(Clock.Now())), ("@by", Environment.UserName));
-        var rs = Read(db, tx);
+        var rs = current is null ? Read(db, tx) : Changed(current, version, next => Drop(next, kind, id));
         tx.Commit();
-        return rs;
+        return loaded = rs;
     });
+
+    RuleSet? Current(SqliteConnection db, SqliteTransaction? tx)
+    {
+        if (loaded is not { } rs) return null;
+        using var cmd = Command(db, tx, "SELECT store, version FROM meta");
+        using var r = cmd.ExecuteReader();
+        return r.Read() && r.GetString(0) == rs.Store && r.GetInt64(1) == rs.Version ? rs : null;
+    }
+
+    // The set kept is shared by whoever loaded it, so a change goes into a set of its own.
+    static RuleSet Changed(RuleSet rs, long version, Action<RuleSet> change)
+    {
+        var next = new RuleSet
+        {
+            Store = rs.Store,
+            Version = version,
+            Categories = new(rs.Categories),
+            Ingredients = new(rs.Ingredients),
+            Mappings = new(rs.Mappings),
+            Products = new(rs.Products),
+            YieldRules = new(rs.YieldRules),
+            Gewerbezweige = new(rs.Gewerbezweige),
+            Templates = new(rs.Templates),
+            Bases = rs.Bases,
+        };
+        change(next);
+        return next;
+    }
+
+    // As Put leaves the store: a mapping in it is confirmed, and a new default template unseats the old one.
+    static void Keep(RuleSet rs, IRuleEntity e)
+    {
+        if (e is ArticleMapping m) m.Confirmed = true;
+        if (e is ReportTemplate { Default: true })
+            foreach (var (id, t) in rs.Templates.Where(t => t.Value.Default && t.Key != e.Id).ToList())
+            {
+                var unseated = Json.Copy(t);
+                unseated.Default = false;
+                rs.Templates[id] = unseated;
+            }
+        rs.Put(e);
+    }
+
+    static void Drop(RuleSet rs, Entity kind, string id)
+    {
+        switch (kind)
+        {
+            case Entity.Category: rs.Categories.Remove(id); break;
+            case Entity.Ingredient: rs.Ingredients.Remove(id); break;
+            case Entity.Mapping: rs.Mappings.Remove(id); break;
+            case Entity.Product:
+                rs.Products.Remove(id);
+                rs.Bases = null;
+                break;
+            case Entity.Gewerbezweig: rs.Gewerbezweige.Remove(id); break;
+            case Entity.Template: rs.Templates.Remove(id); break;
+            default: rs.YieldRules.Remove(id); break;
+        }
+    }
 
     public List<SammlungInfo> Sammlungen() => Guarded(() =>
     {
