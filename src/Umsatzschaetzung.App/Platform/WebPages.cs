@@ -64,6 +64,10 @@ static partial class WebPages
     internal static bool Of(Uri? request, string file) =>
         request is null || request.IsFile && string.Equals(Path.GetFullPath(request.LocalPath), file, StringComparison.OrdinalIgnoreCase);
 
+    // Every request goes to a proxy nobody answers, loopback included, and a fixed proxy never falls
+    // back to a direct connection: whatever a page or the engine starts, nothing leaves the machine.
+    internal const string NoNetwork = "--proxy-server=127.0.0.1:9 --proxy-bypass-list=<-loopback>";
+
     internal static void Isolate(WebViewEnvironmentRequestedEventArgs e)
     {
         e.EnableDevTools = false;
@@ -71,6 +75,7 @@ static partial class WebPages
         {
             case WindowsWebView2EnvironmentRequestedEventArgs windows:
                 windows.IsInPrivateModeEnabled = true;
+                windows.AdditionalBrowserArguments = NoNetwork;
                 break;
             case AppleWKWebViewEnvironmentRequestedEventArgs mac:
                 mac.NonPersistentDataStore = true;

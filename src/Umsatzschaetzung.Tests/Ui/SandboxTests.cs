@@ -57,8 +57,8 @@ public class SandboxTests
         Assert.DoesNotContain(seen.Navigations, n => n.EndsWith("/ran", StringComparison.Ordinal));
     }
 
-    // The control page skips the policy: its request proves the sink is reachable at all, so the
-    // silence of every sealed page means something.
+    // The control request comes from outside the web view and proves the sink is reachable, so the
+    // silence means something; the unsealed page shows the web view has no network even without the policy.
     public static Seen Probe()
     {
         using var sink = new Sink();
@@ -73,7 +73,8 @@ public class SandboxTests
         {
             try
             {
-                loaded &= await Raw(view, $"<img src=\"{sink.Url}/control\">", done.Token);
+                using (var http = new HttpClient()) await http.GetAsync(sink.Url + "/control", done.Token);
+                loaded &= await Raw(view, $"<img src=\"{sink.Url}/web-view\">", done.Token);
                 loaded &= await Raw(view, $"<script>location.href = \"{sink.Url}/ran\";</script>", done.Token);
                 view.Navigate(new Uri(sink.Url + "/navigate"));
                 foreach (var (name, html) in Mistakes)
