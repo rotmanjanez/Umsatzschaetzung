@@ -108,7 +108,10 @@ public class SandboxTests
         var file = Path.Combine(WebPages.Folder, $"{Guid.NewGuid():N}.html");
         await File.WriteAllTextAsync(file, html, Encoding.UTF8, ct);
         var loaded = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        void Completed(object? sender, WebViewNavigationCompletedEventArgs e) => loaded.TrySetResult(e.IsSuccess);
+        void Completed(object? sender, WebViewNavigationCompletedEventArgs e)
+        {
+            if (WebPages.Of(e.Request, file)) loaded.TrySetResult(e.IsSuccess);
+        }
         view.NavigationCompleted += Completed;
         try
         {

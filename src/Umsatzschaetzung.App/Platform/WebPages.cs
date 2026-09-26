@@ -60,6 +60,10 @@ static partial class WebPages
         url is not null && (url.AbsoluteUri == "about:blank"
         || url.IsFile && string.Equals(Path.GetDirectoryName(url.LocalPath)?.Normalize(), Folder.Normalize(), StringComparison.OrdinalIgnoreCase));
 
+    // A navigation the view refused or a newer page cut short completes too, often while the next page loads.
+    internal static bool Of(Uri? request, string file) =>
+        request is null || request.IsFile && string.Equals(Path.GetFullPath(request.LocalPath), file, StringComparison.OrdinalIgnoreCase);
+
     internal static void Isolate(WebViewEnvironmentRequestedEventArgs e)
     {
         e.EnableDevTools = false;
@@ -91,7 +95,10 @@ static partial class WebPages
         var file = Path.Combine(Folder, $"{Guid.NewGuid()}.html");
         await File.WriteAllTextAsync(file, Seal(html), Encoding.UTF8, ct);
         var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        void Completed(object? sender, WebViewNavigationCompletedEventArgs e) => done.TrySetResult(e.IsSuccess);
+        void Completed(object? sender, WebViewNavigationCompletedEventArgs e)
+        {
+            if (Of(e.Request, file)) done.TrySetResult(e.IsSuccess);
+        }
         view.NavigationCompleted += Completed;
         try
         {

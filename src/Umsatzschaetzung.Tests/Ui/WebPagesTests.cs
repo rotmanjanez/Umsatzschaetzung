@@ -76,6 +76,17 @@ public class WebPagesTests
     static Uri Page(string name) => new(Path.Combine(WebPages.Folder, name));
 
     [Fact]
+    public void APageWaitsForItsOwnNavigationToComplete()
+    {
+        var file = Path.Combine(WebPages.Folder, "b.html");
+
+        Assert.True(WebPages.Of(Page("b.html"), file));
+        Assert.True(WebPages.Of(null, file));
+        Assert.False(WebPages.Of(Page("a.html"), file));
+        Assert.False(WebPages.Of(new Uri("http://127.0.0.1:5000/navigate"), file));
+    }
+
+    [Fact]
     public void OnlyOurOwnPagesAreNavigatedTo()
     {
         Assert.True(WebPages.Ours(Page($"{Guid.NewGuid():N}.html")));
