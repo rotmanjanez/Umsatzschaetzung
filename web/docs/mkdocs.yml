@@ -56,6 +56,7 @@ plugins:
           - import-export.md: Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV
           - verwaltung.md: Für die IT, Datenablage, gemeinsame Regel-Datenbank, unbeaufsichtigte Installation und Gruppenrichtlinien
           - datenschutz.md: Für IT und Datenschutz, wo Daten liegen, Löschung, Netzwerk, Signatur und Modelle
+          - dateiformate.md: Für die IT, Aufbau von rules.db und der Prüfungsdatei, Maßstäbe der Beträge und Schemaversion
           - vorlagen.md: Für die IT, Berichtsvorlagen anpassen, Aufbau, Daten und Filter
         Hilfe:
           - faq.md: Häufige Fragen, nach Arbeitsschritt geordnet
@@ -106,6 +107,7 @@ nav:
       - Import und Export: import-export.md
       - Verwaltete Installation: verwaltung.md
       - Sicherheit und Datenschutz: datenschutz.md
+      - Dateiformate: dateiformate.md
   - Hilfe:
       - Häufige Fragen: faq.md
       - CSV-Dateien: hilfe/csv.md

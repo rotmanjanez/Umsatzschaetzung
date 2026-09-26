@@ -332,11 +332,6 @@ public sealed partial class CaseStore(string dir)
             File.Delete(temp);
             throw;
         }
-        finally
-        {
-            // Eine ältere Datei wird beim Lesen nachgezogen; die Sicherung der Zwischenkopie braucht niemand.
-            foreach (var bak in Directory.EnumerateFiles(dir, Path.GetFileName(temp) + ".v*.bak")) File.Delete(bak);
-        }
     });
 
     public void SaveFile(string caseId, string invoiceId, string name, byte[] data) => Guarded(() =>
@@ -772,8 +767,9 @@ public sealed partial class CaseStore(string dir)
 
     static SqliteConnection Reader(string path) => Open(path, SqliteOpenMode.ReadOnly);
 
-    // Eine Falldatei ist ein Dokument und wird beim Öffnen nachgezogen. Die Fassung davor
-    // bleibt daneben liegen, falls ein Schritt sich später als falsch herausstellt.
+    // Eine Falldatei ist ein Dokument und wird beim Öffnen nachgezogen. Die Fassung davor liegt
+    // nur so lange daneben, bis die nachgezogene Datei heil ist und sich ganz lesen lässt; sonst
+    // kommt sie zurück. Eine Sicherung, die liegen bliebe, hielte gelöschte Belege fest.
     static SqliteConnection Open(string path, SqliteOpenMode mode)
     {
         var db = Connect(path, mode);
@@ -791,18 +787,29 @@ public sealed partial class CaseStore(string dir)
         if (from == Migrations.Length) return db;
         db.Dispose();
         if (from == 0 && mode == SqliteOpenMode.ReadOnly) throw new CaseInvalidException("Falldatei enthält keinen Fall");
-        if (from > 0 && from < Migrations.Length) File.Copy(path, $"{path}.v{from}.bak", true);
-        using (var writer = Connect(path, SqliteOpenMode.ReadWriteCreate))
+        var bak = from > 0 && from < Migrations.Length ? $"{path}.v{from}.bak" : null;
+        if (bak is not null) File.Copy(path, bak, true);
+        try
         {
-            try
+            using var writer = Connect(path, SqliteOpenMode.ReadWriteCreate);
+            Schema.Migrate(writer, Migrations);
+            if (bak is not null)
             {
-                Schema.Migrate(writer, Migrations);
-            }
-            catch (SchemaTooNewException e)
-            {
-                throw new CaseInvalidException("Die Falldatei " + e.Message, e);
+                if (Scalar(writer, "PRAGMA quick_check") as string != "ok") throw new CaseInvalidException("Falldatei ist nach dem Nachziehen beschädigt");
+                Read(writer);
             }
         }
+        catch (SchemaTooNewException e)
+        {
+            throw new CaseInvalidException("Die Falldatei " + e.Message, e);
+        }
+        catch when (bak is not null)
+        {
+            File.Move(bak, path, true);
+            File.Delete(path + "-journal");
+            throw;
+        }
+        if (bak is not null) File.Delete(bak);
         return Connect(path, mode);
     }
 
