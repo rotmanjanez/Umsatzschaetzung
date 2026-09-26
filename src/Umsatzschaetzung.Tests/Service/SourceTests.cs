@@ -122,7 +122,8 @@ public sealed class SourceTests : IDisposable
 
         var row = await svc.InvoiceSnippet(at[0], at[1], 1, "Zucker", ct);
 
-        Assert.Equal((152 - 8, 72 - 38), row is { } r ? (r.Width, r.Height) : default);
+        // Cut from the page as it is kept: at half its resolution.
+        Assert.Equal(((152 - 8) / 2, (72 - 38) / 2), row is { } r ? (r.Width, r.Height) : default);
         Assert.Null(await svc.InvoiceSnippet(at[0], at[1], 5, "Salz", ct));
     }
 

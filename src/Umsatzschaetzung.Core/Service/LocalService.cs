@@ -18,6 +18,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     const int AutoMapMinConfidence = 80;
 
     readonly Matcher matcher = new(ranking);
+    readonly Excerpts excerpts = new(cases);
 
     IDocuments Documents => documents ?? throw new ServiceError(ErrorCode.Unsupported, "Belege lassen sich hier nicht lesen");
 
@@ -106,11 +107,17 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     {
         if (caseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
         cases.Delete(caseId);
+        excerpts.Forget(caseId);
         return Task.FromResult(0);
     });
 
     public Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) =>
-        Guard(ct, () => cases.Import(data, overwrite));
+        Guard(ct, () =>
+        {
+            var c = cases.Import(data, overwrite);
+            excerpts.Forget(c.Id);
+            return c;
+        });
 
     public Task<ExportResp> ExportCase(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
@@ -253,20 +260,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         return new InvoiceReadingResp(pages);
     });
 
-    public Task<Raster?> InvoiceSnippet(string caseId, string invoiceId, int line, string name, CancellationToken ct) => Guard<Raster?>(ct, async () =>
-    {
-        if (cases.LoadReading(caseId, invoiceId) is not { } pages || Rows.Of(pages, line, name) is not (var at, var box)) return null;
-        byte[] data;
-        try
-        {
-            (_, data) = cases.LoadFile(caseId, invoiceId);
-        }
-        catch (CaseNotFoundException)
-        {
-            return null;
-        }
-        return await Documents.Cut(data, at, pages[at].Correction, box, ct);
-    });
+    public Task<Raster?> InvoiceSnippet(string caseId, string invoiceId, int line, string name, CancellationToken ct) =>
+        Guard(ct, () => excerpts.Row(Documents, caseId, invoiceId, line, name));
 
     // A line asked about on its own carries no invoice date; the end of the audit period stands in.
     public Task<List<MappingCandidate>> SuggestMapping(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () =>
@@ -369,6 +364,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         if (c.CreatedAt == default) c.CreatedAt = t;
         c.UpdatedAt = t;
         cases.Save(c, add);
+        if (add is not null) excerpts.Forget(c.Id, add.InvoiceId);
     }
 
     Case Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> own, List<OcrPage>? reading = null)
