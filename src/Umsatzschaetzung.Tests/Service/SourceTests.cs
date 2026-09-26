@@ -75,15 +75,16 @@ public sealed class SourceTests : IDisposable
     }
 
     [Fact]
-    public async Task AStoredReadingGetsItsPageImagesRenderedAgain()
+    public async Task AStoredReadingIsShownWithThePagesKeptWhenItWasStored()
     {
-        var reading = new List<OcrPage> { new() { Width = 1 }, new() { Width = 2 } };
+        var reading = new List<OcrPage> { new() { Width = 2 }, new() { Width = 4 } };
         var at = (await Store("scan.pdf", "%PDF-1.4 kein Inhalt"u8.ToArray(), reading)).Split('/');
+        Assert.Equal([Umsatzschaetzung.Service.Scan.Dpi], pages.Dpis);
 
         var read = (await svc.InvoiceReading(at[0], at[1], ct)).Pages;
 
-        Assert.Equal([1, 2], read.Select(p => p.Width));
-        Assert.Equal([1, 2], read.Select(p => p.Image!.Width));
+        Assert.Equal([2, 4], read.Select(p => p.Width));
+        Assert.Equal([1, 1], read.Select(p => p.Image!.Width));
         Assert.Equal([Umsatzschaetzung.Service.Scan.Dpi], pages.Dpis);
     }
 

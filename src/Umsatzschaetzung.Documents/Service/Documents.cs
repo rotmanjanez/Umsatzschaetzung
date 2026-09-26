@@ -31,19 +31,6 @@ public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
         return read;
     }
 
-    public async IAsyncEnumerable<Raster> Pages(byte[] data, IReadOnlyList<Correction> reading, [EnumeratorCancellation] CancellationToken ct)
-    {
-        if (pdf is null && InvoiceParser.Detect(data) != Kind.Image) yield break;
-        var i = 0;
-        await foreach (var image in Scan.Pages(pdf, data, Scan.Dpi, ct))
-            using (image)
-            {
-                if (i >= reading.Count) yield break;
-                var c = reading[i++];
-                yield return await Task.Run(() => Scan.Upright(image, c), ct);
-            }
-    }
-
     // The preview keeps its own resolution; the turns do not depend on it.
     public async IAsyncEnumerable<Raster> Preview(byte[] data, IReadOnlyList<Correction> reading, [EnumeratorCancellation] CancellationToken ct)
     {
@@ -56,11 +43,20 @@ public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
             }
     }
 
-    public async Task<byte[]> Keep(byte[] data, int page, Correction correction, CancellationToken ct)
+    public async IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<Correction> reading, [EnumeratorCancellation] CancellationToken ct)
     {
-        using var image = await Scan.Page(pdf, data, page, Scan.Dpi, ct);
-        return await Task.Run(() => Scan.Keep(image, correction, KeptScale), ct);
+        if (pdf is null && InvoiceParser.Detect(data) != Kind.Image) yield break;
+        var i = 0;
+        await foreach (var image in Scan.Pages(pdf, data, Scan.Dpi, ct))
+            using (image)
+            {
+                if (i >= reading.Count) yield break;
+                var c = reading[i++];
+                yield return await Task.Run(() => Scan.Keep(image, c, KeptScale), ct);
+            }
     }
+
+    public Raster Show(byte[] kept) => Scan.Crop(kept, new SKRectI(0, 0, int.MaxValue, int.MaxValue))!;
 
     public Raster? Cut(byte[] kept, Box region) =>
         Scan.Crop(kept, SKRectI.Round(new SKRect(region.X * KeptScale, region.Y * KeptScale,

@@ -16,14 +16,13 @@ public interface IDocuments
     // Regions of a read page, read again on their own; boxes in the frame of the reading.
     Task<List<List<OcrWord>>> Reread(byte[] data, OcrPage reading, int page, IReadOnlyList<Box> regions, CancellationToken ct);
 
-    // The pages as the reading saw them, as many as it has.
-    IAsyncEnumerable<Raster> Pages(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
-
     // Every page at a resolution for looking at, turned as the reading turned it.
     IAsyncEnumerable<Raster> Preview(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
 
-    // A page kept to cut rows from: upright as the reading saw it, smaller, compressed.
-    Task<byte[]> Keep(byte[] data, int page, Correction correction, CancellationToken ct);
+    // The pages kept beside the reading, as many as it has: upright as it saw them, smaller, compressed.
+    IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
+
+    Raster Show(byte[] kept);
 
     // A region of the reading's frame, cut from a kept page.
     Raster? Cut(byte[] kept, Box region);

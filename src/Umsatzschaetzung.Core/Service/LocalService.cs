@@ -204,7 +204,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         var resp = new VerifyResp(inv, flags, blocked, false, null);
         if (!store) return resp;
         inv.Verification = confirm ? new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto } : null;
-        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], own, req.Reading);
+        var images = req is { Reading: { } reading, Data: { } data } && documents is not null
+            ? await documents.Keep(data, [.. reading.Select(p => p.Correction)], ct).ToListAsync(ct)
+            : null;
+        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], own, req.Reading, images);
         return resp with { Invoice = inv, Case = c, Accepted = confirm };
     });
 
@@ -239,24 +242,12 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         return new InvoiceSourceResp(name, pages);
     });
 
-    public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, async () =>
+    public Task<InvoiceReadingResp> InvoiceReading(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, () =>
     {
         if (cases.LoadReading(caseId, invoiceId) is not { } pages) return new InvoiceReadingResp([]);
-        byte[] data;
-        try
-        {
-            (_, data) = cases.LoadFile(caseId, invoiceId);
-        }
-        catch (CaseNotFoundException)
-        {
-            return new InvoiceReadingResp([]);
-        }
-        if (documents is not null && InvoiceParser.Detect(data) is Kind.Image or Kind.Pdf)
-        {
-            var i = 0;
-            await foreach (var image in documents.Pages(data, [.. pages.Select(p => p.Correction)], ct))
-                pages[i++].Image = image;
-        }
+        if (documents is not null)
+            foreach (var (page, kept) in pages.Zip(cases.LoadImages(caseId, invoiceId)))
+                page.Image = documents.Show(kept);
         return new InvoiceReadingResp(pages);
     });
 
@@ -367,7 +358,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         if (add is not null) excerpts.Forget(c.Id, add.InvoiceId);
     }
 
-    Case Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> own, List<OcrPage>? reading = null)
+    Case Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> own, List<OcrPage>? reading = null, List<byte[]>? images = null)
     {
         var c = LoadCase(caseId);
         foreach (var (id, m) in own) c.Mappings[id] = m;
@@ -375,7 +366,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
         if (inv.Lines.Any(l => string.IsNullOrEmpty(l.MappingId))) c.MappedStore = null;
-        SaveCase(c, new Attachment(inv.Id, fileName, data, reading));
+        SaveCase(c, new Attachment(inv.Id, fileName, data, reading, images));
         return c;
     }
 

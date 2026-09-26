@@ -175,7 +175,7 @@ public class InvoiceTests(MatcherHost host)
         Assert.Equal((10, 20), Assert.Single(source.Pages).Image is { } shown ? (shown.Width, shown.Height) : default);
         var read = Assert.Single((await svc.InvoiceReading(kase.Id, stored.Id, ct)).Pages);
         Assert.Equal("Servietten", Assert.Single(read.Words).Text);
-        Assert.Equal((10, 20), read.Image is { } image ? (image.Width, image.Height) : default);
+        Assert.Equal((5, 10), read.Image is { } image ? (image.Width, image.Height) : default);
     }
 
     [Theory]
