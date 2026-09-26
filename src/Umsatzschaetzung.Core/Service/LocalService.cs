@@ -13,11 +13,11 @@ using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Service;
 
-public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? documents, ITagger? tagger, IEncoder? encoder, IPdfPrinter? printer, string appVersion, Readings? readings = null) : IService
+public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? documents, ITagger? tagger, IRanking? ranking, IPdfPrinter? printer, string appVersion, Readings? readings = null) : IService
 {
     const int AutoMapMinConfidence = 80;
 
-    readonly Matcher matcher = new(encoder, new EmbeddingStore(rules.Dir));
+    readonly Matcher matcher = new(ranking);
 
     IDocuments Documents => documents ?? throw new ServiceError(ErrorCode.Unsupported, "Belege lassen sich hier nicht lesen");
 

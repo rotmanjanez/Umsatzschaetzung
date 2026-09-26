@@ -34,7 +34,7 @@ public class Host : IDisposable
         File.Copy(Seeded.Value, Path.Combine(Sub("store"), "rules.db"));
         Store = new RuleStore(Sub("store"), TestData.Seed());
         Cases = new CaseStore(Sub("cases"));
-        Service = new LocalService(Store, Cases, new Documents(ocr, pdf), Tagger, Encoder, printer, "test", readings);
+        Service = new LocalService(Store, Cases, new Documents(ocr, pdf), Tagger, new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir)), printer, "test", readings);
     }
 
     public RuleStore Store { get; }
