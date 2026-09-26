@@ -14,10 +14,11 @@ public interface IRanking
 public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = null) : IRanking
 {
     const double Mismatch = 0.1;
+    const int MostLines = 4096;
 
     readonly Lock gate = new();
 
-    // Load() hands out a fresh RuleSet every call, so the version is the key: one
+    // A RuleSet is known by its version, not by reference, so the version is the key: one
     // ranking belongs to one rule store and reindexes only once a save bumps it or a
     // case from another Gewerbe asks. Validity is a question of the invoice's date and
     // is asked per query, not baked into the index.
@@ -29,12 +30,20 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
     string[] wording = [];
     float[] vectors = [];
 
+    // A line is asked about again with every selection and every mapping that changes the rules.
+    readonly Dictionary<string, float[]> lines = new(StringComparer.Ordinal);
+
     public IReadOnlyList<Ranked> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count)
     {
         lock (gate)
         {
             Index(rs, gewerbe);
-            var query = Embed([Matcher.Normal(line.Name)], keep: false)[0];
+            var text = Matcher.Normal(line.Name);
+            if (!lines.TryGetValue(text, out var query))
+            {
+                if (lines.Count >= MostLines) lines.Clear();
+                lines[text] = query = Embed([text], keep: false)[0];
+            }
             var best = new Dictionary<string, double>(StringComparer.Ordinal);
             for (var i = 0; i < owner.Length; i++)
             {
