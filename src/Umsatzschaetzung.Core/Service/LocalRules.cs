@@ -24,7 +24,7 @@ sealed class LocalRules(RuleStore rules, string appVersion) : IRules
             .DefaultIfEmpty(default)
             .Max();
 
-    public Task<RuleSet> Load(CancellationToken ct) => Guard(ct, () => Json.Copy(rules.Load()));
+    public Task<RuleSet> Load(CancellationToken ct) => Guard(ct, rules.Load);
 
     public Task<RuleSet> Save(IRuleEntity rule, CancellationToken ct) => Guard(ct, () =>
     {
@@ -37,7 +37,7 @@ sealed class LocalRules(RuleStore rules, string appVersion) : IRules
             throw new ServiceError(ErrorCode.Invalid, "In die Regeln kommt nur eine bestätigte Zuordnung");
         rs.Put(rule);
         RuleCheck.Validate(rs);
-        return Json.Copy(rules.Save(rule));
+        return rules.Save(rule);
     });
 
     public Task<RuleSet> Delete(Entity kind, string id, CancellationToken ct) => Guard(ct, () =>
@@ -48,6 +48,6 @@ sealed class LocalRules(RuleStore rules, string appVersion) : IRules
             throw new ServiceError(ErrorCode.Conflict, "Die Standardvorlage lässt sich nicht löschen; erst eine andere zum Standard machen");
         if (RuleCheck.Users(rs, kind, id) is { Count: > 0 } users)
             throw new ServiceError(ErrorCode.Conflict, $"{Format.EntityName(kind)} wird noch verwendet von: {string.Join(", ", users)}");
-        return Json.Copy(rules.Delete(kind, id));
+        return rules.Delete(kind, id);
     });
 }

@@ -245,6 +245,8 @@ public sealed class ReportTemplate : IRuleEntity
     public Meta Meta { get; set; } = new();
 }
 
+// A set is read, never changed: the store keeps one and hands the same to everyone who asks, the
+// interface included. What is to be changed is changed on a copy of the entity and put through the store.
 public sealed class RuleSet
 {
     // Kennung der Regel-Datenbank; Version zählt nur innerhalb ihrer.

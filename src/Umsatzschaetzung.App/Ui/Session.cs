@@ -244,9 +244,9 @@ public sealed class Session : Observable
     {
         var kind = RuleChange.KindOf(data);
         var before = Rules?.Find(kind, data.Id) is { } old ? Json.Copy(old) : null;
-        data.Meta = new Meta { ChangedAt = Clock.Now() };
         var after = Json.Copy(data);
-        if (!await Store(data, ct)) return false;
+        after.Meta = new Meta { ChangedAt = Clock.Now() };
+        if (!await Store(after, ct)) return false;
         at.History.Record(at, new RuleChange(this, kind, data.Id, before, after));
         return true;
     }
