@@ -149,7 +149,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         var own = kase?.Mappings ?? [];
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = Ids.New();
-        var (_, unmapped) = await MapLines(inv, kase?.Taxpayer.Gewerbe ?? "", true, own, ct);
+        var (_, unmapped) = await MapLines(rules.Load().With(own), inv, kase?.Taxpayer.Gewerbe ?? "", true, own, ct);
         var c = kase is null ? null : Attach(caseId, inv, fileName, data, own);
         return new ParseResp(inv, unmapped, false, c);
     });
@@ -162,7 +162,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
         var kase = Find(caseId);
-        await MapLines(draft, kase?.Taxpayer.Gewerbe ?? "", false, kase?.Mappings ?? [], ct);
+        await MapLines(rules.Load().With(kase?.Mappings), draft, kase?.Taxpayer.Gewerbe ?? "", false, kase?.Mappings ?? [], ct);
         return new OcrResp(draft.Id, pages, draft);
     });
 
@@ -193,7 +193,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         var store = confirm || req.Intent is Intent.Store or Intent.Auto;
         var kase = store ? LoadCase(req.CaseId) : Find(req.CaseId);
         var own = kase?.Mappings ?? [];
-        await MapLines(inv, kase?.Taxpayer.Gewerbe ?? "", confirm, own, ct);
+        await MapLines(rules.Load().With(own), inv, kase?.Taxpayer.Gewerbe ?? "", confirm, own, ct);
         var resp = new VerifyResp(inv, flags, blocked, false, null);
         if (!store) return resp;
         inv.Verification = confirm ? new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto } : null;
@@ -285,7 +285,9 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         var rs = rules.Load();
         if (c.MappedTo(rs)) return c;
         var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
-        foreach (var inv in c.Invoices) rs = (await MapLines(inv, c.Taxpayer.Gewerbe, true, c.Mappings, ct)).Rules;
+        // One read of the rules serves every invoice: what a line maps on its own is in the set for the next.
+        rs = rs.With(c.Mappings);
+        foreach (var inv in c.Invoices) rs = (await MapLines(rs, inv, c.Taxpayer.Gewerbe, true, c.Mappings, ct)).Rules;
         c.MappedStore = rs.Store;
         c.MappedAt = rs.Version;
         if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) SaveCase(c);
@@ -390,9 +392,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
 
     // What the matcher decides on its own stays with the case in own; only a person's confirmation
     // puts a mapping into the shared rules.
-    async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(Invoice inv, string gewerbe, bool ask, Dictionary<string, ArticleMapping> own, CancellationToken ct)
+    async Task<(RuleSet Rules, List<int> Unmapped)> MapLines(RuleSet rs, Invoice inv, string gewerbe, bool ask, Dictionary<string, ArticleMapping> own, CancellationToken ct)
     {
-        var rs = rules.Load().With(own);
         var unmapped = new List<int>();
         foreach (var l in inv.Lines)
         {
@@ -427,7 +428,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         rs.Mappings[m.Id] = m;
         try
         {
-            RuleCheck.Validate(rs);
+            RuleCheck.Validate(rs, m);
         }
         catch (RulesException)
         {

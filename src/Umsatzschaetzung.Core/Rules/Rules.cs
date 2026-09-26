@@ -22,6 +22,10 @@ public static class RuleCheck
         foreach (var (id, e) in rs.Templates) ValidateTemplate(rs, Keyed(id, e));
     }
 
+    // A mapping refers to an ingredient and nothing refers to it, so one added to a valid set
+    // needs no more than its own check.
+    public static void Validate(RuleSet rs, ArticleMapping mapping) => ValidateMapping(rs, Keyed(mapping.Id, mapping));
+
     // Names of the entries that would dangle if this entity were deleted.
     public static List<string> Users(RuleSet rs, Entity kind, string id) => kind switch
     {

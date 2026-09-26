@@ -6,8 +6,10 @@ public static class Scale
 {
     public static Unit? Of(RuleSet rs, string ingredientId) => Bases(rs).GetValueOrDefault(ingredientId);
 
+    public static Dictionary<string, Unit?> Bases(RuleSet rs) => rs.Bases ??= Compute(rs);
+
     // Eine unbekannte Einheit oder zwei verschiedene Basen lassen die Zutat ohne Basis.
-    public static Dictionary<string, Unit?> Bases(RuleSet rs)
+    static Dictionary<string, Unit?> Compute(RuleSet rs)
     {
         var output = new Dictionary<string, Unit?>(StringComparer.Ordinal);
         foreach (var p in rs.Products.Values)

@@ -253,8 +253,22 @@ public sealed class RuleSet
     public Dictionary<string, Category> Categories { get; set; } = [];
     public Dictionary<string, Ingredient> Ingredients { get; set; } = [];
     public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
-    public Dictionary<string, Product> Products { get; set; } = [];
+    public Dictionary<string, Product> Products
+    {
+        get => products;
+        set
+        {
+            products = value;
+            Bases = null;
+        }
+    }
     public Dictionary<string, YieldRule> YieldRules { get; set; } = [];
+
+    Dictionary<string, Product> products = [];
+
+    // What each ingredient is measured in follows from every recipe at once, so it is worked out
+    // once for this set and dropped when a product changes, not once per line that asks.
+    internal Dictionary<string, Unit?>? Bases { get; set; }
     public Dictionary<string, Gewerbezweig> Gewerbezweige { get; set; } = [];
     public Dictionary<string, ReportTemplate> Templates { get; set; } = [];
 
@@ -282,6 +296,7 @@ public sealed class RuleSet
             YieldRules = YieldRules,
             Gewerbezweige = Gewerbezweige,
             Templates = Templates,
+            Bases = Bases,
         };
     }
 
@@ -307,7 +322,10 @@ public sealed class RuleSet
             case Category x: Categories[x.Id] = x; break;
             case Ingredient x: Ingredients[x.Id] = x; break;
             case ArticleMapping x: Mappings[x.Id] = x; break;
-            case Product x: Products[x.Id] = x; break;
+            case Product x:
+                Products[x.Id] = x;
+                Bases = null;
+                break;
             case YieldRule x: YieldRules[x.Id] = x; break;
             case Gewerbezweig x: Gewerbezweige[x.Id] = x; break;
             case ReportTemplate x: Templates[x.Id] = x; break;
