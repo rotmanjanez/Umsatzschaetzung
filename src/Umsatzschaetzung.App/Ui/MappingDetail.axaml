@@ -107,7 +107,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </StackPanel>
-                        <StackPanel IsVisible="{Binding ShowFields}" Margin="0,4,0,0">
+                        <StackPanel x:Name="FactorFields" IsVisible="{Binding ShowFields}" Margin="0,4,0,0">
                             <Grid ColumnDefinitions="*,16,200">
                                 <StackPanel IsVisible="{Binding Manual}">
                                     <TextBlock Text="Zutat *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
