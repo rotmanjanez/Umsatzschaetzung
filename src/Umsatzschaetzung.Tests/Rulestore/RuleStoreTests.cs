@@ -107,7 +107,7 @@ public class RuleStoreTests
     {
         "category" => new Category { Id = "e", Name = "n" },
         "ingredient" => new Ingredient { Id = "e", Name = "n" },
-        "mapping" => new ArticleMapping { Id = "e", IngredientId = "i" },
+        "mapping" => new ArticleMapping { Id = "e", IngredientId = "i", Confirmed = true },
         "product" => new Product { Id = "e", Name = "n" },
         "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "k", Name = "n" },
         "template" => new ReportTemplate { Id = "e", Name = "n" },

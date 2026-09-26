@@ -25,7 +25,7 @@ public sealed class MappingModel : Observable
     {
         while (!running.IsCompleted) await running;
         if (ct.IsCancellationRequested || session.Case is not { } k || session.Rules is not { } rs || !Groups.Any(g => g.IsPending)
-            || caughtUp == (k, rs) || k.MappedAt == rs.Version) return;
+            || caughtUp == (k, rs) || k.MappedTo(rs)) return;
         running = Map(session, k, ct);
         await running;
     }

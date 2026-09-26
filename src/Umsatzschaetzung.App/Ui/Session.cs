@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Security.Cryptography;
 using Avalonia.Styling;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
@@ -352,8 +351,6 @@ public sealed class Session : Observable
         public Func<Task> Work { get; set; } = work;
         public TaskCompletionSource<bool> Done { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
-
-    public static string NewId(string prefix) => prefix + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(6));
 
     public List<Category> Categories() =>
         Rules is null ? [] : Rules.Categories.Values.OrderBy(c => c.Name, StringComparer.Ordinal).ToList();

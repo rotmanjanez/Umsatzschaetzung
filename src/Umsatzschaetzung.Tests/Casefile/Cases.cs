@@ -8,10 +8,10 @@ static class Cases
 {
     public const string FixtureId = "case.bar.2024";
 
-    public static Case Minimal(string id, string label = "Prüfung") => new()
+    public static Case Minimal(string id, string? label = null) => new()
     {
         Id = id,
-        Label = label,
+        Label = label ?? id,
         PeriodFrom = new DateOnly(2024, 1, 1),
         PeriodTo = new DateOnly(2024, 12, 31),
         Taxpayer = new Taxpayer { Name = "Muster", TaxNumber = "123/4567", PabNumber = "89" },
@@ -30,8 +30,8 @@ static class Cases
         c.Inventory =
         [
             new() { IngredientId = "ing.bier.fass", Opening = 50_000, Closing = 100_000, Unit = "LTR" },
-            new() { IngredientId = "ing.korn", Opening = 0, Closing = -1, Unit = "" },
-            new() { IngredientId = "ing.bier.fass", Opening = 1, Closing = 2, Unit = "" },
+            new() { IngredientId = "ing.korn", Opening = 0, Closing = -1, Unit = "MLT" },
+            new() { IngredientId = "ing.bier.fass", Opening = 1, Closing = 2, Unit = "MLT" },
         ];
         c.Products =
         [
@@ -83,7 +83,7 @@ static class Cases
     // Die Vorlage case.sql legt ihre Zeilen über einen gespeicherten Rahmenfall.
     public static Case Fixture(CaseStore store, string dir)
     {
-        store.Save(Minimal(FixtureId, "Vorlage"));
+        store.Save(Minimal(FixtureId));
         Sql.Exec(Path.Combine(dir, FixtureId + ".db"), File.ReadAllText(TestData.File("case.sql")));
         return store.Load(FixtureId);
     }

@@ -19,7 +19,7 @@ public interface IService
     Task<Case> GetCase(string caseId, CancellationToken ct);                                                                // GET    /cases/{id}
     Task<Case> PutCase(Case kase, CancellationToken ct);                                                                    // PUT    /cases/{id}
     Task DeleteCase(string caseId, CancellationToken ct);                                                                   // DELETE /cases/{id}
-    Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct);                              // POST   /cases/import   ohne overwrite meldet ein vorhandener Fall Conflict, Details trägt seine Bezeichnung
+    Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct);                              // POST   /cases/import   ohne overwrite meldet ein Fall mit derselben ID oder Bezeichnung Conflict, Details trägt die Bezeichnungen
     Task<ExportResp> ExportCase(string caseId, CancellationToken ct);                                                       // GET    /cases/{id}/export   a copy of the case file
 
     Task<ParseResp> ParseInvoice(string caseId, string fileName, byte[] data, CancellationToken ct);                        // POST /cases/{id}/invoices/parse   persists the invoice; resp.Case is the saved case

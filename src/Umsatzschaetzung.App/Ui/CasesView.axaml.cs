@@ -190,10 +190,12 @@ public partial class CasesView : Screen
         }
         catch (ServiceError err) when (err.Code == ErrorCode.Conflict && !overwrite)
         {
-            var label = err.Details as string ?? "";
+            var labels = err.Details as List<string> ?? [];
             var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
-                "„" + label + "“ ist bereits vorhanden und wird mit allen Rechnungen durch die Datei ersetzt.",
-                "Prüfung ersetzen");
+                labels.Count > 1
+                    ? "„" + string.Join("“ und „", labels) + "“ sind bereits vorhanden und werden mit allen Rechnungen durch die Datei ersetzt."
+                    : "„" + labels.FirstOrDefault() + "“ ist bereits vorhanden und wird mit allen Rechnungen durch die Datei ersetzt.",
+                "Prüfung ersetzen", "Ersetzen", "Abbrechen");
             if (answer) await Import(file, true);
         }
     });

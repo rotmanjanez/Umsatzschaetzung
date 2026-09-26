@@ -23,7 +23,7 @@ static class MacPdfPrint
     public static async Task<byte[]> Print(nint webView, string folder, CancellationToken ct)
     {
         Directory.CreateDirectory(folder);
-        var file = Path.Combine(folder, $"print-{Guid.NewGuid():N}.pdf");
+        var file = Path.Combine(folder, $"print-{Guid.NewGuid()}.pdf");
         var info = Send(Send(Class("NSPrintInfo"), Sel("alloc")), Sel("init"));
         var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var context = GCHandle.Alloc(done);

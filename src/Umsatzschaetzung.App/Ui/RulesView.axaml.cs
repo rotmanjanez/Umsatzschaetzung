@@ -499,7 +499,7 @@ public partial class RulesView : Screen
         f.PieceInvalid = f.Piece.Trim() != "" && weight is not > 0;
         f.Category.Invalid = f.Category.Creating && f.Category.NewName.Trim() == "";
         if (f.NameInvalid || f.PieceInvalid || f.Category.Invalid) return;
-        var id = f.CurrentId ?? Session.NewId("ingredient");
+        var id = f.CurrentId ?? Ids.New();
         var at = new Place(History, IngredientPage, id);
         var data = new Ingredient
         {
@@ -606,7 +606,7 @@ public partial class RulesView : Screen
     async void SaveProduct(object? sender, RoutedEventArgs e)
     {
         var f = model.Products;
-        var id = f.CurrentId ?? Session.NewId("product");
+        var id = f.CurrentId ?? Ids.New();
         var data = new Product { Id = id, Name = f.Name.Trim() };
         f.NameInvalid = data.Name == "";
         var lines = true;
@@ -666,7 +666,7 @@ public partial class RulesView : Screen
         }
         if (Session.Categories().Find(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)) is { } existing)
             return existing.Id;
-        var id = Session.NewId("category");
+        var id = Ids.New();
         return await Session.Put(new Category { Id = id, Name = name }, at, CancellationToken.None) ? id : null;
     }
 
@@ -751,7 +751,7 @@ public partial class RulesView : Screen
         row.DeductionInvalid = !rated;
         if (row.NameInvalid || row.DeductionInvalid) return;
         var isNew = row.Id is null;
-        var id = row.Id ?? Session.NewId("yield_rule");
+        var id = row.Id ?? Ids.New();
         var data = new YieldRule
         {
             Id = id,
@@ -823,7 +823,7 @@ public partial class RulesView : Screen
     async Task SaveGewerbe()
     {
         var f = model.Gewerbe;
-        var data = new Gewerbezweig { Id = f.CurrentId ?? Session.NewId("gewerbe"), Kennzahl = f.Kennzahl.Trim(), Name = f.Name.Trim() };
+        var data = new Gewerbezweig { Id = f.CurrentId ?? Ids.New(), Kennzahl = f.Kennzahl.Trim(), Name = f.Name.Trim() };
         var taken = Session.Gewerbezweige().Exists(g => g.Kennzahl == data.Kennzahl && g.Id != data.Id);
         f.KennzahlInvalid = !Gewerbe.Kennzahl(data.Kennzahl) || taken;
         f.NameInvalid = data.Name == "";
@@ -873,7 +873,7 @@ public partial class RulesView : Screen
     async void SaveTemplate(object? sender, RoutedEventArgs e)
     {
         var f = model.Templates;
-        var id = f.CurrentId ?? Session.NewId("tpl");
+        var id = f.CurrentId ?? Ids.New();
         var data = new ReportTemplate { Id = id, Name = f.Name.Trim(), Source = f.Source, Default = f.IsDefault };
         f.NameInvalid = data.Name == "";
         if (f.NameInvalid)

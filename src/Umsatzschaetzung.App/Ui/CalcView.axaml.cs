@@ -374,7 +374,7 @@ public partial class CalcView : Screen
         if (model.Editor is not { } editor || Listed(editor.ProductId) is not { } cp || shown is not { } s
             || !s.Catalog.Products.TryGetValue(editor.ProductId, out var p)) return;
         cp.Recipe = [.. Recipes.Flat(s.Catalog, p).Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })];
-        cp.RecipeBasis = p.Meta.Rev;
+        cp.RecipeBasis = Recipes.Basis(s.Catalog, p);
         edited = ProductItem + cp.ProductId;
         ProductSelected(null, null);
         Schedule(0);

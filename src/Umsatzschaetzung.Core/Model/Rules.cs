@@ -182,21 +182,22 @@ public static class Match
         return name != "" && ArticleName.Canonical(m.Name) == name;
     }
 
-    // The Prüfung's choice first, the ingredient's before its category's; an empty choice is "no deduction".
+    // The Prüfung's choice first, the ingredient's before its category's; a choice without a rule is "no deduction".
     // Without a choice the default of the ingredient, then of its category.
     public static YieldRule? YieldRule(Case c, RuleSet rs, Ingredient ing)
     {
-        string? byIngredient = null, byCategory = null;
+        YieldChoice? byIngredient = null, byCategory = null;
         foreach (var y in c.Yields)
         {
-            if (y.IngredientId == ing.Id) byIngredient = y.YieldRuleId;
+            if (y.IngredientId == ing.Id) byIngredient = y;
             else if (string.IsNullOrEmpty(y.IngredientId) && !string.IsNullOrEmpty(y.CategoryId) && y.CategoryId == ing.CategoryId)
-                byCategory = y.YieldRuleId;
+                byCategory = y;
         }
         foreach (var chosen in new[] { byIngredient, byCategory })
         {
-            if (chosen == "") return null;
-            if (chosen is not null && rs.YieldRules.TryGetValue(chosen, out var r)) return r;
+            if (chosen is null) continue;
+            if (chosen.YieldRuleId is not { } id) return null;
+            if (rs.YieldRules.TryGetValue(id, out var r)) return r;
         }
         return rs.YieldRules.Values.FirstOrDefault(r => r.Default && r.IngredientId == ing.Id)
             ?? rs.YieldRules.Values.FirstOrDefault(r => r.Default && string.IsNullOrEmpty(r.IngredientId) && r.CategoryId == ing.CategoryId);
@@ -246,6 +247,8 @@ public sealed class ReportTemplate : IRuleEntity
 
 public sealed class RuleSet
 {
+    // Kennung der Regel-Datenbank; Version zählt nur innerhalb ihrer.
+    public string? Store { get; set; }
     public long Version { get; set; }
     public Dictionary<string, Category> Categories { get; set; } = [];
     public Dictionary<string, Ingredient> Ingredients { get; set; } = [];
@@ -270,6 +273,7 @@ public sealed class RuleSet
         if (mappings is null) return this;
         return new RuleSet
         {
+            Store = Store,
             Version = Version,
             Categories = Categories,
             Ingredients = Ingredients,

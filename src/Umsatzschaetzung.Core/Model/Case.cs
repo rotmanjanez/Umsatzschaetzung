@@ -14,7 +14,8 @@ public sealed class YieldChoice
 {
     public string? IngredientId { get; set; }
     public string? CategoryId { get; set; }
-    public string YieldRuleId { get; set; } = "";
+    // Ohne Regel wird nichts abgezogen.
+    public string? YieldRuleId { get; set; }
 }
 
 public sealed class PinnedPortions
@@ -43,8 +44,8 @@ public sealed class CaseProduct
     public string ProductId { get; set; } = "";
     public long GrossPrice { get; set; }
     public long Vat { get; set; }
-    // Rezeptur nur dieser Prüfung; null heißt: die des Katalogs. Basis ist die Änderungsnummer
-    // des Katalogprodukts, von der die Kopie stammt.
+    // Rezeptur nur dieser Prüfung; null heißt: die des Katalogs. Basis ist die Prüfsumme
+    // der Katalogrezeptur, von der die Kopie stammt.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<RecipeLine>? Recipe { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
@@ -71,8 +72,12 @@ public sealed class Case
     public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
     // Leer heißt: die Standardvorlage der Regeln.
     public string? TemplateId { get; set; }
+    // Der Zähler gilt nur in der Regel-Datenbank, die MappedStore nennt.
+    public string? MappedStore { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long MappedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+
+    public bool MappedTo(RuleSet rs) => MappedStore == rs.Store && MappedAt == rs.Version;
 }

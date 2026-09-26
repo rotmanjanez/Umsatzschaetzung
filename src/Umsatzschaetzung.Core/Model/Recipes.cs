@@ -1,3 +1,7 @@
+using System.Buffers.Binary;
+using System.Security.Cryptography;
+using System.Text;
+
 namespace Umsatzschaetzung.Model;
 
 // Die Rezeptur der Prüfung geht der des Katalogs vor, Teilrezepte werden zu Zutaten
@@ -19,6 +23,7 @@ public static class Recipes
         if (products is null) return rs;
         return new RuleSet
         {
+            Store = rs.Store,
             Version = rs.Version,
             Categories = rs.Categories,
             Ingredients = rs.Ingredients,
@@ -60,7 +65,15 @@ public static class Recipes
         c.Products.Find(p => p.ProductId == productId)?.Recipe is not null;
 
     public static bool Stale(CaseProduct cp, RuleSet rs) =>
-        cp.Recipe is not null && rs.Products.TryGetValue(cp.ProductId, out var p) && p.Meta.Rev != cp.RecipeBasis;
+        cp.Recipe is not null && rs.Products.TryGetValue(cp.ProductId, out var p) && Basis(rs, p) != cp.RecipeBasis;
+
+    // Hängt nur an den Zeilen, nicht an der Regel-Datenbank: eine Falldatei trägt sie mit an ein anderes Amt.
+    public static long Basis(RuleSet rs, Product p)
+    {
+        var text = new StringBuilder();
+        foreach (var l in Flat(rs, p)) text.Append(l.IngredientId).Append('\t').Append(l.Amount).Append('\t').Append(l.Unit).Append('\n');
+        return BinaryPrimitives.ReadInt64LittleEndian(SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())));
+    }
 
     public static bool Same(List<RecipeLine> a, List<RecipeLine> b)
     {

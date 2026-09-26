@@ -63,7 +63,7 @@ public sealed class RuleTests : IDisposable
     {
         { "an ingredient in a missing category", new Ingredient { Id = "ing.kaputt", Name = "Kaputt", CategoryId = "cat.fehlt" } },
         { "a recipe of a missing ingredient", new Product { Id = "prod.kaputt", Name = "Kaputt", Recipe = [new RecipeLine { IngredientId = "ing.fehlt", Amount = 1 }] } },
-        { "a mapping to a missing ingredient", new ArticleMapping { Id = "map.kaputt", Name = "Kaputt", IngredientId = "ing.fehlt" } },
+        { "a mapping to a missing ingredient", new ArticleMapping { Id = "map.kaputt", Name = "Kaputt", IngredientId = "ing.fehlt", Confirmed = true } },
         { "an entity without an id", new Category { Name = "Ohne" } },
     };
 

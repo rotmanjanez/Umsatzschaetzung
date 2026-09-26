@@ -409,7 +409,7 @@ public partial class MappingDetail : UserControl
             {
                 if (suggested.Id == "")
                 {
-                    suggested.Id = g.MappingId ?? Session.NewId("map");
+                    suggested.Id = g.MappingId ?? Ids.New();
                     suggested.UnitCode = g.Unit;
                 }
                 if (model.ShowFactor) suggested.Factor = packed;
@@ -427,7 +427,7 @@ public partial class MappingDetail : UserControl
         if (!ReadFactor(g, out var factor, out var weight) || !await Weigh(g, model.Ingredient.Id, weight)) return;
         var mapping = new ArticleMapping
         {
-            Id = g.MappingId ?? Session.NewId("map"),
+            Id = g.MappingId ?? Ids.New(),
             SupplierName = g.Supplier,
             SupplierArticleId = g.Article,
             Name = g.Name,

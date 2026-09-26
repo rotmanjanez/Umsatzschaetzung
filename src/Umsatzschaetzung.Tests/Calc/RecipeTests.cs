@@ -17,7 +17,7 @@ public class RecipeTests
         var c = Vorlage.Load();
         var cp = c.Products.Single(p => p.ProductId == Flasche);
         cp.Recipe = [new RecipeLine { IngredientId = ingredientId, Amount = amount, Unit = "MLT" }];
-        cp.RecipeBasis = Rules.Products[Flasche].Meta.Rev;
+        cp.RecipeBasis = Recipes.Basis(Rules, Rules.Products[Flasche]);
         return c;
     }
 
@@ -74,7 +74,7 @@ public class RecipeTests
         var cp = Adjusted("ing.bier.flasche", 500).Products.Single(p => p.ProductId == Flasche);
         Assert.False(Recipes.Stale(cp, rules));
 
-        rules.Products[Flasche].Meta.Rev = cp.RecipeBasis + 1;
+        rules.Products[Flasche].Recipe[0].Amount += 1;
 
         Assert.True(Recipes.Stale(cp, rules));
     }

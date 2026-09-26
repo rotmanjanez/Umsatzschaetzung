@@ -49,7 +49,7 @@ public class CaseTransferTests
 
         var e = Assert.Throws<CaseExistsException>(() => store.Import(data, false));
 
-        Assert.Equal("Alt", e.Label);
+        Assert.Equal(["Alt"], e.Labels);
         Assert.Equal("Alt", store.Load("fall-1").Label);
         Assert.Empty(Directory.GetFiles(tmp.Path, ".*"));
     }
@@ -112,7 +112,7 @@ public class CaseTransferTests
         using var tmp = new TempDir();
         var other = new CaseStore(tmp.Sub("b"));
         other.Save(Cases.Minimal("fall-1"));
-        Sql.Exec(tmp.Sub("b/fall-1.db"), "UPDATE kase SET label = ''");
+        Sql.Exec(tmp.Sub("b/fall-1.db"), "UPDATE fall SET label = ''");
 
         Assert.Throws<CaseInvalidException>(() => new CaseStore(tmp.Path).Import(File.ReadAllBytes(tmp.Sub("b/fall-1.db")), false));
     }

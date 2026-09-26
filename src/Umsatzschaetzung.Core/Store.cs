@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Data.Sqlite;
 
 namespace Umsatzschaetzung;
@@ -12,6 +13,10 @@ public sealed class SchemaTooNewException(int found, int known)
 // nie geändert. PRAGMA user_version steht im Dateikopf und wandert daher mit der Datei mit.
 static class Schema
 {
+    // Steht in jeder Datei, die das Programm schreibt: jede Rückfrage des Supports will es wissen.
+    public static string App { get; } =
+        typeof(Schema).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "dev";
+
     public static int Version(SqliteConnection db)
     {
         using var cmd = db.CreateCommand();

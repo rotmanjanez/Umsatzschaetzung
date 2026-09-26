@@ -131,6 +131,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `noRevenue` | Liste von Text |
 | `mappings` | ID → [ArticleMapping](#m-articlemapping) |
 | `templateId` | Text? |
+| `mappedStore` | Text? |
 | `mappedAt` | Zahl |
 | `createdAt` | Zeitpunkt |
 | `updatedAt` | Zeitpunkt |
@@ -139,6 +140,7 @@ mit der installierten Version überein. Als JSON Schema:
 
 | Feld | Typ |
 |---|---|
+| `store` | Text? |
 | `version` | Zahl |
 | `categories` | ID → [Category](#m-category) |
 | `ingredients` | ID → [Ingredient](#m-ingredient) |
@@ -315,7 +317,7 @@ mit der installierten Version überein. Als JSON Schema:
 |---|---|
 | `ingredientId` | Text? |
 | `categoryId` | Text? |
-| `yieldRuleId` | Text |
+| `yieldRuleId` | Text? |
 
 ### PinnedPortions { #m-pinnedportions }
 

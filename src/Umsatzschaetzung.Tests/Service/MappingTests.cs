@@ -98,7 +98,7 @@ public class MappingTests(MatcherHost host)
         Assert.Equal("map.zwickl", caughtUp.Invoices[0].Lines[0].MappingId);
         var guessed = caughtUp.Invoices[0].Lines[1].MappingId;
         Assert.False(string.IsNullOrEmpty(guessed));
-        Assert.Matches("^map-", guessed);
+        Assert.Equal(7, Guid.Parse(guessed).Version);
         Assert.False((await svc.Rules(ct)).Mappings.ContainsKey(guessed));
         var saved = await svc.GetCase(late.Id, ct);
         Assert.Equal(["map.zwickl", guessed], saved.Invoices[0].Lines.Select(l => l.MappingId));

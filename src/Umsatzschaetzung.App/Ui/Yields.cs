@@ -67,7 +67,7 @@ public static class Yields
     public static List<YieldChoice> Choices(IEnumerable<YieldKindGroup> groups) => groups
         .SelectMany(g => g.Rows)
         .Where(r => r.Selected is not null)
-        .Select(r => new YieldChoice { IngredientId = r.Choice.IngredientId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule?.Id ?? "" })
+        .Select(r => new YieldChoice { IngredientId = r.Choice.IngredientId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule?.Id })
         .ToList();
 
     static List<YieldGroupRow> Sorted(List<YieldGroupRow> rows) =>
@@ -92,7 +92,7 @@ public static class Yields
         foreach (var y in k.Yields)
         {
             if (y.IngredientId != row.Choice.IngredientId || y.CategoryId != row.Choice.CategoryId) continue;
-            if (y.YieldRuleId == "") return RuleOption.None;
+            if (y.YieldRuleId is null) return RuleOption.None;
             var option = row.Options.Find(o => o.Rule?.Id == y.YieldRuleId);
             if (option is not null) return option;
         }

@@ -12,7 +12,7 @@ public sealed class Dialog : Window
 
     bool answer;
 
-    Dialog(string message, string title, bool confirm)
+    Dialog(string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
     {
         Title = title;
         SizeToContent = SizeToContent.WidthAndHeight;
@@ -28,8 +28,8 @@ public sealed class Dialog : Window
         };
         if (confirm)
         {
-            buttons.Children.Add(Action("Ja", true, "SecondaryButton", false, false));
-            buttons.Children.Add(Action("Nein", false, "PrimaryButton", true, true));
+            buttons.Children.Add(Action(yes, true, "SecondaryButton", false, false));
+            buttons.Children.Add(Action(no, false, "PrimaryButton", true, true));
         }
         else
         {
@@ -66,7 +66,8 @@ public sealed class Dialog : Window
 
     public static Task Alert(Window? owner, string message, string title) => Ask(owner, message, title, false);
 
-    public static Task<bool> Confirm(Window? owner, string message, string title) => Ask(owner, message, title, true);
+    public static Task<bool> Confirm(Window? owner, string message, string title, string yes = "Ja", string no = "Nein") =>
+        Ask(owner, message, title, true, yes, no);
 
     // The crash path may have no window yet; the caller owns and shows this one.
     public static Window Standalone(string message, string title) => new Dialog(message, title, false);
@@ -78,9 +79,9 @@ public sealed class Dialog : Window
         return (dialog, dialog.answered.Task);
     }
 
-    static Task<bool> Ask(Window? owner, string message, string title, bool confirm)
+    static Task<bool> Ask(Window? owner, string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
     {
-        var dialog = new Dialog(message, title, confirm);
+        var dialog = new Dialog(message, title, confirm, yes, no);
         if (owner is null) dialog.Show();
         else _ = dialog.ShowDialog(owner);
         return dialog.answered.Task;

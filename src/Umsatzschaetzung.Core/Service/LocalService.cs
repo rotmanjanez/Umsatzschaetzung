@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Casefile;
@@ -48,6 +47,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
             throw new ServiceError(ErrorCode.Conflict, "Eine Vorlage bleibt Standard, bis eine andere zum Standard wird");
         if (rule is ReportTemplate { Default: true })
             foreach (var t in rs.Templates.Values) t.Default = false;
+        if (rule is ArticleMapping { Confirmed: false })
+            throw new ServiceError(ErrorCode.Invalid, "In die Regeln kommt nur eine bestätigte Zuordnung");
         rs.Put(rule);
         RuleCheck.Validate(rs);
         return rules.Save(rule);
@@ -108,17 +109,8 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         return Task.FromResult(0);
     });
 
-    public Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) => Guard(ct, () =>
-    {
-        try
-        {
-            return cases.Import(data, overwrite);
-        }
-        catch (CaseExistsException e)
-        {
-            throw new ServiceError(ErrorCode.Conflict, e.Message, e.Label, e);
-        }
-    });
+    public Task<Case> ImportCase(string fileName, byte[] data, bool overwrite, CancellationToken ct) =>
+        Guard(ct, () => cases.Import(data, overwrite));
 
     public Task<ExportResp> ExportCase(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
@@ -156,7 +148,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         var kase = caseId == "" ? null : LoadCase(caseId);
         var own = kase?.Mappings ?? [];
         var inv = InvoiceParser.Parse(fileName, data);
-        inv.Id = NewId("re-");
+        inv.Id = Ids.New();
         var (_, unmapped) = await MapLines(inv, kase?.Taxpayer.Gewerbe ?? "", true, own, ct);
         var c = kase is null ? null : Attach(caseId, inv, fileName, data, own);
         return new ParseResp(inv, unmapped, false, c);
@@ -166,7 +158,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     {
         if (data.Length == 0) throw new ServiceError(ErrorCode.Invalid, $"leere Datei \"{fileName}\"");
         var (pages, draft) = await Read(fileName, data, ct);
-        draft.Id = NewId("re-");
+        draft.Id = Ids.New();
         draft.FileName = fileName;
         (draft.NetTotal, draft.GrossTotal) = InvoiceMath.LineTotals(draft.Lines);
         var kase = Find(caseId);
@@ -187,7 +179,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     public Task<VerifyResp> VerifyInvoice(VerifyReq req, CancellationToken ct) => Guard(ct, async () =>
     {
         var inv = req.Invoice;
-        if (inv.Id == "") inv.Id = NewId("re-");
+        if (inv.Id == "") inv.Id = Ids.New();
         if (inv.Source == Source.Scan)
             (inv.NetTotal, inv.GrossTotal) = InvoiceMath.LineTotals(inv.Lines);
         var flags = Check.Invoice(inv);
@@ -291,12 +283,13 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     {
         var c = LoadCase(caseId);
         var rs = rules.Load();
-        if (c.MappedAt == rs.Version) return c;
+        if (c.MappedTo(rs)) return c;
         var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
         foreach (var inv in c.Invoices) rs = (await MapLines(inv, c.Taxpayer.Gewerbe, true, c.Mappings, ct)).Rules;
+        c.MappedStore = rs.Store;
         c.MappedAt = rs.Version;
         if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) SaveCase(c);
-        else cases.SaveMappedAt(c.Id, c.MappedAt);
+        else cases.SaveMappedAt(c.Id, c.MappedStore, c.MappedAt);
         return c;
     });
 
@@ -305,7 +298,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     {
         var c = LoadCase(caseId);
         if (!Suppliers.Unify(c, invoiceIds.ToHashSet())) return c;
-        c.MappedAt = 0;
+        c.MappedStore = null;
         SaveCase(c);
         return c;
     });
@@ -370,7 +363,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
     void SaveCase(Case c, Attachment? add = null)
     {
         var t = Clock.Now();
-        if (c.Id == "") c.Id = NewId("fall-");
+        if (c.Id == "") c.Id = Ids.New();
         if (c.CreatedAt == default) c.CreatedAt = t;
         c.UpdatedAt = t;
         cases.Save(c, add);
@@ -383,7 +376,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
-        if (inv.Lines.Any(l => string.IsNullOrEmpty(l.MappingId))) c.MappedAt = 0;
+        if (inv.Lines.Any(l => string.IsNullOrEmpty(l.MappingId))) c.MappedStore = null;
         SaveCase(c, new Attachment(inv.Id, fileName, data, reading));
         return c;
     }
@@ -430,7 +423,7 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         }
         if (sg.Confidence < AutoMapMinConfidence) return rs;
         var m = sg.Mapping;
-        m.Id = NewId("map-");
+        m.Id = Ids.New();
         rs.Mappings[m.Id] = m;
         try
         {
@@ -470,9 +463,6 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
 
     static DateOnly Today() => DateOnly.FromDateTime(DateTime.Now);
 
-    static string NewId(string prefix) =>
-        prefix + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(4));
-
     static Task<T> Guard<T>(CancellationToken ct, Func<T> body) => Guard(ct, () => Task.FromResult(body()));
 
     static async Task<T> Guard<T>(CancellationToken ct, Func<Task<T>> body)
@@ -481,6 +471,10 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         try
         {
             return await Task.Run(body, ct);
+        }
+        catch (CaseExistsException e)
+        {
+            throw new ServiceError(ErrorCode.Conflict, e.Message, e.Labels, e);
         }
         catch (Exception e) when (e is not (ServiceError or OperationCanceledException))
         {

@@ -1,4 +1,6 @@
+using System.Buffers;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Data.Sqlite;
 using Umsatzschaetzung.Model;
@@ -9,35 +11,45 @@ public sealed class CaseInvalidException(string message, Exception? inner = null
 
 public sealed class CaseNotFoundException(string message) : Exception(message);
 
-public sealed class CaseExistsException(string message, string label) : Exception(message)
+public sealed class CaseExistsException(string message, List<string> labels) : Exception(message)
 {
-    public string Label { get; } = label;
+    public List<string> Labels { get; } = labels;
 }
 
 public sealed record Attachment(string InvoiceId, string FileName, byte[] Data, List<OcrPage>? Reading);
 
-// Ein Fall ist eine Datei: <id>.db trägt den Fall, jeden Beleg und das, was der Scan
-// gelesen hat, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen.
+// Ein Fall ist eine Datei: <Bezeichnung>.db trägt den Fall, jeden Beleg und das, was der Scan
+// gelesen hat, damit ein gespeicherter Beleg zeigen kann, woher seine Werte stammen. Weil der
+// Name der Datei aus der Bezeichnung folgt, gibt es jede Bezeichnung nur einmal; gefunden wird
+// ein Fall über die ID in der Datei.
 public sealed partial class CaseStore(string dir)
 {
+    readonly Dictionary<string, string> files = new(StringComparer.Ordinal);
+    readonly Lock gate = new();
+
     // Wo das Modell einen Schlüssel garantiert -- Validate lässt keinen doppelten Steuersatz
     // und kein doppeltes Produkt durch -- steht er als Primärschlüssel. Wo es das nicht tut,
     // trägt ord die Reihenfolge der Liste, auf die sich die Auswahl der Ertragsregel verlässt.
     static readonly string[] Migrations = [
         """
-        CREATE TABLE kase(
+        CREATE TABLE fall(
             id TEXT PRIMARY KEY, label TEXT NOT NULL,
             period_from TEXT NOT NULL, period_to TEXT NOT NULL,
-            name TEXT NOT NULL, tax_number TEXT NOT NULL, pab_number TEXT NOT NULL, gewerbe TEXT NOT NULL,
+            name TEXT NOT NULL, tax_number TEXT NOT NULL, pab_number TEXT NOT NULL, kennzahl TEXT NOT NULL,
             created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
-            -- Stand der Regeln, gegen den die offenen Positionen zuletzt geprüft wurden.
-            mapped_at INTEGER NOT NULL DEFAULT 0,
-            template_id TEXT) WITHOUT ROWID;
+            -- Stand der Regeln, gegen den die offenen Positionen zuletzt geprüft wurden: der Zähler
+            -- gilt nur in der Regel-Datenbank, die mapped_store nennt.
+            mapped_store TEXT, mapped_at INTEGER NOT NULL DEFAULT 0,
+            template_id TEXT,
+            -- Die Programmversion, die den Fall zuletzt geschrieben hat.
+            app_version TEXT NOT NULL) WITHOUT ROWID;
         CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
         CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
+        -- recipe_basis ist die Prüfsumme der Katalogrezeptur, von der case_recipe kopiert wurde.
         CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL,
             recipe_basis INTEGER) WITHOUT ROWID;
-        CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, ingredient_id TEXT, category_id TEXT, yield_rule_id TEXT NOT NULL);
+        -- Ohne yield_rule_id wird nichts abgezogen.
+        CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, ingredient_id TEXT, category_id TEXT, yield_rule_id TEXT);
         CREATE TABLE pinned(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, portions INTEGER NOT NULL, reason TEXT NOT NULL);
         CREATE TABLE invoice(
             id TEXT PRIMARY KEY, ord INTEGER NOT NULL,
@@ -50,7 +62,7 @@ public sealed partial class CaseStore(string dir)
             unit_price INTEGER NOT NULL, price_base_qty INTEGER NOT NULL, line_net INTEGER NOT NULL,
             vat INTEGER NOT NULL, mapping_id TEXT,
             PRIMARY KEY(invoice_id, ord)) WITHOUT ROWID;
-        CREATE TABLE document(invoice_id TEXT PRIMARY KEY, name TEXT, data BLOB) WITHOUT ROWID;
+        CREATE TABLE document(invoice_id TEXT PRIMARY KEY, name TEXT NOT NULL, data BLOB NOT NULL) WITHOUT ROWID;
 
         -- Was der Scan aus dem Beleg geholt hat. Das Seitenbild steht nicht dabei: der Beleg
         -- liegt daneben und wird zum Anzeigen neu gerendert.
@@ -70,7 +82,7 @@ public sealed partial class CaseStore(string dir)
         CREATE TABLE reading_line(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, ord INTEGER NOT NULL,
             no INTEGER NOT NULL, name TEXT NOT NULL, seller_article_id TEXT, gtin TEXT, quantity INTEGER NOT NULL,
             unit_code TEXT NOT NULL, unit_price INTEGER NOT NULL, price_base_qty INTEGER NOT NULL,
-            line_net INTEGER NOT NULL, vat INTEGER NOT NULL, mapping_id TEXT,
+            line_net INTEGER NOT NULL, vat INTEGER NOT NULL,
             PRIMARY KEY(invoice_id, page, ord)) WITHOUT ROWID;
         CREATE TABLE reading_cell(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, line INTEGER NOT NULL,
             field TEXT NOT NULL, text TEXT NOT NULL, x INTEGER NOT NULL, y INTEGER NOT NULL, w INTEGER NOT NULL,
@@ -99,37 +111,113 @@ public sealed partial class CaseStore(string dir)
         ["reading_line_flag", "reading_page_flag", "reading_cell", "reading_line", "reading_header", "reading_word", "reading_page"];
 
     static readonly string[] CaseTables =
-        ["kase", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "no_revenue", "case_mapping", "invoice", "invoice_line"];
+        ["fall", "declared", "inventory", "case_product", "case_recipe", "yield_choice", "pinned", "no_revenue", "case_mapping", "invoice", "invoice_line"];
 
     [GeneratedRegex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
     private static partial Regex IdPattern();
 
     public static bool ValidId(string id) => IdPattern().IsMatch(id) && !id.Contains("..");
 
-    string PathOf(string id) =>
-        ValidId(id) ? Path.Combine(dir, id + ".db") : throw new CaseInvalidException($"ungültige Fall-ID \"{id}\"");
+    static readonly SearchValues<char> Reserved = SearchValues.Create("<>:\"/\\|?*");
+
+    [GeneratedRegex(@"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)", RegexOptions.IgnoreCase)]
+    private static partial Regex DeviceName();
+
+    // Was Windows, macOS und Linux gleichermaßen als Dateiname nehmen.
+    public static string FileName(string label)
+    {
+        var b = new StringBuilder();
+        foreach (var c in label.Normalize(NormalizationForm.FormC).Trim())
+            b.Append(c < ' ' || Reserved.Contains(c) ? '_' : c);
+        var name = b.ToString().TrimStart('.');
+        if (name.Length > 120) name = name[..(char.IsHighSurrogate(name[119]) ? 119 : 120)];
+        name = name.TrimEnd('.', ' ');
+        if (name == "" || DeviceName().IsMatch(name)) name = "_" + name;
+        return name + ".db";
+    }
+
+    string PathFor(string label) => Path.Combine(dir, FileName(label));
+
+    string? Locate(string id)
+    {
+        if (!ValidId(id)) throw new CaseInvalidException($"ungültige Fall-ID \"{id}\"");
+        lock (gate)
+        {
+            if (files.TryGetValue(id, out var known) && File.Exists(known)) return known;
+            files.Clear();
+            foreach (var path in Files().Order(StringComparer.Ordinal))
+            {
+                try
+                {
+                    using var db = Reader(path);
+                    if (Scalar(db, "SELECT id FROM fall") is string found) files.TryAdd(found, path);
+                }
+                catch (Exception e) when (e is CaseInvalidException or SqliteException) { }
+            }
+            return files.GetValueOrDefault(id);
+        }
+    }
+
+    string Found(string id) => Locate(id) ?? throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
+
+    IEnumerable<string> Files() =>
+        Directory.Exists(dir) ? Directory.EnumerateFiles(dir, "*.db").Where(f => !Path.GetFileName(f).StartsWith('.')) : [];
+
+    // Auf macOS und Windows sind "Prüfung.db" und "prüfung.db" eine Datei, unter Linux nicht:
+    // gleich gelten sie überall.
+    string? Holder(string path) => Files().FirstOrDefault(f => Same(f, path));
+
+    static bool Same(string? a, string? b) =>
+        a is not null && b is not null
+        && string.Equals(Path.GetFileName(a).Normalize(NormalizationForm.FormC), Path.GetFileName(b).Normalize(NormalizationForm.FormC),
+            StringComparison.OrdinalIgnoreCase);
+
+    static string LabelOf(string path)
+    {
+        try
+        {
+            using var db = Reader(path);
+            return Scalar(db, "SELECT label FROM fall") as string ?? Path.GetFileName(path);
+        }
+        catch (Exception e) when (e is CaseInvalidException or SqliteException)
+        {
+            return Path.GetFileName(path);
+        }
+    }
+
+    void Remove(string path)
+    {
+        File.Delete(path);
+        File.Delete(path + "-journal");
+        foreach (var id in files.Where(f => f.Value == path).Select(f => f.Key).ToList()) files.Remove(id);
+    }
 
     static string InvoiceKey(string caseId, string invoiceId) =>
         ValidId(invoiceId) ? invoiceId : throw new CaseInvalidException($"ungültige ID \"{caseId}\"/\"{invoiceId}\"");
 
-    // A file that is no case hides none of the others; it is named instead.
+    // A file that is no case hides none of the others; it is named instead, and so is a copy
+    // of a case that is already listed.
     public (List<Case> Cases, List<string> Unreadable) List() => Guarded<(List<Case>, List<string>)>(() =>
     {
-        if (!Directory.Exists(dir)) return ([], []);
         var cases = new List<Case>();
         var unreadable = new List<string>();
-        foreach (var path in Directory.EnumerateFiles(dir, "*.db"))
+        foreach (var path in Files().Order(StringComparer.Ordinal))
         {
-            var name = Path.GetFileName(path);
-            if (name.StartsWith('.')) continue;
             try
             {
                 using var db = Reader(path);
-                cases.Add(Read(db));
+                var c = Read(db);
+                if (cases.Exists(k => k.Id == c.Id))
+                {
+                    unreadable.Add(Path.GetFileName(path));
+                    continue;
+                }
+                cases.Add(c);
+                lock (gate) files[c.Id] = path;
             }
             catch (CaseInvalidException)
             {
-                unreadable.Add(name);
+                unreadable.Add(Path.GetFileName(path));
             }
         }
         unreadable.Sort(StringComparer.Ordinal);
@@ -141,8 +229,7 @@ public sealed partial class CaseStore(string dir)
 
     public Case Load(string id) => Guarded(() =>
     {
-        var path = PathOf(id);
-        if (!File.Exists(path)) throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
+        var path = Found(id);
         Case c;
         try
         {
@@ -163,26 +250,35 @@ public sealed partial class CaseStore(string dir)
         Validate(c);
         var key = add is null ? "" : InvoiceKey(c.Id, add.InvoiceId);
         var name = add is { Data.Length: > 0 } ? DocumentName(add.FileName) : "";
-        using var db = Writer(c.Id);
-        using var tx = db.BeginTransaction(deferred: false);
-        foreach (var t in CaseTables) Exec(db, tx, "DELETE FROM " + t);
-        Write(db, tx, c);
-        if (add is { Data.Length: > 0 }) PutDocument(db, tx, key, name, add.Data);
-        if (add?.Reading is { Count: > 0 } pages)
+        var target = PathFor(c.Label);
+        lock (gate)
         {
-            DropReading(db, tx, key);
-            WriteReading(db, tx, key, pages);
+            var current = Locate(c.Id);
+            if (Holder(target) is { } holder && !Same(holder, current))
+                throw new CaseExistsException($"Prüfung „{c.Label}“ gibt es schon", [LabelOf(holder)]);
+            Directory.CreateDirectory(dir);
+            using (var db = Open(current ?? target, SqliteOpenMode.ReadWriteCreate))
+            {
+                using var tx = db.BeginTransaction(deferred: false);
+                foreach (var t in CaseTables) Exec(db, tx, "DELETE FROM " + t);
+                Write(db, tx, c);
+                if (add is { Data.Length: > 0 }) PutDocument(db, tx, key, name, add.Data);
+                if (add?.Reading is { Count: > 0 } pages)
+                {
+                    DropReading(db, tx, key);
+                    WriteReading(db, tx, key, pages);
+                }
+                tx.Commit();
+            }
+            if (current is not null && current != target) File.Move(current, target);
+            files[c.Id] = target;
         }
-        tx.Commit();
         return 0;
     });
 
     public void Delete(string id) => Guarded(() =>
     {
-        var path = PathOf(id);
-        if (!File.Exists(path)) throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
-        File.Delete(path);
-        File.Delete(path + "-journal");
+        lock (gate) Remove(Found(id));
         return 0;
     });
 
@@ -190,8 +286,7 @@ public sealed partial class CaseStore(string dir)
     // gelöschte nicht.
     public byte[] Export(string id) => Guarded(() =>
     {
-        var path = PathOf(id);
-        if (!File.Exists(path)) throw new CaseNotFoundException($"Fall \"{id}\": Fall nicht gefunden");
+        var path = Found(id);
         var temp = Temp();
         try
         {
@@ -217,9 +312,19 @@ public sealed partial class CaseStore(string dir)
             Check(temp);
             Case c;
             using (var db = Reader(temp)) c = Read(db);
-            if (!overwrite && File.Exists(PathOf(c.Id)))
-                throw new CaseExistsException($"Fall \"{c.Id}\": Fall ist bereits vorhanden", Load(c.Id).Label);
-            File.Move(temp, PathOf(c.Id), true);
+            var target = PathFor(c.Label);
+            lock (gate)
+            {
+                List<string> clashes = [.. new[] { Locate(c.Id), Holder(target) }.OfType<string>().Distinct()];
+                if (!overwrite && clashes.Count > 0)
+                    throw new CaseExistsException($"Prüfung „{c.Label}“ ist bereits vorhanden", [.. clashes.Select(LabelOf)]);
+                // Wo sich der alte Name nur in Groß- und Kleinschreibung unterscheidet, wäre er
+                // nach dem Verschieben auf macOS und Windows schon die neue Datei.
+                foreach (var f in clashes.Where(f => f != target && Same(f, target))) Remove(f);
+                File.Move(temp, target, true);
+                foreach (var f in clashes.Where(f => !Same(f, target))) Remove(f);
+                files[c.Id] = target;
+            }
             return c;
         }
         catch
@@ -260,10 +365,8 @@ public sealed partial class CaseStore(string dir)
     // startet: so lange lässt sich das Löschen zurücknehmen. Eine unlesbare Datei hält den Start nicht auf.
     public void Purge() => Guarded(() =>
     {
-        if (!Directory.Exists(dir)) return 0;
-        foreach (var path in Directory.EnumerateFiles(dir, "*.db"))
+        foreach (var path in Files())
         {
-            if (Path.GetFileName(path).StartsWith('.')) continue;
             try
             {
                 using var db = Open(path, SqliteOpenMode.ReadWrite);
@@ -289,10 +392,10 @@ public sealed partial class CaseStore(string dir)
         return dropped;
     }
 
-    public void SaveMappedAt(string caseId, long version) => Guarded(() =>
+    public void SaveMappedAt(string caseId, string? store, long version) => Guarded(() =>
     {
         using var db = Attached(caseId);
-        Exec(db, null, "UPDATE kase SET mapped_at = @v", ("@v", version));
+        Exec(db, null, "UPDATE fall SET mapped_store = @store, mapped_at = @v", ("@store", store), ("@v", version));
         return 0;
     });
 
@@ -310,8 +413,7 @@ public sealed partial class CaseStore(string dir)
     public List<OcrPage>? LoadReading(string caseId, string invoiceId) => Guarded(() =>
     {
         var key = InvoiceKey(caseId, invoiceId);
-        var path = PathOf(caseId);
-        if (!File.Exists(path)) return null;
+        if (Locate(caseId) is not { } path) return null;
         using var db = Reader(path);
         return ReadReading(db, key);
     });
@@ -319,24 +421,24 @@ public sealed partial class CaseStore(string dir)
     public (string Name, byte[] Data) LoadFile(string caseId, string invoiceId) => Guarded(() =>
     {
         var key = InvoiceKey(caseId, invoiceId);
-        var path = PathOf(caseId);
-        if (!File.Exists(path)) throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
+        var path = Locate(caseId) ?? throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
         using var db = Reader(path);
         using var cmd = Command(db, null, "SELECT name, data FROM document WHERE invoice_id = @id", ("@id", key));
         using var r = cmd.ExecuteReader();
-        if (!r.Read() || r.IsDBNull(0) || r.IsDBNull(1))
+        if (!r.Read())
             throw new CaseNotFoundException($"Beleg {invoiceId}: Fall nicht gefunden");
         return (r.GetString(0), (byte[])r.GetValue(1));
     });
 
     static void Write(SqliteConnection db, SqliteTransaction tx, Case c)
     {
-        Exec(db, tx, "INSERT INTO kase(id, label, period_from, period_to, name, tax_number, pab_number, gewerbe, created_at, updated_at, mapped_at, template_id) "
-            + "VALUES(@id, @label, @from, @to, @name, @tax, @pab, @gewerbe, @created, @updated, @mapped, @template)",
+        Exec(db, tx, "INSERT INTO fall(id, label, period_from, period_to, name, tax_number, pab_number, kennzahl, created_at, updated_at, "
+            + "mapped_store, mapped_at, template_id, app_version) "
+            + "VALUES(@id, @label, @from, @to, @name, @tax, @pab, @kennzahl, @created, @updated, @store, @mapped, @template, @app)",
             ("@id", c.Id), ("@label", c.Label), ("@from", Day(c.PeriodFrom)), ("@to", Day(c.PeriodTo)),
             ("@name", c.Taxpayer.Name), ("@tax", c.Taxpayer.TaxNumber), ("@pab", c.Taxpayer.PabNumber),
-            ("@gewerbe", c.Taxpayer.Gewerbe), ("@created", Stamp(c.CreatedAt)), ("@updated", Stamp(c.UpdatedAt)), ("@mapped", c.MappedAt),
-            ("@template", c.TemplateId));
+            ("@kennzahl", c.Taxpayer.Gewerbe), ("@created", Stamp(c.CreatedAt)), ("@updated", Stamp(c.UpdatedAt)),
+            ("@store", c.MappedStore), ("@mapped", c.MappedAt), ("@template", c.TemplateId), ("@app", Schema.App));
 
         for (var i = 0; i < c.Declared.Count; i++)
             Exec(db, tx, "INSERT INTO declared(vat, ord, net) VALUES(@vat, @ord, @net)",
@@ -389,7 +491,7 @@ public sealed partial class CaseStore(string dir)
             Exec(db, tx, "INSERT INTO invoice(id, ord, source, file_name, supplier_name, number, date, currency, "
                 + "net_total, gross_total, stated_net, stated_gross, verified_at, verified_auto) "
                 + "VALUES(@id, @ord, @source, @file, @supplier, @number, @date, @currency, @net, @gross, @snet, @sgross, @vat, @vauto)",
-                ("@id", inv.Id), ("@ord", i), ("@source", inv.Source.ToString()), ("@file", inv.FileName),
+                ("@id", inv.Id), ("@ord", i), ("@source", Json.Name(inv.Source)), ("@file", inv.FileName),
                 ("@supplier", inv.SupplierName), ("@number", inv.Number), ("@date", inv.Date is { } d ? Day(d) : null),
                 ("@currency", inv.Currency), ("@net", inv.NetTotal), ("@gross", inv.GrossTotal),
                 ("@snet", inv.StatedNet), ("@sgross", inv.StatedGross),
@@ -398,7 +500,7 @@ public sealed partial class CaseStore(string dir)
             for (var j = 0; j < inv.Lines.Count; j++)
             {
                 var l = inv.Lines[j];
-                Exec(db, tx, $"INSERT INTO invoice_line(invoice_id, ord, {LineColumns}) VALUES(@id, @ord, {LineValues})",
+                Exec(db, tx, $"INSERT INTO invoice_line(invoice_id, ord, {LineColumns}, mapping_id) VALUES(@id, @ord, {LineValues}, @mapping)",
                     LineArgs(l, ("@id", inv.Id), ("@ord", j)));
             }
         }
@@ -426,7 +528,7 @@ public sealed partial class CaseStore(string dir)
             ReadRows(db, "SELECT ingredient_id, category_id, yield_rule_id FROM yield_choice ORDER BY ord",
                 r => c.Yields.Add(new YieldChoice
                 {
-                    IngredientId = Str(r, 0), CategoryId = Str(r, 1), YieldRuleId = r.GetString(2),
+                    IngredientId = Str(r, 0), CategoryId = Str(r, 1), YieldRuleId = Str(r, 2),
                 }));
             ReadRows(db, "SELECT product_id, portions, reason FROM pinned ORDER BY ord",
                 r => c.Pinned.Add(new PinnedPortions
@@ -448,7 +550,7 @@ public sealed partial class CaseStore(string dir)
                 r => c.Invoices.Add(new Invoice
                 {
                     Id = r.GetString(0),
-                    Source = Enum.Parse<Source>(r.GetString(1)),
+                    Source = Parse<Source>(r.GetString(1)),
                     FileName = r.GetString(2),
                     SupplierName = r.GetString(3),
                     Number = r.GetString(4),
@@ -474,7 +576,7 @@ public sealed partial class CaseStore(string dir)
     static Case ReadCase(SqliteConnection db)
     {
         using var cmd = Command(db, null, "SELECT id, label, period_from, period_to, name, tax_number, pab_number, "
-            + "gewerbe, created_at, updated_at, mapped_at, template_id FROM kase");
+            + "kennzahl, created_at, updated_at, mapped_store, mapped_at, template_id FROM fall");
         using var r = cmd.ExecuteReader();
         if (!r.Read()) throw new CaseInvalidException("Falldatei enthält keinen Fall");
         return new Case
@@ -489,18 +591,21 @@ public sealed partial class CaseStore(string dir)
             },
             CreatedAt = When(r, 8),
             UpdatedAt = When(r, 9),
-            MappedAt = r.GetInt64(10),
-            TemplateId = Str(r, 11),
+            MappedStore = Str(r, 10),
+            MappedAt = r.GetInt64(11),
+            TemplateId = Str(r, 12),
         };
     }
 
     static Dictionary<string, List<InvoiceLine>> ReadLines(SqliteConnection db)
     {
         var lines = new Dictionary<string, List<InvoiceLine>>(StringComparer.Ordinal);
-        ReadRows(db, $"SELECT invoice_id, {LineColumns} FROM invoice_line ORDER BY invoice_id, ord", r =>
+        ReadRows(db, $"SELECT invoice_id, {LineColumns}, mapping_id FROM invoice_line ORDER BY invoice_id, ord", r =>
         {
             if (!lines.TryGetValue(r.GetString(0), out var list)) lines[r.GetString(0)] = list = [];
-            list.Add(ReadLine(r, 1));
+            var line = ReadLine(r, 1);
+            line.MappingId = Str(r, 11);
+            list.Add(line);
         });
         return lines;
     }
@@ -540,7 +645,7 @@ public sealed partial class CaseStore(string dir)
             foreach (var (field, word) in page.Header)
                 Exec(db, tx, "INSERT INTO reading_header(invoice_id, page, field, text, x, y, w, h, confidence) "
                     + "VALUES(@id, @page, @field, @text, @x, @y, @w, @h, @confidence)",
-                    WordArgs(key, word, ("@page", p), ("@field", field.ToString())));
+                    WordArgs(key, word, ("@page", p), ("@field", Json.Name(field))));
 
             for (var i = 0; i < page.Flags.Count; i++)
                 Exec(db, tx, "INSERT INTO reading_page_flag(invoice_id, page, ord, code, message, line_no, field) "
@@ -557,7 +662,7 @@ public sealed partial class CaseStore(string dir)
                 foreach (var (field, word) in line.Cells)
                     Exec(db, tx, "INSERT INTO reading_cell(invoice_id, page, line, field, text, x, y, w, h, confidence) "
                         + "VALUES(@id, @page, @line, @field, @text, @x, @y, @w, @h, @confidence)",
-                        WordArgs(key, word, ("@page", p), ("@line", i), ("@field", field.ToString())));
+                        WordArgs(key, word, ("@page", p), ("@line", i), ("@field", Json.Name(field))));
 
                 for (var j = 0; j < line.Flags.Count; j++)
                     Exec(db, tx, "INSERT INTO reading_line_flag(invoice_id, page, line, ord, code, message, line_no, field) "
@@ -583,7 +688,7 @@ public sealed partial class CaseStore(string dir)
             r => pages[r.GetInt32(0)].Words.Add(ReadWord(r, 1)), ("@id", key));
 
         ReadRows(db, "SELECT page, field, text, x, y, w, h, confidence FROM reading_header WHERE invoice_id = @id",
-            r => pages[r.GetInt32(0)].Header[Enum.Parse<Field>(r.GetString(1))] = ReadWord(r, 2), ("@id", key));
+            r => pages[r.GetInt32(0)].Header[Parse<Field>(r.GetString(1))] = ReadWord(r, 2), ("@id", key));
 
         ReadRows(db, "SELECT page, code, message, line_no, field FROM reading_page_flag WHERE invoice_id = @id ORDER BY page, ord",
             r => pages[r.GetInt32(0)].Flags.Add(ReadFlag(r, 1)), ("@id", key));
@@ -592,7 +697,7 @@ public sealed partial class CaseStore(string dir)
             r => pages[r.GetInt32(0)].Lines.Add(new OcrLine { Parsed = ReadLine(r, 1) }), ("@id", key));
 
         ReadRows(db, "SELECT page, line, field, text, x, y, w, h, confidence FROM reading_cell WHERE invoice_id = @id",
-            r => pages[r.GetInt32(0)].Lines[r.GetInt32(1)].Cells[Enum.Parse<Field>(r.GetString(2))] = ReadWord(r, 3), ("@id", key));
+            r => pages[r.GetInt32(0)].Lines[r.GetInt32(1)].Cells[Parse<Field>(r.GetString(2))] = ReadWord(r, 3), ("@id", key));
 
         ReadRows(db, "SELECT page, line, code, message, line_no, field FROM reading_line_flag WHERE invoice_id = @id ORDER BY page, line, ord",
             r => pages[r.GetInt32(0)].Lines[r.GetInt32(1)].Flags.Add(ReadFlag(r, 2)), ("@id", key));
@@ -601,10 +706,11 @@ public sealed partial class CaseStore(string dir)
     }
 
     // Eine Belegzeile steht zweimal: wie sie im Fall gespeichert ist und wie der Scan sie gelesen hat.
+    // Zugeordnet wird nur die gespeicherte.
     const string LineColumns = "no, name, seller_article_id, gtin, quantity, unit_code, unit_price, "
-        + "price_base_qty, line_net, vat, mapping_id";
+        + "price_base_qty, line_net, vat";
 
-    const string LineValues = "@no, @name, @article, @gtin, @qty, @unit, @price, @base, @net, @vat, @mapping";
+    const string LineValues = "@no, @name, @article, @gtin, @qty, @unit, @price, @base, @net, @vat";
 
     static (string Name, object? Value)[] LineArgs(InvoiceLine l, params (string Name, object? Value)[] own) =>
     [
@@ -626,7 +732,6 @@ public sealed partial class CaseStore(string dir)
         PriceBaseQty = r.GetInt64(i + 7),
         LineNet = r.GetInt64(i + 8),
         Vat = r.GetInt64(i + 9),
-        MappingId = Str(r, i + 10),
     };
 
     static (string Name, object? Value)[] WordArgs(string key, OcrWord w, params (string Name, object? Value)[] own) =>
@@ -646,7 +751,7 @@ public sealed partial class CaseStore(string dir)
     static (string Name, object? Value)[] FlagArgs(string key, Flag f, params (string Name, object? Value)[] own) =>
     [
         ("@id", key), ("@code", f.Code), ("@message", f.Message), ("@no", f.LineNo),
-        ("@field", f.Field?.ToString()),
+        ("@field", f.Field is { } field ? Json.Name(field) : null),
         .. own,
     ];
 
@@ -655,22 +760,15 @@ public sealed partial class CaseStore(string dir)
         Code = r.GetString(i),
         Message = r.GetString(i + 1),
         LineNo = r.GetInt64(i + 2),
-        Field = r.IsDBNull(i + 3) ? null : Enum.Parse<Field>(r.GetString(i + 3)),
+        Field = r.IsDBNull(i + 3) ? null : Parse<Field>(r.GetString(i + 3)),
     };
 
-    string Temp() => Path.Combine(dir, "." + Guid.NewGuid().ToString("N") + ".tmp");
+    static T Parse<T>(string name) where T : struct, Enum =>
+        Json.Parse<T>(name) ?? throw new CaseInvalidException($"Falldatei ungültig: unbekannter Wert \"{name}\"");
 
-    SqliteConnection Attached(string caseId)
-    {
-        if (!File.Exists(PathOf(caseId))) throw new CaseNotFoundException($"Fall \"{caseId}\": Fall nicht gefunden");
-        return Writer(caseId);
-    }
+    string Temp() => Path.Combine(dir, "." + Guid.NewGuid() + ".tmp");
 
-    SqliteConnection Writer(string id)
-    {
-        Directory.CreateDirectory(dir);
-        return Open(PathOf(id), SqliteOpenMode.ReadWriteCreate);
-    }
+    SqliteConnection Attached(string caseId) => Open(Found(caseId), SqliteOpenMode.ReadWrite);
 
     static SqliteConnection Reader(string path) => Open(path, SqliteOpenMode.ReadOnly);
 
@@ -769,6 +867,9 @@ public sealed partial class CaseStore(string dir)
             if (d.Net < 0)
                 throw new CaseInvalidException($"erklärter Umsatz zu {Format.Bp(d.Vat)} ist negativ");
         }
+        foreach (var e in c.Inventory)
+            if (Units.Lookup(e.Unit) is null)
+                throw new CaseInvalidException($"Bestand \"{e.IngredientId}\": unbekannte Einheit \"{e.Unit}\"");
         var products = new HashSet<string>();
         foreach (var p in c.Products)
         {

@@ -33,7 +33,7 @@ public class InvoiceTests(MatcherHost host)
         Assert.Equal("RE-20201121/508", parsed.Invoice.Number);
         Assert.Equal(3, parsed.Invoice.Lines.Count);
         Assert.Equal([1, 2, 3], parsed.UnmappedLines);
-        Assert.StartsWith("re-", parsed.Invoice.Id);
+        Assert.Equal(7, Guid.Parse(parsed.Invoice.Id).Version);
         Assert.Equal([parsed.Invoice.Id], parsed.Case!.Invoices.Select(i => i.Id));
         Assert.Equal("zugferd.pdf", host.Cases.LoadFile(kase.Id, parsed.Invoice.Id).Name);
     }
@@ -144,7 +144,7 @@ public class InvoiceTests(MatcherHost host)
         Assert.False(v.Accepted);
         Assert.Null(v.Case);
         Assert.Null(v.Invoice.Verification);
-        Assert.StartsWith("re-", v.Invoice.Id);
+        Assert.Equal(7, Guid.Parse(v.Invoice.Id).Version);
         Assert.Empty((await svc.GetCase(kase.Id, ct)).Invoices);
     }
 
@@ -215,7 +215,7 @@ public class InvoiceTests(MatcherHost host)
 
         var learnt = await svc.VerifyInvoice(new VerifyReq((await NewCase()).Id, Keg(), Intent.Auto, null, null), ct);
         var id = learnt.Invoice.Lines[0].MappingId!;
-        Assert.StartsWith("map-", id);
+        Assert.Equal(7, Guid.Parse(id).Version);
         Assert.Equal(before, (await svc.Rules(ct)).Version);
         Assert.False((await svc.Rules(ct)).Mappings.ContainsKey(id));
         Assert.Equal("Pils vom Fass 30 l Keg", (await svc.GetCase(learnt.Case!.Id, ct)).Mappings[id].Observed);

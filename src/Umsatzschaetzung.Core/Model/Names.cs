@@ -1,5 +1,10 @@
 namespace Umsatzschaetzung.Model;
 
+public static class Ids
+{
+    public static string New() => Guid.CreateVersion7().ToString();
+}
+
 public static class Names
 {
     public static string Ingredient(RuleSet rs, string id) =>

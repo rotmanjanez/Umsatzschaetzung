@@ -142,7 +142,7 @@ public class CaseDocumentTests
 
         store.Purge();
 
-        Assert.Equal(-1, File.ReadAllBytes(tmp.Sub("fall-1.db")).AsSpan().IndexOf(scan.AsSpan(0, 32)));
+        Assert.Equal(-1, File.ReadAllBytes(tmp.Sub(CaseStore.FileName(c.Label))).AsSpan().IndexOf(scan.AsSpan(0, 32)));
     }
 
     [Fact]
@@ -251,7 +251,7 @@ public class CaseDocumentTests
             new OcrLine
             {
                 Parsed = new InvoiceLine { No = 1, Name = "Pils", SellerArticleId = "31090", Quantity = 12000, UnitCode = "XKG",
-                    UnitPrice = 92500000, PriceBaseQty = 1000, LineNet = 111000, Vat = 1900, MappingId = "map.fass50" },
+                    UnitPrice = 92500000, PriceBaseQty = 1000, LineNet = 111000, Vat = 1900 },
                 Cells = { [Field.Quantity] = Word("12", 0.8f), [Field.Name] = Word("Pils", 0.7f) },
                 Flags = [new Flag { Code = "no_unit", Message = "ohne Einheit", LineNo = 1, Field = Field.Unit }],
             },

@@ -47,6 +47,7 @@ public class Host : IDisposable
     {
         var c = Vorlage.Load();
         c.Id = id;
+        if (id != Vorlage.Id) c.Label += " " + id;
         return Service.PutCase(c, CancellationToken.None);
     }
 

@@ -135,11 +135,11 @@ public class MatchTests
     }
 
     [Fact]
-    public void AnEmptyChoiceMeansNoDeductionDespiteADefault()
+    public void AChoiceWithoutARuleMeansNoDeductionDespiteADefault()
     {
         var (rs, ing) = Yields();
-        Assert.Null(Match.YieldRule(Kase(new YieldChoice { IngredientId = "ing.bier", YieldRuleId = "" }), rs, ing));
-        Assert.Null(Match.YieldRule(Kase(new YieldChoice { CategoryId = "cat.bier", YieldRuleId = "" }), rs, ing));
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { IngredientId = "ing.bier" }), rs, ing));
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { CategoryId = "cat.bier" }), rs, ing));
     }
 
     [Fact]

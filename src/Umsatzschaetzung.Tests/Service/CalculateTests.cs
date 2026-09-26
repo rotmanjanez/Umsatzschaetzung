@@ -127,6 +127,7 @@ public sealed class CalculateTests : IDisposable
     {
         var kase = await svc.GetCase(Vorlage.Id, ct);
         kase.Id = "";
+        kase.Label = $"{gewerbe} {year}";
         kase.Taxpayer.Gewerbe = gewerbe;
         kase.PeriodFrom = new DateOnly(year, 1, 1);
         kase.PeriodTo = new DateOnly(year, 12, 31);
@@ -172,6 +173,7 @@ public sealed class CalculateTests : IDisposable
     {
         var kase = await svc.GetCase(Vorlage.Id, ct);
         kase.Id = "";
+        kase.Label = "Tippfehler";
         kase.Pinned.Add(new PinnedPortions { ProductId = "prod.pils.03", Portions = -1, Reason = "Tippfehler" });
         var stored = await svc.PutCase(kase, ct);
 

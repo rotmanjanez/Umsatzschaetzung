@@ -88,7 +88,7 @@ static partial class WebPages
     public static async Task<bool> Show(this IHtmlView view, string html, TimeSpan timeout, CancellationToken ct)
     {
         Directory.CreateDirectory(Folder);
-        var file = Path.Combine(Folder, $"{Guid.NewGuid():N}.html");
+        var file = Path.Combine(Folder, $"{Guid.NewGuid()}.html");
         await File.WriteAllTextAsync(file, Seal(html), Encoding.UTF8, ct);
         var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         void Completed(object? sender, WebViewNavigationCompletedEventArgs e) => done.TrySetResult(e.IsSuccess);

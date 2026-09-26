@@ -11,13 +11,14 @@ public sealed class RuleStore
     const int KeptSnapshots = 10;
     const string SammlungPrefix = "richtsatz/";
 
-    // meta.value zählt die Regeländerungen und hat mit der Schemaversion nichts zu tun;
-    // die steht in user_version. Gelöschtes bleibt mit deleted_at stehen, damit ein
-    // mitgelieferter Satz nicht beim nächsten Start wiederkommt.
+    // meta hat eine Zeile. version zählt die Regeländerungen und hat mit der Schemaversion
+    // nichts zu tun; die steht in user_version. Der Zähler gilt nur zusammen mit store, der
+    // Kennung dieser Datenbank; app ist die Programmversion, die sie zuletzt geöffnet hat.
+    // Gelöschtes bleibt mit deleted_at stehen, damit ein mitgelieferter Satz nicht beim
+    // nächsten Start wiederkommt.
     static readonly string[] Migrations = [
         """
-        CREATE TABLE meta(key TEXT PRIMARY KEY, value INTEGER NOT NULL) WITHOUT ROWID;
-        INSERT INTO meta VALUES('version', 0);
+        CREATE TABLE meta(store TEXT NOT NULL, version INTEGER NOT NULL, created_at TEXT NOT NULL, app TEXT NOT NULL);
 
         CREATE TABLE category(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, sparte TEXT,
@@ -31,11 +32,14 @@ public sealed class RuleStore
         CREATE TABLE ingredient(
             id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT NOT NULL,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
-            deleted_at TEXT, aliases TEXT, piece_amount INTEGER, piece_unit TEXT) WITHOUT ROWID;
+            deleted_at TEXT, piece_amount INTEGER, piece_unit TEXT) WITHOUT ROWID;
+        CREATE TABLE ingredient_alias(ingredient_id TEXT NOT NULL, ord INTEGER NOT NULL, alias TEXT NOT NULL,
+            PRIMARY KEY(ingredient_id, ord)) WITHOUT ROWID;
 
+        -- Hierher kommt nur, was eine Person bestätigt hat.
         CREATE TABLE mapping(
             id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT, name TEXT,
-            observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER, confirmed INTEGER NOT NULL,
+            observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
 
@@ -106,11 +110,13 @@ public sealed class RuleStore
             Directory.CreateDirectory(dir);
             Directory.CreateDirectory(snapshotDir);
             var existed = File.Exists(file);
-            if (existed && !Healthy()) Restore();
+            var restored = existed && !Healthy();
+            if (restored) Restore();
             using var db = Open();
             if (existed) Snapshot(db);
             Schema.Migrate(db, Migrations);
             using var tx = db.BeginTransaction(deferred: false);
+            Identify(db, tx, restored);
             SeedRules(db, tx, seed);
             SeedPieces(db, tx, seed);
             SeedUntouched(db, tx, seed);
@@ -216,8 +222,18 @@ public sealed class RuleStore
 
     static long Bump(SqliteConnection db, SqliteTransaction tx)
     {
-        using var cmd = Command(db, tx, "UPDATE meta SET value = value + 1 WHERE key = 'version' RETURNING value");
+        using var cmd = Command(db, tx, "UPDATE meta SET version = version + 1 RETURNING version");
         return (long)cmd.ExecuteScalar()!;
+    }
+
+    // Eine wiederhergestellte Datenbank zählt von einem älteren Stand weiter: unter der alten
+    // Kennung hielte ein Fall ihren Zähler für den, gegen den er schon geprüft wurde.
+    static void Identify(SqliteConnection db, SqliteTransaction tx, bool restored)
+    {
+        Exec(db, tx, "INSERT INTO meta(store, version, created_at, app) SELECT @store, 0, @now, @app WHERE NOT EXISTS (SELECT 1 FROM meta)",
+            ("@store", Guid.NewGuid().ToString()), ("@now", Stamp(Clock.Now())), ("@app", Schema.App));
+        Exec(db, tx, "UPDATE meta SET app = @app WHERE app <> @app", ("@app", Schema.App));
+        if (restored) Exec(db, tx, "UPDATE meta SET store = @store", ("@store", Guid.NewGuid().ToString()));
     }
 
     static string Table(Entity kind) => kind switch
@@ -250,31 +266,31 @@ public sealed class RuleStore
                 break;
 
             case Ingredient x:
-                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, aliases, piece_amount, piece_unit, "
+                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, piece_amount, piece_unit, "
                     + "valid_from, valid_to, changed_at, changed_by, rev) "
-                    + "VALUES(@id, @name, @category, @aliases, @piece, @pieceUnit, @from, @to, @changed, @by, @rev) "
+                    + "VALUES(@id, @name, @category, @piece, @pieceUnit, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
-                    + "aliases = excluded.aliases, piece_amount = excluded.piece_amount, piece_unit = excluded.piece_unit, "
+                    + "piece_amount = excluded.piece_amount, piece_unit = excluded.piece_unit, "
                     + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
                     + "rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@name", x.Name), ("@category", x.CategoryId),
-                        ("@aliases", x.Aliases.Count == 0 ? null : string.Join("\n", x.Aliases)),
                         ("@piece", x.Piece?.Amount), ("@pieceUnit", x.Piece is { } p ? Units.Code(p.Unit) : null)));
+                PutAliases(db, tx, x.Id, x.Aliases);
                 break;
 
             case ArticleMapping x:
                 Exec(db, tx, "INSERT INTO mapping(id, supplier_name, supplier_article_id, gtin, name, observed, "
-                    + "unit_code, ingredient_id, factor, confirmed, valid_from, valid_to, changed_at, changed_by, rev) "
-                    + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor, @confirmed, "
+                    + "unit_code, ingredient_id, factor, valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor, "
                     + "@from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET supplier_name = excluded.supplier_name, "
                     + "supplier_article_id = excluded.supplier_article_id, gtin = excluded.gtin, name = excluded.name, "
                     + "observed = excluded.observed, unit_code = excluded.unit_code, ingredient_id = excluded.ingredient_id, "
-                    + "factor = excluded.factor, confirmed = excluded.confirmed, valid_from = excluded.valid_from, "
+                    + "factor = excluded.factor, valid_from = excluded.valid_from, "
                     + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@supplier", x.SupplierName), ("@article", x.SupplierArticleId), ("@gtin", x.Gtin),
                         ("@name", x.Name), ("@observed", x.Observed), ("@unit", x.UnitCode),
-                        ("@ingredient", x.IngredientId), ("@factor", x.Factor), ("@confirmed", x.Confirmed)));
+                        ("@ingredient", x.IngredientId), ("@factor", x.Factor)));
                 break;
 
             case Product x:
@@ -351,7 +367,8 @@ public sealed class RuleStore
 
     static RuleSet Read(SqliteConnection db, SqliteTransaction? tx)
     {
-        var rs = new RuleSet { Version = (long)Scalar(db, tx, "SELECT value FROM meta WHERE key = 'version'")! };
+        var rs = new RuleSet();
+        Rows(db, tx, "SELECT store, version FROM meta", r => (rs.Store, rs.Version) = (r.GetString(0), r.GetInt64(1)));
 
         var gewerbe = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         Rows(db, tx, "SELECT category_id, kennzahl FROM category_gewerbe ORDER BY category_id, ord", r =>
@@ -374,22 +391,23 @@ public sealed class RuleStore
                 Sparte = ReadSparte(r, 7),
             }));
 
-        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, changed_by, rev, aliases, piece_amount, piece_unit "
+        var aliases = Aliases(db, tx);
+        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, changed_by, rev, piece_amount, piece_unit "
             + "FROM ingredient WHERE deleted_at IS NULL",
             r => rs.Put(new Ingredient
             {
                 Id = r.GetString(0), Name = r.GetString(1), CategoryId = r.GetString(2), Meta = ReadMeta(r, 3),
-                Aliases = [.. (Str(r, 8) ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries)],
-                Piece = ReadPiece(r, 9),
+                Aliases = aliases.GetValueOrDefault(r.GetString(0), []),
+                Piece = ReadPiece(r, 8),
             }));
 
         Rows(db, tx, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, "
-            + "factor, confirmed, valid_from, valid_to, changed_at, changed_by, rev FROM mapping WHERE deleted_at IS NULL",
+            + "factor, valid_from, valid_to, changed_at, changed_by, rev FROM mapping WHERE deleted_at IS NULL",
             r => rs.Put(new ArticleMapping
             {
                 Id = r.GetString(0), SupplierName = Str(r, 1), SupplierArticleId = Str(r, 2), Gtin = Str(r, 3),
                 Name = Str(r, 4), Observed = Str(r, 5), UnitCode = Str(r, 6), IngredientId = r.GetString(7),
-                Factor = Num(r, 8), Confirmed = r.GetBoolean(9), Meta = ReadMeta(r, 10),
+                Factor = Num(r, 8), Confirmed = true, Meta = ReadMeta(r, 9),
             }));
 
         var recipes = new Dictionary<string, List<RecipeLine>>(StringComparer.Ordinal);
@@ -425,21 +443,29 @@ public sealed class RuleStore
         return rs;
     }
 
-    static string? SparteName(Sparte s) => s switch
-    {
-        Sparte.Getränke => "getraenke",
-        Sparte.Speisen => "speisen",
-        Sparte.Handelsware => "handelsware",
-        _ => null,
-    };
+    static string? SparteName(Sparte s) => s == Sparte.Unbestimmt ? null : Json.Name(s);
 
-    static Sparte ReadSparte(SqliteDataReader r, int i) => r.IsDBNull(i) ? Sparte.Unbestimmt : r.GetString(i) switch
+    static Sparte ReadSparte(SqliteDataReader r, int i) =>
+        r.IsDBNull(i) ? Sparte.Unbestimmt : Json.Parse<Sparte>(r.GetString(i)) ?? Sparte.Unbestimmt;
+
+    static Dictionary<string, List<string>> Aliases(SqliteConnection db, SqliteTransaction? tx)
     {
-        "getraenke" => Sparte.Getränke,
-        "speisen" => Sparte.Speisen,
-        "handelsware" => Sparte.Handelsware,
-        _ => Sparte.Unbestimmt,
-    };
+        var aliases = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        Rows(db, tx, "SELECT ingredient_id, alias FROM ingredient_alias ORDER BY ingredient_id, ord", r =>
+        {
+            if (!aliases.TryGetValue(r.GetString(0), out var list)) aliases[r.GetString(0)] = list = [];
+            list.Add(r.GetString(1));
+        });
+        return aliases;
+    }
+
+    static void PutAliases(SqliteConnection db, SqliteTransaction tx, string id, List<string> aliases)
+    {
+        Exec(db, tx, "DELETE FROM ingredient_alias WHERE ingredient_id = @id", ("@id", id));
+        for (var i = 0; i < aliases.Count; i++)
+            Exec(db, tx, "INSERT INTO ingredient_alias(ingredient_id, ord, alias) VALUES(@id, @ord, @alias)",
+                ("@id", id), ("@ord", i), ("@alias", aliases[i]));
+    }
 
     static Piece? ReadPiece(SqliteDataReader r, int i) => (Num(r, i), Str(r, i + 1)) switch
     {
@@ -462,9 +488,12 @@ public sealed class RuleStore
     // yield rule names and templates: what ships with an update reaches a store that already exists.
     static void SeedUntouched(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
+        HashSet<string> untouched = new(StringComparer.Ordinal);
+        Rows(db, tx, "SELECT id FROM ingredient WHERE rev = 0 AND deleted_at IS NULL", r => untouched.Add(r.GetString(0)));
+        var aliases = Aliases(db, tx);
         foreach (var e in seed.Ingredients.Values)
-            Exec(db, tx, "UPDATE ingredient SET aliases = @aliases WHERE id = @id AND rev = 0 AND deleted_at IS NULL AND aliases IS NOT @aliases",
-                ("@id", e.Id), ("@aliases", e.Aliases.Count == 0 ? null : string.Join("\n", e.Aliases)));
+            if (untouched.Contains(e.Id) && !e.Aliases.SequenceEqual(aliases.GetValueOrDefault(e.Id, []), StringComparer.Ordinal))
+                PutAliases(db, tx, e.Id, e.Aliases);
         foreach (var c in seed.Categories.Values)
             if (Scalar(db, tx, "SELECT 1 FROM category WHERE id = @id AND rev = 0 AND deleted_at IS NULL", ("@id", c.Id)) is not null)
                 PutGebinde(db, tx, c);
@@ -660,7 +689,7 @@ public sealed class RuleStore
     void Snapshot(SqliteConnection db)
     {
         var path = Path.Combine(snapshotDir, "rules-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".db");
-        var temp = Path.Combine(snapshotDir, "rules-" + Guid.NewGuid().ToString("N") + ".tmp");
+        var temp = Path.Combine(snapshotDir, "rules-" + Guid.NewGuid() + ".tmp");
         try
         {
             Exec(db, null, "VACUUM INTO @path", ("@path", temp));

@@ -51,7 +51,7 @@ public sealed class CaseTests : IDisposable
     public async Task ACaseWithoutAnIdGetsOne()
     {
         var neu = await svc.PutCase(Vorlage.Blank(), ct);
-        Assert.StartsWith("fall-", neu.Id);
+        Assert.Equal(7, Guid.Parse(neu.Id).Version);
         Assert.NotEqual(default, neu.CreatedAt);
         Assert.Equal(neu.CreatedAt, neu.UpdatedAt);
         Assert.Contains((await svc.ListCases(ct)).Cases, c => c.Id == neu.Id);
@@ -166,7 +166,7 @@ public sealed class CaseTests : IDisposable
 
         var e = await Assert.ThrowsAsync<ServiceError>(() => svc.ImportCase(dump.FileName, dump.Data, false, ct));
         Assert.Equal(ErrorCode.Conflict, e.Code);
-        Assert.Equal(kase.Label, e.Details);
+        Assert.Equal([kase.Label], Assert.IsType<List<string>>(e.Details));
 
         await svc.DeleteCase(kase.Id, ct);
         var back = await svc.ImportCase(dump.FileName, dump.Data, false, ct);
@@ -206,7 +206,7 @@ public sealed class CaseTests : IDisposable
     public async Task ACaseFileFromANewerVersionIsInvalid()
     {
         var kase = await host.PutVorlage();
-        using (var db = new SqliteConnection($"Data Source={Path.Combine(host.Sub("cases"), kase.Id + ".db")};Pooling=false"))
+        using (var db = new SqliteConnection($"Data Source={Path.Combine(host.Sub("cases"), CaseStore.FileName(kase.Label))};Pooling=false"))
         {
             db.Open();
             using var cmd = db.CreateCommand();

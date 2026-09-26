@@ -17,7 +17,7 @@ static class Vorlage
         store.Save(new Case
         {
             Id = Id,
-            Label = "Vorlage",
+            Label = Id,
             PeriodFrom = new DateOnly(2024, 1, 1),
             PeriodTo = new DateOnly(2024, 12, 31),
             Taxpayer = new Taxpayer { Name = "-", TaxNumber = "-", PabNumber = "-" },
@@ -38,9 +38,10 @@ static class Vorlage
         return store.Load(Id);
     }
 
-    public static Case Blank(string label = "Neue Prüfung", string gewerbe = "") => new()
+    // Eine Bezeichnung gibt es nur einmal: ohne eigene bekommt jede Prüfung eine neue.
+    public static Case Blank(string? label = null, string gewerbe = "") => new()
     {
-        Label = label,
+        Label = label ?? "Prüfung " + Guid.NewGuid(),
         PeriodFrom = new DateOnly(2024, 1, 1),
         PeriodTo = new DateOnly(2024, 12, 31),
         Taxpayer = new Taxpayer { Name = "Muster", TaxNumber = "123/4567", PabNumber = "89", Gewerbe = gewerbe },

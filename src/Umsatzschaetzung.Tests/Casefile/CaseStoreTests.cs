@@ -104,16 +104,18 @@ public class CaseStoreTests
         Assert.Equal(["fall-1"], cases.Select(c => c.Id));
         Assert.Equal(["kaputt.db", "leer.db"], unreadable);
         Assert.Equal(0, new FileInfo(tmp.Sub("leer.db")).Length);
-        Assert.Throws<CaseInvalidException>(() => store.Load("leer"));
+        Assert.Throws<CaseNotFoundException>(() => store.Load("leer"));
     }
 
     [Fact]
-    public void AFileThatIsNotADatabaseIsAnInvalidCaseNotAnUnavailableStore()
+    public void AFileThatIsNotADatabaseIsNamedNotAnUnavailableStore()
     {
         using var tmp = new TempDir();
         File.WriteAllText(tmp.Sub("fall-1.db"), "kein SQLite, aber lang genug, um wie ein Dateikopf auszusehen.......................");
+        var store = new CaseStore(tmp.Path);
 
-        Assert.Throws<CaseInvalidException>(() => new CaseStore(tmp.Path).Load("fall-1"));
+        Assert.Equal(["fall-1.db"], store.List().Unreadable);
+        Assert.Throws<CaseNotFoundException>(() => store.Load("fall-1"));
     }
 
     [Fact]
@@ -142,15 +144,65 @@ public class CaseStoreTests
     }
 
     [Fact]
-    public void AFileRenamedToAnotherIdIsRefused()
+    public void ACaseIsFoundByItsIdNotByItsFileName()
     {
         using var tmp = new TempDir();
         var store = new CaseStore(tmp.Path);
         store.Save(Cases.Minimal("fall-1"));
-        File.Copy(tmp.Sub("fall-1.db"), tmp.Sub("fall-2.db"));
+        File.Move(tmp.Sub("fall-1.db"), tmp.Sub("umbenannt.db"));
 
-        Assert.Throws<CaseInvalidException>(() => store.Load("fall-2"));
+        Assert.Equal("fall-1", store.Load("fall-1").Id);
     }
+
+    [Fact]
+    public void ACopiedFileIsNamedInsteadOfListingTheCaseTwice()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        store.Save(Cases.Minimal("fall-1"));
+        File.Copy(tmp.Sub("fall-1.db"), tmp.Sub("fall-1 Kopie.db"));
+
+        var (cases, unreadable) = store.List();
+
+        Assert.Equal(["fall-1"], cases.Select(c => c.Id));
+        Assert.Single(unreadable);
+    }
+
+    [Fact]
+    public void TheFileIsNamedAfterTheLabelAndFollowsItsChange()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        var c = Cases.Minimal("fall-1", "Bäckerei Huber: 2024/25");
+        store.Save(c);
+        Assert.True(File.Exists(tmp.Sub("Bäckerei Huber_ 2024_25.db")));
+
+        c.Label = "Bäckerei Huber";
+        store.Save(c);
+
+        Assert.Equal([tmp.Sub("Bäckerei Huber.db")], Directory.GetFiles(tmp.Path));
+        Assert.Equal("Bäckerei Huber", store.Load("fall-1").Label);
+    }
+
+    [Fact]
+    public void ALabelIsTakenOnlyOnceWhateverItsCase()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        store.Save(Cases.Minimal("fall-1", "Huber"));
+
+        var e = Assert.Throws<CaseExistsException>(() => store.Save(Cases.Minimal("fall-2", "HUBER")));
+
+        Assert.Equal(["Huber"], e.Labels);
+        Assert.Equal(["fall-1"], store.List().Cases.Select(c => c.Id));
+    }
+
+    [Theory]
+    [InlineData("CON", "_CON.db")]
+    [InlineData("..", "_.db")]
+    [InlineData(" .versteckt. ", "versteckt.db")]
+    [InlineData("a\tb/c", "a_b_c.db")]
+    public void AFileNameIsSafeOnEverySystem(string label, string name) => Assert.Equal(name, CaseStore.FileName(label));
 
     [Theory]
     [InlineData("fall-20240101-120000-0a1b2c3d")]
@@ -306,7 +358,7 @@ public class CaseStoreTests
         Assert.IsType<SchemaTooNewException>(load.InnerException?.InnerException ?? load.InnerException);
         Assert.Throws<CaseInvalidException>(() => store.Save(Cases.Minimal("fall-1", "überschrieben")));
         Assert.Equal(99, Sql.UserVersion(path));
-        Assert.Equal("Prüfung", Sql.Scalar(path, "SELECT label FROM kase"));
+        Assert.Equal("fall-1", Sql.Scalar(path, "SELECT label FROM fall"));
     }
 
     [Fact]
@@ -336,15 +388,17 @@ public class CaseStoreTests
 
         Assert.Null(back.Products.Single(p => p.ProductId == "prod.pils.05").Recipe);
         Assert.Equal(2, back.Products.Single(p => p.ProductId == "prod.radler").Recipe!.Count);
-        Assert.Equal(2L, Sql.Scalar(tmp.Sub("fall-1.db"), "SELECT count(*) FROM case_product WHERE recipe_basis IS NULL"));
+        Assert.Equal(2L, Sql.Scalar(tmp.Sub(CaseStore.FileName(back.Label)), "SELECT count(*) FROM case_product WHERE recipe_basis IS NULL"));
     }
 
     [Fact]
-    public void AnEmptyDatabaseIsMigratedAndThenFoundToHoldNoCase()
+    public void AnEmptyDatabaseHoldsNoCase()
     {
         using var tmp = new TempDir();
         Sql.Exec(tmp.Sub("fall-1.db"), "PRAGMA user_version = 0");
+        var store = new CaseStore(tmp.Path);
 
-        Assert.Throws<CaseInvalidException>(() => new CaseStore(tmp.Path).Load("fall-1"));
+        Assert.Equal(["fall-1.db"], store.List().Unreadable);
+        Assert.Throws<CaseNotFoundException>(() => store.Load("fall-1"));
     }
 }
