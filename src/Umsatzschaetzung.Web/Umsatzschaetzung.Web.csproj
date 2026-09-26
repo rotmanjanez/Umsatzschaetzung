@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <Import Project="Browser.props" />
+  <PropertyGroup>
+    <RootNamespace>Umsatzschaetzung.Web</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
+    <PackageReference Include="Avalonia.Browser" Version="12.1.2" />
+  </ItemGroup>
+</Project>

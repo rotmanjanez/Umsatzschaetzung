@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="headless" />
+    <InternalsVisibleTo Include="Umsatzschaetzung.Web" />
     <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />
   </ItemGroup>
 
