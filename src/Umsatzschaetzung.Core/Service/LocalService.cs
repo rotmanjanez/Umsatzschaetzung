@@ -39,11 +39,11 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
             .DefaultIfEmpty(default)
             .Max();
 
-    public Task<RuleSet> Rules(CancellationToken ct) => Guard(ct, rules.Load);
+    public Task<RuleSet> Rules(CancellationToken ct) => Guard(ct, () => Json.Copy(rules.Load()));
 
     public Task<RuleSet> SaveRule(IRuleEntity rule, CancellationToken ct) => Guard(ct, () =>
     {
-        var rs = rules.Load();
+        var rs = Json.Copy(rules.Load());
         if (rule is ReportTemplate { Default: false } && rs.Find(Entity.Template, rule.Id) is ReportTemplate { Default: true })
             throw new ServiceError(ErrorCode.Conflict, "Eine Vorlage bleibt Standard, bis eine andere zum Standard wird");
         if (rule is ReportTemplate { Default: true })
@@ -421,19 +421,18 @@ public sealed class LocalService(RuleStore rules, CaseStore cases, IDocuments? d
         if (sg.Confidence < AutoMapMinConfidence) return rs;
         var m = sg.Mapping;
         m.Id = Ids.New();
-        rs.Mappings[m.Id] = m;
+        var next = rs.With(new Dictionary<string, ArticleMapping> { [m.Id] = m });
         try
         {
-            RuleCheck.Validate(rs, m);
+            RuleCheck.Validate(next, m);
         }
         catch (RulesException)
         {
-            rs.Mappings.Remove(m.Id);
             return rs;
         }
         own[m.Id] = m;
         l.MappingId = m.Id;
-        return rs;
+        return next;
     }
 
     static string FileName(string label, string ext)
