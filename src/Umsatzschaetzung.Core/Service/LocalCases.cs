@@ -10,6 +10,8 @@ sealed class LocalCases(RuleStore rules, CaseStore cases) : ICases
 {
     public CaseStore Store => cases;
 
+    public Excerpts Excerpts { get; } = new(cases);
+
     public Task<CasesResp> List(CancellationToken ct) => Guard(ct, () =>
     {
         var (list, unreadable) = cases.List();
@@ -37,11 +39,17 @@ sealed class LocalCases(RuleStore rules, CaseStore cases) : ICases
     {
         if (caseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
         cases.Delete(caseId);
+        Excerpts.Forget(caseId);
         return Task.FromResult(0);
     });
 
     public Task<Case> Import(string fileName, byte[] data, bool overwrite, CancellationToken ct) =>
-        Guard(ct, () => cases.Import(data, overwrite));
+        Guard(ct, () =>
+        {
+            var c = cases.Import(data, overwrite);
+            Excerpts.Forget(c.Id);
+            return c;
+        });
 
     public Task<ExportResp> Export(string caseId, CancellationToken ct) => Guard(ct, () =>
     {
@@ -69,5 +77,6 @@ sealed class LocalCases(RuleStore rules, CaseStore cases) : ICases
         if (c.CreatedAt == default) c.CreatedAt = t;
         c.UpdatedAt = t;
         cases.Save(c, add);
+        if (add is not null) Excerpts.Forget(c.Id, add.InvoiceId);
     }
 }

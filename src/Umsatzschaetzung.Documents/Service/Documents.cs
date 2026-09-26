@@ -10,6 +10,7 @@ namespace Umsatzschaetzung.Service;
 public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
 {
     const int PreviewDpi = 150;
+    const float KeptScale = 0.5f;
 
     public string Reader => $"{RapidOcr.Name}|{RapidOcr.MaxImageDimension}|{Scan.Dpi}";
 
@@ -55,12 +56,15 @@ public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
             }
     }
 
-    // The page is rendered once and only the region is drawn from it, the correction included.
-    public async Task<Raster?> Cut(byte[] data, int page, Correction correction, Box region, CancellationToken ct)
+    public async Task<byte[]> Keep(byte[] data, int page, Correction correction, CancellationToken ct)
     {
         using var image = await Scan.Page(pdf, data, page, Scan.Dpi, ct);
-        return Scan.Cut(image, correction, Rect(region));
+        return await Task.Run(() => Scan.Keep(image, correction, KeptScale), ct);
     }
+
+    public Raster? Cut(byte[] kept, Box region) =>
+        Scan.Crop(kept, SKRectI.Round(new SKRect(region.X * KeptScale, region.Y * KeptScale,
+            (region.X + region.W) * KeptScale, (region.Y + region.H) * KeptScale)));
 
     public List<Sheet> Sheets(byte[] pdf) => Richtsatz.Sheets.Read(pdf);
 

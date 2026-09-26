@@ -141,20 +141,8 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
         return new InvoiceReadingResp(pages);
     });
 
-    public Task<Raster?> Snippet(string caseId, string invoiceId, int line, string name, CancellationToken ct) => Guard<Raster?>(ct, async () =>
-    {
-        if (cases.Store.LoadReading(caseId, invoiceId) is not { } pages || Rows.Of(pages, line, name) is not (var at, var box)) return null;
-        byte[] data;
-        try
-        {
-            (_, data) = cases.Store.LoadFile(caseId, invoiceId);
-        }
-        catch (CaseNotFoundException)
-        {
-            return null;
-        }
-        return await Documents.Cut(data, at, pages[at].Correction, box, ct);
-    });
+    public Task<Raster?> Snippet(string caseId, string invoiceId, int line, string name, CancellationToken ct) =>
+        Guard(ct, () => cases.Excerpts.Row(Documents, caseId, invoiceId, line, name));
 
     // A line mapped by article number under the old name is asked again under the new one.
     public Task<Case> UnifySuppliers(string caseId, List<string> invoiceIds, CancellationToken ct) => Guard(ct, () =>

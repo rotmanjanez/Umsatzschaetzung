@@ -22,7 +22,11 @@ public interface IDocuments
     // Every page at a resolution for looking at, turned as the reading turned it.
     IAsyncEnumerable<Raster> Preview(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
 
-    Task<Raster?> Cut(byte[] data, int page, Correction correction, Box region, CancellationToken ct);
+    // A page kept to cut rows from: upright as the reading saw it, smaller, compressed.
+    Task<byte[]> Keep(byte[] data, int page, Correction correction, CancellationToken ct);
+
+    // A region of the reading's frame, cut from a kept page.
+    Raster? Cut(byte[] kept, Box region);
 
     List<Sheet> Sheets(byte[] pdf);
 

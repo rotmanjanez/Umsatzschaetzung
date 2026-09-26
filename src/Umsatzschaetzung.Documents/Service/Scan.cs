@@ -58,6 +58,38 @@ public static class Scan
         return clipped.Width > 0 && clipped.Height > 0 ? Draw(page, map, c.Scale, clipped) : null;
     }
 
+    // Upright and scaled in one resample, then compressed: a page kept to cut rows from. Halving
+    // with a linear filter already averages each two by two; mipmaps only pay below that.
+    public static byte[] Keep(SKBitmap page, Correction c, float scale)
+    {
+        var (map, size) = Frame(page.Width, page.Height, c);
+        var info = new SKImageInfo(Math.Max((int)(size.Width * scale), 1), Math.Max((int)(size.Height * scale), 1), SKColorType.Bgra8888, SKAlphaType.Premul);
+        using var kept = new SKBitmap(info);
+        using (var canvas = new SKCanvas(kept))
+        {
+            canvas.Clear(SKColors.White);
+            canvas.Concat(SKMatrix.CreateScale(scale, scale).PreConcat(map));
+            using var image = SKImage.FromPixels(page.PeekPixels());
+            canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Linear, c.Scale * scale < 0.5 ? SKMipmapMode.Linear : SKMipmapMode.None));
+        }
+        using var jpeg = kept.Encode(SKEncodedImageFormat.Jpeg, 85) ?? throw new InvalidDataException("Die Seite konnte nicht behalten werden.");
+        return jpeg.ToArray();
+    }
+
+    // Only the rows down to the region's bottom are decoded, and only the region is kept of them.
+    public static Raster? Crop(byte[] kept, SKRectI region)
+    {
+        using var page = Decode(kept);
+        var clipped = SKRectI.Intersect(region, new SKRectI(0, 0, page.Width, page.Height));
+        if (clipped.Width <= 0 || clipped.Height <= 0) return null;
+        var info = new SKImageInfo(clipped.Width, clipped.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        var pixels = GC.AllocateUninitializedArray<byte>(info.BytesSize, pinned: true);
+        using var cut = page.PeekPixels().ExtractSubset(clipped);
+        if (cut is null || !cut.ReadPixels(info, Marshal.UnsafeAddrOfPinnedArrayElement(pixels, 0), info.RowBytes))
+            throw new InvalidDataException("Das Seitenbild konnte nicht gelesen werden.");
+        return new Raster(clipped.Width, clipped.Height, pixels);
+    }
+
     // The reader's steps as one transform, each on the size the one before left: scaled,
     // straightened, turned and straightened again. One resample instead of four.
     public static (SKMatrix Map, SKSizeI Size) Frame(int width, int height, Correction c)
