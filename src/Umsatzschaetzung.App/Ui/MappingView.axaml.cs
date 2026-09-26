@@ -33,7 +33,7 @@ public sealed class MappingModel : Observable
     {
         Mapping = true;
         Case? mapped = null;
-        await session.Run(async () => mapped = await session.Service.MapCase(k.Id, ct));
+        await session.Run(async () => mapped = await session.Service.Mapping.Map(k.Id, ct));
         Mapping = false;
         if (mapped is null || session.Case != k || !await session.LoadRules(ct)) return;
         session.SetCase(mapped);

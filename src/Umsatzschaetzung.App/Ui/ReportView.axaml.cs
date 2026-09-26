@@ -87,7 +87,7 @@ public partial class ReportView : Screen
         await Session.Run(async () =>
         {
             var ct = Ct;
-            var html = await Task.Run(async () => (await Session.Service.RenderReport(id, false, ct)).Html, ct);
+            var html = await Task.Run(async () => (await Session.Service.Reports.Render(id, false, ct)).Html, ct);
             await ShowHtml(html);
             model.Ready = true;
         });
@@ -114,7 +114,7 @@ public partial class ReportView : Screen
         model.Busy = true;
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.RenderReport(caseId, true, Ct);
+            var resp = await Session.Service.Reports.Render(caseId, true, Ct);
             if (resp is not { Pdf: { } pdf, FileName: { } file })
             {
                 Session.Fail("PDF konnte nicht erstellt werden");

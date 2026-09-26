@@ -228,7 +228,7 @@ public partial class ProductsView : Screen
         if (Session.Case is null || !await Session.SaveCase(At(edited), Ct) || Session.Case is not { } kase) return;
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.ExportAssortment(kase.Id, Ct);
+            var resp = await Session.Service.Assortment.Export(kase.Id, Ct);
             await Session.SaveFile(resp.FileName, resp.Data, Session.CsvFilter);
         });
     }
@@ -238,7 +238,7 @@ public partial class ProductsView : Screen
         if (Session.Case is null || (await Session.PickFiles(Session.CsvFilter, false)).FirstOrDefault() is not { } file) return;
         await Session.Run(async () =>
         {
-            var read = await Session.Service.ReadAssortment(file.Data, Ct);
+            var read = await Session.Service.Assortment.Read(file.Data, Ct);
             if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
             var listed = kase.Products.DistinctBy(p => p.ProductId).ToDictionary(p => p.ProductId);
             var conflicts = read.Products

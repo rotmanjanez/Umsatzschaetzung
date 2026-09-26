@@ -18,7 +18,7 @@ public partial class ShellView : UserControl
     RulesWindow? rules;
     bool moving;
 
-    public ShellView(IService service)
+    public ShellView(Services service)
     {
         InitializeComponent();
         session = new Session(service);

@@ -41,8 +41,8 @@ public sealed class ReadingsTests : IDisposable
         using var first = new Host(ocr, readings: new Readings(dir.Path, "test"));
         using var second = new Host(ocr, readings: new Readings(dir.Path, "test"));
 
-        var read = await first.Service.OcrInvoice("", "scan.png", Png, ct);
-        var replayed = await second.Service.OcrInvoice("", "kopie.png", Png, ct);
+        var read = await first.Service.Invoices.Ocr("", "scan.png", Png, ct);
+        var replayed = await second.Service.Invoices.Ocr("", "kopie.png", Png, ct);
 
         Assert.Equal(1, ocr.Calls);
         Assert.NotEqual(read.InvoiceId, replayed.InvoiceId);
@@ -56,8 +56,8 @@ public sealed class ReadingsTests : IDisposable
     {
         using var host = new Host(ocr, readings: new Readings(dir.Path, "test"));
 
-        await host.Service.OcrInvoice("", "a.png", Png, ct);
-        await host.Service.OcrInvoice("", "b.png", [.. Png, 4], ct);
+        await host.Service.Invoices.Ocr("", "a.png", Png, ct);
+        await host.Service.Invoices.Ocr("", "b.png", [.. Png, 4], ct);
 
         Assert.Equal(2, ocr.Calls);
     }

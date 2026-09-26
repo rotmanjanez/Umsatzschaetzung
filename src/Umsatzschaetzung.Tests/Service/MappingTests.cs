@@ -9,28 +9,28 @@ public class MappingTests(MatcherHost host)
     const string Rheinland = MatcherHost.Rheinland;
     static readonly InvoiceLine Korn = new() { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", UnitCode = "XBO" };
 
-    readonly IService svc = host.Service;
+    readonly Services svc = host.Service;
     readonly CancellationToken ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task AFriseurIsNeverOfferedKorn()
     {
-        var friseur = await svc.PutCase(Vorlage.Blank("Salon", "96021.0"), ct);
-        var sugs = await svc.SuggestMapping(friseur.Id, Korn, null, ct);
+        var friseur = await svc.Cases.Put(Vorlage.Blank("Salon", "96021.0"), ct);
+        var sugs = await svc.Mapping.Suggest(friseur.Id, Korn, null, ct);
         Assert.DoesNotContain(sugs, s => s.Mapping.IngredientId == "ing.korn");
     }
 
     [Fact]
     public async Task ACaseWithoutGewerbeSeesEverything()
     {
-        var neu = await svc.PutCase(Vorlage.Blank(), ct);
-        Assert.Equal("ing.korn", (await svc.SuggestMapping(neu.Id, Korn, null, ct))[0].Mapping.IngredientId);
+        var neu = await svc.Cases.Put(Vorlage.Blank(), ct);
+        Assert.Equal("ing.korn", (await svc.Mapping.Suggest(neu.Id, Korn, null, ct))[0].Mapping.IngredientId);
     }
 
     [Fact]
     public async Task AnEmptyCaseIdSuggestsWithoutFilter()
     {
-        var sugs = await svc.SuggestMapping("", Korn, null, ct);
+        var sugs = await svc.Mapping.Suggest("", Korn, null, ct);
         Assert.Equal("ing.korn", sugs[0].Mapping.IngredientId);
         Assert.Equal(700, sugs[0].Mapping.Factor);
         Assert.Equal(OriginKind.Encoder, sugs[0].Kind);
@@ -40,7 +40,7 @@ public class MappingTests(MatcherHost host)
     [Fact]
     public async Task AnUnknownCaseSuggestsWithoutFilter()
     {
-        var sugs = await svc.SuggestMapping("fall-gibt-es-nicht", Korn, null, ct);
+        var sugs = await svc.Mapping.Suggest("fall-gibt-es-nicht", Korn, null, ct);
         Assert.Equal("ing.korn", sugs[0].Mapping.IngredientId);
     }
 
@@ -48,7 +48,7 @@ public class MappingTests(MatcherHost host)
     public async Task AnExactHitLeadsAndTheEncodersAlternativesFollow()
     {
         var line = new InvoiceLine { Name = Korn.Name, SellerArticleId = "Z-1", UnitCode = "XBO" };
-        var sugs = await svc.SuggestMapping("", line, Rheinland, ct);
+        var sugs = await svc.Mapping.Suggest("", line, Rheinland, ct);
         Assert.True(sugs.Count > 1);
         Assert.Equal((OriginKind.Exact, "map.zwickl"), (sugs[0].Kind, sugs[0].Mapping.Id));
         Assert.Equal((OriginKind.Encoder, "ing.korn"), (sugs[1].Kind, sugs[1].Mapping.IngredientId));
@@ -64,14 +64,14 @@ public class MappingTests(MatcherHost host)
     [Fact]
     public async Task VerifyKeepsARuleThatStillFitsTheLine()
     {
-        var v = await svc.VerifyInvoice(new VerifyReq("", Zwickl("Z-1"), Intent.Check, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq("", Zwickl("Z-1"), Intent.Check, null, null), ct);
         Assert.Equal("map.zwickl", v.Invoice.Lines[0].MappingId);
     }
 
     [Fact]
     public async Task VerifyLeavesARuleBehindOnceTheArticleNumberIsEdited()
     {
-        var v = await svc.VerifyInvoice(new VerifyReq("", Zwickl("Z-9"), Intent.Check, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq("", Zwickl("Z-9"), Intent.Check, null, null), ct);
         Assert.True(string.IsNullOrEmpty(v.Invoice.Lines[0].MappingId));
     }
 
@@ -91,16 +91,16 @@ public class MappingTests(MatcherHost host)
                 ],
             },
         ];
-        var late = await svc.PutCase(kase, ct);
+        var late = await svc.Cases.Put(kase, ct);
 
-        var caughtUp = await svc.MapCase(late.Id, ct);
+        var caughtUp = await svc.Mapping.Map(late.Id, ct);
 
         Assert.Equal("map.zwickl", caughtUp.Invoices[0].Lines[0].MappingId);
         var guessed = caughtUp.Invoices[0].Lines[1].MappingId;
         Assert.False(string.IsNullOrEmpty(guessed));
         Assert.Equal(7, Guid.Parse(guessed).Version);
-        Assert.False((await svc.Rules(ct)).Mappings.ContainsKey(guessed));
-        var saved = await svc.GetCase(late.Id, ct);
+        Assert.False((await svc.Rules.Load(ct)).Mappings.ContainsKey(guessed));
+        var saved = await svc.Cases.Get(late.Id, ct);
         Assert.Equal(["map.zwickl", guessed], saved.Invoices[0].Lines.Select(l => l.MappingId));
         Assert.Equal((false, "ing.bier.fass"), saved.Mappings[guessed!] is var m ? (m.Confirmed, m.IngredientId) : default);
     }
@@ -117,12 +117,12 @@ public class MappingTests(MatcherHost host)
                 Lines = [new InvoiceLine { No = 1, Name = "Servietten 3-lagig 250 Stk", UnitCode = "H87", Quantity = 1000 }],
             },
         ];
-        var stored = await svc.PutCase(kase, ct);
+        var stored = await svc.Cases.Put(kase, ct);
 
-        var after = await svc.MapCase(stored.Id, ct);
+        var after = await svc.Mapping.Map(stored.Id, ct);
 
         Assert.Null(after.Invoices[0].Lines[0].MappingId);
-        Assert.Equal(stored.UpdatedAt, (await svc.GetCase(stored.Id, ct)).UpdatedAt);
+        Assert.Equal(stored.UpdatedAt, (await svc.Cases.Get(stored.Id, ct)).UpdatedAt);
     }
 
     [Fact]
@@ -137,21 +137,21 @@ public class MappingTests(MatcherHost host)
                 Lines = [new InvoiceLine { No = 1, Name = "Servietten 3-lagig 250 Stk", UnitCode = "H87", Quantity = 1000 }],
             },
         ];
-        var stored = await svc.PutCase(kase, ct);
-        var version = (await svc.Rules(ct)).Version;
+        var stored = await svc.Cases.Put(kase, ct);
+        var version = (await svc.Rules.Load(ct)).Version;
 
-        var first = await svc.MapCase(stored.Id, ct);
-        var again = await svc.MapCase(stored.Id, ct);
+        var first = await svc.Mapping.Map(stored.Id, ct);
+        var again = await svc.Mapping.Map(stored.Id, ct);
 
         Assert.Equal(version, first.MappedAt);
         Assert.Equal(version, again.MappedAt);
-        Assert.Equal(version, (await svc.GetCase(stored.Id, ct)).MappedAt);
+        Assert.Equal(version, (await svc.Cases.Get(stored.Id, ct)).MappedAt);
     }
 
     [Fact]
     public async Task MapCaseOfAnUnknownCaseIsNotFound()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.MapCase("fall-gibt-es-nicht", ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Mapping.Map("fall-gibt-es-nicht", ct));
         Assert.Equal(ErrorCode.NotFound, e.Code);
     }
 }

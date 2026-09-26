@@ -326,7 +326,7 @@ public partial class InvoiceView : Screen
         Source.Show(null, "Beleg wird geladen …");
         var ok = await Session.Run(async () =>
         {
-            var src = await Session.Service.InvoiceSource(caseId, invoice.Id, Ct);
+            var src = await Session.Service.Invoices.Source(caseId, invoice.Id, Ct);
             Session.Sources[invoice.Id] = src;
             Source.Show(src, src.FileName);
             sourceLoaded = true;
@@ -339,7 +339,7 @@ public partial class InvoiceView : Screen
     async Task<bool> Read(string caseId)
     {
         var read = new List<OcrPage>();
-        await Session.Run(async () => read = (await Session.Service.InvoiceReading(caseId, invoice.Id, Ct)).Pages);
+        await Session.Run(async () => read = (await Session.Service.Invoices.Reading(caseId, invoice.Id, Ct)).Pages);
         if (read.Count == 0 || !IsActive) return false;
         Session.Readings[invoice.Id] = new OcrResp(invoice.Id, read, invoice);
         pages = read;
@@ -432,7 +432,7 @@ public partial class InvoiceView : Screen
     {
         if (Session.Case is null) return;
         var req = new VerifyReq(Session.Case.Id, Current(), Intent.Check, null, null);
-        await Session.Run(async () => ApplyTotals(await Session.Service.VerifyInvoice(req, Ct)));
+        await Session.Run(async () => ApplyTotals(await Session.Service.Invoices.Verify(req, Ct)));
     }
 
     // Every edit is stored as it settles, one write after the other so an older one never lands
@@ -523,7 +523,7 @@ public partial class InvoiceView : Screen
         var req = new VerifyReq(Session.Case.Id, Copy(Current()), Intent.Store, null, null);
         await Session.Run(async () =>
         {
-            var v = await Session.Service.VerifyInvoice(req, CancellationToken.None);
+            var v = await Session.Service.Invoices.Verify(req, CancellationToken.None);
             invoice.Verification = v.Invoice.Verification;
             model.State = Checks.Of(invoice);
             model.StateText = Checks.Text(invoice);
@@ -583,7 +583,7 @@ public partial class InvoiceView : Screen
         var req = new VerifyReq(kase.Id, Copy(Current()), Intent.Confirm, null, null);
         await Session.Run(async () =>
         {
-            var v = await Session.Service.VerifyInvoice(req, Ct);
+            var v = await Session.Service.Invoices.Verify(req, Ct);
             Apply(v);
             if (!v.Accepted || v.Case is null)
             {
@@ -602,7 +602,7 @@ public partial class InvoiceView : Screen
         if (Session.Case is null) return;
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.ExportInvoice(Session.Case.Id, invoice.Id, Ct);
+            var resp = await Session.Service.Invoices.Export(Session.Case.Id, invoice.Id, Ct);
             await Session.SaveFile(resp.FileName, resp.Data, Session.CsvFilter);
         });
     }

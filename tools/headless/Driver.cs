@@ -193,7 +193,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         Close();
         shell = launch(true);
         if (id is null) return;
-        var kase = shell.Session.Service.GetCase(id, CancellationToken.None);
+        var kase = shell.Session.Service.Cases.Get(id, CancellationToken.None);
         while (!kase.IsCompleted) Settle();
         shell.Session.Open(kase.Result);
     }
@@ -210,7 +210,6 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     {
         shell.Close();
         Settle();
-        (shell.Session.Service as IDisposable)?.Dispose();
     }
 
     void Pick(List<string> paths)

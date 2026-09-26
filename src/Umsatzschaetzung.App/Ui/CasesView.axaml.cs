@@ -58,7 +58,7 @@ public partial class CasesView : Screen
 
     Task Reload() => Session.Run(async () =>
     {
-        var (cases, unreadable) = await Session.Service.ListCases(Ct);
+        var (cases, unreadable) = await Session.Service.Cases.List(Ct);
         if (unreadable.Count > 0) Session.Fail("Keine lesbare Prüfung, nicht angezeigt: " + string.Join(", ", unreadable));
         model.Set(cases.Select(c => new CaseRow(c, Format.Period(c.PeriodFrom, c.PeriodTo), Format.Day(c.UpdatedAt), c.Invoices.Count)).ToList());
     });
@@ -114,7 +114,7 @@ public partial class CasesView : Screen
         var kase = new Case { Label = label, PeriodFrom = from!.Value, PeriodTo = to!.Value, Taxpayer = taxpayer };
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.PutCase(kase, Ct);
+            var resp = await Session.Service.Cases.Put(kase, Ct);
             model.Creating = false;
             NewLabel.Text = NewFrom.Text = NewTo.Text = "";
             NewName.Text = NewTaxNumber.Text = NewPab.Text = NewGewerbe.Kennzahl = "";
@@ -145,7 +145,7 @@ public partial class CasesView : Screen
         if (row is null) return;
         await Session.Run(async () =>
         {
-            Session.Open(await Session.Service.GetCase(row.Case.Id, Ct));
+            Session.Open(await Session.Service.Cases.Get(row.Case.Id, Ct));
         });
     }
 
@@ -158,7 +158,7 @@ public partial class CasesView : Screen
         if (!answer) return;
         await Session.Run(async () =>
         {
-            await Session.Service.DeleteCase(row.Case.Id, Ct);
+            await Session.Service.Cases.Delete(row.Case.Id, Ct);
             await Reload();
         });
     }
@@ -168,7 +168,7 @@ public partial class CasesView : Screen
         if ((sender as Control)?.DataContext is not CaseRow row) return;
         await Session.Run(async () =>
         {
-            var resp = await Session.Service.ExportCase(row.Case.Id, Ct);
+            var resp = await Session.Service.Cases.Export(row.Case.Id, Ct);
             await Session.SaveFile(resp.FileName, resp.Data, Session.CaseFilter);
         });
     }
@@ -184,7 +184,7 @@ public partial class CasesView : Screen
     {
         try
         {
-            Session.Open(await Session.Service.ImportCase(file.Name, file.Data, overwrite, Ct));
+            Session.Open(await Session.Service.Cases.Import(file.Name, file.Data, overwrite, Ct));
         }
         catch (ServiceError err) when (err.Code == ErrorCode.Conflict && !overwrite)
         {

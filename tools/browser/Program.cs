@@ -20,11 +20,11 @@ App.SingleViewService = () =>
 await AppBuilder.Configure<App>().WithInterFont().StartBrowserAppAsync("out");
 
 // Nothing reads pixels or runs a model here: a case with one e-invoice is set up in memory.
-static async Task<IService> Compose()
+static async Task<Services> Compose()
 {
-    var service = new LocalService(new RuleStore("/work/rules", RuleStore.Seed()), new CaseStore("/work/cases"), null, null, null, null, "browser");
+    var service = Services.Local(new RuleStore("/work/rules", RuleStore.Seed()), new CaseStore("/work/cases"), null, null, null, null, "browser");
     var ct = CancellationToken.None;
-    var kase = await service.PutCase(new Case
+    var kase = await service.Cases.Put(new Case
     {
         Label = "Gasthaus Probe",
         PeriodFrom = new DateOnly(2025, 1, 1),
@@ -34,6 +34,6 @@ static async Task<IService> Compose()
     await using var xml = typeof(Program).Assembly.GetManifestResourceStream("rechnung.xml")!;
     var data = new byte[xml.Length];
     xml.ReadExactly(data);
-    await service.ParseInvoice(kase.Id, "rechnung.xml", data, ct);
+    await service.Invoices.Parse(kase.Id, "rechnung.xml", data, ct);
     return service;
 }

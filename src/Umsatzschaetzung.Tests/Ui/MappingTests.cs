@@ -1,4 +1,3 @@
-using System.Reflection;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
@@ -18,11 +17,12 @@ public class MappingTests(MatcherHost host)
         kase.Id = "case.mapping.again";
         foreach (var line in kase.Invoices.SelectMany(i => i.Lines)) line.MappingId = null;
         kase.MappedAt = 0;
-        await host.Service.PutCase(kase, CancellationToken.None);
+        await host.Service.Cases.Put(kase, CancellationToken.None);
 
-        var service = Slow.Over(host.Service);
+        var slow = new Slow(host.Service.Mapping);
+        var service = host.Service with { Mapping = slow };
         var session = new Session(service);
-        session.Open(await service.GetCase(kase.Id, CancellationToken.None));
+        session.Open(await service.Cases.Get(kase.Id, CancellationToken.None));
         Assert.True(await session.LoadRules(CancellationToken.None));
         var model = new MappingModel();
         foreach (var g in LineGroup.Of(session.Case, session.Rules)) model.Groups.Add(g);
@@ -31,7 +31,7 @@ public class MappingTests(MatcherHost host)
         var left = model.MapOpen(session, first.Token);
         first.Cancel();
         var back = model.MapOpen(session, second.Token);
-        ((Slow)(object)service).Line.SetResult();
+        slow.Line.SetResult();
         await left;
         await back;
 
@@ -39,36 +39,17 @@ public class MappingTests(MatcherHost host)
     }
 
     // The case is mapped once the line the matcher is on is done.
-    public class Slow : DispatchProxy
+    sealed class Slow(IMapping inner) : IMapping
     {
-        IService inner = null!;
-
         public TaskCompletionSource Line { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public static IService Over(IService inner)
-        {
-            var proxy = Create<IService, Slow>();
-            ((Slow)(object)proxy).inner = inner;
-            return proxy;
-        }
+        public Task<List<MappingCandidate>> Suggest(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) =>
+            inner.Suggest(caseId, line, supplier, ct);
 
-        protected override object? Invoke(MethodInfo? method, object?[]? args)
-        {
-            if (method!.Name == nameof(IService.MapCase)) return MapCase((string)args![0]!, (CancellationToken)args[1]!);
-            try
-            {
-                return method.Invoke(inner, args);
-            }
-            catch (TargetInvocationException e)
-            {
-                throw e.InnerException!;
-            }
-        }
-
-        async Task<Case> MapCase(string caseId, CancellationToken ct)
+        public async Task<Case> Map(string caseId, CancellationToken ct)
         {
             await Line.Task;
-            return await inner.MapCase(caseId, ct);
+            return await inner.Map(caseId, ct);
         }
     }
 }

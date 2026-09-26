@@ -7,7 +7,7 @@ using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Tests.Service;
 
-// A LocalService over its own rule and case store. Its matcher loads the encoder on first use,
+// The local services over their own rule and case store. Its matcher loads the encoder on first use,
 // so a host that suggests is built once per collection, not per test.
 public class Host : IDisposable
 {
@@ -34,12 +34,12 @@ public class Host : IDisposable
         File.Copy(Seeded.Value, Path.Combine(Sub("store"), "rules.db"));
         Store = new RuleStore(Sub("store"), TestData.Seed());
         Cases = new CaseStore(Sub("cases"));
-        Service = new LocalService(Store, Cases, new Documents(ocr, pdf), Tagger, new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir)), printer, "test", readings);
+        Service = Services.Local(Store, Cases, new Documents(ocr, pdf), Tagger, new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir)), printer, "test", readings);
     }
 
     public RuleStore Store { get; }
     public CaseStore Cases { get; }
-    public LocalService Service { get; }
+    public Services Service { get; }
 
     public string Sub(string name) => dir.Sub(name);
 
@@ -48,7 +48,7 @@ public class Host : IDisposable
         var c = Vorlage.Load();
         c.Id = id;
         if (id != Vorlage.Id) c.Label += " " + id;
-        return Service.PutCase(c, CancellationToken.None);
+        return Service.Cases.Put(c, CancellationToken.None);
     }
 
     public void Dispose() => dir.Dispose();

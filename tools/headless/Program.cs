@@ -70,7 +70,7 @@ Shell Launch(bool forget)
 {
     if (forget) Directory.Delete(store, true);
     var documents = new Documents(new RapidOcr(), new PdfiumPages());
-    var service = new LocalService(
+    var service = Services.Local(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
         documents, new Tagger(), new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes), null, "headless",

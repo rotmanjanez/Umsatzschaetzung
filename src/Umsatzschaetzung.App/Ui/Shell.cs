@@ -6,7 +6,7 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed class Shell : Window
 {
-    public Shell(IService service)
+    public Shell(Services service)
     {
         View = new ShellView(service);
         Content = View;

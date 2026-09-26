@@ -20,7 +20,7 @@ public sealed class CalculateTests : IDisposable
 
     readonly Printer printer = new();
     readonly Host host;
-    readonly IService svc;
+    readonly Services svc;
     readonly CancellationToken ct = TestContext.Current.CancellationToken;
 
     public CalculateTests()
@@ -35,7 +35,7 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task TheBarCaseAddsUp()
     {
-        var calc = await svc.Calculate(Vorlage.Id, ct);
+        var calc = await svc.Reports.Calculate(Vorlage.Id, ct);
         var t = calc.Report.Totals;
 
         Assert.Equal("1.690,00 €", Format.Cents(t.Purchases));
@@ -55,7 +55,7 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task TheDrinksDivisionCarriesTheWholeMarkup()
     {
-        var drinks = (await svc.Calculate(Vorlage.Id, ct)).Report.Markups.Single(m => m.Sparte == Sparte.Getränke);
+        var drinks = (await svc.Reports.Calculate(Vorlage.Id, ct)).Report.Markups.Single(m => m.Sparte == Sparte.Getränke);
         Assert.Equal("1.453,91 €", Format.Cents(drinks.CostOfGoods));
         Assert.Equal("7.353,35 €", Format.Cents(drinks.RevenueNet));
         Assert.Equal("405,76 %", Format.Bp(drinks.Markup));
@@ -64,8 +64,8 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task EachRecipeCarriesItsOwnMarkup()
     {
-        var rules = await svc.Rules(ct);
-        var beer = (await svc.Calculate(Vorlage.Id, ct)).Report.Products.Single(p => Names.Product(rules, p.ProductId) == "Pils 0,3 l vom Fass");
+        var rules = await svc.Rules.Load(ct);
+        var beer = (await svc.Reports.Calculate(Vorlage.Id, ct)).Report.Products.Single(p => Names.Product(rules, p.ProductId) == "Pils 0,3 l vom Fass");
         Assert.Equal(Sparte.Getränke, beer.Sparte);
         Assert.Equal("0,55 €", Format.Cents(beer.CostPerPortion));
         Assert.Equal("384,68 %", Format.Bp(beer.Markup));
@@ -74,8 +74,8 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task EachIngredientCarriesItsPurchasesYieldAndStock()
     {
-        var kase = await svc.GetCase(Vorlage.Id, ct);
-        var pils = (await svc.Calculate(Vorlage.Id, ct)).Report.Ingredients.Single(i => i.Name == "Fassbier Pils");
+        var kase = await svc.Cases.Get(Vorlage.Id, ct);
+        var pils = (await svc.Reports.Calculate(Vorlage.Id, ct)).Report.Ingredients.Single(i => i.Name == "Fassbier Pils");
 
         Assert.NotEmpty(pils.Purchases);
         Assert.All(pils.Purchases, p =>
@@ -94,7 +94,7 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task TheReportCarriesTheMarkupSection()
     {
-        var report = await svc.RenderReport(Vorlage.Id, false, ct);
+        var report = await svc.Reports.Render(Vorlage.Id, false, ct);
 
         Assert.Contains("7.353,35 €", report.Html);
         Assert.Contains("Anhang D", report.Html);
@@ -108,7 +108,7 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task AReportPrintsWhereAPrinterIsAvailable()
     {
-        var report = await svc.RenderReport(Vorlage.Id, true, ct);
+        var report = await svc.Reports.Render(Vorlage.Id, true, ct);
         Assert.StartsWith("%PDF-", Encoding.ASCII.GetString(report.Pdf!, 0, 5));
         Assert.Equal(report.Html, printer.Html);
         Assert.EndsWith(".pdf", report.FileName);
@@ -119,19 +119,19 @@ public sealed class CalculateTests : IDisposable
     {
         using var bare = new Host();
         await bare.PutVorlage();
-        var e = await Assert.ThrowsAsync<ServiceError>(() => bare.Service.RenderReport(Vorlage.Id, true, ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => bare.Service.Reports.Render(Vorlage.Id, true, ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 
     async Task<CalcResp> WithGewerbe(string gewerbe, int year)
     {
-        var kase = await svc.GetCase(Vorlage.Id, ct);
+        var kase = await svc.Cases.Get(Vorlage.Id, ct);
         kase.Id = "";
         kase.Label = $"{gewerbe} {year}";
         kase.Taxpayer.Gewerbe = gewerbe;
         kase.PeriodFrom = new DateOnly(year, 1, 1);
         kase.PeriodTo = new DateOnly(year, 12, 31);
-        return await svc.Calculate((await svc.PutCase(kase, ct)).Id, ct);
+        return await svc.Reports.Calculate((await svc.Cases.Put(kase, ct)).Id, ct);
     }
 
     [Fact]
@@ -171,13 +171,13 @@ public sealed class CalculateTests : IDisposable
     [Fact]
     public async Task ACaseTheCalculationCannotTakeIsInvalid()
     {
-        var kase = await svc.GetCase(Vorlage.Id, ct);
+        var kase = await svc.Cases.Get(Vorlage.Id, ct);
         kase.Id = "";
         kase.Label = "Tippfehler";
         kase.Pinned.Add(new PinnedPortions { ProductId = "prod.pils.03", Portions = -1, Reason = "Tippfehler" });
-        var stored = await svc.PutCase(kase, ct);
+        var stored = await svc.Cases.Put(kase, ct);
 
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Calculate(stored.Id, ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Reports.Calculate(stored.Id, ct));
 
         Assert.Equal(ErrorCode.Invalid, e.Code);
         Assert.StartsWith("Kalkulation: ", e.Message);

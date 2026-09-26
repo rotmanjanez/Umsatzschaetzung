@@ -159,7 +159,7 @@ public sealed class Imports
     {
         try
         {
-            Adopt(job, await session.Service.UnifySuppliers(job.CaseId, job.Imported, job.Ct));
+            Adopt(job, await session.Service.Invoices.UnifySuppliers(job.CaseId, job.Imported, job.Ct));
         }
         catch (OperationCanceledException)
         {
@@ -174,14 +174,14 @@ public sealed class Imports
     {
         var file = new PickedFile(Path.GetFileName(path), await File.ReadAllBytesAsync(path, job.Ct));
         return (file, InvoiceParser.Detect(file.Data) is Kind.Pdf or Kind.Image
-            ? session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct)
+            ? session.Service.Invoices.Ocr(job.CaseId, file.Name, file.Data, job.Ct)
             : null);
     }
 
     async Task Import(ImportJob job, PickedFile file, Task<OcrResp>? reading)
     {
         job.Progress.Begin(ImportStage.Parse);
-        var parsed = await session.Service.ParseInvoice(job.CaseId, file.Name, file.Data, job.Ct);
+        var parsed = await session.Service.Invoices.Parse(job.CaseId, file.Name, file.Data, job.Ct);
         if (!parsed.NeedsOcr)
         {
             Adopt(job, parsed.Case);
@@ -190,9 +190,9 @@ public sealed class Imports
             return;
         }
         job.Progress.Begin(ImportStage.Ocr);
-        var ocr = await (reading ?? session.Service.OcrInvoice(job.CaseId, file.Name, file.Data, job.Ct));
+        var ocr = await (reading ?? session.Service.Invoices.Ocr(job.CaseId, file.Name, file.Data, job.Ct));
         job.Progress.Begin(ImportStage.Verify);
-        var v = await session.Service.VerifyInvoice(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data, ocr.Pages), job.Ct);
+        var v = await session.Service.Invoices.Verify(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data, ocr.Pages), job.Ct);
         Adopt(job, v.Case);
         job.Imported.Add(v.Invoice.Id);
         if (v.Accepted)

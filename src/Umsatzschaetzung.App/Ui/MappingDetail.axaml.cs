@@ -331,7 +331,7 @@ public partial class MappingDetail : UserControl
         ShowSnippets(seq, g);
         await Session.Run(async () =>
         {
-            var candidates = await Session.Service.SuggestMapping(Session.Case.Id, lineItem, g.Supplier, Ct);
+            var candidates = await Session.Service.Mapping.Suggest(Session.Case.Id, lineItem, g.Supplier, Ct);
             if (seq != suggestSeq) return;
             model.Loading = false;
             model.SetCandidates(Rows(candidates, g.MappingId));
@@ -360,11 +360,11 @@ public partial class MappingDetail : UserControl
         try
         {
             if (inv.Source == Source.Scan)
-                return (await Session.Service.InvoiceSnippet(caseId, inv.Id, index, line.Name, Ct) is { } row ? Images.From(row) : null, null);
+                return (await Session.Service.Invoices.Snippet(caseId, inv.Id, index, line.Name, Ct) is { } row ? Images.From(row) : null, null);
             if (inv.Source is Source.Ubl or Source.Cii)
             {
                 if (!Session.Sources.TryGetValue(inv.Id, out var src))
-                    Session.Sources[inv.Id] = src = await Session.Service.InvoiceSource(caseId, inv.Id, Ct);
+                    Session.Sources[inv.Id] = src = await Session.Service.Invoices.Source(caseId, inv.Id, Ct);
                 if (src.Pages.FirstOrDefault()?.Text is { } xml) return (null, Ui.Snippet.Excerpt(xml, index, line));
             }
         }

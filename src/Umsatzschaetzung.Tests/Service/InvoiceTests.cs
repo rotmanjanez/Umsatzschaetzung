@@ -9,10 +9,10 @@ public class InvoiceTests(MatcherHost host)
     static readonly byte[] Zugferd = File.ReadAllBytes(TestData.File("zugferd.pdf"));
     static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3];
 
-    readonly IService svc = host.Service;
+    readonly Services svc = host.Service;
     readonly CancellationToken ct = TestContext.Current.CancellationToken;
 
-    Task<Case> NewCase() => svc.PutCase(Vorlage.Blank(), ct);
+    Task<Case> NewCase() => svc.Cases.Put(Vorlage.Blank(), ct);
 
     // 1 kg at 5,00 € the kilo, 5,00 € net and 5,95 € gross, as the supplier prints it.
     static Invoice Clean(string unitCode = "KGM", long lineNet = 500, long? statedGross = 595) => new()
@@ -27,7 +27,7 @@ public class InvoiceTests(MatcherHost host)
     {
         var kase = await NewCase();
 
-        var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", Zugferd, ct);
+        var parsed = await svc.Invoices.Parse(kase.Id, "zugferd.pdf", Zugferd, ct);
 
         Assert.False(parsed.NeedsOcr);
         Assert.Equal("RE-20201121/508", parsed.Invoice.Number);
@@ -41,7 +41,7 @@ public class InvoiceTests(MatcherHost host)
     [Fact]
     public async Task AnInvoiceParsedWithoutACaseIsNotAttached()
     {
-        var parsed = await svc.ParseInvoice("", "zugferd.pdf", Zugferd, ct);
+        var parsed = await svc.Invoices.Parse("", "zugferd.pdf", Zugferd, ct);
         Assert.Equal(3, parsed.Invoice.Lines.Count);
         Assert.Null(parsed.Case);
     }
@@ -50,7 +50,7 @@ public class InvoiceTests(MatcherHost host)
     public async Task AnXmlInvoiceIsParsed()
     {
         var xml = File.ReadAllBytes(TestData.Fixture("dataset/2025/spirituosen/2025-10-01_RE2503135.xml"));
-        var parsed = await svc.ParseInvoice("", "re.xml", xml, ct);
+        var parsed = await svc.Invoices.Parse("", "re.xml", xml, ct);
         Assert.False(parsed.NeedsOcr);
         Assert.Equal(Source.Ubl, parsed.Invoice.Source);
         Assert.NotEmpty(parsed.Invoice.Lines);
@@ -59,7 +59,7 @@ public class InvoiceTests(MatcherHost host)
     [Fact]
     public async Task AnInvoiceForAnUnknownCaseIsNotFound()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.ParseInvoice("fall-gibt-es-nicht", "zugferd.pdf", Zugferd, ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Parse("fall-gibt-es-nicht", "zugferd.pdf", Zugferd, ct));
         Assert.Equal(ErrorCode.NotFound, e.Code);
     }
 
@@ -67,23 +67,23 @@ public class InvoiceTests(MatcherHost host)
     public async Task AScanNeedsOcrAndIsNotStored()
     {
         var kase = await NewCase();
-        var parsed = await svc.ParseInvoice(kase.Id, "scan.png", Png, ct);
+        var parsed = await svc.Invoices.Parse(kase.Id, "scan.png", Png, ct);
         Assert.True(parsed.NeedsOcr);
         Assert.Null(parsed.Case);
-        Assert.Empty((await svc.GetCase(kase.Id, ct)).Invoices);
+        Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
     }
 
     [Fact]
     public async Task AnEmptyFileIsInvalid()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.ParseInvoice("", "leer.pdf", [], ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Parse("", "leer.pdf", [], ct));
         Assert.Equal(ErrorCode.Invalid, e.Code);
     }
 
     [Fact]
     public async Task AnUnknownFormatIsUnsupported()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.ParseInvoice("", "notiz.txt", "Hallo"u8.ToArray(), ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Parse("", "notiz.txt", "Hallo"u8.ToArray(), ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 
@@ -91,8 +91,8 @@ public class InvoiceTests(MatcherHost host)
     public async Task APdfPreviewWithoutARendererIsUnsupported()
     {
         var kase = await NewCase();
-        var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", Zugferd, ct);
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.InvoiceSource(kase.Id, parsed.Invoice.Id, ct));
+        var parsed = await svc.Invoices.Parse(kase.Id, "zugferd.pdf", Zugferd, ct);
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Source(kase.Id, parsed.Invoice.Id, ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 
@@ -100,34 +100,34 @@ public class InvoiceTests(MatcherHost host)
     public async Task ADeletedInvoiceComesBackWithItsFileUntilThePurge()
     {
         var kase = await NewCase();
-        var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", Zugferd, ct);
+        var parsed = await svc.Invoices.Parse(kase.Id, "zugferd.pdf", Zugferd, ct);
 
-        var after = await svc.DeleteInvoice(kase.Id, parsed.Invoice.Id, ct);
+        var after = await svc.Invoices.Delete(kase.Id, parsed.Invoice.Id, ct);
 
         Assert.Empty(after.Invoices);
-        Assert.Empty((await svc.GetCase(kase.Id, ct)).Invoices);
+        Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
         after.Invoices.Add(parsed.Invoice);
-        await svc.PutCase(after, ct);
+        await svc.Cases.Put(after, ct);
         Assert.Equal("zugferd.pdf", host.Cases.LoadFile(kase.Id, parsed.Invoice.Id).Name);
 
-        await svc.DeleteInvoice(kase.Id, parsed.Invoice.Id, ct);
+        await svc.Invoices.Delete(kase.Id, parsed.Invoice.Id, ct);
         host.Cases.Purge();
 
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.InvoiceSource(kase.Id, parsed.Invoice.Id, ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Source(kase.Id, parsed.Invoice.Id, ct));
         Assert.Equal(ErrorCode.NotFound, e.Code);
     }
 
     [Fact]
     public async Task OcrWithoutAnEngineIsUnsupported()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.OcrInvoice("", "scan.png", Png, ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Ocr("", "scan.png", Png, ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 
     [Fact]
     public async Task OcrOfAnEmptyFileIsInvalid()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.OcrInvoice("", "scan.png", [], ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Ocr("", "scan.png", [], ct));
         Assert.Equal(ErrorCode.Invalid, e.Code);
     }
 
@@ -137,7 +137,7 @@ public class InvoiceTests(MatcherHost host)
         var kase = await NewCase();
         var inv = Clean(unitCode: "");
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, inv, Intent.Check, "r.png", Png), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, inv, Intent.Check, "r.png", Png), ct);
 
         Assert.Contains(v.Flags, f => f.Code == "no_unit");
         Assert.False(v.Blocked);
@@ -145,13 +145,13 @@ public class InvoiceTests(MatcherHost host)
         Assert.Null(v.Case);
         Assert.Null(v.Invoice.Verification);
         Assert.Equal(7, Guid.Parse(v.Invoice.Id).Version);
-        Assert.Empty((await svc.GetCase(kase.Id, ct)).Invoices);
+        Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
     }
 
     [Fact]
     public async Task CheckNeedsNoCase()
     {
-        var v = await svc.VerifyInvoice(new VerifyReq("", Clean(), Intent.Check, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq("", Clean(), Intent.Check, null, null), ct);
         Assert.Empty(v.Flags);
         Assert.Null(v.Case);
     }
@@ -163,17 +163,17 @@ public class InvoiceTests(MatcherHost host)
         var reading = new List<OcrPage> { new() { Width = 10, Height = 20, Words = [new OcrWord { Text = "Servietten" }] } };
 
         using var sheet = Tests.Scan.Sheets.Blank(10, 20);
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Store, "r.png", Tests.Scan.Sheets.Png(sheet), reading), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(), Intent.Store, "r.png", Tests.Scan.Sheets.Png(sheet), reading), ct);
 
         Assert.False(v.Accepted);
         Assert.Null(v.Invoice.Verification);
-        var stored = Assert.Single((await svc.GetCase(kase.Id, ct)).Invoices);
+        var stored = Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices);
         Assert.Equal(v.Invoice.Id, stored.Id);
         Assert.Null(stored.Verification);
-        var source = await svc.InvoiceSource(kase.Id, stored.Id, ct);
+        var source = await svc.Invoices.Source(kase.Id, stored.Id, ct);
         Assert.Equal("r.png", source.FileName);
         Assert.Equal((10, 20), Assert.Single(source.Pages).Image is { } shown ? (shown.Width, shown.Height) : default);
-        var read = Assert.Single((await svc.InvoiceReading(kase.Id, stored.Id, ct)).Pages);
+        var read = Assert.Single((await svc.Invoices.Reading(kase.Id, stored.Id, ct)).Pages);
         Assert.Equal("Servietten", Assert.Single(read.Words).Text);
         Assert.Equal((10, 20), read.Image is { } image ? (image.Width, image.Height) : default);
     }
@@ -184,7 +184,7 @@ public class InvoiceTests(MatcherHost host)
     [InlineData(Intent.Auto)]
     public async Task AnIntentThatStoresNeedsACase(Intent intent)
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.VerifyInvoice(new VerifyReq("", Clean(), intent, null, null), ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Verify(new VerifyReq("", Clean(), intent, null, null), ct));
         Assert.Equal(ErrorCode.Invalid, e.Code);
     }
 
@@ -194,7 +194,7 @@ public class InvoiceTests(MatcherHost host)
     [InlineData(Intent.Auto)]
     public async Task AnIntentThatStoresNeedsAnExistingCase(Intent intent)
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.VerifyInvoice(new VerifyReq("fall-gibt-es-nicht", Clean(), intent, null, null), ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Verify(new VerifyReq("fall-gibt-es-nicht", Clean(), intent, null, null), ct));
         Assert.Equal(ErrorCode.NotFound, e.Code);
     }
 
@@ -208,17 +208,17 @@ public class InvoiceTests(MatcherHost host)
             inv.Lines[0].Name = "Pils vom Fass 30 l Keg";
             return inv;
         }
-        var before = (await svc.Rules(ct)).Version;
+        var before = (await svc.Rules.Load(ct)).Version;
 
-        await Assert.ThrowsAsync<ServiceError>(() => svc.VerifyInvoice(new VerifyReq("fall-gibt-es-nicht", Keg(), Intent.Auto, null, null), ct));
-        Assert.Equal(before, (await svc.Rules(ct)).Version);
+        await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Verify(new VerifyReq("fall-gibt-es-nicht", Keg(), Intent.Auto, null, null), ct));
+        Assert.Equal(before, (await svc.Rules.Load(ct)).Version);
 
-        var learnt = await svc.VerifyInvoice(new VerifyReq((await NewCase()).Id, Keg(), Intent.Auto, null, null), ct);
+        var learnt = await svc.Invoices.Verify(new VerifyReq((await NewCase()).Id, Keg(), Intent.Auto, null, null), ct);
         var id = learnt.Invoice.Lines[0].MappingId!;
         Assert.Equal(7, Guid.Parse(id).Version);
-        Assert.Equal(before, (await svc.Rules(ct)).Version);
-        Assert.False((await svc.Rules(ct)).Mappings.ContainsKey(id));
-        Assert.Equal("Pils vom Fass 30 l Keg", (await svc.GetCase(learnt.Case!.Id, ct)).Mappings[id].Observed);
+        Assert.Equal(before, (await svc.Rules.Load(ct)).Version);
+        Assert.False((await svc.Rules.Load(ct)).Mappings.ContainsKey(id));
+        Assert.Equal("Pils vom Fass 30 l Keg", (await svc.Cases.Get(learnt.Case!.Id, ct)).Mappings[id].Observed);
     }
 
     [Fact]
@@ -226,13 +226,13 @@ public class InvoiceTests(MatcherHost host)
     {
         var kase = await NewCase();
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Confirm, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(), Intent.Confirm, null, null), ct);
 
         Assert.True(v.Accepted);
         Assert.False(v.Blocked);
         Assert.Equal(false, v.Invoice.Verification?.Auto);
         Assert.NotNull(Assert.Single(v.Case!.Invoices).Verification);
-        Assert.NotNull(Assert.Single((await svc.GetCase(kase.Id, ct)).Invoices).Verification);
+        Assert.NotNull(Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices).Verification);
     }
 
     [Fact]
@@ -240,7 +240,7 @@ public class InvoiceTests(MatcherHost host)
     {
         var kase = await NewCase();
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(statedGross: 700), Intent.Confirm, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(statedGross: 700), Intent.Confirm, null, null), ct);
 
         Assert.Contains(v.Flags, f => f.Code == "gross_check");
         Assert.False(v.Blocked);
@@ -252,13 +252,13 @@ public class InvoiceTests(MatcherHost host)
     {
         var kase = await NewCase();
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(lineNet: 600), Intent.Confirm, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(lineNet: 600), Intent.Confirm, null, null), ct);
 
         Assert.Contains(v.Flags, f => f.Code == "line_total");
         Assert.True(v.Blocked);
         Assert.False(v.Accepted);
         Assert.Null(v.Case);
-        Assert.Empty((await svc.GetCase(kase.Id, ct)).Invoices);
+        Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
     }
 
     [Fact]
@@ -270,7 +270,7 @@ public class InvoiceTests(MatcherHost host)
         inv.StatedNet = null;
         inv.NetTotal = 999;
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, inv, Intent.Confirm, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, inv, Intent.Confirm, null, null), ct);
 
         Assert.Equal((500, 595), (v.Invoice.NetTotal, v.Invoice.GrossTotal));
         Assert.False(v.Blocked);
@@ -282,11 +282,11 @@ public class InvoiceTests(MatcherHost host)
     {
         var kase = await NewCase();
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Auto, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(), Intent.Auto, null, null), ct);
 
         Assert.True(v.Accepted);
         Assert.Equal(true, v.Invoice.Verification?.Auto);
-        Assert.Equal(true, Assert.Single((await svc.GetCase(kase.Id, ct)).Invoices).Verification?.Auto);
+        Assert.Equal(true, Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices).Verification?.Auto);
     }
 
     [Fact]
@@ -296,11 +296,11 @@ public class InvoiceTests(MatcherHost host)
         var inv = Clean();
         inv.Number = "";
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, inv, Intent.Auto, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, inv, Intent.Auto, null, null), ct);
 
         Assert.Empty(v.Flags);
         Assert.False(v.Accepted);
-        Assert.Null(Assert.Single((await svc.GetCase(kase.Id, ct)).Invoices).Verification);
+        Assert.Null(Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices).Verification);
     }
 
     [Fact]
@@ -308,22 +308,22 @@ public class InvoiceTests(MatcherHost host)
     {
         var kase = await NewCase();
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(statedGross: 700), Intent.Auto, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(statedGross: 700), Intent.Auto, null, null), ct);
 
         Assert.False(v.Blocked);
         Assert.False(v.Accepted);
-        Assert.Single((await svc.GetCase(kase.Id, ct)).Invoices);
+        Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices);
     }
 
     [Fact]
     public async Task VerifyingAStoredInvoiceAgainReplacesIt()
     {
         var kase = await NewCase();
-        var first = await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Store, null, null), ct);
+        var first = await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(), Intent.Store, null, null), ct);
         var edited = first.Invoice;
         edited.Number = "PM-2";
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, edited, Intent.Confirm, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, edited, Intent.Confirm, null, null), ct);
 
         Assert.Equal(first.Invoice.Id, v.Invoice.Id);
         Assert.Equal("PM-2", Assert.Single(v.Case!.Invoices).Number);
@@ -333,21 +333,21 @@ public class InvoiceTests(MatcherHost host)
     public async Task AnInvoiceTakenBackForReviewIsNoLongerVerified()
     {
         var kase = await NewCase();
-        var confirmed = (await svc.VerifyInvoice(new VerifyReq(kase.Id, Clean(), Intent.Confirm, null, null), ct)).Invoice;
+        var confirmed = (await svc.Invoices.Verify(new VerifyReq(kase.Id, Clean(), Intent.Confirm, null, null), ct)).Invoice;
         Assert.NotNull(confirmed.Verification);
 
-        var v = await svc.VerifyInvoice(new VerifyReq(kase.Id, confirmed, Intent.Store, null, null), ct);
+        var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, confirmed, Intent.Store, null, null), ct);
 
         Assert.Null(v.Invoice.Verification);
-        Assert.Null(Assert.Single((await svc.GetCase(kase.Id, ct)).Invoices).Verification);
+        Assert.Null(Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices).Verification);
     }
 
     [Fact]
     public async Task AnInvoiceNeverScannedHasNoReading()
     {
         var kase = await NewCase();
-        var parsed = await svc.ParseInvoice(kase.Id, "zugferd.pdf", Zugferd, ct);
-        Assert.Empty((await svc.InvoiceReading(kase.Id, parsed.Invoice.Id, ct)).Pages);
-        Assert.Empty((await svc.InvoiceReading(kase.Id, "re-gibt-es-nicht", ct)).Pages);
+        var parsed = await svc.Invoices.Parse(kase.Id, "zugferd.pdf", Zugferd, ct);
+        Assert.Empty((await svc.Invoices.Reading(kase.Id, parsed.Invoice.Id, ct)).Pages);
+        Assert.Empty((await svc.Invoices.Reading(kase.Id, "re-gibt-es-nicht", ct)).Pages);
     }
 }

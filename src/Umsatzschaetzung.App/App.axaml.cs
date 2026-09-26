@@ -26,7 +26,7 @@ public partial class App : Application
     }
 
     // A browser has no windows: its host composes the service and gets the program as one view.
-    public static Func<IService>? SingleViewService { get; set; }
+    public static Func<Services>? SingleViewService { get; set; }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -84,7 +84,7 @@ public partial class App : Application
     // Vor dem ersten Fenster zeigt der Lebenszyklus das MainWindow selbst, danach niemand mehr.
     void Launch(IClassicDesktopStyleApplicationLifetime desktop, Config config, bool show)
     {
-        IService service;
+        Services service;
         try
         {
             // A second instance leaves deleted invoices alone: the first can still take their deletion back.
@@ -134,7 +134,7 @@ public partial class App : Application
         if (show) window.Show();
     }
 
-    IService CreateService(Config config, bool purge)
+    Services CreateService(Config config, bool purge)
     {
         Directory.CreateDirectory(AppData.Dir);
         var rules = new RuleStore(config.Store, RuleStore.Seed());
@@ -154,6 +154,6 @@ public partial class App : Application
             WebPages.Clear(WebPages.Folder);
             CrashLog.Clear();
         }
-        return new LocalService(rules, cases, new Documents(ocr, new PdfiumPages()), tagger, new EncoderRanking(encoder, new EmbeddingStore(rules.Dir)), printer, Release.Version);
+        return Services.Local(rules, cases, new Documents(ocr, new PdfiumPages()), tagger, new EncoderRanking(encoder, new EmbeddingStore(rules.Dir)), printer, Release.Version);
     }
 }

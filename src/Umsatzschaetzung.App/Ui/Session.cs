@@ -34,7 +34,7 @@ public sealed class Session : Observable
     string error = "";
     Dictionary<string, string> recorded = [];
 
-    public Session(IService service)
+    public Session(Services service)
     {
         Service = service;
         Imports = new Imports(this);
@@ -52,7 +52,7 @@ public sealed class Session : Observable
     // Answers the next file dialog in place of the person, where there is none to show.
     public Func<IEnumerable<string>>? Picked { get; set; }
 
-    public IService Service { get; }
+    public Services Service { get; }
     public Imports Imports { get; }
     public Case? Case { get; private set; }
     public RuleSet? Rules { get; private set; }
@@ -156,13 +156,13 @@ public sealed class Session : Observable
 
     public Task LoadStatus(CancellationToken ct) => Run(async () =>
     {
-        Status = await Service.Status(ct);
+        Status = await Service.Rules.Status(ct);
         StatusChanged?.Invoke();
     });
 
     public Task<bool> LoadRules(CancellationToken ct) => Run(async () =>
     {
-        Rules = await Service.Rules(ct);
+        Rules = await Service.Rules.Load(ct);
         RulesChanged?.Invoke();
     });
 
@@ -219,7 +219,7 @@ public sealed class Session : Observable
     Task<bool> Store(Case kase, CancellationToken ct) =>
         Enqueue(kase, async () =>
         {
-            var saved = await Service.PutCase(Json.Copy(kase), CancellationToken.None);
+            var saved = await Service.Cases.Put(Json.Copy(kase), CancellationToken.None);
             kase.CreatedAt = saved.CreatedAt;
             kase.UpdatedAt = saved.UpdatedAt;
             if (Case == kase) CaseChanged?.Invoke();
@@ -258,7 +258,7 @@ public sealed class Session : Observable
         {
             try
             {
-                Rules = await Service.SaveRule(Json.Copy(data), CancellationToken.None);
+                Rules = await Service.Rules.Save(Json.Copy(data), CancellationToken.None);
             }
             catch (ServiceError)
             {
@@ -272,7 +272,7 @@ public sealed class Session : Observable
     Task<bool> Drop(Entity entity, string id, CancellationToken ct) =>
         Enqueue(null, async () =>
         {
-            Rules = await Service.DeleteRule(entity, id, CancellationToken.None);
+            Rules = await Service.Rules.Delete(entity, id, CancellationToken.None);
             RulesChanged?.Invoke();
             await LoadStatus(CancellationToken.None);
         }, ct);
@@ -371,7 +371,7 @@ public sealed class Session : Observable
         Rules is null ? [] : Rules.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
 
     public async Task<IReadOnlyList<string>> SimilarIngredients(string text, CancellationToken ct) =>
-        (await Service.SuggestMapping(Case?.Id ?? "", new InvoiceLine { Name = text }, null, ct))
+        (await Service.Mapping.Suggest(Case?.Id ?? "", new InvoiceLine { Name = text }, null, ct))
             .Select(c => c.Mapping.IngredientId).ToList();
 
     public List<Product> Products() =>
