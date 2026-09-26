@@ -31,7 +31,9 @@ Wird ein Betrieb ein zweites oder drittes Mal geprüft, muss das Sortiment nicht
 
 Aus einer Speisekarte, als Foto oder von der Website des Betriebs, macht eine KI wie Claude, Gemini oder ChatGPT die passende Tabelle. Die Karte einfügen und dazu schreiben:
 
-> Mach aus dieser Speisekarte eine CSV-Datei mit Semikolon als Trennzeichen und den Spalten Produkt, Bruttopreis und USt, Preise mit Komma. Den Steuersatz je Produkt nach deutschem Umsatzsteuerrecht für Verzehr im Lokal im Jahr 2025.
+> Mach aus dieser Speisekarte eine CSV-Datei mit Semikolon als Trennzeichen und den Spalten Produkt, Bruttopreis und USt, Preise mit Komma. Den Steuersatz je Produkt nach deutschem Umsatzsteuerrecht für Verzehr im Lokal im Jahr 2025. Jedes Gericht nur mit seinem üblichen Namen, ohne Nummer auf der Karte und ohne Beschreibung.
+
+Der Import findet ein Produkt nur über seinen Namen im Katalog. Aus „7. Elsässer Flammkuchen, hauchdünn, mit Speck und Zwiebeln“ wird kein Treffer, aus „Flammkuchen“ schon. Ohne diesen Hinweis übernimmt die KI meist die Karte wörtlich.
 
 Das Jahr auf den Prüfungszeitraum setzen: Der Satz für Speisen im Lokal hat sich mehrfach geändert, der für Getränke nicht.
 

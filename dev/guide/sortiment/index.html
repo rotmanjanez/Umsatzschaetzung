@@ -1301,8 +1301,13 @@ einfügen und dazu schreiben:</p>
 <p>Mach aus dieser Speisekarte eine CSV-Datei mit Semikolon als
 Trennzeichen und den Spalten Produkt, Bruttopreis und USt, Preise mit
 Komma. Den Steuersatz je Produkt nach deutschem Umsatzsteuerrecht für
-Verzehr im Lokal im Jahr 2025.</p>
+Verzehr im Lokal im Jahr 2025. Jedes Gericht nur mit seinem üblichen
+Namen, ohne Nummer auf der Karte und ohne Beschreibung.</p>
 </blockquote>
+<p>Der Import findet ein Produkt nur über seinen Namen im Katalog. Aus
+„7. Elsässer Flammkuchen, hauchdünn, mit Speck und Zwiebeln“ wird kein
+Treffer, aus „Flammkuchen“ schon. Ohne diesen Hinweis übernimmt die KI
+meist die Karte wörtlich.</p>
 <p>Das Jahr auf den Prüfungszeitraum setzen: Der Satz für Speisen im Lokal
 hat sich mehrfach geändert, der für Getränke nicht.</p>
 <p>Das Ergebnis als <code>.csv</code> speichern und importieren. Namen, die der Katalog
