@@ -30,7 +30,7 @@ public class ReportViewTests
     static (bool Ready, string Note, string Error, bool Large) Show()
     {
         using var host = new Host();
-        var kase = host.PutVorlage().GetAwaiter().GetResult();
+        var kase = Task.Run(() => host.PutVorlage()).GetAwaiter().GetResult();
 
         var shell = new Shell(host.Service);
         using var done = new CancellationTokenSource(TimeSpan.FromSeconds(90));
