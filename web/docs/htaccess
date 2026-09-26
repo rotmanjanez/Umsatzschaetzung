@@ -1,3 +1,6 @@
+AddType text/markdown .md
+AddCharset utf-8 .txt .md
+
 RewriteEngine On
 
 RewriteCond %{HTTPS} !=on [OR]

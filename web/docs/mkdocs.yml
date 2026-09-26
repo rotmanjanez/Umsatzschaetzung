@@ -31,6 +31,47 @@ theme:
 plugins:
   - search:
       lang: de
+  - llmstxt:
+      preprocess: llmstxt.py
+      markdown_description: >-
+        Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den
+        Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen
+        Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz
+        gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Zutaten
+        zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt
+        jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
+      full_output: llms-full.txt
+      sections:
+        Start:
+          - index.md: Überblick und Ablauf einer Prüfung
+        Programm:
+          - pruefungen.md: Liste der Prüfungen, anlegen, öffnen, löschen, wo eine Prüfung liegt
+          - pruefung.md: Eckdaten, Zeitraum, erklärter Umsatz, Bestand und Gewerbekennzahl
+          - rechnungen.md: E-Rechnungen und Scans einlesen, Formate, Durchsicht und Korrektur
+          - zuordnung.md: Rechnungspositionen Zutaten zuordnen, Vorschläge, Sicherheit und Faktor
+          - kalkulation.md: Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz
+          - bericht.md: Aufbau des Berichts, Hinweise, Richtsatzvergleich und PDF
+        Grundlagen:
+          - regeln.md: Zutaten, Produkte, Rezepte und Ertragsregeln, die für alle Prüfungen gelten
+          - import-export.md: Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV
+          - verwaltung.md: Für die IT, Datenablage, gemeinsame Regel-Datenbank, unbeaufsichtigte Installation und Gruppenrichtlinien
+          - datenschutz.md: Für IT und Datenschutz, wo Daten liegen, Löschung, Netzwerk, Signatur und Modelle
+          - vorlagen.md: Für die IT, Berichtsvorlagen anpassen, Aufbau, Daten und Filter
+        Hilfe:
+          - faq.md: Häufige Fragen, nach Arbeitsschritt geordnet
+          - hilfe/csv.md: Was eine CSV-Datei ist und wie man sie öffnet und bearbeitet
+        Beispielprüfung:
+          - guide/index.md: Schritt-für-Schritt-Anleitung durch eine vollständige Prüfung eines Gasthauses
+          - guide/install-macos.md: Voraussetzungen und Installation unter macOS
+          - guide/install-windows.md: Voraussetzungen und Installation unter Windows
+          - guide/start.md: Die erste Prüfung anlegen
+          - guide/rechnungen.md: Die Beispielrechnungen herunterladen und importieren
+          - guide/korrektur.md: Falsch gelesene Scans korrigieren
+          - guide/zuordnung.md: Offene Zuordnungen nachholen und Faktoren ergänzen
+          - guide/sortiment.md: Das Sortiment mit Verkaufspreisen anlegen
+          - guide/kalkulation.md: Übrige Einkäufe aufräumen und das Ergebnis prüfen
+          - guide/bericht.md: Vorschau prüfen und den Bericht als PDF speichern
+          - guide/danach.md: Was für die nächste eigene Prüfung gut zu wissen ist
 
 extra:
   version:
