@@ -62,6 +62,24 @@ public class RuleStoreTests
     }
 
     [Fact]
+    public void ASetIsReadAgainOnlyOnceAnotherProgramChangedTheStore()
+    {
+        using var tmp = new TempDir();
+        var here = Open(tmp);
+        var read = here.Load();
+        Assert.Same(read, here.Load());
+
+        var there = Open(tmp);
+        var korn = there.Load().Products["prod.korn.4cl"];
+        korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
+        var saved = there.Save(korn);
+
+        var now = here.Load();
+        Assert.NotSame(read, now);
+        Assert.Equal(Dump(saved), Dump(now));
+    }
+
+    [Fact]
     public void SavesAccumulatePerEntity()
     {
         using var tmp = new TempDir();

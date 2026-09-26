@@ -24,11 +24,11 @@ sealed class LocalRules(RuleStore rules, string appVersion) : IRules
             .DefaultIfEmpty(default)
             .Max();
 
-    public Task<RuleSet> Load(CancellationToken ct) => Guard(ct, rules.Load);
+    public Task<RuleSet> Load(CancellationToken ct) => Guard(ct, () => Json.Copy(rules.Load()));
 
     public Task<RuleSet> Save(IRuleEntity rule, CancellationToken ct) => Guard(ct, () =>
     {
-        var rs = rules.Load();
+        var rs = Json.Copy(rules.Load());
         if (rule is ReportTemplate { Default: false } && rs.Find(Entity.Template, rule.Id) is ReportTemplate { Default: true })
             throw new ServiceError(ErrorCode.Conflict, "Eine Vorlage bleibt Standard, bis eine andere zum Standard wird");
         if (rule is ReportTemplate { Default: true })

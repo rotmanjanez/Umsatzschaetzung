@@ -74,18 +74,17 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
         if (sg.Confidence < AutoMapMinConfidence) return rs;
         var m = sg.Mapping;
         m.Id = Ids.New();
-        rs.Mappings[m.Id] = m;
+        var next = rs.With(new Dictionary<string, ArticleMapping> { [m.Id] = m });
         try
         {
-            RuleCheck.Validate(rs, m);
+            RuleCheck.Validate(next, m);
         }
         catch (RulesException)
         {
-            rs.Mappings.Remove(m.Id);
             return rs;
         }
         own[m.Id] = m;
         l.MappingId = m.Id;
-        return rs;
+        return next;
     }
 }

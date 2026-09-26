@@ -95,6 +95,7 @@ public sealed class RuleStore
     readonly string file;
     readonly string snapshotDir;
     readonly string connectionString;
+    RuleSet? loaded;
 
     public string Dir { get; }
     public string? Notice { get; private set; }
@@ -156,10 +157,18 @@ public sealed class RuleStore
         }
     }
 
+    // Another program may write the same store; its revision tells whether the set read last still holds.
+    // Everyone asking gets that same set, so what is to be changed is changed on a copy.
     public RuleSet Load() => Guarded(() =>
     {
         using var db = Open();
-        return Read(db, null);
+        if (loaded is { } rs)
+        {
+            using var cmd = Command(db, null, "SELECT store, version FROM meta");
+            using var r = cmd.ExecuteReader();
+            if (r.Read() && r.GetString(0) == rs.Store && r.GetInt64(1) == rs.Version) return rs;
+        }
+        return loaded = Read(db, null);
     });
 
     public RuleSet Save(IRuleEntity e) => Guarded(() =>
