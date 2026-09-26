@@ -1,3 +1,4 @@
+* text=auto eol=lf
 fixtures/dataset/2025/**/*.pdf filter=lfs diff=lfs merge=lfs -text
 fixtures/dataset/2025/**/*.png filter=lfs diff=lfs merge=lfs -text
 fixtures/dataset/2025/**/*.jpeg filter=lfs diff=lfs merge=lfs -text

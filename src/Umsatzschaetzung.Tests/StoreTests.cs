@@ -19,7 +19,7 @@ public class StoreTests
         using var r = cmd.ExecuteReader();
         var lines = new List<string>();
         while (r.Read()) lines.Add(r.GetString(0) + ";\n");
-        return string.Concat(lines);
+        return string.Concat(lines).ReplaceLineEndings("\n");
     }
 
     static string Text(string name) => File.ReadAllText(Frozen(name)).ReplaceLineEndings("\n");
