@@ -11,7 +11,8 @@ namespace Umsatzschaetzung.Model;
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     UseStringEnumConverter = true,
-    WriteIndented = true)]
+    WriteIndented = true,
+    NewLine = "\n")]
 [JsonSerializable(typeof(RuleSet))]
 [JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(Invoice))]
