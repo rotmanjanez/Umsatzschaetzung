@@ -36,7 +36,7 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
         <div class="mark">
           <svg viewBox="0 0 256 256" aria-hidden="true">
             <path class="glass" d="M68 52h120l-14 132a26 26 0 0 1-26 23h-40a26 26 0 0 1-26-23z" />
-            <g class="bars"><rect x="94" y="156" width="26" height="38" rx="5" /><rect x="136" y="116" width="26" height="78" rx="5" /></g>
+            <g class="bars"><rect x="95" y="156" width="26" height="38" rx="13" /><rect x="135" y="116" width="26" height="78" rx="13" /></g>
           </svg>
         </div>
       </div>
@@ -46,16 +46,16 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
 </html>
 
 <style>
-  :root { --blue: #2f63d8; --rule: 86%; }  /* --rule: where the scan bar comes to rest, just under the baseline */
+  :root { color-scheme: dark; --blue: #6e97f2; --fg: #eef2fa; --muted: #8a97b3; --bg: #0e1629; --raised: #1b2a4d; --rule: 86%; }  /* --rule: where the scan bar comes to rest, just under the baseline */
   * { box-sizing: border-box; }
-  body { margin: 0; background: #e9e6df; color: #1c1b19; font: 17px/1.5 "Sora", sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.5 "Sora", sans-serif; }
   main { max-width: 1140px; margin: 0 auto; padding: 40px 16px 80px; overflow: hidden; }
   .hero { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; min-height: 560px; }
   h1 { font-size: clamp(40px, 5.4vw, 72px); line-height: 1; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 20px; }
   .scanline { position: relative; display: inline-block; white-space: nowrap; }
   .scanline::after {
     content: ""; position: absolute; left: -0.04em; right: -0.04em; top: 0; height: 4px; opacity: 0;
-    background: var(--blue); box-shadow: 0 0 18px 7px rgba(47, 99, 216, 0.22);
+    background: var(--blue); box-shadow: 0 0 18px 7px rgba(110, 151, 242, 0.3);
     animation: scanbar 0.85s 0.3s ease-in-out forwards;
   }
   .scan { display: inline-block; clip-path: inset(0 0 100% 0); animation: scanreveal 0.85s 0.3s ease-in-out forwards; }
@@ -64,25 +64,25 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
   .out { position: absolute; left: 0; top: 0; white-space: nowrap; }
   .out::after { content: ""; display: inline-block; width: 0.07em; height: 0.82em; margin-left: 0.06em; vertical-align: -0.04em; background: currentColor; animation: caret 1s steps(2) infinite; }
   .type.done .out::after { display: none; }
-  p { margin: 0 0 40px; max-width: 44ch; text-wrap: pretty; }
+  p { margin: 0 0 40px; max-width: 44ch; color: var(--muted); text-wrap: pretty; }
   .acts { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-  .acts a { text-decoration: none; font-weight: 600; background: #1c1b19; color: #fff; padding: 14px 24px; transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
+  .acts a { text-decoration: none; font-weight: 600; background: var(--fg); color: var(--bg); padding: 14px 24px; transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
   .acts a:hover { background: var(--blue); }
-  .acts a.doc { background: none; color: #1c1b19; padding: 0; border-bottom: 2px solid #1c1b19; }
+  .acts a.doc { background: none; color: var(--fg); padding: 0; border-bottom: 2px solid var(--fg); }
   .acts a.doc:hover { background: none; color: var(--blue); border-color: var(--blue); }
-  .guide { margin: 32px 0 0; padding: 20px 24px; max-width: 44ch; background: #fff; border-left: 4px solid var(--blue); animation: rise 0.4s ease-out; }
+  .guide { margin: 32px 0 0; padding: 20px 24px; max-width: 44ch; background: var(--raised); border-left: 4px solid var(--blue); animation: rise 0.4s ease-out; }
   .guide p { margin: 0 0 16px; }
-  .guide a { display: inline-block; text-decoration: none; font-weight: 600; background: var(--blue); color: #fff; padding: 14px 24px; transition: background-color 0.15s; }
-  .guide a:hover { background: #1c1b19; }
+  .guide a { display: inline-block; text-decoration: none; font-weight: 600; background: var(--blue); color: var(--bg); padding: 14px 24px; transition: background-color 0.15s; }
+  .guide a:hover { background: var(--fg); }
   a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
   footer { margin-top: 72px; font-size: 15px; display: flex; gap: 24px; }
-  footer a { color: #6b6862; transition: color 0.15s; }
+  footer a { color: var(--muted); transition: color 0.15s; }
   footer a:hover { color: var(--blue); }
 
   .mark { display: flex; justify-content: center; align-items: center; }
   .mark svg { width: min(100%, 420px); height: auto; }
-  .glass { fill: #1c1b19; }
-  .bars rect { fill: #e9e6df; }
+  .glass { fill: none; stroke: #4f83f1; stroke-width: 10; stroke-linejoin: round; }
+  .bars rect { fill: #eef2fa; }
 
   @keyframes scanreveal { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
   @keyframes scanbar { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 100% { top: var(--rule); opacity: 1; } }

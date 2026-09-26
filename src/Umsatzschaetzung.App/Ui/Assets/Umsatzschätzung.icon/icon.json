@@ -1,6 +1,9 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:0.21520,0.34096,0.71582,1.00000"
+    "linear-gradient" : [
+      "srgb:0.10588,0.16471,0.30196,1.00000",
+      "srgb:0.05490,0.08627,0.16078,1.00000"
+    ]
   },
   "groups" : [
     {
@@ -23,10 +26,6 @@
     {
       "layers" : [
         {
-          "blend-mode" : "normal",
-          "fill" : {
-            "automatic-gradient" : "display-p3:1.00000,1.00000,1.00000,1.00000"
-          },
           "image-name" : "cup.svg",
           "name" : "Cup"
         }
