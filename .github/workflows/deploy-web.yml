@@ -43,6 +43,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - run: dotnet workload install wasm-tools
+      - id: toolchain
+        run: echo "wasm=$(dotnet workload list | grep wasm-tools | tr -s ' ' '_')" >> "$GITHUB_OUTPUT"
+      # The AOT compiler skips an assembly whose trimmed IL it compiled before; keyed by the
+      # toolchain, since a new compiler would take the old output for current.
+      - uses: actions/cache@v6
+        with:
+          path: src/Umsatzschaetzung.Web/obj/Release/net10.0/wasm/for-publish
+          key: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-${{ github.sha }}
+          restore-keys: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
       - run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
       # The weights and the runtime sit under their release and never change there: what the
       # server has is kept, only what is new goes up.
