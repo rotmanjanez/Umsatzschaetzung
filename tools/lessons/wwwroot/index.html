@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Umsatzschätzung</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="coach.css">
+</head>
+<body>
+<div id="out"></div>
+<div id="spot"></div>
+<div id="ring"></div>
+<p id="caption" hidden aria-live="polite"></p>
+
+<aside id="card" hidden>
+  <div id="dachs" aria-hidden="true"><img src="dachs-zu.png" alt=""><img src="dachs-halb.png" alt=""><img src="dachs-offen.png" alt=""><img src="dachs-zu.png" alt=""></div>
+  <div class="meta">
+    <strong id="chapter"></strong>
+    <button id="pause" class="tool" aria-pressed="false" disabled title="Pause" aria-label="Pause">
+      <svg class="hold" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5v14M15.5 5v14"/></svg>
+      <svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 5v14l11-7z"/></svg>
+    </button>
+    <button id="subtitles" class="tool" aria-pressed="false" title="Untertitel" aria-label="Untertitel">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 10.2a2.4 2.4 0 1 0 0 3.6M17 10.2a2.4 2.4 0 1 0 0 3.6"/></svg>
+    </button>
+    <select id="speed" class="tool" title="Tempo" aria-label="Tempo">
+      <option value="0.75">0,75×</option>
+      <option value="1" selected>1×</option>
+      <option value="1.25">1,25×</option>
+      <option value="1.5">1,5×</option>
+      <option value="2">2×</option>
+      <option value="2.5">2,5×</option>
+      <option value="3">3×</option>
+    </select>
+    <button id="replay" class="tool" title="Noch einmal hören" aria-label="Noch einmal hören">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg>
+    </button>
+  </div>
+  <p id="line" aria-live="polite"></p>
+  <p id="hint" aria-live="assertive"></p>
+  <p id="count"></p>
+</aside>
+
+<section id="stage">
+  <div class="sheet">
+    <p class="kicker" id="kicker"></p>
+    <h1 id="title"></h1>
+    <p class="text" id="text"></p>
+    <ol id="list"></ol>
+    <div class="pad" id="pad" hidden><i></i></div>
+    <div class="actions" id="actions">
+      <div class="load" id="load" hidden role="progressbar" aria-label="Das Programm wird geladen">
+        Das Programm wird geladen …
+        <div class="track"><i id="loaded"></i></div>
+      </div>
+      <button class="primary" id="start">▶  Los geht’s</button>
+    </div>
+  </div>
+</section>
+
+<audio id="voice"></audio>
+<script type="module" src="main.js"></script>
+</body>
+</html>
