@@ -214,7 +214,12 @@ public partial class CaseView : Screen
             Session.Fail("Änderungen an der Prüfung konnten nicht gespeichert werden");
     }
 
-    void AddStock(object? sender, RoutedEventArgs e) => model.Stock.Add(new StockRow(Session.Ingredients()));
+    void AddStock(object? sender, RoutedEventArgs e)
+    {
+        var row = new StockRow(Session.Ingredients());
+        model.Stock.Add(row);
+        Reveal.Row(StockBox, row);
+    }
 
     void RemoveStock(object? sender, RoutedEventArgs e)
     {

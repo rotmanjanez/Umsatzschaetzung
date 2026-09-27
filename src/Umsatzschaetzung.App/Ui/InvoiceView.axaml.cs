@@ -613,6 +613,7 @@ public partial class InvoiceView : Screen
         var row = new LineRow(new InvoiceLine { No = no + 1, PriceBaseQty = 1000 }, Math.Max(currentPage, 0), []);
         row.Changed += LineEdited;
         model.Lines.Add(row);
+        Reveal.Row(Lines, row);
         Schedule();
     }
 
