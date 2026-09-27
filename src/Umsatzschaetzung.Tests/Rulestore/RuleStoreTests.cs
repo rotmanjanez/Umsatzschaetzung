@@ -521,7 +521,7 @@ public class RuleStoreTests
         Open(tmp).Save(new Category { Id = "c2", Name = "nach der Sicherung" });
         File.WriteAllText(tmp.Sub("rules.db"), "kaputt");
 
-        var restored = Open(tmp);
+        var restored = new RuleStore(tmp.Path, TestData.Seed(), recheck: TimeSpan.Zero);
         var rs = restored.Load();
 
         Assert.NotNull(restored.Notice);
@@ -556,13 +556,121 @@ public class RuleStoreTests
         Open(tmp).Save(new Category { Id = "c1", Name = "eins" });
         File.WriteAllText(tmp.Sub("rules.db"), "kaputt, und nie gesichert");
 
-        var fresh = Open(tmp);
+        var fresh = new RuleStore(tmp.Path, TestData.Seed(), recheck: TimeSpan.Zero);
         var seed = TestData.Seed();
         seed.Version = 0;
 
         Assert.Contains("neu angelegt", fresh.Notice);
         Assert.Equal(Dump(seed), Dump(fresh.Load()));
         Assert.Single(Directory.GetFiles(tmp.Path, "rules.db.defekt-*"));
+    }
+
+    [Fact]
+    public async Task AStoreThatReadsDamagedOnlyOnceIsNotRestored()
+    {
+        using var tmp = new TempDir();
+        Open(tmp).Save(new Category { Id = "c1", Name = "eins" });
+        Open(tmp);
+        var file = tmp.Sub("rules.db");
+        var good = File.ReadAllBytes(file);
+        File.WriteAllText(file, "kurz nicht lesbar");
+
+        var opening = Task.Run(() => new RuleStore(tmp.Path, TestData.Seed(), recheck: TimeSpan.FromSeconds(1)));
+        await Task.Delay(200, TestContext.Current.CancellationToken);
+        File.WriteAllBytes(file, good);
+        var store = await opening;
+
+        Assert.Null(store.Notice);
+        Assert.Empty(Directory.GetFiles(tmp.Path, "rules.db.defekt-*"));
+        Assert.True(store.Load().Categories.ContainsKey("c1"));
+    }
+
+    [Fact]
+    public void AStartThatChangesNothingLeavesTheFileAlone()
+    {
+        using var tmp = new TempDir();
+        Open(tmp).Save(new Category { Id = "c1", Name = "eins" });
+        var file = tmp.Sub("rules.db");
+        var written = File.GetLastWriteTimeUtc(file);
+        Thread.Sleep(20);
+
+        Open(tmp).Load();
+
+        Assert.Equal(written, File.GetLastWriteTimeUtc(file));
+    }
+
+    [Fact]
+    public void AWriteLeavesNothingBesideTheFile()
+    {
+        using var tmp = new TempDir();
+        var store = Open(tmp);
+
+        store.Save(new Category { Id = "c1", Name = "eins" });
+
+        Assert.Equal(["rules.db", "rules.lock"], Directory.GetFiles(tmp.Path).Select(Path.GetFileName).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task AWriterWaitsWhileAnotherHoldsTheLock()
+    {
+        using var tmp = new TempDir();
+        var store = new RuleStore(tmp.Path, TestData.Seed(), lockWait: TimeSpan.FromSeconds(10));
+        var other = new FileStream(tmp.Sub("rules.lock"), FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+        var saving = Task.Run(() => store.Save(new Category { Id = "c1", Name = "eins" }));
+        await Task.Delay(300, TestContext.Current.CancellationToken);
+        Assert.False(saving.IsCompleted);
+        other.Dispose();
+
+        Assert.True((await saving).Categories.ContainsKey("c1"));
+    }
+
+    [Fact]
+    public void AWriterGivesUpOnALockHeldTooLongAndSaysWhy()
+    {
+        using var tmp = new TempDir();
+        var store = new RuleStore(tmp.Path, TestData.Seed(), lockWait: TimeSpan.FromMilliseconds(200));
+        var before = store.Load();
+        using var other = new FileStream(tmp.Sub("rules.lock"), FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+        var e = Assert.Throws<StoreUnavailableException>(() => store.Save(new Category { Id = "c1", Name = "eins" }));
+
+        Assert.Contains("an einem anderen Arbeitsplatz geändert", e.Message);
+        Assert.Equal(Dump(before), Dump(store.Load()));
+        Assert.Throws<StoreUnavailableException>(() => new RuleStore(tmp.Path, TestData.Seed(), lockWait: TimeSpan.FromMilliseconds(200)));
+    }
+
+    [Fact]
+    public void AWriteThatCannotReplaceTheFileIsNotKept()
+    {
+        using var tmp = new TempDir();
+        var store = Open(tmp);
+        var before = store.Load();
+        Directory.CreateDirectory(tmp.Sub("rules.db.neu"));
+
+        Assert.Throws<StoreUnavailableException>(() => store.Save(new Category { Id = "c1", Name = "eins" }));
+
+        Assert.Equal(Dump(before), Dump(store.Load()));
+        Assert.Equal(Dump(before), Dump(Open(tmp).Load()));
+    }
+
+    [Fact]
+    public void WritersOnManyStoresAtOnceLoseNoWrite()
+    {
+        using var tmp = new TempDir();
+        Open(tmp);
+        var stores = Enumerable.Range(0, 4).Select(_ => Open(tmp)).ToList();
+
+        Parallel.ForEach(stores, new ParallelOptions { MaxDegreeOfParallelism = stores.Count }, (store, _, i) =>
+        {
+            for (var j = 0; j < 10; j++) store.Save(new Category { Id = $"c{i}.{j}", Name = "n" });
+        });
+
+        var rs = Open(tmp).Load();
+        for (var i = 0; i < stores.Count; i++)
+            for (var j = 0; j < 10; j++)
+                Assert.True(rs.Categories.ContainsKey($"c{i}.{j}"), $"c{i}.{j}");
+        Assert.All(stores, s => Assert.Equal(Dump(rs), Dump(s.Load())));
     }
 
     [Fact]

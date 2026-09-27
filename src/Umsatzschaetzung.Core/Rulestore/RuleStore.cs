@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Runtime.InteropServices;
 using Microsoft.Data.Sqlite;
+using SQLitePCL;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Richtsatz;
 
@@ -92,37 +94,61 @@ public sealed class RuleStore
 
     static readonly string[] SatzArten = ["aufschlag", "rohgewinn1", "rohgewinn2", "halbrein", "rein"];
 
+    // SQLite locks do not hold on every network share. So SQLite only ever works on an image in
+    // memory: the file on the share is read whole and replaced whole by a rename, and whoever
+    // replaces it holds rules.lock opened exclusively, a share mode the file server itself enforces.
     readonly string file;
+    readonly string lockFile;
     readonly string snapshotDir;
-    readonly string connectionString;
+    readonly TimeSpan lockWait;
+    readonly Lock gate = new();
+    SqliteConnection? db;
+    (long Length, DateTime Written) seen;
     RuleSet? loaded;
 
     public string Dir { get; }
     public string? Notice { get; private set; }
 
-    public RuleStore(string dir, RuleSet seed)
+    // recheck: a store that reads as damaged is read once more after this before it is restored.
+    public RuleStore(string dir, RuleSet seed, TimeSpan? lockWait = null, TimeSpan? recheck = null)
     {
         Dir = dir;
+        this.lockWait = lockWait ?? TimeSpan.FromSeconds(10);
         file = Path.Combine(dir, "rules.db");
+        lockFile = Path.Combine(dir, "rules.lock");
         snapshotDir = Path.Combine(dir, "snapshots");
-        connectionString = new SqliteConnectionStringBuilder { DataSource = file, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = false, DefaultTimeout = 10 }.ToString();
         Guarded(() =>
         {
             Directory.CreateDirectory(dir);
             Directory.CreateDirectory(snapshotDir);
-            var existed = File.Exists(file);
-            var restored = existed && !Healthy();
-            if (restored) Restore();
-            using var db = Open();
-            if (existed) Snapshot(db);
-            Schema.Migrate(db, Migrations);
-            using var tx = db.BeginTransaction(deferred: false);
-            Identify(db, tx, restored);
-            SeedRules(db, tx, seed);
-            SeedPieces(db, tx, seed);
-            SeedUntouched(db, tx, seed);
-            SeedSammlungen(db, tx);
-            tx.Commit();
+            lock (gate)
+            {
+                using var held = Hold();
+                RollBackLegacyJournal();
+                var image = Fetch();
+                var restored = false;
+                if (!Healthy(Use(image)))
+                {
+                    Thread.Sleep(recheck ?? TimeSpan.FromSeconds(1));
+                    if (!Healthy(Use(image = Fetch())))
+                    {
+                        Use(image = Restore());
+                        restored = true;
+                    }
+                }
+                if (image is not null && !restored) Snapshot(image);
+                Schema.Migrate(db!, Migrations);
+                using (var tx = db!.BeginTransaction(deferred: false))
+                {
+                    Identify(db, tx, restored);
+                    SeedRules(db, tx, seed);
+                    SeedPieces(db, tx, seed);
+                    SeedUntouched(db, tx, seed);
+                    SeedSammlungen(db, tx);
+                    tx.Commit();
+                }
+                Publish(restored ? null : image);
+            }
             return 0;
         });
     }
@@ -159,37 +185,27 @@ public sealed class RuleStore
 
     // Another program may write the same store; its version tells whether the set kept still holds.
     // Everyone asking gets that same set, so what is to be changed is changed on a copy.
-    public RuleSet Load() => Guarded(() =>
-    {
-        using var db = Open();
-        return Current(db, null) ?? (loaded = Read(db, null));
-    });
+    public RuleSet Load() => Reading(db => Current(db, null) ?? (loaded = Read(db, null)));
 
     // The write holds the store from its first statement: the set kept is brought along only when
     // it was still the store's before the write; if someone else wrote since, all is read again.
-    public RuleSet Save(IRuleEntity e) => Guarded(() =>
+    public RuleSet Save(IRuleEntity e) => Writing((db, tx) =>
     {
-        using var db = Open();
-        using var tx = db.BeginTransaction(deferred: false);
         var current = Current(db, tx);
         e.Meta.Rev = Bump(db, tx);
         e.Meta.ChangedBy = Environment.UserName;
         Put(db, tx, e);
         var rs = current is null ? Read(db, tx) : Changed(current, e.Meta.Rev, next => Keep(next, Json.Copy(e)));
-        tx.Commit();
         return loaded = rs;
     });
 
-    public RuleSet Delete(Entity kind, string id) => Guarded(() =>
+    public RuleSet Delete(Entity kind, string id) => Writing((db, tx) =>
     {
-        using var db = Open();
-        using var tx = db.BeginTransaction(deferred: false);
         var current = Current(db, tx);
         var version = Bump(db, tx);
         Exec(db, tx, $"UPDATE {Table(kind)} SET deleted_at = @now, changed_by = @by WHERE id = @id",
             ("@id", id), ("@now", Stamp(Clock.Now())), ("@by", Environment.UserName));
         var rs = current is null ? Read(db, tx) : Changed(current, version, next => Drop(next, kind, id));
-        tx.Commit();
         return loaded = rs;
     });
 
@@ -252,38 +268,22 @@ public sealed class RuleStore
         }
     }
 
-    public List<SammlungInfo> Sammlungen() => Guarded(() =>
-    {
-        using var db = Open();
-        return Infos(db, null);
-    });
+    public List<SammlungInfo> Sammlungen() => Reading(db => Infos(db, null));
 
-    public Sammlung? Sammlung(int year) => Guarded(() =>
-    {
-        using var db = Open();
-        return ReadSammlung(db, null, year);
-    });
+    public Sammlung? Sammlung(int year) => Reading(db => ReadSammlung(db, null, year));
 
     // Ersetzt eine Sammlung desselben Jahres. Eine gelöschte mitgelieferte Sammlung
     // kommt beim nächsten Start zurück.
-    public List<SammlungInfo> ImportSammlung(Sammlung s, string quelle) => Guarded(() =>
+    public List<SammlungInfo> ImportSammlung(Sammlung s, string quelle) => Writing((db, tx) =>
     {
-        using var db = Open();
-        using var tx = db.BeginTransaction(deferred: false);
         PutSammlung(db, tx, s, quelle);
-        var infos = Infos(db, tx);
-        tx.Commit();
-        return infos;
+        return Infos(db, tx);
     });
 
-    public List<SammlungInfo> DeleteSammlung(int year) => Guarded(() =>
+    public List<SammlungInfo> DeleteSammlung(int year) => Writing((db, tx) =>
     {
-        using var db = Open();
-        using var tx = db.BeginTransaction(deferred: false);
         DropSammlung(db, tx, year);
-        var infos = Infos(db, tx);
-        tx.Commit();
-        return infos;
+        return Infos(db, tx);
     });
 
     // Mindestens die Unix-Millisekunden: eine von Hand zurückkopierte Datenbank behält ihre Kennung,
@@ -720,18 +720,158 @@ public sealed class RuleStore
         }
     }
 
-    SqliteConnection Open()
+    T Reading<T>(Func<SqliteConnection, T> read) => Guarded(() =>
     {
-        var db = new SqliteConnection(connectionString);
-        db.Open();
-        return db;
+        lock (gate)
+        {
+            if (db is null || Stat() != seen) Use(Fetch());
+            return read(db!);
+        }
+    });
+
+    // A write reads the file again under the lock even when it looks unchanged: it must never
+    // start from an image someone else has since replaced.
+    T Writing<T>(Func<SqliteConnection, SqliteTransaction, T> change) => Guarded(() =>
+    {
+        lock (gate)
+        {
+            try
+            {
+                using var held = Hold();
+                var image = Fetch();
+                var db = Use(image);
+                T result;
+                using (var tx = db.BeginTransaction(deferred: false))
+                {
+                    result = change(db, tx);
+                    tx.Commit();
+                }
+                Publish(image);
+                return result;
+            }
+            catch
+            {
+                db?.Dispose();
+                db = null;
+                loaded = null;
+                throw;
+            }
+        }
+    });
+
+    FileStream Hold()
+    {
+        var until = Environment.TickCount64 + (long)lockWait.TotalMilliseconds;
+        while (true)
+        {
+            try
+            {
+                return new FileStream(lockFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException e) when (Held(e))
+            {
+                if (Environment.TickCount64 >= until)
+                    throw new StoreUnavailableException(
+                        $"Die Regel-Datenbank wird seit {lockWait.TotalSeconds:0} Sekunden an einem anderen Arbeitsplatz geändert: {Dir}\n\n"
+                        + "Ist das Programm dort abgestürzt oder die Netzverbindung abgerissen, gibt der Server die Sperre nach einigen Minuten frei.", e);
+                Thread.Sleep(50);
+            }
+        }
     }
 
-    bool Healthy()
+    static bool Held(IOException e) =>
+        OperatingSystem.IsWindows() ? (e.HResult & 0xFFFF) is 32 or 33 : e.HResult is 11 or 35;
+
+    // Programs before this one wrote into the file itself; SQLite rolls back what a crash of theirs left behind.
+    void RollBackLegacyJournal()
+    {
+        if (!File.Exists(file + "-journal")) return;
+        using var legacy = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = file, Mode = SqliteOpenMode.ReadWrite, Pooling = false }.ToString());
+        legacy.Open();
+        try
+        {
+            Schema.Version(legacy);
+        }
+        catch (SqliteException e) when (e.SqliteErrorCode is 11 or 26) { }
+    }
+
+    (long, DateTime) Stat()
+    {
+        var f = new FileInfo(file);
+        return f.Exists ? (f.Length, f.LastWriteTimeUtc) : default;
+    }
+
+    byte[]? Fetch()
     {
         try
         {
-            using var db = Open();
+            using var s = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            var image = new byte[RandomAccess.GetLength(s.SafeFileHandle)];
+            s.ReadExactly(image);
+            seen = (image.Length, File.GetLastWriteTimeUtc(s.SafeFileHandle));
+            return image;
+        }
+        catch (FileNotFoundException)
+        {
+            seen = default;
+            return null;
+        }
+    }
+
+    SqliteConnection Use(byte[]? image)
+    {
+        db?.Dispose();
+        db = null;
+        var next = new SqliteConnection("Data Source=:memory:;Pooling=False");
+        next.Open();
+        if (image is { Length: > 0 })
+        {
+            var p = raw.sqlite3_malloc64(image.Length);
+            Marshal.Copy(image, 0, p, image.Length);
+            var rc = raw.sqlite3_deserialize(next.Handle, "main", p, image.Length, image.Length,
+                raw.SQLITE_DESERIALIZE_FREEONCLOSE | raw.SQLITE_DESERIALIZE_RESIZEABLE);
+            if (rc != raw.SQLITE_OK)
+            {
+                next.Dispose();
+                SqliteException.ThrowExceptionForRC(rc, null);
+            }
+        }
+        return db = next;
+    }
+
+    // The new image goes beside the file and replaces it by a rename, which the file server does
+    // whole: a reader gets the old file or the new one, never half of each.
+    void Publish(byte[]? before)
+    {
+        var p = raw.sqlite3_serialize(db!.Handle, "main", out var size, 0);
+        var image = new byte[size];
+        Marshal.Copy(p, image, 0, image.Length);
+        raw.sqlite3_free(p);
+        if (before is not null && image.AsSpan().SequenceEqual(before)) return;
+        var next = file + ".neu";
+        using (var s = new FileStream(next, FileMode.Create, FileAccess.Write, FileShare.None))
+        {
+            s.Write(image);
+            s.Flush(flushToDisk: true);
+        }
+        // Windows refuses to replace a file while a reader copies it.
+        for (var tries = 40; ; tries--)
+            try
+            {
+                File.Move(next, file, overwrite: true);
+                break;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException && tries > 0)
+            {
+                Thread.Sleep(50);
+            }
+        seen = Stat();
+    }
+
+    static bool Healthy(SqliteConnection db)
+    {
+        try
+        {
             return Scalar(db, null, "PRAGMA quick_check") as string == "ok";
         }
         catch (SqliteException e) when (e.SqliteErrorCode is 11 or 26)
@@ -740,38 +880,36 @@ public sealed class RuleStore
         }
     }
 
-    void Restore()
+    byte[]? Restore()
     {
         var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         File.Move(file, file + ".defekt-" + stamp, true);
-        File.Delete(file + "-journal");
         var latest = Directory.EnumerateFiles(snapshotDir, "rules-*.db").Order(StringComparer.Ordinal).LastOrDefault();
         if (latest is null)
         {
             Notice = "Die Datenbank war beschädigt und wurde neu angelegt.";
-            return;
+            return null;
         }
-        File.Copy(latest, file);
         Notice = $"Die Datenbank war beschädigt und wurde aus der Sicherung vom {File.GetLastWriteTime(latest):dd.MM.yyyy HH:mm} wiederhergestellt.";
+        return File.ReadAllBytes(latest);
     }
 
-    void Snapshot(SqliteConnection db)
+    void Snapshot(byte[] image)
     {
         var path = Path.Combine(snapshotDir, "rules-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".db");
         var temp = Path.Combine(snapshotDir, "rules-" + Guid.NewGuid() + ".tmp");
         try
         {
-            Exec(db, null, "VACUUM INTO @path", ("@path", temp));
+            File.WriteAllBytes(temp, image);
             File.Move(temp, path, true);
         }
-        catch (Exception e) when (e is SqliteException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             try { File.Delete(temp); } catch (IOException) { }
             throw new StoreUnavailableException(
                 $"In der Regel-Datenbank lässt sich keine Sicherung anlegen: {snapshotDir}\n\n{e.Message}\n\n"
                 + "Die Gruppe der Anwender braucht in diesem Ordner Lese-, Schreib-, Erstell- und Löschrechte.", e);
         }
-        // Zwei gleichzeitig startende Instanzen räumen denselben Ordner auf.
         try
         {
             foreach (var old in Directory.EnumerateFiles(snapshotDir, "rules-*.db").OrderDescending(StringComparer.Ordinal).Skip(KeptSnapshots))
