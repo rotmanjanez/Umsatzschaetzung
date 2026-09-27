@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import tarfile
 from functools import partial
+from html import escape
 from itertools import accumulate, groupby, pairwise
 from operator import itemgetter
 from pathlib import Path
@@ -370,6 +371,7 @@ def site(ep: Lesson):
         shutil.copy(f, SITE / "fonts")
     for f in ("dachs-zu.png", "dachs-halb.png", "dachs-offen.png", "favicon.svg"):
         shutil.copy(ROOT / "web" / "docs" / "pages" / "assets" / f, SITE)
+    shutil.copy(ROOT / "web" / "docs" / "pages" / "assets" / "dachs.png", SITE / "didi.png")
 
     target = SITE / ep.path.parent.name
     shutil.rmtree(target, ignore_errors=True)
@@ -384,7 +386,18 @@ def site(ep: Lesson):
     beats = [{**b, "audio": clips.get(b["say"])} for b in ep.beats]
     lesson = {key: ep.spec[key] for key in ("course", "number", "title", "summary", "done")}
     (target / "lesson.json").write_text(json.dumps({**lesson, "beats": beats}, ensure_ascii=False, indent=1))
+    overview(ep.spec["course"])
     print(target / "index.html")
+
+
+# The site's own page lists every lesson it holds, in their order.
+def overview(course: str):
+    lessons = sorted(({**json.loads(p.read_text()), "name": p.parent.name} for p in SITE.glob("*/lesson.json")),
+                     key=itemgetter("number"))
+    items = "\n".join(f'    <li><a href="{l["name"]}/"><p class="kicker">Übung {l["number"]}</p>'
+                      f'<h2>{escape(l["title"])}</h2><p>{escape(l["summary"])}</p></a></li>' for l in lessons)
+    page = (ROOT / "web" / "lessons" / "uebersicht.html").read_text()
+    (SITE / "index.html").write_text(page.replace("{course}", escape(course)).replace("{lessons}", items))
 
 
 # A weight never changes under its release, so one already there is the same file.

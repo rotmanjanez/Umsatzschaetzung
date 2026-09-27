@@ -11,7 +11,9 @@ The lessons are one site, `web/lessons/out/lektionen/`: the page once, a folder 
 with its `lesson.json` and the stores it starts from, and the clips of every lesson in
 `ton/`. The page takes its weights from the web app's `models/` and `ort/` one level up, as
 it does beside the app at `app.umsatzschaetzung.amtstools.de/lektionen/<lesson>/`; `site`
-links them into `out/`. It needs a web server, `python3 -m http.server -d web/lessons/out`
+links them into `out/`. Its own page, `lektionen/`, lists every lesson it holds, from
+`uebersicht.html`, with Didi, the badger who speaks in them, drawn by Maxie Bichmann
+(bichmann.net). It needs a web server, `python3 -m http.server -d web/lessons/out`
 will do, with the lesson at `localhost:8000/lektionen/zuordnung/`; a page opened as a
 file cannot load WebAssembly.
 
