@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Headless;
 
 namespace Umsatzschaetzung.Lessons;
@@ -195,7 +196,9 @@ public static partial class Coach
     static string? Field(Visual hit) =>
         (hit as TextBox ?? hit.GetVisualDescendants().OfType<TextBox>().FirstOrDefault())?.Text;
 
+    // An amount reads right at the value the program keeps from it, as 4,6 does for 4,60.
     static bool Same(string a, string b) =>
+        Input.Micro(a) is { } x && x == Input.Micro(b) ||
         string.Equals(string.Join(' ', a.Split(' ', StringSplitOptions.RemoveEmptyEntries)),
             string.Join(' ', b.Split(' ', StringSplitOptions.RemoveEmptyEntries)), StringComparison.OrdinalIgnoreCase);
 }
