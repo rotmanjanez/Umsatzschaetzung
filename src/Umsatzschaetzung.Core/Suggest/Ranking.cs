@@ -9,6 +9,9 @@ public sealed record Ranked(string IngredientId, int Confidence);
 public interface IRanking
 {
     Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default);
+
+    // Pays ahead what the first Rank would: the model opened and the wares indexed.
+    Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default);
 }
 
 public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = null) : IRanking
@@ -66,6 +69,21 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
                 .ThenBy(s => s.Key, StringComparer.Ordinal)
                 .Take(count)
                 .Select(s => new Ranked(s.Key, encoder.Confidence(s.Value)))];
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
+
+    public async Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default)
+    {
+        await gate.WaitAsync(ct);
+        try
+        {
+            await Index(rs, gewerbe, ct);
+            await encoder.Embed([], ct);
+            await encoder.Load(ct);
         }
         finally
         {

@@ -76,6 +76,7 @@ public interface IMapping
 {
     Task<List<MappingCandidate>> Suggest(string caseId, InvoiceLine line, string? supplier, CancellationToken ct);          // POST /cases/{id}/mappings/suggest   caseId "" suggests without a Gewerbe filter
     Task<Case> Map(string caseId, CancellationToken ct);                                                                    // POST /cases/{id}/mappings/run       maps every open line the matcher is sure about
+    Task Warm(string caseId, CancellationToken ct);                                                                         // POST /cases/{id}/mappings/warm      readies the matcher for the case's Gewerbe
 }
 
 public interface IReports

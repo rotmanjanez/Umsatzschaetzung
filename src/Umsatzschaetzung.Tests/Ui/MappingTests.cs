@@ -51,5 +51,7 @@ public class MappingTests(MatcherHost host)
             await Line.Task;
             return await inner.Map(caseId, ct);
         }
+
+        public Task Warm(string caseId, CancellationToken ct) => inner.Warm(caseId, ct);
     }
 }

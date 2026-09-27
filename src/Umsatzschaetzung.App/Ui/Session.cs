@@ -197,6 +197,20 @@ public sealed class Session : Observable
         History.Clear();
         SetCase(kase);
         CaseOpened?.Invoke(kase);
+        _ = Warm(kase.Id);
+    }
+
+    // The matcher's model takes seconds to open in the browser; it opens with the case instead of
+    // with the first line asked about. What fails here fails again there, where it is shown.
+    async Task Warm(string caseId)
+    {
+        try
+        {
+            await Service.Mapping.Warm(caseId, CancellationToken.None);
+        }
+        catch (ServiceError)
+        {
+        }
     }
 
     // A case the service hands back is taken as it is, not as a change of this window.

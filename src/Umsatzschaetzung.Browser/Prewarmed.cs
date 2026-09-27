@@ -16,6 +16,9 @@ sealed class Prewarmed(IWeights weights, string dir, Func<IRanking> open) : IRan
     public async Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default) =>
         await (await (ranking ??= Open())).Rank(rs, gewerbe, line, date, count, ct);
 
+    public async Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default) =>
+        await (await (ranking ??= Open())).Warm(rs, gewerbe, ct);
+
     async Task<IRanking> Open()
     {
         var path = Path.Combine(dir, "embeddings.db");

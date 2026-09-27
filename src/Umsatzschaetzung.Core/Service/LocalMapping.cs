@@ -39,6 +39,13 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
         return c;
     });
 
+    public Task Warm(string caseId, CancellationToken ct) => ranking is null ? Task.CompletedTask : Guard(ct, async () =>
+    {
+        var c = cases.Find(caseId);
+        await ranking.Warm(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", ct);
+        return c;
+    });
+
     // What the matcher decides on its own stays with the case in own; only a person's confirmation
     // puts a mapping into the shared rules.
     public async Task<(RuleSet Rules, List<int> Unmapped)> Lines(RuleSet rs, Invoice inv, string gewerbe, bool ask, Dictionary<string, ArticleMapping> own, CancellationToken ct)

@@ -76,6 +76,7 @@ public static class Remote
     {
         public Task<List<MappingCandidate>> Suggest(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => at.Call<SuggestArg, List<MappingCandidate>>("mapping.suggest", new(caseId, line, supplier), ct);
         public Task<Case> Map(string caseId, CancellationToken ct) => at.Call<CaseArg, Case>("mapping.map", new(caseId), ct);
+        public Task Warm(string caseId, CancellationToken ct) => at.Send("mapping.warm", new CaseArg(caseId), ct);
     }
 
     sealed class Reports(Caller at) : IReports
@@ -138,6 +139,7 @@ public sealed class Dispatch(Services s)
 
         "mapping.suggest" => In<SuggestArg, List<MappingCandidate>>(m, a => s.Mapping.Suggest(a.CaseId, a.Line, a.Supplier, ct)),
         "mapping.map" => In<CaseArg, Case>(m, a => s.Mapping.Map(a.CaseId, ct)),
+        "mapping.warm" => Done(s.Mapping.Warm(Wire.Read<CaseArg>(m).CaseId, ct)),
 
         "reports.calculate" => In<CaseArg, CalcResp>(m, a => s.Reports.Calculate(a.CaseId, ct)),
         "reports.render" => In<RenderArg, ReportResp>(m, a => s.Reports.Render(a.CaseId, a.Pdf, ct)),
