@@ -13,6 +13,14 @@ Das Programm rechnet aus den Eingangsrechnungen eines Betriebs nach, welchen Ums
 1. **[Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md)** Vom Einkauf über Rezepte und Preise zum Umsatz, den der Einkauf ergibt.
 1. **[Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md)** Erklärter neben kalkuliertem Umsatz, jede Zahl bis zur Rechnungszeile belegt, als PDF.
 
+## Im Browser
+
+Unter [app.umsatzschaetzung.amtstools.de](https://app.umsatzschaetzung.amtstools.de/) läuft das Programm ohne Installation im Browser. Die Rechnungen verlassen auch dort das Gerät nicht.
+
+**Vorschau**
+
+Die Browserversion ist noch in Erprobung. Sie kann langsamer sein als das Programm für Windows und macOS, und Prüfungen liegen nur im Speicher dieses Browsers. Für die tägliche Arbeit empfiehlt sich das installierte Programm.
+
 ## Grundlagen
 
 - [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Zutaten, Produkte, Rezepte und Ertragsregeln. Sie gehören zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.

@@ -4,48 +4,54 @@ Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu Pi
 
 ## Die Liste
 
-Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder einmal, auch wenn er auf 25 Rechnungen vorkommt. Die erste Spalte ist der Status:
+Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz: `5 offen, 117 automatisch, 0 manuell`.
+
+Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen die offenen oben:
 
 - **Offen**: Das Programm war sich bei keiner Zutat sicher genug. Hier ist eine Entscheidung nötig.
 - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
-## Eine Position ansehen
+## Ein Vorschlag, der nicht passt
 
 Die Zeile **2022 Domina trocken 0,75 l** anklicken. Rechts erscheint alles, was zu diesem Artikel bekannt ist:
 
 - **Aus der Rechnung**: Name, Lieferant, Artikelnummer und die Gesamtmenge über alle Rechnungen, hier 158 Flaschen in 6 Positionen.
-- **Aus den Regeln**: die Vorschläge des Programms mit einer Sicherheit in Prozent. Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die Position offen geblieben.
-- **Faktor**: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die Rechnung in Flaschen. Der Faktor sagt, wie viel in einem Gebinde steckt, hier 750 ml je Flasche. Das Programm hat ihn aus dem Artikeltext gelesen und rechnet darunter vor: 158 Flaschen × 750 ml = 118,5 l.
+- **Aus den Regeln**: die Vorschläge des Programms mit einer Sicherheit in Prozent.
+- **Faktor**: wie viel in einem Gebinde steckt.
 - **Belege**: die Rechnungszeilen, aus denen der Artikel stammt, als Ausschnitt des Scans.
 
-Ein Domina ist ein fränkischer Rotwein. Den Vorschlag **Rotwein × 750 ml** anklicken und **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen, und die Bilanz zeigt `5 offen`.
+Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die Position offen geblieben.
 
-## Die übrigen offenen Positionen
+Ein Domina ist ein fränkischer Rotwein: den Vorschlag **Rotwein × 750 ml** anklicken.
 
-Nach demselben Muster die anderen fünf. Bei zweien ist die Zutat klar, das Programm zeigt sie als **Exakter Treffer**, aber der Faktor fehlt: Aus „Karton“ oder „Bund“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist:
+Der **Faktor** passt schon: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor: 158 Flaschen × 750 ml = 118,5 l.
 
-Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen, die Zeile darunter rechnet vor:
+Dann **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.
 
-| Position                               | Vorschlag wählen                         | Faktor           | Dann         |
-| -------------------------------------- | ---------------------------------------- | ---------------- | ------------ |
-| Frühkartoffeln festkochend 12,5 kg     | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500`  | **Zuordnen** |
-| Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt)                | `1800` eintragen | **Zuordnen** |
-| Leberkäse am Stück, ungebacken         |                                          |                  | offen lassen |
-| Putenbrustfilet frisch                 | **Putenfleisch** wählen                  |                  | **Zuordnen** |
-| Petersilie glatt, Bund                 |                                          |                  | offen lassen |
+Das Programm merkt sich die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank): Kommt der Domina in einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln sich auch Rezepte und Ertragsregeln, siehe [3. Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/index.md) und [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md).
 
-Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen. Ohne verlässliche Einheit gibt es keinen verlässlichen Faktor, die Position bleibt offen.
+## Wenn eine Menge fehlt
 
-Beim Putenbrustfilet schlägt das Programm als **Exakter Treffer** **Hähnchenfleisch** vor. Das ist falsch: Pute ist kein Hähnchen, die richtige Zutat **Putenfleisch** steht mit 90 % darunter. Ein exakter Treffer verdient also trotzdem einen Blick.
+Nach dem Zuordnen wählt das Programm die nächste offene Position, hier **Kaffeesahne Portionen 10 × 7,5 g 240er**. Die Zutat ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
 
-Leberkäse und Petersilie bleiben offen. Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter **Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht. Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist offen lassen die ehrlichere Antwort.
+Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
 
-Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `2 offen` steht.
+## Wenn alles passt
+
+Danach ist **Frühkartoffeln festkochend 12,5 kg** dran. **Kartoffeln × 12,5 kg** ist schon gewählt, und der Faktor `12.500` stimmt. Das Programm war sich nur nicht sicher genug, um es allein zu entscheiden. Einfach **Zuordnen**.
+
+## Was offen bleiben darf
+
+Bleiben **Leberkäse am Stück, ungebacken** und **Petersilie glatt, Bund**. Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins Gewicht.
+
+Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter **Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht. Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist offen lassen die ehrlichere Antwort.
+
+Am Ende steht über der Liste `2 offen`.
 
 **Geschafft, wenn …**
 
-- über der Liste `2 offen, 116 automatisch, 4 manuell` steht
+- über der Liste `2 offen, 117 automatisch, 3 manuell` steht
 - nur noch Leberkäse und Petersilie **Offen** sind
 
 **Zum Nachlesen**

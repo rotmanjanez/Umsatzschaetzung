@@ -6,6 +6,8 @@ Diese Anleitung führt Schritt für Schritt durch eine vollständige Prüfung: v
 
 Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt sich aus dem Einkauf nachrechnen: Wer 600 Liter Fassbier einkauft, schenkt daraus rund 1.100 Gläser zu 0,5 l aus, ein Teil geht als Schankverlust verloren. Mal 4,60 € je Glas ergibt das den Umsatz allein mit Fassbier. Das Programm macht diese Rechnung für jede eingekaufte Ware und stellt die Summe dem erklärten Umsatz gegenüber.
 
+## Fünf Schritte, fünf Reiter
+
 Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfung:
 
 1. **1. Rechnungen** Die Eingangsrechnungen des Betriebs: was er eingekauft hat.
@@ -13,6 +15,8 @@ Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfun
 1. **3. Sortiment** Was der Betrieb verkauft und zu welchem Preis: Bier 0,5 l für 4,60 €, Schnitzel mit Pommes für 15,90 €.
 1. **4. Kalkulation** Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
 1. **5. Bericht** Der kalkulierte Umsatz neben dem erklärten, als PDF.
+
+## Die wichtigsten Begriffe
 
 Ein paar Wörter kommen dabei immer wieder vor:
 
@@ -25,7 +29,7 @@ Ein paar Wörter kommen dabei immer wieder vor:
 | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat.                                                                                                             |
 | **Regeln**    | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
 
-## Das Beispiel
+## Das Gasthaus Zur Linde
 
 Geprüft wird das **Gasthaus Zur Linde** für das Jahr 2025. Es hat einen Umsatz von 196.418 € netto erklärt. Es liegen 106 Eingangsrechnungen vor, alle als Scan, dazu die Speisekarte als Tabelle. Beide Dateien sind an der Stelle verlinkt, an der sie gebraucht werden.
 

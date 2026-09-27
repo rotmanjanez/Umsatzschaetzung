@@ -1157,10 +1157,9 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Übrige Einkäufe">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#das-schnitzel" class="md-nav__link">
     <span class="md-ellipsis">
       Das Schnitzel
@@ -1168,18 +1167,13 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#was-keinen-umsatz-bringt" class="md-nav__link">
     <span class="md-ellipsis">
       Was keinen Umsatz bringt
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1287,41 +1281,53 @@
 
 
 
+<!-- written from web/lessons/einkaeufe/lesson.yaml -->
+
 <h1 id="kalkulation">Kalkulation</h1>
 <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><span class="here">4. Kalkulation</span><a href="../bericht/">5. Bericht</a></p>
 
+<p>Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den
+Umsatz. Was dabei nicht über Rezept und Preis hineinfindet, steht gesondert
+auf der Seite <strong>Übrige Einkäufe</strong>. Bevor das Ergebnis zählt, wird dort
+aufgeräumt.</p>
 <h2 id="ubrige-einkaufe">Übrige Einkäufe</h2>
-<p>Auf <strong>4. Kalkulation</strong> wechseln und die Seite <strong>Übrige Einkäufe</strong>
-öffnen. Bevor das Ergebnis zählt, wird hier aufgeräumt.</p>
-<p>Die Seite zeigt die Einkäufe, die nicht über Rezeptur und Preis in den
-Umsatz eingehen, in zwei Listen mit dem Grund je Position:</p>
+<p>Auf <strong>4. Kalkulation</strong> wechseln und die Seite <strong>Übrige Einkäufe</strong> öffnen.
+Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz
+eingehen, in zwei Listen mit dem Grund je Position:</p>
 <ul>
-<li><strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong>: Die Zutat kommt in keinem Produkt des
-  Sortiments vor, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den
-  Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten,
-  für die sich kein eigenes Produkt lohnt, oder Zutaten, die ein Rezept nicht
-  aufs Gramm genau abbildet.</li>
-<li><strong>Nicht in der Umsatzschätzung</strong>: Einkäufe, die keinen Umsatz bringen, etwa
-  Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.</li>
+<li><strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong>: Die Zutat kommt in
+  keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor.
+  Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das
+  in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder
+  Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.</li>
+<li><strong>Nicht in der Umsatzschätzung</strong>: Einkäufe, die keinen Umsatz bringen,
+  etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.</li>
 </ul>
-<p>Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche
-Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut stehen nicht in
-den Listen, sie gleichen sich über die Zeit aus.</p>
-<h3 id="das-schnitzel">Das Schnitzel</h3>
+<p>Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine
+falsche Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut
+stehen nicht in den Listen, sie gleichen sich über die Zeit aus.</p>
+<h2 id="das-schnitzel">Das Schnitzel</h2>
+<div class="us-side">
+<div>
 <p>In <strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong> steht ganz oben
-<strong>Schweineschnitzel natur, ausgelöst</strong>, mit fast 3.500 € netto. Das Programm
-hat es als <strong>Schnitzel, paniert, je Stück</strong> zugeordnet, als fertig paniertes
-Schnitzel. Das Gasthaus kauft das Fleisch aber roh, 427 kg im Jahr, und
-paniert selbst; im Sortiment steht <strong>Schnitzel mit Pommes</strong>, und dessen Rezept
-rechnet mit Schweinefleisch.</p>
-<p>Die Zeile anklicken, <strong>Manuell zuordnen</strong>, als Zutat <code class="copy">Schweinefleisch</code>
-wählen und <strong>Zuordnen</strong>:</p>
+<strong>Schweineschnitzel natur, ausgelöst</strong>, mit fast 3.500 € netto. Das
+Programm hat es als <strong>Schnitzel, paniert, je Stück</strong> zugeordnet, als
+fertig paniertes Schnitzel. Das Gasthaus kauft das Fleisch aber roh,
+427 kg im Jahr, und paniert selbst; im Sortiment steht <strong>Schnitzel mit
+Pommes</strong>, und dessen Rezept rechnet mit Schweinefleisch.</p>
+<p>Rechts steht die Zuordnung, darunter die Vorschläge. <strong>Schweinefleisch</strong>
+trägt das Zeichen <strong>In Rezeptur</strong>: Ein Produkt des Sortiments braucht die
+Zutat, hier <strong>Schnitzel mit Pommes</strong>. Den Vorschlag wählen und
+<strong>Zuordnen</strong>.</p>
+</div>
 <p><img alt="Das Schnitzel wird Schweinefleisch zugeordnet" src="../img/kalkulation-schnitzel.png" /></p>
+</div>
 <p>Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.</p>
-<p>Die automatische Zuordnung liegt meistens richtig, aber nicht immer. Darum am
-Ende immer prüfen, ob alles zusammenpasst: Ein großer Betrag in dieser Liste
-verdient einen zweiten Blick.</p>
-<h3 id="was-keinen-umsatz-bringt">Was keinen Umsatz bringt</h3>
+<p>Die automatische Zuordnung liegt meistens richtig. Wo nicht, fällt es hier
+als großer Betrag auf. Wie auf
+<a href="../zuordnung/">2. Zuordnung</a> merkt sich das Programm die Zuordnung in der
+<a href="../../verwaltung/#regel-datenbank">Regel-Datenbank</a>.</p>
+<h2 id="was-keinen-umsatz-bringt">Was keinen Umsatz bringt</h2>
 <p>In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht
 verkauft. Bleiben sie dort, schätzt das Programm auch auf sie einen Umsatz
 über den Rohgewinnaufschlagsatz. Bei diesen Positionen auf das Kreuz am
@@ -1335,12 +1341,12 @@ Zeilenende klicken (<strong>… bringt in diesem Betrieb keinen Umsatz</strong>)
 <p>Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position.
 Alle Positionen derselben Zutat wandern mit: mit den Servietten auch
 Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der
-Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale die
-Leihgebühr der Thermobox. Sie stehen danach unter <strong>Nicht in der
+Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale
+die Leihgebühr der Thermobox. Sie stehen danach unter <strong>Nicht in der
 Umsatzschätzung</strong>, und auf sie wird kein Gewinn ermittelt. Das Symbol dort
 nimmt die Festlegung wieder zurück.</p>
 <p><img alt="Was keinen Umsatz bringt, steht unter „Nicht in der Umsatzschätzung“" src="../img/kalkulation-ohne-umsatz.png" /></p>
-<p>Übrig bleiben in der oberen Liste knapp 3.900 €, 5,86 % der Einkäufe:
+<p>Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe:
 Kleinigkeiten, für die sich kein eigenes Produkt lohnt.</p>
 <div class="admonition geschafft">
 <p class="admonition-title">Geschafft, wenn …</p>
@@ -1348,54 +1354,63 @@ Kleinigkeiten, für die sich kein eigenes Produkt lohnt.</p>
 <li><strong>Schweineschnitzel natur</strong> nicht mehr in den Listen steht</li>
 <li>Servietten, CO2, Handspülmittel und Versandkostenpauschale unter
   <strong>Nicht in der Umsatzschätzung</strong> stehen</li>
-<li>neben <strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong> <code>3.909,85 €
-  (5,86 % der Einkäufe)</code> steht</li>
+<li>neben <strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong> <code>4.350,66 €
+  (6,52 % der Einkäufe)</code> steht</li>
 </ul>
 </div>
 <h2 id="ertragsregeln">Ertragsregeln</h2>
-<p>Auf der Seite <strong>Ertragsregeln</strong> stehen die Kategorien und Zutaten der Prüfung,
-für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch. Je Zutat oder
-Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort
-neu. Für das Beispiel bleiben die Voreinstellungen.</p>
+<p>Auf der Seite <strong>Ertragsregeln</strong> stehen die Kategorien und Zutaten der
+Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch.
+Je Zutat oder Warengruppe lässt sich wählen, welche Regel gilt; die
+Kalkulation rechnet sofort neu. Für das Beispiel bleiben die
+Voreinstellungen.</p>
 <h2 id="rezeptur-anpassen">Rezeptur anpassen</h2>
-<p>Ein Klick auf ein Produkt unter <strong>Portionen</strong> öffnet rechts seine Details. Unter
-<strong>Rezeptur je Portion</strong> steht, was in eine Portion geht, und daneben, woher das
-Rezept kommt: <strong>Katalog</strong> oder <strong>Nur diese Prüfung</strong>.</p>
+<p>Ein Klick auf ein Produkt unter <strong>Portionen</strong> öffnet rechts seine Details.
+Unter <strong>Rezeptur je Portion</strong> steht, was in eine Portion geht, und daneben,
+woher das Rezept kommt: <strong>Katalog</strong> oder <strong>Nur diese Prüfung</strong>.</p>
 <p>Passt ein Rezept nicht, gibt es zwei Wege:</p>
 <ul>
-<li><strong>Im Katalog bearbeiten</strong> öffnet die Regeln auf diesem Produkt. Die Änderung
-  gilt für alle Prüfungen.</li>
+<li><strong>Im Katalog bearbeiten</strong> öffnet die Regeln auf diesem Produkt. Die
+  Änderung gilt für alle Prüfungen.</li>
 <li><strong>Für diese Prüfung anpassen</strong> kopiert das Rezept in die Prüfung. Der
   Katalog bleibt, wie er ist.</li>
 </ul>
-<p>Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit, dazu
-fügt das Plus (<strong>Zutat hinzufügen</strong>) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was
-er vorsieht, etwa <strong>Katalog: 200 g</strong>. Eine Zutat wird in jedem Rezept in
-derselben Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei
-jeder Änderung sofort neu; unter <strong>Portionen</strong> steht beim Produkt <strong>angepasst</strong>,
-auf <strong>3. Sortiment</strong> <strong>Rezept angepasst</strong>, und ein Klick darauf führt hierher.</p>
+<p>Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit,
+dazu fügt das Plus (<strong>Zutat hinzufügen</strong>) eine Zeile an. Weicht eine Zeile
+vom Katalog ab, steht grau daneben, was er vorsieht, etwa <strong>Katalog:
+200 g</strong>. Eine Zutat wird in jedem Rezept in derselben Einheit gemessen,
+auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort
+neu; unter <strong>Portionen</strong> steht beim Produkt <strong>angepasst</strong>, auf
+<strong>3. Sortiment</strong> <strong>Rezept angepasst</strong>, und ein Klick darauf führt hierher.</p>
 <p>Der Bericht druckt das angepasste Rezept so, wie es gerechnet ist.</p>
 <p>Unten stehen zwei Schaltflächen:</p>
 <ul>
 <li><strong>Auf Katalog zurücksetzen</strong> verwirft die Anpassung.</li>
-<li><strong>In den Katalog übernehmen</strong> öffnet die Regeln mit dem angepassten Rezept.
-  Ist es dort gespeichert, entfällt die Anpassung, und das Produkt steht
-  wieder auf <strong>Katalog</strong>.</li>
+<li><strong>In den Katalog übernehmen</strong> öffnet die Regeln mit dem angepassten
+  Rezept. Ist es dort gespeichert, entfällt die Anpassung, und das Produkt
+  steht wieder auf <strong>Katalog</strong>.</li>
 </ul>
 <p>Ändert sich das Katalogrezept später, übernimmt die Prüfung das nicht von
-selbst. Beim Produkt steht dann <strong>Katalogrezept seit der Anpassung geändert</strong>;
-ob die Anpassung bleibt oder zurückgesetzt wird, entscheidet der Prüfer.</p>
+selbst. Beim Produkt steht dann <strong>Katalogrezept seit der Anpassung
+geändert</strong>; ob die Anpassung bleibt oder zurückgesetzt wird, entscheidet
+der Prüfer.</p>
 <div class="admonition tip">
 <p class="admonition-title">Faustregel</p>
-<p>Ist das Rezept für jeden Betrieb falsch, den Katalog berichtigen. Weicht nur
-dieser Betrieb belegbar ab, etwa mit größeren Portionen oder einem anderen
-Salat, für die Prüfung anpassen.</p>
+<p>Ist das Rezept für jeden Betrieb falsch, den Katalog berichtigen.
+Weicht nur dieser Betrieb belegbar ab, etwa mit größeren Portionen oder
+einem anderen Salat, für die Prüfung anpassen.</p>
 </div>
 <p>Für das Beispiel bleiben die Katalogrezepte.</p>
 <h2 id="ergebnis">Ergebnis</h2>
 <p>Zum Schluss die letzte Seite, <strong>Ergebnis</strong>, öffnen: Umsätze vor und nach
-Betriebsprüfung, Rohgewinnaufschlag und Zusammenfassung. Jede Korrektur auf den anderen Seiten ist hier schon
-eingerechnet.</p>
+Betriebsprüfung, Rohgewinnaufschlag und Zusammenfassung. Jede Korrektur
+auf den anderen Seiten ist hier schon eingerechnet.</p>
+<div class="admonition nachlesen">
+<p class="admonition-title">Zum Nachlesen</p>
+<p>Den Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz
+und die Seite <strong>Übrige Einkäufe</strong> im Einzelnen beschreibt
+<a href="../../kalkulation/#nicht-berucksichtigt">Kalkulation</a>.</p>
+</div>
 <p><a class="us-next" href="../bericht/">Weiter: 5. Bericht <span>Das Ergebnis als PDF</span></a></p>
 
 

@@ -1,27 +1,27 @@
 # Kalkulation
 
+Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den Umsatz. Was dabei nicht über Rezept und Preis hineinfindet, steht gesondert auf der Seite **Übrige Einkäufe**. Bevor das Ergebnis zählt, wird dort aufgeräumt.
+
 ## Übrige Einkäufe
 
-Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Bevor das Ergebnis zählt, wird hier aufgeräumt.
-
-Die Seite zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
+Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
 - **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.
 - **Nicht in der Umsatzschätzung**: Einkäufe, die keinen Umsatz bringen, etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.
 
 Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut stehen nicht in den Listen, sie gleichen sich über die Zeit aus.
 
-### Das Schnitzel
+## Das Schnitzel
 
 In **Nicht Teil der Ermittlung des Aufschlagsatzes** steht ganz oben **Schweineschnitzel natur, ausgelöst**, mit fast 3.500 € netto. Das Programm hat es als **Schnitzel, paniert, je Stück** zugeordnet, als fertig paniertes Schnitzel. Das Gasthaus kauft das Fleisch aber roh, 427 kg im Jahr, und paniert selbst; im Sortiment steht **Schnitzel mit Pommes**, und dessen Rezept rechnet mit Schweinefleisch.
 
-Die Zeile anklicken, **Manuell zuordnen**, als Zutat `Schweinefleisch` wählen und **Zuordnen**:
+Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die Zutat, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und **Zuordnen**.
 
 Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.
 
-Die automatische Zuordnung liegt meistens richtig, aber nicht immer. Darum am Ende immer prüfen, ob alles zusammenpasst: Ein großer Betrag in dieser Liste verdient einen zweiten Blick.
+Die automatische Zuordnung liegt meistens richtig. Wo nicht, fällt es hier als großer Betrag auf. Wie auf [2. Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md) merkt sich das Programm die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank).
 
-### Was keinen Umsatz bringt
+## Was keinen Umsatz bringt
 
 In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauft. Bleiben sie dort, schätzt das Programm auch auf sie einen Umsatz über den Rohgewinnaufschlagsatz. Bei diesen Positionen auf das Kreuz am Zeilenende klicken (**… bringt in diesem Betrieb keinen Umsatz**):
 
@@ -32,13 +32,13 @@ In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauf
 
 Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten auch Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
 
-Übrig bleiben in der oberen Liste knapp 3.900 €, 5,86 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
+Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
 **Geschafft, wenn …**
 
 - **Schweineschnitzel natur** nicht mehr in den Listen steht
 - Servietten, CO2, Handspülmittel und Versandkostenpauschale unter **Nicht in der Umsatzschätzung** stehen
-- neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `3.909,85 € (5,86 % der Einkäufe)` steht
+- neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `4.350,66 € (6,52 % der Einkäufe)` steht
 
 ## Ertragsregeln
 
@@ -73,5 +73,9 @@ Für das Beispiel bleiben die Katalogrezepte.
 ## Ergebnis
 
 Zum Schluss die letzte Seite, **Ergebnis**, öffnen: Umsätze vor und nach Betriebsprüfung, Rohgewinnaufschlag und Zusammenfassung. Jede Korrektur auf den anderen Seiten ist hier schon eingerechnet.
+
+**Zum Nachlesen**
+
+Den Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz und die Seite **Übrige Einkäufe** im Einzelnen beschreibt [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt).
 
 [Weiter: 5. Bericht Das Ergebnis als PDF](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md)

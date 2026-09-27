@@ -1174,9 +1174,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#die-vorschau" class="md-nav__link">
+  <a href="#ertragsregeln" class="md-nav__link">
     <span class="md-ellipsis">
-      Die Vorschau
+      Ertragsregeln
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#das-ergebnis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Das Ergebnis
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#der-bericht-in-der-vorschau" class="md-nav__link">
+    <span class="md-ellipsis">
+      Der Bericht in der Vorschau
     </span>
   </a>
   
@@ -1186,6 +1204,15 @@
   <a href="#als-pdf-speichern" class="md-nav__link">
     <span class="md-ellipsis">
       Als PDF speichern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#die-prufung-wiederfinden" class="md-nav__link">
+    <span class="md-ellipsis">
+      Die Prüfung wiederfinden
     </span>
   </a>
   
@@ -1245,42 +1272,121 @@
 
 
 
+<!-- written from web/lessons/bericht/lesson.yaml -->
+
 <h1 id="bericht">Bericht</h1>
 <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><span class="here">5. Bericht</span></p>
 
 <p>Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben
-dem kalkulierten, mit allem, was zur Rechnung dazugehört. Auf <strong>5. Bericht</strong>
-wechseln.</p>
-<h2 id="die-vorschau">Die Vorschau</h2>
-<p>Der Reiter zeigt den fertigen Bericht so, wie er als PDF gespeichert
-wird:</p>
+dem kalkulierten, mit allem, was zur Rechnung dazugehört. Vorher gibt es auf
+<strong>4. Kalkulation</strong> noch zwei Seiten anzusehen: die <strong>Ertragsregeln</strong>, die
+festlegen, wie viel vom Einkauf als verkauft gilt, und das <strong>Ergebnis</strong>.</p>
+<h2 id="ertragsregeln">Ertragsregeln</h2>
+<div class="us-side">
+<div>
+<p>Auf <strong>4. Kalkulation</strong> die Seite <strong>Ertragsregeln</strong> öffnen. Sie legt fest,
+wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird,
+wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das
+Personal isst mit.</p>
+<p>Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es
+eine Ertragsregel gibt, <strong>Nach Kategorie</strong> und <strong>Nach Zutat</strong>. Je Zeile
+wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer
+Kategorie vor. Die Kalkulation rechnet sofort neu.</p>
+</div>
+<p><img alt="Die Seite „Ertragsregeln“ des Gasthauses, überall „Kein Abzug“" src="../img/bericht-ertragsregeln.png" width="330" /></p>
+</div>
+<p>Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es
+keine, <strong>Kein Abzug</strong>. Beim Gasthaus steht überall <strong>Kein Abzug</strong>. Für
+<strong>Bier vom Fass</strong> stehen drei Regeln <strong>Schankverlust</strong> mit 3 %, 5 % und
+8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte
+Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel
+gewählt.</p>
+<p>Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug
+ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz,
+sondern auch, warum er gilt.</p>
+<p>Die Ertragsregeln stehen in der
+<a href="../../verwaltung/#regel-datenbank">Regel-Datenbank</a>, neben Zutaten,
+Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das
+Reglersymbol (<strong>Regeln</strong>) unter <strong>Ertragsregeln</strong> angelegt, mit Namen und
+Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe
+<a href="../../regeln/#ertragsregeln">Ertragsregeln</a>. Die Sätze sind
+Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des
+Prüfungsjahres.</p>
+<p>Für das Beispiel bleibt es bei <strong>Kein Abzug</strong>.</p>
+<h2 id="das-ergebnis">Das Ergebnis</h2>
+<p>Die letzte Seite, <strong>Ergebnis</strong>, öffnen. Jede Korrektur auf den anderen
+Seiten ist hier schon eingerechnet, ebenso jede spätere Änderung an
+Rechnungen, Zuordnung, Sortiment, Rezepten oder Ertragsregeln. Die Seite
+hat drei Teile:</p>
+<ul>
+<li>
+<p><strong>Umsätze vor und nach Betriebsprüfung</strong>: der erklärte Umsatz von
+  196.418,00 € neben dem kalkulierten von knapp 300.000 €, mit der
+  Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der
+  Prüfung.</p>
+</li>
+<li>
+<p><strong>Rohgewinnaufschlag</strong>: Einsatz der Portionen, Umsatz, Rohgewinn und
+  Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund
+  340 %. Ermittelt wird der Satz nur an Portionen mit Preis.</p>
+</li>
+<li>
+<p><strong>Zusammenfassung</strong>: die Brücke von den erfassten Einkäufen über den
+  Wareneinsatz zum Einsatz der verkauften Portionen und zum geschätzten
+  Umsatz. <strong>davon Schwund und Abzüge</strong> steht auf <code>0,00 €</code>, weil keine
+  Ertragsregel gewählt ist.</p>
+</li>
+</ul>
+<p><img alt="Die Seite „Ergebnis“ mit dem erklärten und dem kalkulierten Umsatz" src="../img/bericht-ergebnis.png" /></p>
+<h2 id="der-bericht-in-der-vorschau">Der Bericht in der Vorschau</h2>
+<p>Auf <strong>5. Bericht</strong> wechseln. Der Reiter zeigt den fertigen Bericht so, wie
+er als PDF gespeichert wird.</p>
 <ol>
 <li><strong>Umsätze vor und nach Betriebsprüfung</strong>: der erklärte Umsatz von
    196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.</li>
 <li><strong>Rohgewinnaufschlag</strong>: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
    Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.</li>
-<li><strong>Anhang</strong>: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute
-   und die Portionen je Zutat, damit jede Zahl des Berichts nachvollziehbar
-   bleibt.</li>
+<li><strong>Anhang</strong>: die Eingangspositionen, die Rezepturen je Produkt, die
+   Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat,
+   damit jede Zahl des Berichts nachvollziehbar bleibt.</li>
 </ol>
+<p>Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg
+<strong>Hinweise</strong>. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF
+gehen die Hinweise nicht mit. Gibt es mehrere Berichtsvorlagen, wählt die
+Auswahl über der Vorschau eine andere für diese Prüfung.</p>
 <h2 id="als-pdf-speichern">Als PDF speichern</h2>
-<p>Das Pfeilsymbol rechts oben (<strong>Als PDF speichern</strong>) legt den Bericht als PDF
-ab, wo man will. Er
-gibt immer den aktuellen Stand wieder: Wer danach eine Rechnung, eine
-Zuordnung oder einen Preis ändert, sieht das in der Vorschau sofort und
-speichert das PDF neu.</p>
+<p>Das Pfeilsymbol rechts oben (<strong>Als PDF speichern</strong>) legt den Bericht als
+PDF ab, wo man will.</p>
+<p>Die Vorschau gibt immer den aktuellen Stand wieder: Wer danach eine
+Rechnung, eine Zuordnung oder einen Preis ändert, sieht das dort sofort.
+Ein schon gespeichertes PDF ändert sich nicht mit; nach einer Änderung
+wird es neu gespeichert.</p>
+<h2 id="die-prufung-wiederfinden">Die Prüfung wiederfinden</h2>
+<div class="us-side">
+<div>
+<p>Der Pfeil links oben führt zurück zur Liste der Prüfungen. Dort steht das
+Gasthaus jetzt mit Zeitraum und dem Datum der letzten Änderung. Ein Klick
+auf die Zeile öffnet die Prüfung wieder, beim nächsten Start genauso. Bei
+vielen Prüfungen hilft das Feld <strong>Filtern</strong>.</p>
+</div>
+<p><img alt="Die Liste der Prüfungen mit dem Gasthaus" src="../img/pruefungen-wieder.png" /></p>
+</div>
 <div class="admonition geschafft">
 <p class="admonition-title">Geschafft, wenn …</p>
 <ul>
+<li>auf <strong>4. Kalkulation → Ergebnis</strong> neben den erklärten <code>196.418,00 €</code>
+  der kalkulierte Umsatz nach BP steht, knapp 300.000 €</li>
 <li>das PDF gespeichert ist und sich öffnen lässt</li>
 </ul>
 </div>
 <div class="admonition nachlesen">
 <p class="admonition-title">Zum Nachlesen</p>
-<p>Die Abschnitte des Berichts im Einzelnen beschreibt <a href="../../bericht/">Bericht</a>.</p>
+<p>Die Abschnitte des Berichts im Einzelnen beschreibt <a href="../../bericht/">Bericht</a>,
+die Ertragsregeln <a href="../../regeln/#ertragsregeln">Regeln</a> und
+<a href="../../kalkulation/#ertragsregeln">Kalkulation</a>.</p>
 </div>
 <p>Damit ist die Beispielprüfung vollständig.</p>
-<p><a class="us-next" href="../danach/">Weiter: Danach <span>Die Prüfung wiederfinden, weitergeben und die eigene beginnen</span></a></p>
+<p><a class="us-next" href="../danach/">Weiter: Danach <span>Die Prüfung weitergeben und die eigene beginnen</span></a></p>
 
 
 

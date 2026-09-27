@@ -1245,6 +1245,8 @@
 
 
 
+<!-- written from web/lessons/sortiment/lesson.yaml -->
+
 <h1 id="sortiment-anlegen">Sortiment anlegen</h1>
 <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><span class="here">3. Sortiment</span><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
@@ -1252,25 +1254,31 @@
 es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist
 das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und
 Zutaten rechnet die Kalkulation den Umsatz.</p>
-<p>Die Produkte selbst, samt Rezept, bringt das Programm mit. Aus diesem Katalog
-wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb.</p>
+<p>Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der
+<a href="../../verwaltung/#regel-datenbank">Regel-Datenbank</a> und gelten für jede Prüfung.
+Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was
+fehlt, legt man unter <a href="../../regeln/#produkte">Regeln → Produkte</a> an, und so
+wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment
+zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser
+Prüfung.</p>
 <h2 id="das-erste-produkt-von-hand">Das erste Produkt von Hand</h2>
-<p>In der Prüfung auf <strong>3. Sortiment</strong> wechseln. Rechts oben steht das Suchfeld
-<strong>Produkt hinzufügen …</strong>, links daneben die beiden Symbole für den CSV-Import
-und -Export:</p>
-<p><img alt="Die Kopfzeile des Sortiments" src="../img/sortiment-kopf.png" /></p>
-<p>In das Suchfeld <code class="copy">Bier 0,5</code> tippen. Darunter erscheint eine Liste passender
-Produkte aus dem Katalog; <strong>Bier 0,5 l vom Fass</strong> anklicken. Das Produkt steht
-jetzt im Sortiment, noch mit dem Hinweis <strong>Preis fehlt</strong>:</p>
+<p>In der Prüfung auf <strong>3. Sortiment</strong> wechseln. Rechts oben steht das
+Suchfeld <strong>Produkt hinzufügen …</strong>; über dieses Feld kommt ein Produkt
+aus dem Katalog ins Sortiment.</p>
+<p>In das Suchfeld <code class="copy">Bier 0,5</code> tippen. Darunter erscheint eine Liste
+passender Produkte aus dem Katalog; <strong>Bier 0,5 l vom Fass</strong> anklicken. Das
+Produkt steht jetzt im Sortiment, noch mit dem Hinweis <strong>Preis fehlt</strong>:</p>
 <p><img alt="Das erste Produkt, noch ohne Preis" src="../img/sortiment-erstes.png" /></p>
-<p>In das Feld <strong>Bruttopreis</strong> <code class="copy">4,60</code> eintragen, also den Preis auf der Karte,
-mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.</p>
+<p>In das Feld <strong>Bruttopreis</strong> <code class="copy">4,60</code> eintragen, also den Preis auf der
+Karte, mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.</p>
 <h2 id="der-rest-per-tabelle">Der Rest per Tabelle</h2>
 <p>Die übrigen 27 Produkte des Gasthauses stehen mit ihren Preisen in einer
 Tabelle: <a download="sortiment-gasthaus.csv" href="../sortiment-gasthaus.csv">sortiment-gasthaus.csv</a>
 <a aria-label="Was ist eine CSV-Datei?" href="../../hilfe/csv/" title="Was ist eine CSV-Datei?"></a>.
-Herunterladen, dann auf das linke Symbol der Kopfzeile (<strong>CSV importieren</strong>)
-klicken und die Datei auswählen.</p>
+Herunterladen, dann links neben <strong>Produkt hinzufügen …</strong> auf das linke der
+beiden Symbole (<strong>CSV importieren</strong>) klicken und die Datei auswählen. Das
+rechte, <strong>CSV exportieren</strong>, schreibt das Sortiment in eine solche Datei.</p>
+<p><img alt="Die Kopfzeile des Sortiments" src="../img/sortiment-kopf.png" /></p>
 <div class="us-side">
 <div>
 <p>Die Produkte werden über ihren Namen im Katalog gefunden und mit Preis und
@@ -1320,7 +1328,9 @@ Akte stammt, unterliegt dem Steuergeheimnis und gehört in keine KI.</p>
 <p class="admonition-title">Zum Nachlesen</p>
 <p>Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen
 Produkten geschieht, steht unter
-<a href="../../import-export/#sortiment">Sortiment importieren und exportieren</a>.</p>
+<a href="../../import-export/#sortiment">Sortiment importieren und exportieren</a>.
+Was ein Produkt mit seinem Rezept ist, steht unter
+<a href="../../regeln/#produkte">Produkte</a>.</p>
 </div>
 <p><a class="us-next" href="../kalkulation/">Weiter: 4. Kalkulation <span>Den Umsatz aus dem Einkauf berechnen</span></a></p>
 

@@ -1114,18 +1114,36 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#eine-position-ansehen" class="md-nav__link">
+  <a href="#ein-vorschlag-der-nicht-passt" class="md-nav__link">
     <span class="md-ellipsis">
-      Eine Position ansehen
+      Ein Vorschlag, der nicht passt
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#die-ubrigen-offenen-positionen" class="md-nav__link">
+  <a href="#wenn-eine-menge-fehlt" class="md-nav__link">
     <span class="md-ellipsis">
-      Die übrigen offenen Positionen
+      Wenn eine Menge fehlt
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wenn-alles-passt" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wenn alles passt
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#was-offen-bleiben-darf" class="md-nav__link">
+    <span class="md-ellipsis">
+      Was offen bleiben darf
     </span>
   </a>
   
@@ -1254,6 +1272,8 @@
 
 
 
+<!-- written from web/lessons/zuordnung/lesson.yaml -->
+
 <h1 id="zuordnung-prufen">Zuordnung prüfen</h1>
 <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><span class="here">2. Zuordnung</span><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
@@ -1266,8 +1286,10 @@ es nicht wusste.</p>
 <div class="us-side">
 <div>
 <p>Auf <strong>2. Zuordnung</strong> wechseln. Links stehen alle Artikel der Prüfung, jeder
-einmal, auch wenn er auf 25 Rechnungen vorkommt. Die erste Spalte ist der
-Status:</p>
+einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz:
+<code>5 offen, 117 automatisch, 0 manuell</code>.</p>
+<p>Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen
+die offenen oben:</p>
 <ul>
 <li><strong>Offen</strong>: Das Programm war sich bei keiner Zutat sicher genug. Hier ist
   eine Entscheidung nötig.</li>
@@ -1275,9 +1297,9 @@ Status:</p>
 <li><strong>Manuell</strong>: Ein Mensch hat die Zuordnung gewählt oder bestätigt.</li>
 </ul>
 </div>
-<p><img alt="Der Reiter „2. Zuordnung“ nach dem Import, sechs Positionen offen" src="../img/zuordnung-liste.png" /></p>
+<p><img alt="Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen" src="../img/zuordnung-liste.png" /></p>
 </div>
-<h2 id="eine-position-ansehen">Eine Position ansehen</h2>
+<h2 id="ein-vorschlag-der-nicht-passt">Ein Vorschlag, der nicht passt</h2>
 <div class="us-side">
 <div>
 <p>Die Zeile <strong>2022 Domina trocken 0,75 l</strong> anklicken. Rechts erscheint alles,
@@ -1286,13 +1308,8 @@ was zu diesem Artikel bekannt ist:</p>
 <li><strong>Aus der Rechnung</strong>: Name, Lieferant, Artikelnummer und die Gesamtmenge
   über alle Rechnungen, hier 158 Flaschen in 6 Positionen.</li>
 <li><strong>Aus den Regeln</strong>: die Vorschläge des Programms mit einer Sicherheit in
-  Prozent. Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich
-  aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau
-  deshalb ist die Position offen geblieben.</li>
-<li><strong>Faktor</strong>: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die
-  Rechnung in Flaschen. Der Faktor sagt, wie viel in einem Gebinde steckt,
-  hier 750 ml je Flasche. Das Programm hat ihn aus dem Artikeltext gelesen und
-  rechnet darunter vor: 158 Flaschen × 750 ml = 118,5 l.</li>
+  Prozent.</li>
+<li><strong>Faktor</strong>: wie viel in einem Gebinde steckt.</li>
 <li><strong>Belege</strong>: die Rechnungszeilen, aus denen der Artikel stammt, als
   Ausschnitt des Scans.</li>
 </ul>
@@ -1301,91 +1318,66 @@ was zu diesem Artikel bekannt ist:</p>
 </div>
 <div class="us-side">
 <div>
-<p>Ein Domina ist ein fränkischer Rotwein. Den Vorschlag <strong>Rotwein × 750 ml</strong>
-anklicken und <strong>Zuordnen</strong>. Rechts oben bestätigt ein grüner Hinweis die
-Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen
-Zuordnungen, und die Bilanz zeigt <code>5 offen</code>.</p>
+<p>Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht
+sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die
+Position offen geblieben.</p>
+<p>Ein Domina ist ein fränkischer Rotwein: den Vorschlag <strong>Rotwein × 750 ml</strong>
+anklicken.</p>
+<p>Der <strong>Faktor</strong> passt schon: Das Rezept für ein Glas Rotwein rechnet in
+Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je
+Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor:
+158 Flaschen × 750 ml = 118,5 l.</p>
+<p>Dann <strong>Zuordnen</strong>. Rechts oben bestätigt ein grüner Hinweis die Zuordnung,
+die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.</p>
 </div>
 <p><img alt="Die Bestätigung nach dem Zuordnen" src="../img/zuordnung-zugeordnet.png" width="428" /></p>
 </div>
-<h2 id="die-ubrigen-offenen-positionen">Die übrigen offenen Positionen</h2>
+<p>Das Programm merkt sich die Zuordnung in der
+<a href="../../verwaltung/#regel-datenbank">Regel-Datenbank</a>: Kommt der Domina in
+einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln
+sich auch Rezepte und Ertragsregeln, siehe
+<a href="../sortiment/">3. Sortiment</a> und <a href="../bericht/">5. Bericht</a>.</p>
+<h2 id="wenn-eine-menge-fehlt">Wenn eine Menge fehlt</h2>
 <div class="us-side">
 <div>
-<p>Nach demselben Muster die anderen fünf. Bei zweien ist die Zutat klar, das
-Programm zeigt sie als <strong>Exakter Treffer</strong>, aber der Faktor fehlt: Aus
-„Karton“ oder „Bund“ lässt sich nicht lesen, wie viel drin ist. Das Feld
-<strong>Faktor</strong> ist dann mit einem Stern markiert, und darunter steht die Frage,
-die zu beantworten ist:</p>
+<p>Nach dem Zuordnen wählt das Programm die nächste offene Position, hier
+<strong>Kaffeesahne Portionen 10 × 7,5 g 240er</strong>. Die Zutat ist klar, <strong>Sahne</strong>
+ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht
+lesen, wie viel drin ist. Das Feld <strong>Faktor</strong> ist dann mit einem Stern
+markiert, und darunter steht die Frage, die zu beantworten ist.</p>
 </div>
 <p><img alt="Die Kaffeesahne: Zutat klar, Faktor fehlt" src="../img/zuordnung-faktor-fehlt.png" width="630" /></p>
 </div>
 <div class="us-side">
 <div>
 <p>Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
-1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. <code class="copy">1800</code> eintragen,
-die Zeile darunter rechnet vor:</p>
+1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. <code class="copy">1800</code>
+eintragen, die Zeile darunter rechnet vor. Dann <strong>Zuordnen</strong>.</p>
 </div>
 <p><img alt="Der Faktor ist eingetragen" src="../img/zuordnung-faktor.png" width="630" /></p>
 </div>
-<table>
-<thead>
-<tr>
-<th>Position</th>
-<th>Vorschlag wählen</th>
-<th>Faktor</th>
-<th>Dann</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Frühkartoffeln festkochend 12,5 kg</td>
-<td><strong>Kartoffeln × 12,5 kg</strong> (schon gewählt)</td>
-<td>bleibt <code>12.500</code></td>
-<td><strong>Zuordnen</strong></td>
-</tr>
-<tr>
-<td>Kaffeesahne Portionen 10 × 7,5 g 240er</td>
-<td><strong>Sahne</strong> (schon gewählt)</td>
-<td><code class="copy">1800</code> eintragen</td>
-<td><strong>Zuordnen</strong></td>
-</tr>
-<tr>
-<td>Leberkäse am Stück, ungebacken</td>
-<td></td>
-<td></td>
-<td>offen lassen</td>
-</tr>
-<tr>
-<td>Putenbrustfilet frisch</td>
-<td><strong>Putenfleisch</strong> wählen</td>
-<td></td>
-<td><strong>Zuordnen</strong></td>
-</tr>
-<tr>
-<td>Petersilie glatt, Bund</td>
-<td></td>
-<td></td>
-<td>offen lassen</td>
-</tr>
-</tbody>
-</table>
-<p>Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen. Ohne verlässliche
-Einheit gibt es keinen verlässlichen Faktor, die Position bleibt offen.</p>
-<p>Beim Putenbrustfilet schlägt das Programm als <strong>Exakter Treffer</strong>
-<strong>Hähnchenfleisch</strong> vor. Das ist falsch: Pute ist kein Hähnchen, die richtige
-Zutat <strong>Putenfleisch</strong> steht mit 90 % darunter. Ein exakter Treffer verdient
-also trotzdem einen Blick.</p>
-<p>Leberkäse und Petersilie bleiben offen. Nicht jede Position muss zugeordnet sein: Was
-offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter
-<strong>Nicht in der Umsatzschätzung</strong> auf, damit es nicht unbemerkt verloren geht.
-Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht
-fällt, ist offen lassen die ehrlichere Antwort.</p>
-<p>Mit jeder Zuordnung zählt die Bilanz herunter, bis dort <code>2 offen</code> steht.</p>
+<h2 id="wenn-alles-passt">Wenn alles passt</h2>
+<p>Danach ist <strong>Frühkartoffeln festkochend 12,5 kg</strong> dran. <strong>Kartoffeln × 12,5
+kg</strong> ist schon gewählt, und der Faktor <code>12.500</code> stimmt. Das Programm war
+sich nur nicht sicher genug, um es allein zu entscheiden. Einfach
+<strong>Zuordnen</strong>.</p>
+<h2 id="was-offen-bleiben-darf">Was offen bleiben darf</h2>
+<p>Bleiben <strong>Leberkäse am Stück, ungebacken</strong> und <strong>Petersilie glatt, Bund</strong>.
+Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche
+Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich
+aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins
+Gewicht.</p>
+<p>Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum
+Wareneinsatz, und die Kalkulation führt es unter <strong>Nicht in der
+Umsatzschätzung</strong> auf, damit es nicht unbemerkt verloren geht. Wo der Faktor
+erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist
+offen lassen die ehrlichere Antwort.</p>
+<p>Am Ende steht über der Liste <code>2 offen</code>.</p>
 <p><img alt="Nur Leberkäse und Petersilie sind noch offen" src="../img/zuordnung-fertig.png" width="610" /></p>
 <div class="admonition geschafft">
 <p class="admonition-title">Geschafft, wenn …</p>
 <ul>
-<li>über der Liste <code>2 offen, 116 automatisch, 4 manuell</code> steht</li>
+<li>über der Liste <code>2 offen, 117 automatisch, 3 manuell</code> steht</li>
 <li>nur noch Leberkäse und Petersilie <strong>Offen</strong> sind</li>
 </ul>
 </div>

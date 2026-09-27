@@ -13,7 +13,7 @@ Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit de
 
 Dazu ist der Lieferant nur halb gelesen: `FROSTW`.
 
-### Die fehlende Zeile
+## Die fehlende Zeile
 
 Auf dem Beleg stehen acht Positionen, in den gelesenen Werten nur sieben. Die letzte liegt unter dem Stempel und ist beim Lesen verloren gegangen:
 
@@ -27,7 +27,7 @@ Dann oben den **Lieferanten** vervollständigen: `Frostwerk Tiefkühl-Service Gm
 
 Die Summe der Positionen stimmt jetzt mit dem Nettobetrag überein, der erste Hinweis ist verschwunden.
 
-### Die Steuersätze
+## Die Steuersätze
 
 Bleibt der zweite Hinweis: Netto geht auf, Brutto aber nicht. Laut Beleg sind es 912,12 €, aus den Positionen nur 842,80 €. Die Differenz ist genau die Umsatzsteuer: Alle Zeilen stehen auf 0 %, denn der Beleg druckt den Satz nicht in eine eigene Spalte, sondern klein unter jeden Artikel („MwSt. 7 %“).
 
@@ -50,7 +50,7 @@ Was bei Scans sonst noch schiefgeht, und woran es zu erkennen ist:
 | Der Lieferant fehlt oder ist abgeschnitten | Leeres oder unvollständiges Feld                                                                                            | Eintragen                                                       |
 | Der Steuersatz ist falsch gelesen          | Brutto ist markiert, **Laut Beleg** und **Aus Positionen** weichen voneinander ab                                           | Steuersatz je Zeile eintragen                                   |
 
-Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das Bestätigen. Alles andere lässt sich bestätigen, gehört aber trotzdem korrigiert: Die Kalkulation rechnet mit genau diesen Zeilen.
+Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das Bestätigen.
 
 **Geschafft, wenn …**
 

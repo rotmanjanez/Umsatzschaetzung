@@ -19,6 +19,14 @@ Das Programm rechnet aus den Eingangsrechnungen eines Betriebs nach, welchen Ums
 1. **[Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md)** Vom Einkauf über Rezepte und Preise zum Umsatz, den der Einkauf ergibt.
 1. **[Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md)** Erklärter neben kalkuliertem Umsatz, jede Zahl bis zur Rechnungszeile belegt, als PDF.
 
+## Im Browser
+
+Unter [app.umsatzschaetzung.amtstools.de](https://app.umsatzschaetzung.amtstools.de/) läuft das Programm ohne Installation im Browser. Die Rechnungen verlassen auch dort das Gerät nicht.
+
+**Vorschau**
+
+Die Browserversion ist noch in Erprobung. Sie kann langsamer sein als das Programm für Windows und macOS, und Prüfungen liegen nur im Speicher dieses Browsers. Für die tägliche Arbeit empfiehlt sich das installierte Programm.
+
 ## Grundlagen
 
 - [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Zutaten, Produkte, Rezepte und Ertragsregeln. Sie gehören zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.
@@ -1515,6 +1523,8 @@ Diese Anleitung führt Schritt für Schritt durch eine vollständige Prüfung: v
 
 Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt sich aus dem Einkauf nachrechnen: Wer 600 Liter Fassbier einkauft, schenkt daraus rund 1.100 Gläser zu 0,5 l aus, ein Teil geht als Schankverlust verloren. Mal 4,60 € je Glas ergibt das den Umsatz allein mit Fassbier. Das Programm macht diese Rechnung für jede eingekaufte Ware und stellt die Summe dem erklärten Umsatz gegenüber.
 
+## Fünf Schritte, fünf Reiter
+
 Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfung:
 
 1. **1. Rechnungen** Die Eingangsrechnungen des Betriebs: was er eingekauft hat.
@@ -1522,6 +1532,8 @@ Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfun
 1. **3. Sortiment** Was der Betrieb verkauft und zu welchem Preis: Bier 0,5 l für 4,60 €, Schnitzel mit Pommes für 15,90 €.
 1. **4. Kalkulation** Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
 1. **5. Bericht** Der kalkulierte Umsatz neben dem erklärten, als PDF.
+
+## Die wichtigsten Begriffe
 
 Ein paar Wörter kommen dabei immer wieder vor:
 
@@ -1534,7 +1546,7 @@ Ein paar Wörter kommen dabei immer wieder vor:
 | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat.                                                                                                             |
 | **Regeln**    | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
 
-## Das Beispiel
+## Das Gasthaus Zur Linde
 
 Geprüft wird das **Gasthaus Zur Linde** für das Jahr 2025. Es hat einen Umsatz von 196.418 € netto erklärt. Es liegen 106 Eingangsrechnungen vor, alle als Scan, dazu die Speisekarte als Tabelle. Beide Dateien sind an der Stelle verlinkt, an der sie gebraucht werden.
 
@@ -1613,7 +1625,11 @@ ______________________________________________________________________
 
 # Prüfung anlegen
 
-Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was dazugehört. Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim ersten Mal ist sie leer.
+Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was dazugehört.
+
+## Die Liste der Prüfungen
+
+Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim ersten Mal ist sie leer.
 
 ## Die Eckdaten
 
@@ -1621,16 +1637,16 @@ Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was
 
 Einzutragen sind:
 
-| Feld         | Wert                                         |
-| ------------ | -------------------------------------------- |
-| Bezeichnung  | `Gasthaus Zur Linde, Bp 2025`                |
-| Zeitraum von | `01.01.2025`                                 |
-| Zeitraum bis | `31.12.2025`                                 |
-| Name         | `Gasthaus Zur Linde, Inh. Renate Vogel e.K.` |
-| Steuernummer | `203/128/40507`                              |
-| PAB-Nr.      | `PAB 2025/0417`                              |
+| Feld         | Wert                          |
+| ------------ | ----------------------------- |
+| Bezeichnung  | `Gasthaus Zur Linde, Bp 2025` |
+| Zeitraum von | `01.01.2025`                  |
+| Zeitraum bis | `31.12.2025`                  |
+| Name         | `Renate Vogel`                |
+| Steuernummer | `123/456/789`                 |
+| PAB-Nr.      | `PAB 2025/0417`               |
 
-Der Zeitraum entscheidet, welche Rechnungen in die Kalkulation eingehen. Die Gewerbekennzahl bleibt leer.
+Die mit Stern markierten Felder sind Pflicht. Der Zeitraum entscheidet, welche Rechnungen in die Kalkulation eingehen. Die Gewerbekennzahl bleibt leer.
 
 **Anlegen** öffnet die Prüfung.
 
@@ -1644,7 +1660,7 @@ Einen Knopf zum Speichern gibt es nicht. Jede Eingabe wird sofort gespeichert. D
 
 Nach dem Anlegen ist der Reiter **Prüfung** geöffnet:
 
-Er sammelt alles, was nicht aus den Rechnungen kommt. Für den Bericht wird davon eines gebraucht: der Umsatz, den der Betrieb erklärt hat. Unter **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
+Er hält die Kerndaten der Prüfung. Für den Bericht wird davon eines gebraucht: der Umsatz, den der Betrieb erklärt hat. Unter **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
 
 | Feld           | Wert         |
 | -------------- | ------------ |
@@ -1736,7 +1752,7 @@ Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit de
 
 Dazu ist der Lieferant nur halb gelesen: `FROSTW`.
 
-### Die fehlende Zeile
+## Die fehlende Zeile
 
 Auf dem Beleg stehen acht Positionen, in den gelesenen Werten nur sieben. Die letzte liegt unter dem Stempel und ist beim Lesen verloren gegangen:
 
@@ -1750,7 +1766,7 @@ Dann oben den **Lieferanten** vervollständigen: `Frostwerk Tiefkühl-Service Gm
 
 Die Summe der Positionen stimmt jetzt mit dem Nettobetrag überein, der erste Hinweis ist verschwunden.
 
-### Die Steuersätze
+## Die Steuersätze
 
 Bleibt der zweite Hinweis: Netto geht auf, Brutto aber nicht. Laut Beleg sind es 912,12 €, aus den Positionen nur 842,80 €. Die Differenz ist genau die Umsatzsteuer: Alle Zeilen stehen auf 0 %, denn der Beleg druckt den Satz nicht in eine eigene Spalte, sondern klein unter jeden Artikel („MwSt. 7 %“).
 
@@ -1773,7 +1789,7 @@ Was bei Scans sonst noch schiefgeht, und woran es zu erkennen ist:
 | Der Lieferant fehlt oder ist abgeschnitten | Leeres oder unvollständiges Feld                                                                                            | Eintragen                                                       |
 | Der Steuersatz ist falsch gelesen          | Brutto ist markiert, **Laut Beleg** und **Aus Positionen** weichen voneinander ab                                           | Steuersatz je Zeile eintragen                                   |
 
-Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das Bestätigen. Alles andere lässt sich bestätigen, gehört aber trotzdem korrigiert: Die Kalkulation rechnet mit genau diesen Zeilen.
+Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das Bestätigen.
 
 **Geschafft, wenn …**
 
@@ -1792,48 +1808,54 @@ Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu Pi
 
 ## Die Liste
 
-Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder einmal, auch wenn er auf 25 Rechnungen vorkommt. Die erste Spalte ist der Status:
+Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz: `5 offen, 117 automatisch, 0 manuell`.
+
+Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen die offenen oben:
 
 - **Offen**: Das Programm war sich bei keiner Zutat sicher genug. Hier ist eine Entscheidung nötig.
 - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
-## Eine Position ansehen
+## Ein Vorschlag, der nicht passt
 
 Die Zeile **2022 Domina trocken 0,75 l** anklicken. Rechts erscheint alles, was zu diesem Artikel bekannt ist:
 
 - **Aus der Rechnung**: Name, Lieferant, Artikelnummer und die Gesamtmenge über alle Rechnungen, hier 158 Flaschen in 6 Positionen.
-- **Aus den Regeln**: die Vorschläge des Programms mit einer Sicherheit in Prozent. Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die Position offen geblieben.
-- **Faktor**: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die Rechnung in Flaschen. Der Faktor sagt, wie viel in einem Gebinde steckt, hier 750 ml je Flasche. Das Programm hat ihn aus dem Artikeltext gelesen und rechnet darunter vor: 158 Flaschen × 750 ml = 118,5 l.
+- **Aus den Regeln**: die Vorschläge des Programms mit einer Sicherheit in Prozent.
+- **Faktor**: wie viel in einem Gebinde steckt.
 - **Belege**: die Rechnungszeilen, aus denen der Artikel stammt, als Ausschnitt des Scans.
 
-Ein Domina ist ein fränkischer Rotwein. Den Vorschlag **Rotwein × 750 ml** anklicken und **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen, und die Bilanz zeigt `5 offen`.
+Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die Position offen geblieben.
 
-## Die übrigen offenen Positionen
+Ein Domina ist ein fränkischer Rotwein: den Vorschlag **Rotwein × 750 ml** anklicken.
 
-Nach demselben Muster die anderen fünf. Bei zweien ist die Zutat klar, das Programm zeigt sie als **Exakter Treffer**, aber der Faktor fehlt: Aus „Karton“ oder „Bund“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist:
+Der **Faktor** passt schon: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor: 158 Flaschen × 750 ml = 118,5 l.
 
-Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen, die Zeile darunter rechnet vor:
+Dann **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.
 
-| Position                               | Vorschlag wählen                         | Faktor           | Dann         |
-| -------------------------------------- | ---------------------------------------- | ---------------- | ------------ |
-| Frühkartoffeln festkochend 12,5 kg     | **Kartoffeln × 12,5 kg** (schon gewählt) | bleibt `12.500`  | **Zuordnen** |
-| Kaffeesahne Portionen 10 × 7,5 g 240er | **Sahne** (schon gewählt)                | `1800` eintragen | **Zuordnen** |
-| Leberkäse am Stück, ungebacken         |                                          |                  | offen lassen |
-| Putenbrustfilet frisch                 | **Putenfleisch** wählen                  |                  | **Zuordnen** |
-| Petersilie glatt, Bund                 |                                          |                  | offen lassen |
+Das Programm merkt sich die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank): Kommt der Domina in einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln sich auch Rezepte und Ertragsregeln, siehe [3. Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/index.md) und [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md).
 
-Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen. Ohne verlässliche Einheit gibt es keinen verlässlichen Faktor, die Position bleibt offen.
+## Wenn eine Menge fehlt
 
-Beim Putenbrustfilet schlägt das Programm als **Exakter Treffer** **Hähnchenfleisch** vor. Das ist falsch: Pute ist kein Hähnchen, die richtige Zutat **Putenfleisch** steht mit 90 % darunter. Ein exakter Treffer verdient also trotzdem einen Blick.
+Nach dem Zuordnen wählt das Programm die nächste offene Position, hier **Kaffeesahne Portionen 10 × 7,5 g 240er**. Die Zutat ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
 
-Leberkäse und Petersilie bleiben offen. Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter **Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht. Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist offen lassen die ehrlichere Antwort.
+Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
 
-Mit jeder Zuordnung zählt die Bilanz herunter, bis dort `2 offen` steht.
+## Wenn alles passt
+
+Danach ist **Frühkartoffeln festkochend 12,5 kg** dran. **Kartoffeln × 12,5 kg** ist schon gewählt, und der Faktor `12.500` stimmt. Das Programm war sich nur nicht sicher genug, um es allein zu entscheiden. Einfach **Zuordnen**.
+
+## Was offen bleiben darf
+
+Bleiben **Leberkäse am Stück, ungebacken** und **Petersilie glatt, Bund**. Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins Gewicht.
+
+Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter **Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht. Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist offen lassen die ehrlichere Antwort.
+
+Am Ende steht über der Liste `2 offen`.
 
 **Geschafft, wenn …**
 
-- über der Liste `2 offen, 116 automatisch, 4 manuell` steht
+- über der Liste `2 offen, 117 automatisch, 3 manuell` steht
 - nur noch Leberkäse und Petersilie **Offen** sind
 
 **Zum Nachlesen**
@@ -1846,11 +1868,11 @@ Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit Pfand, Fra
 
 Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und Zutaten rechnet die Kalkulation den Umsatz.
 
-Die Produkte selbst, samt Rezept, bringt das Programm mit. Aus diesem Katalog wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb.
+Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank) und gelten für jede Prüfung. Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was fehlt, legt man unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte) an, und so wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser Prüfung.
 
 ## Das erste Produkt von Hand
 
-In der Prüfung auf **3. Sortiment** wechseln. Rechts oben steht das Suchfeld **Produkt hinzufügen …**, links daneben die beiden Symbole für den CSV-Import und -Export:
+In der Prüfung auf **3. Sortiment** wechseln. Rechts oben steht das Suchfeld **Produkt hinzufügen …**; über dieses Feld kommt ein Produkt aus dem Katalog ins Sortiment.
 
 In das Suchfeld `Bier 0,5` tippen. Darunter erscheint eine Liste passender Produkte aus dem Katalog; **Bier 0,5 l vom Fass** anklicken. Das Produkt steht jetzt im Sortiment, noch mit dem Hinweis **Preis fehlt**:
 
@@ -1858,7 +1880,7 @@ In das Feld **Bruttopreis** `4,60` eintragen, also den Preis auf der Karte, mit 
 
 ## Der Rest per Tabelle
 
-Die übrigen 27 Produkte des Gasthauses stehen mit ihren Preisen in einer Tabelle: [sortiment-gasthaus.csv](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment-gasthaus.csv) . Herunterladen, dann auf das linke Symbol der Kopfzeile (**CSV importieren**) klicken und die Datei auswählen.
+Die übrigen 27 Produkte des Gasthauses stehen mit ihren Preisen in einer Tabelle: [sortiment-gasthaus.csv](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment-gasthaus.csv) . Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das rechte, **CSV exportieren**, schreibt das Sortiment in eine solche Datei.
 
 Die Produkte werden über ihren Namen im Katalog gefunden und mit Preis und Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste:
 
@@ -1887,34 +1909,34 @@ Nur mit öffentlichen Angaben wie der Karte aus dem Internet: Was aus der Akte s
 
 **Zum Nachlesen**
 
-Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen Produkten geschieht, steht unter [Sortiment importieren und exportieren](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#sortiment).
+Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen Produkten geschieht, steht unter [Sortiment importieren und exportieren](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#sortiment). Was ein Produkt mit seinem Rezept ist, steht unter [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte).
 
 [Weiter: 4. Kalkulation Den Umsatz aus dem Einkauf berechnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kalkulation/index.md)
 
 # Kalkulation
 
+Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den Umsatz. Was dabei nicht über Rezept und Preis hineinfindet, steht gesondert auf der Seite **Übrige Einkäufe**. Bevor das Ergebnis zählt, wird dort aufgeräumt.
+
 ## Übrige Einkäufe
 
-Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Bevor das Ergebnis zählt, wird hier aufgeräumt.
-
-Die Seite zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
+Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
 - **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.
 - **Nicht in der Umsatzschätzung**: Einkäufe, die keinen Umsatz bringen, etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.
 
 Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut stehen nicht in den Listen, sie gleichen sich über die Zeit aus.
 
-### Das Schnitzel
+## Das Schnitzel
 
 In **Nicht Teil der Ermittlung des Aufschlagsatzes** steht ganz oben **Schweineschnitzel natur, ausgelöst**, mit fast 3.500 € netto. Das Programm hat es als **Schnitzel, paniert, je Stück** zugeordnet, als fertig paniertes Schnitzel. Das Gasthaus kauft das Fleisch aber roh, 427 kg im Jahr, und paniert selbst; im Sortiment steht **Schnitzel mit Pommes**, und dessen Rezept rechnet mit Schweinefleisch.
 
-Die Zeile anklicken, **Manuell zuordnen**, als Zutat `Schweinefleisch` wählen und **Zuordnen**:
+Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die Zutat, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und **Zuordnen**.
 
 Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.
 
-Die automatische Zuordnung liegt meistens richtig, aber nicht immer. Darum am Ende immer prüfen, ob alles zusammenpasst: Ein großer Betrag in dieser Liste verdient einen zweiten Blick.
+Die automatische Zuordnung liegt meistens richtig. Wo nicht, fällt es hier als großer Betrag auf. Wie auf [2. Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md) merkt sich das Programm die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank).
 
-### Was keinen Umsatz bringt
+## Was keinen Umsatz bringt
 
 In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauft. Bleiben sie dort, schätzt das Programm auch auf sie einen Umsatz über den Rohgewinnaufschlagsatz. Bei diesen Positionen auf das Kreuz am Zeilenende klicken (**… bringt in diesem Betrieb keinen Umsatz**):
 
@@ -1925,13 +1947,13 @@ In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauf
 
 Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten auch Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
 
-Übrig bleiben in der oberen Liste knapp 3.900 €, 5,86 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
+Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
 **Geschafft, wenn …**
 
 - **Schweineschnitzel natur** nicht mehr in den Listen steht
 - Servietten, CO2, Handspülmittel und Versandkostenpauschale unter **Nicht in der Umsatzschätzung** stehen
-- neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `3.909,85 € (5,86 % der Einkäufe)` steht
+- neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `4.350,66 € (6,52 % der Einkäufe)` steht
 
 ## Ertragsregeln
 
@@ -1967,35 +1989,70 @@ Für das Beispiel bleiben die Katalogrezepte.
 
 Zum Schluss die letzte Seite, **Ergebnis**, öffnen: Umsätze vor und nach Betriebsprüfung, Rohgewinnaufschlag und Zusammenfassung. Jede Korrektur auf den anderen Seiten ist hier schon eingerechnet.
 
+**Zum Nachlesen**
+
+Den Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz und die Seite **Übrige Einkäufe** im Einzelnen beschreibt [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt).
+
 [Weiter: 5. Bericht Das Ergebnis als PDF](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md)
 
 # Bericht
 
-Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben dem kalkulierten, mit allem, was zur Rechnung dazugehört. Auf **5. Bericht** wechseln.
+Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben dem kalkulierten, mit allem, was zur Rechnung dazugehört. Vorher gibt es auf **4. Kalkulation** noch zwei Seiten anzusehen: die **Ertragsregeln**, die festlegen, wie viel vom Einkauf als verkauft gilt, und das **Ergebnis**.
 
-## Die Vorschau
+## Ertragsregeln
 
-Der Reiter zeigt den fertigen Bericht so, wie er als PDF gespeichert wird:
+Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Sie legt fest, wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird, wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das Personal isst mit.
+
+Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es eine Ertragsregel gibt, **Nach Kategorie** und **Nach Zutat**. Je Zeile wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer Kategorie vor. Die Kalkulation rechnet sofort neu.
+
+Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt.
+
+Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz, sondern auch, warum er gilt.
+
+Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), neben Zutaten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
+
+Für das Beispiel bleibt es bei **Kein Abzug**.
+
+## Das Ergebnis
+
+Die letzte Seite, **Ergebnis**, öffnen. Jede Korrektur auf den anderen Seiten ist hier schon eingerechnet, ebenso jede spätere Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder Ertragsregeln. Die Seite hat drei Teile:
+
+- **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418,00 € neben dem kalkulierten von knapp 300.000 €, mit der Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der Prüfung.
+- **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund 340 %. Ermittelt wird der Satz nur an Portionen mit Preis.
+- **Zusammenfassung**: die Brücke von den erfassten Einkäufen über den Wareneinsatz zum Einsatz der verkauften Portionen und zum geschätzten Umsatz. **davon Schwund und Abzüge** steht auf `0,00 €`, weil keine Ertragsregel gewählt ist.
+
+## Der Bericht in der Vorschau
+
+Auf **5. Bericht** wechseln. Der Reiter zeigt den fertigen Bericht so, wie er als PDF gespeichert wird.
 
 1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
 1. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
-1. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute und die Portionen je Zutat, damit jede Zahl des Berichts nachvollziehbar bleibt.
+1. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat, damit jede Zahl des Berichts nachvollziehbar bleibt.
+
+Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg **Hinweise**. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit. Gibt es mehrere Berichtsvorlagen, wählt die Auswahl über der Vorschau eine andere für diese Prüfung.
 
 ## Als PDF speichern
 
-Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht als PDF ab, wo man will. Er gibt immer den aktuellen Stand wieder: Wer danach eine Rechnung, eine Zuordnung oder einen Preis ändert, sieht das in der Vorschau sofort und speichert das PDF neu.
+Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht als PDF ab, wo man will.
+
+Die Vorschau gibt immer den aktuellen Stand wieder: Wer danach eine Rechnung, eine Zuordnung oder einen Preis ändert, sieht das dort sofort. Ein schon gespeichertes PDF ändert sich nicht mit; nach einer Änderung wird es neu gespeichert.
+
+## Die Prüfung wiederfinden
+
+Der Pfeil links oben führt zurück zur Liste der Prüfungen. Dort steht das Gasthaus jetzt mit Zeitraum und dem Datum der letzten Änderung. Ein Klick auf die Zeile öffnet die Prüfung wieder, beim nächsten Start genauso. Bei vielen Prüfungen hilft das Feld **Filtern**.
 
 **Geschafft, wenn …**
 
+- auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €` der kalkulierte Umsatz nach BP steht, knapp 300.000 €
 - das PDF gespeichert ist und sich öffnen lässt
 
 **Zum Nachlesen**
 
-Die Abschnitte des Berichts im Einzelnen beschreibt [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md).
+Die Abschnitte des Berichts im Einzelnen beschreibt [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md), die Ertragsregeln [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln) und [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#ertragsregeln).
 
 Damit ist die Beispielprüfung vollständig.
 
-[Weiter: Danach Die Prüfung wiederfinden, weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md)
+[Weiter: Danach Die Prüfung weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md)
 
 # Danach
 

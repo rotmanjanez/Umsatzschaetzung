@@ -31,7 +31,7 @@ Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Ei
 
 ## Beispielprüfung
 
-- [Beispielprüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md): Schritt-für-Schritt-Anleitung durch eine vollständige Prüfung eines Gasthauses
+- [Index](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md): Schritt-für-Schritt-Anleitung durch eine vollständige Prüfung eines Gasthauses
 - [macOS](https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-macos/index.md): Voraussetzungen und Installation unter macOS
 - [Windows](https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-windows/index.md): Voraussetzungen und Installation unter Windows
 - [Prüfung anlegen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/start/index.md): Die erste Prüfung anlegen
