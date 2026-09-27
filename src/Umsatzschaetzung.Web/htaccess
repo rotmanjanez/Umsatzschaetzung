@@ -12,6 +12,12 @@ RewriteCond %{HTTP:Accept-Encoding} br
 RewriteCond %{REQUEST_FILENAME}.br -s
 RewriteRule ^(.*)$ $1.br [L]
 
+# Already compressed: the server's own compression would wrap it in gzip under a header that says br.
+<FilesMatch "\.br$">
+  SetEnv no-gzip 1
+  SetEnv no-brotli 1
+</FilesMatch>
+
 <FilesMatch "\.wasm\.br$">
   ForceType application/wasm
 </FilesMatch>
