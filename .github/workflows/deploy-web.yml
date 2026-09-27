@@ -113,15 +113,6 @@ jobs:
             dotnet run --project tools/headless -- "$script" \
               --width 1320 --height 860 --out "$out" --readings readings
           done
-      - name: Keep the stores each lesson starts from
-        env:
-          UMSATZ_LESSON_CACHE: ${{ github.workspace }}
-        run: for name in $LESSONS; do python web/lessons/lesson.py "web/lessons/$name/lesson.yaml" zustand; done
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: zustand
-          path: web/lessons/out/*/zustand
-          if-no-files-found: error
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always() && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
         with:
@@ -133,11 +124,53 @@ jobs:
           name: shots
           path: shots-out
 
+  # Each lesson starts where the ones before it in the guide stop; the program is driven there
+  # headlessly and its stores kept. Apart from the screenshots, so a guide page that fails
+  # its image does not hold back the lessons.
+  zustand:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/Library/Application Support/umsatzschaetzung/models
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+      - name: Fetch the example invoices
+        run: |
+          curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
+          unzip -q beispiel.zip -d beispiel-rechnungen
+      - name: Key the recorded readings
+        id: code
+        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: readings
+          key: ${{ steps.code.outputs.key }}
+          restore-keys: ${{ steps.code.outputs.key }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: web/lessons/requirements.txt
+      - run: pip install -r web/lessons/requirements.txt
+      - name: Keep the stores each lesson starts from
+        env:
+          UMSATZ_LESSON_CACHE: ${{ github.workspace }}
+        run: for name in $LESSONS; do python web/lessons/lesson.py "web/lessons/$name/lesson.yaml" zustand; done
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: zustand
+          path: web/lessons/out/*/zustand
+          if-no-files-found: error
+
   # The lessons take their weights from the app beside them, so they go up after it. Clips
   # come from the store only: a sentence nobody has spoken yet fails the build, and is
   # spoken locally with `voice --elevenlabs`.
   lessons:
-    needs: [shots, app]
+    needs: [zustand, app]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
