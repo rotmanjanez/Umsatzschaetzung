@@ -207,6 +207,20 @@ public sealed class Session : Observable
         CaseChanged?.Invoke();
     }
 
+    // An invoice the service stored is taken into the case with what storing it changed; the rest
+    // of the case stays as this window has it.
+    public void Take(string caseId, Invoice invoice, Stored stored)
+    {
+        if (Case is not { } kase || kase.Id != caseId) return;
+        var i = kase.Invoices.FindIndex(x => x.Id == invoice.Id);
+        if (i >= 0) kase.Invoices[i] = invoice;
+        else kase.Invoices.Add(invoice);
+        foreach (var (id, m) in stored.Mappings) kase.Mappings[id] = m;
+        kase.MappedStore = stored.MappedStore;
+        CaseParts.Take(recorded, kase, invoice, stored.Mappings.Count > 0);
+        CaseChanged?.Invoke();
+    }
+
     public void CloseCase()
     {
         Case = null;

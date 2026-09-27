@@ -201,7 +201,7 @@ public partial class InvoicesView : Screen
     InvoiceView EditorFor(InvoiceRow row)
     {
         if (editors.TryGetValue(row.Id, out var existing)) return existing;
-        var view = new InvoiceView(Session, row.Invoice, Session.Readings.GetValueOrDefault(row.Id), Session.SetCase);
+        var view = new InvoiceView(Session, row.Invoice, Session.Readings.GetValueOrDefault(row.Id));
         editors[row.Id] = view;
         return view;
     }

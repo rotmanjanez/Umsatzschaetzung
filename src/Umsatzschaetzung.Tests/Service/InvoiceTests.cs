@@ -34,7 +34,8 @@ public class InvoiceTests(MatcherHost host)
         Assert.Equal(3, parsed.Invoice.Lines.Count);
         Assert.Equal([1, 2, 3], parsed.UnmappedLines);
         Assert.Equal(7, Guid.Parse(parsed.Invoice.Id).Version);
-        Assert.Equal([parsed.Invoice.Id], parsed.Case!.Invoices.Select(i => i.Id));
+        Assert.Empty(parsed.Stored!.Mappings);
+        Assert.Equal([parsed.Invoice.Id], (await svc.Cases.Get(kase.Id, ct)).Invoices.Select(i => i.Id));
         Assert.Equal("zugferd.pdf", host.Cases.LoadFile(kase.Id, parsed.Invoice.Id).Name);
     }
 
@@ -43,7 +44,7 @@ public class InvoiceTests(MatcherHost host)
     {
         var parsed = await svc.Invoices.Parse("", "zugferd.pdf", Zugferd, ct);
         Assert.Equal(3, parsed.Invoice.Lines.Count);
-        Assert.Null(parsed.Case);
+        Assert.Null(parsed.Stored);
     }
 
     [Fact]
@@ -69,7 +70,7 @@ public class InvoiceTests(MatcherHost host)
         var kase = await NewCase();
         var parsed = await svc.Invoices.Parse(kase.Id, "scan.png", Png, ct);
         Assert.True(parsed.NeedsOcr);
-        Assert.Null(parsed.Case);
+        Assert.Null(parsed.Stored);
         Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
     }
 
@@ -142,7 +143,7 @@ public class InvoiceTests(MatcherHost host)
         Assert.Contains(v.Flags, f => f.Code == "no_unit");
         Assert.False(v.Blocked);
         Assert.False(v.Accepted);
-        Assert.Null(v.Case);
+        Assert.Null(v.Stored);
         Assert.Null(v.Invoice.Verification);
         Assert.Equal(7, Guid.Parse(v.Invoice.Id).Version);
         Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
@@ -153,7 +154,7 @@ public class InvoiceTests(MatcherHost host)
     {
         var v = await svc.Invoices.Verify(new VerifyReq("", Clean(), Intent.Check, null, null), ct);
         Assert.Empty(v.Flags);
-        Assert.Null(v.Case);
+        Assert.Null(v.Stored);
     }
 
     [Fact]
@@ -213,12 +214,14 @@ public class InvoiceTests(MatcherHost host)
         await Assert.ThrowsAsync<ServiceError>(() => svc.Invoices.Verify(new VerifyReq("fall-gibt-es-nicht", Keg(), Intent.Auto, null, null), ct));
         Assert.Equal(before, (await svc.Rules.Load(ct)).Version);
 
-        var learnt = await svc.Invoices.Verify(new VerifyReq((await NewCase()).Id, Keg(), Intent.Auto, null, null), ct);
+        var kase = await NewCase();
+        var learnt = await svc.Invoices.Verify(new VerifyReq(kase.Id, Keg(), Intent.Auto, null, null), ct);
         var id = learnt.Invoice.Lines[0].MappingId!;
         Assert.Equal(7, Guid.Parse(id).Version);
         Assert.Equal(before, (await svc.Rules.Load(ct)).Version);
         Assert.False((await svc.Rules.Load(ct)).Mappings.ContainsKey(id));
-        Assert.Equal("Pils vom Fass 30 l Keg", (await svc.Cases.Get(learnt.Case!.Id, ct)).Mappings[id].Observed);
+        Assert.Equal([id], learnt.Stored!.Mappings.Keys);
+        Assert.Equal("Pils vom Fass 30 l Keg", (await svc.Cases.Get(kase.Id, ct)).Mappings[id].Observed);
     }
 
     [Fact]
@@ -231,7 +234,7 @@ public class InvoiceTests(MatcherHost host)
         Assert.True(v.Accepted);
         Assert.False(v.Blocked);
         Assert.Equal(false, v.Invoice.Verification?.Auto);
-        Assert.NotNull(Assert.Single(v.Case!.Invoices).Verification);
+        Assert.NotNull(v.Stored);
         Assert.NotNull(Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices).Verification);
     }
 
@@ -257,7 +260,7 @@ public class InvoiceTests(MatcherHost host)
         Assert.Contains(v.Flags, f => f.Code == "line_total");
         Assert.True(v.Blocked);
         Assert.False(v.Accepted);
-        Assert.Null(v.Case);
+        Assert.Null(v.Stored);
         Assert.Empty((await svc.Cases.Get(kase.Id, ct)).Invoices);
     }
 
@@ -326,7 +329,7 @@ public class InvoiceTests(MatcherHost host)
         var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, edited, Intent.Confirm, null, null), ct);
 
         Assert.Equal(first.Invoice.Id, v.Invoice.Id);
-        Assert.Equal("PM-2", Assert.Single(v.Case!.Invoices).Number);
+        Assert.Equal("PM-2", Assert.Single((await svc.Cases.Get(kase.Id, ct)).Invoices).Number);
     }
 
     [Fact]

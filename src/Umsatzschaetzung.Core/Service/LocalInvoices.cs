@@ -25,12 +25,12 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
                 throw new ServiceError(ErrorCode.Unsupported, $"Dateiformat von \"{fileName}\" nicht erkannt");
         }
         var kase = caseId == "" ? null : cases.Load(caseId);
-        var own = kase?.Mappings ?? [];
+        var made = new Dictionary<string, ArticleMapping>();
         var inv = InvoiceParser.Parse(fileName, data);
         inv.Id = Ids.New();
-        var (_, unmapped) = await mapping.Lines(rules.Load().With(own), inv, kase?.Taxpayer.Gewerbe ?? "", true, own, ct);
-        var c = kase is null ? null : Attach(caseId, inv, fileName, data, own);
-        return new ParseResp(inv, unmapped, false, c);
+        var (_, unmapped) = await mapping.Lines(rules.Load().With(kase?.Mappings), inv, kase?.Taxpayer.Gewerbe ?? "", true, made, ct);
+        var stored = kase is null ? null : Attach(caseId, inv, fileName, data, made);
+        return new ParseResp(inv, unmapped, false, stored);
     });
 
     public Task<OcrResp> Ocr(string caseId, string fileName, byte[] data, CancellationToken ct) => Guard(ct, async () =>
@@ -71,16 +71,16 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
         };
         var store = confirm || req.Intent is Intent.Store or Intent.Auto;
         var kase = store ? cases.Load(req.CaseId) : cases.Find(req.CaseId);
-        var own = kase?.Mappings ?? [];
-        await mapping.Lines(rules.Load().With(own), inv, kase?.Taxpayer.Gewerbe ?? "", confirm, own, ct);
+        var made = new Dictionary<string, ArticleMapping>();
+        await mapping.Lines(rules.Load().With(kase?.Mappings), inv, kase?.Taxpayer.Gewerbe ?? "", confirm, made, ct);
         var resp = new VerifyResp(inv, flags, blocked, false, null);
         if (!store) return resp;
         inv.Verification = confirm ? new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto } : null;
         var images = req is { Reading: { } reading, Data: { } data } && documents is not null
             ? await documents.Keep(data, [.. reading.Select(p => p.Correction)], ct).ToListAsync(ct)
             : null;
-        var c = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], own, req.Reading, images);
-        return resp with { Invoice = inv, Case = c, Accepted = confirm };
+        var stored = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], made, req.Reading, images);
+        return resp with { Stored = stored, Accepted = confirm };
     });
 
     public Task<Case> Delete(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, () =>
@@ -145,15 +145,15 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
         return c;
     });
 
-    Case Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> own, List<OcrPage>? reading = null, List<byte[]>? images = null)
+    Stored Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> made, List<OcrPage>? reading = null, List<byte[]>? images = null)
     {
         var c = cases.Load(caseId);
-        foreach (var (id, m) in own) c.Mappings[id] = m;
+        foreach (var (id, m) in made) c.Mappings[id] = m;
         var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
         if (i >= 0) c.Invoices[i] = inv;
         else c.Invoices.Add(inv);
         if (inv.Lines.Any(l => string.IsNullOrEmpty(l.MappingId))) c.MappedStore = null;
         cases.Save(c, new Attachment(inv.Id, fileName, data, reading, images));
-        return c;
+        return new Stored(made, c.MappedStore);
     }
 }

@@ -8,7 +8,11 @@ public sealed record StatusResp(long RulesVersion, DateTimeOffset RulesDate, str
 // Files in the case folder that hold no case, by name; the cases are listed without them.
 public sealed record CasesResp(List<Case> Cases, List<string> Unreadable);
 
-public sealed record ParseResp(Invoice Invoice, List<int> UnmappedLines, bool NeedsOcr, Case? Case);
+// What storing an invoice changed on its case besides the invoice: the mappings made for its lines
+// and the rules the case counts as mapped against.
+public sealed record Stored(Dictionary<string, ArticleMapping> Mappings, string? MappedStore);
+
+public sealed record ParseResp(Invoice Invoice, List<int> UnmappedLines, bool NeedsOcr, Stored? Stored);
 
 public sealed record OcrResp(string InvoiceId, List<OcrPage> Pages, Invoice Draft);
 
@@ -20,7 +24,7 @@ public enum Intent { Check, Store, Confirm, Auto }
 // is written, they are rendered from the document again.
 public sealed record VerifyReq(string CaseId, Invoice Invoice, Intent Intent, string? FileName, byte[]? Data, List<OcrPage>? Reading = null);
 
-public sealed record VerifyResp(Invoice Invoice, List<Flag> Flags, bool Blocked, bool Accepted, Case? Case);
+public sealed record VerifyResp(Invoice Invoice, List<Flag> Flags, bool Blocked, bool Accepted, Stored? Stored);
 
 public sealed record SourcePage(Raster? Image, string? Text);
 

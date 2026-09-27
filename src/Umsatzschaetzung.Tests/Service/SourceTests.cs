@@ -45,7 +45,7 @@ public sealed class SourceTests : IDisposable
     {
         var kase = await svc.Cases.Put(Vorlage.Blank(), ct);
         var v = await svc.Invoices.Verify(new VerifyReq(kase.Id, new Invoice { Number = "1" }, Intent.Store, fileName, data, reading), ct);
-        return v.Case!.Id + "/" + v.Invoice.Id;
+        return kase.Id + "/" + v.Invoice.Id;
     }
 
     [Fact]

@@ -209,7 +209,6 @@ public partial class InvoiceView : Screen
 
     readonly InvoiceModel model = new();
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(350) };
-    readonly Action<Case> onSaved;
     readonly History history;
     List<OcrPage> pages;
     Invoice invoice;
@@ -221,10 +220,9 @@ public partial class InvoiceView : Screen
     bool applying, sourceLoaded, checkedOnce, sideBySide;
 
 
-    public InvoiceView(Session session, Invoice stored, OcrResp? ocr, Action<Case> onSaved) : base(session)
+    public InvoiceView(Session session, Invoice stored, OcrResp? ocr) : base(session)
     {
         InitializeComponent();
-        this.onSaved = onSaved;
         history = new History(session);
         invoice = Copy(stored);
         recorded = Snapshot(invoice);
@@ -533,7 +531,7 @@ public partial class InvoiceView : Screen
                 ApplyTotals(v);
                 model.Dirty = false;
             }
-            if (v.Case is not null) onSaved(v.Case);
+            if (v.Stored is not null) Session.Take(req.CaseId, v.Invoice, v.Stored);
         });
     }
 
@@ -586,13 +584,13 @@ public partial class InvoiceView : Screen
         {
             var v = await Session.Service.Invoices.Verify(req, Ct);
             Apply(v);
-            if (!v.Accepted || v.Case is null)
+            if (!v.Accepted || v.Stored is null)
             {
                 Session.Fail("Nicht bestätigt, bitte die markierten Werte korrigieren.");
                 return;
             }
             model.Dirty = false;
-            onSaved(v.Case);
+            Session.Take(req.CaseId, v.Invoice, v.Stored);
             Frame.Of(this)?.Close();
         });
         model.Saving = false;

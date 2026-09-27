@@ -184,7 +184,7 @@ public sealed class Imports
         var parsed = await session.Service.Invoices.Parse(job.CaseId, file.Name, file.Data, job.Ct);
         if (!parsed.NeedsOcr)
         {
-            Adopt(job, parsed.Case);
+            if (parsed.Stored is not null) session.Take(job.CaseId, parsed.Invoice, parsed.Stored);
             job.Imported.Add(parsed.Invoice.Id);
             job.Stored++;
             return;
@@ -193,7 +193,7 @@ public sealed class Imports
         var ocr = await (reading ?? session.Service.Invoices.Ocr(job.CaseId, file.Name, file.Data, job.Ct));
         job.Progress.Begin(ImportStage.Verify);
         var v = await session.Service.Invoices.Verify(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data, ocr.Pages), job.Ct);
-        Adopt(job, v.Case);
+        if (v.Stored is not null) session.Take(job.CaseId, v.Invoice, v.Stored);
         job.Imported.Add(v.Invoice.Id);
         if (v.Accepted)
         {

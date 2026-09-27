@@ -23,6 +23,15 @@ public static class CaseParts
         return parts;
     }
 
+    // The parts an invoice the service stored touched, without taking the whole case apart again.
+    public static void Take(Dictionary<string, string> parts, Case c, Invoice inv, bool mappings)
+    {
+        parts[Invoice + inv.Id] = JsonSerializer.SerializeToNode(inv, ModelJsonContext.Default.Invoice)!.ToJsonString();
+        if (mappings) parts["mappings"] = JsonSerializer.SerializeToNode(c.Mappings, ModelJsonContext.Default.DictionaryStringArticleMapping)!.ToJsonString();
+        if (c.MappedStore is { } store) parts["mappedStore"] = JsonValue.Create(store).ToJsonString();
+        else parts.Remove("mappedStore");
+    }
+
     // An invoice set to nothing leaves the case; one that comes back is added at the end.
     public static Case With(Case c, IReadOnlyDictionary<string, string?> parts)
     {
