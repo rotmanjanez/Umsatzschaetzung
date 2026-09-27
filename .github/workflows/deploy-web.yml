@@ -15,8 +15,8 @@ jobs:
   landing:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: bun install --frozen-lockfile
         working-directory: web/landing
       - run: bun run build
@@ -34,12 +34,12 @@ jobs:
   app:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/umsatzschaetzung/models
           key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Browser/Browser.targets') }}
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
       - run: dotnet workload install wasm-tools
@@ -47,7 +47,7 @@ jobs:
         run: echo "wasm=$(dotnet workload list | grep wasm-tools | tr -s ' ' '_')" >> "$GITHUB_OUTPUT"
       # The AOT compiler skips an assembly whose trimmed IL it compiled before; keyed by the
       # toolchain, since a new compiler would take the old output for current.
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: src/Umsatzschaetzung.Web/obj/Release/net10.0/wasm/for-publish
           key: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-${{ github.sha }}
@@ -69,12 +69,12 @@ jobs:
   shots:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/Library/Application Support/umsatzschaetzung/models
           key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
       - name: Fetch the example invoices
@@ -84,13 +84,13 @@ jobs:
       - name: Key the recorded readings
         id: code
         run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache/restore@v6
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: readings
         with:
           path: readings
           key: ${{ steps.code.outputs.key }}
           restore-keys: ${{ steps.code.outputs.key }}
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
           cache: pip
@@ -107,12 +107,12 @@ jobs:
             dotnet run --project tools/headless -- "$script" \
               --width 1320 --height 860 --out "$out" --readings readings
           done
-      - uses: actions/cache/save@v6
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always() && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
         with:
           path: readings
           key: ${{ steps.code.outputs.key }}-${{ hashFiles('readings/*.json') }}
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: shots
@@ -124,10 +124,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
           cache: pip
@@ -140,7 +140,7 @@ jobs:
       - name: Write the guide's pages from the lessons
         run: for lesson in web/lessons/*/lesson.yaml; do python web/lessons/lesson.py "$lesson" guide; done
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: shots
           path: web/docs/pages

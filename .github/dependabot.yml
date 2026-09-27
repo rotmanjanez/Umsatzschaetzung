@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      avalonia:
+        patterns: ["Avalonia*"]
+      skiasharp:
+        patterns: ["SkiaSharp*"]
+      pdfium:
+        patterns: ["bblanchon.PDFium*"]
+      onnxruntime:
+        patterns: ["Microsoft.ML.OnnxRuntime*"]
+
+  - package-ecosystem: github-actions
+    directories: ["/", "/.github/actions/*"]
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

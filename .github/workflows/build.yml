@@ -22,15 +22,15 @@ jobs:
         os: [windows-latest, windows-11-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.local/share/umsatzschaetzung/models
             ~/AppData/Local/umsatzschaetzung/models
             ~/Library/Application Support/umsatzschaetzung/models
           key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
       - run: dotnet build
@@ -40,8 +40,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
       - run: dotnet tool install --global wix --version 6.0.2
@@ -61,15 +61,15 @@ jobs:
     env:
       PFX_BASE64: ${{ secrets.PFX_BASE64 }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.local/share/umsatzschaetzung/models
             ~/AppData/Local/umsatzschaetzung/models
             ~/Library/Application Support/umsatzschaetzung/models
           key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -85,7 +85,7 @@ jobs:
       - run: pwsh packaging/windows/build.ps1 -Version ${{ inputs.version || github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX"
         env:
           UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: umsatzschätzung-${{ matrix.arch }}-msi
           path: |
@@ -100,15 +100,15 @@ jobs:
     env:
       CERT_BASE64: ${{ secrets.MACOS_CERT_BASE64 }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.local/share/umsatzschaetzung/models
             ~/AppData/Local/umsatzschaetzung/models
             ~/Library/Application Support/umsatzschaetzung/models
           key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -136,7 +136,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: umsatzschätzung-osx-arm64-dmg
           path: |
@@ -154,10 +154,10 @@ jobs:
       attestations: write
       artifact-metadata: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: packaging/windows/policy
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: umsatzschätzung-*
           path: artifacts
@@ -177,15 +177,15 @@ jobs:
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -l release
 
-      - uses: actions/attest@v4
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: release/umsatzschaetzung-win-x64.msi
           sbom-path: release/umsatzschaetzung-win-x64.cdx.json
-      - uses: actions/attest@v4
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: release/umsatzschaetzung-win-arm64.msi
           sbom-path: release/umsatzschaetzung-win-arm64.cdx.json
-      - uses: actions/attest@v4
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: release/umsatzschaetzung-osx-arm64.dmg
           sbom-path: release/umsatzschaetzung-osx-arm64.cdx.json
