@@ -89,12 +89,6 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
             case KeepStep s:
                 Keep(s.To);
                 break;
-            case PushStep:
-                lesson.Notes.Push();
-                break;
-            case DiffStep s:
-                lesson.Diff(Path.GetFullPath(s.To));
-                break;
             case PressStep:
                 Press(at!);
                 break;

@@ -28,8 +28,6 @@ public sealed record Inset
 [JsonDerivedType(typeof(WaitStep), "wait")]
 [JsonDerivedType(typeof(RestartStep), "restart")]
 [JsonDerivedType(typeof(KeepStep), "keep")]
-[JsonDerivedType(typeof(PushStep), "push")]
-[JsonDerivedType(typeof(DiffStep), "diff")]
 [JsonDerivedType(typeof(PressStep), "press")]
 [JsonDerivedType(typeof(CloseStep), "close")]
 public abstract record Step
@@ -122,13 +120,6 @@ public sealed record WaitStep : Step
 public sealed record RestartStep : Step;
 
 public sealed record KeepStep : Step
-{
-    public required string To { get; init; }
-}
-
-public sealed record PushStep : Step;
-
-public sealed record DiffStep : Step
 {
     public required string To { get; init; }
 }

@@ -86,7 +86,7 @@ Shell Launch(bool forget)
         Release.Version,
         documents: documents,
         tagger: new Tagger(weights),
-        ranking: new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes),
+        ranking: new EncoderRanking(encoder, new EmbeddingStore(store)),
         readings: options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
     if (Number("width") is { } width) shell.Width = width;

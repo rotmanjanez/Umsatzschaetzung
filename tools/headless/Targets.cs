@@ -6,7 +6,7 @@ using Avalonia.VisualTree;
 namespace Umsatzschaetzung.Headless;
 
 // What a step reaches for: a name from the XAML, a visible text, a control
-// type - and optionally the ancestor it actually means.
+// type - and optionally the ancestor it actually means, or the cell of its row in a column.
 public sealed record Target
 {
     public string? Name { get; init; }
@@ -15,6 +15,7 @@ public sealed record Target
     public string? Type { get; init; }
     public string? Tip { get; init; }
     public string? Up { get; init; }
+    public string? Column { get; init; }
 }
 
 // Shared by the headless driver and the exercise in the browser, so a script and an
@@ -39,7 +40,16 @@ public static class Targets
     public static Visual? Seek(Visual root, Target target, out Visual? hit)
     {
         hit = root.GetVisualDescendants().FirstOrDefault(v => Is(v, target));
-        return hit is null ? null : target.Up is { } up ? Up(hit, up) : hit;
+        if (hit is null) return null;
+        var found = target.Up is { } up ? Up(hit, up) : hit;
+        return target.Column is { } column ? Cell(found, column) : found;
+    }
+
+    static Visual? Cell(Visual inside, string column)
+    {
+        var row = inside as DataGridRow ?? (DataGridRow)Up(inside, "DataGridRow");
+        var grid = (DataGrid)Up(row, "DataGrid");
+        return grid.Columns.FirstOrDefault(c => c.Header as string == column)?.GetCellContent(row)?.FindAncestorOfType<DataGridCell>();
     }
 
     public static bool Is(Visual v, Target target) =>

@@ -73,6 +73,10 @@ with a twist at the end), `tip` the tooltip (for buttons that only show an icon)
 
     { "text": "Lieferant", "up": "DataGrid" }
 
+`column` names the cell of that row under the column with this header:
+
+    { "text": "0,00 €", "up": "DataGridRow", "column": "Menge" }
+
 A `text` or `starts` that nothing on screen shows is looked for in the rows of the
 lists: the row that holds it is scrolled into view, and the search runs again.
 
