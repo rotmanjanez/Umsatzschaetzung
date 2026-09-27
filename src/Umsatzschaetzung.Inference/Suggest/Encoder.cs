@@ -95,7 +95,7 @@ public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
         catch (Exception e) when (e is IOException or JsonException or KeyNotFoundException)
         {
             throw new InvalidOperationException(
-                "Die Kalibrierung der Artikelzuordnung konnte nicht gelesen werden. Erwartet unter models/" + CalibrationFile + ".", e);
+                "Die Kalibrierung der Artikelzuordnung konnte nicht gelesen werden. Erwartet unter models/" + CalibrationFile + ": " + e.Message, e);
         }
     }
 
@@ -115,7 +115,7 @@ public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
         {
             opened?.Dispose();
             throw new InvalidOperationException(
-                "Das Modell zur Artikelzuordnung konnte nicht geladen werden. Erwartet unter models/" + ModelFile + ".", e);
+                "Das Modell zur Artikelzuordnung konnte nicht geladen werden. Erwartet unter models/" + ModelFile + ": " + e.Message, e);
         }
     }
 

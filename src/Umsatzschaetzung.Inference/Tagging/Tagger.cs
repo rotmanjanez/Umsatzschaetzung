@@ -80,7 +80,7 @@ public sealed class Tagger(IWeights weights) : ITagger, IDisposable
         {
             opened?.Dispose();
             throw new InvalidOperationException(
-                "Das Modell zur Belegerkennung konnte nicht geladen werden. Erwartet unter models/" + ModelFile + ".", e);
+                "Das Modell zur Belegerkennung konnte nicht geladen werden. Erwartet unter models/" + ModelFile + ": " + e.Message, e);
         }
     }
 

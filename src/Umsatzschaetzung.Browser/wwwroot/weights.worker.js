@@ -21,6 +21,17 @@ const kept = manifest.then(async m => {
 
 const loading = new Map();
 
+// A dropped connection or a server that stumbles is tried again, as the runtime does with its own files.
+async function download(url, name, tries = 4) {
+    for (let attempt = 1; ; attempt++) {
+        const r = await fetch(url).then(r => r.ok ? r.arrayBuffer() : r).catch(e => e);
+        if (r instanceof ArrayBuffer) return r;
+        const again = r instanceof Error || r.status >= 500;
+        if (!again || attempt === tries) throw new Error(`${name}: ${r.message ?? r.status}`);
+        await new Promise(done => setTimeout(done, 500 * 2 ** attempt));
+    }
+}
+
 async function bytes(name) {
     const f = (await manifest).files[name];
     if (!f) throw new Error(`Unbekannte Modelldatei: ${name}`);
@@ -28,9 +39,7 @@ async function bytes(name) {
     const url = at(f.url);
     const hit = await cache.match(url);
     if (hit) return new Uint8Array(await hit.arrayBuffer());
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`${f.url}: ${r.status}`);
-    const data = await r.arrayBuffer();
+    const data = await download(url, f.url);
     const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)), b => b.toString(16).padStart(2, '0')).join('');
     if (hash !== f.sha256) throw new Error(`${f.url}: Prüfsumme stimmt nicht`);
     await cache.put(url, new Response(data, { headers: { 'content-type': 'application/octet-stream' } }));

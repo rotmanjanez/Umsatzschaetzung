@@ -67,7 +67,7 @@ public sealed class Bpe
         catch (Exception e) when (e is IOException or JsonException or KeyNotFoundException)
         {
             throw new InvalidOperationException(
-                "Die Wortzerlegung für die Belegerkennung konnte nicht geladen werden. Erwartet unter models/" + dir + ".", e);
+                "Die Wortzerlegung für die Belegerkennung konnte nicht geladen werden. Erwartet unter models/" + dir + ": " + e.Message, e);
         }
     }
 
