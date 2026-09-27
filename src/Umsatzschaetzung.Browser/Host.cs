@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Platform;
+using Avalonia.Platform.Storage;
 using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Service;
@@ -21,7 +22,16 @@ public static partial class Host
         App.App.SingleViewPrint = html => Print(WebPages.Seal(html));
         await AppBuilder.Configure<App.App>().WithInterFont().StartBrowserAppAsync(element);
         if (Mac()) CommandKey();
-        return (ShellView)((ISingleViewApplicationLifetime)Application.Current!.ApplicationLifetime!).MainView!;
+        var view = (ShellView)((ISingleViewApplicationLifetime)Application.Current!.ApplicationLifetime!).MainView!;
+        _ = LoadPickers(view);
+        return view;
+    }
+
+    // Avalonia fetches its picker script on the first pick, which outlasts the click that may open a picker.
+    static async Task LoadPickers(Visual view)
+    {
+        if (TopLevel.GetTopLevel(view)?.StorageProvider is not { } storage) return;
+        (await storage.TryGetWellKnownFolderAsync(WellKnownFolder.Documents))?.Dispose();
     }
 
     static bool Mac() =>
