@@ -1,10 +1,8 @@
-<Window x:Class="Umsatzschaetzung.App.Ui.ImportWindow"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-        x:DataType="ui:ImportJob"
-        Width="440" SizeToContent="Height" CanResize="False" ShowInTaskbar="False"
-        WindowStartupLocation="CenterOwner">
+<UserControl x:Class="Umsatzschaetzung.App.Ui.ImportPane"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
+             x:DataType="ui:ImportJob">
     <StackPanel Margin="20,16">
         <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
         <ProgressBar Height="6" Margin="0,12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}" IsVisible="{Binding Pending}"/>
@@ -17,4 +15,4 @@
         <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Pending}"/>
         <Button Content="Schließen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Complete}"/>
     </StackPanel>
-</Window>
+</UserControl>

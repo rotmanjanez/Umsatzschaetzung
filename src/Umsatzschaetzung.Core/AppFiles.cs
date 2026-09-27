@@ -4,7 +4,7 @@ namespace Umsatzschaetzung;
 // Mitgelieferte Daten liegen neben dem Programm, im macOS-Bundle aber eine Ebene
 // weiter unter Contents/Resources: alles andere unter Contents/MacOS hält codesign
 // für verschachtelten Code und verweigert die Signatur.
-static class AppFiles
+public static class AppFiles
 {
     public static string Dir { get; } = Resolve();
 

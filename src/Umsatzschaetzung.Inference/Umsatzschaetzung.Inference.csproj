@@ -6,10 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
-    <!-- Pinned: the tagger's weights are per-channel int8, which ORT only reads back
-         correctly from 1.27 on. A transitive bump would change which CPU kernel runs and
-         would not show up in any diff here. -->
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
+    <ProjectReference Include="../Umsatzschaetzung.Nets/Umsatzschaetzung.Nets.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="eval" />

@@ -11,7 +11,13 @@ public interface IHtmlView
     void Navigate(Uri url);
 }
 
-public sealed class HtmlView : NativeWebView, IHtmlView
+// Where the Bericht is previewed: a native web view on the desktop, whatever the host brings in a browser.
+public interface IHtmlPreview
+{
+    Task<bool> Show(string html, TimeSpan timeout, CancellationToken ct);
+}
+
+public sealed class HtmlView : NativeWebView, IHtmlView, IHtmlPreview
 {
     public HtmlView()
     {
@@ -24,6 +30,13 @@ public sealed class HtmlView : NativeWebView, IHtmlView
         NavigationStarted += (_, e) => e.Cancel = !WebPages.Ours(e.Request);
         NewWindowRequested += (_, e) => e.Handled = true;
     }
+
+    public Task<bool> Show(string html, TimeSpan timeout, CancellationToken ct) => WebPages.Show(this, html, timeout, ct);
+}
+
+public sealed class NoHtmlPreview : IHtmlPreview
+{
+    public Task<bool> Show(string html, TimeSpan timeout, CancellationToken ct) => Task.FromResult(false);
 }
 
 public sealed class HtmlDialog : NativeWebDialog, IHtmlView

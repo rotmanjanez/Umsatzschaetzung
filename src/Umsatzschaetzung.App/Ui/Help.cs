@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -20,27 +18,21 @@ public static class Help
     public const string Report = "bericht/";
     public const string Rules = "regeln/";
 
-    public static void Open(Window? owner, string topic)
+    public static async void Open(Control origin, string topic)
     {
         var url = $"https://docs.umsatzschaetzung.amtstools.de/{Release.Docs}/{topic}";
-        try
-        {
-            using var browser = Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-        catch (Exception e) when (e is Win32Exception or IOException or PlatformNotSupportedException)
-        {
-            _ = Dialog.Alert(owner, $"Die Dokumentation ließ sich nicht öffnen. Sie steht unter:\n\n{url}", "Hilfe");
-        }
+        if (TopLevel.GetTopLevel(origin)?.Launcher is { } launcher && await launcher.LaunchUriAsync(new Uri(url))) return;
+        _ = Dialog.Alert(origin, $"Die Dokumentation ließ sich nicht öffnen. Sie steht unter:\n\n{url}", "Hilfe");
     }
 
-    public static void OnF1(TopLevel window, Func<string> topic)
+    public static void OnF1(Control scope, Func<string> topic)
     {
         void Pressed(object? sender, KeyEventArgs e)
         {
             if (e.Key != Key.F1) return;
-            Open(window as Window, topic());
+            Open(scope, topic());
             e.Handled = true;
         }
-        window.AddHandler(InputElement.KeyDownEvent, Pressed, RoutingStrategies.Tunnel);
+        scope.AddHandler(InputElement.KeyDownEvent, Pressed, RoutingStrategies.Tunnel);
     }
 }

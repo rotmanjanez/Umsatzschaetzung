@@ -1,23 +1,23 @@
 using System.Collections.Concurrent;
 using RapidOcrNet;
 using SkiaSharp;
+using Umsatzschaetzung.Nets;
 
 namespace Umsatzschaetzung.Tests.RapidOcrNet;
 
 // The models the app ships: the v6 small detector with the v5 classifier and latin recogniser.
 // Loaded once, on the CPU, so the readings do not depend on the machine's accelerator.
-public sealed class OcrModels : IDisposable
+public sealed class OcrModels : IAsyncLifetime
 {
-    static string Model(string version, string file) => Path.Combine(AppContext.BaseDirectory, "models", version, file);
+    static readonly OrtWeights Weights = new(Path.Combine(AppContext.BaseDirectory, "models"));
+
+    static readonly NetOptions Cpu = new(Threads: 0, InterThreads: 0, Extended: true);
 
     public static readonly RapidOcrModelSet Set = RapidOcrModelSet.PPOCRv5Latin with
     {
-        DetModelPath = Model("v6", "PP-OCRv6_det_small.onnx"),
+        DetModelPath = RapidOcrModelSet.PPOCRv6Small.DetModelPath,
         DetMean = RapidOcrModelSet.PPOCRv6Small.DetMean,
         DetStd = RapidOcrModelSet.PPOCRv6Small.DetStd,
-        ClsModelPath = Model("v5", "ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx"),
-        RecModelPath = Model("v5", "latin_PP-OCRv5_rec_mobile_infer.onnx"),
-        KeysPath = Model("v5", "ppocrv5_latin_dict.txt"),
     };
 
     public static readonly RapidOcrOptions Upstream = RapidOcrOptions.PPOCRv6 with { ReturnWordBox = true };
@@ -42,22 +42,25 @@ public sealed class OcrModels : IDisposable
     public SKBitmap Page { get; } = Images.Text(480, 260, 40, [.. Lines.Select((l, i) => (l, 20f, (float)Baselines[i]))]);
     public SKBitmap Turned { get; }
 
-    readonly ConcurrentDictionary<(bool, RapidOcrOptions), OcrResult> reads = new();
+    readonly ConcurrentDictionary<(bool, RapidOcrOptions), Lazy<Task<OcrResult>>> reads = new();
 
-    public OcrResult Read(bool turned, RapidOcrOptions options) =>
-        reads.GetOrAdd((turned, options), key => Engine.Detect(key.Item1 ? Turned : Page, key.Item2));
+    public Task<OcrResult> Read(bool turned, RapidOcrOptions options) =>
+        reads.GetOrAdd((turned, options), key => new(() => Engine.Detect(key.Item1 ? Turned : Page, key.Item2))).Value;
 
     public OcrModels()
     {
-        using var options = RapidOcr.GetDefaultSessionOptions();
-        Engine.InitModels(Set, options);
-        Detector.InitModel(Set.DetModelPath, Set.DetMean, Set.DetStd, options);
-        Classifier.InitModel(Set.ClsModelPath, options);
-        Recognizer.InitModel(Set.RecModelPath, Set.KeysPath, options);
         Turned = Images.Turned180(Page);
     }
 
-    public void Dispose()
+    public async ValueTask InitializeAsync()
+    {
+        await Engine.InitModels(Weights, Set, Cpu, Cpu);
+        Detector.InitModel(await Weights.Open(Set.DetModelPath, Cpu), Set.DetMean, Set.DetStd);
+        Classifier.InitModel(await Weights.Open(Set.ClsModelPath, Cpu));
+        Recognizer.InitModel(await Weights.Open(Set.RecModelPath, Cpu), await Weights.Read(Set.KeysPath));
+    }
+
+    public ValueTask DisposeAsync()
     {
         Engine.Dispose();
         Detector.Dispose();
@@ -65,6 +68,7 @@ public sealed class OcrModels : IDisposable
         Recognizer.Dispose();
         Page.Dispose();
         Turned.Dispose();
+        return ValueTask.CompletedTask;
     }
 }
 

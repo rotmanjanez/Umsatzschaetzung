@@ -40,7 +40,7 @@ internal static class Pdfium
 
     [DllImport(Lib)] public static extern nint FPDFBitmap_CreateEx(int width, int height, int format, nint buffer, int stride);
     [DllImport(Lib)] public static extern void FPDFBitmap_Destroy(nint bitmap);
-    [DllImport(Lib)] public static extern void FPDFBitmap_FillRect(nint bitmap, int left, int top, int width, int height, uint color);
+    [DllImport(Lib)] public static extern int FPDFBitmap_FillRect(nint bitmap, int left, int top, int width, int height, uint color);
     [DllImport(Lib)] public static extern void FPDF_RenderPageBitmap(nint bitmap, nint page, int x, int y, int width, int height, int rotate, int flags);
 
     [DllImport(Lib)] public static extern nint FPDFText_LoadPage(nint page);
@@ -67,7 +67,7 @@ internal static class Pdfium
     [DllImport(Lib)] public static extern int FPDFPageObj_SetFillColor(nint obj, uint r, uint g, uint b, uint a);
     [DllImport(Lib)] public static extern void FPDFPageObj_Transform(nint obj, double a, double b, double c, double d, double e, double f);
     [DllImport(Lib)] public static extern void FPDFPageObj_Destroy(nint obj);
-    [DllImport(Lib)] public static extern void FPDFPage_InsertObject(nint page, nint obj);
+    [DllImport(Lib)] public static extern int FPDFPage_InsertObject(nint page, nint obj);
     [DllImport(Lib)] public static extern int FPDFPage_GenerateContent(nint page);
     [DllImport(Lib)] public static extern int FPDF_SaveAsCopy(nint document, ref FileWrite writer, uint flags);
 }

@@ -39,11 +39,14 @@ public partial class ReportView : Screen
     readonly ReportModel model = new();
     bool picking;
 
+    internal IHtmlPreview Web { get; } = App.HtmlPreview();
+
     protected override int Page => (int)Tab.Report;
 
     public ReportView(Session session) : base(session)
     {
         InitializeComponent();
+        Preview.Content = Web as Control;
         DataContext = model;
         Session.CaseChanged += () => { if (IsActive && Session.Case?.TemplateId != model.Template?.Id) Load(); };
         model.PropertyChanged += (_, e) =>
@@ -114,6 +117,11 @@ public partial class ReportView : Screen
         model.Busy = true;
         await Session.Run(async () =>
         {
+            if (App.SingleViewPrint is { } print)
+            {
+                print((await Session.Service.Reports.Render(caseId, false, Ct)).Html);
+                return;
+            }
             var resp = await Session.Service.Reports.Render(caseId, true, Ct);
             if (resp is not { Pdf: { } pdf, FileName: { } file })
             {

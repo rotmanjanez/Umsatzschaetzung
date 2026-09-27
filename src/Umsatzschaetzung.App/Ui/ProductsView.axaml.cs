@@ -246,7 +246,7 @@ public partial class ProductsView : Screen
                 .Select(p => new AssortmentConflict(Names.Product(rs, p.ProductId), listed[p.ProductId], p))
                 .OrderBy(c => c.Name, StringComparer.CurrentCulture)
                 .ToList();
-            HashSet<string>? take = conflicts.Count == 0 ? [] : await AssortmentConflicts.Ask(TopLevel.GetTopLevel(this) as Window, conflicts);
+            HashSet<string>? take = conflicts.Count == 0 ? [] : await AssortmentConflicts.Ask(this, conflicts);
             if (take is null || Session.Case != kase) return;
             foreach (var p in read.Products)
             {

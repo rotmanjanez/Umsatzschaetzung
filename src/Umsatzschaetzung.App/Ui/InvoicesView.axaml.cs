@@ -86,7 +86,7 @@ public partial class InvoicesView : Screen
 
     readonly InvoicesModel model = new();
     readonly Dictionary<string, InvoiceView> editors = [];
-    readonly Dictionary<string, InvoiceWindow> windows = [];
+    readonly Dictionary<string, Frame> windows = [];
     bool refreshing;
 
     public InvoicesView(Session session) : base(session)
@@ -180,11 +180,9 @@ public partial class InvoicesView : Screen
             open.Activate();
             return;
         }
-        var window = new InvoiceWindow(EditorFor(row), row.Supplier + " · " + row.Number);
-        windows[row.Id] = window;
-        window.Closed += (_, _) => Closed(row.Id);
-        if (TopLevel.GetTopLevel(this) is Window owner) window.Show(owner);
-        else window.Show();
+        var frame = InvoicePane.Open(this, EditorFor(row), row.Supplier + " · " + row.Number);
+        windows[row.Id] = frame;
+        frame.Closed += () => Closed(row.Id);
     }
 
     void Closed(string id)
@@ -206,7 +204,7 @@ public partial class InvoicesView : Screen
     async void Delete(object? sender, RoutedEventArgs e)
     {
         if ((sender as Control)?.DataContext is not InvoiceRow row || Session.Case is not { } k) return;
-        var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+        var answer = await Dialog.Confirm(this,
             "Die Rechnung „" + row.Supplier + " · " + row.Number + "“ wird mit dem Beleg gelöscht. "
                 + "Rückgängig machen lässt sich das, bis das Programm beendet wird.",
             "Rechnung löschen");
@@ -244,7 +242,7 @@ public partial class InvoicesView : Screen
     {
         model.Dragging = false;
         if (e.DataTransfer.TryGetFiles() is not { } items) return;
-        StartImport([.. items.Select(f => f.TryGetLocalPath()).OfType<string>()]);
+        StartImport(await Session.Paths(items));
     }
 
     void StartImport(List<string> paths)

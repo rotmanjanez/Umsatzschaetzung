@@ -6,8 +6,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Clipper2" Version="2.0.0" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Umsatzschaetzung.Nets/Umsatzschaetzung.Nets.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />

@@ -9,7 +9,11 @@ public class MatcherRankingTests
     const string Line = "Ware";
     const string Supplier = "Rheinland Getränke Fachgroßhandel GmbH";
 
-    static int Confidence(double cos) => Encoders.Shipped.Confidence((float)cos);
+    static async Task<int> Confidence(double cos)
+    {
+        await Encoders.Shipped.Load();
+        return Encoders.Shipped.Confidence((float)cos);
+    }
 
     static Ingredient Ing(string id, string name, string category = "") => new() { Id = id, Name = name, CategoryId = category };
 
@@ -20,7 +24,7 @@ public class MatcherRankingTests
         return rs;
     }
 
-    static List<Suggestion> Suggest(FixedCache cache, RuleSet rs, string gewerbe = "", string? supplier = null, InvoiceLine? line = null)
+    static Task<List<Suggestion>> Suggest(FixedCache cache, RuleSet rs, string gewerbe = "", string? supplier = null, InvoiceLine? line = null)
     {
         var m = new Matcher(Encoders.Shipped, cache.Query(line?.Name ?? Line));
         return m.Suggest(rs, gewerbe, supplier, line ?? new InvoiceLine { Name = Line });
@@ -29,23 +33,23 @@ public class MatcherRankingTests
     static List<string> Ids(List<Suggestion> s) => [.. s.Select(x => x.Mapping.IngredientId)];
 
     [Fact]
-    public void ConfidenceIsTheCalibratedCosine()
+    public async Task ConfidenceIsTheCalibratedCosine()
     {
-        var s = Suggest(new FixedCache().At("A", 0.8), Rules(Ing("ing.a", "A")));
+        var s = await Suggest(new FixedCache().At("A", 0.8), Rules(Ing("ing.a", "A")));
         var only = Assert.Single(s);
-        Assert.Equal(("ing.a", Confidence(0.8), OriginKind.Encoder), (only.Mapping.IngredientId, only.Confidence, only.Kind));
+        Assert.Equal(("ing.a", await Confidence(0.8), OriginKind.Encoder), (only.Mapping.IngredientId, only.Confidence, only.Kind));
     }
 
     [Fact]
-    public void ACandidateBelowTheFloorIsDropped()
+    public async Task ACandidateBelowTheFloorIsDropped()
     {
-        Assert.InRange(Confidence(0.1), 0, 19);
-        var s = Suggest(new FixedCache().At("A", 0.9).At("B", 0.1), Rules(Ing("ing.a", "A"), Ing("ing.b", "B")));
+        Assert.InRange(await Confidence(0.1), 0, 19);
+        var s = await Suggest(new FixedCache().At("A", 0.9).At("B", 0.1), Rules(Ing("ing.a", "A"), Ing("ing.b", "B")));
         Assert.Equal(["ing.a"], Ids(s));
     }
 
     [Fact]
-    public void AtMostFiveCandidatesComeBackBestFirst()
+    public async Task AtMostFiveCandidatesComeBackBestFirst()
     {
         var cache = new FixedCache();
         var rs = Rules();
@@ -54,33 +58,33 @@ public class MatcherRankingTests
             cache.At("W" + i, 0.60 + i * 0.05);
             rs.Put(Ing("ing." + i, "W" + i));
         }
-        var s = Suggest(cache, rs);
+        var s = await Suggest(cache, rs);
         Assert.Equal(["ing.7", "ing.6", "ing.5", "ing.4", "ing.3"], Ids(s));
         Assert.Equal(s.Select(x => x.Confidence).OrderDescending(), s.Select(x => x.Confidence));
     }
 
     [Fact]
-    public void ATieIsBrokenByTheIngredientIdAndStaysPut()
+    public async Task ATieIsBrokenByTheIngredientIdAndStaysPut()
     {
         var cache = new FixedCache().At("Zweite", 0.8).At("Erste", 0.8).Query(Line);
         var rs = Rules(Ing("ing.z", "Erste"), Ing("ing.a", "Zweite"), Ing("ing.m", "Erste"));
         var m = new Matcher(Encoders.Shipped, cache);
-        var first = m.Suggest(rs, "", null, new InvoiceLine { Name = Line });
-        var again = m.Suggest(rs, "", null, new InvoiceLine { Name = Line });
+        var first = await m.Suggest(rs, "", null, new InvoiceLine { Name = Line }, ct: TestContext.Current.CancellationToken);
+        var again = await m.Suggest(rs, "", null, new InvoiceLine { Name = Line }, ct: TestContext.Current.CancellationToken);
         Assert.Equal(["ing.a", "ing.m", "ing.z"], Ids(first));
         Assert.Equal(Ids(first), Ids(again));
         Assert.All(first, x => Assert.Equal(first[0].Confidence, x.Confidence));
     }
 
     [Fact]
-    public void AnIngredientScoresByItsClosestWordingNotTheirAverage()
+    public async Task AnIngredientScoresByItsClosestWordingNotTheirAverage()
     {
         var x = Ing("ing.x", "Fern");
         x.Aliases = ["Nah", "Mittel"];
         var cache = new FixedCache().At("Fern", 0.1).At("Nah", 0.95).At("Mittel", 0.5).At("Y", 0.9);
-        var s = Suggest(cache, Rules(x, Ing("ing.y", "Y")));
+        var s = await Suggest(cache, Rules(x, Ing("ing.y", "Y")));
         Assert.Equal(["ing.x", "ing.y"], Ids(s));
-        Assert.Equal(Confidence(0.95), s[0].Confidence);
+        Assert.Equal(await Confidence(0.95), s[0].Confidence);
     }
 
     [Theory]
@@ -89,7 +93,7 @@ public class MatcherRankingTests
     [InlineData("47250.0", true)]
     [InlineData("96021.0", false)]
     [InlineData("", true)]
-    public void OnlyTheIngredientsOfTheCaseGewerbeAreOffered(string gewerbe, bool korn)
+    public async Task OnlyTheIngredientsOfTheCaseGewerbeAreOffered(string gewerbe, bool korn)
     {
         var rs = Rules(
             new Category { Id = "cat.spirituosen", Name = "Spirituosen", Gewerbe = ["561", "47250.0"] },
@@ -98,12 +102,12 @@ public class MatcherRankingTests
             Ing("ing.bier", "Bier", "cat.bier"),
             Ing("ing.lose", "Lose", "cat.fehlt"));
         var cache = new FixedCache().At("Korn", 0.9).At("Bier", 0.8).At("Lose", 0.7);
-        var s = Suggest(cache, rs, gewerbe);
+        var s = await Suggest(cache, rs, gewerbe);
         Assert.Equal(korn ? ["ing.korn", "ing.bier", "ing.lose"] : ["ing.bier", "ing.lose"], Ids(s));
     }
 
     [Fact]
-    public void AnotherGewerbeOnTheSameRuleSetReindexes()
+    public async Task AnotherGewerbeOnTheSameRuleSetReindexes()
     {
         var rs = Rules(
             new Category { Id = "cat.spirituosen", Name = "Spirituosen", Gewerbe = ["561"] },
@@ -111,24 +115,24 @@ public class MatcherRankingTests
             Ing("ing.bier", "Bier"));
         var m = new Matcher(Encoders.Shipped, new FixedCache().At("Korn", 0.9).At("Bier", 0.8).Query(Line));
         var line = new InvoiceLine { Name = Line };
-        Assert.Equal(["ing.korn", "ing.bier"], Ids(m.Suggest(rs, "56101.0", null, line)));
-        Assert.Equal(["ing.bier"], Ids(m.Suggest(rs, "96021.0", null, line)));
-        Assert.Equal(["ing.korn", "ing.bier"], Ids(m.Suggest(rs, "56101.0", null, line)));
+        Assert.Equal(["ing.korn", "ing.bier"], Ids(await m.Suggest(rs, "56101.0", null, line, ct: TestContext.Current.CancellationToken)));
+        Assert.Equal(["ing.bier"], Ids(await m.Suggest(rs, "96021.0", null, line, ct: TestContext.Current.CancellationToken)));
+        Assert.Equal(["ing.korn", "ing.bier"], Ids(await m.Suggest(rs, "56101.0", null, line, ct: TestContext.Current.CancellationToken)));
     }
 
     [Fact]
-    public void AnIngredientNoLongerValidIsNotOffered()
+    public async Task AnIngredientNoLongerValidIsNotOffered()
     {
         var old = Ing("ing.alt", "Alt");
         old.Meta.ValidTo = new DateOnly(2020, 1, 1);
         var later = Ing("ing.neu", "Neu");
         later.Meta.ValidFrom = DateOnly.FromDateTime(DateTime.Now).AddYears(1);
-        var s = Suggest(new FixedCache().At("Alt", 0.9).At("Neu", 0.9).At("B", 0.5), Rules(old, later, Ing("ing.b", "B")));
+        var s = await Suggest(new FixedCache().At("Alt", 0.9).At("Neu", 0.9).At("B", 0.5), Rules(old, later, Ing("ing.b", "B")));
         Assert.Equal(["ing.b"], Ids(s));
     }
 
     [Fact]
-    public void AnIngredientIsOfferedOnTheDatesItWasValid()
+    public async Task AnIngredientIsOfferedOnTheDatesItWasValid()
     {
         var old = Ing("ing.alt", "Alt");
         old.Meta.ValidTo = new DateOnly(2020, 1, 1);
@@ -136,54 +140,54 @@ public class MatcherRankingTests
         var m = new Matcher(Encoders.Shipped, new FixedCache().At("Alt", 0.9).At("B", 0.5).Query(Line));
         var line = new InvoiceLine { Name = Line };
 
-        Assert.Equal(["ing.alt", "ing.b"], Ids(m.Suggest(rs, "", null, line, new DateOnly(2019, 6, 1))));
-        Assert.Equal(["ing.b"], Ids(m.Suggest(rs, "", null, line, new DateOnly(2021, 6, 1))));
+        Assert.Equal(["ing.alt", "ing.b"], Ids(await m.Suggest(rs, "", null, line, new DateOnly(2019, 6, 1), ct: TestContext.Current.CancellationToken)));
+        Assert.Equal(["ing.b"], Ids(await m.Suggest(rs, "", null, line, new DateOnly(2021, 6, 1), ct: TestContext.Current.CancellationToken)));
     }
 
     [Fact]
-    public void AConfirmedMappingTeachesItsWordingAndAGuessDoesNot()
+    public async Task AConfirmedMappingTeachesItsWordingAndAGuessDoesNot()
     {
         var rs = Rules(
             Ing("ing.a", "A"),
             Ing("ing.b", "B"),
             new ArticleMapping { Id = "map.a", Observed = "Gelernt", IngredientId = "ing.a", Confirmed = true },
             new ArticleMapping { Id = "map.b", Observed = "Geraten", IngredientId = "ing.b", Confirmed = false });
-        var s = Suggest(new FixedCache().At("A", 0.1).At("B", 0.1).At("Gelernt", 0.97).At("Geraten", 0.99), rs);
+        var s = await Suggest(new FixedCache().At("A", 0.1).At("B", 0.1).At("Gelernt", 0.97).At("Geraten", 0.99), rs);
         var only = Assert.Single(s);
-        Assert.Equal(("ing.a", Confidence(0.97), OriginKind.Encoder, ""), (only.Mapping.IngredientId, only.Confidence, only.Kind, only.Mapping.Id));
+        Assert.Equal(("ing.a", await Confidence(0.97), OriginKind.Encoder, ""), (only.Mapping.IngredientId, only.Confidence, only.Kind, only.Mapping.Id));
     }
 
     [Fact]
-    public void AConfirmedMappingCannotBringBackAnIngredientOutsideTheGewerbe()
+    public async Task AConfirmedMappingCannotBringBackAnIngredientOutsideTheGewerbe()
     {
         var rs = Rules(
             new Category { Id = "cat.spirituosen", Name = "Spirituosen", Gewerbe = ["561"] },
             Ing("ing.korn", "Korn", "cat.spirituosen"),
             new ArticleMapping { Id = "map.korn", Name = "Klarer", IngredientId = "ing.korn", Confirmed = true });
-        Assert.Empty(Suggest(new FixedCache().At("Korn", 0.9).At("Klarer", 0.99), rs, "96021.0"));
+        Assert.Empty(await Suggest(new FixedCache().At("Korn", 0.9).At("Klarer", 0.99), rs, "96021.0"));
     }
 
     [Fact]
-    public void AnUpperCaseLineIsLookedUpInTitleCase()
+    public async Task AnUpperCaseLineIsLookedUpInTitleCase()
     {
         var cache = new FixedCache().At("Fassbier", 0.9).Query("Fassbier Pils, Keg 50 L");
         var m = new Matcher(Encoders.Shipped, cache);
-        var s = m.Suggest(Rules(Ing("ing.fass", "Fassbier")), "", null, new InvoiceLine { Name = "FASSBIER PILS, KEG 50 L" });
+        var s = await m.Suggest(Rules(Ing("ing.fass", "Fassbier")), "", null, new InvoiceLine { Name = "FASSBIER PILS, KEG 50 L" }, ct: TestContext.Current.CancellationToken);
         Assert.Equal(["ing.fass"], Ids(s));
         Assert.Equal("FASSBIER PILS, KEG 50 L", s[0].Mapping.Observed);
     }
 
     [Fact]
-    public void AnEmptyRuleSetSuggestsNothing() => Assert.Empty(Suggest(new FixedCache(), Rules()));
+    public async Task AnEmptyRuleSetSuggestsNothing() => Assert.Empty(await Suggest(new FixedCache(), Rules()));
 
     [Fact]
-    public void AnExactHitLeadsWithFullConfidenceAndItsIngredientIsNotRepeated()
+    public async Task AnExactHitLeadsWithFullConfidenceAndItsIngredientIsNotRepeated()
     {
         var rs = Rules(
             Ing("ing.a", "A"),
             Ing("ing.b", "B"),
             new ArticleMapping { Id = "map.a", Name = Line, IngredientId = "ing.a", Factor = 42, Confirmed = true });
-        var s = Suggest(new FixedCache().At("A", 0.99).At("B", 0.8), rs);
+        var s = await Suggest(new FixedCache().At("A", 0.99).At("B", 0.8), rs);
         Assert.Equal(["ing.a", "ing.b"], Ids(s));
         Assert.Equal((OriginKind.Exact, 100), (s[0].Kind, s[0].Confidence));
         Assert.Same(rs.Mappings["map.a"], s[0].Mapping);
@@ -191,10 +195,10 @@ public class MatcherRankingTests
     }
 
     [Fact]
-    public void AnExactHitStandsAloneWhenTheEncoderHasNothing()
+    public async Task AnExactHitStandsAloneWhenTheEncoderHasNothing()
     {
         var rs = Rules(Ing("ing.a", "A"), new ArticleMapping { Id = "map.a", Name = Line, IngredientId = "ing.a", Confirmed = true });
-        var only = Assert.Single(Suggest(new FixedCache().At("A", 0.1), rs));
+        var only = Assert.Single(await Suggest(new FixedCache().At("A", 0.1), rs));
         Assert.Equal(("map.a", OriginKind.Exact), (only.Mapping.Id, only.Kind));
     }
 
@@ -204,11 +208,11 @@ public class MatcherRankingTests
     [InlineData(Supplier, null, null, Supplier, null, null, Line)]
     [InlineData(null, null, "4001234567890", null, null, "4001234567890", null)]
     [InlineData(Supplier, "A-1", "4001234567890", Supplier, "A-1", "4001234567890", null)]
-    public void AProposalIdentifiesTheArticleByWhatTheLineOffers(string? supplier, string? articleId, string? gtin,
+    public async Task AProposalIdentifiesTheArticleByWhatTheLineOffers(string? supplier, string? articleId, string? gtin,
         string? wantSupplier, string? wantArticle, string? wantGtin, string? wantName)
     {
         var line = new InvoiceLine { Name = Line, SellerArticleId = articleId, Gtin = gtin };
-        var m = Assert.Single(Suggest(new FixedCache().At("A", 0.9), Rules(Ing("ing.a", "A")), supplier: supplier, line: line)).Mapping;
+        var m = Assert.Single(await Suggest(new FixedCache().At("A", 0.9), Rules(Ing("ing.a", "A")), supplier: supplier, line: line)).Mapping;
         Assert.Equal(("", wantSupplier, wantArticle, wantGtin, wantName, Line, false),
             (m.Id, m.SupplierName, m.SupplierArticleId, m.Gtin, m.Name, m.Observed, m.Confirmed));
     }
@@ -218,10 +222,10 @@ public class MatcherRankingTests
     [Theory]
     [InlineData("XCS", "XCS")]
     [InlineData("", null)]
-    public void AProposalIsBoundToTheUnitItsFactorWasReadFor(string unitCode, string? bound)
+    public async Task AProposalIsBoundToTheUnitItsFactorWasReadFor(string unitCode, string? bound)
     {
         var line = new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", UnitCode = unitCode };
-        var m = Assert.Single(Suggest(new FixedCache().At("A", 0.9), Rules(Ing("ing.a", "A")), line: line)).Mapping;
+        var m = Assert.Single(await Suggest(new FixedCache().At("A", 0.9), Rules(Ing("ing.a", "A")), line: line)).Mapping;
         Assert.Equal(bound, m.UnitCode);
         Assert.True(Match.Fits(m, null, null, line));
         Assert.Equal(bound is null, Match.Fits(m, null, null, new InvoiceLine { Name = line.Name, UnitCode = "XBO" }));
@@ -233,14 +237,14 @@ public class MatcherRankingTests
     [InlineData("GRM", null)]
     [InlineData("H87", null)]
     [InlineData(null, null)]
-    public void TheFactorComesFromThePackSizeInTheRecipeUnit(string? recipeUnit, long? factor)
+    public async Task TheFactorComesFromThePackSizeInTheRecipeUnit(string? recipeUnit, long? factor)
     {
         const string name = "Pils Kiste 20 x 0,5 l";
         var rs = Rules(Ing("ing.a", "A"));
         if (recipeUnit is not null)
             rs.Put(new Product { Id = "prod.a", Name = "A", Recipe = [new() { IngredientId = "ing.a", Amount = 1, Unit = recipeUnit }] });
         var line = new InvoiceLine { Name = name, UnitCode = "XCS" };
-        var s = Suggest(new FixedCache().At("A", 0.9), rs, line: line);
+        var s = await Suggest(new FixedCache().At("A", 0.9), rs, line: line);
         Assert.Equal(factor, Assert.Single(s).Mapping.Factor);
     }
 
@@ -255,21 +259,21 @@ public class MatcherRankingTests
     [InlineData("Pils Fass 30 l", "H87", "ing.fass")]
     [InlineData("Pils 30 l KEG", "", "ing.fass")]
     [InlineData("Pils 20 x 0,5 l", "XCS", "ing.flasche")]
-    public void ThePackagingDecidesBetweenWaresTheWordsCannotTellApart(string name, string unit, string want)
+    public async Task ThePackagingDecidesBetweenWaresTheWordsCannotTellApart(string name, string unit, string want)
     {
         var cache = new FixedCache().At("Fassbier", 0.9).At("Flaschenbier", 0.9).Query(name);
         var m = new Matcher(Encoders.Shipped, cache);
-        var s = m.Suggest(Beer(), "", null, new InvoiceLine { Name = name, UnitCode = unit });
+        var s = await m.Suggest(Beer(), "", null, new InvoiceLine { Name = name, UnitCode = unit }, ct: TestContext.Current.CancellationToken);
         Assert.Equal(want, s[0].Mapping.IngredientId);
-        Assert.Equal(Confidence(0.9), s[0].Confidence);
+        Assert.Equal(await Confidence(0.9), s[0].Confidence);
     }
 
     [Fact]
-    public void WithoutAContainerThePackagingSaysNothing()
+    public async Task WithoutAContainerThePackagingSaysNothing()
     {
         var cache = new FixedCache().At("Fassbier", 0.8).At("Flaschenbier", 0.9).Query("Pils 0,33 l");
         var m = new Matcher(Encoders.Shipped, cache);
-        var s = m.Suggest(Beer(), "", null, new InvoiceLine { Name = "Pils 0,33 l", UnitCode = "H87" });
-        Assert.Equal([Confidence(0.9), Confidence(0.8)], s.Select(x => x.Confidence));
+        var s = await m.Suggest(Beer(), "", null, new InvoiceLine { Name = "Pils 0,33 l", UnitCode = "H87" }, ct: TestContext.Current.CancellationToken);
+        Assert.Equal([await Confidence(0.9), await Confidence(0.8)], s.Select(x => x.Confidence));
     }
 }

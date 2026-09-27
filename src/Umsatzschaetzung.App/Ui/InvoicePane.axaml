@@ -1,8 +1,6 @@
-<Window x:Class="Umsatzschaetzung.App.Ui.InvoiceWindow"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Rechnung" Width="1500" Height="940" MinWidth="900" MinHeight="600"
-        WindowStartupLocation="CenterOwner">
+<UserControl x:Class="Umsatzschaetzung.App.Ui.InvoicePane"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DockPanel>
         <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
             <DockPanel>
@@ -12,4 +10,4 @@
         </Border>
         <ContentControl x:Name="Body" Margin="16"/>
     </DockPanel>
-</Window>
+</UserControl>

@@ -2,7 +2,6 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-           xmlns:platform="clr-namespace:Umsatzschaetzung.App.Platform"
            x:DataType="ui:ReportModel"
            Margin="0,12,0,0">
     <DockPanel>
@@ -27,7 +26,7 @@
         </StackPanel>
         <Border Theme="{StaticResource Panel}">
             <Grid>
-                <platform:HtmlView x:Name="Web"/>
+                <ContentControl x:Name="Preview"/>
                 <TextBlock Text="{Binding Note}" Theme="{StaticResource EmptyState}" IsVisible="{Binding ShowNote}"/>
             </Grid>
         </Border>

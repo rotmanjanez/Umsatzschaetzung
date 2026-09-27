@@ -7,13 +7,13 @@ public static class Extractor
 {
     public static async Task<Invoice> InvoiceAsync(ITagger tagger, List<OcrPage> pages, CancellationToken ct, Reread? reread = null)
     {
-        var inv = await Task.Run(() =>
+        var inv = await Task.Run(async () =>
         {
             var tagged = new List<List<TaggedWord>>(pages.Count);
             foreach (var p in pages)
             {
                 ct.ThrowIfCancellationRequested();
-                tagged.Add(tagger.Tag(p.Words, p.Width, p.Height));
+                tagged.Add(await tagger.Tag(p.Words, p.Width, p.Height, ct));
             }
             return Assemble.Invoice(tagged, pages);
         }, ct);

@@ -287,6 +287,38 @@
         </Setter>
     </ControlTheme>
 
+    <ControlTheme x:Key="Sheet" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SoftBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="BoxShadow" Value="0 8 32 0 #40000000"/>
+        <Setter Property="Margin" Value="16"/>
+    </ControlTheme>
+
+    <ControlTheme x:Key="SheetBar" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource SoftBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Padding" Value="16,6,8,6"/>
+    </ControlTheme>
+
+    <ControlTheme x:Key="SheetTitle" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </ControlTheme>
+
+    <ControlTheme x:Key="SheetTab" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+        <Setter Property="Padding" Value="12,4"/>
+        <Setter Property="MaxWidth" Value="240"/>
+        <Setter Property="FontSize" Value="12"/>
+    </ControlTheme>
+
+    <ControlTheme x:Key="SheetBackdrop" TargetType="Rectangle">
+        <Setter Property="Fill" Value="#40000000"/>
+    </ControlTheme>
+
     <ControlTheme x:Key="Grid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>

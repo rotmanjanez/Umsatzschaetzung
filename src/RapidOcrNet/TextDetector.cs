@@ -5,9 +5,8 @@
 
 using System.Numerics;
 using Clipper2Lib;
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using SkiaSharp;
+using Umsatzschaetzung.Nets;
 
 namespace RapidOcrNet;
 
@@ -26,24 +25,16 @@ public sealed class TextDetector : IDisposable
     private float[] _meanValues = DefaultMeanValues;
     private float[] _normValues = DefaultNormValues;
 
-    private InferenceSession _dbNet = null!;
+    private INet _dbNet = null!;
     private string _inputName = null!;
 
-    /// <summary>
-    /// Serializes inference across detectors that share one accelerator, which does not
-    /// take concurrent runs from several sessions.
-    /// </summary>
-    public object? RunLock { get; set; }
+    // One page at a time through a detector: its runtime spreads a page over every core.
+    private readonly SemaphoreSlim _running = new(1, 1);
 
-    public void InitModel(string path, SessionOptions op)
+    public void InitModel(INet net)
     {
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException($"Detector model file does not exist: '{path}'.");
-        }
-
-        _dbNet = new InferenceSession(path, op);
-        _inputName = _dbNet.InputMetadata.Keys.First();
+        _dbNet = net;
+        _inputName = net.Inputs[0].Name;
     }
 
     /// <summary>
@@ -52,7 +43,7 @@ public sealed class TextDetector : IDisposable
     /// inverted internally so the existing <c>(pixel - mean) * (1/std)</c> normalization math
     /// is preserved. Use this for PP-OCRv6 detectors, which expect mean/std (127.5, 127.5).
     /// </summary>
-    public void InitModel(string path, float[] mean, float[] std, SessionOptions op)
+    public void InitModel(INet net, float[] mean, float[] std)
     {
         ArgumentNullException.ThrowIfNull(mean);
         ArgumentNullException.ThrowIfNull(std);
@@ -61,7 +52,7 @@ public sealed class TextDetector : IDisposable
             throw new ArgumentException("Detector mean and std must each have exactly 3 channel values.");
         }
 
-        InitModel(path, op);
+        InitModel(net);
 
         _meanValues = mean;
         var norm = new float[3];
@@ -78,42 +69,33 @@ public sealed class TextDetector : IDisposable
         _normValues = norm;
     }
 
-    public void InitModel(string path, int numThread)
-    {
-        using var sessionOptions = RapidOcr.GetDefaultSessionOptions(numThread);
-        InitModel(path, sessionOptions);
-    }
-
-    public IReadOnlyList<TextBox>? GetTextBoxes(SKBitmap src, ScaleParam scale, float boxScoreThresh, float boxThresh,
+    public async Task<IReadOnlyList<TextBox>?> GetTextBoxes(SKBitmap src, ScaleParam scale, float boxScoreThresh, float boxThresh,
         float unClipRatio)
     {
-        Tensor<float> inputTensors;
+        Tensor input;
         if (src.Width == scale.DstWidth && src.Height == scale.DstHeight)
         {
-            inputTensors = OcrUtils.SubtractMeanNormalize(src, _meanValues, _normValues);
+            input = OcrUtils.SubtractMeanNormalize(src, _meanValues, _normValues, _inputName);
         }
         else
         {
             using var srcResize = Bands.Resize(src, src.Info.WithSize(scale.DstWidth, scale.DstHeight), OcrUtils.NetworkSampling);
-            inputTensors = OcrUtils.SubtractMeanNormalize(srcResize, _meanValues, _normValues);
+            input = OcrUtils.SubtractMeanNormalize(srcResize, _meanValues, _normValues, _inputName);
         }
 
-        IReadOnlyCollection<NamedOnnxValue> inputs = new NamedOnnxValue[]
+        Tensor[] results;
+        await _running.WaitAsync();
+        try
         {
-                NamedOnnxValue.CreateFromTensor(_inputName, inputTensors)
-        };
-
-        IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results;
-        lock (RunLock ?? _dbNet)
+            results = await _dbNet.Run([input]);
+        }
+        finally
         {
-            results = _dbNet.Run(inputs);
+            _running.Release();
         }
 
-        using (results)
-        {
-            return GetTextBoxes(results[0], scale.DstHeight, scale.DstWidth, scale, boxScoreThresh,
-                boxThresh, unClipRatio);
-        }
+        return GetTextBoxes(results[0].F, scale.DstHeight, scale.DstWidth, scale, boxScoreThresh,
+            boxThresh, unClipRatio);
     }
 
     // A 3x3 maximum over the 0/1 mask: what Skia's dilate of radius 1 gave, byte for byte,
@@ -172,7 +154,7 @@ public sealed class TextDetector : IDisposable
     }
 
 
-    private IReadOnlyList<TextBox> GetTextBoxes(DisposableNamedOnnxValue outputTensor, int rows, int cols,
+    private IReadOnlyList<TextBox> GetTextBoxes(ReadOnlySpan<float> predData, int rows, int cols,
         ScaleParam s, float boxScoreThresh, float boxThresh, float unClipRatio)
     {
         const float maxSideThresh = 3.0f; // Long Edge Threshold
@@ -180,17 +162,6 @@ public sealed class TextDetector : IDisposable
         // The dilation grows a box by a detector pixel a side and unclip multiplies that; on a
         // shrunk input the pixel is larger than a source pixel, so the excess comes off again.
         float shrink = (1 + unClipRatio) * MathF.Max(0, 1 - MathF.Min(s.ScaleWidth, s.ScaleHeight));
-
-        // Data preparation
-        ReadOnlySpan<float> predData;
-        if (outputTensor.AsTensor<float>() is DenseTensor<float> dt)
-        {
-            predData = dt.Buffer.Span;
-        }
-        else
-        {
-            predData = outputTensor.AsEnumerable<float>().ToArray();
-        }
 
         var gray8 = new SKImageInfo()
         {
@@ -602,6 +573,7 @@ public sealed class TextDetector : IDisposable
 
     public void Dispose()
     {
-        _dbNet.Dispose();
+        _dbNet?.Dispose();
+        _running.Dispose();
     }
 }

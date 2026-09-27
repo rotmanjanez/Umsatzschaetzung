@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Tests.Tagging;
@@ -6,7 +7,7 @@ namespace Umsatzschaetzung.Tests.Tagging;
 public sealed class BpeTests : IDisposable
 {
     static readonly string Shipped = AppFiles.Beside(Path.Combine("models", "belegtagger"));
-    static readonly Lazy<Bpe> Real = new(() => Bpe.Open(Shipped));
+    static readonly Lazy<Task<Bpe>> Real = new(() => Bpe.Open(new OrtWeights(AppFiles.Beside("models")), "belegtagger"));
 
     const string Gpt2Split = @"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+";
 
@@ -15,7 +16,7 @@ public sealed class BpeTests : IDisposable
     public void Dispose() => dir.Dispose();
 
     // A tokenizer of a few letters: byte map as shipped, everything else hand-written.
-    Bpe Tiny(string merges, string split = Gpt2Split)
+    Task<Bpe> Tiny(string merges, string split = Gpt2Split)
     {
         var at = dir.Sub(Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(at);
@@ -32,25 +33,33 @@ public sealed class BpeTests : IDisposable
             unk_id = 3,
             specials = new Dictionary<string, int> { ["<s>"] = 0, ["</s>"] = 2, ["<pad>"] = 1, ["<unk>"] = 3 },
         }));
-        return Bpe.Open(at);
+        return Bpe.Open(new OrtWeights(dir.Path), Path.GetFileName(at));
     }
 
     [Fact]
-    public void TheSpecialsComeFromTheSpec() =>
-        Assert.Equal((0, 2, 1, 3), (Real.Value.Bos, Real.Value.Eos, Real.Value.Pad, Real.Value.Unk));
+    public async Task TheSpecialsComeFromTheSpec()
+    {
+        var bpe = await Real.Value;
+        Assert.Equal((0, 2, 1, 3), (bpe.Bos, bpe.Eos, bpe.Pad, bpe.Unk));
+    }
 
     [Theory]
     [InlineData("Rechnung")]
     [InlineData("1.234,56")]
     [InlineData("Größe")]
     [InlineData("")]
-    public void AWordIsEncodedAfterASpace(string word) => Assert.Equal(Real.Value.Encode(" " + word), Real.Value.Word(word));
+    public async Task AWordIsEncodedAfterASpace(string word)
+    {
+        var bpe = await Real.Value;
+        Assert.Equal(bpe.Encode(" " + word), bpe.Word(word));
+    }
 
     [Fact]
-    public void NothingIsNoTokensButAnEmptyWordIsItsSpace()
+    public async Task NothingIsNoTokensButAnEmptyWordIsItsSpace()
     {
-        Assert.Empty(Real.Value.Encode(""));
-        Assert.Equal([751], Real.Value.Word(""));
+        var bpe = await Real.Value;
+        Assert.Empty(bpe.Encode(""));
+        Assert.Equal([751], bpe.Word(""));
     }
 
     [Theory]
@@ -58,44 +67,56 @@ public sealed class BpeTests : IDisposable
     [InlineData("MwSt. 19%", new[] { "MwSt", ".", " 19", "%" })]
     [InlineData("a  b", new[] { "a", " ", " b" })]
     [InlineData("it's", new[] { "it", "'s" })]
-    public void ATextIsEncodedPieceByPieceAsTheSpecSplitsIt(string text, string[] pieces) =>
-        Assert.Equal(pieces.SelectMany(Real.Value.Encode), Real.Value.Encode(text));
+    public async Task ATextIsEncodedPieceByPieceAsTheSpecSplitsIt(string text, string[] pieces)
+    {
+        var bpe = await Real.Value;
+        Assert.Equal(pieces.SelectMany(bpe.Encode), bpe.Encode(text));
+    }
 
     [Fact]
-    public void TheSameWordGivesTheSameIdsAgain()
+    public async Task TheSameWordGivesTheSameIdsAgain()
     {
-        var first = Real.Value.Word("Sonnenallee");
-        Assert.Equal(first, Real.Value.Word("Sonnenallee"));
+        var bpe = await Real.Value;
+        var first = bpe.Word("Sonnenallee");
+        Assert.Equal(first, bpe.Word("Sonnenallee"));
         Assert.Equal([2525, 22030], first);
     }
 
     [Fact]
-    public void MergesApplyInTheOrderOfTheFile()
+    public async Task MergesApplyInTheOrderOfTheFile()
     {
-        Assert.Equal([4, 8], Tiny("#version: 0.2\nb c\na b\nab c\n").Encode("abc"));
-        Assert.Equal([9], Tiny("#version: 0.2\na b\nab c\nb c\n").Encode("abc"));
+        var byLine = await Tiny("#version: 0.2\nb c\na b\nab c\n");
+        var reordered = await Tiny("#version: 0.2\na b\nab c\nb c\n");
+        Assert.Equal([4, 8], byLine.Encode("abc"));
+        Assert.Equal([9], reordered.Encode("abc"));
     }
 
     [Fact]
-    public void AMergesFileWithoutHeaderStartsAtItsFirstLine() =>
-        Assert.Equal([4, 8], Tiny("b c\na b\n").Encode("abc"));
-
-    [Fact]
-    public void TheLeftmostOfEqualPairsMergesFirst() =>
-        Assert.Equal([12, 4], Tiny("#version: 0.2\na a\n").Encode("aaa"));
-
-    [Fact]
-    public void ALeadingSpaceBecomesTheWordStartMarker()
+    public async Task AMergesFileWithoutHeaderStartsAtItsFirstLine()
     {
-        var bpe = Tiny("#version: 0.2\nĠ a\n");
+        var bpe = await Tiny("b c\na b\n");
+        Assert.Equal([4, 8], bpe.Encode("abc"));
+    }
+
+    [Fact]
+    public async Task TheLeftmostOfEqualPairsMergesFirst()
+    {
+        var bpe = await Tiny("#version: 0.2\na a\n");
+        Assert.Equal([12, 4], bpe.Encode("aaa"));
+    }
+
+    [Fact]
+    public async Task ALeadingSpaceBecomesTheWordStartMarker()
+    {
+        var bpe = await Tiny("#version: 0.2\nĠ a\n");
         Assert.Equal([11], bpe.Word("a"));
         Assert.Equal([10], bpe.Encode(" "));
     }
 
     [Fact]
-    public void WhatTheVocabularyLacksIsUnknownByteForByte()
+    public async Task WhatTheVocabularyLacksIsUnknownByteForByte()
     {
-        var bpe = Tiny("#version: 0.2\n");
+        var bpe = await Tiny("#version: 0.2\n");
         Assert.Equal([3], bpe.Encode("x"));
         Assert.Equal([3, 3], bpe.Encode("é"));
         Assert.Equal([3, 3, 3], bpe.Encode("€"));
@@ -103,27 +124,28 @@ public sealed class BpeTests : IDisposable
     }
 
     [Fact]
-    public void ThePreTokenizerIsTheSpecs()
+    public async Task ThePreTokenizerIsTheSpecs()
     {
         var merges = "#version: 0.2\na b\n";
-        Assert.Equal([7], Tiny(merges).Encode("ab"));
-        Assert.Equal([4, 5], Tiny(merges, ".").Encode("ab"));
+        var gpt2 = await Tiny(merges);
+        var dot = await Tiny(merges, ".");
+        Assert.Equal([7], gpt2.Encode("ab"));
+        Assert.Equal([4, 5], dot.Encode("ab"));
     }
 
     [Fact]
-    public void AMissingTokenizerSaysWhereItWasExpected()
+    public async Task AMissingTokenizerSaysWhereItWasExpected()
     {
-        var missing = dir.Sub("fehlt");
-        var e = Assert.Throws<InvalidOperationException>(() => Bpe.Open(missing));
-        Assert.Contains(missing, e.Message);
+        var e = await Assert.ThrowsAsync<InvalidOperationException>(() => Bpe.Open(new OrtWeights(dir.Path), "fehlt", TestContext.Current.CancellationToken));
+        Assert.Contains("fehlt", e.Message);
     }
 
     [Fact]
-    public void ASpecWithoutItsSpecialsIsRefused()
+    public async Task ASpecWithoutItsSpecialsIsRefused()
     {
         var at = dir.Sub("kaputt");
         Directory.CreateDirectory(at);
         File.WriteAllText(Path.Combine(at, "spec.json"), """{"unk_id": 3}""");
-        Assert.Throws<InvalidOperationException>(() => Bpe.Open(at));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Bpe.Open(new OrtWeights(dir.Path), "kaputt", TestContext.Current.CancellationToken));
     }
 }

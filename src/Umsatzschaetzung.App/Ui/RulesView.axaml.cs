@@ -431,7 +431,7 @@ public partial class RulesView : Screen
     }
 
     Task<bool> Confirmed(string title, Entity entity) =>
-        Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+        Dialog.Confirm(this,
             "„" + title + "“ wird dauerhaft aus den Regeln entfernt. Bereits erstellte Berichte bleiben unverändert.",
             Format.EntityName(entity) + " löschen");
 

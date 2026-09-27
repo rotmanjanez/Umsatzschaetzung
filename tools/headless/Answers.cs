@@ -37,9 +37,9 @@ public sealed class Notes
 
 public sealed class Noted(IRanking inner, Notes notes) : IRanking
 {
-    public IReadOnlyList<Ranked> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count)
+    public async Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default)
     {
-        var ranked = inner.Rank(rs, gewerbe, line, date, count);
+        var ranked = await inner.Rank(rs, gewerbe, line, date, count, ct);
         notes.Note(new Answer(gewerbe, line.Name, line.UnitCode, rs.Version, [.. ranked]));
         return ranked;
     }
@@ -51,10 +51,10 @@ public sealed class Replayed(IReadOnlyList<Answer> answers) : IRanking
 {
     readonly ILookup<(string, string, string), Answer> byLine = answers.ToLookup(a => (a.Gewerbe, a.Name, a.Unit));
 
-    public IReadOnlyList<Ranked> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count)
+    public Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default)
     {
         var asked = byLine[(gewerbe, line.Name, line.UnitCode)].OrderBy(a => a.Version).ToList();
         var answer = asked.LastOrDefault(a => a.Version <= rs.Version) ?? asked.FirstOrDefault();
-        return answer is null ? [] : [.. answer.Ranked.Take(count)];
+        return Task.FromResult<IReadOnlyList<Ranked>>(answer is null ? [] : [.. answer.Ranked.Take(count)]);
     }
 }

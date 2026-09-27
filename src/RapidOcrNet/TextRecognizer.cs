@@ -3,11 +3,9 @@
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/CrnnNet.cs
 
-using System.Collections.Concurrent;
 using System.Text;
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using SkiaSharp;
+using Umsatzschaetzung.Nets;
 
 namespace RapidOcrNet;
 
@@ -19,45 +17,27 @@ public sealed class TextRecognizer : IDisposable
     //private const int CrnnDefaultWidth = 320; // matches PP-OCR rec_img_shape [3, 48, 320]
     //private const int RecBatchNum = 6;
 
-    private InferenceSession _crnnNet = null!;
-    private InferenceSession? _accelerated;
-    private object? _acceleratorLock;
+    private INet _crnnNet = null!;
+    private INet? _accelerated;
     private volatile bool _acceleratorFailed;
     private string[] _keys = null!;
     private string _inputName = null!;
 
     /// <summary>
-    /// <paramref name="accelerated"/> reads beside the cores, one run at a time under
-    /// <paramref name="acceleratorLock"/>; a run that fails there is read on the cores.
+    /// <paramref name="keys"/> is the dictionary file, a key per line. <paramref name="accelerated"/>
+    /// reads beside the cores; a run that fails there is read on the cores.
     /// </summary>
-    public void InitModel(string path, string keysPath, SessionOptions op, SessionOptions? accelerated = null, object? acceleratorLock = null)
+    public void InitModel(INet net, byte[] keys, INet? accelerated = null)
     {
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException($"Recognizer model file does not exist: '{path}'.");
-        }
-
-        if (!File.Exists(keysPath))
-        {
-            throw new FileNotFoundException($"Recognizer keys file does not exist: '{keysPath}'.");
-        }
-
-        _crnnNet = new InferenceSession(path, op);
-        if (accelerated is not null) _accelerated = new InferenceSession(path, accelerated);
-        _acceleratorLock = acceleratorLock;
-        _inputName = _crnnNet.InputMetadata.Keys.First();
-        _keys = InitKeys(keysPath);
+        _crnnNet = net;
+        _accelerated = accelerated;
+        _inputName = net.Inputs[0].Name;
+        _keys = InitKeys(keys);
     }
 
-    public void InitModel(string path, string keysPath, int numThread)
+    private static string[] InitKeys(byte[] dictionary)
     {
-        using var sessionOptions = RapidOcr.GetDefaultSessionOptions(numThread);
-        InitModel(path, keysPath, sessionOptions);
-    }
-
-    private static string[] InitKeys(string path)
-    {
-        using (var sr = new StreamReader(path, Encoding.UTF8))
+        using (var sr = new StreamReader(new MemoryStream(dictionary), Encoding.UTF8))
         {
             List<string> keys = ["#"];
 
@@ -73,7 +53,7 @@ public sealed class TextRecognizer : IDisposable
         }
     }
 
-    public TextLine[] GetTextLines(SKBitmap[] partImgs)
+    public async Task<TextLine[]> GetTextLines(SKBitmap[] partImgs)
     {
         // NOTE: Python's pipeline batches crops by aspect ratio and zero-right-pads
         // each crop to 48 * max(w/h, 320/48) so the recognizer sees its training
@@ -86,12 +66,14 @@ public sealed class TextRecognizer : IDisposable
         // the session is best given one intra-op thread. A line costs its width, so the cores
         // take the narrowest and the accelerator, whose fixed cost per run is highest, the
         // widest; without an accelerator the widest go first, so none is left for last on one
-        // core while the others idle.
+        // core while the others idle. A runtime that finishes a run on the thread that asks
+        // for it keeps every core busy; a single-threaded one reads the crops one after another.
         var textLines = new TextLine[partImgs.Length];
         var widestFirst = Enumerable.Range(0, partImgs.Length).OrderByDescending(i => partImgs[i].Width / (float)partImgs[i].Height).ToArray();
+        var cores = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
         if (_accelerated is null || _acceleratorFailed)
         {
-            Parallel.ForEach(Partitioner.Create(widestFirst, EnumerablePartitionerOptions.NoBuffering), i => textLines[i] = GetTextLine(partImgs[i]));
+            await Parallel.ForEachAsync(widestFirst, cores, async (i, _) => textLines[i] = await GetTextLine(partImgs[i]));
             return textLines;
         }
 
@@ -101,39 +83,39 @@ public sealed class TextRecognizer : IDisposable
         {
             lock (gate) return widest > narrowest ? -1 : wide ? widestFirst[widest++] : widestFirst[narrowest--];
         }
-        var accelerator = Task.Run(() =>
+        var accelerator = Task.Run(async () =>
         {
-            for (int i; (i = Next(wide: true)) >= 0;) textLines[i] = GetAcceleratedTextLine(partImgs[i]);
+            for (int i; (i = Next(wide: true)) >= 0;) textLines[i] = await GetAcceleratedTextLine(partImgs[i]);
         });
-        Parallel.For(0, Environment.ProcessorCount, _ =>
+        await Parallel.ForEachAsync(Enumerable.Range(0, Environment.ProcessorCount), cores, async (_, _) =>
         {
-            for (int i; (i = Next(wide: false)) >= 0;) textLines[i] = GetTextLine(partImgs[i]);
+            for (int i; (i = Next(wide: false)) >= 0;) textLines[i] = await GetTextLine(partImgs[i]);
         });
-        accelerator.Wait();
+        await accelerator;
         return textLines;
     }
 
-    private TextLine GetAcceleratedTextLine(SKBitmap src)
+    private async Task<TextLine> GetAcceleratedTextLine(SKBitmap src)
     {
         if (!_acceleratorFailed)
         {
             try
             {
-                return GetTextLine(src, _accelerated!, _acceleratorLock ?? _accelerated!);
+                return await GetTextLine(src, _accelerated!);
             }
-            catch (OnnxRuntimeException)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 _acceleratorFailed = true;
             }
         }
-        return GetTextLine(src);
+        return await GetTextLine(src);
     }
 
-    public TextLine GetTextLine(SKBitmap src)
+    public async Task<TextLine> GetTextLine(SKBitmap src)
     {
         try
         {
-            return GetTextLine(src, _crnnNet, runLock: null);
+            return await GetTextLine(src, _crnnNet);
         }
         catch (Exception ex)
         {
@@ -143,7 +125,7 @@ public sealed class TextRecognizer : IDisposable
         return new TextLine();
     }
 
-    private TextLine GetTextLine(SKBitmap src, InferenceSession session, object? runLock)
+    private async Task<TextLine> GetTextLine(SKBitmap src, INet net)
     {
         var sw = ValueStopwatch.StartNew();
         float scale = CrnnDstHeight / (float)src.Height;
@@ -151,43 +133,24 @@ public sealed class TextRecognizer : IDisposable
         // bitmap for that.
         int dstWidth = Math.Max((int)(src.Width * scale), 1);
 
-        Tensor<float> inputTensors;
+        Tensor input;
         using (SKBitmap srcResize = src.Resize(new SKSizeI(dstWidth, CrnnDstHeight), OcrUtils.NetworkSampling))
         {
-//#if DEBUG
-//            using (var fs = new FileStream($"Recognizer_{Guid.NewGuid()}.png", FileMode.Create))
-//            {
-//                srcResize.Encode(fs, SKEncodedImageFormat.Png, 100);
-//            }
-//#endif
-
-            inputTensors = OcrUtils.SubtractMeanNormalize(srcResize, MeanValues, NormValues);
+            input = OcrUtils.SubtractMeanNormalize(srcResize, MeanValues, NormValues, _inputName);
         }
 
-        IReadOnlyCollection<NamedOnnxValue> inputs =
-        [
-            NamedOnnxValue.CreateFromTensor(_inputName, inputTensors)
-        ];
-
-        IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results;
-        if (runLock is null) results = session.Run(inputs);
-        else lock (runLock) results = session.Run(inputs);
-        using (results)
-        {
-            var result = results[0];
-            var tl = ScoreToTextLine(result.AsTensor<float>());
-            tl.Time = (float)sw.ElapsedMilliseconds;
-            return tl;
-        }
+        var outputs = await net.Run([input]);
+        var tl = ScoreToTextLine(outputs[0]);
+        tl.Time = (float)sw.ElapsedMilliseconds;
+        return tl;
     }
 
-    private TextLine ScoreToTextLine(Tensor<float> srcData)
+    private TextLine ScoreToTextLine(Tensor srcData)
     {
-        var dimensions = srcData.Dimensions;
-        int h = dimensions[1];
-        int w = dimensions[2];
+        int h = srcData.Shape[1];
+        int w = srcData.Shape[2];
 
-        ReadOnlySpan<float> data = (srcData as DenseTensor<float> ?? srcData.ToDenseTensor()).Buffer.Span;
+        ReadOnlySpan<float> data = srcData.F;
 
         int lastIndex = 0;
         var scores = new List<float>();
@@ -230,93 +193,9 @@ public sealed class TextRecognizer : IDisposable
         };
     }
 
-    private static void WriteImageIntoBatch(SKBitmap src, Tensor<float> batch, int batchIdx, int batchW)
-    {
-        int rows = src.Height;
-        int cols = src.Width;
-        int rowBytes = src.RowBytes;
-        int channels = src.BytesPerPixel;
-        ReadOnlySpan<byte> span = src.GetPixelSpan();
-
-        if (src.Info.ColorType == SKColorType.Gray8)
-        {
-            for (int r = 0; r < rows; r++)
-            {
-                int rowBase = r * rowBytes;
-                for (int c = 0; c < cols; c++)
-                {
-                    float v = (span[rowBase + c] - 127.5F) / 127.5F;
-                    batch[batchIdx, 0, r, c] = v;
-                    batch[batchIdx, 1, r, c] = v;
-                    batch[batchIdx, 2, r, c] = v;
-                }
-                // remaining cols are zero-padded (DenseTensor default value)
-            }
-        }
-        else if (src.Info.ColorType == SKColorType.Bgra8888)
-        {
-            for (int r = 0; r < rows; r++)
-            {
-                int rowBase = r * rowBytes;
-                for (int c = 0; c < cols; c++)
-                {
-                    int pixelBase = rowBase + c * channels;
-                    batch[batchIdx, 0, r, c] = (span[pixelBase + 0] - 127.5F) / 127.5F;
-                    batch[batchIdx, 1, r, c] = (span[pixelBase + 1] - 127.5F) / 127.5F;
-                    batch[batchIdx, 2, r, c] = (span[pixelBase + 2] - 127.5F) / 127.5F;
-                }
-                // remaining cols are zero-padded (already 0 in DenseTensor)
-            }
-        }
-        else
-        {
-            throw new ArgumentException($"Recognizer crop must be '{SKColorType.Bgra8888}' or '{SKColorType.Gray8}'.");
-        }
-    }
-
-    private TextLine ScoreToTextLineFromBatch(Tensor<float> srcData, int batchIdx, int h, int w)
-    {
-        int lastIndex = 0;
-        var scores = new List<float>();
-        var chars = new List<string>();
-        var cols = new List<int>();
-
-        for (int i = 0; i < h; i++)
-        {
-            int maxIndex = 0;
-            float maxValue = -1000F;
-            for (int j = 0; j < w; j++)
-            {
-                float v = srcData[batchIdx, i, j];
-                if (v > maxValue)
-                {
-                    maxIndex = j;
-                    maxValue = v;
-                }
-            }
-
-            if (maxIndex > 0 && maxIndex < _keys.Length && !(i > 0 && maxIndex == lastIndex))
-            {
-                scores.Add(maxValue);
-                chars.Add(_keys[maxIndex]);
-                cols.Add(i);
-            }
-
-            lastIndex = maxIndex;
-        }
-
-        return new TextLine
-        {
-            Chars = chars.ToArray(),
-            CharScores = scores.ToArray(),
-            CharCols = cols.ToArray(),
-            ColCount = h
-        };
-    }
-
     public void Dispose()
     {
-        _crnnNet.Dispose();
+        _crnnNet?.Dispose();
         _accelerated?.Dispose();
     }
 }

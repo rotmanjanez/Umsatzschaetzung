@@ -63,8 +63,9 @@ public sealed class Session : Observable
     public Dictionary<string, OcrResp> Readings { get; } = [];
     public Dictionary<string, InvoiceSourceResp> Sources { get; } = [];
 
-    public Window? ActiveWindow { get; set; }
-    public Window? ErrorWindow { get; private set; }
+    // The window, or the frame, last worked in.
+    public object? ActiveWindow { get; set; }
+    public object? ErrorWindow { get; private set; }
 
     public string Error
     {
@@ -76,22 +77,22 @@ public sealed class Session : Observable
         }
     }
 
-    // An error belongs to the window it happened in; only that one shows it, and closing it drops it.
-    public void Anchor(Window window, Control banner, TextBlock text)
+    // An error belongs to the frame it happened in; only that one shows it, and closing it drops it.
+    public void Anchor(Frame frame, Control banner, TextBlock text)
     {
         void Changed(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(Error)) return;
             text.Text = error;
-            banner.IsVisible = ErrorWindow == window;
+            banner.IsVisible = ErrorWindow == frame;
         }
         PropertyChanged += Changed;
-        window.Activated += (_, _) => ActiveWindow = window;
-        window.Closed += (_, _) =>
+        frame.Activated += () => ActiveWindow = frame;
+        frame.Closed += () =>
         {
             PropertyChanged -= Changed;
-            if (ActiveWindow == window) ActiveWindow = null;
-            if (ErrorWindow == window) Error = "";
+            if (ActiveWindow == frame) ActiveWindow = null;
+            if (ErrorWindow == frame) Error = "";
         };
     }
 
@@ -341,8 +342,8 @@ public sealed class Session : Observable
         return await write;
     }
 
-    // Every window that edits shows the same badge while a write takes long.
-    public void Indicate(Control window, Border badge, TextBlock text)
+    // Every window that edits shows the same badge while a write takes long, until it stops as returned.
+    public Action Indicate(Control window, Border badge, TextBlock text)
     {
         void Changed(object? sender, PropertyChangedEventArgs e)
         {
@@ -357,7 +358,7 @@ public sealed class Session : Observable
                 : null);
         }
         PropertyChanged += Changed;
-        if (window is Window closable) closable.Closed += (_, _) => PropertyChanged -= Changed;
+        return () => PropertyChanged -= Changed;
     }
 
     sealed class Write(object? key, Func<Task> work)
@@ -402,8 +403,26 @@ public sealed class Session : Observable
     {
         if (Picked is { } answer) return [.. answer()];
         if (Owner?.StorageProvider is not { } storage) return [];
-        var picked = await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter });
-        return [.. picked.Select(f => f.TryGetLocalPath()).OfType<string>()];
+        return await Paths(await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter }));
+    }
+
+    // A browser hands out files without a path; they are copied into its file system first.
+    public static async Task<List<string>> Paths(IEnumerable<IStorageItem> items)
+    {
+        var paths = new List<string>();
+        foreach (var item in items)
+            if (item.TryGetLocalPath() is { } path) paths.Add(path);
+            else if (item is IStorageFile file) paths.Add(await Copy(file));
+        return paths;
+    }
+
+    static async Task<string> Copy(IStorageFile file)
+    {
+        var path = Path.Combine(Directory.CreateTempSubdirectory("picked").FullName, file.Name);
+        await using var from = await file.OpenReadAsync();
+        await using var to = File.Create(path);
+        await from.CopyToAsync(to);
+        return path;
     }
 
     public async Task<List<PickedFile>> ReadFiles(IEnumerable<string> paths)

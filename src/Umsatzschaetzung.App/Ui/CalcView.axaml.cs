@@ -383,7 +383,7 @@ public partial class CalcView : Screen
     async void ResetRecipe(object? sender, RoutedEventArgs e)
     {
         if (model.Editor is not { } editor || Listed(editor.ProductId) is not { Recipe: not null }) return;
-        var confirmed = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+        var confirmed = await Dialog.Confirm(this,
             "Die Rezeptur dieser Prüfung geht verloren. Danach gilt wieder das Katalogrezept.",
             "Auf Katalog zurücksetzen");
         if (!confirmed || Listed(editor.ProductId) is not { } cp) return;

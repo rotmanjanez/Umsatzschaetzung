@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.Ocr;
@@ -42,7 +43,8 @@ static class Program
         if (!Directory.Exists(root)) { Console.Error.WriteLine($"kein Verzeichnis: {root}"); return 2; }
 
         var todo = Walk(root, force, all).Order(StringComparer.Ordinal).ToList();
-        Console.WriteLine($"{todo.Count} Seiten, {workers} parallel, PDF-Raster {dpi} dpi, Erkennung auf {RapidOcr.Detector}");
+        var weights = new OrtWeights(AppFiles.Beside("models"));
+        Console.WriteLine($"{todo.Count} Seiten, {workers} parallel, PDF-Raster {dpi} dpi, Erkennung auf {(weights.Accelerated ? "WebGPU" : "CPU")}");
 
         var pdf = new PdfiumPages();
         var pool = new ConcurrentBag<RapidOcr>();
@@ -53,7 +55,7 @@ static class Program
         await Parallel.ForEachAsync(todo, new ParallelOptions { MaxDegreeOfParallelism = workers },
             async (file, ct) =>
             {
-                if (!pool.TryTake(out var ocr)) ocr = new RapidOcr();
+                if (!pool.TryTake(out var ocr)) ocr = new RapidOcr(weights);
                 var started = Stopwatch.GetTimestamp();
                 try
                 {

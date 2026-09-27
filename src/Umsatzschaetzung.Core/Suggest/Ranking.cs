@@ -8,7 +8,7 @@ public sealed record Ranked(string IngredientId, int Confidence);
 // answers. The exact hit, the cut and the mapping are the matcher's, whoever ranks.
 public interface IRanking
 {
-    IReadOnlyList<Ranked> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count);
+    Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default);
 }
 
 public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = null) : IRanking
@@ -16,7 +16,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
     const double Mismatch = 0.1;
     const int MostLines = 4096;
 
-    readonly Lock gate = new();
+    readonly SemaphoreSlim gate = new(1, 1);
 
     // A RuleSet is known by its version, not by reference, so the version is the key: one
     // ranking belongs to one rule store and reindexes only once a save bumps it or a
@@ -33,16 +33,17 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
     // A line is asked about again with every selection and every mapping that changes the rules.
     readonly Dictionary<string, float[]> lines = new(StringComparer.Ordinal);
 
-    public IReadOnlyList<Ranked> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count)
+    public async Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default)
     {
-        lock (gate)
+        await gate.WaitAsync(ct);
+        try
         {
-            Index(rs, gewerbe);
+            await Index(rs, gewerbe, ct);
             var text = Matcher.Normal(line.Name);
             if (!lines.TryGetValue(text, out var query))
             {
                 if (lines.Count >= MostLines) lines.Clear();
-                lines[text] = query = Embed([text], keep: false)[0];
+                lines[text] = query = (await Embed([text], keep: false, ct))[0];
             }
             var best = new Dictionary<string, double>(StringComparer.Ordinal);
             for (var i = 0; i < owner.Length; i++)
@@ -59,11 +60,16 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
                 if (rs.Categories.GetValueOrDefault(rs.Ingredients[id].CategoryId)?.Contradicts(held) == true)
                     best[id] -= Mismatch;
 
+            await encoder.Load(ct);
             return [.. best
                 .OrderByDescending(s => s.Value)
                 .ThenBy(s => s.Key, StringComparer.Ordinal)
                 .Take(count)
                 .Select(s => new Ranked(s.Key, encoder.Confidence(s.Value)))];
+        }
+        finally
+        {
+            gate.Release();
         }
     }
 
@@ -90,7 +96,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
     // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never
     // offered Blondierpulver. Every name a ware is known under is its own entry — the
     // ingredient is whichever of its wordings comes closest, not their average.
-    void Index(RuleSet rs, string gewerbe)
+    async Task Index(RuleSet rs, string gewerbe, CancellationToken ct)
     {
         if (indexed == rs.Version && indexedGewerbe == gewerbe) return;
         var covered = rs.Ingredients.Values
@@ -136,7 +142,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
             var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
             for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
             var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
-            var embedded = fresh.Zip(Embed(fresh, keep: true)).ToDictionary(StringComparer.Ordinal);
+            var embedded = fresh.Zip(await Embed(fresh, keep: true, ct)).ToDictionary(StringComparer.Ordinal);
             var next = new float[texts.Count * IEncoder.Width];
             for (var i = 0; i < texts.Count; i++)
             {
@@ -154,14 +160,14 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
         indexedGewerbe = gewerbe;
     }
 
-    float[][] Embed(IReadOnlyList<string> texts, bool keep)
+    async Task<float[][]> Embed(IReadOnlyList<string> texts, bool keep, CancellationToken ct)
     {
         var want = texts.Distinct(StringComparer.Ordinal).ToList();
         var known = cache?.Read(encoder.Model, want) ?? [];
         var missing = want.FindAll(t => !known.ContainsKey(t));
         if (missing.Count > 0)
         {
-            var fresh = encoder.Embed(missing);
+            var fresh = await encoder.Embed(missing, ct);
             for (var i = 0; i < missing.Count; i++) known[missing[i]] = fresh[i];
             if (keep) cache?.Write(encoder.Model, [.. missing.Select((t, i) => (t, fresh[i]))]);
         }

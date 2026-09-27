@@ -1,5 +1,6 @@
 using RapidOcrNet;
 using SkiaSharp;
+using Umsatzschaetzung.Nets;
 
 namespace Umsatzschaetzung.Tests.RapidOcrNet;
 
@@ -14,13 +15,13 @@ public class OcrUtilsTests
         using var bitmap = Images.Blank(3, 2, new SKColor(0, 0, 0));
         bitmap.SetPixel(1, 0, new SKColor(10, 20, 30));
 
-        var tensor = OcrUtils.SubtractMeanNormalize(bitmap, Mean, Norm);
+        var tensor = OcrUtils.SubtractMeanNormalize(bitmap, Mean, Norm, "x");
 
-        Assert.Equal([1, 3, 2, 3], tensor.Dimensions.ToArray());
-        Assert.Equal((30 - 1) * 0.5f, tensor[0, 0, 0, 1]);
-        Assert.Equal((20 - 2) * 0.25f, tensor[0, 1, 0, 1]);
-        Assert.Equal((10 - 3) * 2f, tensor[0, 2, 0, 1]);
-        Assert.Equal(-0.5f, tensor[0, 0, 1, 2]);
+        Assert.Equal([1, 3, 2, 3], tensor.Shape);
+        Assert.Equal((30 - 1) * 0.5f, At(tensor, 0, 0, 1));
+        Assert.Equal((20 - 2) * 0.25f, At(tensor, 1, 0, 1));
+        Assert.Equal((10 - 3) * 2f, At(tensor, 2, 0, 1));
+        Assert.Equal(-0.5f, At(tensor, 0, 1, 2));
     }
 
     [Fact]
@@ -31,15 +32,15 @@ public class OcrUtilsTests
         Assert.True(source.ExtractSubset(subset, new SKRectI(1, 1, 3, 3)));
         Assert.True(subset.RowBytes > subset.Width * 4);
 
-        var tensor = OcrUtils.SubtractMeanNormalize(subset, [0f, 0f, 0f], [1f, 1f, 1f]);
+        var tensor = OcrUtils.SubtractMeanNormalize(subset, [0f, 0f, 0f], [1f, 1f, 1f], "x");
 
         for (var y = 0; y < 2; y++)
             for (var x = 0; x < 2; x++)
             {
                 var c = Images.Code(x + 1, y + 1);
-                Assert.Equal(c.Blue, tensor[0, 0, y, x]);
-                Assert.Equal(c.Green, tensor[0, 1, y, x]);
-                Assert.Equal(c.Red, tensor[0, 2, y, x]);
+                Assert.Equal(c.Blue, At(tensor, 0, y, x));
+                Assert.Equal(c.Green, At(tensor, 1, y, x));
+                Assert.Equal(c.Red, At(tensor, 2, y, x));
             }
     }
 
@@ -49,19 +50,19 @@ public class OcrUtilsTests
         using var gray = new SKBitmap(new SKImageInfo(2, 2, SKColorType.Gray8, SKAlphaType.Opaque));
         gray.Erase(new SKColor(100, 100, 100));
 
-        var tensor = OcrUtils.SubtractMeanNormalize(gray, Mean, Norm);
+        var tensor = OcrUtils.SubtractMeanNormalize(gray, Mean, Norm, "x");
 
-        Assert.Equal([1, 3, 2, 2], tensor.Dimensions.ToArray());
-        Assert.Equal(49.5f, tensor[0, 0, 1, 1]);
-        Assert.Equal(24.5f, tensor[0, 1, 1, 1]);
-        Assert.Equal(194f, tensor[0, 2, 1, 1]);
+        Assert.Equal([1, 3, 2, 2], tensor.Shape);
+        Assert.Equal(49.5f, At(tensor, 0, 1, 1));
+        Assert.Equal(24.5f, At(tensor, 1, 1, 1));
+        Assert.Equal(194f, At(tensor, 2, 1, 1));
     }
 
     [Fact]
     public void NormalisationRejectsAnyOtherPixelLayout()
     {
         using var rgba = new SKBitmap(new SKImageInfo(2, 2, SKColorType.Rgba8888, SKAlphaType.Premul));
-        Assert.Throws<ArgumentException>(() => OcrUtils.SubtractMeanNormalize(rgba, Mean, Norm));
+        Assert.Throws<ArgumentException>(() => OcrUtils.SubtractMeanNormalize(rgba, Mean, Norm, "x"));
     }
 
     [Theory]
@@ -341,6 +342,8 @@ public class OcrUtilsTests
         Assert.Throws<InvalidOperationException>(() => OcrUtils.GetPartImages(source, boxes));
         Assert.Throws<InvalidOperationException>(() => OcrUtils.GetPartImagesWithContext(source, boxes));
     }
+
+    static float At(Tensor t, int channel, int y, int x) => t.F[(channel * t.Shape[2] + y) * t.Shape[3] + x];
 
     internal static SKPointI[] Corners(float cx, float cy, float degrees, float width, float height)
     {

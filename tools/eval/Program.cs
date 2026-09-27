@@ -1,7 +1,9 @@
 using System.Globalization;
+using Umsatzschaetzung;
 using Umsatzschaetzung.Eval;
 using Umsatzschaetzung.Extract;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Tagging;
 
 var corpus = "fixtures/dataset/2025";
@@ -37,9 +39,9 @@ for (var i = 0; i < args.Length; i++)
     }
 }
 
-if (labels != "") return Matching.Run(labels, detail, show);
+if (labels != "") return await Matching.Run(labels, detail, show);
 
-using var tagger = rows == "" || parity ? new Tagger() : null;
+using var tagger = rows == "" || parity ? new Tagger(new OrtWeights(AppFiles.Beside("models"))) : null;
 var agree = new Agreement();
 var results = new List<Result>();
 int accepted = 0, acceptedClean = 0;
@@ -47,10 +49,11 @@ var rowsOut = new List<string>();
 foreach (var variation in rows == "" ? Corpus.ReadDumps(corpus) : Corpus.ReadRows(rows, split))
 {
     var want = Corpus.Expected(Corpus.ExpectedPath(corpus, variation.Invoice));
-    var tagged = variation.Pages.Select(p =>
-        rows == "" ? tagger!.Tag([.. p.Words.Select(w => w.Word)], p.Width, p.Height)
-        : parity ? Retag(tagger!, p, agree)
-        : p.Words).ToList();
+    var tagged = new List<List<TaggedWord>>(variation.Pages.Count);
+    foreach (var p in variation.Pages)
+        tagged.Add(rows == "" ? await tagger!.Tag([.. p.Words.Select(w => w.Word)], p.Width, p.Height)
+            : parity ? await Retag(tagger!, p, agree)
+            : p.Words);
     var pages = tagged.Select(_ => new OcrPage()).ToList();
     var got = Assemble.Invoice(tagged, pages);
     (got.NetTotal, got.GrossTotal) = InvoiceMath.LineTotals(got.Lines);
@@ -107,9 +110,9 @@ static void Show(Variation variation, List<List<TaggedWord>> tagged, Invoice got
 }
 
 // The dump's rows go in unchanged so every word lines up with its Python prediction.
-static List<TaggedWord> Retag(Tagger tagger, Page page, Agreement agree)
+static async Task<List<TaggedWord>> Retag(Tagger tagger, Page page, Agreement agree)
 {
-    var got = tagger.Tag([.. page.Words.Select(w => (w.Word, w.Row))], page.Width, page.Height);
+    var got = await tagger.Tag([.. page.Words.Select(w => (w.Word, w.Row))], page.Width, page.Height);
     agree.Add(page.Words, got);
     return got;
 }

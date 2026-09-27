@@ -1,7 +1,5 @@
 // Apache-2.0 license
 
-using System.IO;
-
 namespace RapidOcrNet;
 
 /// <summary>
@@ -11,9 +9,8 @@ namespace RapidOcrNet;
 /// PP-OCRv6 models, or build a custom set pointing at your own files.
 /// </summary>
 /// <remarks>
-/// Preset paths are resolved relative to the working/output directory under
-/// <c>models/&lt;version&gt;/</c>, matching how <see cref="RapidOcr"/> resolves its
-/// default model constants. The PP-OCRv6 presets reuse the PP-OCRv5 classifier model,
+/// Preset paths are names under the models folder, <c>&lt;version&gt;/&lt;file&gt;</c>, as
+/// <see cref="Umsatzschaetzung.Nets.IWeights"/> opens them. The PP-OCRv6 presets reuse the PP-OCRv5 classifier model,
 /// because PP-OCRv6 ships no classifier of its own.
 /// </remarks>
 public sealed record RapidOcrModelSet
@@ -50,8 +47,8 @@ public sealed record RapidOcrModelSet
     private static readonly float[] HalfMean = [127.5F, 127.5F, 127.5F];
     private static readonly float[] HalfStd = [127.5F, 127.5F, 127.5F];
 
-    private static string V5(string fileName) => Path.Combine(RapidOcr.ModelsFolderName, "v5", fileName);
-    private static string V6(string fileName) => Path.Combine(RapidOcr.ModelsFolderName, "v6", fileName);
+    private static string V5(string fileName) => "v5/" + fileName;
+    private static string V6(string fileName) => "v6/" + fileName;
 
     private const string V5ClsModel = "ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx";
 

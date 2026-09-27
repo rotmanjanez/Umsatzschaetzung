@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Casefile;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.Service;
@@ -27,6 +28,15 @@ public partial class App : Application
 
     // A browser has no windows: its host composes the service and gets the program as one view.
     public static Func<Services>? SingleViewService { get; set; }
+
+    // Nor a native web view: its host brings the Bericht's preview, or there is none.
+    public static Func<IHtmlPreview>? SingleViewPreview { get; set; }
+
+    // Nor a printer that hands back a PDF: its host opens the browser's print dialog on the Bericht.
+    public static Action<string>? SingleViewPrint { get; set; }
+
+    internal static IHtmlPreview HtmlPreview() =>
+        Current?.ApplicationLifetime is ISingleViewApplicationLifetime ? SingleViewPreview?.Invoke() ?? new NoHtmlPreview() : new HtmlView();
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -108,7 +118,7 @@ public partial class App : Application
         if (show) shell.Show();
     }
 
-    public static void ShowAbout(Window? owner) =>
+    public static void ShowAbout(Control? owner) =>
         _ = Dialog.Alert(owner, $"Umsatzschätzung {Release.Version}\n© Janez Rotman", "Über Umsatzschätzung");
 
     void About(object? sender, EventArgs e) =>
@@ -138,12 +148,13 @@ public partial class App : Application
     {
         Directory.CreateDirectory(AppData.Dir);
         var rules = new RuleStore(config.Store, RuleStore.Seed());
-        var ocr = new RapidOcr();
+        var weights = new OrtWeights(AppFiles.Beside("models"));
+        var ocr = new RapidOcr(weights);
         owned.Add(ocr);
         _ = ocr.Warm();
-        var tagger = new Tagger();
+        var tagger = new Tagger(weights);
         owned.Add(tagger);
-        var encoder = new Encoder();
+        var encoder = new Encoder(weights);
         owned.Add(encoder);
         var printer = new WebViewPdfPrinter();
         owned.Add(printer);

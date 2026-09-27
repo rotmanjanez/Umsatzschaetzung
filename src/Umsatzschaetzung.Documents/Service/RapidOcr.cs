@@ -1,9 +1,8 @@
 using System.Runtime.InteropServices;
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.EP.WebGpu;
 using RapidOcrNet;
 using SkiaSharp;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Engine = RapidOcrNet.RapidOcr;
 
 namespace Umsatzschaetzung.Service;
@@ -14,7 +13,7 @@ namespace Umsatzschaetzung.Service;
 // at a time wants every core, a corpus run with a page per core wants one each. The crops
 // are read one per core, each on a single thread, and the widest beside them on the
 // accelerator, which is idle once the page's lines are found.
-public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
+public sealed class RapidOcr(IWeights weights, int threads = 0) : IOcr, IDisposable
 {
     public const string Name = "RapidOcrNet/PP-OCRv6-det-small+PP-OCRv5-latin-rec";
 
@@ -49,19 +48,23 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         ClsMaxCrops = 32,
     };
 
-    public static string Detector => Accelerator.Available ? "WebGPU" : "CPU";
+    public string Detector => weights.Accelerated ? "WebGPU" : "CPU";
 
     static readonly RapidOcrModelSet Models = RapidOcrModelSet.PPOCRv5Latin with
     {
-        DetModelPath = AppFiles.Beside("models/v6/PP-OCRv6_det_small.onnx"),
+        DetModelPath = RapidOcrModelSet.PPOCRv6Small.DetModelPath,
         DetMean = RapidOcrModelSet.PPOCRv6Small.DetMean,
         DetStd = RapidOcrModelSet.PPOCRv6Small.DetStd,
-        ClsModelPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.ClsModelPath),
-        RecModelPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.RecModelPath),
-        KeysPath = AppFiles.Beside(RapidOcrModelSet.PPOCRv5Latin.KeysPath),
     };
 
-    readonly Lock gate = new();
+    // An idle detector thread spinning for work takes its core from the crops read beside it.
+    NetOptions Detecting(bool gpu) => new(Threads: threads, InterThreads: threads, Accelerated: gpu, Spin: false, Extended: true);
+
+    static readonly NetOptions Reading = new(Threads: 1, InterThreads: 1, Extended: true);
+
+    static readonly NetOptions AcceleratedReading = Reading with { Accelerated = true };
+
+    readonly SemaphoreSlim gate = new(1, 1);
     Engine? engine, retired;
     bool accelerated;
 
@@ -69,26 +72,27 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     {
         engine?.Dispose();
         retired?.Dispose();
+        gate.Dispose();
     }
 
     // Compiles the detector's shaders for the accelerator before the first import asks for
     // them, on a blank A4 page at the import's resolution.
-    public Task Warm() => Task.Run(() =>
+    public Task Warm() => Task.Run(async () =>
     {
         using var blank = new SKBitmap(new SKImageInfo(2480, 3508, SKColorType.Bgra8888, SKAlphaType.Opaque));
         blank.Erase(SKColors.White);
-        Read(blank);
+        await Read(blank);
     });
 
-    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(() =>
+    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(async () =>
     {
         using var decoded = Decode(image);
-        return Recognize(decoded);
+        return await Recognize(decoded);
     }, ct);
 
     public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => Task.Run(() => Recognize(page), ct);
 
-    public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.Run(() =>
+    public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.Run(async () =>
     {
         var handle = GCHandle.Alloc(crop.Pixels, GCHandleType.Pinned);
         try
@@ -96,7 +100,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
             using var bitmap = new SKBitmap();
             var info = new SKImageInfo(crop.Width, crop.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
             bitmap.InstallPixels(info, handle.AddrOfPinnedObject(), info.RowBytes);
-            return Words(Read(bitmap));
+            return Words(await Read(bitmap));
         }
         finally
         {
@@ -110,7 +114,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // page only shows its lean once its lines run across, so it is straightened again and,
     // if that moves it, detected again. The page carries no image: the correction renders it
     // again from the document when it is looked at.
-    OcrPage Recognize(SKBitmap decoded)
+    async Task<OcrPage> Recognize(SKBitmap decoded)
     {
         using var cleaned = Deink.Apply(decoded);
         var read = cleaned ?? decoded;
@@ -118,7 +122,7 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         var page = straightened ?? read;
         var correction = new Correction { Scale = (double)read.Width / decoded.Width, Skew = skew };
         var turn = 0;
-        var first = Read(page, blocks => (turn = Settled(blocks)) == 0);
+        var first = await Read(page, blocks => (turn = Settled(blocks)) == 0);
         if (turn == 0) turn = Turn(first);
         if (turn == 0) return Page(page, first, correction);
         using var turned = Rotate(page, turn);
@@ -127,8 +131,8 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         correction.Turn = turn;
         correction.Settle = settle;
         return settled is null
-            ? Page(turned, Read(turned, Turned(first.Boxes, page, turn)), correction)
-            : Page(settled, Read(settled), correction);
+            ? Page(turned, await Read(turned, Turned(first.Boxes, page, turn)), correction)
+            : Page(settled, await Read(settled), correction);
     }
 
     // The lines where the turn takes them, their corners renumbered to start at the top left again.
@@ -152,35 +156,49 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
     // recognised on the cores while the next is detected. A detector that fails on the
     // accelerator, at load or on a page, is replaced by one on the CPU and the page read
     // again; the failed engine may still be reading another page and is kept until the end.
-    OcrResult Read(SKBitmap page, Predicate<TextBlock[]>? read = null) => Run(engine => engine.Detect(page, Options, read));
+    Task<OcrResult> Read(SKBitmap page, Predicate<TextBlock[]>? read = null) => Run(engine => engine.Detect(page, Options, read));
 
-    OcrResult Read(SKBitmap page, IEnumerable<TextBox> lines) => Run(engine => engine.Read(page, lines, Options));
+    Task<OcrResult> Read(SKBitmap page, IEnumerable<TextBox> lines) => Run(engine => engine.Read(page, lines, Options));
 
-    OcrResult Run(Func<Engine, OcrResult> read)
+    // The web runtime fails with script errors rather than the native runtime's own.
+    async Task<OcrResult> Run(Func<Engine, Task<OcrResult>> read)
     {
-        var current = Current();
+        var current = await Current();
         try
         {
-            return read(current);
+            return await read(current);
         }
-        catch (OnnxRuntimeException) when (accelerated)
+        catch (Exception e) when (accelerated && e is not OperationCanceledException)
         {
-            return read(Replace(current));
+            return await read(await Replace(current));
         }
     }
 
-    Engine Current()
+    async Task<Engine> Current()
     {
-        lock (gate) return engine ??= Open(Accelerator.Available);
+        await gate.WaitAsync();
+        try
+        {
+            return engine ??= await Open(weights.Accelerated);
+        }
+        finally
+        {
+            gate.Release();
+        }
     }
 
-    Engine Replace(Engine failed)
+    async Task<Engine> Replace(Engine failed)
     {
-        lock (gate)
+        await gate.WaitAsync();
+        try
         {
             if (!ReferenceEquals(engine, failed)) return engine!;
             retired = failed;
-            return engine = Open(false);
+            return engine = await Open(false);
+        }
+        finally
+        {
+            gate.Release();
         }
     }
 
@@ -250,30 +268,22 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
             _ => 0,
         };
 
-    Engine Open(bool gpu)
+    async Task<Engine> Open(bool gpu)
     {
         var engine = new Engine();
         try
         {
-            using var detector = gpu ? Accelerator.Session(threads) : Engine.GetDefaultSessionOptions(threads);
-            using var reader = Engine.GetDefaultSessionOptions(1);
-            using var acceleratedReader = gpu ? Accelerator.Session(1) : null;
-            // An idle detector thread spinning for work takes its core from the crops read beside it.
-            detector.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");
-            if (gpu) lock (Accelerator.Gate) engine.InitModels(Models, detector, reader, Accelerator.Gate, acceleratedReader);
-            else engine.InitModels(Models, detector, reader);
+            await engine.InitModels(weights, Models, Detecting(gpu), Reading, gpu ? AcceleratedReading : null);
         }
-        catch (OnnxRuntimeException) when (gpu)
+        catch (Exception e) when (gpu && e is not OperationCanceledException)
         {
             engine.Dispose();
-            return Open(false);
+            return await Open(false);
         }
         catch (Exception e)
         {
             engine.Dispose();
-            throw new InvalidOperationException(
-                "Die Texterkennungsmodelle konnten nicht geladen werden. Erwartet unter " +
-                AppFiles.Beside("models") + ".", e);
+            throw new InvalidOperationException("Die Texterkennungsmodelle konnten nicht geladen werden: " + e.Message, e);
         }
         accelerated = gpu;
         return engine;
@@ -324,43 +334,5 @@ public sealed class RapidOcr(int threads = 0) : IOcr, IDisposable
         var (cos, sin) = degrees switch { 90 => (0, 1), 180 => (-1, 0), _ => (0, -1) };
         var map = new SKMatrix(cos, -sin, degrees == 270 ? 0 : width, sin, cos, degrees == 90 ? 0 : height, 0, 0, 1);
         return (map, new SKSizeI(width, height));
-    }
-}
-
-// The WebGPU plugin: DirectX 12 on Windows, Metal on macOS, loaded beside the CPU runtime
-// the tagger is pinned to. No adapter, no library, or a runtime that refuses it all mean CPU,
-// and so does UMSATZSCHAETZUNG_CPU=1 for machines whose only adapter is a software one.
-// The device takes one session at a time, at load and per run: the corpus tool runs a
-// reader per core and they all queue here for the detector.
-static class Accelerator
-{
-    static readonly Lazy<OrtEpDevice?> device = new(Find);
-
-    public static readonly object Gate = new();
-
-    public static bool Available => device.Value is not null;
-
-    // The device's buffer cache keeps every page size it has seen, gigabytes of them in unified
-    // memory; without it a page reads as fast.
-    public static SessionOptions Session(int threads)
-    {
-        var options = Engine.GetDefaultSessionOptions(threads);
-        if (device.Value is { } gpu) options.AppendExecutionProvider(OrtEnv.Instance(), [gpu], new Dictionary<string, string> { ["storageBufferCacheMode"] = "disabled" });
-        return options;
-    }
-
-    static OrtEpDevice? Find()
-    {
-        if (Environment.GetEnvironmentVariable("UMSATZSCHAETZUNG_CPU") == "1") return null;
-        try
-        {
-            var env = OrtEnv.Instance();
-            env.RegisterExecutionProviderLibrary("webgpu", WebGpuEp.GetLibraryPath());
-            return env.GetEpDevices().FirstOrDefault(d => d.EpName == WebGpuEp.GetEpName());
-        }
-        catch (Exception e) when (e is OnnxRuntimeException or IOException or PlatformNotSupportedException or DllNotFoundException)
-        {
-            return null;
-        }
     }
 }

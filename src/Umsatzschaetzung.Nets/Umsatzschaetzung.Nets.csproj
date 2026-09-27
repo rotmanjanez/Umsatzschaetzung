@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Umsatzschaetzung.Nets</RootNamespace>
+  </PropertyGroup>
+  <!-- One runtime in the process. Pinned: the tagger's weights are per-channel int8, which ORT
+       only reads back correctly from 1.27 on. A transitive bump would change which CPU kernel
+       runs and would not show up in any diff here. The WebGPU plugin sits beside it: DirectX 12
+       on Windows, Metal on macOS. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.EP.WebGpu" Version="0.3.0" />
+  </ItemGroup>
+</Project>

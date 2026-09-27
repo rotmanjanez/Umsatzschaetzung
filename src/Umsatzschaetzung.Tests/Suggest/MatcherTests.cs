@@ -43,7 +43,7 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
         Confirmed = true,
     };
 
-    List<Suggestion> Suggest(string name, string unitCode, RuleSet? rs = null, string gewerbe = "") =>
+    Task<List<Suggestion>> Suggest(string name, string unitCode, RuleSet? rs = null, string gewerbe = "") =>
         f.Matcher.Suggest(rs ?? f.Seed, gewerbe, Rheinland, new InvoiceLine { Name = name, UnitCode = unitCode });
 
     // Nothing outside the fixture rule set is goods, so a line that is no ware may only be
@@ -52,80 +52,80 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
         Assert.All(s, x => Assert.Equal("cat.kein.wareneinsatz", rs.Ingredients[x.Mapping.IngredientId].CategoryId));
 
     [Fact]
-    public void AKegMapsToTheDraughtBeerWithItsVolume()
+    public async Task AKegMapsToTheDraughtBeerWithItsVolume()
     {
-        var top = Suggest("Fassbier Pils, Keg 50 l", "XKG")[0];
+        var top = (await Suggest("Fassbier Pils, Keg 50 l", "XKG"))[0];
         Assert.Equal(("ing.bier.fass", 50000L, OriginKind.Encoder, ""), (top.Mapping.IngredientId, top.Mapping.Factor, top.Kind, top.Mapping.Id));
         Assert.InRange(top.Confidence, 1, 99);
     }
 
     [Fact]
-    public void TheBottleSizeBeatsTheAlcoholStrength()
+    public async Task TheBottleSizeBeatsTheAlcoholStrength()
     {
-        var top = Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO")[0];
+        var top = (await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO"))[0];
         Assert.Equal(("ing.korn", 700L), (top.Mapping.IngredientId, top.Mapping.Factor));
     }
 
     [Fact]
-    public void ADepositLineIsOfferedNoWare() => NoWare(f.Seed, Suggest("Pfand Leergut Kiste", "XCS"));
+    public async Task ADepositLineIsOfferedNoWare() => NoWare(f.Seed, await Suggest("Pfand Leergut Kiste", "XCS"));
 
     [Fact]
-    public void AnUpperCaseWordingScoresLikeTheCatalogues()
+    public async Task AnUpperCaseWordingScoresLikeTheCatalogues()
     {
-        var plain = Suggest("Fassbier Pils, Keg 50 l", "XKG")[0];
-        var shouted = Suggest("FASSBIER PILS, KEG 50 L", "XKG")[0];
+        var plain = (await Suggest("Fassbier Pils, Keg 50 l", "XKG"))[0];
+        var shouted = (await Suggest("FASSBIER PILS, KEG 50 L", "XKG"))[0];
         Assert.Equal(("ing.bier.fass", 50000L), (shouted.Mapping.IngredientId, shouted.Mapping.Factor));
         Assert.True(shouted.Confidence >= plain.Confidence - 5, $"{plain.Confidence} -> {shouted.Confidence}");
     }
 
     [Fact]
-    public void TheSameLineOnTheSameRulesRanksTheSameWithoutReindexing()
+    public async Task TheSameLineOnTheSameRulesRanksTheSameWithoutReindexing()
     {
         var rs = f.Rules();
-        var first = Suggest("Fassbier Pils, Keg 50 l", "XKG", rs);
+        var first = await Suggest("Fassbier Pils, Keg 50 l", "XKG", rs);
         var writes = f.Cache.Writes;
-        var again = Suggest("Fassbier Pils, Keg 50 l", "XKG", rs);
+        var again = await Suggest("Fassbier Pils, Keg 50 l", "XKG", rs);
         Assert.Equal(first, again, (a, b) => (a.Mapping.IngredientId, a.Mapping.Factor, a.Confidence, a.Kind) == (b.Mapping.IngredientId, b.Mapping.Factor, b.Confidence, b.Kind));
         Assert.Equal(writes, f.Cache.Writes);
     }
 
     [Fact]
-    public void OnlyTheCatalogAndConfirmedWordingsReachTheCache()
+    public async Task OnlyTheCatalogAndConfirmedWordingsReachTheCache()
     {
         var cache = new MemoryCache();
         var matcher = new Matcher(Encoders.Shipped, cache);
         var automatic = new ArticleMapping { Id = "map.auto", SupplierName = Rheinland, Observed = "Maerzen hell, Keg 30 l", IngredientId = "ing.bier.fass" };
         var rs = f.Rules(Zwickl, automatic);
-        matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Lieferung an Gasthaus Huber, Hauptstr. 3", UnitCode = "H87" });
+        await matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Lieferung an Gasthaus Huber, Hauptstr. 3", UnitCode = "H87" }, ct: TestContext.Current.CancellationToken);
 
         Assert.Empty(cache.Read(Encoder.Name, ["Lieferung an Gasthaus Huber, Hauptstr. 3", "Maerzen hell, Keg 30 l"]));
         Assert.Equal(2, cache.Read(Encoder.Name, [rs.Ingredients["ing.korn"].Name, "Zwickl naturtrueb, Keg 30 l"]).Count);
     }
 
     [Fact]
-    public void AFriseurIsNeverOfferedKorn()
+    public async Task AFriseurIsNeverOfferedKorn()
     {
-        Assert.All(Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO", gewerbe: "96021.0"), x => Assert.NotEqual("ing.korn", x.Mapping.IngredientId));
-        Assert.Equal("ing.korn", Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO", gewerbe: "")[0].Mapping.IngredientId);
-        Assert.Equal("ing.korn", Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO", gewerbe: "56101.0")[0].Mapping.IngredientId);
+        Assert.All(await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO", gewerbe: "96021.0"), x => Assert.NotEqual("ing.korn", x.Mapping.IngredientId));
+        Assert.Equal("ing.korn", (await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO", gewerbe: ""))[0].Mapping.IngredientId);
+        Assert.Equal("ing.korn", (await Suggest("Doppelkorn 38 % vol, Flasche 0,7 l", "XBO", gewerbe: "56101.0"))[0].Mapping.IngredientId);
     }
 
     [Fact]
-    public void OneConfirmationTeachesTheWordingAndTheNewPackSizeStillDecidesTheFactor()
+    public async Task OneConfirmationTeachesTheWordingAndTheNewPackSizeStillDecidesTheFactor()
     {
-        var naive = Suggest("Zwickl naturtrueb, Keg 50 l", "XKG").Find(s => s.Mapping.IngredientId == "ing.bier.fass")?.Confidence ?? 0;
+        var naive = (await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG")).Find(s => s.Mapping.IngredientId == "ing.bier.fass")?.Confidence ?? 0;
         var learnt = f.Rules(Zwickl);
-        var top = Suggest("Zwickl naturtrueb, Keg 50 l", "XKG", learnt)[0];
+        var top = (await Suggest("Zwickl naturtrueb, Keg 50 l", "XKG", learnt))[0];
         Assert.Equal(("ing.bier.fass", 50000L, OriginKind.Encoder), (top.Mapping.IngredientId, top.Mapping.Factor, top.Kind));
         Assert.True(top.Confidence >= naive && top.Confidence >= 80, $"{naive} -> {top.Confidence}");
-        NoWare(learnt, Suggest("Pfand Leergut Kiste", "XCS", learnt));
+        NoWare(learnt, await Suggest("Pfand Leergut Kiste", "XCS", learnt));
     }
 
     [Fact]
-    public void AnExactHitLeadsAndTheEncodersAlternativesFollow()
+    public async Task AnExactHitLeadsAndTheEncodersAlternativesFollow()
     {
         var rs = f.Rules(Zwickl);
-        var s = f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", SellerArticleId = "Z-1", UnitCode = "XBO" });
+        var s = await f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Doppelkorn 38 % vol, Flasche 0,7 l", SellerArticleId = "Z-1", UnitCode = "XBO" }, ct: TestContext.Current.CancellationToken);
         Assert.True(s.Count > 1);
         Assert.Equal(("map.zwickl", OriginKind.Exact, 100), (s[0].Mapping.Id, s[0].Kind, s[0].Confidence));
         Assert.Equal(("ing.korn", OriginKind.Encoder), (s[1].Mapping.IngredientId, s[1].Kind));
@@ -133,14 +133,14 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
     }
 
     [Fact]
-    public void AnUnconfirmedMappingFitsItsArticleWhateverTheWording()
+    public async Task AnUnconfirmedMappingFitsItsArticleWhateverTheWording()
     {
         var rs = f.Rules(new ArticleMapping
         {
             Id = "map.guess", SupplierName = Rheinland, SupplierArticleId = "G-1",
             Observed = "Pils Kiste 20 x 0,5 l", IngredientId = "ing.bier.fass", Confirmed = false,
         });
-        var misread = f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" });
+        var misread = await f.Matcher.Suggest(rs, "", Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" }, ct: TestContext.Current.CancellationToken);
         Assert.Equal(("map.guess", OriginKind.Exact), (misread[0].Mapping.Id, misread[0].Kind));
     }
 
@@ -153,9 +153,9 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
     [InlineData("xq7 zz", "")]
     [InlineData("", "")]
     [InlineData("   ", "")]
-    public void AnEncoderCandidateIsNeverCertainAndNeverBelowTheFloor(string name, string unitCode)
+    public async Task AnEncoderCandidateIsNeverCertainAndNeverBelowTheFloor(string name, string unitCode)
     {
-        var s = Suggest(name, unitCode);
+        var s = await Suggest(name, unitCode);
         Assert.All(s, x => Assert.Equal(OriginKind.Encoder, x.Kind));
         Assert.All(s, x => Assert.InRange(x.Confidence, 20, 99));
         Assert.Equal(s.Select(x => x.Confidence).OrderDescending(), s.Select(x => x.Confidence));
@@ -163,9 +163,9 @@ public class MatcherTests(MatcherFixture f) : IClassFixture<MatcherFixture>
     }
 
     [Fact]
-    public void ThePackSizeOfABottleCrateDecidesTheFactor()
+    public async Task ThePackSizeOfABottleCrateDecidesTheFactor()
     {
-        var top = Suggest("Flaschenbier Pils 24 x 0,33 l", "XCS")[0];
+        var top = (await Suggest("Flaschenbier Pils 24 x 0,33 l", "XCS"))[0];
         Assert.Equal(("ing.bier.flasche", 7920L), (top.Mapping.IngredientId, top.Mapping.Factor));
     }
 }

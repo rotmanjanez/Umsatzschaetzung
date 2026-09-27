@@ -1,3 +1,4 @@
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Tests.Suggest;
@@ -56,7 +57,7 @@ sealed class FixedCache : IEmbeddingCache
 
 static class Encoders
 {
-    public static readonly Encoder Shipped = new();
+    public static readonly Encoder Shipped = new(new OrtWeights(AppFiles.Beside("models")));
 }
 
 static class Vec

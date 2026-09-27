@@ -92,18 +92,18 @@ public sealed class History(Session session)
 
     // The platform's undo and redo keys, taken before any control sees them. Where a page saves only
     // on request, a text field keeps the keys while it has typing of its own to take back.
-    public static void Keys(TopLevel window, Func<bool, Task> move, Func<bool>? textFirst = null)
+    public static void Keys(Control scope, Func<bool, Task> move, Func<bool>? textFirst = null)
     {
         void Pressed(object? sender, KeyEventArgs e)
         {
             if (Application.Current?.PlatformSettings?.HotkeyConfiguration is not { } keys) return;
             bool? back = keys.Undo.Any(g => g.Matches(e)) ? true : keys.Redo.Any(g => g.Matches(e)) ? false : null;
             if (back is not { } b) return;
-            if (textFirst?.Invoke() == true && window.FocusManager?.GetFocusedElement() is TextBox box && (b ? box.CanUndo : box.CanRedo)) return;
+            if (textFirst?.Invoke() == true && TopLevel.GetTopLevel(scope)?.FocusManager?.GetFocusedElement() is TextBox box && (b ? box.CanUndo : box.CanRedo)) return;
             e.Handled = true;
             _ = move(b);
         }
-        window.AddHandler(InputElement.KeyDownEvent, Pressed, RoutingStrategies.Tunnel);
+        scope.AddHandler(InputElement.KeyDownEvent, Pressed, RoutingStrategies.Tunnel);
     }
 
     sealed class Step(Place at, List<IChange> changes, DateTime when)

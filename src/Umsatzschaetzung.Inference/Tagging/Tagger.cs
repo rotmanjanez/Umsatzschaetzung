@@ -1,13 +1,12 @@
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using Umsatzschaetzung.Extract;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 
 namespace Umsatzschaetzung.Tagging;
 
 // LiLT layout stream with GottBERT as its text side, int8 ONNX. One page of OCR words in;
 // per word a class, a column and a cell start, per row a role. docs/models.md §2.
-public sealed class Tagger : ITagger, IDisposable
+public sealed class Tagger(IWeights weights) : ITagger, IDisposable
 {
     public const string Name = "belegtagger-2.0.0/int8";
 
@@ -29,69 +28,73 @@ public sealed class Tagger : ITagger, IDisposable
     const int Roles = 9;
     const int CellClasses = 2;
 
+    const string Dir = "belegtagger";
+    const string ModelFile = Dir + "/belegtagger.int8.onnx";
+
     // Eight threads measured 2.3x slower than four on an M1 Pro (efficiency cores).
-    const int Threads = 4;
+    static readonly NetOptions Options = new(Threads: 4);
 
-    static string Dir => AppFiles.Beside(Path.Combine("models", "belegtagger"));
-    static string ModelPath => Path.Combine(Dir, "belegtagger.int8.onnx");
-
-    readonly Lock gate = new();
-    // Not InferenceSession: naming it in Dispose loads OnnxRuntime on every shutdown.
-    IDisposable? session;
+    readonly SemaphoreSlim gate = new(1, 1);
+    INet? net;
     Bpe? bpe;
 
-    public void Dispose() => session?.Dispose();
+    public void Dispose() => net?.Dispose();
 
-    public List<TaggedWord> Tag(IReadOnlyList<OcrWord> words, int width, int height)
+    public Task<List<TaggedWord>> Tag(IReadOnlyList<OcrWord> words, int width, int height, CancellationToken ct = default)
     {
         var rows = Rows.GroupRows(words);
         var ordered = new List<(OcrWord Word, int Row)>();
         for (var r = 0; r < rows.Count; r++)
             foreach (var w in rows[r].Words) ordered.Add((w, r));
-        return Tag(ordered, width, height);
+        return Tag(ordered, width, height, ct);
     }
 
     // Rows given, for the eval's word-for-word comparison with a Python dump.
-    public List<TaggedWord> Tag(IReadOnlyList<(OcrWord Word, int Row)> ordered, int width, int height)
+    public async Task<List<TaggedWord>> Tag(IReadOnlyList<(OcrWord Word, int Row)> ordered, int width, int height, CancellationToken ct = default)
     {
-        lock (gate)
-        {
-            bpe ??= Bpe.Open(Dir);
-            session ??= Open();
-            return Run((InferenceSession)session, bpe, ordered, width, height);
-        }
-    }
-
-    static InferenceSession Open()
-    {
-        var options = new SessionOptions { IntraOpNumThreads = Threads, InterOpNumThreads = 1 };
+        await gate.WaitAsync(ct);
         try
         {
-            var session = new InferenceSession(ModelPath, options);
-            Check(session, "word_logits", Classes.Length);
-            Check(session, "role_logits", Roles);
-            Check(session, "cell_logits", CellClasses);
-            return session;
+            bpe ??= await Bpe.Open(weights, Dir, ct);
+            net ??= await Open(ct);
+            return await Run(net, bpe, ordered, width, height, ct);
         }
-        catch (Exception e)
+        finally
         {
-            options.Dispose();
-            throw new InvalidOperationException(
-                "Das Modell zur Belegerkennung konnte nicht geladen werden. Erwartet unter " + ModelPath + ".", e);
+            gate.Release();
         }
     }
 
-    static void Check(InferenceSession session, string output, int width)
+    async Task<INet> Open(CancellationToken ct)
     {
-        if (Width(session, output) != width)
+        INet? opened = null;
+        try
+        {
+            opened = await weights.Open(ModelFile, Options, ct);
+            Check(opened, "word_logits", Classes.Length);
+            Check(opened, "role_logits", Roles);
+            Check(opened, "cell_logits", CellClasses);
+            return opened;
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            opened?.Dispose();
+            throw new InvalidOperationException(
+                "Das Modell zur Belegerkennung konnte nicht geladen werden. Erwartet unter models/" + ModelFile + ".", e);
+        }
+    }
+
+    static void Check(INet net, string output, int width)
+    {
+        if (Width(net, output) != width)
             throw new InvalidOperationException($"Das Belegerkennungsmodell liefert \"{output}\" nicht {width}-fach.");
     }
 
-    static int Width(InferenceSession session, string output)
+    static int Width(INet net, string output)
     {
-        if (!session.OutputMetadata.TryGetValue(output, out var meta))
-            throw new InvalidOperationException($"Das Belegerkennungsmodell liefert keinen Ausgang \"{output}\".");
-        var n = meta.Dimensions[^1];
+        var port = net.Outputs.FirstOrDefault(p => p.Name == output)
+            ?? throw new InvalidOperationException($"Das Belegerkennungsmodell liefert keinen Ausgang \"{output}\".");
+        var n = port.Shape[^1];
         if (n <= 0) throw new InvalidOperationException($"Das Belegerkennungsmodell gibt die Breite von \"{output}\" nicht an.");
         return n;
     }
@@ -102,8 +105,8 @@ public sealed class Tagger : ITagger, IDisposable
         public readonly float[] Sum = new float[tokens * width];
     }
 
-    static List<TaggedWord> Run(InferenceSession session, Bpe bpe, IReadOnlyList<(OcrWord Word, int Row)> ordered,
-        int width, int height)
+    static async Task<List<TaggedWord>> Run(INet net, Bpe bpe, IReadOnlyList<(OcrWord Word, int Row)> ordered,
+        int width, int height, CancellationToken ct)
     {
         var ids = new List<int>();
         var boxes = new List<int[]>();
@@ -128,7 +131,7 @@ public sealed class Tagger : ITagger, IDisposable
 
         // Windows are summed, not averaged: every class at a position shares the window count.
         var word = new Logits(ids.Count, Classes.Length);
-        var col = new Logits(ids.Count, Width(session, "col_logits"));
+        var col = new Logits(ids.Count, Width(net, "col_logits"));
         var cell = new Logits(ids.Count, CellClasses);
         var role = new Dictionary<int, float[]>();
 
@@ -137,7 +140,7 @@ public sealed class Tagger : ITagger, IDisposable
         for (var s = 0; s < ids.Count; s += step)
         {
             var e = Math.Min(s + body, ids.Count);
-            Window(session, bpe, ids, boxes, rowOf, s, e, word, col, cell, role);
+            await Window(net, bpe, ids, boxes, rowOf, s, e, word, col, cell, role, ct);
             if (e == ids.Count) break;
         }
 
@@ -158,32 +161,32 @@ public sealed class Tagger : ITagger, IDisposable
         return tagged;
     }
 
-    static void Window(InferenceSession session, Bpe bpe, List<int> ids, List<int[]> boxes, List<int> rowOf,
-                       int from, int to, Logits word, Logits col, Logits cell, Dictionary<int, float[]> role)
+    static async Task Window(INet net, Bpe bpe, List<int> ids, List<int[]> boxes, List<int> rowOf,
+                       int from, int to, Logits word, Logits col, Logits cell, Dictionary<int, float[]> role, CancellationToken ct)
     {
         var n = to - from + 2;
-        var input = new DenseTensor<long>([1, n]);
-        var bbox = new DenseTensor<long>([1, n, 4]);
-        var mask = new DenseTensor<long>([1, n]);
-        input[0, 0] = bpe.Bos;
-        input[0, n - 1] = bpe.Eos;
-        for (var i = 0; i < n; i++) mask[0, i] = 1;
+        var input = new long[n];
+        var bbox = new long[n * 4];
+        var mask = new long[n];
+        input[0] = bpe.Bos;
+        input[n - 1] = bpe.Eos;
+        Array.Fill(mask, 1);
         for (var i = from; i < to; i++)
         {
             var at = i - from + 1;
-            input[0, at] = ids[i];
-            for (var c = 0; c < 4; c++) bbox[0, at, c] = boxes[i][c];
+            input[at] = ids[i];
+            for (var c = 0; c < 4; c++) bbox[at * 4 + c] = boxes[i][c];
         }
 
-        using var results = session.Run([
-            NamedOnnxValue.CreateFromTensor("input_ids", input),
-            NamedOnnxValue.CreateFromTensor("bbox", bbox),
-            NamedOnnxValue.CreateFromTensor("attention_mask", mask),
-        ]);
-        Add(Output(results, "word_logits"), from, to, word);
-        Add(Output(results, "col_logits"), from, to, col);
-        Add(Output(results, "cell_logits"), from, to, cell);
-        var roleLogits = Output(results, "role_logits");
+        var results = await net.Run([
+            Tensor.Of("input_ids", input, 1, n),
+            Tensor.Of("bbox", bbox, 1, n, 4),
+            Tensor.Of("attention_mask", mask, 1, n),
+        ], ct);
+        Add(results.Named("word_logits").F, from, to, word);
+        Add(results.Named("col_logits").F, from, to, col);
+        Add(results.Named("cell_logits").F, from, to, cell);
+        var roleLogits = results.Named("role_logits").F;
 
         // The role head is affine, so the mean of its logits over a row's first subwords is
         // the row_pool the model was trained with.
@@ -218,13 +221,6 @@ public sealed class Tagger : ITagger, IDisposable
             var at = (i - from + 1) * w;
             for (var c = 0; c < w; c++) acc.Sum[i * w + c] += logits[at + c];
         }
-    }
-
-    static float[] Output(IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results, string name)
-    {
-        foreach (var r in results)
-            if (r.Name == name) return r.AsTensor<float>().ToArray();
-        throw new InvalidOperationException($"Das Belegerkennungsmodell liefert keinen Ausgang \"{name}\".");
     }
 
     // model.py quantise_box: pixels to bin space, so the dpi of the scan does not matter.

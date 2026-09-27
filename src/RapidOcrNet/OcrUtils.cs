@@ -3,8 +3,8 @@
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/OcrUtils.cs
 
-using Microsoft.ML.OnnxRuntime.Tensors;
 using SkiaSharp;
+using Umsatzschaetzung.Nets;
 
 namespace RapidOcrNet;
 
@@ -61,21 +61,21 @@ internal static class OcrUtils
     /// </summary>
     public static readonly SKSamplingOptions WarpSampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
 
-    public static Tensor<float> SubtractMeanNormalize(SKBitmap src, float[] meanVals, float[] normVals)
+    // One batch of three planes, [1, 3, rows, cols], under the net's input name.
+    public static Tensor SubtractMeanNormalize(SKBitmap src, float[] meanVals, float[] normVals, string name)
     {
         int cols = src.Width;
         int rows = src.Height;
         int rowBytes = src.RowBytes; // Use actual row stride (may include padding)
         int plane = rows * cols;
 
-        var inputTensor = new DenseTensor<float>([1, 3, rows, cols]);
-        Memory<float> buffer = inputTensor.Buffer;
+        var buffer = GC.AllocateUninitializedArray<float>(3 * plane);
 
         if (src.Info.ColorType == SKColorType.Gray8)
         {
             Parallel.For(0, rows, r =>
             {
-                Span<float> data = buffer.Span;
+                Span<float> data = buffer;
                 ReadOnlySpan<byte> row = src.GetPixelSpan().Slice(r * rowBytes, cols);
                 for (int ch = 0; ch < 3; ++ch)
                 {
@@ -92,7 +92,7 @@ internal static class OcrUtils
         {
             Parallel.For(0, rows, r =>
             {
-                Span<float> data = buffer.Span;
+                Span<float> data = buffer;
                 ReadOnlySpan<byte> row = src.GetPixelSpan().Slice(r * rowBytes, cols * 4);
                 for (int ch = 0; ch < 3; ++ch)
                 {
@@ -110,7 +110,7 @@ internal static class OcrUtils
             throw new ArgumentException($"This image needs to be '{SKColorType.Bgra8888}' or '{SKColorType.Gray8}', but got '{src.Info.ColorType}'.");
         }
 
-        return inputTensor;
+        return Tensor.Of(name, buffer, 1, 3, rows, cols);
     }
 
     /// <summary>

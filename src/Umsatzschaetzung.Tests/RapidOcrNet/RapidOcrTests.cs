@@ -18,9 +18,9 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void ThreePrintedLinesAreReadBackTopToBottom()
+    public async Task ThreePrintedLinesAreReadBackTopToBottom()
     {
-        var blocks = models.Read(false, OcrModels.App).TextBlocks;
+        var blocks = (await models.Read(false, OcrModels.App)).TextBlocks;
 
         Assert.Equal(3, blocks.Length);
         for (var i = 0; i < 3; i++)
@@ -34,9 +34,9 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void EveryWordLiesInsideItsLineInReadingOrder()
+    public async Task EveryWordLiesInsideItsLineInReadingOrder()
     {
-        foreach (var block in models.Read(false, OcrModels.App).TextBlocks)
+        foreach (var block in (await models.Read(false, OcrModels.App)).TextBlocks)
         {
             var words = block.WordResults;
             Assert.NotNull(words);
@@ -47,9 +47,9 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void AnUpsideDownPageIsReadUprightWhenTheClassifierMayTurnCrops()
+    public async Task AnUpsideDownPageIsReadUprightWhenTheClassifierMayTurnCrops()
     {
-        var blocks = models.Read(true, OcrModels.Upstream).TextBlocks;
+        var blocks = (await models.Read(true, OcrModels.Upstream)).TextBlocks;
 
         Assert.Equal(3, blocks.Length);
         for (var i = 0; i < 3; i++)
@@ -65,9 +65,9 @@ public class RapidOcrTests(OcrModels models)
     // The page as a whole is turned by the caller, from the verdicts: a line read upside down
     // reads as garbage or as nothing, and dropping it for that would drop its verdict with it.
     [Fact]
-    public void WithoutTurningCropsAnUpsideDownPageStillReportsItsVerdictOnEveryLine()
+    public async Task WithoutTurningCropsAnUpsideDownPageStillReportsItsVerdictOnEveryLine()
     {
-        var blocks = models.Read(true, OcrModels.App).TextBlocks;
+        var blocks = (await models.Read(true, OcrModels.App)).TextBlocks;
 
         Assert.Equal(3, blocks.Length);
         Assert.All(blocks, b => Assert.Equal(1, b.AngleIndex));
@@ -75,34 +75,34 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void ACappedClassifierLeavesTheShorterLinesWithoutAVerdict()
+    public async Task ACappedClassifierLeavesTheShorterLinesWithoutAVerdict()
     {
-        var blocks = models.Read(true, OcrModels.App with { ClsMaxCrops = 1 }).TextBlocks;
+        var blocks = (await models.Read(true, OcrModels.App with { ClsMaxCrops = 1 })).TextBlocks;
 
         Assert.Single(blocks, b => b.AngleIndex == 1);
         Assert.All(blocks, b => Assert.Contains(b.AngleIndex, new[] { 1, -1 }));
     }
 
     [Fact]
-    public void AnUprightPageReadsTheSameWhetherCropsMayBeTurnedOrNot()
+    public async Task AnUprightPageReadsTheSameWhetherCropsMayBeTurnedOrNot()
     {
-        var app = models.Read(false, OcrModels.App).TextBlocks;
-        var upstream = models.Read(false, OcrModels.Upstream).TextBlocks;
+        var app = (await models.Read(false, OcrModels.App)).TextBlocks;
+        var upstream = (await models.Read(false, OcrModels.Upstream)).TextBlocks;
         Assert.Equal(upstream.Select(b => b.Text), app.Select(b => b.Text));
     }
 
     [Fact]
-    public void AColumnOfShortTokensThatTheDetectorRanTogetherIsReadLineByLine()
+    public async Task AColumnOfShortTokensThatTheDetectorRanTogetherIsReadLineByLine()
     {
         const int gap = 24;
         var baselines = Enumerable.Range(0, 5).Select(i => 50f + i * gap).ToArray();
         using var column = Images.Text(300, 60 + 5 * gap, 40, [("Artikel", 20, 50), .. baselines.Select(b => ("ca", 200f, b))]);
 
-        var joined = models.Engine.Detect(column, OcrModels.App with { SplitStackedCrops = false }).TextBlocks;
+        var joined = (await models.Engine.Detect(column, OcrModels.App with { SplitStackedCrops = false })).TextBlocks;
         if (joined.Count(b => b.Text == "ca") == 5)
             Assert.Skip("The detector kept the column apart on this machine's rendering.");
 
-        var split = models.Engine.Detect(column, OcrModels.App).TextBlocks;
+        var split = (await models.Engine.Detect(column, OcrModels.App)).TextBlocks;
 
         var units = split.Where(b => b.Text == "ca").Select(b => Images.Bounds(b.BoxPoints)).OrderBy(b => b.Y0).ToArray();
         Assert.Equal(5, units.Length);
@@ -111,41 +111,41 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void AWhitePageHasNothingToRead()
+    public async Task AWhitePageHasNothingToRead()
     {
         using var blank = Images.Blank(400, 300);
 
-        var result = models.Engine.Detect(blank, OcrModels.App);
+        var result = await models.Engine.Detect(blank, OcrModels.App);
 
         Assert.Empty(result.TextBlocks);
         Assert.Equal("", result.StrRes);
-        Assert.Empty(models.Engine.DetectBoxes(blank, OcrModels.App));
+        Assert.Empty(await models.Engine.DetectBoxes(blank, OcrModels.App));
     }
 
     [Fact]
-    public void ASliverFarTallerThanWideIsReadWithoutFailing()
+    public async Task ASliverFarTallerThanWideIsReadWithoutFailing()
     {
         using var sliver = Images.Blank(2, 200);
 
-        var line = models.Recognizer.GetTextLine(sliver);
+        var line = await models.Recognizer.GetTextLine(sliver);
 
         Assert.Empty(line.Chars ?? []);
     }
 
     [Fact]
-    public void DetectedBoxesAreTheBoxesTheLinesAreReadFrom()
+    public async Task DetectedBoxesAreTheBoxesTheLinesAreReadFrom()
     {
-        var boxes = models.Engine.DetectBoxes(models.Page, OcrModels.App);
-        var blocks = models.Read(false, OcrModels.App).TextBlocks;
+        var boxes = await models.Engine.DetectBoxes(models.Page, OcrModels.App);
+        var blocks = (await models.Read(false, OcrModels.App)).TextBlocks;
         Assert.Equal(blocks.Select(b => Images.Bounds(b.BoxPoints)), boxes.Select(b => Images.Bounds(b.BoxPoints)));
     }
 
     [Fact]
-    public void TheDetectorBoxesEachLineAroundItsInk()
+    public async Task TheDetectorBoxesEachLineAroundItsInk()
     {
         var scale = ScaleParam.GetAdaptiveScaleParam(models.Page);
 
-        var boxes = models.Detector.GetTextBoxes(models.Page, scale, 0.5f, 0.3f, 1.6f);
+        var boxes = await models.Detector.GetTextBoxes(models.Page, scale, 0.5f, 0.3f, 1.6f);
 
         Assert.NotNull(boxes);
         Assert.Equal(3, boxes.Count);
@@ -154,13 +154,13 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void TheClassifierTellsAnUprightLineFromAnUpsideDownOne()
+    public async Task TheClassifierTellsAnUprightLineFromAnUpsideDownOne()
     {
         using var line = FirstLine();
         using var flipped = OcrUtils.BitmapRotateClockWise180(line);
 
-        var upright = models.Classifier.GetAngle(line, preserveAspectRatio: true);
-        var turned = models.Classifier.GetAngle(flipped, preserveAspectRatio: true);
+        var upright = await models.Classifier.GetAngle(line, preserveAspectRatio: true);
+        var turned = await models.Classifier.GetAngle(flipped, preserveAspectRatio: true);
 
         Assert.Equal(0, upright.Index);
         Assert.Equal(1, turned.Index);
@@ -168,29 +168,29 @@ public class RapidOcrTests(OcrModels models)
     }
 
     [Fact]
-    public void TheClassifierCanBeSkippedOrOutvoted()
+    public async Task TheClassifierCanBeSkippedOrOutvoted()
     {
         using var line = FirstLine();
         using var flipped = OcrUtils.BitmapRotateClockWise180(line);
 
-        Assert.All(models.Classifier.GetAngles([line, flipped], doAngle: false, mostAngle: false), a => Assert.Equal(-1, a.Index));
-        Assert.All(models.Classifier.GetAngles([flipped, flipped, line], doAngle: true, mostAngle: true, true), a => Assert.Equal(1, a.Index));
-        Assert.All(models.Classifier.GetAngles([line, line, flipped], doAngle: true, mostAngle: true, true), a => Assert.Equal(0, a.Index));
+        Assert.All(await models.Classifier.GetAngles([line, flipped], doAngle: false, mostAngle: false), a => Assert.Equal(-1, a.Index));
+        Assert.All(await models.Classifier.GetAngles([flipped, flipped, line], doAngle: true, mostAngle: true, true), a => Assert.Equal(1, a.Index));
+        Assert.All(await models.Classifier.GetAngles([line, line, flipped], doAngle: true, mostAngle: true, true), a => Assert.Equal(0, a.Index));
     }
 
     [Fact]
-    public void TheRecogniserReadsALineWithAColumnPerCharacter()
+    public async Task TheRecogniserReadsALineWithAColumnPerCharacter()
     {
         using var line = FirstLine();
 
-        var read = models.Recognizer.GetTextLine(line);
+        var read = await models.Recognizer.GetTextLine(line);
 
         AssertReads(OcrModels.Lines[0], string.Concat(read.Chars!));
         Assert.Equal(read.Chars!.Length, read.CharScores!.Length);
         Assert.Equal(read.Chars.Length, read.CharCols!.Length);
         Assert.True(read.CharCols.Zip(read.CharCols.Skip(1)).All(p => p.First < p.Second));
         Assert.InRange(read.CharCols[^1], 0, read.ColCount - 1);
-        Assert.Single(models.Recognizer.GetTextLines([line]));
+        Assert.Single(await models.Recognizer.GetTextLines([line]));
     }
 
     SKBitmap FirstLine() =>

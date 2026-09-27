@@ -2,9 +2,8 @@
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/AngleNet.cs
 
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using SkiaSharp;
+using Umsatzschaetzung.Nets;
 
 namespace RapidOcrNet;
 
@@ -25,22 +24,17 @@ public sealed class TextClassifier : IDisposable
     private int _angleDstWidth = DefaultAngleDstWidth;
     private int _angleDstHeight = DefaultAngleDstHeight;
 
-    private InferenceSession _angleNet = null!;
+    private INet _angleNet = null!;
     private string _inputName = null!;
 
-    public void InitModel(string path, SessionOptions op)
+    public void InitModel(INet net)
     {
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException($"Classifier model file does not exist: '{path}'.");
-        }
-
-        _angleNet = new InferenceSession(path, op);
-        _inputName = _angleNet.InputMetadata.Keys.First();
+        _angleNet = net;
+        _inputName = net.Inputs[0].Name;
 
         // NCHW input: dims[2] is height, dims[3] is width. A dimension of -1 means
         // dynamic, in which case we keep the legacy 48x192 default.
-        int[] dims = _angleNet.InputMetadata[_inputName].Dimensions;
+        int[] dims = net.Inputs[0].Shape;
         if (dims is { Length: 4 })
         {
             if (dims[2] > 0)
@@ -55,28 +49,23 @@ public sealed class TextClassifier : IDisposable
         }
     }
 
-    public void InitModel(string path, int numThread)
-    {
-        using var sessionOptions = RapidOcr.GetDefaultSessionOptions(numThread);
-        InitModel(path, sessionOptions);
-    }
-
-    public Angle[] GetAngles(SKBitmap[] partImgs, bool doAngle, bool mostAngle, bool preserveAspectRatio = false, int maxCrops = 0)
+    public async Task<Angle[]> GetAngles(SKBitmap[] partImgs, bool doAngle, bool mostAngle, bool preserveAspectRatio = false, int maxCrops = 0)
     {
         var angles = new Angle[partImgs.Length];
+        var cores = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
         if (doAngle && maxCrops > 0 && partImgs.Length > maxCrops)
         {
             var longest = Enumerable.Range(0, partImgs.Length)
                 .OrderByDescending(i => partImgs[i].Width / (float)partImgs[i].Height)
                 .Take(maxCrops)
                 .ToHashSet();
-            Parallel.For(0, partImgs.Length, i => angles[i] = longest.Contains(i)
-                ? GetAngle(partImgs[i], preserveAspectRatio)
+            await Parallel.ForEachAsync(Enumerable.Range(0, partImgs.Length), cores, async (i, _) => angles[i] = longest.Contains(i)
+                ? await GetAngle(partImgs[i], preserveAspectRatio)
                 : new Angle { Index = -1 });
         }
         else if (doAngle)
         {
-            Parallel.For(0, partImgs.Length, i => angles[i] = GetAngle(partImgs[i], preserveAspectRatio));
+            await Parallel.ForEachAsync(Enumerable.Range(0, partImgs.Length), cores, async (i, _) => angles[i] = await GetAngle(partImgs[i], preserveAspectRatio));
 
             // Most Possible AngleIndex
             if (mostAngle)
@@ -111,12 +100,12 @@ public sealed class TextClassifier : IDisposable
         return angles;
     }
 
-    public Angle GetAngle(SKBitmap src) => GetAngle(src, preserveAspectRatio: false);
+    public Task<Angle> GetAngle(SKBitmap src) => GetAngle(src, preserveAspectRatio: false);
 
-    public Angle GetAngle(SKBitmap src, bool preserveAspectRatio)
+    public async Task<Angle> GetAngle(SKBitmap src, bool preserveAspectRatio)
     {
         var sw = ValueStopwatch.StartNew();
-        Tensor<float> inputTensors;
+        Tensor inputTensors;
 
         if (preserveAspectRatio)
         {
@@ -141,7 +130,7 @@ public sealed class TextClassifier : IDisposable
                     canvas.Clear(new SKColor(128, 128, 128));
                     canvas.DrawBitmap(resized, 0, 0);
                 }
-                inputTensors = OcrUtils.SubtractMeanNormalize(angleImg, MeanValues, NormValues);
+                inputTensors = OcrUtils.SubtractMeanNormalize(angleImg, MeanValues, NormValues, _inputName);
             }
         }
         else
@@ -150,35 +139,16 @@ public sealed class TextClassifier : IDisposable
             // Mitchell cubic.
             using (var angleImg = src.Resize(new SKSizeI(_angleDstWidth, _angleDstHeight), new SKSamplingOptions(SKCubicResampler.Mitchell)))
             {
-                inputTensors = OcrUtils.SubtractMeanNormalize(angleImg, MeanValues, NormValues);
+                inputTensors = OcrUtils.SubtractMeanNormalize(angleImg, MeanValues, NormValues, _inputName);
             }
         }
 
-        IReadOnlyCollection<NamedOnnxValue> inputs =
-        [
-            NamedOnnxValue.CreateFromTensor(_inputName, inputTensors)
-        ];
-
         try
         {
-            using (IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = _angleNet.Run(inputs))
-            {
-                var outputTensor = results[0];
-
-                ReadOnlySpan<float> outputData;
-                if (outputTensor.AsTensor<float>() is DenseTensor<float> dt)
-                {
-                    outputData = dt.Buffer.Span;
-                }
-                else
-                {
-                    outputData = outputTensor.AsEnumerable<float>().ToArray();
-                }
-
-                var angle = ScoreToAngle(outputData, AngleCols);
-                angle.Time = (float)sw.ElapsedMilliseconds;
-                return angle;
-            }
+            var outputs = await _angleNet.Run([inputTensors]);
+            var angle = ScoreToAngle(outputs[0].F, AngleCols);
+            angle.Time = (float)sw.ElapsedMilliseconds;
+            return angle;
         }
         catch (Exception ex)
         {
@@ -213,6 +183,6 @@ public sealed class TextClassifier : IDisposable
 
     public void Dispose()
     {
-        _angleNet.Dispose();
+        _angleNet?.Dispose();
     }
 }

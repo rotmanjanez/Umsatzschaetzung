@@ -6,7 +6,7 @@ namespace Umsatzschaetzung.Tagging;
 public interface ITagger
 {
     string Model { get; }
-    List<TaggedWord> Tag(IReadOnlyList<OcrWord> words, int width, int height);
+    Task<List<TaggedWord>> Tag(IReadOnlyList<OcrWord> words, int width, int height, CancellationToken ct = default);
 }
 
 // In the order of ROLES in tools/train/schema.py: the order is part of the model contract.

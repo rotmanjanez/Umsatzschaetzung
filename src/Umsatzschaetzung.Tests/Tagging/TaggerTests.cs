@@ -1,11 +1,12 @@
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Tests.Tagging;
 
 public sealed class TaggerFixture : IDisposable
 {
-    public Tagger Tagger { get; } = new();
+    public Tagger Tagger { get; } = new(new OrtWeights(AppFiles.Beside("models")));
 
     public void Dispose() => Tagger.Dispose();
 }
@@ -38,10 +39,10 @@ public class TaggerTests(TaggerFixture f) : IClassFixture<TaggerFixture>
         string.Join('\n', t.Select(x => $"{x.Row} {x.Word.Text} {x.Field} {x.Role} {x.Conf:F2} col {x.Col} {(x.CellStart ? "start" : "")}"));
 
     [Fact]
-    public void EveryWordComesBackOnceInReadingOrderOnItsRow()
+    public async Task EveryWordComesBackOnceInReadingOrderOnItsRow()
     {
         var page = Page();
-        var tagged = f.Tagger.Tag(page, Width, Height);
+        var tagged = await f.Tagger.Tag(page, Width, Height, TestContext.Current.CancellationToken);
         Assert.Equal(page, tagged.Select(t => t.Word));
         var rows = RowStarts;
         for (var r = 0; r < rows.Length - 1; r++)
@@ -50,13 +51,13 @@ public class TaggerTests(TaggerFixture f) : IClassFixture<TaggerFixture>
     }
 
     [Fact]
-    public void ConfidenceIsAProbability() =>
-        Assert.All(f.Tagger.Tag(Page(), Width, Height), t => Assert.InRange(t.Conf, 0f, 1f));
+    public async Task ConfidenceIsAProbability() =>
+        Assert.All(await f.Tagger.Tag(Page(), Width, Height, TestContext.Current.CancellationToken), t => Assert.InRange(t.Conf, 0f, 1f));
 
     [Fact]
-    public void AnObviousItemRowIsReadAsALineItemOfTableCells()
+    public async Task AnObviousItemRowIsReadAsALineItemOfTableCells()
     {
-        var tagged = f.Tagger.Tag(Page(), Width, Height);
+        var tagged = await f.Tagger.Tag(Page(), Width, Height, TestContext.Current.CancellationToken);
         var item = tagged.FindAll(t => t.Row == ItemRow);
         Assert.True(item.TrueForAll(t => t.Role == Role.LineItem), Dump(tagged));
         Assert.True(item.TrueForAll(t => t.Field == Field.Cell), Dump(tagged));
@@ -66,9 +67,9 @@ public class TaggerTests(TaggerFixture f) : IClassFixture<TaggerFixture>
     }
 
     [Fact]
-    public void TheHeaderAndTheTotalsAreTaggedAsSuch()
+    public async Task TheHeaderAndTheTotalsAreTaggedAsSuch()
     {
-        var tagged = f.Tagger.Tag(Page(), Width, Height);
+        var tagged = await f.Tagger.Tag(Page(), Width, Height, TestContext.Current.CancellationToken);
         Assert.True(tagged.Find(t => t.Word.Text == "2024-04711")?.Field == Field.InvoiceNumber, Dump(tagged));
         Assert.True(tagged.Find(t => t.Word.Text == "01.03.2024")?.Field == Field.InvoiceDate, Dump(tagged));
         Assert.True(tagged.Find(t => t.Word.Text == "1.384,45")?.Field == Field.GrossTotal, Dump(tagged));
@@ -77,76 +78,76 @@ public class TaggerTests(TaggerFixture f) : IClassFixture<TaggerFixture>
     }
 
     [Fact]
-    public void AnEmptyPageHasNoWords() => Assert.Empty(f.Tagger.Tag(new List<OcrWord>(), Width, Height));
+    public async Task AnEmptyPageHasNoWords() => Assert.Empty(await f.Tagger.Tag(new List<OcrWord>(), Width, Height, TestContext.Current.CancellationToken));
 
     [Fact]
-    public void ABlankWordIsNoWord()
+    public async Task ABlankWordIsNoWord()
     {
         var page = Page();
         page.Insert(5, W("  ", 250, 160, 10));
         page.Add(W("", 80, 1500, 10));
-        Assert.Equal(Page().Select(w => w.Text), f.Tagger.Tag(page, Width, Height).Select(t => t.Word.Text));
+        Assert.Equal(Page().Select(w => w.Text), (await f.Tagger.Tag(page, Width, Height, TestContext.Current.CancellationToken)).Select(t => t.Word.Text));
     }
 
     [Fact]
-    public void OneWordIsOneTaggedWord()
+    public async Task OneWordIsOneTaggedWord()
     {
         var word = W("Rechnung", 80, 160, 130);
-        var tagged = Assert.Single(f.Tagger.Tag([word], Width, Height));
+        var tagged = Assert.Single(await f.Tagger.Tag([word], Width, Height, TestContext.Current.CancellationToken));
         Assert.Same(word, tagged.Word);
         Assert.Equal(0, tagged.Row);
         Assert.InRange(tagged.Conf, 0f, 1f);
     }
 
     [Fact]
-    public void WordsOutOfOrderAreTaggedAsIfRead()
+    public async Task WordsOutOfOrderAreTaggedAsIfRead()
     {
         var page = Page();
         var shuffled = page.OrderBy(w => w.Text.GetHashCode() ^ w.Box.X).ToList();
-        Assert.Equal(Key(f.Tagger.Tag(page, Width, Height)), Key(f.Tagger.Tag(shuffled, Width, Height)));
+        Assert.Equal(Key(await f.Tagger.Tag(page, Width, Height, TestContext.Current.CancellationToken)), Key(await f.Tagger.Tag(shuffled, Width, Height, TestContext.Current.CancellationToken)));
     }
 
     // Boxes are binned against the page size, so the resolution of the scan does not matter.
     [Fact]
-    public void TheSamePageAtTwiceTheResolutionIsTaggedTheSame()
+    public async Task TheSamePageAtTwiceTheResolutionIsTaggedTheSame()
     {
         var sharp = Page().Select(w => new OcrWord { Text = w.Text, Box = new Box(w.Box.X * 2, w.Box.Y * 2, w.Box.W * 2, w.Box.H * 2) }).ToList();
-        var a = f.Tagger.Tag(Page(), Width, Height);
-        var b = f.Tagger.Tag(sharp, Width * 2, Height * 2);
+        var a = await f.Tagger.Tag(Page(), Width, Height, TestContext.Current.CancellationToken);
+        var b = await f.Tagger.Tag(sharp, Width * 2, Height * 2, TestContext.Current.CancellationToken);
         Assert.Equal(Key(a), Key(b));
         Assert.Equal(a.Select(t => t.Conf), b.Select(t => t.Conf));
     }
 
     [Fact]
-    public void TheSameBoxesOnALargerPageAreReadDifferently()
+    public async Task TheSameBoxesOnALargerPageAreReadDifferently()
     {
-        var a = f.Tagger.Tag(Page(), Width, Height);
-        var b = f.Tagger.Tag(Page(), Width * 4, Height * 4);
+        var a = await f.Tagger.Tag(Page(), Width, Height, TestContext.Current.CancellationToken);
+        var b = await f.Tagger.Tag(Page(), Width * 4, Height * 4, TestContext.Current.CancellationToken);
         Assert.NotEqual(a.Select(t => t.Conf), b.Select(t => t.Conf));
     }
 
     [Fact]
-    public void BoxesOutsideThePageAreClampedNotRejected()
+    public async Task BoxesOutsideThePageAreClampedNotRejected()
     {
         var page = Page();
         page.Add(W("Seite", 5000, 1900, 400));
-        var tagged = f.Tagger.Tag(page, Width, Height);
+        var tagged = await f.Tagger.Tag(page, Width, Height, TestContext.Current.CancellationToken);
         Assert.Equal(page.Count, tagged.Count);
-        Assert.Equal(page.Count, f.Tagger.Tag(page, 0, 0).Count);
+        Assert.Equal(page.Count, (await f.Tagger.Tag(page, 0, 0, TestContext.Current.CancellationToken)).Count);
     }
 
     [Fact]
-    public void RowsGivenAreKept()
+    public async Task RowsGivenAreKept()
     {
         var ordered = Page().Select((w, i) => (w, i % 3)).ToList();
-        var tagged = f.Tagger.Tag(ordered, Width, Height);
+        var tagged = await f.Tagger.Tag(ordered, Width, Height, TestContext.Current.CancellationToken);
         Assert.Equal(ordered.Select(o => (o.w, o.Item2)), tagged.Select(t => (t.Word, t.Row)));
     }
 
     // Longer than one window and with more rows than the role head pools: the windows
     // overlap and every word still comes back once.
     [Fact]
-    public void APageLongerThanOneWindowKeepsEveryWord()
+    public async Task APageLongerThanOneWindowKeepsEveryWord()
     {
         var page = new List<OcrWord>();
         for (var r = 0; r < 160; r++)
@@ -156,7 +157,7 @@ public class TaggerTests(TaggerFixture f) : IClassFixture<TaggerFixture>
             page.Add(W("Weizenmehl Type 550", 150, y, 300));
             page.Add(W($"{r + 3},{r % 100:00}", 1000, y, 80));
         }
-        var tagged = f.Tagger.Tag(page, Width, 5000);
+        var tagged = await f.Tagger.Tag(page, Width, 5000, TestContext.Current.CancellationToken);
         Assert.Equal(page, tagged.Select(t => t.Word));
         Assert.Equal(Enumerable.Range(0, 160).SelectMany(r => new[] { r, r, r }), tagged.Select(t => t.Row));
         Assert.All(tagged, t => Assert.InRange(t.Conf, 0f, 1f));

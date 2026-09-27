@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Umsatzschaetzung.Nets;
 
 namespace Umsatzschaetzung.Tagging;
 
@@ -25,9 +26,9 @@ public sealed class Bpe
     public int Eos { get; }
     public int Pad { get; }
 
-    Bpe(string dir)
+    Bpe(byte[] specJson, byte[] vocabJson, byte[] bytesJson, byte[] mergesTxt)
     {
-        using var spec = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(dir, "spec.json")));
+        using var spec = JsonDocument.Parse(specJson);
         var root = spec.RootElement;
         Unk = root.GetProperty("unk_id").GetInt32();
         var specials = root.GetProperty("specials");
@@ -36,15 +37,15 @@ public sealed class Bpe
         Pad = specials.GetProperty("<pad>").GetInt32();
         split = new Regex(root.GetProperty("pretokenizer_regex").GetString()!, RegexOptions.Compiled);
 
-        using var v = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(dir, "vocab.json")));
+        using var v = JsonDocument.Parse(vocabJson);
         vocab = new Dictionary<string, int>(StringComparer.Ordinal);
         foreach (var token in v.RootElement.EnumerateObject()) vocab[token.Name] = token.Value.GetInt32();
 
-        using var b = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(dir, "byte_to_unicode.json")));
+        using var b = JsonDocument.Parse(bytesJson);
         foreach (var entry in b.RootElement.EnumerateObject()) bytes[int.Parse(entry.Name)] = entry.Value.GetString()!;
 
         ranks = [];
-        var lines = File.ReadAllText(Path.Combine(dir, "merges.txt"), Encoding.UTF8).Split('\n');
+        var lines = new StreamReader(new MemoryStream(mergesTxt), Encoding.UTF8).ReadToEnd().Split('\n');
         var start = lines.Length > 0 && lines[0].StartsWith('#') ? 1 : 0;
         for (var i = start; i < lines.Length; i++)
         {
@@ -53,16 +54,20 @@ public sealed class Bpe
         }
     }
 
-    public static Bpe Open(string dir)
+    public static async Task<Bpe> Open(IWeights weights, string dir, CancellationToken ct = default)
     {
         try
         {
-            return new Bpe(dir);
+            return new Bpe(
+                await weights.Read(dir + "/spec.json", ct),
+                await weights.Read(dir + "/vocab.json", ct),
+                await weights.Read(dir + "/byte_to_unicode.json", ct),
+                await weights.Read(dir + "/merges.txt", ct));
         }
         catch (Exception e) when (e is IOException or JsonException or KeyNotFoundException)
         {
             throw new InvalidOperationException(
-                "Die Wortzerlegung für die Belegerkennung konnte nicht geladen werden. Erwartet unter " + dir + ".", e);
+                "Die Wortzerlegung für die Belegerkennung konnte nicht geladen werden. Erwartet unter models/" + dir + ".", e);
         }
     }
 

@@ -92,14 +92,14 @@ public sealed class EmbeddingStoreTests : IDisposable
     }
 
     [Fact]
-    public void AMatcherTakesItsVectorsFromTheStore()
+    public async Task AMatcherTakesItsVectorsFromTheStore()
     {
         var store = new EmbeddingStore(dir.Path);
         store.Write(Model, [("Ware", Vec.At(1)), ("Pils", Vec.At(0.9))]);
         var rs = new RuleSet();
         rs.Put(new Ingredient { Id = "ing.pils", Name = "Pils" });
         var m = new Matcher(Encoders.Shipped, store);
-        var only = Assert.Single(m.Suggest(rs, "", null, new InvoiceLine { Name = "Ware" }));
+        var only = Assert.Single(await m.Suggest(rs, "", null, new InvoiceLine { Name = "Ware" }, ct: TestContext.Current.CancellationToken));
         Assert.Equal(("ing.pils", Encoders.Shipped.Confidence(0.9f)), (only.Mapping.IngredientId, only.Confidence));
     }
 }

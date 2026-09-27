@@ -152,7 +152,7 @@ public partial class CasesView : Screen
     async void Delete(object? sender, RoutedEventArgs e)
     {
         if ((sender as Control)?.DataContext is not CaseRow row) return;
-        var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+        var answer = await Dialog.Confirm(this,
             "„" + row.Case.Label + "“ wird mit allen Rechnungen unwiderruflich gelöscht.",
             "Prüfung löschen");
         if (!answer) return;
@@ -189,7 +189,7 @@ public partial class CasesView : Screen
         catch (ServiceError err) when (err.Code == ErrorCode.Conflict && !overwrite)
         {
             var labels = err.Details as List<string> ?? [];
-            var answer = await Dialog.Confirm(TopLevel.GetTopLevel(this) as Window,
+            var answer = await Dialog.Confirm(this,
                 labels.Count > 1
                     ? "„" + string.Join("“ und „", labels) + "“ sind bereits vorhanden und werden mit allen Rechnungen durch die Datei ersetzt."
                     : "„" + labels.FirstOrDefault() + "“ ist bereits vorhanden und wird mit allen Rechnungen durch die Datei ersetzt.",

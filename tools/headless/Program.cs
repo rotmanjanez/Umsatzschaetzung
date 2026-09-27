@@ -16,8 +16,10 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Headless;
+using Umsatzschaetzung;
 using Umsatzschaetzung.App;
 using Umsatzschaetzung.App.Platform;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Headless;
@@ -54,7 +56,8 @@ AppBuilder.Configure<App>()
     .WithInterFont()
     .SetupWithoutStarting();
 
-var encoder = new Encoder();
+var weights = new OrtWeights(AppFiles.Beside("models"));
+var encoder = new Encoder(weights);
 var lesson = new Lesson(store, Path.Combine(work.FullName, "cases"));
 using var perfOut = options.TryGetValue("perf", out var perfPath) ? File.CreateText(perfPath) : null;
 var perf = perfOut is null ? null : new Perf(perfOut);
@@ -76,13 +79,13 @@ return 0;
 Shell Launch(bool forget)
 {
     if (forget) Directory.Delete(store, true);
-    var documents = new Documents(new RapidOcr(), new PdfiumPages());
+    var documents = new Documents(new RapidOcr(weights), new PdfiumPages());
     var service = Services.Local(
         new RuleStore(store, seed),
         new CaseStore(Path.Combine(work.FullName, "cases")),
         Release.Version,
         documents: documents,
-        tagger: new Tagger(),
+        tagger: new Tagger(weights),
         ranking: new Noted(new EncoderRanking(encoder, new EmbeddingStore(store)), lesson.Notes),
         readings: options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);

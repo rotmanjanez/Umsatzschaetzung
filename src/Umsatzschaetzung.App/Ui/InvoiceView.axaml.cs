@@ -592,7 +592,7 @@ public partial class InvoiceView : Screen
             }
             model.Dirty = false;
             onSaved(v.Case);
-            (TopLevel.GetTopLevel(this) as InvoiceWindow)?.Close();
+            Frame.Of(this)?.Close();
         });
         model.Saving = false;
     }

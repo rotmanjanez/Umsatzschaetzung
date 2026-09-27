@@ -13,10 +13,10 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
     readonly Matcher matcher = new(ranking);
 
     // A line asked about on its own carries no invoice date; the end of the audit period stands in.
-    public Task<List<MappingCandidate>> Suggest(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, () =>
+    public Task<List<MappingCandidate>> Suggest(string caseId, InvoiceLine line, string? supplier, CancellationToken ct) => Guard(ct, async () =>
     {
         var c = cases.Find(caseId);
-        return matcher.Suggest(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today())
+        return (await matcher.Suggest(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", supplier, line, c?.PeriodTo ?? Today(), ct))
             .Select(sg => new MappingCandidate(Json.Copy(sg.Mapping), sg.Confidence, sg.Kind)).ToList();
     });
 
@@ -63,7 +63,7 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
             return rs;
         }
         if (!ask) return rs;
-        var sugs = await Task.Run(() => matcher.Suggest(rs, gewerbe, inv.SupplierName, l, inv.Date ?? Today()), ct);
+        var sugs = await Task.Run(() => matcher.Suggest(rs, gewerbe, inv.SupplierName, l, inv.Date ?? Today(), ct), ct);
         if (sugs.Count == 0) return rs;
         var sg = sugs[0];
         if (sg.Kind == OriginKind.Exact)

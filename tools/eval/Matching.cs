@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.Suggest;
 
@@ -27,10 +28,10 @@ public static class Matching
 
     sealed record Scored(Row Row, string Top, int Confidence, bool Top1, bool Top5);
 
-    public static int Run(string labels, string detail, string show)
+    public static async Task<int> Run(string labels, string detail, string show)
     {
         var rs = RuleStore.Seed();
-        using var encoder = new Suggest.Encoder();
+        using var encoder = new Suggest.Encoder(new OrtWeights(AppFiles.Beside("models")));
         var matcher = new Matcher(encoder);
         var expected = Expectations(rs);
         var nonGoods = rs.Ingredients.Values.Where(i => i.CategoryId == NonGoodsCategory)
@@ -45,7 +46,7 @@ public static class Matching
 
         foreach (var row in rows)
         {
-            var sugs = matcher.Suggest(rs, Gewerbe, null, new InvoiceLine { Name = row.Name, UnitCode = "" });
+            var sugs = await matcher.Suggest(rs, Gewerbe, null, new InvoiceLine { Name = row.Name, UnitCode = "" });
             var ings = sugs.ConvertAll(s => s.Mapping.IngredientId);
             var want = expected.GetValueOrDefault(Fold(row.Produkt))
                 ?? (NonGoods.Contains(row.Gruppe) && nonGoods.Count > 0 ? nonGoods : null);

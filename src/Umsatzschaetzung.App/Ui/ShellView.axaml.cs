@@ -13,14 +13,15 @@ public partial class ShellView : UserControl
     readonly Session session;
     readonly CasesView cases;
     readonly Screen[] screens;
-    readonly Dictionary<ImportJob, ImportWindow> imports = [];
+    readonly Dictionary<ImportJob, Frame> imports = [];
     Screen? current;
-    RulesWindow? rules;
+    RulesPane? rules;
     bool moving;
 
     public ShellView(Services service)
     {
         InitializeComponent();
+        Sheets.Below = Main;
         session = new Session(service);
         session.Imports.Jobs.CollectionChanged += ImportsChanged;
         cases = new CasesView(session);
@@ -49,8 +50,10 @@ public partial class ShellView : UserControl
         {
             var top = TopLevel.GetTopLevel(this)!;
             session.Owner = top;
-            Help.OnF1(top, () => Topic);
-            History.Keys(top, Move);
+            // A window takes the keys pressed with nothing focused too; in a page the sheets over the program have their own.
+            Control keys = top is Window ? top : Main;
+            Help.OnF1(keys, () => Topic);
+            History.Keys(keys, Move);
             Show(cases);
             await session.LoadStatus(CancellationToken.None);
             await session.LoadRules(CancellationToken.None);
@@ -76,39 +79,33 @@ public partial class ShellView : UserControl
     public void Closed()
     {
         session.Imports.CancelAll();
-        rules?.Close();
+        rules?.Frame.Close();
     }
 
-    void ShowHelp(object? sender, RoutedEventArgs e) => Help.Open(Host, Topic);
+    void ShowHelp(object? sender, RoutedEventArgs e) => Help.Open(this, Topic);
 
-    void ShowManual(object? sender, RoutedEventArgs e) => Help.Open(Host, Help.Start);
+    void ShowManual(object? sender, RoutedEventArgs e) => Help.Open(this, Help.Start);
 
-    void ShowAbout(object? sender, RoutedEventArgs e) => App.ShowAbout(Host);
+    void ShowAbout(object? sender, RoutedEventArgs e) => App.ShowAbout(this);
 
     void ImportsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         foreach (ImportJob job in e.OldItems ?? Array.Empty<ImportJob>())
-            if (imports.Remove(job, out var window) && job.Summary == "") window.Close();
+            if (imports.Remove(job, out var frame) && job.Summary == "") frame.Close();
         foreach (ImportJob job in e.NewItems ?? Array.Empty<ImportJob>())
-        {
-            var window = new ImportWindow(job);
-            imports[job] = window;
-            if (Host is { } host) window.Show(host);
-            else window.Show();
-        }
+            imports[job] = ImportPane.Open(this, job);
     }
 
     void ShowRules(object? sender, RoutedEventArgs e) => ShowRules();
 
-    RulesWindow ShowRules()
+    RulesPane ShowRules()
     {
         if (rules is null)
         {
-            rules = new RulesWindow(session);
-            rules.Closed += (_, _) => rules = null;
-            rules.Show();
+            rules = RulesPane.Open(session);
+            rules.Frame.Closed += () => rules = null;
         }
-        else rules.Activate();
+        else rules.Frame.Activate();
         return rules;
     }
 

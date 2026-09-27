@@ -1,8 +1,6 @@
-<Window x:Class="Umsatzschaetzung.App.Ui.RulesWindow"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Regeln" Width="1100" Height="760" MinWidth="820" MinHeight="520"
-        WindowStartupLocation="CenterScreen">
+<UserControl x:Class="Umsatzschaetzung.App.Ui.RulesPane"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DockPanel>
         <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
             <DockPanel>
@@ -20,4 +18,4 @@
             </Border>
         </Panel>
     </DockPanel>
-</Window>
+</UserControl>

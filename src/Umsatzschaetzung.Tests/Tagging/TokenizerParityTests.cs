@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Tests.Tagging;
@@ -30,14 +31,14 @@ public class TokenizerParityTests
     }
 
     [Fact]
-    public void TheShippedTokenizerMatchesPythonOnTheCheckedInCases() =>
-        AssertParity(Bpe.Open(AppFiles.Beside(Path.Combine("models", "belegtagger"))), TestData.File(Path.Combine("tagging", "tokenizer-cases.jsonl")));
+    public async Task TheShippedTokenizerMatchesPythonOnTheCheckedInCases() =>
+        AssertParity(await Bpe.Open(new OrtWeights(AppFiles.Beside("models")), "belegtagger", TestContext.Current.CancellationToken), TestData.File(Path.Combine("tagging", "tokenizer-cases.jsonl")));
 
     [Fact]
-    public void TheTokenizerMatchesPythonOnEveryWordOfTheCorpus()
+    public async Task TheTokenizerMatchesPythonOnEveryWordOfTheCorpus()
     {
         if (!File.Exists(Path.Combine(Generated, "cases.jsonl")))
             Assert.Skip("tools/train/tokenizer is not generated; see tools/train/README.md");
-        AssertParity(Bpe.Open(Generated), Path.Combine(Generated, "cases.jsonl"));
+        AssertParity(await Bpe.Open(new OrtWeights(Path.GetDirectoryName(Generated)!), Path.GetFileName(Generated), TestContext.Current.CancellationToken), Path.Combine(Generated, "cases.jsonl"));
     }
 }

@@ -23,7 +23,7 @@ public abstract class Screen : UserControl
     protected Place At(string item = "") => new(History, Page, item);
 
     protected void ShowHelp(object? sender, RoutedEventArgs e) =>
-        Help.Open(TopLevel.GetTopLevel(this) as Window, Topic);
+        Help.Open(this, Topic);
 
     public bool IsActive => cts is not null;
 

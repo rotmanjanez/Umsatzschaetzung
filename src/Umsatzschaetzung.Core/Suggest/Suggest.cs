@@ -18,7 +18,10 @@ public interface IEncoder
     const int Width = 768;
 
     string Model { get; }
-    float[][] Embed(IReadOnlyList<string> texts);
+    Task<float[][]> Embed(IReadOnlyList<string> texts, CancellationToken ct = default);
+
+    // Reads what Confidence needs; Confidence before it throws.
+    Task Load(CancellationToken ct = default);
     int Confidence(double cos);
 }
 
@@ -32,12 +35,12 @@ public sealed class Matcher(IRanking? ranking)
 
     // An exact hit leads, and the ranking's alternatives follow it: revising a mapped
     // line needs them as much as an open line does.
-    public List<Suggestion> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line, DateOnly? date = null)
+    public async Task<List<Suggestion>> Suggest(RuleSet rs, string gewerbe, string? supplier, InvoiceLine line, DateOnly? date = null, CancellationToken ct = default)
     {
         var on = date ?? DateOnly.FromDateTime(DateTime.Now);
         var hit = Match.Mapping(rs, supplier, on, line);
         var pack = PackSize.Read(line.Name);
-        var sugs = (ranking?.Rank(rs, gewerbe, line, on, Candidates + 1) ?? [])
+        var sugs = (ranking is null ? [] : await ranking.Rank(rs, gewerbe, line, on, Candidates + 1, ct))
             .Where(r => r.IngredientId != hit?.IngredientId && rs.Ingredients.ContainsKey(r.IngredientId))
             .Take(Candidates)
             .Where(r => r.Confidence >= Floor)

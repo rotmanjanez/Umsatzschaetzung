@@ -1,5 +1,6 @@
 using Umsatzschaetzung.Casefile;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.Service;
 using Umsatzschaetzung.Suggest;
@@ -11,8 +12,9 @@ namespace Umsatzschaetzung.Tests.Service;
 // so a host that suggests is built once per collection, not per test.
 public class Host : IDisposable
 {
-    static readonly Tagger Tagger = new();
-    static readonly Encoder Encoder = new();
+    static readonly OrtWeights Weights = new(AppFiles.Beside("models"));
+    static readonly Tagger Tagger = new(Weights);
+    static readonly Encoder Encoder = new(Weights);
 
     // Seeding the shipped Richtsatzsammlungen costs most of a store; a copy of a seeded one is cheap.
     static readonly Lazy<string> Seeded = new(() =>

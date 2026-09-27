@@ -1,5 +1,6 @@
 using SkiaSharp;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Service;
 using Reader = Umsatzschaetzung.Service.Scan;
 
@@ -7,7 +8,7 @@ namespace Umsatzschaetzung.Tests.Scan;
 
 public sealed class OcrFixture : IDisposable
 {
-    public RapidOcr Ocr { get; } = new();
+    public RapidOcr Ocr { get; } = new(new OrtWeights(AppFiles.Beside("models")));
 
     public void Dispose() => Ocr.Dispose();
 }

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -17,17 +18,18 @@ public static class Blur
 
     // A click on a bare surface moves no focus, so a list kept its focused row until something focusable was hit.
     public static void Register() =>
-        InputElement.PointerPressedEvent.AddClassHandler<Window>(Pressed, RoutingStrategies.Bubble, handledEventsToo: true);
+        InputElement.PointerPressedEvent.AddClassHandler<TopLevel>(Pressed, RoutingStrategies.Bubble, handledEventsToo: true);
 
     // A source the press itself took out of the tree, like a cell swapped for its editor, cannot tell where it was.
-    static void Pressed(Window window, PointerPressedEventArgs e)
+    static void Pressed(TopLevel top, PointerPressedEventArgs e)
     {
+        if (top is PopupRoot) return;
         if (e.Source is Visual source && TopLevel.GetTopLevel(source) is null) return;
-        if (window.FocusManager?.GetFocusedElement() is not Visual focused) return;
+        if (top.FocusManager?.GetFocusedElement() is not Visual focused) return;
         var list = focused.FindAncestorOfType<DataGrid>(true) ?? (Control?)focused.FindAncestorOfType<ListBox>(true);
         if (list is null || Within(list, e.Source)) return;
         if (list is DataGrid grid && !Within(GetDetail(grid), e.Source)) grid.SelectedItem = null;
-        window.FocusManager.Focus(null);
+        top.FocusManager.Focus(null);
     }
 
     static bool Within(Visual? scope, object? source) =>

@@ -1,12 +1,13 @@
 using Umsatzschaetzung.Extract;
 using Umsatzschaetzung.Model;
+using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Tagging;
 
 namespace Umsatzschaetzung.Tests.Extract;
 
 public sealed class TaggerFixture : IDisposable
 {
-    public Tagger Tagger { get; } = new();
+    public Tagger Tagger { get; } = new(new OrtWeights(AppFiles.Beside("models")));
 
     public void Dispose() => Tagger.Dispose();
 }
@@ -77,7 +78,7 @@ public class ExtractorTests(TaggerFixture fixture) : IClassFixture<TaggerFixture
     [Fact]
     public async Task ACancelledReadNeverTouchesTheModel()
     {
-        using var unused = new Tagger();
+        using var unused = new Tagger(new OrtWeights(AppFiles.Beside("models")));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             Extractor.InvoiceAsync(unused, [Invoice()], new CancellationToken(canceled: true)));
     }

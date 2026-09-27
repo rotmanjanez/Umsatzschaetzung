@@ -3,104 +3,37 @@
 // Adapted from RapidAI / RapidOCR
 // https://github.com/RapidAI/RapidOCR/blob/92aec2c1234597fa9c3c270efd2600c83feecd8d/dotnet/RapidOcrOnnxCs/OcrLib/OcrLite.cs
 
-using Microsoft.ML.OnnxRuntime;
 using SkiaSharp;
 using System.Text;
+using Umsatzschaetzung.Nets;
 
 namespace RapidOcrNet;
 
 public sealed class RapidOcr : IDisposable
 {
-    public const string ModelsFolderName = "models";
-    public const string ModelsVersion = "v5";
-    public const string DefaultDetModelPath = "ch_PP-OCRv5_mobile_det.onnx";
-    public const string DefaultClsModelPath = "ch_PP-LCNet_x0_25_textline_ori_cls_mobile.onnx";
-    public const string DefaultRecModelPath = "latin_PP-OCRv5_rec_mobile_infer.onnx";
-    public const string DefaultKeysFilePath = "ppocrv5_latin_dict.txt";
-
     private readonly TextDetector _textDetector = new TextDetector();
     private readonly TextClassifier _textClassifier = new TextClassifier();
     private readonly TextRecognizer _textRecognizer = new TextRecognizer();
 
     /// <summary>
-    /// Initialize using default models (latin) and default options.
-    /// </summary>
-    public void InitModels(int numThread = 0)
-    {
-        using var sessionOptions = GetDefaultSessionOptions(numThread);
-        InitModels(sessionOptions);
-    }
-
-    /// <summary>
-    /// Initialize using default models (latin) and custom options.
-    /// </summary>
-    public void InitModels(SessionOptions op)
-    {
-        string detPath = Path.Combine(ModelsFolderName, ModelsVersion, DefaultDetModelPath);
-        string clsPath = Path.Combine(ModelsFolderName, ModelsVersion, DefaultClsModelPath);
-        string recPath = Path.Combine(ModelsFolderName, ModelsVersion, DefaultRecModelPath);
-        string keysPath = Path.Combine(ModelsFolderName, ModelsVersion, DefaultKeysFilePath);
-
-        InitModels(detPath, clsPath, recPath, keysPath, op);
-    }
-
-    /// <summary>
-    /// Initialize using custom models and default options.
-    /// </summary>
-    public void InitModels(string detPath, string clsPath, string recPath, string keysPath, int numThread = 0)
-    {
-        using var sessionOptions = GetDefaultSessionOptions(numThread);
-        InitModels(detPath, clsPath, recPath, keysPath, sessionOptions);
-    }
-
-    /// <summary>
-    /// Initialize using custom models and custom options.
-    /// </summary>
-    public void InitModels(string detPath, string clsPath, string recPath, string keysPath, SessionOptions op)
-    {
-        _textDetector.InitModel(detPath, op);
-        _textClassifier.InitModel(clsPath, op);
-        _textRecognizer.InitModel(recPath, keysPath, op);
-    }
-
-    /// <summary>
-    /// Initialize using a model set (e.g. <see cref="RapidOcrModelSet.PPOCRv5Latin"/> or
-    /// <see cref="RapidOcrModelSet.PPOCRv6Small"/>) and default options.
-    /// </summary>
-    public void InitModels(RapidOcrModelSet models, int numThread = 0)
-    {
-        using var sessionOptions = GetDefaultSessionOptions(numThread);
-        InitModels(models, sessionOptions);
-    }
-
-    /// <summary>
-    /// Initialize using a model set (e.g. <see cref="RapidOcrModelSet.PPOCRv5Latin"/> or
-    /// <see cref="RapidOcrModelSet.PPOCRv6Small"/>) and custom options. The model set carries
+    /// Opens the model set's nets from <paramref name="weights"/>: the detector, whose single
+    /// large input suits an accelerator, with <paramref name="detector"/>, the classifier and
+    /// recognizer with <paramref name="reader"/>. <paramref name="acceleratedReader"/> opens a
+    /// second recognizer that reads the widest lines beside the cores. The model set carries
     /// the detector's per-version normalization, so v6 detectors are wired up correctly.
     /// </summary>
-    public void InitModels(RapidOcrModelSet models, SessionOptions op)
-    {
-        InitModels(models, op, op);
-    }
-
-    /// <summary>
-    /// Initialize using a model set with separate session options for the detector, whose
-    /// single large input suits an accelerator, and for the classifier and recognizer.
-    /// <paramref name="acceleratedRecognizer"/> reads the widest lines beside the cores.
-    /// <paramref name="acceleratorLock"/> serializes accelerator runs across instances sharing
-    /// that accelerator.
-    /// </summary>
-    public void InitModels(RapidOcrModelSet models, SessionOptions detector, SessionOptions op, object? acceleratorLock = null, SessionOptions? acceleratedRecognizer = null)
+    public async Task InitModels(IWeights weights, RapidOcrModelSet models, NetOptions detector, NetOptions reader, NetOptions? acceleratedReader = null)
     {
         ArgumentNullException.ThrowIfNull(models);
 
-        _textDetector.RunLock = acceleratorLock;
-        _textDetector.InitModel(models.DetModelPath, models.DetMean, models.DetStd, detector);
-        _textClassifier.InitModel(models.ClsModelPath, op);
-        _textRecognizer.InitModel(models.RecModelPath, models.KeysPath, op, acceleratedRecognizer, acceleratorLock);
+        _textDetector.InitModel(await weights.Open(models.DetModelPath, detector), models.DetMean, models.DetStd);
+        _textClassifier.InitModel(await weights.Open(models.ClsModelPath, reader));
+        var recognizer = await weights.Open(models.RecModelPath, reader);
+        var keys = await weights.Read(models.KeysPath);
+        _textRecognizer.InitModel(recognizer, keys, acceleratedReader is { } accelerated ? await weights.Open(models.RecModelPath, accelerated) : null);
     }
 
-    public OcrResult Detect(string path, RapidOcrOptions options)
+    public async Task<OcrResult> Detect(string path, RapidOcrOptions options)
     {
         if (!File.Exists(path))
         {
@@ -109,7 +42,7 @@ public sealed class RapidOcr : IDisposable
 
         using (var originSrc = SKBitmap.Decode(path))
         {
-            return Detect(originSrc, options);
+            return await Detect(originSrc, options);
         }
     }
 
@@ -117,12 +50,12 @@ public sealed class RapidOcr : IDisposable
     /// <paramref name="read"/> is shown the boxes and their classified angles before any crop
     /// is read; returning false skips recognition and returns those blocks unread.
     /// </summary>
-    public OcrResult Detect(SKBitmap originSrc, RapidOcrOptions options, Predicate<TextBlock[]>? read = null)
+    public async Task<OcrResult> Detect(SKBitmap originSrc, RapidOcrOptions options, Predicate<TextBlock[]>? read = null)
     {
         using var input = PrepareDetectorInput(originSrc, options);
-        var textBoxes = _textDetector.GetTextBoxes(input.Bitmap, input.Scale, options.BoxScoreThresh, options.BoxThresh, options.UnClipRatio) ?? [];
+        var textBoxes = await _textDetector.GetTextBoxes(input.Bitmap, input.Scale, options.BoxScoreThresh, options.BoxThresh, options.UnClipRatio) ?? [];
         if (options.SplitStackedCrops) textBoxes = OcrUtils.SplitStackedBoxes(input.Bitmap, textBoxes);
-        return ReadBoxes(input, textBoxes, options, read);
+        return await ReadBoxes(input, textBoxes, options, read);
     }
 
     /// <summary>
@@ -130,11 +63,11 @@ public sealed class RapidOcr : IDisposable
     /// reads the lines it finds: a page turned once it was detected is read in its lines,
     /// turned with it, instead of being detected again.
     /// </summary>
-    public OcrResult Read(SKBitmap page, IEnumerable<TextBox> boxes, RapidOcrOptions options)
+    public async Task<OcrResult> Read(SKBitmap page, IEnumerable<TextBox> boxes, RapidOcrOptions options)
     {
         using var input = new DetectorInput(page, new ScaleParam(page.Width, page.Height, page.Width, page.Height),
             0, 0, 1, 1, page.Width, page.Height, null, null, null);
-        return ReadBoxes(input, TextDetector.SortBoxesInReadingOrder([.. boxes]), options, null);
+        return await ReadBoxes(input, TextDetector.SortBoxesInReadingOrder([.. boxes]), options, null);
     }
 
     /// <summary>
@@ -148,7 +81,7 @@ public sealed class RapidOcr : IDisposable
     /// <param name="options">Detection options. Recognition-only fields (TextScore,
     /// ReturnWordBox, ClsThresh, etc.) are ignored on this path.</param>
     /// <returns>Boxes in source-image coordinates, sorted in reading order.</returns>
-    public IReadOnlyList<TextBox> DetectBoxes(string path, RapidOcrOptions options)
+    public async Task<IReadOnlyList<TextBox>> DetectBoxes(string path, RapidOcrOptions options)
     {
         if (!File.Exists(path))
         {
@@ -157,7 +90,7 @@ public sealed class RapidOcr : IDisposable
 
         using (var originSrc = SKBitmap.Decode(path))
         {
-            return DetectBoxes(originSrc, options);
+            return await DetectBoxes(originSrc, options);
         }
     }
 
@@ -165,10 +98,10 @@ public sealed class RapidOcr : IDisposable
     /// Runs the detection stage only and returns the raw text boxes, skipping angle
     /// classification and recognition. See <see cref="DetectBoxes(string, RapidOcrOptions)"/>.
     /// </summary>
-    public IReadOnlyList<TextBox> DetectBoxes(SKBitmap originSrc, RapidOcrOptions options)
+    public async Task<IReadOnlyList<TextBox>> DetectBoxes(SKBitmap originSrc, RapidOcrOptions options)
     {
         using var input = PrepareDetectorInput(originSrc, options);
-        var textBoxes = _textDetector.GetTextBoxes(input.Bitmap, input.Scale,
+        var textBoxes = await _textDetector.GetTextBoxes(input.Bitmap, input.Scale,
             options.BoxScoreThresh, options.BoxThresh, options.UnClipRatio) ?? [];
 
         // Map from letterboxed-image space back into the original image's space, the
@@ -302,7 +235,7 @@ public sealed class RapidOcr : IDisposable
         }
     }
 
-    private OcrResult ReadBoxes(in DetectorInput input, IReadOnlyList<TextBox> textBoxes, RapidOcrOptions options,
+    private async Task<OcrResult> ReadBoxes(DetectorInput input, IReadOnlyList<TextBox> textBoxes, RapidOcrOptions options,
         Predicate<TextBlock[]>? read)
     {
         SKBitmap src = input.Bitmap;
@@ -326,7 +259,7 @@ public sealed class RapidOcr : IDisposable
         }
 
         // step: angleNet getAngles
-        Angle[] angles = _textClassifier.GetAngles(partImages, options.DoAngle, options.MostAngle, options.ClsPreserveAspectRatio, options.ClsMaxCrops);
+        Angle[] angles = await _textClassifier.GetAngles(partImages, options.DoAngle, options.MostAngle, options.ClsPreserveAspectRatio, options.ClsMaxCrops);
 
         // Rotate partImgs only if the classifier is confident enough (Python <c>cls_thresh</c>).
         // Without this gate, low-confidence flips wrongly invert clean upright text and the
@@ -368,7 +301,7 @@ public sealed class RapidOcr : IDisposable
         }
 
         // step: crnnNet getTextLines
-        TextLine[] textLines = _textRecognizer.GetTextLines(partImages);
+        TextLine[] textLines = await _textRecognizer.GetTextLines(partImages);
 
         foreach (var bmp in partImages)
         {
@@ -549,26 +482,6 @@ public sealed class RapidOcr : IDisposable
         _textClassifier.Dispose();
         _textRecognizer.Dispose();
         _textDetector.Dispose();
-    }
-
-    /// <summary>
-    /// Creates a new instance of SessionOptions configured with extended graph optimization and the specified
-    /// number of threads.
-    /// </summary>
-    /// <remarks>The returned SessionOptions object has GraphOptimizationLevel set to
-    /// ORT_ENABLE_EXTENDED. Both InterOpNumThreads and IntraOpNumThreads are set to the value of
-    /// numThread.</remarks>
-    /// <param name="numThread">The number of threads to use for both inter- and intra-operation parallelism. If set to 0, the default
-    /// thread count is used.</param>
-    /// <returns>A SessionOptions instance with extended graph optimization enabled and thread counts set according to the
-    /// specified value.</returns>
-    public static SessionOptions GetDefaultSessionOptions(int numThread = 0)
-    {
-        var op = new SessionOptions();
-        op.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_EXTENDED;
-        op.InterOpNumThreads = numThread;
-        op.IntraOpNumThreads = numThread;
-        return op;
     }
 }
 

@@ -4,6 +4,7 @@
     <Project Path="src/Umsatzschaetzung.Core/Umsatzschaetzung.Core.csproj" />
     <Project Path="src/Umsatzschaetzung.Documents/Umsatzschaetzung.Documents.csproj" />
     <Project Path="src/Umsatzschaetzung.Inference/Umsatzschaetzung.Inference.csproj" />
+    <Project Path="src/Umsatzschaetzung.Nets/Umsatzschaetzung.Nets.csproj" />
     <Project Path="src/Umsatzschaetzung.Tests/Umsatzschaetzung.Tests.csproj" />
     <Project Path="src/RapidOcrNet/RapidOcrNet.csproj" />
   </Folder>

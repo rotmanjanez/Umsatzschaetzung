@@ -9,21 +9,16 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed record AssortmentConflict(string Name, CaseProduct Listed, CaseProduct Imported);
 
-public sealed class AssortmentConflicts : Window
+public sealed class AssortmentConflicts : UserControl
 {
     readonly TaskCompletionSource<HashSet<string>?> answered = new();
     readonly List<(string Id, RadioButton Listed, RadioButton Imported)> choices = [];
+    readonly Frame frame;
 
     HashSet<string>? answer;
 
     AssortmentConflicts(List<AssortmentConflict> conflicts)
     {
-        Title = "Sortiment importieren";
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
-        ShowInTaskbar = false;
-        WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
         var grid = new Grid { ColumnDefinitions = new("*,Auto,Auto"), ColumnSpacing = 16, RowSpacing = 6 };
         grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         grid.Children.Add(Cell(Pick("Bisher", "Alle bisherigen Werte behalten", false), 0, 1));
@@ -68,6 +63,8 @@ public sealed class AssortmentConflicts : Window
                 },
             },
         };
+        frame = Frame.For(this, "Sortiment importieren");
+        frame.Closed += () => answered.TrySetResult(answer);
     }
 
     static string Values(CaseProduct p) =>
@@ -102,21 +99,14 @@ public sealed class AssortmentConflicts : Window
     {
         var button = new Button { Content = caption, MinWidth = 96, IsDefault = preferred, IsCancel = !preferred };
         Themed(button, theme);
-        button.Click += (_, _) => { decide(); Close(); };
+        button.Click += (_, _) => { decide(); frame.Close(); };
         return button;
     }
 
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        answered.TrySetResult(answer);
-    }
-
-    public static Task<HashSet<string>?> Ask(Window? owner, List<AssortmentConflict> conflicts)
+    public static Task<HashSet<string>?> Ask(Control? owner, List<AssortmentConflict> conflicts)
     {
         var dialog = new AssortmentConflicts(conflicts);
-        if (owner is null) dialog.Show();
-        else _ = dialog.ShowDialog(owner);
+        dialog.frame.Show(owner, modal: true);
         return dialog.answered.Task;
     }
 }

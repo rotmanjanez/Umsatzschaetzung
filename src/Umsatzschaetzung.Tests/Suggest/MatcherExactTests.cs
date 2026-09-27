@@ -10,13 +10,13 @@ public class MatcherExactTests
     const string Rheinland = "Rheinland Getränke Fachgroßhandel GmbH";
     const string Gtin = "4001234567890";
 
-    static Suggestion? Hit(RuleSet rs, string? supplier, InvoiceLine line)
+    static async Task<Suggestion?> Hit(RuleSet rs, string? supplier, InvoiceLine line)
     {
         var cache = new FixedCache().Apart([.. rs.Ingredients.Values.Select(i => Matcher.Normal(i.Name))]).Apart(Matcher.Normal(line.Name));
         foreach (var m in rs.Mappings.Values)
             if (Matcher.Wording(m) is { } w) cache.Apart(Matcher.Normal(w));
         var matcher = new Matcher(Encoders.Shipped, cache);
-        var s = matcher.Suggest(rs, "", supplier, line);
+        var s = await matcher.Suggest(rs, "", supplier, line);
         Assert.All(s.Skip(1), x => Assert.Equal(OriginKind.Encoder, x.Kind));
         Assert.All(s.Where(x => x.Kind == OriginKind.Encoder), x => Assert.InRange(x.Confidence, 20, 99));
         return s.Count > 0 && s[0].Kind == OriginKind.Exact ? s[0] : null;
@@ -30,9 +30,9 @@ public class MatcherExactTests
     }
 
     [Fact]
-    public void TheSuppliersArticleNumberHits()
+    public async Task TheSuppliersArticleNumberHits()
     {
-        var hit = Hit(Seed(), Rheinland, new InvoiceLine { Name = "Korn 0,7", SellerArticleId = "55120", UnitCode = "XBO" });
+        var hit = await Hit(Seed(), Rheinland, new InvoiceLine { Name = "Korn 0,7", SellerArticleId = "55120", UnitCode = "XBO" });
         Assert.Equal(("map.korn07", 100, 700L), (hit?.Mapping.Id, hit?.Confidence, hit?.Mapping.Factor));
     }
 
@@ -40,23 +40,23 @@ public class MatcherExactTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("Anderer Großhandel GmbH")]
-    public void AnArticleNumberIsOnlyTheSuppliersOwn(string? supplier) =>
-        Assert.Null(Hit(Seed(), supplier, new InvoiceLine { Name = "Korn 0,7", SellerArticleId = "55120", UnitCode = "XBO" }));
+    public async Task AnArticleNumberIsOnlyTheSuppliersOwn(string? supplier) =>
+        Assert.Null(await Hit(Seed(), supplier, new InvoiceLine { Name = "Korn 0,7", SellerArticleId = "55120", UnitCode = "XBO" }));
 
     [Theory]
     [InlineData("XBO", true)]
     [InlineData("xbo", true)]
     [InlineData("", true)]
     [InlineData("XCS", false)]
-    public void AMappingForAnotherUnitDoesNotHit(string unitCode, bool hits) =>
-        Assert.Equal(hits, Hit(Seed(), Rheinland, new InvoiceLine { Name = "Korn", SellerArticleId = "55120", UnitCode = unitCode }) is not null);
+    public async Task AMappingForAnotherUnitDoesNotHit(string unitCode, bool hits) =>
+        Assert.Equal(hits, await Hit(Seed(), Rheinland, new InvoiceLine { Name = "Korn", SellerArticleId = "55120", UnitCode = unitCode }) is not null);
 
     [Fact]
-    public void AGtinHitsWhoeverSellsIt()
+    public async Task AGtinHitsWhoeverSellsIt()
     {
         var rs = Seed(new ArticleMapping { Id = "map.gtin", Gtin = Gtin, IngredientId = "ing.korn", Confirmed = true });
-        Assert.Equal("map.gtin", Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = Gtin })?.Mapping.Id);
-        Assert.Null(Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = "4009999999999" }));
+        Assert.Equal("map.gtin", (await Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = Gtin }))?.Mapping.Id);
+        Assert.Null(await Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = "4009999999999" }));
     }
 
     [Theory]
@@ -64,62 +64,62 @@ public class MatcherExactTests
     [InlineData("FASSBIER PILS, KEG")]
     [InlineData("fassbier   pils,  keg")]
     [InlineData("Fassbier-Pils, Keg!")]
-    public void AWordingHitsWhateverItsCaseAndSpacing(string name)
+    public async Task AWordingHitsWhateverItsCaseAndSpacing(string name)
     {
         var rs = Seed(new ArticleMapping { Id = "map.name", Name = "Fassbier Pils, Keg", IngredientId = "ing.bier.fass", Confirmed = true });
-        Assert.Equal("map.name", Hit(rs, null, new InvoiceLine { Name = name })?.Mapping.Id);
+        Assert.Equal("map.name", (await Hit(rs, null, new InvoiceLine { Name = name }))?.Mapping.Id);
     }
 
     [Theory]
     [InlineData("Fassbier Pils Keg")]
     [InlineData("Fassbier Pils, Fass")]
     [InlineData("")]
-    public void AnotherWordingDoesNotHit(string name)
+    public async Task AnotherWordingDoesNotHit(string name)
     {
         var rs = Seed(new ArticleMapping { Id = "map.name", Name = "Fassbier Pils, Keg", IngredientId = "ing.bier.fass", Confirmed = true });
-        Assert.Null(Hit(rs, null, new InvoiceLine { Name = name }));
+        Assert.Null(await Hit(rs, null, new InvoiceLine { Name = name }));
     }
 
     [Fact]
-    public void TheArticleNumberOutranksTheGtinWhichOutranksTheWording()
+    public async Task TheArticleNumberOutranksTheGtinWhichOutranksTheWording()
     {
         var byName = new ArticleMapping { Id = "map.a", Name = "Klarer", IngredientId = "ing.bier.flasche", Confirmed = true };
         var byGtin = new ArticleMapping { Id = "map.b", Gtin = Gtin, IngredientId = "ing.bier.fass", Confirmed = true };
         var byArticle = new ArticleMapping { Id = "map.c", SupplierName = Rheinland, SupplierArticleId = "K-1", IngredientId = "ing.korn", Confirmed = true };
         var rs = Seed(byName, byGtin, byArticle);
-        Assert.Equal("map.c", Hit(rs, Rheinland, new InvoiceLine { Name = "Klarer", Gtin = Gtin, SellerArticleId = "K-1" })?.Mapping.Id);
-        Assert.Equal("map.b", Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = Gtin, SellerArticleId = "K-1" })?.Mapping.Id);
-        Assert.Equal("map.a", Hit(rs, null, new InvoiceLine { Name = "Klarer" })?.Mapping.Id);
+        Assert.Equal("map.c", (await Hit(rs, Rheinland, new InvoiceLine { Name = "Klarer", Gtin = Gtin, SellerArticleId = "K-1" }))?.Mapping.Id);
+        Assert.Equal("map.b", (await Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = Gtin, SellerArticleId = "K-1" }))?.Mapping.Id);
+        Assert.Equal("map.a", (await Hit(rs, null, new InvoiceLine { Name = "Klarer" }))?.Mapping.Id);
     }
 
     [Fact]
-    public void AMappingNoLongerValidDoesNotHit()
+    public async Task AMappingNoLongerValidDoesNotHit()
     {
         var rs = Seed();
         rs.Mappings["map.korn07"].Meta.ValidTo = new DateOnly(2020, 1, 1);
-        Assert.Null(Hit(rs, Rheinland, new InvoiceLine { Name = "Korn", SellerArticleId = "55120", UnitCode = "XBO" }));
+        Assert.Null(await Hit(rs, Rheinland, new InvoiceLine { Name = "Korn", SellerArticleId = "55120", UnitCode = "XBO" }));
     }
 
     [Fact]
-    public void AnUnconfirmedMappingFitsItsArticleWhateverTheWording()
+    public async Task AnUnconfirmedMappingFitsItsArticleWhateverTheWording()
     {
         var rs = Seed(new ArticleMapping
         {
             Id = "map.guess", SupplierName = Rheinland, SupplierArticleId = "G-1",
             Observed = "Pils Kiste 20 x 0,5 l", IngredientId = "ing.bier.fass", Confirmed = false,
         });
-        Assert.Equal("map.guess", Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", SellerArticleId = "G-1" })?.Mapping.Id);
-        Assert.Equal("map.guess", Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" })?.Mapping.Id);
+        Assert.Equal("map.guess", (await Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", SellerArticleId = "G-1" }))?.Mapping.Id);
+        Assert.Equal("map.guess", (await Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" }))?.Mapping.Id);
     }
 
     [Fact]
-    public void TheMappingALineCarriesLeads()
+    public async Task TheMappingALineCarriesLeads()
     {
-        var hit = Hit(Seed(), null, new InvoiceLine { Name = "Irgendwas", MappingId = "map.fass50" });
+        var hit = await Hit(Seed(), null, new InvoiceLine { Name = "Irgendwas", MappingId = "map.fass50" });
         Assert.Equal(("map.fass50", OriginKind.Exact, 100), (hit?.Mapping.Id, hit?.Kind, hit?.Confidence));
     }
 
     [Fact]
-    public void AnUnknownCarriedMappingIsNoHit() =>
-        Assert.Null(Hit(Seed(), null, new InvoiceLine { Name = "Irgendwas", MappingId = "map.geloescht" }));
+    public async Task AnUnknownCarriedMappingIsNoHit() =>
+        Assert.Null(await Hit(Seed(), null, new InvoiceLine { Name = "Irgendwas", MappingId = "map.geloescht" }));
 }

@@ -6,20 +6,15 @@ using Avalonia.Styling;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed class Dialog : Window
+public sealed class Dialog : UserControl
 {
     readonly TaskCompletionSource<bool> answered = new();
+    readonly Frame frame;
 
     bool answer;
 
-    Dialog(string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
+    Dialog(bool standalone, string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
     {
-        Title = title;
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
-        ShowInTaskbar = false;
-        WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
         var buttons = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -47,6 +42,8 @@ public sealed class Dialog : Window
                 buttons,
             },
         };
+        frame = standalone ? new WindowFrame(this, title) : Frame.For(this, title);
+        frame.Closed += () => answered.TrySetResult(answer);
     }
 
     Button Action(string caption, bool value, string theme, bool preferred, bool cancel)
@@ -54,36 +51,29 @@ public sealed class Dialog : Window
         var button = new Button { Content = caption, MinWidth = 96, IsDefault = preferred, IsCancel = cancel };
         if (Application.Current?.TryFindResource(theme, out var found) == true && found is ControlTheme control)
             button.Theme = control;
-        button.Click += (_, _) => { answer = value; Close(); };
+        button.Click += (_, _) => { answer = value; frame.Close(); };
         return button;
     }
 
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
-        answered.TrySetResult(answer);
-    }
+    public static Task Alert(Control? owner, string message, string title) => Ask(owner, message, title, false);
 
-    public static Task Alert(Window? owner, string message, string title) => Ask(owner, message, title, false);
-
-    public static Task<bool> Confirm(Window? owner, string message, string title, string yes = "Ja", string no = "Nein") =>
+    public static Task<bool> Confirm(Control? owner, string message, string title, string yes = "Ja", string no = "Nein") =>
         Ask(owner, message, title, true, yes, no);
 
     // The crash path may have no window yet; the caller owns and shows this one.
-    public static Window Standalone(string message, string title) => new Dialog(message, title, false);
+    public static Window Standalone(string message, string title) => ((WindowFrame)new Dialog(true, message, title, false).frame).Window;
 
     // Likewise before the shell exists, but the answer decides whether it ever does.
     public static (Window Window, Task<bool> Answer) StandaloneConfirm(string message, string title)
     {
-        var dialog = new Dialog(message, title, true);
-        return (dialog, dialog.answered.Task);
+        var dialog = new Dialog(true, message, title, true);
+        return (((WindowFrame)dialog.frame).Window, dialog.answered.Task);
     }
 
-    static Task<bool> Ask(Window? owner, string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
+    static Task<bool> Ask(Control? owner, string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
     {
-        var dialog = new Dialog(message, title, confirm, yes, no);
-        if (owner is null) dialog.Show();
-        else _ = dialog.ShowDialog(owner);
+        var dialog = new Dialog(false, message, title, confirm, yes, no);
+        dialog.frame.Show(owner, modal: true);
         return dialog.answered.Task;
     }
 }

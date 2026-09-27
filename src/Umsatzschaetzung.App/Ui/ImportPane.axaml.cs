@@ -4,19 +4,29 @@ using Avalonia.Threading;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public partial class ImportWindow : Window
+public partial class ImportPane : UserControl
 {
     readonly ImportJob job;
+    readonly Frame frame;
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
 
-    public ImportWindow(ImportJob job)
+    ImportPane(ImportJob job)
     {
         InitializeComponent();
         this.job = job;
         DataContext = job;
+        frame = Frame.For(this, "Import " + job.Label, width: 440);
+        frame.Closed += Closed;
         timer.Tick += (_, _) => Tick();
         timer.Start();
         Tick();
+    }
+
+    public static Frame Open(Control owner, ImportJob job)
+    {
+        var pane = new ImportPane(job);
+        pane.frame.Show(owner);
+        return pane.frame;
     }
 
     void Tick()
@@ -24,18 +34,17 @@ public partial class ImportWindow : Window
         if (job.Complete)
         {
             timer.Stop();
-            Title = "Import " + job.Label;
+            frame.Title = "Import " + job.Label;
             return;
         }
         job.Sample();
-        Title = "Import " + job.Label + " (" + job.Percent + ")";
+        frame.Title = "Import " + job.Label + " (" + job.Percent + ")";
     }
 
-    void CancelClick(object? sender, RoutedEventArgs e) => Close();
+    void CancelClick(object? sender, RoutedEventArgs e) => frame.Close();
 
-    protected override void OnClosed(EventArgs e)
+    void Closed()
     {
-        base.OnClosed(e);
         timer.Stop();
         if (!job.Complete) job.Cancel();
     }
