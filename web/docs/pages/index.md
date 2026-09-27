@@ -32,6 +32,17 @@ Häufige Fragen, nach Arbeitsschritt geordnet.
 <li><b><a href="bericht/">Bericht</a></b> Erklärter neben kalkuliertem Umsatz, jede Zahl bis zur Rechnungszeile belegt, als PDF.</li>
 </ol>
 
+## Im Browser
+
+Unter [app.umsatzschaetzung.amtstools.de](https://app.umsatzschaetzung.amtstools.de/)
+läuft das Programm ohne Installation im Browser. Die Rechnungen verlassen auch
+dort das Gerät nicht.
+
+!!! warning "Experimentell"
+    Die Browserversion ist noch in Erprobung. Sie kann langsamer sein als das
+    Programm für Windows und macOS, und Prüfungen liegen nur im Speicher dieses
+    Browsers. Für die tägliche Arbeit empfiehlt sich das installierte Programm.
+
 ## Grundlagen
 
 - [Regeln](regeln.md): Zutaten, Produkte, Rezepte und Ertragsregeln. Sie gehören

@@ -27,7 +27,7 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
           <div class="acts">
             <a href={release + 'umsatzschaetzung-win-x64.msi'} data-os="windows">Für Windows</a>
             <a href={release + 'umsatzschaetzung-osx-arm64.dmg'} data-os="macos">Für macOS</a>
-            <a class="web" href={app}>Im Browser öffnen</a>
+            <a class="web" href={app}>Im Browser öffnen <small>experimentell</small></a>
             <a class="doc" href={docs}>Dokumentation</a>
           </div>
           <div class="guide" hidden>
@@ -72,6 +72,8 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
   .acts a:hover { background: var(--blue); }
   .acts a.web { background: none; color: var(--fg); padding: 12px 22px; border: 2px solid var(--fg); }
   .acts a.web:hover { color: var(--blue); border-color: var(--blue); }
+  .acts a.web small { margin-left: 6px; padding: 2px 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; vertical-align: 2px; color: var(--bg); background: var(--muted); transition: background-color 0.15s; }
+  .acts a.web:hover small { background: var(--blue); }
   .acts a.doc { background: none; color: var(--fg); padding: 0; border-bottom: 2px solid var(--fg); }
   .acts a.doc:hover { background: none; color: var(--blue); border-color: var(--blue); }
   .guide { margin: 32px 0 0; padding: 20px 24px; max-width: 44ch; background: var(--raised); border-left: 4px solid var(--blue); animation: rise 0.4s ease-out; }

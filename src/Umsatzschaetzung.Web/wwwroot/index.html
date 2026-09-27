@@ -22,10 +22,27 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Umsatzschätzung im Browser.">
 <meta name="twitter:card" content="summary_large_image">
-<style>html, body, #out { margin: 0; width: 100%; height: 100%; overflow: hidden; }</style>
+<style>
+html, body, #out { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body { background: #0e1629; color: #eef2fa; font: 16px/1.5 system-ui, sans-serif; }
+#boot { position: fixed; inset: 0; display: grid; place-content: center; justify-items: center; gap: 16px; padding: 16px; text-align: center; }
+#boot svg { width: 96px; height: 96px; }
+#boot .glass { fill: none; stroke: #4f83f1; stroke-width: 10; stroke-linejoin: round; }
+#boot .bars rect { fill: #eef2fa; }
+#boot p { margin: 0; }
+#boot small { color: #8a97b3; max-width: 36ch; }
+#boot .bar { width: min(280px, 70vw); height: 4px; background: #1b2a4d; }
+#boot .bar i { display: block; height: 100%; width: 0; background: #6e97f2; transition: width 0.3s; }
+</style>
 </head>
 <body>
 <div id="out"></div>
+<div id="boot">
+<svg viewBox="0 0 256 256" aria-hidden="true"><path class="glass" d="M68 52h120l-14 132a26 26 0 0 1-26 23h-40a26 26 0 0 1-26-23z"/><g class="bars"><rect x="95" y="156" width="26" height="38" rx="13"/><rect x="135" y="116" width="26" height="78" rx="13"/></g></svg>
+<p role="status">Umsatzschätzung wird geladen …</p>
+<div class="bar"><i></i></div>
+<small>Experimentelle Version im Browser. Für die tägliche Arbeit empfiehlt sich das Programm für Windows oder macOS.</small>
+</div>
 <script type="module" src="main.js"></script>
 </body>
 </html>
