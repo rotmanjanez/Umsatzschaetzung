@@ -21,9 +21,11 @@ public sealed class CaseRecipeRow : Observable
     }
 
     public List<Ingredient> Options { get; }
-    public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) Rescale(UnitCode); } }
-    public string Amount { get => amount; set { if (Set(ref amount, value)) Raise(nameof(AmountInvalid)); } }
+    public Ingredient? Ingredient { get => ingredient; set { if (!Set(ref ingredient, value)) return; Rescale(UnitCode); Raise(nameof(RemoveName)); } }
+    public string Amount { get => amount; set { if (!Set(ref amount, value)) return; Raise(nameof(AmountInvalid)); Raise(nameof(AmountHint)); } }
     public bool AmountInvalid => amount.Trim() != "" && Input.Int(amount) is not > 0;
+    public string AmountHint => AmountInvalid ? "Ungültig: eine ganze Zahl größer 0 eingeben" : "";
+    public string RemoveName => ingredient is null ? "Zutat entfernen" : $"„{ingredient.Name}“ entfernen";
     public List<string> Units { get => units; private set => Set(ref units, value); }
     // The box drops its index while its items are swapped; a line always has a unit.
     public int UnitIndex { get => unitIndex; set { if (value >= 0) Set(ref unitIndex, value); } }

@@ -77,6 +77,7 @@
     <StreamGeometry x:Key="SpinnerIcon">M8,1 A7,7 0 1 1 1,8 H3 A5,5 0 1 0 8,3 Z</StreamGeometry>
 
     <ControlTheme x:Key="Spinner" TargetType="PathIcon" BasedOn="{StaticResource {x:Type PathIcon}}">
+        <Setter Property="AutomationProperties.AccessibilityView" Value="Raw"/>
         <Setter Property="Data" Value="{StaticResource SpinnerIcon}"/>
         <Setter Property="Width" Value="14"/>
         <Setter Property="Height" Value="14"/>
@@ -99,7 +100,16 @@
         </Style>
     </ControlTheme>
 
+    <FocusAdornerTemplate x:Key="FocusRing">
+        <Border BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="6" Margin="-3"/>
+    </FocusAdornerTemplate>
+
+    <FocusAdornerTemplate x:Key="FocusInset">
+        <Border BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="4"/>
+    </FocusAdornerTemplate>
+
     <ControlTheme x:Key="PageTitle" TargetType="TextBlock">
+        <Setter Property="AutomationProperties.HeadingLevel" Value="1"/>
         <Setter Property="FontSize" Value="22"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Margin" Value="0,0,0,16"/>
@@ -107,6 +117,7 @@
     </ControlTheme>
 
     <ControlTheme x:Key="SectionHeader" TargetType="TextBlock">
+        <Setter Property="AutomationProperties.HeadingLevel" Value="2"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
@@ -195,6 +206,9 @@
         <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
         <Setter Property="Content" Value="?"/>
         <Setter Property="ToolTip.Tip" Value="Hilfe zu dieser Seite (F1)"/>
+        <Setter Property="AutomationProperties.Name" Value="Hilfe"/>
+        <Setter Property="AutomationProperties.AcceleratorKey" Value="F1"/>
+        <Setter Property="AutomationProperties.AutomationId" Value="HelpButton"/>
     </ControlTheme>
 
     <ControlTheme x:Key="DangerIcon" TargetType="Button" BasedOn="{StaticResource IconButton}">
@@ -262,6 +276,7 @@
     </ControlTheme>
 
     <ControlTheme x:Key="ErrorBannerText" TargetType="TextBlock">
+        <Setter Property="AutomationProperties.LiveSetting" Value="Assertive"/>
         <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
@@ -269,6 +284,7 @@
     </ControlTheme>
 
     <ControlTheme x:Key="ErrorBannerClose" TargetType="Button">
+        <Setter Property="AutomationProperties.Name" Value="Fehlermeldung schließen"/>
         <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -304,6 +320,7 @@
     </ControlTheme>
 
     <ControlTheme x:Key="SheetTitle" TargetType="TextBlock">
+        <Setter Property="AutomationProperties.HeadingLevel" Value="1"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -331,6 +348,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
+        <Setter Property="FocusAdorner" Value="{StaticResource FocusInset}"/>
     </ControlTheme>
 
     <ControlTheme x:Key="DropZone" TargetType="Rectangle">

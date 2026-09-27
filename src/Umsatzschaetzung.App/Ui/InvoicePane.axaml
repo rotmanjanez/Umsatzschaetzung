@@ -4,8 +4,9 @@
     <DockPanel>
         <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
             <DockPanel>
-                <Button DockPanel.Dock="Right" Content="✕" Theme="{StaticResource ErrorBannerClose}" Click="DismissError"/>
-                <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}"/>
+                <Button DockPanel.Dock="Right" Content="✕" Theme="{StaticResource ErrorBannerClose}" Click="DismissError"
+                        AutomationProperties.Name="Fehlermeldung schließen" AutomationProperties.AutomationId="InvoiceErrorClose"/>
+                <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}" AutomationProperties.LiveSetting="Assertive"/>
             </DockPanel>
         </Border>
         <ContentControl x:Name="Body" Margin="16"/>

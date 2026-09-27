@@ -9,59 +9,62 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="0,0,16,0">
                 <Border Theme="{StaticResource SectionRule}"/>
-                <TextBlock Text="Erklärte Umsätze, netto in €" Theme="{StaticResource SectionHeader}"/>
+                <TextBlock Text="Erklärte Umsätze, netto in €" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
                 <Grid Margin="0,0,0,24" ColumnDefinitions="*,16,*,16,*" MaxWidth="960" HorizontalAlignment="Left">
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Umsatz zu 19 %" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="Declared19Box" Theme="{StaticResource NumberBox}" Text="{Binding Declared19, Mode=TwoWay}"/>
+                        <TextBox x:Name="Declared19Box" Theme="{StaticResource NumberBox}" Text="{Binding Declared19, Mode=TwoWay}" AutomationProperties.Name="Erklärter Umsatz zu 19 %, netto in €" AutomationProperties.AutomationId="CaseDeclared19"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Umsatz zu 7 %" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="Declared7Box" Theme="{StaticResource NumberBox}" Text="{Binding Declared7, Mode=TwoWay}"/>
+                        <TextBox x:Name="Declared7Box" Theme="{StaticResource NumberBox}" Text="{Binding Declared7, Mode=TwoWay}" AutomationProperties.Name="Erklärter Umsatz zu 7 %, netto in €" AutomationProperties.AutomationId="CaseDeclared7"/>
                     </StackPanel>
                     <StackPanel Grid.Column="4">
                         <TextBlock Text="Umsatz zu 0 %" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="Declared0Box" Theme="{StaticResource NumberBox}" Text="{Binding Declared0, Mode=TwoWay}"/>
+                        <TextBox x:Name="Declared0Box" Theme="{StaticResource NumberBox}" Text="{Binding Declared0, Mode=TwoWay}" AutomationProperties.Name="Erklärter Umsatz zu 0 %, netto in €" AutomationProperties.AutomationId="CaseDeclared0"/>
                     </StackPanel>
                 </Grid>
 
                 <Border Theme="{StaticResource SectionRule}"/>
-                <TextBlock Text="Bestand" Theme="{StaticResource SectionHeader}"/>
+                <TextBlock Text="Bestand" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
                 <StackPanel Margin="0,0,0,24">
-                    <DataGrid x:Name="StockBox" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Stock}" IsReadOnly="True">
+                    <DataGrid x:Name="StockBox" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Stock}" IsReadOnly="True" KeyDown="StockKey" AutomationProperties.Name="Bestand" AutomationProperties.HelpText="Entf entfernt die gewählte Zutat" AutomationProperties.AutomationId="CaseStockGrid">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Zutat" Width="260" MinWidth="140">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=model:Ingredient}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"/>
+                                        <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=model:Ingredient}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch" AutomationProperties.Name="Zutat" AutomationProperties.AutomationId="StockIngredient"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Anfangsbestand" Width="140">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Opening, Mode=TwoWay}" Margin="2"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Opening, Mode=TwoWay}" Margin="2" AutomationProperties.Name="{Binding Title, StringFormat='Anfangsbestand {0}'}" AutomationProperties.AutomationId="StockOpening"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Endbestand" Width="140">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Closing, Mode=TwoWay}" Margin="2"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Closing, Mode=TwoWay}" Margin="2" AutomationProperties.Name="{Binding Title, StringFormat='Endbestand {0}'}" AutomationProperties.AutomationId="StockClosing"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Einheit" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <ComboBox ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"/>
+                                        <ComboBox ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Title, StringFormat='Einheit {0}'}" AutomationProperties.AutomationId="StockUnit"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Width="90">
+                                <DataGridTemplateColumn.Header>
+                                    <Panel AutomationProperties.Name="Entfernen"/>
+                                </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveStock" HorizontalAlignment="Right">
+                                        <Button IsTabStop="False" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveStock" HorizontalAlignment="Right" AutomationProperties.Name="{Binding Title, StringFormat='{}{0} entfernen'}" AutomationProperties.AutomationId="StockRemoveButton">
                                             <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                         </Button>
                                     </DataTemplate>
@@ -69,42 +72,43 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zutat hinzufügen" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0">
+                    <Button x:Name="AddStockButton" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zutat hinzufügen" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0" AutomationProperties.Name="Zutat hinzufügen" AutomationProperties.AutomationId="StockAddButton">
                         <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
                     </Button>
                 </StackPanel>
 
                 <Border Theme="{StaticResource SectionRule}"/>
-                <TextBlock Text="Eckdaten" Theme="{StaticResource SectionHeader}"/>
+                <TextBlock Text="Eckdaten" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
                 <StackPanel MaxWidth="960" HorizontalAlignment="Left" Margin="0,0,0,24">
                     <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="LabelBox" Text="{Binding Label, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="LabelBox" Text="{Binding Label, Mode=TwoWay}" Width="440" HorizontalAlignment="Left" AutomationProperties.Name="Bezeichnung" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="CaseLabelBox"/>
                     <Grid Width="440" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Zeitraum von *" Theme="{StaticResource FieldLabel}"/>
-                            <ui:DateBox x:Name="FromBox" Text="{Binding From, Mode=TwoWay}"/>
+                            <ui:DateBox x:Name="FromBox" AutomationProperties.Name="Zeitraum von" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="CaseFrom" Text="{Binding From, Mode=TwoWay}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Zeitraum bis *" Theme="{StaticResource FieldLabel}"/>
-                            <ui:DateBox x:Name="ToBox" Text="{Binding To, Mode=TwoWay}"/>
+                            <ui:DateBox x:Name="ToBox" AutomationProperties.Name="Zeitraum bis" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="CaseTo" Text="{Binding To, Mode=TwoWay}"/>
                         </StackPanel>
                     </Grid>
-                    <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                    <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0" AutomationProperties.HeadingLevel="3"/>
                     <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="NameBox" Text="{Binding Name, Mode=TwoWay}" Width="440" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="NameBox" Text="{Binding Name, Mode=TwoWay}" Width="440" HorizontalAlignment="Left" AutomationProperties.Name="Name des Steuerpflichtigen" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="CaseName"/>
                     <Grid Width="440" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Steuernummer *" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TaxNumberBox" Text="{Binding TaxNumber, Mode=TwoWay}"/>
+                            <TextBox x:Name="TaxNumberBox" Text="{Binding TaxNumber, Mode=TwoWay}" AutomationProperties.Name="Steuernummer" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="CaseTaxNumber"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="PAB-Nr. *" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="PabBox" Text="{Binding Pab, Mode=TwoWay}"/>
+                            <TextBox x:Name="PabBox" Text="{Binding Pab, Mode=TwoWay}" AutomationProperties.Name="PAB-Nummer" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="CasePab"/>
                         </StackPanel>
                     </Grid>
                     <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
                     <ui:GewerbeBox x:Name="GewerbeBox" Choices="{Binding Gewerbezweige}" Kennzahl="{Binding Gewerbe, Mode=TwoWay}"
-                                   Classes.invalid="{Binding GewerbeInvalid}" Width="440" HorizontalAlignment="Left"/>
+                                   Classes.invalid="{Binding GewerbeInvalid}" Width="440" HorizontalAlignment="Left"
+                                   AutomationProperties.Name="Gewerbekennzahl" AutomationProperties.HelpText="{Binding GewerbeHelp}" AutomationProperties.AutomationId="CaseGewerbe"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

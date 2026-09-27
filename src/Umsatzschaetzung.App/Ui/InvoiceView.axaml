@@ -45,48 +45,56 @@
         <Border x:Name="FormPane" Grid.Row="0" Theme="{StaticResource Panel}" Padding="16,12" ClipToBounds="True">
             <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" VerticalAlignment="Top">
                 <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                    <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
-                    <Button x:Name="AcceptInvoice" DockPanel.Dock="Right" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Bestätigen" IsEnabled="{Binding CanAccept}" Click="Accept">
-                        <Panel>
-                            <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Saving}"/>
-                            <PathIcon Data="{StaticResource ConfirmIcon}" Width="14" Height="14" IsVisible="{Binding !Saving}"/>
-                        </Panel>
-                    </Button>
-                    <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="CSV exportieren" Margin="0,0,8,0" IsEnabled="{Binding CanExport}" Click="ExportCsv">
-                        <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>
-                    </Button>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="CSV exportieren" Margin="0,0,8,0" IsEnabled="{Binding CanExport}" Click="ExportCsv"
+                                AutomationProperties.Name="CSV exportieren" AutomationProperties.AutomationId="InvoiceExportButton">
+                            <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
+                        </Button>
+                        <Button x:Name="AcceptInvoice" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Bestätigen" IsEnabled="{Binding CanAccept}" Click="Accept"
+                                AutomationProperties.Name="Rechnung bestätigen" AutomationProperties.HelpText="Markiert die Rechnung als durchgesehen und schließt sie" AutomationProperties.AutomationId="InvoiceAcceptButton">
+                            <Panel>
+                                <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Saving}" AutomationProperties.AccessibilityView="Raw"/>
+                                <PathIcon Data="{StaticResource ConfirmIcon}" Width="14" Height="14" IsVisible="{Binding !Saving}" AutomationProperties.AccessibilityView="Raw"/>
+                            </Panel>
+                        </Button>
+                        <Button Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"
+                                AutomationProperties.Name="Hilfe" AutomationProperties.HelpText="Hilfe zu dieser Seite (F1)" AutomationProperties.AcceleratorKey="F1" AutomationProperties.AutomationId="InvoiceHelpButton"/>
+                    </StackPanel>
                     <Border x:Name="State" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="12,0"
                             VerticalAlignment="Center"
                             Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">
-                        <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}"/>
+                        <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}" AutomationProperties.LiveSetting="Polite"/>
                     </Border>
-                    <TextBlock Text="Rechnung" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Rechnung" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center" AutomationProperties.HeadingLevel="2"/>
                 </DockPanel>
                 <StackPanel Grid.Row="1">
                     <Grid ColumnDefinitions="*,12,*,12,*">
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Lieferant" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="SupplierBox" Text="{Binding Supplier, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                            <TextBlock x:Name="SupplierLabel" Text="Lieferant" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="SupplierBox" Text="{Binding Supplier, Mode=TwoWay}" GotFocus="HeaderFocus"
+                                     AutomationProperties.LabeledBy="{Binding #SupplierLabel}" AutomationProperties.AutomationId="InvoiceSupplier"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Rechnungsnummer" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="NumberBox" Text="{Binding Number, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                            <TextBlock x:Name="NumberLabel" Text="Rechnungsnummer" Theme="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="NumberBox" Text="{Binding Number, Mode=TwoWay}" GotFocus="HeaderFocus"
+                                     AutomationProperties.LabeledBy="{Binding #NumberLabel}" AutomationProperties.AutomationId="InvoiceNumber"/>
                         </StackPanel>
                         <StackPanel Grid.Column="4">
                             <DockPanel>
                                 <Border Theme="{StaticResource BadgeWarning}" DockPanel.Dock="Right" IsVisible="{Binding OutsidePeriod}" ToolTip.Tip="{Binding PeriodHint}">
-                                    <TextBlock Text="Außerhalb des Zeitraums" Theme="{StaticResource BadgeText}"/>
+                                    <TextBlock Text="Außerhalb des Zeitraums" Theme="{StaticResource BadgeText}" AutomationProperties.HelpText="{Binding PeriodHint}"/>
                                 </Border>
-                                <TextBlock Text="Datum" Theme="{StaticResource FieldLabel}"/>
+                                <TextBlock x:Name="DateLabel" Text="Datum" Theme="{StaticResource FieldLabel}"/>
                             </DockPanel>
-                            <TextBox x:Name="DateBox" Text="{Binding Date, Mode=TwoWay}" GotFocus="HeaderFocus"/>
+                            <TextBox x:Name="DateBox" Text="{Binding Date, Mode=TwoWay}" GotFocus="HeaderFocus"
+                                     AutomationProperties.LabeledBy="{Binding #DateLabel}" AutomationProperties.AutomationId="InvoiceDate"/>
                         </StackPanel>
                     </Grid>
                     <StackPanel>
-                        <TextBlock Text="Beleg" Theme="{StaticResource FieldLabel}"/>
-                        <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding FileName}"/>
+                        <TextBlock x:Name="FileLabel" Text="Beleg" Theme="{StaticResource FieldLabel}"/>
+                        <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding FileName}" AutomationProperties.LabeledBy="{Binding #FileLabel}"/>
                     </StackPanel>
-                    <ItemsControl ItemsSource="{Binding HeaderFlags}" Margin="0,12,0,0">
+                    <ItemsControl ItemsSource="{Binding HeaderFlags}" Margin="0,12,0,0" AutomationProperties.Name="Hinweise zur Rechnung">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="x:String">
                                 <Border Theme="{StaticResource Banner}">
@@ -95,21 +103,22 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8"/>
+                    <TextBlock Text="Positionen" Theme="{StaticResource SectionHeader}" Margin="0,8,0,8" AutomationProperties.HeadingLevel="2"/>
                 </StackPanel>
-                <DataGrid x:Name="Lines" Grid.Row="2" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged" PreparingCellForEdit="EditStarted">
+                <DataGrid x:Name="Lines" Grid.Row="2" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Lines}" CurrentCellChanged="CellChanged" PreparingCellForEdit="EditStarted" KeyDown="LinesKey"
+                          AutomationProperties.Name="Positionen" AutomationProperties.HelpText="F2 bearbeitet die Zelle, Entf entfernt die Position" AutomationProperties.AutomationId="InvoiceLines">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Menge" Width="90" SortMemberPath="Quantity">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding QuantityFlagged}" ToolTip.Tip="{Binding QuantityFlag}">
-                                        <TextBlock Text="{Binding Quantity}" Theme="{StaticResource Cell}"/>
+                                        <TextBlock Text="{Binding Quantity}" Theme="{StaticResource Cell}" AutomationProperties.HelpText="{Binding QuantityFlag}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <TextBox Text="{Binding Quantity, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                    <TextBox Text="{Binding Quantity, Mode=TwoWay}" Theme="{StaticResource NumberBox}" AutomationProperties.Name="Menge"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -117,13 +126,13 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding UnitFlagged}" ToolTip.Tip="{Binding UnitFlag}">
-                                        <TextBlock Text="{Binding UnitLabel}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding UnitLabel}" VerticalAlignment="Center" AutomationProperties.HelpText="{Binding UnitFlag}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <TextBox Text="{Binding Unit, Mode=TwoWay}"/>
+                                    <TextBox Text="{Binding Unit, Mode=TwoWay}" AutomationProperties.Name="Einheit"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -133,15 +142,16 @@
                                     <Border Classes="cell" Classes.flagged="{Binding NameFlagged}" ToolTip.Tip="{Binding NameFlag}">
                                         <DockPanel>
                                             <PathIcon DockPanel.Dock="Right" Theme="{StaticResource RowWarning}"
-                                                      IsVisible="{Binding RowFlagged}" ToolTip.Tip="{Binding RowFlag}"/>
-                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                      IsVisible="{Binding RowFlagged}" ToolTip.Tip="{Binding RowFlag}"
+                                                      AutomationProperties.Name="{Binding RowFlag, StringFormat='Warnung: {0}'}"/>
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" AutomationProperties.HelpText="{Binding NameFlag}"/>
                                         </DockPanel>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <TextBox Text="{Binding Name, Mode=TwoWay}"/>
+                                    <TextBox Text="{Binding Name, Mode=TwoWay}" AutomationProperties.Name="Position"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -149,13 +159,13 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding UnitPriceFlagged}" ToolTip.Tip="{Binding UnitPriceFlag}">
-                                        <TextBlock Text="{Binding UnitPrice}" Theme="{StaticResource Cell}"/>
+                                        <TextBlock Text="{Binding UnitPrice}" Theme="{StaticResource Cell}" AutomationProperties.HelpText="{Binding UnitPriceFlag}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <TextBox Text="{Binding UnitPrice, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                    <TextBox Text="{Binding UnitPrice, Mode=TwoWay}" Theme="{StaticResource NumberBox}" AutomationProperties.Name="Einzelpreis"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -163,13 +173,13 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding LineNetFlagged}" ToolTip.Tip="{Binding LineNetFlag}">
-                                        <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}"/>
+                                        <TextBlock Text="{Binding LineNet}" Theme="{StaticResource Cell}" AutomationProperties.HelpText="{Binding LineNetFlag}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <TextBox Text="{Binding LineNet, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                    <TextBox Text="{Binding LineNet, Mode=TwoWay}" Theme="{StaticResource NumberBox}" AutomationProperties.Name="Netto"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -177,45 +187,51 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
                                     <Border Classes="cell" Classes.flagged="{Binding VatFlagged}" ToolTip.Tip="{Binding VatFlag}">
-                                        <TextBlock Text="{Binding Vat}" Theme="{StaticResource Cell}"/>
+                                        <TextBlock Text="{Binding Vat}" Theme="{StaticResource Cell}" AutomationProperties.HelpText="{Binding VatFlag}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <TextBox Text="{Binding Vat, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                    <TextBox Text="{Binding Vat, Mode=TwoWay}" Theme="{StaticResource NumberBox}" AutomationProperties.Name="USt"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
+                            <DataGridTemplateColumn.Header>
+                                <Panel AutomationProperties.Name="Entfernen"/>
+                            </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:LineRow">
-                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveLine">
-                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
+                                    <Button IsTabStop="False" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" Click="RemoveLine"
+                                            AutomationProperties.Name="{Binding Name, StringFormat='Position {0} entfernen'}" AutomationProperties.AcceleratorKey="Entf" AutomationProperties.AutomationId="InvoiceLineRemove">
+                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                                     </Button>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <Button Grid.Row="3" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zeile hinzufügen" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine">
-                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
+                <Button Grid.Row="3" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zeile hinzufügen" HorizontalAlignment="Right" Margin="0,8,0,0" Click="AddLine"
+                        AutomationProperties.Name="Zeile hinzufügen" AutomationProperties.AutomationId="InvoiceAddLine">
+                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                 </Button>
                 <DataGrid x:Name="Totals" Grid.Row="4" Theme="{StaticResource Grid}" Margin="0,8,0,0" CanUserSortColumns="False"
-                          ItemsSource="{Binding Totals}" CurrentCellChanged="TotalChanged" PreparingCellForEdit="EditStarted">
+                          ItemsSource="{Binding Totals}" CurrentCellChanged="TotalChanged" PreparingCellForEdit="EditStarted"
+                          AutomationProperties.Name="Summen" AutomationProperties.AutomationId="InvoiceTotals">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Summe" Binding="{Binding Label, DataType=ui:TotalRow}" Width="*" IsReadOnly="True"/>
                         <DataGridTemplateColumn Header="Laut Beleg" Width="130">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:TotalRow">
                                     <Border Classes="cell" Classes.flagged="{Binding Flagged}" ToolTip.Tip="{Binding Flag}">
-                                        <TextBlock Text="{Binding Stated}" Theme="{StaticResource Cell}"/>
+                                        <TextBlock Text="{Binding Stated}" Theme="{StaticResource Cell}" AutomationProperties.HelpText="{Binding Flag}"/>
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate x:DataType="ui:TotalRow">
-                                    <TextBox Text="{Binding Stated, Mode=TwoWay}" Theme="{StaticResource NumberBox}"/>
+                                    <TextBox Text="{Binding Stated, Mode=TwoWay}" Theme="{StaticResource NumberBox}" AutomationProperties.Name="Laut Beleg"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
@@ -233,28 +249,33 @@
             </Grid>
         </Border>
 
-        <GridSplitter x:Name="PaneSplit" Grid.Row="1" Height="6" ResizeDirection="Rows" Background="Transparent"/>
+        <GridSplitter x:Name="PaneSplit" Grid.Row="1" Height="6" ResizeDirection="Rows" Background="Transparent"
+                      AutomationProperties.Name="Trenner zwischen Rechnung und Beleg" AutomationProperties.HelpText="Mit den Pfeiltasten verschieben" AutomationProperties.AutomationId="InvoicePaneSplit"/>
 
         <Border x:Name="ScanPane" Grid.Row="2" Theme="{StaticResource Panel}" ClipToBounds="True">
             <Grid>
                 <DockPanel x:Name="OcrPane">
                     <DockPanel DockPanel.Dock="Top" Margin="12,8">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <Button Content="−" Theme="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"/>
+                            <Button Content="−" Theme="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"
+                                    AutomationProperties.Name="Verkleinern" AutomationProperties.AcceleratorKey="-" AutomationProperties.AutomationId="InvoiceZoomOut"/>
                             <TextBlock Text="{Binding #Viewer.(ui:ZoomPan.Zoom), StringFormat='{}{0:P0}'}"
-                                       VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
-                            <Button Content="+" Theme="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"/>
-                            <Button Content="Anpassen" Theme="{StaticResource LinkButton}" Click="ZoomFit"/>
-                            <ComboBox x:Name="PageSelect" MinWidth="120" Margin="8,0,0,0" SelectionChanged="PageChanged"/>
+                                       VerticalAlignment="Center" MinWidth="48" TextAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+                            <Button Content="+" Theme="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"
+                                    AutomationProperties.Name="Vergrößern" AutomationProperties.AcceleratorKey="+" AutomationProperties.AutomationId="InvoiceZoomIn"/>
+                            <Button Content="Anpassen" Theme="{StaticResource LinkButton}" Click="ZoomFit"
+                                    AutomationProperties.HelpText="An die Breite anpassen" AutomationProperties.AcceleratorKey="0" AutomationProperties.AutomationId="InvoiceZoomFit"/>
+                            <ComboBox x:Name="PageSelect" MinWidth="120" Margin="8,0,0,0" SelectionChanged="PageChanged"
+                                      AutomationProperties.Name="Seite" AutomationProperties.AutomationId="InvoicePageSelect"/>
                         </StackPanel>
-                        <TextBlock Text="Beleg" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Beleg" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center" AutomationProperties.HeadingLevel="2"/>
                     </DockPanel>
-                    <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12"
+                    <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12" AutomationProperties.Name="Beleg" AutomationProperties.AutomationId="InvoiceScanViewer"
                                   VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                         <LayoutTransformControl HorizontalAlignment="Left" VerticalAlignment="Top">
                             <Canvas x:Name="PageCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
                                 <Image x:Name="PageImage" Stretch="Fill"/>
-                                <Canvas x:Name="Flagged"/>
+                                <Canvas x:Name="Flagged" AutomationProperties.Name="Markierte Werte"/>
                                 <Rectangle x:Name="FocusBox" Stroke="{DynamicResource FocusBoxBrush}" StrokeThickness="3" RadiusX="3" RadiusY="3" IsVisible="False"/>
                             </Canvas>
                         </LayoutTransformControl>

@@ -1,4 +1,7 @@
 using System.Collections.Specialized;
+using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -17,6 +20,19 @@ public partial class ShellView : UserControl
     Screen? current;
     RulesPane? rules;
     bool moving;
+
+    // VoiceOver reads a heading only from the header role; UIA takes the level on any text.
+    static ShellView()
+    {
+        if (OperatingSystem.IsMacOS())
+            AutomationProperties.HeadingLevelProperty.Changed.AddClassHandler<Control, int>((c, e) =>
+                AutomationProperties.SetControlTypeOverride(c, e.NewValue.Value > 0 ? AutomationControlType.Header : null));
+        TemplateAppliedEvent.AddClassHandler<AutoCompleteBox>((box, e) =>
+        {
+            if (e.NameScope.Find<TextBox>("PART_TextBox") is { } text) Accessible.Forward(box, text);
+        });
+        GotFocusEvent.AddClassHandler<TabControl>((tabs, _) => KeyboardNavigation.SetTabOnceActiveElement(tabs, tabs.ContainerFromIndex(tabs.SelectedIndex)));
+    }
 
     public ShellView(Services service)
     {
@@ -140,7 +156,9 @@ public partial class ShellView : UserControl
 
     void TabChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.Source == Tabs && Tabs.SelectedIndex >= 0 && CaseUi.IsVisible) Show(screens[Tabs.SelectedIndex]);
+        if (e.Source != Tabs || Tabs.SelectedIndex < 0 || !CaseUi.IsVisible) return;
+        Show(screens[Tabs.SelectedIndex]);
+        if (Tabs.SelectedItem is TabItem { Header: string page, IsFocused: false }) Accessible.Announce(this, "Seite " + page);
     }
 
     void OpenCase(Case resp)
@@ -150,6 +168,8 @@ public partial class ShellView : UserControl
         CaseUi.IsVisible = true;
         Tabs.SelectedIndex = 0;
         Show(screens[0]);
+        Tabs.ContainerFromIndex(0)?.Focus();
+        Accessible.Announce(this, "Prüfung " + resp.Label + " geöffnet");
     }
 
     async void Back(object? sender, RoutedEventArgs e)
@@ -164,6 +184,8 @@ public partial class ShellView : UserControl
         CasesHost.IsVisible = true;
         Titled?.Invoke("Umsatzschätzung");
         Show(cases);
+        FocusManager.FindFirstFocusableElement(cases)?.Focus();
+        Accessible.Announce(this, "Prüfungen");
     }
 
     void RefreshContext()

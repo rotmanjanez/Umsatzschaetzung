@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 
@@ -9,6 +10,7 @@ public partial class ImportPane : UserControl
     readonly ImportJob job;
     readonly Frame frame;
     readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    bool attended;
 
     ImportPane(ImportJob job)
     {
@@ -35,8 +37,10 @@ public partial class ImportPane : UserControl
         {
             timer.Stop();
             frame.Title = "Import " + job.Label;
+            if (attended || frame is WindowFrame) Done.Focus(NavigationMethod.Tab);
             return;
         }
+        attended = IsKeyboardFocusWithin;
         job.Sample();
         frame.Title = "Import " + job.Label + " (" + job.Percent + ")";
     }

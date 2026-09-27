@@ -21,15 +21,24 @@
         <Style Selector="Window">
             <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
         </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="FocusAdorner" Value="{DynamicResource FocusRing}"/>
+        </Style>
+        <Style Selector=":is(Control).invalid">
+            <Setter Property="AutomationProperties.ItemStatus" Value="Ungültige Eingabe"/>
+        </Style>
         <Style Selector="TextBox.invalid, ComboBox.invalid">
             <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
         </Style>
         <Style Selector=":is(Control).invalid /template/ Border#PART_BorderElement">
             <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
         </Style>
         <!-- AutoCompleteBox draws its border in the inner TextBox, out of reach of the selector above. -->
         <Style Selector="AutoCompleteBox.invalid /template/ TextBox#PART_TextBox">
             <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
         </Style>
         <Style Selector=":is(Control).revealed">
             <Style.Animations>

@@ -20,6 +20,15 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
+        <Style Selector="DataGrid#Groups DataGridRow" x:DataType="ui:LineGroup">
+            <Setter Property="AutomationProperties.Name">
+                <MultiBinding StringFormat="{}{0}, {1}, {2}">
+                    <Binding Path="Name"/>
+                    <Binding Path="Supplier"/>
+                    <Binding Path="StateText"/>
+                </MultiBinding>
+            </Setter>
+        </Style>
     </ui:Screen.Styles>
     <DockPanel>
         <Grid>
@@ -31,23 +40,27 @@
             <Border Theme="{StaticResource Panel}" ClipToBounds="True">
                 <DockPanel>
                     <DockPanel DockPanel.Dock="Top" Margin="8">
-                        <ui:SearchBox x:Name="Search" DockPanel.Dock="Right"/>
+                        <ui:SearchBox x:Name="Search" DockPanel.Dock="Right" AutomationProperties.Name="Positionen filtern" AutomationProperties.AutomationId="MappingSearch"/>
                         <Panel Margin="4,0,12,0">
-                            <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" IsVisible="{Binding !Mapping}"/>
+                            <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" IsVisible="{Binding !Mapping}"
+                                       AutomationProperties.LiveSetting="Polite"/>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding Mapping}">
-                                <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0"/>
-                                <TextBlock Text="Wird zugeordnet …" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0" AutomationProperties.AccessibilityView="Raw"/>
+                                <TextBlock Text="Wird zugeordnet …" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                           AutomationProperties.LiveSetting="Polite"/>
                             </StackPanel>
                         </Panel>
                     </DockPanel>
                     <Grid>
                     <DataGrid x:Name="Groups" ui:Blur.Detail="{Binding #Detail}" ui:Grids.Flex="1" Theme="{StaticResource Grid}" IsReadOnly="True"
-                              SelectionChanged="GroupSelected" IsVisible="{Binding !NoInvoices}">
+                              SelectionChanged="GroupSelected" IsVisible="{Binding !NoInvoices}"
+                              AutomationProperties.Name="Rechnungspositionen" AutomationProperties.AutomationId="MappingGroups"
+                              AutomationProperties.HelpText="Position wählen, um sie rechts einer Zutat zuzuordnen">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Status" Width="120" SortMemberPath="Rank">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:LineGroup">
-                                        <Border Theme="{StaticResource Badge}" Classes="state" Margin="8,0"
+                                        <Border Theme="{StaticResource Badge}" Classes="state" Margin="8,0" AutomationProperties.Name="{Binding StateText}"
                                                 Classes.auto="{Binding IsAutomatic}" Classes.manual="{Binding IsManual}" Classes.pending="{Binding IsPending}">
                                             <TextBlock Text="{Binding StateText}" Theme="{StaticResource BadgeText}"/>
                                         </Border>
@@ -71,18 +84,21 @@
                         </DataGrid.Columns>
                     </DataGrid>
                     <StackPanel MaxWidth="360" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16" IsVisible="{Binding NoInvoices}">
-                        <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"
+                                   AutomationProperties.HeadingLevel="2"/>
                         <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
                                    Text="Zugeordnet werden Rechnungspositionen zu Zutaten. Fügen Sie zuerst Rechnungen hinzu."/>
-                        <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
+                        <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"
+                                AutomationProperties.AutomationId="MappingGoInvoices"/>
                     </StackPanel>
                     <ui:NoResults Search="{Binding #Search}"/>
                     </Grid>
                 </DockPanel>
             </Border>
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"
+                          AutomationProperties.Name="Breite von Liste und Zuordnung" AutomationProperties.AutomationId="MappingSplitter"/>
             <Border Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
-                <ui:MappingDetail x:Name="Detail"/>
+                <ui:MappingDetail x:Name="Detail" AutomationProperties.Name="Zuordnung" AutomationProperties.AccessibilityView="Control" AutomationProperties.AutomationId="MappingDetail"/>
             </Border>
         </Grid>
     </DockPanel>

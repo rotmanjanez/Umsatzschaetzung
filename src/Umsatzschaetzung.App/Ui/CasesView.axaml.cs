@@ -8,7 +8,10 @@ using Umsatzschaetzung.Service;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed record CaseRow(Case Case, string Period, string UpdatedAt, int Invoices);
+public sealed record CaseRow(Case Case, string Period, string UpdatedAt, int Invoices)
+{
+    public string Summary => Case.Label + ", " + Period + ", zuletzt geändert " + UpdatedAt;
+}
 
 public sealed class CasesModel : Observable
 {
@@ -41,6 +44,7 @@ public partial class CasesView : Screen
         Search.Attach(model.Cases, r => r.Case.Label + " " + r.Period + " " + r.Case.Taxpayer.Name);
         Grid.ItemsSource = Search.View;
         Grid.AddHandler(PointerReleasedEvent, RowClicked, RoutingStrategies.Bubble);
+        Grid.AddHandler(KeyDownEvent, GridKeyDown, RoutingStrategies.Tunnel);
         fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab];
         foreach (var field in fields) field.TextChanged += (s, _) => ((TextBox)s!).Classes.Set("invalid", false);
         NewGewerbe.PropertyChanged += (_, e) => { if (e.Property == GewerbeBox.KennzahlProperty) NewGewerbe.Classes.Set("invalid", false); };
@@ -71,7 +75,20 @@ public partial class CasesView : Screen
         NewLabel.Focus();
     }
 
-    void CancelNew(object? sender, RoutedEventArgs e) => model.Creating = false;
+    void CancelNew(object? sender, RoutedEventArgs e) => CancelNew();
+
+    void CancelNew()
+    {
+        model.Creating = false;
+        NewCase.Focus();
+    }
+
+    void NewKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape) return;
+        e.Handled = true;
+        CancelNew();
+    }
 
     async void Create(object? sender, RoutedEventArgs e)
     {
@@ -135,9 +152,11 @@ public partial class CasesView : Screen
 
     void GridKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Enter) return;
+        if (e.Source is Button || Grid.SelectedItem is not CaseRow row) return;
+        if (e.Key == Key.Enter) Open(row);
+        else if (e.Key == Key.Delete) Remove(row);
+        else return;
         e.Handled = true;
-        Open(Grid.SelectedItem as CaseRow);
     }
 
     async void Open(CaseRow? row)
@@ -149,9 +168,13 @@ public partial class CasesView : Screen
         });
     }
 
-    async void Delete(object? sender, RoutedEventArgs e)
+    void Delete(object? sender, RoutedEventArgs e)
     {
-        if ((sender as Control)?.DataContext is not CaseRow row) return;
+        if ((sender as Control)?.DataContext is CaseRow row) Remove(row);
+    }
+
+    async void Remove(CaseRow row)
+    {
         var answer = await Dialog.Confirm(this,
             "„" + row.Case.Label + "“ wird mit allen Rechnungen unwiderruflich gelöscht.",
             "Prüfung löschen");

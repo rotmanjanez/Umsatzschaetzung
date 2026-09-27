@@ -18,6 +18,13 @@ public sealed class ExcludedRow(LineGroup group, Exclusion why, string? ingredie
     public bool CanRestoreRevenue => Why == Exclusion.NoRevenue;
     public string DropTip => $"„{Ingredient}“ bringt in diesem Betrieb keinen Umsatz";
     public string RestoreTip => $"„{Ingredient}“ bringt doch Umsatz";
+    public string Reason => Why switch
+    {
+        Exclusion.Unmapped => "nicht zugeordnet",
+        Exclusion.Unused => $"„{Ingredient}“ in keiner Rezeptur",
+        _ => $"„{Ingredient}“ bringt keinen Umsatz",
+    };
+    public string Spoken => Name + ", " + LineNet + ", " + Reason;
 }
 
 public sealed class ExclusionModel : Observable

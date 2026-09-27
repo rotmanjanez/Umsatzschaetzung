@@ -26,6 +26,7 @@ public partial class InvoicePane : UserControl
         editor.Session.Anchor(frame, pane.ErrorBanner, pane.ErrorText);
         // The view outlives the frame when its review is unfinished, so it is handed back first.
         frame.Closed += () => pane.Body.Content = null;
+        frame.Opening += () => editor.SupplierBox.Focus();
         frame.Show(owner);
         return frame;
     }

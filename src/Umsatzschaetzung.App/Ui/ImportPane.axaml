@@ -4,15 +4,19 @@
              xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
              x:DataType="ui:ImportJob">
     <StackPanel Margin="20,16">
-        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-        <ProgressBar Height="6" Margin="0,12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}" IsVisible="{Binding Pending}"/>
+        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" AutomationProperties.HeadingLevel="1"/>
+        <ProgressBar Height="6" Margin="0,12" Maximum="1" Value="{Binding Fraction, Mode=OneWay}" IsVisible="{Binding Pending}"
+                     AutomationProperties.Name="Importfortschritt" AutomationProperties.HelpText="{Binding Eta}" AutomationProperties.AutomationId="ImportProgress"/>
         <DockPanel IsVisible="{Binding Pending}">
-            <TextBlock DockPanel.Dock="Right" Text="{Binding Eta}" Theme="{StaticResource Muted}" Margin="12,0,0,0"/>
-            <TextBlock Text="{Binding Count}"/>
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Eta}" Theme="{StaticResource Muted}" Margin="12,0,0,0" AutomationProperties.AutomationId="ImportEta"/>
+            <TextBlock Text="{Binding Count}" AutomationProperties.LiveSetting="Polite" AutomationProperties.AutomationId="ImportCount"/>
         </DockPanel>
-        <TextBlock Text="{Binding Detail}" Theme="{StaticResource Muted}" TextTrimming="PathSegmentEllipsis" Margin="0,4,0,0" IsVisible="{Binding Pending}"/>
-        <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" IsVisible="{Binding Complete}" TextWrapping="Wrap" Margin="0,12,0,0"/>
-        <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Pending}"/>
-        <Button Content="Schließen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Complete}"/>
+        <TextBlock Text="{Binding Detail}" Theme="{StaticResource Muted}" TextTrimming="PathSegmentEllipsis" Margin="0,4,0,0" IsVisible="{Binding Pending}" AutomationProperties.AutomationId="ImportFile"/>
+        <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" IsVisible="{Binding Complete}" TextWrapping="Wrap" Margin="0,12,0,0"
+                   AutomationProperties.LiveSetting="Polite" AutomationProperties.AutomationId="ImportSummary"/>
+        <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Pending}"
+                AutomationProperties.HelpText="Bricht den Import ab; bereits übernommene Rechnungen bleiben erhalten" AutomationProperties.AutomationId="ImportCancelButton"/>
+        <Button x:Name="Done" Content="Schließen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Right" Margin="0,16,0,0" Click="CancelClick" IsVisible="{Binding Complete}"
+                AutomationProperties.HelpText="{Binding Summary}" AutomationProperties.AutomationId="ImportCloseButton"/>
     </StackPanel>
 </UserControl>

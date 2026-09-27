@@ -63,13 +63,18 @@ public static class Cells
     {
         var text = await clipboard.TryGetTextAsync();
         if (string.IsNullOrEmpty(text) || grid.SelectedItem != item || grid.CurrentColumn != column) return;
+        Write(grid, column, item, text.Split('\n')[0].Split('\t')[0].TrimEnd('\r'));
+    }
+
+    internal static void Write(DataGrid grid, DataGridColumn column, object item, string text)
+    {
         if (!grid.BeginEdit()) return;
         if (Box(column.GetCellContent(item)) is not { } box)
         {
             grid.CancelEdit();
             return;
         }
-        box.Text = text.Split('\n')[0].Split('\t')[0].TrimEnd('\r');
+        box.Text = text;
         grid.CommitEdit();
     }
 

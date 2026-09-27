@@ -5,15 +5,18 @@
     <DockPanel>
         <DockPanel DockPanel.Dock="Top" Margin="12,8">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                <Button Content="−" Theme="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"/>
+                <Button Content="−" Theme="{StaticResource LinkButton}" Click="ZoomOut" MinWidth="32"
+                        AutomationProperties.Name="Verkleinern" AutomationProperties.AcceleratorKey="-" AutomationProperties.AutomationId="SourceZoomOut"/>
                 <TextBlock Text="{Binding #Viewer.(ui:ZoomPan.Zoom), StringFormat='{}{0:P0}'}"
-                           VerticalAlignment="Center" MinWidth="48" TextAlignment="Center"/>
-                <Button Content="+" Theme="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"/>
-                <Button Content="Anpassen" Theme="{StaticResource LinkButton}" Click="ZoomReset"/>
+                           VerticalAlignment="Center" MinWidth="48" TextAlignment="Center" AutomationProperties.LiveSetting="Polite"/>
+                <Button Content="+" Theme="{StaticResource LinkButton}" Click="ZoomIn" MinWidth="32"
+                        AutomationProperties.Name="Vergrößern" AutomationProperties.AcceleratorKey="+" AutomationProperties.AutomationId="SourceZoomIn"/>
+                <Button Content="Anpassen" Theme="{StaticResource LinkButton}" Click="ZoomReset"
+                        AutomationProperties.HelpText="An die Breite anpassen" AutomationProperties.AcceleratorKey="0" AutomationProperties.AutomationId="SourceZoomFit"/>
             </StackPanel>
-            <TextBlock x:Name="Note" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="Note" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" AutomationProperties.LiveSetting="Polite"/>
         </DockPanel>
-        <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12"
+        <ScrollViewer x:Name="Viewer" ui:ZoomPan.Enabled="True" Padding="12" AutomationProperties.Name="Beleg" AutomationProperties.AutomationId="SourceViewer"
                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <LayoutTransformControl HorizontalAlignment="Left" VerticalAlignment="Top">
                 <StackPanel x:Name="Pages" HorizontalAlignment="Left"/>

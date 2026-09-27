@@ -77,6 +77,7 @@ public static partial class Host
         {
             frame = Element("iframe");
             frame.SetProperty("sandbox", "");
+            frame.SetProperty("title", "Berichtsvorschau");
             frame.GetPropertyAsJSObject("style")?.SetProperty("border", "0");
             frame.SetProperty("srcdoc", html);
             return new JSObjectControlHandle(frame);

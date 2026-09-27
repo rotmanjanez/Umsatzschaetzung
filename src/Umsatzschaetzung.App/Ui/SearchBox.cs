@@ -1,5 +1,7 @@
 using System.Collections;
 using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -33,6 +35,10 @@ public sealed class SearchBox : Grid
     public SearchBox()
     {
         Width = 220;
+        AutomationProperties.SetName(this, "Filtern");
+        Accessible.Forward(this, box, id: true);
+        AutomationProperties.SetName(clear, "Filter löschen");
+        AutomationProperties.SetAutomationId(clear, "SearchClear");
         hint[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
         var icon = new PathIcon { Width = 10, Height = 10 };
         icon[!PathIcon.DataProperty] = new DynamicResourceExtension("ClearIcon");
@@ -48,7 +54,15 @@ public sealed class SearchBox : Grid
             Update();
         };
         clear.Click += (_, _) => Reset();
+        box.KeyDown += (_, e) =>
+        {
+            if (e.Key != Key.Escape || box.Text is null or "") return;
+            e.Handled = true;
+            Reset();
+        };
     }
+
+    protected override AutomationPeer OnCreateAutomationPeer() => new Peer(this);
 
     // Avalonia has no ICollectionView: the filtered view is a separate object, so
     // consumers bind their ItemsSource to View rather than to the source collection.
@@ -83,6 +97,12 @@ public sealed class SearchBox : Grid
         var terms = (box.Text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return terms.Length == 0 || terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));
     }
+
+    sealed class Peer(SearchBox owner) : NoneAutomationPeer(owner)
+    {
+        protected override IReadOnlyList<AutomationPeer>? GetChildrenCore() =>
+            base.GetChildrenCore()?.Where(p => p is not ControlAutomationPeer { Owner: TextBlock }).ToList();
+    }
 }
 
 // Overlay for a list filtered by a SearchBox: shown only while the filter hides every row.
@@ -106,6 +126,7 @@ public sealed class NoResults : StackPanel
             Margin = new Thickness(0, 12, 0, 0),
             HorizontalAlignment = HorizontalAlignment.Center,
         };
+        AutomationProperties.SetAutomationId(reset, "SearchReset");
         reset.Click += (_, _) => Search?.Reset();
         Children.Add(text);
         Children.Add(reset);
@@ -120,7 +141,9 @@ public sealed class NoResults : StackPanel
         IsVisible = search.NoMatches;
         search.PropertyChanged += (_, a) =>
         {
-            if (a.Property == SearchBox.NoMatchesProperty) IsVisible = search.NoMatches;
+            if (a.Property != SearchBox.NoMatchesProperty) return;
+            IsVisible = search.NoMatches;
+            if (IsVisible) Accessible.Announce(search, "Keine Treffer");
         };
     }
 }

@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
@@ -57,6 +58,7 @@ public sealed class IngredientBox : AutoCompleteBox
         MinimumPrefixLength = 0;
         IsTextCompletionEnabled = false;
         PlaceholderText = "Zutat suchen …";
+        AutomationProperties.SetName(this, "Zutat");
         ValueMemberBinding = new Binding(nameof(Ingredient.Name));
         ItemTemplate = new FuncDataTemplate<Ingredient>((i, _) => Row(Category(i)), false);
     }
@@ -65,6 +67,14 @@ public sealed class IngredientBox : AutoCompleteBox
     {
         base.OnPropertyChanged(change);
         if (change.Property == ChoicesProperty) SetCurrentValue(ItemsSourceProperty, Choices);
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        if (e.NameScope.Find<ItemsControl>("PART_SelectingItemsControl") is { } list)
+            list.ContainerPrepared += (_, c) =>
+                AutomationProperties.SetName(c.Container, list.Items[c.Index] is Ingredient i ? (i.Name + " " + Category(i)).Trim() : "");
     }
 
     protected override void OnGotFocus(FocusChangedEventArgs e)

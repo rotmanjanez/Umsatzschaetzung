@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
@@ -46,6 +47,7 @@ public sealed class GewerbeBox : AutoCompleteBox
         MaxDropDownHeight = 320;
         IsTextCompletionEnabled = false;
         PlaceholderText = "Kennzahl oder Gewerbe suchen …";
+        AutomationProperties.SetName(this, "Gewerbekennzahl");
         ValueMemberBinding = new Binding(".") { Converter = new FuncValueConverter<Gewerbezweig, string>(Label) };
         ItemTemplate = new FuncDataTemplate<Gewerbezweig>((_, _) => Row(), false);
     }
@@ -75,7 +77,11 @@ public sealed class GewerbeBox : AutoCompleteBox
         base.OnApplyTemplate(e);
         if (e.NameScope.Find<ItemsControl>("PART_SelectingItemsControl") is not { } list) return;
         list.Focusable = false;
-        list.ContainerPrepared += (_, c) => c.Container.Focusable = false;
+        list.ContainerPrepared += (_, c) =>
+        {
+            c.Container.Focusable = false;
+            AutomationProperties.SetName(c.Container, Label(list.Items[c.Index] as Gewerbezweig));
+        };
     }
 
     protected override void OnLostFocus(FocusChangedEventArgs e)

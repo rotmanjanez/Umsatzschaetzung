@@ -1,5 +1,6 @@
 using System.Globalization;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -34,6 +35,9 @@ public sealed class DateBox : Grid
         };
         pick[!ThemeProperty] = new DynamicResourceExtension("IconButton");
         ToolTip.SetTip(pick, "Datum wählen");
+        AutomationProperties.SetName(pick, "Datum wählen");
+        AutomationProperties.SetAutomationId(pick, "DatePick");
+        Accessible.Forward(this, box, id: true);
 
         box.InnerRightContent = pick;
         Children.Add(box);

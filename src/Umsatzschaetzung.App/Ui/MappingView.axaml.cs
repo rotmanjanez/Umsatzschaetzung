@@ -112,6 +112,7 @@ public partial class MappingView : Screen
         model.Groups.Replace(groups);
         var again = kept is null ? null : model.Groups.FirstOrDefault(g => g.Key == kept.Key);
         var moved = again is not null && again.State != kept!.State;
+        focused |= moved && Detail.IsKeyboardFocusWithin;
         if (moved) again = ((DataGridCollectionView)Groups.ItemsSource).Cast<LineGroup>().FirstOrDefault(g => g.IsPending);
         if (again is not null) Groups.SelectedItem = again;
         refreshing = false;
@@ -120,6 +121,7 @@ public partial class MappingView : Screen
         if (again is null)
         {
             Detail.Show(null);
+            if (focused) Groups.Focus();
             return;
         }
         if (moved || again.MappingId != kept!.MappingId) Detail.Show(again);

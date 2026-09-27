@@ -5,49 +5,51 @@
              Background="{DynamicResource WindowBackgroundBrush}">
     <Panel>
         <DockPanel x:Name="Main">
-            <Menu x:Name="MenuBar" DockPanel.Dock="Top" IsVisible="False">
-                <MenuItem Header="_Hilfe">
-                    <MenuItem Header="Hilfe zu dieser Seite" InputGesture="F1" Click="ShowHelp"/>
-                    <MenuItem Header="Handbuch" Click="ShowManual"/>
+            <Menu x:Name="MenuBar" DockPanel.Dock="Top" IsVisible="False" AutomationProperties.Name="Menüleiste">
+                <MenuItem Header="_Hilfe" AutomationProperties.AutomationId="HelpMenu" AutomationProperties.AccessKey="Alt+H">
+                    <MenuItem Header="Hilfe zu dieser Seite" InputGesture="F1" Click="ShowHelp" AutomationProperties.AutomationId="HelpTopicItem" AutomationProperties.AcceleratorKey="F1"/>
+                    <MenuItem Header="Handbuch" Click="ShowManual" AutomationProperties.AutomationId="ManualItem"/>
                     <Separator/>
-                    <MenuItem Header="Über Umsatzschätzung" Click="ShowAbout"/>
+                    <MenuItem Header="Über Umsatzschätzung" Click="ShowAbout" AutomationProperties.AutomationId="AboutItem"/>
                 </MenuItem>
             </Menu>
             <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
                 <DockPanel>
-                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Theme="{StaticResource ErrorBannerClose}" Click="DismissError"/>
-                    <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}"/>
+                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Theme="{StaticResource ErrorBannerClose}" Click="DismissError" AutomationProperties.AutomationId="ShellErrorClose"/>
+                    <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}" AutomationProperties.AutomationId="ShellError"/>
                 </DockPanel>
             </Border>
             <Grid>
                 <ContentControl x:Name="CasesHost"/>
                 <DockPanel x:Name="CaseUi" Margin="24,16,24,16" IsVisible="False">
                     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-                        <Button x:Name="BackButton" DockPanel.Dock="Left" Theme="{StaticResource BackButton}" Margin="-6,0,8,0" ToolTip.Tip="Zurück zu den Prüfungen" Click="Back">
+                        <Button x:Name="BackButton" DockPanel.Dock="Left" Theme="{StaticResource BackButton}" Margin="-6,0,8,0" ToolTip.Tip="Zurück zu den Prüfungen" Click="Back" AutomationProperties.Name="Zurück zu den Prüfungen" AutomationProperties.AutomationId="BackToCases">
                             <PathIcon Data="{StaticResource BackIcon}" Width="14" Height="14"/>
                         </Button>
-                        <Button DockPanel.Dock="Right" Theme="{StaticResource HelpButton}" Click="ShowHelp"/>
-                        <Button DockPanel.Dock="Right" Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" ToolTip.Tip="Regeln" Click="ShowRules">
-                            <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
-                        </Button>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Theme="{StaticResource SecondaryButton}" VerticalAlignment="Center" ToolTip.Tip="Regeln" Click="ShowRules" AutomationProperties.Name="Regeln" AutomationProperties.HelpText="Öffnet den Katalog der Regeln, Produkte und Rezepte" AutomationProperties.AutomationId="ShowRules">
+                                <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
+                            </Button>
+                            <Button Theme="{StaticResource HelpButton}" Click="ShowHelp" AutomationProperties.AutomationId="CaseHelp"/>
+                        </StackPanel>
                         <Border x:Name="SaveBadge" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="0,0,12,0" IsVisible="False">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <PathIcon Theme="{StaticResource Spinner}" Width="12" Height="12"/>
-                                <TextBlock x:Name="SaveText" Theme="{StaticResource BadgeText}"/>
+                                <TextBlock x:Name="SaveText" Theme="{StaticResource BadgeText}" AutomationProperties.AutomationId="SaveState"/>
                             </StackPanel>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock x:Name="CaseLabel" Theme="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock x:Name="CasePeriod" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock x:Name="CaseLabel" Theme="{StaticResource PageTitle}" Margin="0" TextTrimming="CharacterEllipsis" AutomationProperties.HeadingLevel="1" AutomationProperties.AutomationId="CaseLabel"/>
+                            <TextBlock x:Name="CasePeriod" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis" AutomationProperties.AutomationId="CasePeriod"/>
                         </StackPanel>
                     </DockPanel>
-                    <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged">
-                        <TabItem Header="Prüfung"/>
-                        <TabItem Header="1. Rechnungen"/>
-                        <TabItem Header="2. Zuordnung"/>
-                        <TabItem Header="3. Sortiment"/>
-                        <TabItem Header="4. Kalkulation"/>
-                        <TabItem Header="5. Bericht"/>
+                    <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged" AutomationProperties.Name="Schritte der Prüfung" AutomationProperties.LandmarkType="Navigation" AutomationProperties.AutomationId="CaseTabs">
+                        <TabItem Header="Prüfung" AutomationProperties.AutomationId="CaseTab"/>
+                        <TabItem Header="1. Rechnungen" AutomationProperties.AutomationId="InvoicesTab"/>
+                        <TabItem Header="2. Zuordnung" AutomationProperties.AutomationId="MappingTab"/>
+                        <TabItem Header="3. Sortiment" AutomationProperties.AutomationId="ProductsTab"/>
+                        <TabItem Header="4. Kalkulation" AutomationProperties.AutomationId="CalcTab"/>
+                        <TabItem Header="5. Bericht" AutomationProperties.AutomationId="ReportTab"/>
                     </TabControl>
                 </DockPanel>
             </Grid>

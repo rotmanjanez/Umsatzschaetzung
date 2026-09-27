@@ -51,7 +51,7 @@ public class HtmlTests
         var html = Html.Render(Kase, Rules, Report, null);
         Assert.StartsWith("<!DOCTYPE html>", html.TrimStart(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("<h1>2 Rohgewinnaufschlag</h1>", html);
-        Assert.Contains("<th class=\"wide\">Getränke</th>", html);
+        Assert.Contains("<th scope=\"col\" class=\"wide\">Getränke</th>", html);
         Assert.Contains("Anhang D", html);
         Assert.Contains("2024-04711", html);
         Assert.Contains("Pils 0,3 l vom Fass", html);
@@ -67,8 +67,8 @@ public class HtmlTests
 
         var html = Html.Render(kase, Rules, Calculation.Run(kase, Rules), null);
 
-        Assert.Contains("<th class=\"wide\">Produkt</th>", html);
-        Assert.DoesNotContain("<th class=\"wide\">Speisen</th>", html);
+        Assert.Contains("<th scope=\"col\" class=\"wide\">Produkt</th>", html);
+        Assert.DoesNotContain("<th scope=\"col\" class=\"wide\">Speisen</th>", html);
     }
 
     [Fact]

@@ -22,6 +22,7 @@ public partial class RulesPane : UserControl
         session.Anchor(Frame, ErrorBanner, ErrorText);
         Frame.Closed += session.Indicate(this, SaveBadge, SaveText);
         Frame.Closed += view.Leave;
+        Frame.Opening += view.FocusPage;
     }
 
     public Frame Frame { get; }

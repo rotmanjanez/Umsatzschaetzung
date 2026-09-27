@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -21,14 +22,16 @@ public sealed class AssortmentConflicts : UserControl
     {
         var grid = new Grid { ColumnDefinitions = new("*,Auto,Auto"), ColumnSpacing = 16, RowSpacing = 6 };
         grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        grid.Children.Add(Cell(Pick("Bisher", "Alle bisherigen Werte behalten", false), 0, 1));
-        grid.Children.Add(Cell(Pick("Import", "Alle Werte aus der Datei übernehmen", true), 0, 2));
+        grid.Children.Add(Cell(Pick("Bisher", "Alle bisherigen Werte behalten", "ConflictAllListed", false), 0, 1));
+        grid.Children.Add(Cell(Pick("Import", "Alle Werte aus der Datei übernehmen", "ConflictAllImported", true), 0, 2));
         foreach (var c in conflicts)
         {
             var row = grid.RowDefinitions.Count;
             grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-            var listed = new RadioButton { GroupName = c.Listed.ProductId, Content = Values(c.Listed) };
-            var imported = new RadioButton { GroupName = c.Listed.ProductId, Content = Values(c.Imported), IsChecked = true };
+            var listed = Named(new RadioButton { GroupName = c.Listed.ProductId, Content = Values(c.Listed) },
+                $"{c.Name}: bisher {Values(c.Listed)}", "ConflictListed");
+            var imported = Named(new RadioButton { GroupName = c.Listed.ProductId, Content = Values(c.Imported), IsChecked = true },
+                $"{c.Name}: aus der Datei {Values(c.Imported)}", "ConflictImported");
             choices.Add((c.Listed.ProductId, listed, imported));
             grid.Children.Add(Cell(new TextBlock { Text = c.Name, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis }, row, 0));
             grid.Children.Add(Cell(listed, row, 1));
@@ -57,14 +60,22 @@ public sealed class AssortmentConflicts : UserControl
                     Spacing = 8,
                     Children =
                     {
-                        Action("Abbrechen", "SecondaryButton", false, () => answer = null),
-                        Action("Importieren", "PrimaryButton", true, () => answer = [.. choices.Where(c => c.Imported.IsChecked == true).Select(c => c.Id)]),
+                        Action("Abbrechen", "SecondaryButton", "ConflictCancel", false, () => answer = null),
+                        Action("Importieren", "PrimaryButton", "ConflictImport", true, () => answer = [.. choices.Where(c => c.Imported.IsChecked == true).Select(c => c.Id)]),
                     },
                 },
             },
         };
         frame = Frame.For(this, "Sortiment importieren");
         frame.Closed += () => answered.TrySetResult(answer);
+        frame.Opening += () => choices[0].Imported.Focus();
+    }
+
+    static T Named<T>(T control, string name, string id) where T : Control
+    {
+        AutomationProperties.SetName(control, name);
+        AutomationProperties.SetAutomationId(control, id);
+        return control;
     }
 
     static string Values(CaseProduct p) =>
@@ -83,10 +94,11 @@ public sealed class AssortmentConflicts : UserControl
             button.Theme = control;
     }
 
-    Button Pick(string caption, string tip, bool imported)
+    Button Pick(string caption, string tip, string id, bool imported)
     {
-        var button = new Button { Content = caption };
+        var button = Named(new Button { Content = caption }, caption, id);
         ToolTip.SetTip(button, tip);
+        AutomationProperties.SetHelpText(button, tip);
         Themed(button, "LinkButton");
         button.Click += (_, _) =>
         {
@@ -95,9 +107,9 @@ public sealed class AssortmentConflicts : UserControl
         return button;
     }
 
-    Button Action(string caption, string theme, bool preferred, Action decide)
+    Button Action(string caption, string theme, string id, bool preferred, Action decide)
     {
-        var button = new Button { Content = caption, MinWidth = 96, IsDefault = preferred, IsCancel = !preferred };
+        var button = Named(new Button { Content = caption, MinWidth = 96, IsDefault = preferred, IsCancel = !preferred }, caption, id);
         Themed(button, theme);
         button.Click += (_, _) => { decide(); frame.Close(); };
         return button;

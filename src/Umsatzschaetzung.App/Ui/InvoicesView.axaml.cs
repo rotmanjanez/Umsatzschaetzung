@@ -30,6 +30,8 @@ public sealed class InvoiceRow(Invoice invoice)
         Checked.Manual => "Manuell",
         _ => "Durchsicht offen",
     };
+    public string Title => Supplier + " · " + Number;
+    public string Spoken => StateText + ", " + Supplier + ", " + Number + ", " + Date + ", " + NetTotal;
 
     // What the three sortable columns sort by: the review still to be done comes first.
     public int Rank => State == Checked.Pending ? 0 : State == Checked.Manual ? 1 : 2;
@@ -97,6 +99,7 @@ public partial class InvoicesView : Screen
         view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(InvoiceRow.Rank)));
         view.SortDescriptions.Add(DataGridSortDescription.FromPath(nameof(InvoiceRow.Supplier)));
         List.ItemsSource = view;
+        List.AddHandler(KeyDownEvent, ListKey, RoutingStrategies.Tunnel);
         AddHandler(DragDrop.DragOverEvent, DragOverFiles);
         AddHandler(DragDrop.DragLeaveEvent, DragLeft);
         AddHandler(DragDrop.DropEvent, Dropped);
@@ -156,8 +159,10 @@ public partial class InvoicesView : Screen
 
     void ListKey(object? sender, KeyEventArgs e)
     {
-        if (e.Key is not (Key.Enter or Key.Return)) return;
-        OpenSelected();
+        if (e.Source is Button || List.SelectedItem is not InvoiceRow row) return;
+        if (e.Key is Key.Enter or Key.Return) Show(row);
+        else if (e.Key == Key.Delete) Remove(row);
+        else return;
         e.Handled = true;
     }
 
@@ -180,7 +185,7 @@ public partial class InvoicesView : Screen
             open.Activate();
             return;
         }
-        var frame = InvoicePane.Open(this, EditorFor(row), row.Supplier + " · " + row.Number);
+        var frame = InvoicePane.Open(this, EditorFor(row), row.Title);
         windows[row.Id] = frame;
         frame.Closed += () => Closed(row.Id);
     }
@@ -201,11 +206,16 @@ public partial class InvoicesView : Screen
         return view;
     }
 
-    async void Delete(object? sender, RoutedEventArgs e)
+    void Delete(object? sender, RoutedEventArgs e)
     {
-        if ((sender as Control)?.DataContext is not InvoiceRow row || Session.Case is not { } k) return;
+        if ((sender as Control)?.DataContext is InvoiceRow row) Remove(row);
+    }
+
+    async void Remove(InvoiceRow row)
+    {
+        if (Session.Case is not { } k) return;
         var answer = await Dialog.Confirm(this,
-            "Die Rechnung „" + row.Supplier + " · " + row.Number + "“ wird mit dem Beleg gelöscht. "
+            "Die Rechnung „" + row.Title + "“ wird mit dem Beleg gelöscht. "
                 + "Rückgängig machen lässt sich das, bis das Programm beendet wird.",
             "Rechnung löschen");
         if (!answer || Session.Case != k) return;

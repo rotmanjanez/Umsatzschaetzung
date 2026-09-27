@@ -8,7 +8,10 @@ using Umsatzschaetzung.Service;
 namespace Umsatzschaetzung.App.Ui;
 
 // Id null is the default of the rules, whichever template that is.
-public sealed record TemplateChoice(string? Id, string Label);
+public sealed record TemplateChoice(string? Id, string Label)
+{
+    public override string ToString() => Label;
+}
 
 public sealed class ReportModel : Observable
 {

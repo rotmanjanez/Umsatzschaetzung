@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -12,6 +13,7 @@ public sealed class Dialog : UserControl
     readonly Frame frame;
 
     bool answer;
+    Button? first;
 
     Dialog(bool standalone, string message, string title, bool confirm, string yes = "Ja", string no = "Nein")
     {
@@ -23,12 +25,12 @@ public sealed class Dialog : UserControl
         };
         if (confirm)
         {
-            buttons.Children.Add(Action(yes, true, "SecondaryButton", false, false));
-            buttons.Children.Add(Action(no, false, "PrimaryButton", true, true));
+            buttons.Children.Add(Action(yes, true, "SecondaryButton", false, false, message));
+            buttons.Children.Add(Action(no, false, "PrimaryButton", true, true, message));
         }
         else
         {
-            buttons.Children.Add(Action("OK", true, "PrimaryButton", true, true));
+            buttons.Children.Add(Action("OK", true, "PrimaryButton", true, true, message));
         }
 
         Content = new StackPanel
@@ -44,11 +46,16 @@ public sealed class Dialog : UserControl
         };
         frame = standalone ? new WindowFrame(this, title) : Frame.For(this, title);
         frame.Closed += () => answered.TrySetResult(answer);
+        frame.Opening += () => first?.Focus();
     }
 
-    Button Action(string caption, bool value, string theme, bool preferred, bool cancel)
+    // The message is read with the button that has the focus: a screen reader reads nothing else of it.
+    Button Action(string caption, bool value, string theme, bool preferred, bool cancel, string message)
     {
         var button = new Button { Content = caption, MinWidth = 96, IsDefault = preferred, IsCancel = cancel };
+        AutomationProperties.SetHelpText(button, message);
+        AutomationProperties.SetAutomationId(button, !value ? "DialogNo" : preferred ? "DialogOk" : "DialogYes");
+        if (preferred) first = button;
         if (Application.Current?.TryFindResource(theme, out var found) == true && found is ControlTheme control)
             button.Theme = control;
         button.Click += (_, _) => { answer = value; frame.Close(); };

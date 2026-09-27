@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Umsatzschaetzung.Model;
@@ -8,13 +9,26 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed record KV(string Label, string Value);
 
-public sealed record RevenueRow(string Vat, string Declared, string Calculated, string Difference, bool Total);
+public sealed record RevenueRow(string Vat, string Declared, string Calculated, string Difference, bool Total)
+{
+    public string Spoken => $"{Vat}: vor BP {Declared}, nach BP {Calculated}, Differenz {Difference}";
+}
 
 public sealed record MarkupRow(string Sparte, string CostOfGoods, string RevenueNet, string GrossProfit,
-    string Markup, bool Total);
+    string Markup, bool Total)
+{
+    public string Spoken => $"{Sparte}: Einsatz {CostOfGoods}, Umsatz {RevenueNet}, Rohgewinn {GrossProfit}, Aufschlagsatz {Markup}";
+}
 
 public sealed record ResultRow(string ProductId, string Name, string Portions, long PortionsValue, string Cost, string Revenue,
-    long RevenueValue, string Markup, bool PriceMissing, bool Adjusted, string RecipeTip);
+    long RevenueValue, string Markup, bool PriceMissing, bool Adjusted, string RecipeTip)
+{
+    public string Spoken => string.Join(", ", new[]
+    {
+        Name, Adjusted ? "Rezeptur angepasst" : "", Portions + " Portionen",
+        PriceMissing ? "Preis fehlt" : "Umsatz " + Revenue, Markup == "" ? "" : "Aufschlagsatz " + Markup,
+    }.Where(s => s != ""));
+}
 
 public sealed record RecipeUse(string Name, string Amount, string Note)
 {
@@ -276,9 +290,18 @@ public partial class CalcView : Screen
         Mapping.Show(row?.Group);
     }
 
-    async void ToggleRevenue(object? sender, RoutedEventArgs e)
+    void ToggleRevenue(object? sender, RoutedEventArgs e) => Toggle((sender as Control)?.DataContext as ExcludedRow);
+
+    void ExcludedKeyDown(object? sender, KeyEventArgs e)
     {
-        if ((sender as Control)?.DataContext is not ExcludedRow { IngredientId: { } id } || Session.Case is not { } kase) return;
+        if (e.Key != Key.Delete || (sender as DataGrid)?.SelectedItem is not ExcludedRow row || !(row.CanDropRevenue || row.CanRestoreRevenue)) return;
+        e.Handled = true;
+        Toggle(row);
+    }
+
+    async void Toggle(ExcludedRow? row)
+    {
+        if (row is not { IngredientId: { } id } || Session.Case is not { } kase) return;
         if (!kase.NoRevenue.Remove(id))
         {
             kase.NoRevenue.Add(id);

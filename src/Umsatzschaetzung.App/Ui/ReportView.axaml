@@ -6,28 +6,31 @@
            Margin="0,12,0,0">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
-            <TextBlock Text="{Binding Saved}" Theme="{StaticResource Muted}" IsVisible="{Binding ShowSaved}"
+            <TextBlock Text="{Binding Saved}" Theme="{StaticResource Muted}" IsVisible="{Binding ShowSaved}" AutomationProperties.LiveSetting="Polite"
                        VerticalAlignment="Center" Margin="0,0,12,0" TextTrimming="CharacterEllipsis" MaxWidth="320"/>
             <ComboBox x:Name="TemplatePicker" ItemsSource="{Binding Templates}" SelectedItem="{Binding Template, Mode=TwoWay}"
                       ToolTip.Tip="Vorlage" MinWidth="180" MaxWidth="320" Margin="0,0,8,0" VerticalAlignment="Center"
-                      IsVisible="{Binding ShowTemplates}">
+                      IsVisible="{Binding ShowTemplates}" AutomationProperties.Name="Vorlage"
+                      AutomationProperties.HelpText="Berichtsvorlage für diese Prüfung" AutomationProperties.AutomationId="ReportTemplatePicker">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="ui:TemplateChoice">
                         <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Als PDF speichern" Click="SavePdf" IsEnabled="{Binding CanSave}">
+            <Button Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Als PDF speichern" Click="SavePdf" IsEnabled="{Binding CanSave}"
+                    AutomationProperties.Name="Als PDF speichern" AutomationProperties.HelpText="Speichert den Bericht als PDF-Datei"
+                    AutomationProperties.AutomationId="ReportSavePdfButton">
                 <Panel>
-                    <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Busy}"/>
-                    <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14" IsVisible="{Binding !Busy}"/>
+                    <PathIcon Theme="{StaticResource Spinner}" IsVisible="{Binding Busy}" AutomationProperties.AccessibilityView="Raw"/>
+                    <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14" IsVisible="{Binding !Busy}" AutomationProperties.AccessibilityView="Raw"/>
                 </Panel>
             </Button>
         </StackPanel>
         <Border Theme="{StaticResource Panel}">
             <Grid>
-                <ContentControl x:Name="Preview"/>
-                <TextBlock Text="{Binding Note}" Theme="{StaticResource EmptyState}" IsVisible="{Binding ShowNote}"/>
+                <ContentControl x:Name="Preview" AutomationProperties.Name="Berichtsvorschau" AutomationProperties.AutomationId="ReportPreview"/>
+                <TextBlock Text="{Binding Note}" Theme="{StaticResource EmptyState}" IsVisible="{Binding ShowNote}" AutomationProperties.LiveSetting="Polite"/>
             </Grid>
         </Border>
     </DockPanel>

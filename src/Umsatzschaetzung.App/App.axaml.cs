@@ -1,4 +1,6 @@
 using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -24,6 +26,11 @@ public partial class App : Application
         Headers.Register();
         Blur.Register();
         Cells.Register();
+        Tables.Register();
+        TabItems.Register();
+        AutomationProperties.AccessibilityViewProperty.OverrideDefaultValue<UserControl>(AccessibilityView.Raw);
+        AutomationProperties.ControlTypeOverrideProperty.OverrideDefaultValue<UserControl>(AutomationControlType.Group);
+        AutomationProperties.AccessibilityViewProperty.OverrideDefaultValue<NativeControlHost>(AccessibilityView.Raw);
     }
 
     // A browser has no windows: its host composes the service and gets the program as one view.

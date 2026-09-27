@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Avalonia.Automation;
 using Avalonia.Styling;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
@@ -374,11 +375,14 @@ public sealed class Session : Observable
             badge.IsVisible = saveState != SaveState.Idle;
             badge.Theme = (ControlTheme)window.FindResource(stuck ? "BadgeWarning" : "Badge")!;
             text.Text = stuck ? "Speichern dauert ungewöhnlich lange" : "Speichert …";
-            ToolTip.SetTip(badge, stuck
+            var tip = stuck
                 ? "Die letzten Änderungen sind noch nicht gespeichert. Liegt der Speicher auf einem Netzlaufwerk, "
                     + "kann die Verbindung langsam oder unterbrochen sein. Das Speichern läuft weiter."
-                : null);
+                : null;
+            ToolTip.SetTip(badge, tip);
+            AutomationProperties.SetHelpText(text, tip);
         }
+        AutomationProperties.SetLiveSetting(text, AutomationLiveSetting.Polite);
         PropertyChanged += Changed;
         return () => PropertyChanged -= Changed;
     }

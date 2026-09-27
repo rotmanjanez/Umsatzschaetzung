@@ -9,6 +9,8 @@ public sealed class RuleOption(YieldRule? rule)
     public YieldRule? Rule { get; } = rule;
     public string Text => Rule is null ? "Kein Abzug" : Rule.Default ? Rule.Name + " (Standard)" : Rule.Name;
     public string Deduction => Format.Bp(Rule?.Deduction ?? 0);
+
+    public override string ToString() => $"{Text}, Abzug {Deduction}";
 }
 
 public sealed class YieldKindGroup(string kind, List<YieldGroupRow> rows)
@@ -30,6 +32,7 @@ public sealed class YieldGroupRow : Observable
 
     public YieldChoice Choice { get; }
     public string Label { get; }
+    public string Spoken => "Ertragsregel für " + Label;
     public List<RuleOption> Options { get; }
     // The box nulls its selection while it rebinds; a row always has a rule, so ignore that.
     public RuleOption? Selected { get => selected; set { if (value is not null) Set(ref selected, value); } }

@@ -20,6 +20,19 @@
         <Style Selector="TextBlock.total">
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
+        <Style Selector="DataGrid#ProductGrid DataGridRow" x:DataType="ui:ResultRow">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Spoken}"/>
+            <Setter Property="AutomationProperties.HelpText" Value="{Binding RecipeTip}"/>
+        </Style>
+        <Style Selector="DataGrid#RevenueGrid DataGridRow" x:DataType="ui:RevenueRow">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Spoken}"/>
+        </Style>
+        <Style Selector="DataGrid#MarkupGrid DataGridRow" x:DataType="ui:MarkupRow">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Spoken}"/>
+        </Style>
+        <Style Selector="DataGrid.excluded DataGridRow" x:DataType="ui:ExcludedRow">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Spoken}"/>
+        </Style>
         <Style Selector="TabControl#Pages TabItem">
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="MinHeight" Value="36"/>
@@ -28,14 +41,14 @@
     <ui:Screen.Resources>
         <DataTemplate x:Key="YieldGroupTemplate" x:DataType="ui:YieldKindGroup">
             <StackPanel Margin="0,0,0,16">
-                <TextBlock Text="{Binding Kind}" Theme="{StaticResource FieldLabel}"/>
+                <TextBlock Text="{Binding Kind}" Theme="{StaticResource FieldLabel}" AutomationProperties.HeadingLevel="2"/>
                 <ItemsControl ItemsSource="{Binding Rows}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="ui:YieldGroupRow">
                             <Grid ColumnDefinitions="260,16,*" Margin="0,0,0,6">
                                 <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                 <ComboBox Grid.Column="2" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected, Mode=TwoWay}"
-                                          HorizontalAlignment="Stretch">
+                                          HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Spoken}" AutomationProperties.AutomationId="YieldRule">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="ui:RuleOption">
                                             <Grid ColumnDefinitions="*,Auto">
@@ -53,20 +66,21 @@
         </DataTemplate>
     </ui:Screen.Resources>
     <Grid>
-        <TextBlock Text="Wird berechnet …" Theme="{StaticResource EmptyState}" IsVisible="{Binding Calculating}"/>
+        <TextBlock Text="Wird berechnet …" Theme="{StaticResource EmptyState}" IsVisible="{Binding Calculating}" AutomationProperties.LiveSetting="Polite"/>
         <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding NoInvoices}">
-            <TextBlock Text="Noch keine Datengrundlage" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+            <TextBlock Text="Noch keine Datengrundlage" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center" AutomationProperties.HeadingLevel="2"/>
             <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
                        Text="Die Kalkulation leitet Portionen und Umsätze aus den zugeordneten Rechnungspositionen ab. Ohne Rechnungen gibt es nichts zu rechnen."/>
-            <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"/>
+            <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices" AutomationProperties.AutomationId="CalcGoInvoices"/>
         </StackPanel>
-        <TabControl x:Name="Pages" Background="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding HasResult}">
-            <TabItem x:Name="PortionsPage" Header="Portionen">
+        <TabControl x:Name="Pages" Background="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding HasResult}"
+                    AutomationProperties.Name="Kalkulation" AutomationProperties.AutomationId="CalcPages">
+            <TabItem x:Name="PortionsPage" Header="Portionen" AutomationProperties.AutomationId="CalcPortionsTab">
                 <Grid Margin="0,16,0,0">
                     <StackPanel MaxWidth="440" HorizontalAlignment="Left" IsVisible="{Binding EmptyAssortment}">
                         <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap"
                                    Text="Noch keine Produkte im Sortiment."/>
-                        <Button Content="Zu den Produkten" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="GoProducts"/>
+                        <Button Content="Zu den Produkten" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,12,0,0" Click="GoProducts" AutomationProperties.AutomationId="CalcGoProducts"/>
                     </StackPanel>
                     <Grid IsVisible="{Binding !EmptyAssortment}">
                         <Grid.ColumnDefinitions>
@@ -75,7 +89,8 @@
                             <ColumnDefinition Width="36*" MinWidth="320"/>
                         </Grid.ColumnDefinitions>
                         <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Products}" IsReadOnly="True"
-                                  SelectionMode="Single" SelectionChanged="ProductSelected" VerticalAlignment="Top">
+                                  SelectionMode="Single" SelectionChanged="ProductSelected" VerticalAlignment="Top"
+                                  AutomationProperties.Name="Portionen und Umsatz je Produkt" AutomationProperties.AutomationId="CalcProducts">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Produkt" Width="280" MinWidth="120" SortMemberPath="Name">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -117,14 +132,15 @@
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"
+                                      AutomationProperties.Name="Breite der Produktliste" AutomationProperties.AutomationId="CalcProductsSplitter"/>
                         <Border Grid.Column="2" Theme="{StaticResource Panel}" VerticalAlignment="Top">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <Grid Margin="16">
                                 <TextBlock Text="Kein Produkt gewählt" Theme="{StaticResource Muted}" IsVisible="{Binding NoDetail}"/>
                                 <StackPanel IsVisible="{Binding !NoDetail}">
                                 <StackPanel DataContext="{Binding Detail}" x:DataType="ui:ProductDetail">
-                                    <TextBlock Text="{Binding Name}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Name}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2"/>
                                     <ItemsControl ItemsSource="{Binding Facts}" Margin="0,0,0,16" Grid.IsSharedSizeScope="True">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="ui:KV">
@@ -144,16 +160,18 @@
                                     <StackPanel IsVisible="{Binding !Adjusted}">
                                         <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,8">
                                             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                <TextBlock Text="Rezeptur je Portion" Theme="{StaticResource FieldLabel}" Margin="0"/>
+                                                <TextBlock Text="Rezeptur je Portion" Theme="{StaticResource FieldLabel}" Margin="0" AutomationProperties.HeadingLevel="3"/>
                                                 <Border Theme="{StaticResource Badge}" ToolTip.Tip="Es gilt das Rezept aus dem Katalog.">
-                                                    <TextBlock Text="Katalog" Theme="{StaticResource BadgeText}"/>
+                                                    <TextBlock Text="Katalog" Theme="{StaticResource BadgeText}" AutomationProperties.HelpText="Es gilt das Rezept aus dem Katalog."/>
                                                 </Border>
                                             </StackPanel>
-                                            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="AdjustRecipe"
+                                            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="AdjustRecipe" AutomationProperties.AutomationId="RecipeAdjust"
+                                                    AutomationProperties.Name="Für diese Prüfung anpassen" AutomationProperties.HelpText="Gilt nur in dieser Prüfung, der Katalog bleibt unverändert."
                                                     ToolTip.Tip="Für diese Prüfung anpassen&#10;Gilt nur in dieser Prüfung, der Katalog bleibt unverändert.">
                                                 <PathIcon Data="{StaticResource EditIcon}" Width="14" Height="14"/>
                                             </Button>
-                                            <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Margin="0" Click="EditCatalog"
+                                            <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Margin="0" Click="EditCatalog" AutomationProperties.AutomationId="RecipeEditCatalog"
+                                                    AutomationProperties.Name="Im Katalog bearbeiten" AutomationProperties.HelpText="Ändert das Rezept für alle Prüfungen."
                                                     ToolTip.Tip="Im Katalog bearbeiten&#10;Ändert das Rezept für alle Prüfungen.">
                                                 <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
                                             </Button>
@@ -175,10 +193,10 @@
                                     <Border IsVisible="{Binding Adjusted}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
                                         <StackPanel>
                                             <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-                                                <TextBlock Text="Rezeptur für diese Prüfung" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Rezeptur für diese Prüfung" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.HeadingLevel="3"/>
                                                 <Border Grid.Column="1" Theme="{StaticResource BadgeInfo}" Margin="8,0,0,0"
                                                         ToolTip.Tip="Gilt nur in dieser Prüfung, der Katalog bleibt unverändert.">
-                                                    <TextBlock Text="Nur diese Prüfung" Theme="{StaticResource BadgeText}"/>
+                                                    <TextBlock Text="Nur diese Prüfung" Theme="{StaticResource BadgeText}" AutomationProperties.HelpText="Gilt nur in dieser Prüfung, der Katalog bleibt unverändert."/>
                                                 </Border>
                                             </Grid>
                                             <ItemsControl ItemsSource="{Binding Rows}">
@@ -186,15 +204,19 @@
                                                     <DataTemplate x:DataType="ui:CaseRecipeRow">
                                                         <StackPanel Margin="0,0,0,10">
                                                             <Grid ColumnDefinitions="*,Auto">
-                                                                <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
-                                                                <Button Grid.Column="1" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Zutat entfernen" Click="RemoveRecipeLine">
+                                                                <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                                                                  AutomationProperties.Name="Zutat" AutomationProperties.AutomationId="RecipeIngredient"/>
+                                                                <Button Grid.Column="1" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Zutat entfernen" Click="RemoveRecipeLine"
+                                                                        AutomationProperties.Name="{Binding RemoveName}" AutomationProperties.AutomationId="RecipeRemoveIngredient">
                                                                     <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                                                 </Button>
                                                             </Grid>
                                                             <Grid ColumnDefinitions="96,Auto,*" Margin="0,4,0,0">
-                                                                <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}" Classes.invalid="{Binding AmountInvalid}"/>
+                                                                <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}" Classes.invalid="{Binding AmountInvalid}"
+                                                                         AutomationProperties.Name="Menge" AutomationProperties.HelpText="{Binding AmountHint}"
+                                                                         AutomationProperties.AutomationId="RecipeAmount"/>
                                                                 <ComboBox Grid.Column="1" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
-                                                                          Width="120" Margin="6,0,0,0"/>
+                                                                          Width="120" Margin="6,0,0,0" AutomationProperties.Name="Einheit" AutomationProperties.AutomationId="RecipeUnit"/>
                                                                 <TextBlock Grid.Column="2" Text="{Binding CatalogValue}" Theme="{StaticResource Muted}" FontSize="12"
                                                                            Margin="10,0,0,0" IsVisible="{Binding Differs}"/>
                                                             </Grid>
@@ -206,14 +228,17 @@
                                             <TextBlock Text="Ohne gültige Zutat bleibt die zuletzt gespeicherte Rezeptur in Kraft." Theme="{StaticResource Muted}"
                                                        FontSize="12" Margin="0,0,0,8" IsVisible="{Binding Emptied}"/>
                                             <Grid ColumnDefinitions="*,Auto,Auto">
-                                                <Button Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine" ToolTip.Tip="Zutat hinzufügen">
+                                                <Button Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine" ToolTip.Tip="Zutat hinzufügen"
+                                                        AutomationProperties.Name="Zutat hinzufügen" AutomationProperties.AutomationId="RecipeAddIngredient">
                                                     <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
                                                 </Button>
-                                                <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="PromoteRecipe"
+                                                <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="PromoteRecipe" AutomationProperties.AutomationId="RecipePromote"
+                                                        AutomationProperties.Name="In den Katalog übernehmen" AutomationProperties.HelpText="Macht diese Rezeptur zum Katalogrezept für alle Prüfungen."
                                                         ToolTip.Tip="In den Katalog übernehmen&#10;Macht diese Rezeptur zum Katalogrezept für alle Prüfungen.">
                                                     <PathIcon Data="{StaticResource PromoteIcon}" Width="14" Height="14"/>
                                                 </Button>
-                                                <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Margin="0" Foreground="{DynamicResource DangerBrush}" Click="ResetRecipe"
+                                                <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Margin="0" Foreground="{DynamicResource DangerBrush}" Click="ResetRecipe" AutomationProperties.AutomationId="RecipeReset"
+                                                        AutomationProperties.Name="Auf Katalog zurücksetzen" AutomationProperties.HelpText="Verwirft die Rezeptur dieser Prüfung, danach gilt das Katalogrezept."
                                                         ToolTip.Tip="Auf Katalog zurücksetzen&#10;Verwirft die Rezeptur dieser Prüfung, danach gilt das Katalogrezept.">
                                                     <PathIcon Data="{StaticResource ResetIcon}" Width="14" Height="14"/>
                                                 </Button>
@@ -230,12 +255,12 @@
                     </Grid>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="YieldsPage" Header="Ertragsregeln" IsVisible="{Binding HasYields}">
+            <TabItem x:Name="YieldsPage" Header="Ertragsregeln" IsVisible="{Binding HasYields}" AutomationProperties.AutomationId="CalcYieldsTab">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl Margin="0,16,16,8" ItemsSource="{Binding Yields}" ItemTemplate="{StaticResource YieldGroupTemplate}" MaxWidth="960" HorizontalAlignment="Left"/>
                 </ScrollViewer>
             </TabItem>
-            <TabItem x:Name="ExcludedPage" Header="Übrige Einkäufe">
+            <TabItem x:Name="ExcludedPage" Header="Übrige Einkäufe" AutomationProperties.AutomationId="CalcExcludedTab">
                 <DockPanel DataContext="{Binding Exclusions}" x:DataType="ui:ExclusionModel" Margin="0,16,0,0">
                     <TextBlock DockPanel.Dock="Bottom" Text="{Binding Deposit}" Theme="{StaticResource Muted}" Margin="0,12,0,0" IsVisible="{Binding HasDeposit}" TextWrapping="Wrap"/>
                     <TextBlock DockPanel.Dock="Top" Text="Keine: alle Einkäufe gehen in die Ermittlung des Aufschlagsatzes ein." Theme="{StaticResource Muted}"
@@ -249,13 +274,16 @@
                         <DockPanel>
                             <Grid x:Name="Lists" RowDefinitions="Auto,*,Auto,*">
                                 <DockPanel Grid.Row="0" IsVisible="{Binding HasUnused}" Margin="0,0,0,8">
-                                    <TextBlock DockPanel.Dock="Left" Text="Nicht Teil der Ermittlung des Aufschlagsatzes" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                                    <TextBlock DockPanel.Dock="Left" Text="Nicht Teil der Ermittlung des Aufschlagsatzes" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"
+                                               AutomationProperties.HeadingLevel="2"/>
                                     <TextBlock Text="{Binding UnusedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                 </DockPanel>
                                 <Grid Grid.Row="1" IsVisible="{Binding HasUnused}">
                                 <Border Theme="{StaticResource Panel}" ClipToBounds="True">
-                                    <DataGrid x:Name="UnusedGrid" ui:Blur.Detail="{Binding #MappingPane}" ui:Grids.Flex="0" Theme="{StaticResource Grid}"
-                                              ItemsSource="{Binding Unused}" IsReadOnly="True" SelectionChanged="ExcludedSelected">
+                                    <DataGrid x:Name="UnusedGrid" Classes="excluded" ui:Blur.Detail="{Binding #MappingPane}" ui:Grids.Flex="0" Theme="{StaticResource Grid}"
+                                              ItemsSource="{Binding Unused}" IsReadOnly="True" SelectionChanged="ExcludedSelected" KeyDown="ExcludedKeyDown"
+                                              AutomationProperties.Name="Nicht Teil der Ermittlung des Aufschlagsatzes" AutomationProperties.AutomationId="CalcUnused"
+                                              AutomationProperties.HelpText="Entf: die gewählte Position bringt in diesem Betrieb keinen Umsatz">
                                         <DataGrid.Columns>
                                             <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
                                                 <DataGridTemplateColumn.CellTemplate>
@@ -272,9 +300,13 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
                                             <DataGridTemplateColumn Width="Auto">
+                                                <DataGridTemplateColumn.Header>
+                                                    <Panel AutomationProperties.Name="Kein Umsatz"/>
+                                                </DataGridTemplateColumn.Header>
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate x:DataType="ui:ExcludedRow">
-                                                        <Button Theme="{StaticResource IconButton}" ToolTip.Tip="{Binding DropTip}" Click="ToggleRevenue">
+                                                        <Button IsTabStop="False" Theme="{StaticResource IconButton}" ToolTip.Tip="{Binding DropTip}" Click="ToggleRevenue"
+                                                                AutomationProperties.Name="{Binding DropTip}" AutomationProperties.AutomationId="CalcDropRevenue" AutomationProperties.AcceleratorKey="Delete">
                                                             <PathIcon Data="{StaticResource ClearIcon}" Width="12" Height="12"/>
                                                         </Button>
                                                     </DataTemplate>
@@ -285,13 +317,16 @@
                                 </Border>
                                 </Grid>
                                 <DockPanel Grid.Row="2" IsVisible="{Binding HasOmitted}" Margin="0,12,0,8">
-                                    <TextBlock DockPanel.Dock="Left" Text="Nicht in der Umsatzschätzung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"/>
+                                    <TextBlock DockPanel.Dock="Left" Text="Nicht in der Umsatzschätzung" Theme="{StaticResource SectionHeader}" Margin="0,0,16,0"
+                                               AutomationProperties.HeadingLevel="2"/>
                                     <TextBlock Text="{Binding OmittedSummary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                 </DockPanel>
                                 <Grid Grid.Row="3" IsVisible="{Binding HasOmitted}">
                                 <Border Theme="{StaticResource Panel}" ClipToBounds="True">
-                                    <DataGrid x:Name="OmittedGrid" ui:Blur.Detail="{Binding #MappingPane}" ui:Grids.Flex="0" Theme="{StaticResource Grid}"
-                                              ItemsSource="{Binding Omitted}" IsReadOnly="True" SelectionChanged="ExcludedSelected">
+                                    <DataGrid x:Name="OmittedGrid" Classes="excluded" ui:Blur.Detail="{Binding #MappingPane}" ui:Grids.Flex="0" Theme="{StaticResource Grid}"
+                                              ItemsSource="{Binding Omitted}" IsReadOnly="True" SelectionChanged="ExcludedSelected" KeyDown="ExcludedKeyDown"
+                                              AutomationProperties.Name="Nicht in der Umsatzschätzung" AutomationProperties.AutomationId="CalcOmitted"
+                                              AutomationProperties.HelpText="Entf: die gewählte Position ohne Umsatz bringt doch Umsatz">
                                         <DataGrid.Columns>
                                             <DataGridTemplateColumn Header="Position" Width="*" MinWidth="120" SortMemberPath="Name">
                                                 <DataGridTemplateColumn.CellTemplate>
@@ -308,9 +343,13 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
                                             <DataGridTemplateColumn Width="Auto">
+                                                <DataGridTemplateColumn.Header>
+                                                    <Panel AutomationProperties.Name="Doch Umsatz"/>
+                                                </DataGridTemplateColumn.Header>
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate x:DataType="ui:ExcludedRow">
-                                                        <Button Theme="{StaticResource IconButton}" ToolTip.Tip="{Binding RestoreTip}" Click="ToggleRevenue"
+                                                        <Button IsTabStop="False" Theme="{StaticResource IconButton}" ToolTip.Tip="{Binding RestoreTip}" Click="ToggleRevenue"
+                                                                AutomationProperties.Name="{Binding RestoreTip}" AutomationProperties.AutomationId="CalcRestoreRevenue" AutomationProperties.AcceleratorKey="Delete"
                                                                 IsVisible="{Binding CanRestoreRevenue}">
                                                             <PathIcon Data="{StaticResource ResetIcon}" Width="12" Height="12"/>
                                                         </Button>
@@ -323,7 +362,8 @@
                                 </Grid>
                             </Grid>
                         </DockPanel>
-                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"/>
+                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent"
+                                      AutomationProperties.Name="Breite der Einkaufslisten" AutomationProperties.AutomationId="CalcExcludedSplitter"/>
                         <Border x:Name="MappingPane" Grid.Column="2" Theme="{StaticResource Panel}" Padding="16">
                             <DockPanel>
                                 <ui:MappingDetail x:Name="Mapping"/>
@@ -332,11 +372,12 @@
                     </Grid>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Ergebnis">
+            <TabItem Header="Ergebnis" AutomationProperties.AutomationId="CalcResultTab">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,16,16,0">
-                        <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}"/>
-                        <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True">
+                        <TextBlock Text="Umsätze vor und nach Betriebsprüfung" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
+                        <DataGrid x:Name="RevenueGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Revenue}" IsReadOnly="True"
+                                  AutomationProperties.Name="Umsätze vor und nach Betriebsprüfung" AutomationProperties.AutomationId="CalcRevenue">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Steuersatz" Width="220" MinWidth="120" SortMemberPath="Vat">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -369,8 +410,9 @@
                             </DataGrid.Columns>
                         </DataGrid>
 
-                        <TextBlock Text="Rohgewinnaufschlag" Theme="{StaticResource SectionHeader}"/>
-                        <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True">
+                        <TextBlock Text="Rohgewinnaufschlag" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
+                        <DataGrid x:Name="MarkupGrid" ui:Grids.Flex="0" Margin="0,0,0,24" Theme="{StaticResource Grid}" ItemsSource="{Binding Markups}" IsReadOnly="True"
+                                  AutomationProperties.Name="Rohgewinnaufschlag" AutomationProperties.AutomationId="CalcMarkup">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Sparte" Width="220" MinWidth="120">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -410,7 +452,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
 
-                        <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}"/>
+                        <TextBlock Text="Zusammenfassung" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
                         <ItemsControl Margin="0,0,0,24" ItemsSource="{Binding Summary}" Grid.IsSharedSizeScope="True">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="ui:KV">
@@ -429,6 +471,7 @@
                 </ScrollViewer>
             </TabItem>
         </TabControl>
-        <TextBlock Text="Wird neu berechnet …" Theme="{StaticResource Muted}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,0,0" IsVisible="{Binding Busy}"/>
+        <TextBlock Text="Wird neu berechnet …" Theme="{StaticResource Muted}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,0,0" IsVisible="{Binding Busy}"
+                   AutomationProperties.LiveSetting="Polite"/>
     </Grid>
 </ui:Screen>

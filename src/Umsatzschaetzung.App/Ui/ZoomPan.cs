@@ -1,5 +1,8 @@
 using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -12,6 +15,8 @@ public static class ZoomPan
     public const double Min = 0.1;
     public const double Max = 8;
     public const double Step = 1.25;
+
+    const string KeysHelp = "Plus und Minus zoomen, 0 passt an die Breite an, die Pfeiltasten verschieben den Ausschnitt, Pos1 und Ende springen an den Anfang und das Ende.";
 
     // Avalonia reports wheel notches, not WPF's 120ths.
     const double Notch = 40;
@@ -56,15 +61,21 @@ public static class ZoomPan
 
     static double GetFit(ScrollViewer viewer) => viewer.GetValue(FitProperty);
 
-    public static void ZoomBy(ScrollViewer viewer, double factor) =>
+    public static void ZoomBy(ScrollViewer viewer, double factor)
+    {
         ZoomAt(viewer, GetZoom(viewer) * factor, new Point(viewer.Viewport.Width / 2, viewer.Viewport.Height / 2));
+        Speak(viewer);
+    }
 
     public static void FitWidth(ScrollViewer viewer)
     {
         if (WidthRatio(viewer) is not { } ratio) return;
         SetZoom(viewer, ratio / GetFit(viewer));
         viewer.ScrollToHome();
+        Speak(viewer);
     }
+
+    static void Speak(ScrollViewer viewer) => Accessible.Announce(viewer, $"Zoom {GetZoom(viewer):P0}");
 
     static double? WidthRatio(ScrollViewer viewer)
     {
@@ -143,6 +154,11 @@ public static class ZoomPan
             viewer.AddHandler(InputElement.PointerPressedEvent, Down, RoutingStrategies.Tunnel);
             viewer.AddHandler(InputElement.PointerMovedEvent, Move, RoutingStrategies.Tunnel);
             viewer.AddHandler(InputElement.PointerReleasedEvent, Up, RoutingStrategies.Tunnel);
+            viewer.KeyDown += Pressed;
+            viewer.Focusable = true;
+            Accessible.Install(viewer, v => new ScanPeer(v));
+            if (Application.Current?.TryFindResource("FocusInset", out var ring) == true) viewer.FocusAdorner = ring as ITemplate<Control>;
+            AutomationProperties.SetHelpText(viewer, KeysHelp);
             viewer.SizeChanged += Refit;
             viewer.ScrollChanged += Scrolled;
             viewer.Loaded += Loaded;
@@ -155,6 +171,7 @@ public static class ZoomPan
             viewer.RemoveHandler(InputElement.PointerPressedEvent, Down);
             viewer.RemoveHandler(InputElement.PointerMovedEvent, Move);
             viewer.RemoveHandler(InputElement.PointerReleasedEvent, Up);
+            viewer.KeyDown -= Pressed;
             viewer.SizeChanged -= Refit;
             viewer.ScrollChanged -= Scrolled;
             viewer.Loaded -= Loaded;
@@ -204,6 +221,7 @@ public static class ZoomPan
             var buttons = e.GetCurrentPoint(viewer).Properties;
             if (buttons.IsRightButtonPressed) return;
             if (buttons.IsLeftButtonPressed && e.Source is Visual source && InText(source)) return;
+            viewer.Focus(NavigationMethod.Pointer);
             grab = e.GetPosition(viewer);
             origin = viewer.Offset;
             panning = true;
@@ -226,6 +244,34 @@ public static class ZoomPan
             e.Pointer.Capture(null);
         }
 
+        void Pressed(object? sender, KeyEventArgs e)
+        {
+            var inText = e.Source is Visual source && InText(source);
+            if (inText && !e.KeyModifiers.HasFlag(KeyModifiers.Control)) return;
+            switch (e.Key)
+            {
+                case Key.OemPlus or Key.Add: ZoomBy(viewer, Step); break;
+                case Key.OemMinus or Key.Subtract: ZoomBy(viewer, 1 / Step); break;
+                case Key.D0 or Key.NumPad0: FitWidth(viewer); break;
+                case Key.Left when !inText: viewer.LineLeft(); break;
+                case Key.Right when !inText: viewer.LineRight(); break;
+                case Key.Up when !inText: viewer.LineUp(); break;
+                case Key.Down when !inText: viewer.LineDown(); break;
+                case Key.Home when !inText: viewer.ScrollToHome(); break;
+                case Key.End when !inText: viewer.ScrollToEnd(); break;
+                default: return;
+            }
+            e.Handled = true;
+        }
+
         static bool InText(Visual source) => source is TextBox || source.GetVisualAncestors().Any(v => v is TextBox);
+    }
+
+    // The bars come and go with the zoom, and each time VoiceOver would count the viewer's parts
+    // as updated: only the scan is its content, the bars stay reachable as the viewer's own.
+    sealed class ScanPeer(ScrollViewer owner) : ScrollViewerAutomationPeer(owner)
+    {
+        protected override IReadOnlyList<AutomationPeer>? GetChildrenCore() =>
+            Owner.Presenter is { } presenter ? [GetOrCreate(presenter)] : null;
     }
 }

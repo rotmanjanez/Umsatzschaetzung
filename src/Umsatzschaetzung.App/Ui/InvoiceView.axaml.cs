@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
@@ -619,7 +620,18 @@ public partial class InvoiceView : Screen
 
     void RemoveLine(object? sender, RoutedEventArgs e)
     {
-        if ((sender as Control)?.DataContext is not LineRow row) return;
+        if ((sender as Control)?.DataContext is LineRow row) Remove(row);
+    }
+
+    void LinesKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Delete || e.Source is TextBox || Lines.SelectedItem is not LineRow row) return;
+        Remove(row);
+        e.Handled = true;
+    }
+
+    void Remove(LineRow row)
+    {
         row.Changed -= LineEdited;
         model.Lines.Remove(row);
         Schedule();
@@ -632,15 +644,15 @@ public partial class InvoiceView : Screen
             FocusCell(currentPage, null);
             return;
         }
-        var (page, box) = Where(row, LineFields[column.DisplayIndex]);
-        FocusCell(page, box);
+        var (page, word) = Where(row, LineFields[column.DisplayIndex]);
+        FocusCell(page, word);
     }
 
     void TotalChanged(object? sender, EventArgs e)
     {
         if (Totals.SelectedItem is not TotalRow row) return;
-        var (page, box) = Stated(row.Field);
-        FocusCell(page, box);
+        var (page, word) = Stated(row.Field);
+        FocusCell(page, word);
     }
 
     // A template cell leaves focus on the cell itself; typing should land in its box right away.
@@ -653,15 +665,15 @@ public partial class InvoiceView : Screen
 
     // A value the row does not print itself, like the one rate the totals state, was read once
     // for the whole document.
-    (int Page, Box? Box) Where(LineRow row, Field field) =>
-        row.Cells.TryGetValue(field, out var cell) ? (row.Page, cell.Box)
-        : Stated(field) is { Box: not null } stated ? stated
+    (int Page, OcrWord? Word) Where(LineRow row, Field field) =>
+        row.Cells.TryGetValue(field, out var cell) ? (row.Page, cell)
+        : Stated(field) is { Word: not null } stated ? stated
         : (row.Page, null);
 
-    (int Page, Box? Box) Stated(Field field)
+    (int Page, OcrWord? Word) Stated(Field field)
     {
         for (var i = 0; i < pages.Count; i++)
-            if (pages[i].Header.TryGetValue(field, out var word)) return (i, word.Box);
+            if (pages[i].Header.TryGetValue(field, out var word)) return (i, word);
         return (currentPage, null);
     }
 
@@ -670,8 +682,8 @@ public partial class InvoiceView : Screen
         var field = ReferenceEquals(sender, SupplierBox) ? Field.Supplier
             : ReferenceEquals(sender, NumberBox) ? Field.InvoiceNumber
             : Field.InvoiceDate;
-        var (page, box) = Stated(field);
-        FocusCell(page, box);
+        var (page, word) = Stated(field);
+        FocusCell(page, word);
     }
 
     void PageChanged(object? sender, SelectionChangedEventArgs e)
@@ -679,15 +691,17 @@ public partial class InvoiceView : Screen
         if (PageSelect.SelectedIndex >= 0) ShowPage(PageSelect.SelectedIndex);
     }
 
-    void FocusCell(int page, Box? box)
+    void FocusCell(int page, OcrWord? word)
     {
         if (pages.Count == 0) return;
         if (page != currentPage && page >= 0 && page < pages.Count) PageSelect.SelectedIndex = page;
-        if (box is null)
+        if (word is null)
         {
             FocusBox.IsVisible = false;
             return;
         }
+        var box = word.Box;
+        AutomationProperties.SetName(FocusBox, $"Gelesen als „{word.Text}“ auf Seite {currentPage + 1}");
         Canvas.SetLeft(FocusBox, box.X - 4);
         Canvas.SetTop(FocusBox, box.Y - 4);
         FocusBox.Width = box.W + 8;
@@ -714,6 +728,8 @@ public partial class InvoiceView : Screen
         currentPage = index;
         var page = pages[index];
         PageImage.Source = null;
+        AutomationProperties.SetName(PageImage, $"Rechnungsseite {index + 1} von {pages.Count}");
+        AutomationProperties.SetHelpText(PageImage, string.Join(" ", page.Words.Select(w => w.Text)));
         if (page.Width > 0 && page.Height > 0) Place(page.Width, page.Height);
         FocusBox.IsVisible = false;
         RenderFlagged();
@@ -745,13 +761,13 @@ public partial class InvoiceView : Screen
         Flagged.Children.Clear();
         if (currentPage < 0 || currentPage >= pages.Count) return;
         var page = pages[currentPage];
-        var boxes = new List<Box>();
+        var boxes = new List<(Box Box, string Message)>();
         foreach (var f in flags.Where(f => f.LineNo == 0 && f.Field is not null))
-            if (page.Header.TryGetValue(f.Field!.Value, out var cell)) boxes.Add(cell.Box);
+            if (page.Header.TryGetValue(f.Field!.Value, out var cell)) boxes.Add((cell.Box, f.Message));
         foreach (var row in model.Lines)
         foreach (var f in flags.Where(f => f.LineNo == row.Line.No && f.LineNo != 0 && f.Field is not null))
-            if (Where(row, f.Field!.Value) is (var at, { } box) && at == currentPage) boxes.Add(box);
-        foreach (var b in boxes)
+            if (Where(row, f.Field!.Value) is (var at, { } word) && at == currentPage) boxes.Add((word.Box, f.Message));
+        foreach (var (b, message) in boxes)
         {
             var rect = new Rectangle
             {
@@ -759,6 +775,7 @@ public partial class InvoiceView : Screen
                 Height = b.H + 6,
                 Classes = { "flagged" },
             };
+            AutomationProperties.SetName(rect, message);
             Canvas.SetLeft(rect, b.X - 3);
             Canvas.SetTop(rect, b.Y - 3);
             Flagged.Children.Add(rect);

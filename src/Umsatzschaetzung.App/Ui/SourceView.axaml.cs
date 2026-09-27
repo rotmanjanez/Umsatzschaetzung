@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -27,18 +28,22 @@ public partial class SourceView : UserControl
         for (var i = 0; i < list.Count; i++)
         {
             var page = list[i];
+            var name = $"Belegseite {i + 1} von {list.Count}";
             if (images[i] is { } image)
             {
+                var picture = new Image { Source = image, Width = BaseWidth, Stretch = Stretch.Uniform };
+                AutomationProperties.SetName(picture, name);
+                if (page.Text is { } text) AutomationProperties.SetHelpText(picture, text);
                 Pages.Children.Add(new Border
                 {
                     Theme = (ControlTheme)Application.Current!.FindResource("Panel")!,
                     Margin = new Thickness(0, 0, 0, 12),
                     HorizontalAlignment = HorizontalAlignment.Left,
-                    Child = new Image { Source = image, Width = BaseWidth, Stretch = Stretch.Uniform },
+                    Child = picture,
                 });
                 continue;
             }
-            Pages.Children.Add(new TextBox
+            var box = new TextBox
             {
                 Text = page.Text ?? "",
                 IsReadOnly = true,
@@ -47,7 +52,9 @@ public partial class SourceView : UserControl
                 Width = BaseWidth,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Margin = new Thickness(0, 0, 0, 12),
-            });
+            };
+            AutomationProperties.SetName(box, name);
+            Pages.Children.Add(box);
         }
         ZoomPan.SetZoom(Viewer, 1);
         Viewer.ScrollToHome();

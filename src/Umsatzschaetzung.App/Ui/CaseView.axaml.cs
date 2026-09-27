@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Umsatzschaetzung.Model;
@@ -18,7 +19,8 @@ public sealed class StockRow : Observable
 
     public List<Ingredient> Options { get => options; private set => Set(ref options, value); }
     public List<string> Units { get; } = [.. RulesView.RecipeUnits.Select(Model.Units.Label)];
-    public Ingredient? Ingredient { get => ingredient; set => Set(ref ingredient, value); }
+    public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) Raise(nameof(Title)); } }
+    public string Title => ingredient?.Name ?? "neue Zutat";
     public int UnitIndex { get => unitIndex; set => Set(ref unitIndex, value); }
     public string Opening { get => opening; set => Set(ref opening, value); }
     public string Closing { get => closing; set => Set(ref closing, value); }
@@ -45,8 +47,15 @@ public sealed class CaseModel : Observable
     public string Name { get => name; set => Set(ref name, value); }
     public string TaxNumber { get => taxNumber; set => Set(ref taxNumber, value); }
     public string Pab { get => pab; set => Set(ref pab, value); }
-    public string Gewerbe { get => gewerbe; set { if (Set(ref gewerbe, value)) Raise(nameof(GewerbeInvalid)); } }
+    public string Gewerbe { get => gewerbe; set { if (Set(ref gewerbe, value)) RaiseGewerbe(); } }
     public bool GewerbeInvalid => gewerbe != "" && !gewerbezweige.Exists(g => g.Kennzahl == gewerbe);
+    public string GewerbeHelp => GewerbeInvalid ? "Unbekannte Kennzahl, aus der Liste wählen" : "Aus der Liste wählen";
+
+    void RaiseGewerbe()
+    {
+        Raise(nameof(GewerbeInvalid));
+        Raise(nameof(GewerbeHelp));
+    }
 
     // Kein Set: neue Wahlmöglichkeiten sind keine Änderung an der Prüfung.
     public List<Gewerbezweig> Gewerbezweige
@@ -56,7 +65,7 @@ public sealed class CaseModel : Observable
         {
             gewerbezweige = value;
             Raise();
-            Raise(nameof(GewerbeInvalid));
+            RaiseGewerbe();
         }
     }
     public string Declared19 { get => declared[0]; set => Set(ref declared[0], value); }
@@ -219,10 +228,20 @@ public partial class CaseView : Screen
         var row = new StockRow(Session.Ingredients());
         model.Stock.Add(row);
         Reveal.Row(StockBox, row);
+        Dispatcher.UIThread.Post(() => StockBox.Columns[0].GetCellContent(row)?.Focus(), DispatcherPriority.Loaded);
     }
 
     void RemoveStock(object? sender, RoutedEventArgs e)
     {
-        if ((sender as Control)?.DataContext is StockRow row) model.Stock.Remove(row);
+        if ((sender as Control)?.DataContext is not StockRow row) return;
+        model.Stock.Remove(row);
+        AddStockButton.Focus();
+    }
+
+    void StockKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Delete || e.Source is TextBox or ComboBox || StockBox.SelectedItem is not StockRow row) return;
+        model.Stock.Remove(row);
+        e.Handled = true;
     }
 }

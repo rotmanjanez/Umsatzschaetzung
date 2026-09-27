@@ -1,4 +1,6 @@
 using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -28,6 +30,9 @@ public sealed class Sheets : Grid
     public Sheets()
     {
         RowDefinitions = new RowDefinitions("Auto,*");
+        AutomationProperties.SetName(strip, "Geöffnete Fenster");
+        AutomationProperties.SetAccessibilityView(strip, AccessibilityView.Control);
+        AutomationProperties.SetControlTypeOverride(strip, AutomationControlType.ToolBar);
         Children.Add(strip);
     }
 
@@ -55,11 +60,18 @@ public sealed class Sheets : Grid
         Order();
     }
 
-    // Once the closed sheet has told its owner, the one now on top has the keys again.
+    // Once the closed sheet has told its owner, the one now on top has the keys again, on the
+    // control the closed one was opened from where that lies in it.
     void Closed(Sheet sheet)
     {
         if (stack.Count > 0) stack[^1].Focus();
-        else sheet.Restore();
+        sheet.Restore(stack.Count > 0 ? stack[^1].Chrome : Below);
+    }
+
+    // F6 passes the keys on to the sheet beneath, round and round, while none of them is modal.
+    void Cycle()
+    {
+        if (stack.Count > 1 && stack.TrueForAll(s => s.Backdrop is null)) Raise(stack[0]);
     }
 
     void Raise(Sheet sheet)
@@ -110,11 +122,21 @@ public sealed class Sheets : Grid
         public Sheet(Sheets sheets, Control view, string title, double width, double height) : base(view)
         {
             this.sheets = sheets;
+            void Loaded(object? sender, RoutedEventArgs e)
+            {
+                view.Loaded -= Loaded;
+                RaiseOpening();
+            }
+            view.Loaded += Loaded;
             this.title = Themed(new TextBlock { Text = title }, "SheetTitle");
             Tab = Themed(new ToggleButton { Content = title }, "SheetTab");
+            AutomationProperties.SetAcceleratorKey(Tab, "F6");
             Tab.Click += (_, _) => Activate();
             var close = Themed(new Button { Content = new PathIcon { Data = Geometry("ClearIcon"), Width = 10, Height = 10 } }, "IconButton");
             ToolTip.SetTip(close, "Schließen (Esc)");
+            AutomationProperties.SetName(close, "Schließen");
+            AutomationProperties.SetAcceleratorKey(close, "Escape");
+            AutomationProperties.SetAutomationId(close, "SheetClose");
             close.Click += (_, _) => Close();
             DockPanel.SetDock(close, Dock.Right);
             var bar = Themed(new Border { Child = new DockPanel { Children = { close, this.title } } }, "SheetBar");
@@ -128,13 +150,18 @@ public sealed class Sheets : Grid
                 HorizontalAlignment = double.IsNaN(width) ? HorizontalAlignment.Center : HorizontalAlignment.Stretch,
                 VerticalAlignment = double.IsNaN(height) ? VerticalAlignment.Center : VerticalAlignment.Stretch,
             }, "Sheet");
+            AutomationProperties.SetName(Chrome, title);
+            AutomationProperties.SetAccessibilityView(Chrome, AccessibilityView.Control);
+            AutomationProperties.SetControlTypeOverride(Chrome, AutomationControlType.Window);
+            KeyboardNavigation.SetTabNavigation(Chrome, KeyboardNavigationMode.Cycle);
             SetRow(Chrome, 1);
             Chrome.AddHandler(InputElement.PointerPressedEvent, (_, _) => sheets.Raise(this), RoutingStrategies.Tunnel, handledEventsToo: true);
             Chrome.KeyDown += (_, e) =>
             {
-                if (e.Key != Key.Escape) return;
+                if (e.Key == Key.F6) sheets.Cycle();
+                else if (e.Key == Key.Escape) Close();
+                else return;
                 e.Handled = true;
-                Close();
             };
         }
 
@@ -151,6 +178,7 @@ public sealed class Sheets : Grid
             {
                 title.Text = value;
                 Tab.Content = value;
+                AutomationProperties.SetName(Chrome, value);
             }
         }
 
@@ -183,10 +211,11 @@ public sealed class Sheets : Grid
             RaiseActivated();
         }
 
-        // Back to where the program was when the first sheet opened over it.
-        internal void Restore()
+        // Back to where the program was when this sheet opened over it.
+        internal void Restore(Visual? scope)
         {
-            if (before is Visual element && TopLevel.GetTopLevel(element) is not null) before.Focus();
+            if (before is Visual element && TopLevel.GetTopLevel(element) is not null && scope?.IsVisualAncestorOf(element) == true)
+                before.Focus();
         }
 
         static Geometry? Geometry(string key) =>

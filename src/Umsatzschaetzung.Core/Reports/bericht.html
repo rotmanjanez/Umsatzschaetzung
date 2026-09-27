@@ -63,7 +63,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       <div class="cover-left">
         <div class="note">Umsatzschätzung</div>
         <hr class="light">
-        <div class="title">{{ case.label }}</div>
+        <div class="title" role="heading" aria-level="1">{{ case.label }}</div>
         <div>{{ case.taxpayer.name }}</div>
         <div>Zeitraum {{ case.periodFrom | date }} bis {{ case.periodTo | date }}</div>
       </div>
@@ -95,10 +95,10 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Steuersatz</th>
-            <th class="num">Umsatz vor BP</th>
-            <th class="num">Umsatz nach BP</th>
-            <th class="num">Differenz</th>
+            <th scope="col" class="wide">Steuersatz</th>
+            <th scope="col" class="num">Umsatz vor BP</th>
+            <th scope="col" class="num">Umsatz nach BP</th>
+            <th scope="col" class="num">Differenz</th>
           </tr>
         </thead>
         <tbody>
@@ -120,11 +120,11 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Sparte</th>
-            <th class="num">Wareneinsatz</th>
-            <th class="num">Umsatz netto*</th>
-            <th class="num">Rohgewinn*</th>
-            <th class="num">Rohgewinnaufschlagsatz*</th>
+            <th scope="col" class="wide">Sparte</th>
+            <th scope="col" class="num">Wareneinsatz</th>
+            <th scope="col" class="num">Umsatz netto*</th>
+            <th scope="col" class="num">Rohgewinn*</th>
+            <th scope="col" class="num">Rohgewinnaufschlagsatz*</th>
           </tr>
         </thead>
         <tbody>
@@ -157,10 +157,10 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">{% if g.sparte %}{{ g.sparte | sparte }}{% else %}Produkt{% endif %}</th>
-            <th class="num">Wareneinsatz*</th>
-            <th class="num">Nettopreis</th>
-            <th class="num">Rohgewinnaufschlagsatz*</th>
+            <th scope="col" class="wide">{% if g.sparte %}{{ g.sparte | sparte }}{% else %}Produkt{% endif %}</th>
+            <th scope="col" class="num">Wareneinsatz*</th>
+            <th scope="col" class="num">Nettopreis</th>
+            <th scope="col" class="num">Rohgewinnaufschlagsatz*</th>
           </tr>
         </thead>
         <tbody>
@@ -189,12 +189,12 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table class="lines">
         <thead>
           <tr>
-            <th>Rechnungsnr.</th>
-            <th>Fassung vom</th>
-            <th class="wrap">Position</th>
-            <th class="num">Menge</th>
-            <th class="num">Einzelpreis</th>
-            <th class="num">Netto</th>
+            <th scope="col">Rechnungsnr.</th>
+            <th scope="col">Fassung vom</th>
+            <th scope="col" class="wrap">Position</th>
+            <th scope="col" class="num">Menge</th>
+            <th scope="col" class="num">Einzelpreis</th>
+            <th scope="col" class="num">Netto</th>
           </tr>
         </thead>
         {% for inv in included %}
@@ -229,13 +229,13 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th>Produkt</th>
-            <th class="wide">Rezeptur</th>
-            <th>Sparte</th>
-            <th class="num">Einsatz je Portion</th>
-            <th class="num">Bruttopreis</th>
-            <th class="num">USt</th>
-            <th>Bemerkung</th>
+            <th scope="col">Produkt</th>
+            <th scope="col" class="wide">Rezeptur</th>
+            <th scope="col">Sparte</th>
+            <th scope="col" class="num">Einsatz je Portion</th>
+            <th scope="col" class="num">Bruttopreis</th>
+            <th scope="col" class="num">USt</th>
+            <th scope="col">Bemerkung</th>
           </tr>
         </thead>
         <tbody>
@@ -261,14 +261,14 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Zutat</th>
-            <th class="num">Anfangsbestand</th>
-            <th class="num">Einkauf</th>
-            <th class="num">Endbestand</th>
-            <th class="num">Verbrauch</th>
-            <th class="num">Wareneinsatz</th>
-            <th class="num">Ausbeute</th>
-            <th class="num">Verkaufsfähig</th>
+            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="num">Anfangsbestand</th>
+            <th scope="col" class="num">Einkauf</th>
+            <th scope="col" class="num">Endbestand</th>
+            <th scope="col" class="num">Verbrauch</th>
+            <th scope="col" class="num">Wareneinsatz</th>
+            <th scope="col" class="num">Ausbeute</th>
+            <th scope="col" class="num">Verkaufsfähig</th>
           </tr>
         </thead>
         <tbody>
@@ -290,11 +290,11 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Zutat</th>
-            <th class="num">Einkauf</th>
-            <th class="num">Wareneinsatz</th>
-            <th class="num">Ausbeute</th>
-            <th class="num">Verkaufsfähig</th>
+            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="num">Einkauf</th>
+            <th scope="col" class="num">Wareneinsatz</th>
+            <th scope="col" class="num">Ausbeute</th>
+            <th scope="col" class="num">Verkaufsfähig</th>
           </tr>
         </thead>
         <tbody>
@@ -319,10 +319,10 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Zutat</th>
-            <th>Ertragsregel</th>
-            <th class="num">Abzug</th>
-            <th class="num">Ausbeute</th>
+            <th scope="col" class="wide">Zutat</th>
+            <th scope="col">Ertragsregel</th>
+            <th scope="col" class="num">Abzug</th>
+            <th scope="col" class="num">Ausbeute</th>
           </tr>
         </thead>
         <tbody>
@@ -349,11 +349,11 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table class="lines">
         <thead>
           <tr>
-            <th>Zutat</th>
-            <th class="wrap">Produkt</th>
-            <th class="num">Portionen</th>
-            <th class="num">Je Portion</th>
-            <th class="num">Menge</th>
+            <th scope="col">Zutat</th>
+            <th scope="col" class="wrap">Produkt</th>
+            <th scope="col" class="num">Portionen</th>
+            <th scope="col" class="num">Je Portion</th>
+            <th scope="col" class="num">Menge</th>
           </tr>
         </thead>
         {% for i in report.ingredients %}
@@ -397,12 +397,12 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Produkt</th>
-            <th class="num">Portionen</th>
-            <th>Satz</th>
-            <th class="num">Einsatz</th>
-            <th class="num">Rohgewinnaufschlagsatz</th>
-            <th class="num">Umsatz netto</th>
+            <th scope="col" class="wide">Produkt</th>
+            <th scope="col" class="num">Portionen</th>
+            <th scope="col">Satz</th>
+            <th scope="col" class="num">Einsatz</th>
+            <th scope="col" class="num">Rohgewinnaufschlagsatz</th>
+            <th scope="col" class="num">Umsatz netto</th>
           </tr>
         </thead>
         <tbody>
@@ -435,12 +435,12 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th class="wide">Zutat</th>
-            <th class="num">Rest</th>
-            <th>Satz</th>
-            <th class="num">Einsatz</th>
-            <th class="num">Rohgewinnaufschlagsatz</th>
-            <th class="num">Umsatz netto</th>
+            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="num">Rest</th>
+            <th scope="col">Satz</th>
+            <th scope="col" class="num">Einsatz</th>
+            <th scope="col" class="num">Rohgewinnaufschlagsatz</th>
+            <th scope="col" class="num">Umsatz netto</th>
           </tr>
         </thead>
         <tbody>
@@ -473,13 +473,13 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table class="lines">
         <thead>
           <tr>
-            <th>Rechnungsnr.</th>
-            <th>Datum</th>
-            <th class="wrap">Position</th>
-            <th>Satz</th>
-            <th class="num">Netto</th>
-            <th class="num">Rohgewinnaufschlagsatz</th>
-            <th class="num">Umsatz netto</th>
+            <th scope="col">Rechnungsnr.</th>
+            <th scope="col">Datum</th>
+            <th scope="col" class="wrap">Position</th>
+            <th scope="col">Satz</th>
+            <th scope="col" class="num">Netto</th>
+            <th scope="col" class="num">Rohgewinnaufschlagsatz</th>
+            <th scope="col" class="num">Umsatz netto</th>
           </tr>
         </thead>
         <tbody>

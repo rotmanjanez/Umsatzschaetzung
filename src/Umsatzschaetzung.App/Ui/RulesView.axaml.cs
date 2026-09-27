@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Umsatzschaetzung.Model;
@@ -19,6 +20,7 @@ public sealed class IngredientItem(Ingredient ingredient, string category)
         var n => n + " Warenarten",
     };
     public string Search => Name + " " + Category + " " + Aliases;
+    public string Spoken => AliasCount == "" ? Name : Name + ", " + AliasCount;
     public string Tip => string.Join("\n", new[] { Category == "" ? Name : Name + " · " + Category, Aliases }.Where(t => t != ""));
 }
 
@@ -94,6 +96,12 @@ public sealed class ScopeItem(string id, bool ingredient, string label, List<Yie
     public List<YieldRule> Rules { get; } = rules;
     public string Search => Label + " " + string.Join(" ", Rules.Select(r => r.Name));
     public string Hint => (Ingredient ? "Zutat" : "") + (Ingredient && Rules.Count > 0 ? " · " : "") + (Rules.Count > 0 ? Rules.Count.ToString() : "");
+    public string Spoken => Label + (Ingredient ? ", Zutat, " : ", Kategorie, ") + Rules.Count switch
+    {
+        0 => "keine Regel",
+        1 => "1 Regel",
+        var n => n + " Regeln",
+    };
 }
 
 // One rule of the open scope; the last row has no id yet and becomes a rule once named and rated.
@@ -265,6 +273,7 @@ public partial class RulesView : Screen
 {
     public static readonly string[] RecipeUnits = ["GRM", "KGM", "MLT", "LTR", "H87"];
     public const string PortionUnit = "H87";
+    public static readonly FuncValueConverter<bool, string, string?> Flag = new((on, text) => on ? text : null);
 
     const int IngredientPage = 0, GewerbePage = 3, TemplatePage = 4;
 
@@ -294,6 +303,7 @@ public partial class RulesView : Screen
     {
         InitializeComponent();
         DataContext = model;
+        TemplateSource.AddHandler(KeyDownEvent, LeaveOnControlTab, RoutingStrategies.Tunnel);
         IngredientSearch.Attach(model.Ingredients.Items, i => i.Search);
         ProductSearch.Attach(model.Products.Items, p => p.Name + " " + p.Recipe);
         YieldSearch.Attach(model.Yields.Items, s => s.Search);
@@ -319,6 +329,16 @@ public partial class RulesView : Screen
         {
             if (e.PropertyName is nameof(GewerbeForm.Kennzahl) or nameof(GewerbeForm.Name)) Edited(gewerbeSave);
         };
+    }
+
+    public void FocusPage() => Tabs.ContainerFromIndex(Tabs.SelectedIndex)?.Focus();
+
+    void LeaveOnControlTab(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Tab || !e.KeyModifiers.HasFlag(KeyModifiers.Control)) return;
+        e.Handled = true;
+        var direction = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? NavigationDirection.Previous : NavigationDirection.Next;
+        TopLevel.GetTopLevel(this)?.FocusManager?.TryMoveFocus(direction);
     }
 
     Task SaveYieldRows() => Task.WhenAll(model.Yields.Rules.ToList().Select(r => r.Save.Now()));
@@ -422,12 +442,14 @@ public partial class RulesView : Screen
     static string Missing(params string?[] fields) =>
         "Bitte prüfen: " + string.Join(", ", fields.OfType<string>()) + ".";
 
-    async Task Delete(EntityForm form, Entity entity)
+    async Task Delete(EntityForm form, Entity entity, Button next)
     {
         if (form.CurrentId is not { } id || !await Confirmed(form.Title, entity)) return;
         if (form == model.Ingredients) ingredientSave.Cancel();
         if (form == model.Gewerbe) gewerbeSave.Cancel();
-        if (await Session.Delete(entity, id, At(id), Ct)) form.CurrentId = null;
+        if (!await Session.Delete(entity, id, At(id), Ct)) return;
+        form.CurrentId = null;
+        next.Focus();
     }
 
     Task<bool> Confirmed(string title, Entity entity) =>
@@ -470,6 +492,7 @@ public partial class RulesView : Screen
         f.LoadPiece(null, null);
         f.Category.Load(Session.Categories(), null);
         filling = false;
+        IngredientName.Focus();
     }
 
     void CategoryNamed(object? sender, RoutedEventArgs e)
@@ -514,7 +537,7 @@ public partial class RulesView : Screen
     static List<string> AliasLines(string text) =>
         [.. text.Split('\n').Select(a => a.Trim()).Where(a => a != "")];
 
-    async void DeleteIngredient(object? sender, RoutedEventArgs e) => await Delete(model.Ingredients, Entity.Ingredient);
+    async void DeleteIngredient(object? sender, RoutedEventArgs e) => await Delete(model.Ingredients, Entity.Ingredient, IngredientNew);
 
     void ProductSelected(object? sender, SelectionChangedEventArgs e)
     {
@@ -571,7 +594,11 @@ public partial class RulesView : Screen
         model.Products.Origin = "Rezeptur aus der Prüfung übernommen. Erst mit Speichern gilt sie im Katalog für alle Prüfungen.";
     }
 
-    void NewProduct(object? sender, RoutedEventArgs e) => NewProduct("", null);
+    void NewProduct(object? sender, RoutedEventArgs e)
+    {
+        NewProduct("", null);
+        ProductName.Focus();
+    }
 
     public void NewProduct(string name, Action<string>? created)
     {
@@ -630,7 +657,7 @@ public partial class RulesView : Screen
         }
     }
 
-    async void DeleteProduct(object? sender, RoutedEventArgs e) => await Delete(model.Products, Entity.Product);
+    async void DeleteProduct(object? sender, RoutedEventArgs e) => await Delete(model.Products, Entity.Product, ProductNew);
 
     // A new category is a second entity: hold the rebuild so the half-filled form survives both saves.
     async Task Compose(Func<Task> save)
@@ -778,7 +805,7 @@ public partial class RulesView : Screen
         if ((sender as Control)?.DataContext is not YieldRow { Id: { } id } row) return;
         if (!await Confirmed(row.Name, Entity.YieldRule)) return;
         row.Save.Cancel();
-        await Session.Delete(Entity.YieldRule, id, At(id), Ct);
+        if (await Session.Delete(Entity.YieldRule, id, At(id), Ct) && ScopeGrid.SelectedItem is { } scope) ScopeGrid.ContainerFromItem(scope)?.Focus();
     }
 
     void GewerbeSelected(object? sender, SelectionChangedEventArgs e)
@@ -812,6 +839,7 @@ public partial class RulesView : Screen
         f.Title = "Neue Gewerbekennzahl";
         f.Kennzahl = f.Name = "";
         filling = false;
+        GewerbeKennzahl.Focus();
     }
 
     async Task SaveGewerbe()
@@ -828,7 +856,7 @@ public partial class RulesView : Screen
         f.Title = data.Kennzahl + " " + data.Name;
     }
 
-    async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig);
+    async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig, GewerbeNew);
 
     public static List<ReportTemplate> Templates(RuleSet rs) =>
         [.. rs.Templates.Values.OrderByDescending(t => t.Default).ThenBy(t => t.Name, StringComparer.CurrentCulture)];
@@ -862,6 +890,7 @@ public partial class RulesView : Screen
         f.Name = from is null ? "" : "Kopie von " + from.Name;
         f.Source = from?.Source ?? "";
         f.IsDefault = false;
+        TemplateName.Focus();
     }
 
     async void SaveTemplate(object? sender, RoutedEventArgs e)
@@ -885,5 +914,5 @@ public partial class RulesView : Screen
         f.Title = data.Name;
     }
 
-    async void DeleteTemplate(object? sender, RoutedEventArgs e) => await Delete(model.Templates, Entity.Template);
+    async void DeleteTemplate(object? sender, RoutedEventArgs e) => await Delete(model.Templates, Entity.Template, TemplateNew);
 }

@@ -7,63 +7,64 @@
     <ui:Screen.Styles>
         <Style Selector="DataGridRow">
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="AutomationProperties.Name" Value="{Binding Summary, DataType=ui:CaseRow}"/>
         </Style>
     </ui:Screen.Styles>
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
                 <ui:SearchBox x:Name="Search" Margin="0,0,16,0"/>
-                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Regeln" Click="ShowRules">
+                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Regeln" Click="ShowRules" AutomationProperties.Name="Regeln" AutomationProperties.AutomationId="CasesRulesButton">
                     <PathIcon Data="{StaticResource RulesIcon}" Width="14" Height="14"/>
                 </Button>
-                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Importieren" Click="Import">
+                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Importieren" Click="Import" AutomationProperties.Name="Importieren" AutomationProperties.HelpText="Gespeicherte Prüfungsdatei importieren" AutomationProperties.AutomationId="CasesImportButton">
                     <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
                 </Button>
-                <Button x:Name="NewCase" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Neue Prüfung" Click="StartNew">
+                <Button x:Name="NewCase" Theme="{StaticResource PrimaryButton}" ToolTip.Tip="Neue Prüfung" Click="StartNew" AutomationProperties.Name="Neue Prüfung" AutomationProperties.AutomationId="CasesNewButton">
                     <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
                 </Button>
-                <Button Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp"/>
+                <Button Theme="{StaticResource HelpButton}" Margin="8,0,0,0" Click="ShowHelp" AutomationProperties.Name="Hilfe zu dieser Seite" AutomationProperties.AcceleratorKey="F1" AutomationProperties.AutomationId="CasesHelpButton"/>
             </StackPanel>
-            <TextBlock Text="Prüfungen" Theme="{StaticResource PageTitle}"/>
+            <TextBlock Text="Prüfungen" Theme="{StaticResource PageTitle}" AutomationProperties.HeadingLevel="1"/>
         </DockPanel>
-        <Border DockPanel.Dock="Top" Theme="{StaticResource Card}" IsVisible="{Binding Creating}">
+        <Border DockPanel.Dock="Top" Theme="{StaticResource Card}" IsVisible="{Binding Creating}" KeyDown="NewKeyDown">
             <StackPanel MaxWidth="560" HorizontalAlignment="Left">
-                <TextBlock Text="Neue Prüfung" Theme="{StaticResource SectionHeader}"/>
+                <TextBlock Text="Neue Prüfung" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
                 <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="NewLabel" Width="520" HorizontalAlignment="Left"/>
+                <TextBox x:Name="NewLabel" Width="520" HorizontalAlignment="Left" AutomationProperties.Name="Bezeichnung" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="NewCaseLabel"/>
                 <Grid Width="520" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Zeitraum von *" Theme="{StaticResource FieldLabel}"/>
-                        <ui:DateBox x:Name="NewFrom"/>
+                        <ui:DateBox x:Name="NewFrom" AutomationProperties.Name="Zeitraum von" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="NewCaseFrom"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Zeitraum bis *" Theme="{StaticResource FieldLabel}"/>
-                        <ui:DateBox x:Name="NewTo"/>
+                        <ui:DateBox x:Name="NewTo" AutomationProperties.Name="Zeitraum bis" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="NewCaseTo"/>
                     </StackPanel>
                 </Grid>
-                <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0"/>
+                <TextBlock Text="Steuerpflichtiger" Theme="{StaticResource SectionHeader}" Margin="0,20,0,0" AutomationProperties.HeadingLevel="3"/>
                 <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                <TextBox x:Name="NewName" Width="520" HorizontalAlignment="Left"/>
+                <TextBox x:Name="NewName" Width="520" HorizontalAlignment="Left" AutomationProperties.Name="Name des Steuerpflichtigen" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="NewCaseName"/>
                 <Grid Width="520" HorizontalAlignment="Left" ColumnDefinitions="*,16,*">
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Steuernummer *" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="NewTaxNumber"/>
+                        <TextBox x:Name="NewTaxNumber" AutomationProperties.Name="Steuernummer" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="NewCaseTaxNumber"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="PAB-Nr. *" Theme="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="NewPab"/>
+                        <TextBox x:Name="NewPab" AutomationProperties.Name="PAB-Nummer" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="NewCasePab"/>
                     </StackPanel>
                 </Grid>
                 <TextBlock Text="Gewerbekennzahl" Theme="{StaticResource FieldLabel}"/>
-                <ui:GewerbeBox x:Name="NewGewerbe" Width="520" HorizontalAlignment="Left"/>
+                <ui:GewerbeBox x:Name="NewGewerbe" Width="520" HorizontalAlignment="Left" AutomationProperties.Name="Gewerbekennzahl" AutomationProperties.HelpText="Aus der Liste wählen" AutomationProperties.AutomationId="NewCaseGewerbe"/>
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                    <Button Content="Anlegen" Theme="{StaticResource PrimaryButton}" Click="Create" Margin="0,0,8,0"/>
-                    <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" Click="CancelNew"/>
+                    <Button Content="Anlegen" Theme="{StaticResource PrimaryButton}" Click="Create" Margin="0,0,8,0" AutomationProperties.AutomationId="NewCaseCreateButton"/>
+                    <Button Content="Abbrechen" Theme="{StaticResource SecondaryButton}" Click="CancelNew" AutomationProperties.AcceleratorKey="Escape" AutomationProperties.AutomationId="NewCaseCancelButton"/>
                 </StackPanel>
             </StackPanel>
         </Border>
         <Grid>
-            <DataGrid x:Name="Grid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" IsReadOnly="True" KeyDown="GridKeyDown">
+            <DataGrid x:Name="Grid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" IsReadOnly="True" AutomationProperties.Name="Prüfungen" AutomationProperties.HelpText="Eingabetaste öffnet die gewählte Prüfung, Entf löscht sie" AutomationProperties.AutomationId="CasesGrid">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Bezeichnung" Width="320" MinWidth="160">
                         <DataGridTemplateColumn.CellTemplate>
@@ -81,13 +82,16 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Width="Auto">
+                        <DataGridTemplateColumn.Header>
+                            <Panel AutomationProperties.Name="Aktionen"/>
+                        </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="ui:CaseRow">
                                 <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="ExportCase" Theme="{StaticResource IconButton}" ToolTip.Tip="Exportieren" Click="Export">
+                                    <Button IsTabStop="False" x:Name="ExportCase" Theme="{StaticResource IconButton}" ToolTip.Tip="Exportieren" Click="Export" AutomationProperties.Name="{Binding Case.Label, StringFormat='„{0}“ exportieren'}" AutomationProperties.AutomationId="CaseExportButton">
                                         <PathIcon Data="{StaticResource ExportIcon}" Width="14" Height="14"/>
                                     </Button>
-                                    <Button x:Name="DeleteCase" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete">
+                                    <Button IsTabStop="False" x:Name="DeleteCase" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="Delete" AutomationProperties.Name="{Binding Case.Label, StringFormat='„{0}“ löschen'}" AutomationProperties.AutomationId="CaseDeleteButton">
                                         <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                     </Button>
                                 </StackPanel>
@@ -98,17 +102,17 @@
             </DataGrid>
             <ui:NoResults Search="{Binding #Search}"/>
             <StackPanel MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding ShowEmpty}">
-                <TextBlock Text="Noch keine Prüfungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Text="Noch keine Prüfungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center" AutomationProperties.HeadingLevel="2"/>
                 <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center"
                            Text="Eine Prüfung hält Zeitraum, Steuerpflichtigen, Rechnungen und Kalkulation zusammen. Legen Sie eine neue Prüfung an oder importieren Sie eine gespeicherte Prüfungsdatei."/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                    <Button Theme="{StaticResource SecondaryButton}" Click="Import">
+                    <Button Theme="{StaticResource SecondaryButton}" Click="Import" AutomationProperties.Name="Importieren" AutomationProperties.HelpText="Gespeicherte Prüfungsdatei importieren" AutomationProperties.AutomationId="EmptyImportButton">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14"/>
+                        <PathIcon Data="{StaticResource ImportIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                         <TextBlock Text="Importieren"/>
                     </StackPanel>
                 </Button>
-                    <Button Content="Neue Prüfung" Theme="{StaticResource PrimaryButton}" Click="StartNew"/>
+                    <Button Content="Neue Prüfung" Theme="{StaticResource PrimaryButton}" Click="StartNew" AutomationProperties.AutomationId="EmptyNewButton"/>
                 </StackPanel>
             </StackPanel>
         </Grid>

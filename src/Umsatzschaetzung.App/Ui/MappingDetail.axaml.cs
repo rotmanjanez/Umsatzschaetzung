@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Umsatzschaetzung.Model;
@@ -20,6 +21,10 @@ public sealed class CandidateRow(MappingCandidate candidate, string label, bool 
     public string Confidence => IsSuggested ? "Sicherheit " + Candidate.Confidence + " %" : "";
     public bool InRecipe => UsedIn != "";
     public string UsedIn { get; } = usedIn;
+    public string Spoken => Display
+        + (IsExact ? ", " + ExactText : "")
+        + (IsSuggested ? ", Vorschlag, " + Confidence : "")
+        + (InRecipe ? ", in Rezeptur: " + UsedIn : "");
     public bool Selected { get => selected; set => Set(ref selected, value); }
 }
 
@@ -35,13 +40,19 @@ public sealed class SnippetRow(Invoice invoice, int line) : Observable
     public bool HasScan => Scan is not null;
     public bool HasExcerpt => Excerpt != "";
     public bool Missing => !loading && !HasScan && !HasExcerpt;
+    public string Title => "Rechnung " + Invoice.Number + (Invoice.Date is null ? "" : " vom " + Format.Date(Invoice.Date));
+    public string Spoken =>
+        loading ? "Auszug wird geladen"
+        : HasScan ? "Ausschnitt aus dem Scan: „" + Invoice.Lines[Line].Name + "“"
+        : HasExcerpt ? "Ausschnitt aus der E-Rechnung: " + Excerpt
+        : "Kein Auszug verfügbar";
 
     public void Show(Bitmap? image, string? text)
     {
         Scan = image;
         Excerpt = text ?? "";
         loading = false;
-        foreach (var name in (string[])[nameof(Scan), nameof(Excerpt), nameof(Loading), nameof(HasScan), nameof(HasExcerpt), nameof(Missing)])
+        foreach (var name in (string[])[nameof(Scan), nameof(Excerpt), nameof(Loading), nameof(HasScan), nameof(HasExcerpt), nameof(Missing), nameof(Spoken)])
             Raise(name);
     }
 }
@@ -270,6 +281,7 @@ public partial class MappingDetail : UserControl
     {
         InitializeComponent();
         DataContext = model;
+        SnippetGrid.AddHandler(KeyDownEvent, SnippetKey, RoutingStrategies.Tunnel);
     }
 
     public event Action<LineGroup>? Assigned;
@@ -393,6 +405,13 @@ public partial class MappingDetail : UserControl
         if ((sender as Control)?.DataContext is SnippetRow row) Session.OpenInvoice(row.Invoice.Id);
     }
 
+    void SnippetKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || e.Source is Button || SnippetGrid.SelectedItem is not SnippetRow row) return;
+        Session.OpenInvoice(row.Invoice.Id);
+        e.Handled = true;
+    }
+
     void ToggleManual(object? sender, RoutedEventArgs e) => model.Manual = !model.Manual;
 
     // Whatever the group carried before is replaced under the same id: the rule for this
@@ -422,6 +441,7 @@ public partial class MappingDetail : UserControl
         if (model.Ingredient is null)
         {
             Session.Fail("Bitte eine Zutat wählen.");
+            IngredientField.Focus();
             return;
         }
         if (!ReadFactor(g, out var factor, out var weight) || !await Weigh(g, model.Ingredient.Id, weight)) return;
@@ -444,6 +464,7 @@ public partial class MappingDetail : UserControl
     {
         if (model.Decide(out factor, out piece)) return true;
         Session.Fail($"{Units.Label(g.Unit)} lässt sich nicht umrechnen — bitte den Inhalt je {Units.Label(g.Unit)} angeben.");
+        FactorBox.Focus();
         return false;
     }
 

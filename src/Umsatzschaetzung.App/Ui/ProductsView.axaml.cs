@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Umsatzschaetzung.Model;
@@ -16,11 +17,28 @@ public sealed class AssortmentRow(string productId) : Observable
 
     public string ProductId { get; } = productId;
     public string[] VatNames => VatNamesList;
-    public string Name { get => name; set => Set(ref name, value); }
+    public string Name { get => name; set { if (Set(ref name, value)) Raise(nameof(Spoken)); } }
     public string Price { get => price; set => Set(ref price, value); }
     public int VatIndex { get => vatIndex; set => Set(ref vatIndex, value); }
-    public bool PriceMissing { get => priceMissing; set => Set(ref priceMissing, value); }
+    public bool PriceMissing
+    {
+        get => priceMissing;
+        set
+        {
+            if (!Set(ref priceMissing, value)) return;
+            Raise(nameof(Notes));
+            Raise(nameof(Spoken));
+        }
+    }
     public bool Adjusted { get; init; }
+    public string Notes => (priceMissing, Adjusted) switch
+    {
+        (true, true) => "Preis fehlt, Rezept angepasst",
+        (true, false) => "Preis fehlt",
+        (false, true) => "Rezept angepasst",
+        _ => "Keine Hinweise",
+    };
+    public string Spoken => priceMissing || Adjusted ? name + ", " + Notes : name;
 }
 
 public sealed record ProductDraft(string Typed)
@@ -211,7 +229,9 @@ public partial class ProductsView : Screen
 
     void AcceptSuggestion(object? sender, RoutedEventArgs e)
     {
-        if ((sender as Control)?.DataContext is SuggestionRow s) Add(s.ProductId);
+        if ((sender as Control)?.DataContext is not SuggestionRow s) return;
+        Add(s.ProductId);
+        Refocus();
     }
 
     void DismissSuggestion(object? sender, RoutedEventArgs e)
@@ -219,7 +239,13 @@ public partial class ProductsView : Screen
         if ((sender as Control)?.DataContext is not SuggestionRow s || Session.Case is null) return;
         dismissed.Add(s.ProductId);
         model.Suggestions.Remove(s);
+        Refocus();
         Schedule(0);
+    }
+
+    void Refocus()
+    {
+        if (!ProductGrid.Focus()) CatalogBox.Focus();
     }
 
     async void ExportCsv(object? sender, RoutedEventArgs e)
@@ -266,9 +292,22 @@ public partial class ProductsView : Screen
 
     void RemoveFromAssortment(object? sender, RoutedEventArgs e)
     {
-        if ((sender as Control)?.DataContext is not AssortmentRow row || Session.Case is null) return;
+        if ((sender as Control)?.DataContext is AssortmentRow row) Remove(row);
+    }
+
+    void ProductKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Delete || e.Source is TextBox or ComboBox || ProductGrid.SelectedItem is not AssortmentRow row) return;
+        Remove(row);
+        e.Handled = true;
+    }
+
+    void Remove(AssortmentRow row)
+    {
+        if (Session.Case is null) return;
         Session.Case.Products.RemoveAll(p => p.ProductId == row.ProductId);
         model.Rows.Remove(row);
+        Refocus();
         edited = row.ProductId;
         Schedule(0);
     }

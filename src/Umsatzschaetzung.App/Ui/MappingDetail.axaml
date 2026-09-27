@@ -32,6 +32,7 @@
         <Style Selector="StackPanel.origin > PathIcon">
             <Setter Property="Width" Value="12"/>
             <Setter Property="Height" Value="12"/>
+            <Setter Property="AutomationProperties.AccessibilityView" Value="Raw"/>
         </Style>
         <Style Selector="StackPanel.origin > TextBlock">
             <Setter Property="FontSize" Value="11"/>
@@ -49,12 +50,16 @@
             <Setter Property="Height" Value="1"/>
             <Setter Property="Margin" Value="0,12"/>
             <Setter Property="Background" Value="{DynamicResource SoftBorderBrush}"/>
+            <Setter Property="AutomationProperties.AccessibilityView" Value="Raw"/>
+        </Style>
+        <Style Selector="DataGrid#SnippetGrid DataGridRow" x:DataType="ui:SnippetRow">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Title}"/>
         </Style>
     </UserControl.Styles>
     <DockPanel>
         <Border DockPanel.Dock="Top" Theme="{StaticResource BadgeSuccess}" HorizontalAlignment="Left"
                 Margin="0,0,0,12" IsVisible="{Binding HasAssigned}">
-            <TextBlock Text="{Binding Assigned}" Theme="{StaticResource BadgeText}" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding Assigned}" Theme="{StaticResource BadgeText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
         </Border>
         <Grid>
         <TextBlock Text="Keine Position gewählt" Theme="{StaticResource EmptyState}" IsVisible="{Binding NoSelection}"/>
@@ -66,7 +71,7 @@
                             <PathIcon Data="{StaticResource DocumentIcon}"/>
                             <TextBlock Text="{Binding Supplier}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2"/>
                         <Grid ColumnDefinitions="Auto,*">
                             <TextBlock Text="Menge" Theme="{StaticResource KeyLabel}"/>
                             <TextBlock Grid.Column="1" Text="{Binding Total}" Theme="{StaticResource KeyValue}"/>
@@ -74,19 +79,20 @@
                         <Border Classes="divider"/>
                         <StackPanel Classes="origin rules">
                             <PathIcon Data="{StaticResource RulesIcon}"/>
-                            <TextBlock Text="AUS DEN REGELN"/>
+                            <TextBlock Text="AUS DEN REGELN" AutomationProperties.Name="Aus den Regeln" AutomationProperties.HeadingLevel="3"/>
                         </StackPanel>
                         <Grid Margin="0,0,0,8" ColumnDefinitions="Auto,*" IsVisible="{Binding HasCurrent}">
                             <TextBlock Text="Zugeordnet" Theme="{StaticResource KeyLabel}"/>
                             <TextBlock Grid.Column="1" Text="{Binding Current}" Theme="{StaticResource KeyValue}"/>
                         </Grid>
                         <StackPanel IsVisible="{Binding ShowCandidates}">
-                            <TextBlock Text="Vorschläge werden ermittelt …" Theme="{StaticResource Muted}" IsVisible="{Binding Loading}"/>
-                            <TextBlock Text="Keine Vorschläge — bitte manuell zuordnen." Theme="{StaticResource Muted}" IsVisible="{Binding NoCandidates}"/>
-                            <ItemsControl ItemsSource="{Binding Candidates}">
+                            <TextBlock Text="Vorschläge werden ermittelt …" Theme="{StaticResource Muted}" IsVisible="{Binding Loading}" AutomationProperties.LiveSetting="Polite"/>
+                            <TextBlock Text="Keine Vorschläge — bitte manuell zuordnen." Theme="{StaticResource Muted}" IsVisible="{Binding NoCandidates}" AutomationProperties.LiveSetting="Polite"/>
+                            <ItemsControl ItemsSource="{Binding Candidates}" AutomationProperties.Name="Vorschläge" AutomationProperties.AutomationId="MappingCandidates">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="ui:CandidateRow">
-                                        <RadioButton GroupName="Candidates" IsChecked="{Binding Selected, Mode=TwoWay}" Margin="0,0,0,8">
+                                        <RadioButton GroupName="Candidates" IsChecked="{Binding Selected, Mode=TwoWay}" Margin="0,0,0,8"
+                                                     AutomationProperties.Name="{Binding Spoken}" AutomationProperties.AutomationId="MappingCandidate">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Display}" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -111,12 +117,15 @@
                             <Grid ColumnDefinitions="*,16,200">
                                 <StackPanel IsVisible="{Binding Manual}">
                                     <TextBlock Text="Zutat *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <ui:IngredientBox Choices="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"/>
+                                    <ui:IngredientBox x:Name="IngredientField" Choices="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                                      AutomationProperties.Name="Zutat" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="MappingIngredient"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" IsVisible="{Binding ShowFactor}">
                                     <TextBlock Text="{Binding FactorLabel}" ToolTip.Tip="Inhalt eines Gebindes in der Rezepteinheit."
                                                Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <TextBox x:Name="FactorBox" Theme="{StaticResource NumberBox}" Text="{Binding Factor, Mode=TwoWay}">
+                                    <TextBox x:Name="FactorBox" Theme="{StaticResource NumberBox}" Text="{Binding Factor, Mode=TwoWay}"
+                                             AutomationProperties.Name="{Binding FactorUnit, StringFormat='Faktor in {0}'}" AutomationProperties.HelpText="{Binding FactorHint}"
+                                             AutomationProperties.IsRequiredForForm="{Binding NeedsFactor}" AutomationProperties.AutomationId="MappingFactor">
                                         <TextBox.InnerRightContent>
                                             <TextBlock Text="{Binding FactorUnit}" Theme="{StaticResource Muted}" FontSize="12" Margin="0,0,8,0"/>
                                         </TextBox.InnerRightContent>
@@ -127,14 +136,17 @@
                                        HorizontalAlignment="Right" TextAlignment="Right" IsVisible="{Binding ShowFactor}"/>
                             <DockPanel HorizontalAlignment="Right" Margin="0,4,0,0" IsVisible="{Binding HasOrigin}">
                                 <PathIcon DockPanel.Dock="Left" Data="{StaticResource WarningIcon}" Foreground="{DynamicResource WarningBrush}"
-                                          Width="12" Height="12" Margin="0,2,6,0" VerticalAlignment="Top" IsVisible="{Binding Estimate}"/>
+                                          Width="12" Height="12" Margin="0,2,6,0" VerticalAlignment="Top" IsVisible="{Binding Estimate}"
+                                          AutomationProperties.AccessibilityView="Raw"/>
                                 <TextBlock Text="{Binding FactorOrigin}" Theme="{StaticResource Muted}" FontSize="12"
                                            TextAlignment="Right" TextWrapping="Wrap"/>
                             </DockPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="{Binding AssignLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"/>
-                            <Button Content="{Binding ManualLabel}" Theme="{StaticResource SecondaryButton}" Click="ToggleManual"/>
+                            <Button Content="{Binding AssignLabel}" Theme="{StaticResource PrimaryButton}" IsEnabled="{Binding CanAssign}" Click="Assign" Margin="0,0,8,0"
+                                    AutomationProperties.AutomationId="MappingAssign"/>
+                            <Button Content="{Binding ManualLabel}" Theme="{StaticResource SecondaryButton}" Click="ToggleManual"
+                                    AutomationProperties.AutomationId="MappingManual"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -142,30 +154,35 @@
                     <StackPanel>
                         <StackPanel Classes="origin">
                             <PathIcon Data="{StaticResource DocumentIcon}"/>
-                            <TextBlock Text="{Binding SnippetsTitle}"/>
+                            <TextBlock Text="{Binding SnippetsTitle}" AutomationProperties.HeadingLevel="3"/>
                         </StackPanel>
-                        <DataGrid ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Snippets}" IsReadOnly="True"
-                                  Margin="0,8,0,0">
+                        <DataGrid x:Name="SnippetGrid" ui:Grids.Flex="2" Theme="{StaticResource Grid}" ItemsSource="{Binding Snippets}" IsReadOnly="True"
+                                  Margin="0,8,0,0" AutomationProperties.Name="Belege" AutomationProperties.HelpText="Eingabetaste öffnet die Rechnung" AutomationProperties.AutomationId="MappingSnippets">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Auszug" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:SnippetRow">
-                                            <Panel Margin="4">
+                                            <Panel Margin="4" AutomationProperties.Name="{Binding Spoken}">
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding Loading}">
-                                                    <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0"/>
+                                                    <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0" AutomationProperties.AccessibilityView="Raw"/>
                                                     <TextBlock Text="Auszug wird geladen …" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <TextBlock Text="Kein Auszug verfügbar" Theme="{StaticResource Muted}" VerticalAlignment="Center" IsVisible="{Binding Missing}"/>
-                                                <Image Source="{Binding Scan}" Cursor="Hand" ToolTip.Tip="Rechnung öffnen" Tapped="OpenInvoice" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding HasScan}"/>
+                                                <Image Source="{Binding Scan}" Cursor="Hand" ToolTip.Tip="Rechnung öffnen" Tapped="OpenInvoice" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding HasScan}"
+                                                       AutomationProperties.Name="{Binding Spoken}"/>
                                                 <SelectableTextBlock Text="{Binding Excerpt}" FontFamily="{StaticResource MonoFont}" FontSize="11" TextWrapping="Wrap" IsVisible="{Binding HasExcerpt}"/>
                                             </Panel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Width="Auto">
+                                    <DataGridTemplateColumn.Header>
+                                        <Panel AutomationProperties.Name="Öffnen"/>
+                                    </DataGridTemplateColumn.Header>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate x:DataType="ui:SnippetRow">
-                                            <Button Theme="{StaticResource IconButton}" ToolTip.Tip="Rechnung öffnen" Click="OpenInvoice" VerticalAlignment="Center">
+                                            <Button IsTabStop="False" Theme="{StaticResource IconButton}" ToolTip.Tip="Rechnung öffnen" Click="OpenInvoice" VerticalAlignment="Center"
+                                                    AutomationProperties.Name="{Binding Title, StringFormat='{}{0} öffnen'}" AutomationProperties.AutomationId="MappingOpenInvoice">
                                                 <PathIcon Data="{StaticResource OpenIcon}" Width="14" Height="14"/>
                                             </Button>
                                         </DataTemplate>
