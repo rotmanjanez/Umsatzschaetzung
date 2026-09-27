@@ -1,0 +1,336 @@
+course: Umsatzschätzung Schritt für Schritt
+number: 6
+title: Ergebnis und Bericht
+guide:
+  page: web/docs/pages/guide/bericht.md
+  title: Bericht
+  intro: |-
+    <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><span class="here">5. Bericht</span></p>
+
+    Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben
+    dem kalkulierten, mit allem, was zur Rechnung dazugehört. Vorher gibt es auf
+    **4. Kalkulation** noch zwei Seiten anzusehen: die **Ertragsregeln**, die
+    festlegen, wie viel vom Einkauf als verkauft gilt, und das **Ergebnis**.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €`
+          der kalkulierte Umsatz nach BP steht, knapp 300.000 €
+        - das PDF gespeichert ist und sich öffnen lässt
+
+    !!! nachlesen "Zum Nachlesen"
+        Die Abschnitte des Berichts im Einzelnen beschreibt [Bericht](../bericht.md),
+        die Ertragsregeln [Regeln](../regeln.md#ertragsregeln) und
+        [Kalkulation](../kalkulation.md#ertragsregeln).
+
+    Damit ist die Beispielprüfung vollständig.
+
+    [Weiter: Danach <span>Die Prüfung weitergeben und die eigene beginnen</span>](danach.md){ .us-next }
+summary: >-
+  Zum Schluss das Ergebnis: wie viel vom Einkauf als verkauft gilt, was das Gasthaus
+  Zur Linde danach hätte umsetzen müssen, und wie daraus der Bericht für die Akte
+  wird.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+  text: >-
+    Die Beispielprüfung ist fertig, vom ersten Scan bis zum Bericht. Die eigene
+    läuft genauso.
+
+chapters:
+  - title: Vom Einkauf zum Bericht
+    beats:
+      - card:
+          kicker: Umsatzschätzung · Übung 6
+          title: Ergebnis und Bericht
+          text: Die letzte Übung, ein paar Minuten zum Mitklicken.
+        say: >-
+          Willkommen zur letzten Übung! Die Arbeit am Gasthaus ist so gut wie
+          erledigt. In dieser Übung schauen wir uns an, was dabei herausgekommen
+          ist, und wie daraus der Bericht für die Akte wird.
+      - card:
+          kicker: Was noch fehlt
+          title: Nicht alles, was eingekauft wird, wird verkauft
+          text: Wie viel abgeht, legen die Ertragsregeln fest.
+        say: >-
+          Eins fehlt noch. Nicht alles, was ein Wirt einkauft, wird auch verkauft.
+          Beim Zapfen geht halt ein bisserl Bier daneben, Gemüse verdirbt, und das
+          Personal isst auch einmal mit. Wie viel davon abgeht, das regeln die
+          Ertragsregeln.
+
+  - title: Ertragsregeln
+    beats:
+      - say: >-
+          Die Ertragsregeln stehen auf dem Reiter Kalkulation, klicken wir ihn an.
+        click: { text: "4. Kalkulation", type: TabItem }
+        act: [{ do: tab, header: "4. Kalkulation" }]
+        rounds: 8
+        task: Auf „4. Kalkulation“ klicken.
+        hint: Die Reiter stehen oben, unter dem Namen des Gasthauses.
+      - say: >-
+          In der zweiten Reihe gibt es die Seite Ertragsregeln, da klicken wir
+          einmal drauf.
+        click: { text: "Ertragsregeln", type: TabItem }
+        act: [{ do: tab, header: "Ertragsregeln" }]
+        rounds: 4
+        task: Auf „Ertragsregeln“ klicken.
+        hint: Sie steht in der zweiten Reihe, gleich neben „Portionen“.
+        text: |-
+          Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Sie legt fest,
+          wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird,
+          wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das
+          Personal isst mit.
+
+          Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es
+          eine Ertragsregel gibt, **Nach Kategorie** und **Nach Zutat**. Je Zeile
+          wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer
+          Kategorie vor. Die Kalkulation rechnet sofort neu.
+        shot:
+          name: bericht-ertragsregeln
+          at: { text: "Nach Kategorie", up: StackPanel }
+          width: 330
+          alt: Die Seite „Ertragsregeln“ des Gasthauses, überall „Kein Abzug“
+      - say: >-
+          Da steht, für welche Warengruppen es überhaupt eine Regel gibt, beim
+          Gasthaus zum Beispiel Bier vom Fass, Fleisch oder Wein. Und daneben, was
+          gerade gilt.
+        show: { text: "Nach Kategorie" }
+      - say: >-
+          Beim Fassbier stehen in der Auswahl drei Regeln für den Schankverlust,
+          mit drei, fünf und acht Prozent. Gewählt ist aber keine, da steht Kein
+          Abzug. Das Programm zieht nämlich nur dann etwas ab, wenn eine Regel als
+          Standard hinterlegt oder hier ausgewählt ist.
+        show: { text: "Bier vom Fass", up: Grid }
+        text: |-
+          Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es
+          keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für
+          **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und
+          8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte
+          Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel
+          gewählt.
+      - say: >-
+          Eine Prozentzahl einfach eintippen geht übrigens nicht, und das hat einen
+          guten Grund. Jeder Abzug hat einen Namen, zum Beispiel Schankverlust, und
+          der steht später im Bericht. So sieht jeder, nicht nur wie viel abgezogen
+          wurde, sondern auch warum.
+        show: { text: "Bier vom Fass", up: Grid }
+        text: |-
+          Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug
+          ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz,
+          sondern auch, warum er gilt.
+      - say: >-
+          Und wo kommen die Regeln her? Aus der Regel-Datenbank, genau wie die
+          Zuordnungen und die Rezepte. Angelegt werden sie über das Reglersymbol
+          rechts oben, unter Ertragsregeln. Eine neue Regel steht dann in jeder
+          Prüfung zur Wahl. Für unser Gasthaus lassen wir es aber, wie es ist.
+        show: { tip: "Regeln" }
+        hold: 0.5
+        text: |-
+          Die Ertragsregeln stehen in der
+          [Regel-Datenbank](../verwaltung.md#regel-datenbank), neben Zutaten,
+          Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das
+          Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und
+          Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe
+          [Ertragsregeln](../regeln.md#ertragsregeln). Die Sätze sind
+          Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des
+          Prüfungsjahres.
+
+          Für das Beispiel bleibt es bei **Kein Abzug**.
+
+  - title: Das Ergebnis
+    beats:
+      - say: >-
+          Jetzt wird es spannend. Ganz rechts in derselben Reihe ist die Seite
+          Ergebnis, einmal draufklicken.
+        click: { text: "Ergebnis", type: TabItem }
+        act: [{ do: tab, header: "Ergebnis" }]
+        rounds: 4
+        task: Auf „Ergebnis“ klicken.
+        hint: Die letzte Seite in der zweiten Reihe, rechts neben „Übrige Einkäufe“.
+        text: |-
+          Die letzte Seite, **Ergebnis**, öffnen. Jede Korrektur auf den anderen
+          Seiten ist hier schon eingerechnet, ebenso jede spätere Änderung an
+          Rechnungen, Zuordnung, Sortiment, Rezepten oder Ertragsregeln. Die Seite
+          hat drei Teile:
+      - say: >-
+          Ganz oben steht das, worum es eigentlich geht.
+        show: { text: "Umsätze vor und nach Betriebsprüfung" }
+        through: { text: "Differenz" }
+      - say: >-
+          Unter Umsatz vor BP steht der Umsatz, den das Gasthaus erklärt hat, rund
+          hundertsechsundneunzigtausend Euro.
+        show: { text: "Umsatz vor BP" }
+      - say: >-
+          Daneben, unter Umsatz nach BP, der Umsatz, den der Einkauf hergibt,
+          knapp dreihunderttausend.
+        show: { text: "Umsatz nach BP" }
+      - say: >-
+          Das sind rund hunderttausend Euro mehr, als erklärt wurden.
+        show: { text: "Differenz" }
+        text: |-
+          - **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von
+            196.418,00 € neben dem kalkulierten von knapp 300.000 €, mit der
+            Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der
+            Prüfung.
+      - say: >-
+          Darunter der Rohgewinnaufschlagsatz, getrennt nach Getränken und Speisen. Der
+          sagt, wie viel der Wirt auf seinen Einkauf draufschlägt. Beim Gasthaus
+          sind es insgesamt rund dreihundertvierzig Prozent.
+        show: { text: "Rohgewinnaufschlag" }
+        text: |-
+          - **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und
+            Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund
+            340 %. Ermittelt wird der Satz nur an Portionen mit Preis.
+      - say: >-
+          Und ganz unten die Zusammenfassung: vom Einkauf über den Wareneinsatz bis
+          zu dem Teil, dessen Umsatz nur geschätzt ist. Da sieht man auch, dass
+          nichts abgezogen wurde, weil wir ja keine Ertragsregel gewählt haben.
+        show: { text: "Zusammenfassung" }
+        text: |-
+          - **Zusammenfassung**: die Brücke von den erfassten Einkäufen über den
+            Wareneinsatz zum Einsatz der verkauften Portionen und zum geschätzten
+            Umsatz. **davon Schwund und Abzüge** steht auf `0,00 €`, weil keine
+            Ertragsregel gewählt ist.
+        shot:
+          name: bericht-ergebnis
+          at: { text: "Umsätze vor und nach Betriebsprüfung", up: StackPanel }
+          below: true
+          alt: Die Seite „Ergebnis“ mit dem erklärten und dem kalkulierten Umsatz
+
+  - title: Der Bericht in der Vorschau
+    beats:
+      - say: >-
+          Aus all dem macht das Programm den Bericht, der in die Akte kommt. Den
+          findet man oben auf dem letzten Reiter, Bericht. In dieser Übung bleibt er
+          zu, auf dem eigenen Rechner einfach draufklicken.
+        show: { text: "5. Bericht", type: TabItem }
+        text: |-
+          Auf **5. Bericht** wechseln. Der Reiter zeigt den fertigen Bericht so, wie
+          er als PDF gespeichert wird.
+      - card:
+          kicker: Der Bericht
+          title: Was drinsteht
+          list:
+            - Umsätze vor und nach BP
+            - Rohgewinnaufschlag
+            - Anhang zum Nachrechnen
+        say: >-
+          Vorne steht dasselbe wie auf der Seite Ergebnis: der erklärte Umsatz neben
+          dem kalkulierten, und der Rohgewinnaufschlagsatz, dazu jedes Produkt mit
+          seinem Einsatz und seinem Preis. Dahinter kommt ein Anhang mit jeder
+          Rechnungszeile, jedem Rezept und jeder Ertragsregel. So lässt sich jede
+          Zahl bis zur einzelnen Rechnung zurückverfolgen.
+        text: |-
+          1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von
+             196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
+          2. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
+             Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
+          3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die
+             Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat,
+             damit jede Zahl des Berichts nachvollziehbar bleibt.
+      - say: >-
+          Stimmt noch etwas nicht, fehlt zum Beispiel bei einem Produkt der Preis,
+          dann steht auf diesem Reiter ganz vorne in der Vorschau ein Hinweis. Ins PDF kommen diese
+          Hinweise aber nicht mit.
+        show: { text: "5. Bericht", type: TabItem }
+        text: |-
+          Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg
+          **Hinweise**. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF
+          gehen die Hinweise nicht mit. Gibt es mehrere Berichtsvorlagen, wählt die
+          Auswahl über der Vorschau eine andere für diese Prüfung.
+
+  - title: Als PDF speichern
+    beats:
+      - card:
+          kicker: Als PDF speichern
+          title: Das Pfeilsymbol rechts oben
+          text: Auf „5. Bericht“, rechts oben.
+        say: >-
+          Gespeichert wird der Bericht mit dem Pfeilsymbol rechts oben auf dem
+          Reiter Bericht. Dann fragt das Programm, wo das PDF hin soll, und fertig.
+        text: |-
+          Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht als
+          PDF ab, wo man will.
+      - card:
+          kicker: Gut zu wissen
+          title: Nach einer Änderung neu speichern
+          text: Ein gespeichertes PDF ändert sich nicht mit.
+        say: >-
+          Wichtig ist nur eins: Die Vorschau ist immer am aktuellen Stand. Ändert
+          man danach noch eine Rechnung, eine Zuordnung oder einen Preis, sieht man
+          das sofort. Das PDF, das schon gespeichert ist, ändert sich aber nicht mit,
+          das speichert man dann einfach neu.
+        text: |-
+          Die Vorschau gibt immer den aktuellen Stand wieder: Wer danach eine
+          Rechnung, eine Zuordnung oder einen Preis ändert, sieht das dort sofort.
+          Ein schon gespeichertes PDF ändert sich nicht mit; nach einer Änderung
+          wird es neu gespeichert.
+
+  - title: Die Prüfung wiederfinden
+    beats:
+      - say: >-
+          Zum Schluss gehen wir noch zurück zur Liste der Prüfungen. Dafür ist der
+          kleine Pfeil ganz links oben, neben dem Namen des Gasthauses.
+        click: { name: BackButton }
+        act:
+          - { do: click, at: { name: BackButton } }
+          - { do: deselect, at: { text: "Bezeichnung", up: DataGrid } }
+        done: { at: { text: "Bezeichnung", up: DataGrid } }
+        rounds: 2
+        task: Links oben auf den Pfeil klicken.
+        hint: Der Pfeil steht ganz links, vor „Gasthaus Zur Linde“.
+        text: |-
+          Der Pfeil links oben führt zurück zur Liste der Prüfungen. Dort steht das
+          Gasthaus jetzt mit Zeitraum und dem Datum der letzten Änderung. Ein Klick
+          auf die Zeile öffnet die Prüfung wieder, beim nächsten Start genauso. Bei
+          vielen Prüfungen hilft das Feld **Filtern**.
+        shot:
+          name: pruefungen-wieder
+          at: { text: "Bezeichnung", up: DataGrid }
+          trim: { top: 16 }
+          clip: DataGridRow
+          alt: Die Liste der Prüfungen mit dem Gasthaus
+      - say: >-
+          Da ist unser Gasthaus, mit dem Zeitraum und dem Tag, an dem zuletzt
+          etwas geändert wurde. Gespeichert wird übrigens von selbst. Ein Klick auf
+          die Zeile, und die Prüfung ist wieder offen, auch morgen oder nächste
+          Woche.
+        show: { text: "Gasthaus Zur Linde, Bp 2025", up: DataGridRow }
+        hold: 0.5
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: Vom Ergebnis zum Bericht
+          list:
+            - Ertragsregeln prüfen
+            - Ergebnis vergleichen
+            - Bericht ansehen
+            - Als PDF speichern
+        say: >-
+          Am Ende läuft es also immer gleich: bei den Ertragsregeln schauen, was
+          abgezogen wird, auf der Seite Ergebnis den erklärten und den kalkulierten
+          Umsatz vergleichen, dann auf den Reiter Bericht, und mit dem Pfeilsymbol als
+          PDF speichern.
+      - card:
+          kicker: Gut zu wissen
+          title: Das Programm lernt mit
+          text: Jede Prüfung macht die nächste leichter.
+        say: >-
+          Und das Gute ist, was Sie bestätigt und angelegt haben, Zuordnungen, Rezepte
+          und Ertragsregeln, das merkt sich das Programm. Die nächste Prüfung geht also
+          schon ein Stückerl leichter.
+      - card:
+          kicker: Umsatzschätzung Schritt für Schritt
+          title: Das war die ganze Prüfung
+          list:
+            - Anlegen und einlesen
+            - Korrigieren und zuordnen
+            - Sortiment und aufräumen
+            - Ergebnis und Bericht
+        say: >-
+          Damit haben Sie eine ganze Prüfung einmal durchgemacht: angelegt, die
+          Rechnungen eingelesen und korrigiert, zugeordnet, das Sortiment angelegt,
+          aufgeräumt, und jetzt das Ergebnis und den Bericht. Mit echten Rechnungen
+          geht es genauso. Gar nicht schlecht, oder?

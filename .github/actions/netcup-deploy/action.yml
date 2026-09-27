@@ -18,6 +18,10 @@ inputs:
     description: Directories below the document root, as shell globs, that never change once there; the previous deploy's copy stays unless the new one brings its own.
     required: false
     default: ''
+  create:
+    description: Create the deploy path when it is not there yet, for a folder inside another deploy that keeps it.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -30,6 +34,7 @@ runs:
         DEPLOY_PATH: ${{ inputs.deploy-path }}
         SOURCE: ${{ inputs.source }}
         KEEP: ${{ inputs.keep }}
+        CREATE: ${{ inputs.create }}
       run: |
         set -euo pipefail
 
@@ -53,6 +58,7 @@ runs:
         STAGE="$(dirname "$DEPLOY_PATH")/.deploy-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
         tar -czf - "${EXCLUDE[@]}" -C "$SOURCE" . | ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "
           set -e
+          [ '$CREATE' = true ] && mkdir -p '$DEPLOY_PATH'
           [ -d '$DEPLOY_PATH' ] || { echo 'missing $DEPLOY_PATH' >&2; exit 1; }
           rm -rf '$STAGE' && mkdir -p '$STAGE/new' '$STAGE/old'
           tar -xzf - -C '$STAGE/new'

@@ -47,13 +47,13 @@ RewriteRule ^(.*)$ $1.br [L]
   Header set Cross-Origin-Opener-Policy "same-origin"
   Header set Cross-Origin-Embedder-Policy "require-corp"
 
-  # Weights and runtime sit under their release; the framework's files carry their hash.
-  # What names them is asked again on every visit.
+  # Weights and runtime sit under their release; the framework's files carry their hash, and
+  # a lesson's clips are named by what they say. What names them is asked again on every visit.
   Header set Cache-Control "no-cache"
-  <If "%{REQUEST_URI} =~ m#^/(models|ort)/#">
+  <If "%{REQUEST_URI} =~ m#^/(models|ort|lektionen/ton)/#">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </If>
-  <ElseIf "%{REQUEST_URI} =~ m#^/_framework/# && %{REQUEST_URI} !~ m#/dotnet\.js(\.br)?$#">
+  <ElseIf "%{REQUEST_URI} =~ m#^/(lektionen/)?_framework/# && %{REQUEST_URI} !~ m#/dotnet\.js(\.br)?$#">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </ElseIf>
 </IfModule>

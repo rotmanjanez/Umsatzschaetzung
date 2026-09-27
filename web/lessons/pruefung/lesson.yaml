@@ -1,0 +1,325 @@
+course: Umsatzschätzung Schritt für Schritt
+number: 1
+title: Prüfung anlegen
+summary: >-
+  Jede Arbeit im Programm beginnt mit einer Prüfung: ein Betrieb, ein Zeitraum und alles,
+  was dazugehört. Angelegt wird das Beispiel, das Gasthaus Zur Linde, mit dem Umsatz, den
+  es erklärt hat.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+  text: Als Nächstes kommen die Rechnungen.
+
+guide:
+  page: web/docs/pages/guide/start.md
+  title: Prüfung anlegen
+  intro: |-
+    <p class="us-steps"><span class="here">Prüfung</span><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
+
+    Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was
+    dazugehört.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - oben **Gasthaus Zur Linde, Bp 2025** steht und der Reiter **Prüfung** offen ist
+        - unter **Umsatz zu 19 %** `196.418,00` steht
+
+    !!! nachlesen "Zum Nachlesen"
+        Alle Felder des Reiters im Einzelnen beschreibt [Prüfung](../pruefung.md),
+        die Liste der Prüfungen beschreibt [Prüfungen](../pruefungen.md).
+
+    [Weiter: 1. Rechnungen importieren <span>Die 106 Rechnungen des Gasthauses einlesen</span>](rechnungen.md){ .us-next }
+
+chapters:
+  - title: So funktionieren die Übungen
+    beats:
+      - card:
+          kicker: Umsatzschätzung · Übung 1
+          title: Prüfung anlegen
+          text: Ein paar Minuten zum Mitklicken.
+        say: >-
+          Willkommen! Schön, dass Sie da sind. Bevor wir loslegen, erkläre ich kurz,
+          wie diese Übungen funktionieren.
+        hold: 0.5
+      - card:
+          kicker: Nichts zu installieren
+          title: Das echte Programm
+          text: Erfundene Daten. Kaputt machen kann man nichts.
+        say: >-
+          Im Hintergrund läuft schon das echte Programm, direkt hier im Browser.
+          Installieren muss man dafür gar nichts. Alle Beispiele verwenden erfundene
+          Daten, man kann also nichts kaputt machen. Einfach ausprobieren.
+        hold: 0.5
+      - card: &zuhoeren
+          kicker: Zuhören
+          title: Blau heißt anschauen
+          text: Wovon die Rede ist, wird blau umrandet.
+        say: >-
+          Ich erkläre bei jedem Schritt, was passiert und warum.
+          Worüber ich gerade rede, das wird am
+          Bildschirm hell gemacht und blau umrandet. Blau heißt: nur anschauen, da
+          muss man noch nichts tun.
+      - card: *zuhoeren
+        say: >-
+          Zum Beispiel da: Hier sieht man immer, wo wir gerade sind und wie weit es
+          noch ist.
+        show: { page: card }
+      - card: *zuhoeren
+        say: >-
+          Mit diesem Knopf hält man an, und mit einem zweiten Klick geht es weiter.
+        show: { page: pause }
+      - card: *zuhoeren
+        say: >-
+          Der da spielt den letzten Satz noch einmal ab, falls man etwas nicht
+          mitbekommen hat.
+        show: { page: replay }
+      - card: *zuhoeren
+        say: >-
+          Und hier schaltet man Untertitel ein, wenn man lieber mitliest.
+        show: { page: subtitles }
+        hold: 0.5
+      - card: &dran
+          kicker: Selbst machen
+          title: Orange heißt klicken
+          text: Es geht weiter, wenn es erledigt ist.
+          pad: true
+        say: >-
+          Und dann sind Sie dran. Das erkennt man an der Farbe: Es wird orange, oben
+          steht „Sie sind dran“, und darunter genau, was zu tun ist. Die Stelle im
+          Programm bekommt dann einen orangen Ring.
+        show: { page: card, act: true }
+        note: So schaut es aus, wenn Sie dran sind.
+      - card: *dran
+        say: >-
+          Lassen Sie sich ruhig Zeit, es geht erst weiter, wenn es erledigt ist. Und
+          wenn man einmal danebenklickt, macht das gar nichts, dann kommt halt ein
+          kleiner Tipp.
+        hold: 0.5
+      - card:
+          kicker: Lernen durch Tun
+          title: Selbst gemacht, schon gelernt
+          text: Jede Übung ist ein Handgriff aus einer echten Prüfung.
+        say: >-
+          Und warum das nicht einfach in einem Handbuch steht? Weil man sich das, was
+          man einmal selbst gemacht hat, viel besser merkt als alles, was man nur liest.
+          Jede Übung ist ein Handgriff aus einer echten Prüfung, und mit eigenen
+          Rechnungen geht es dann genauso.
+        hold: 0.5
+
+  - title: Die Liste der Prüfungen
+    beats:
+      - card:
+          kicker: Was ist eine Prüfung?
+          title: Ein Betrieb, ein Zeitraum
+          text: Gasthaus Zur Linde, 2025.
+        say: >-
+          Eine Prüfung ist im Programm ein Fall, also ein Betrieb, ein Zeitraum und
+          alles, was dazugehört. Unser Beispiel ist ein Wirtshaus, das Gasthaus Zur
+          Linde, und geprüft wird das Jahr zweitausendfünfundzwanzig.
+      - say: >-
+          So, und jetzt schauen wir uns das Programm an. Nach dem Start
+          zeigt es die Liste der Prüfungen. Beim ersten Mal ist die natürlich noch
+          leer.
+        show: { text: "Noch keine Prüfungen" }
+      - say: >-
+          Und in der Mitte steht ein Knopf: Neue Prüfung.
+        show: { text: "Neue Prüfung" }
+        hold: 1
+        text: |-
+          Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim ersten Mal
+          ist sie leer.
+        shot:
+          name: neue-pruefung-knopf
+          at: { text: "Neue Prüfung", up: DockPanel }
+          alt: Die leere Liste der Prüfungen mit dem Knopf „Neue Prüfung“
+
+  - title: Die Eckdaten
+    beats:
+      - say: >-
+          Und jetzt sind Sie zum ersten Mal dran, Sie sehen es schon orange.
+          Einmal auf Neue Prüfung klicken, bitte.
+        click: { text: "Neue Prüfung" }
+        then: [{ do: focus }]
+        done: { at: { name: NewLabel } }
+        task: Auf „Neue Prüfung“ klicken.
+        hint: Der Knopf steht in der Mitte, rechts neben „Importieren“.
+        text: |-
+          **Neue Prüfung** öffnet das Formular.
+
+          Einzutragen sind:
+
+          | Feld | Wert |
+          |---|---|
+          | Bezeichnung | `Gasthaus Zur Linde, Bp 2025` |
+          | Zeitraum von | `01.01.2025` |
+          | Zeitraum bis | `31.12.2025` |
+          | Name | `Renate Vogel` |
+          | Steuernummer | `123/456/789` |
+          | PAB-Nr. | `PAB 2025/0417` |
+
+          Die mit Stern markierten Felder sind Pflicht. Der Zeitraum entscheidet,
+          welche Rechnungen in die Kalkulation eingehen. Die Gewerbekennzahl bleibt
+          leer.
+
+          **Anlegen** öffnet die Prüfung.
+        shot:
+          name: neue-pruefung
+          at: { name: NewLabel, up: StackPanel }
+          width: 552
+          alt: Das leere Formular für eine neue Prüfung
+      - say: >-
+          Jetzt geht ein Formular auf. Die Werte stehen gleich unter „Sie sind dran“.
+        show: { name: NewLabel, up: StackPanel }
+        hold: 1
+      - say: >-
+          Ganz oben kommt die Bezeichnung hin, das ist der Name, unter dem die Prüfung
+          später in der Liste steht: Gasthaus Zur Linde, Bp zweitausendfünfundzwanzig.
+        type: { at: { name: NewLabel }, text: "Gasthaus Zur Linde, Bp 2025" }
+        accept: ["Gasthaus Zur Linde, BP 2025", "Gasthaus zur Linde, Bp 2025"]
+        task: "Bezeichnung: Gasthaus Zur Linde, Bp 2025"
+        hint: Das oberste Feld im Formular.
+      - say: >-
+          Darunter kommt der Zeitraum. Geprüft wird das ganze Jahr, also vom ersten
+          Jänner zweitausendfünfundzwanzig bis Silvester.
+        type: { at: { name: NewFrom }, text: "01.01.2025" }
+        accept: ["01.01.2025", "1.1.2025"]
+        task: "Zeitraum von: 01.01.2025"
+        hint: Das Feld unter der Bezeichnung.
+      - say: >-
+          Und daneben das Ende, der einunddreißigste Dezember.
+        type: { at: { name: NewTo }, text: "31.12.2025" }
+        accept: ["31.12.2025"]
+        task: "Zeitraum bis: 31.12.2025"
+        hint: Das Feld rechts neben „Zeitraum von“.
+      - say: >-
+          Weiter unten geht es um den Steuerpflichtigen. Beim Namen schreiben wir die
+          Inhaberin hin, Renate Vogel.
+        type: { at: { name: NewName }, text: "Renate Vogel" }
+        task: "Name: Renate Vogel"
+        hint: Das Feld unter „Steuerpflichtiger“.
+      - say: >-
+          Dann die Steuernummer. Die ist leicht: eins zwei drei, vier fünf sechs,
+          sieben acht neun, mit Schrägstrichen dazwischen.
+        type: { at: { name: NewTaxNumber }, text: "123/456/789" }
+        accept: ["123/456/789"]
+        task: "Steuernummer: 123/456/789"
+        hint: Das Feld links unter dem Namen.
+      - say: >-
+          Und daneben noch die PAB-Nummer.
+        type: { at: { name: NewPab }, text: "PAB 2025/0417" }
+        accept: ["PAB 2025/0417"]
+        task: "PAB-Nr.: PAB 2025/0417"
+        hint: Das Feld rechts neben der Steuernummer.
+      - say: >-
+          Die Gewerbekennzahl lassen wir für das Beispiel leer. Alles andere ist
+          ausgefüllt, also klicken wir auf Anlegen.
+        click: { text: "Anlegen" }
+        done: { at: { name: CaseLabel } }
+        task: Auf „Anlegen“ klicken.
+        hint: Der Knopf steht ganz unten im Formular.
+
+  - title: So sieht eine geöffnete Prüfung aus
+    beats:
+      - say: >-
+          Da ist sie schon, die neue Prüfung. Ganz oben steht die Bezeichnung.
+        show: { name: CaseLabel }
+        shot:
+          name: pruefung-kopf
+          at: { name: CaseLabel, up: DockPanel }
+          trim: { bottom: -56 }
+          alt: Die Kopfzeile einer geöffneten Prüfung mit den sechs Reitern
+      - say: >-
+          Und gleich darunter der Zeitraum.
+        show: { name: CasePeriod }
+      - say: >-
+          Darunter sind die Reiter: Prüfung, dann eins Rechnungen bis fünf Bericht.
+          Das sind die fünf Schritte, und die gehen wir in den Übungen genau der Reihe
+          nach durch.
+        show: { text: "1. Rechnungen", type: TabItem }
+        through: { text: "5. Bericht", type: TabItem }
+        text: |-
+          Oben steht die Bezeichnung, darunter die Reiter **Prüfung**, **1. Rechnungen**
+          bis **5. Bericht**: die fünf Schritte in der Reihenfolge, in der diese
+          Anleitung sie durchgeht. Der Pfeil links oben führt zurück zur Liste.
+      - say: >-
+          Mit dem Pfeil links oben kommt man zurück zur Liste der Prüfungen.
+        show: { name: BackButton }
+      - say: >-
+          Einen Knopf zum Speichern sucht man übrigens vergeblich. Das Programm
+          speichert jede Eingabe sofort. Man kann es also jederzeit zumachen, und
+          beim nächsten Start steht die Prüfung wieder in der Liste.
+        text: |-
+          Einen Knopf zum Speichern gibt es nicht. Jede Eingabe wird sofort gespeichert.
+          Das Programm kann jederzeit geschlossen werden; die Prüfung steht beim nächsten
+          Start wieder in der Liste.
+
+  - title: Erklärte Umsätze
+    beats:
+      - say: >-
+          Offen ist gerade der Reiter Prüfung. Da stehen die Kerndaten der Prüfung.
+        show: { text: "Prüfung", type: TabItem }
+      - say: >-
+          Für den Bericht brauchen wir davon vor allem eines: den Umsatz, den der
+          Betrieb selbst erklärt hat.
+        show: { text: "Erklärte Umsätze, netto in €" }
+        text: |-
+          Nach dem Anlegen ist der Reiter **Prüfung** geöffnet:
+
+          Er hält die Kerndaten der Prüfung. Für den Bericht wird davon eines
+          gebraucht: der Umsatz, den der Betrieb erklärt hat. Unter
+          **Erklärte Umsätze, netto in €** steht er getrennt nach Steuersatz.
+        shot:
+          name: pruefung-leer
+          at: { text: "Erklärte Umsätze, netto in €", up: TabControl }
+          trim: { top: 16 }
+          alt: Der Reiter „Prüfung“ direkt nach dem Anlegen
+      - say: >-
+          Das Gasthaus hat alles zu neunzehn Prozent erklärt, netto
+          hundertsechsundneunzigtausendvierhundertachtzehn Euro. Wir klicken ins
+          Feld Umsatz zu neunzehn Prozent und tippen den Betrag ein. Die anderen zwei
+          Felder bleiben leer.
+        type: { at: { name: Declared19Box }, text: "196.418,00" }
+        task: "Umsatz zu 19 %: 196.418,00"
+        hint: Das erste Feld unter „Erklärte Umsätze“, ganz links.
+        text: |-
+          | Feld | Wert |
+          |---|---|
+          | Umsatz zu 19 % | `196.418,00` |
+          | Umsatz zu 7 % | leer lassen |
+          | Umsatz zu 0 % | leer lassen |
+
+          Das Gasthaus hat alles zu 19 % erklärt. Die übrigen Abschnitte des Reiters
+          bleiben für das Beispiel leer.
+        shot:
+          name: erklaerte-umsaetze
+          at: { name: Declared19Box, up: Grid }
+          trim: { top: -30 }
+          width: 336
+          alt: Die erklärten Umsätze des Gasthauses
+      - say: >-
+          Passt. Das ist die Zahl, mit der am Ende die Schätzung verglichen wird.
+        show: { name: Declared19Box }
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: Prüfung anlegen
+          list:
+            - „Neue Prüfung“
+            - Eckdaten eintragen
+            - „Anlegen“
+            - Erklärten Umsatz eintragen
+        say: >-
+          Damit ist die Prüfung angelegt. Noch einmal der Reihe nach: auf Neue Prüfung
+          klicken, die Eckdaten eintragen, anlegen, und dann auf dem Reiter Prüfung den
+          erklärten Umsatz eintragen.
+      - card:
+          kicker: Gut zu wissen
+          title: Alles lässt sich ändern
+          text: Die Kalkulation rechnet einfach neu.
+        say: >-
+          Und keine Sorge, falls sich einmal ein Tippfehler einschleicht: Auf dem
+          Reiter Prüfung lässt sich alles jederzeit ausbessern, und das Programm
+          rechnet dann einfach neu. In der nächsten Übung holen wir uns die Rechnungen
+          des Gasthauses ins Programm.

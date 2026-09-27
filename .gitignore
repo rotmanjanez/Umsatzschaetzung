@@ -12,7 +12,17 @@ __pycache__
 
 web/docs/pages/img/
 web/docs/pages/guide/img/
+web/docs/pages/guide/index.md
+web/docs/pages/guide/start.md
+web/docs/pages/guide/korrektur.md
+web/docs/pages/guide/zuordnung.md
+web/docs/pages/guide/sortiment.md
+web/docs/pages/guide/kalkulation.md
+web/docs/pages/guide/bericht.md
+web/docs/pages/guide/rechnungen.md
+web/docs/shots/guide.jsonl
 .env
 beispiel-rechnungen/
+web/lessons/out/
 tools/pdfium/work/
 tools/pdfium/pdfium.a

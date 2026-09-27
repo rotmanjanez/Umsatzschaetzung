@@ -4,12 +4,17 @@ on:
   push:
     branches: [main]
     tags: ['v*']
-    paths: ['web/**', 'src/**', 'tools/headless/**', 'tools/embeddings/**', '.github/workflows/deploy-web.yml']
+    paths: ['web/**', 'src/**', 'tools/headless/**', 'tools/lessons/**', 'tools/embeddings/**', '.github/actions/**', '.github/workflows/deploy-web.yml']
   workflow_dispatch:
 
 concurrency:
   group: deploy-web
   cancel-in-progress: false
+
+# The lessons that are published; each is in `web/lessons/<name>/lesson.yaml`, and all its
+# sentences are in the clip store.
+env:
+  LESSONS: pruefung korrektur zuordnung
 
 jobs:
   landing:
@@ -54,13 +59,14 @@ jobs:
           restore-keys: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
       - run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
       # The weights and the runtime sit under their release and never change there: what the
-      # server has is kept, only what is new goes up.
+      # server has is kept, only what is new goes up. The lessons are deployed into the app
+      # by their own job.
       - uses: ./.github/actions/netcup-deploy
         if: github.event_name != 'pull_request'
         with:
           source: publish/wwwroot
           deploy-path: ${{ vars.APP_DEPLOY_PATH }}
-          keep: models/* ort/*
+          keep: models/* ort/* lektionen
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
@@ -107,6 +113,15 @@ jobs:
             dotnet run --project tools/headless -- "$script" \
               --width 1320 --height 860 --out "$out" --readings readings
           done
+      - name: Keep the stores each lesson starts from
+        env:
+          UMSATZ_LESSON_CACHE: ${{ github.workspace }}
+        run: for name in $LESSONS; do python web/lessons/lesson.py "web/lessons/$name/lesson.yaml" zustand; done
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: zustand
+          path: web/lessons/out/*/zustand
+          if-no-files-found: error
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always() && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
         with:
@@ -117,6 +132,64 @@ jobs:
         with:
           name: shots
           path: shots-out
+
+  # The lessons take their weights from the app beside them, so they go up after it. Clips
+  # come from the store only: a sentence nobody has spoken yet fails the build, and is
+  # spoken locally with `voice --elevenlabs`.
+  lessons:
+    needs: [shots, app]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.local/share/umsatzschaetzung/models
+          key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Browser/Browser.targets') }}
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet workload install wasm-tools
+      - id: toolchain
+        run: echo "wasm=$(dotnet workload list | grep wasm-tools | tr -s ' ' '_')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/lessons/obj/Release/net10.0/wasm/for-publish
+          key: lessons-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('tools/lessons/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-${{ github.sha }}
+          restore-keys: lessons-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('tools/lessons/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: web/lessons/requirements.txt
+      - run: pip install -r web/lessons/requirements.txt
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: zustand
+          path: web/lessons/out
+      - name: Reach the clip store
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/store_key
+          chmod 600 ~/.ssh/store_key
+      - name: Build the lessons
+        env:
+          UMSATZ_LESSON_STORE: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:umsatzschaetzung-stimme
+          UMSATZ_LESSON_STORE_KEY: ~/.ssh/store_key
+        run: for name in $LESSONS; do python web/lessons/lesson.py "web/lessons/$name/lesson.yaml" voice site --elevenlabs; done
+      - uses: ./.github/actions/netcup-deploy
+        if: github.event_name != 'pull_request'
+        with:
+          source: web/lessons/out/lektionen
+          deploy-path: ${{ vars.APP_DEPLOY_PATH }}/lektionen
+          create: 'true'
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
   docs:
     needs: shots

@@ -1,0 +1,267 @@
+course: Umsatzschätzung Schritt für Schritt
+number: 0
+title: Worum es geht
+summary: >-
+  Was das Programm rechnet, die fünf Schritte einer Prüfung und die Wörter, die dabei
+  immer wieder vorkommen. Dazu das Beispiel, das durch alle Übungen führt: das
+  Gasthaus Zur Linde.
+window: [1440, 810]
+
+done:
+  title: Bereit!
+  text: Als Nächstes wird die Prüfung angelegt.
+
+guide:
+  page: web/docs/pages/guide/index.md
+  title: Beispielprüfung
+  intro: |-
+    Diese Anleitung führt Schritt für Schritt durch eine vollständige Prüfung: von
+    der Installation über die Rechnungen bis zum fertigen Bericht. Vorkenntnisse
+    mit dem Programm sind nicht nötig, eigene Belege auch nicht. Alles, was
+    gebraucht wird, steht hier zum Herunterladen.
+  end: |-
+    ## Vorbereitung
+
+    Vorab muss das Programm auf dem Rechner installiert sein:
+
+    [Windows](install-windows.md){ .md-button .us-os-windows }
+    [macOS](install-macos.md){ .md-button .us-os-macos }
+
+    Wer es schon installiert hat, geht direkt weiter.
+
+    [Weiter: Prüfung anlegen <span>Den Fall im Programm eröffnen und den erklärten Umsatz eintragen</span>](start.md){ .us-next }
+
+chapters:
+  - title: Was das Programm rechnet
+    beats:
+      - card:
+          kicker: Umsatzschätzung · Übung 0
+          title: Worum es geht
+          text: Ein paar Minuten zum Zuhören.
+        say: >-
+          Willkommen! Bevor wir irgendwo draufklicken, schauen wir uns in Ruhe an,
+          worum es bei dem Programm überhaupt geht. Das dauert nur ein paar
+          Minuten, und diesmal wird einfach zugehört.
+      - card:
+          kicker: Die Frage
+          title: Passt der erklärte Umsatz zum Einkauf?
+          text: Was eingekauft wird, wird auch verkauft.
+        say: >-
+          Die Frage ist ganz einfach: Ein Gasthaus sagt, so viel Umsatz hat es im
+          Jahr gemacht. Passt das zu dem, was es eingekauft hat? Denn was eingekauft
+          wird, wird ja auch irgendwann verkauft.
+      - card:
+          kicker: Ein Beispiel
+          title: 600 Liter Fassbier
+          list:
+            - rund 1.100 Halbe
+            - je 4,60 €
+            - = Umsatz mit Fassbier
+        say: >-
+          Nehmen wir das Bier. Wer sechshundert Liter Fassbier einkauft, schenkt
+          daraus ungefähr elfhundert Halbe aus. Ein bisserl was geht beim Zapfen
+          halt immer verloren, das ist der Schankverlust. Mal vier Euro sechzig
+          pro Glas, und schon weiß man, was allein das Fassbier an Umsatz bringen
+          müsste.
+      - card:
+          kicker: Und das für alles
+          title: Die Summe gegen den erklärten Umsatz
+          text: Jede Ware gerechnet, alles zusammengezählt.
+        say: >-
+          Genau diese Rechnung macht das Programm für jede Ware, die eingekauft
+          wurde, vom Bier bis zum Schnitzelfleisch. Am Ende zählt es alles zusammen
+          und stellt es dem Umsatz gegenüber, den der Betrieb erklärt hat.
+        text: |-
+          Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt
+          sich aus dem Einkauf nachrechnen: Wer 600 Liter Fassbier einkauft, schenkt
+          daraus rund 1.100 Gläser zu 0,5 l aus, ein Teil geht als Schankverlust
+          verloren. Mal 4,60 € je Glas ergibt das den Umsatz allein mit Fassbier. Das
+          Programm macht diese Rechnung für jede eingekaufte Ware und stellt die Summe
+          dem erklärten Umsatz gegenüber.
+
+  - title: Fünf Schritte, fünf Reiter
+    beats:
+      - card:
+          kicker: Eine Prüfung
+          title: Fünf Schritte
+          list:
+            - 1. Rechnungen
+            - 2. Zuordnung
+            - 3. Sortiment
+            - 4. Kalkulation
+            - 5. Bericht
+        say: >-
+          Damit das Programm so rechnen kann, braucht es fünf Dinge. Und genau das
+          sind die fünf Reiter, die man später oben in jeder Prüfung sieht. Gehen
+          wir sie kurz der Reihe nach durch.
+        text: |-
+          Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfung:
+
+          <ol class="us-flow">
+          <li><b>1. Rechnungen</b> Die Eingangsrechnungen des Betriebs: was er eingekauft hat.</li>
+          <li><b>2. Zuordnung</b> Jede Rechnungsposition wird einer Zutat zugeordnet, etwa „Frankenbräu Pils Fass 50 l“ zu Fassbier. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.</li>
+          <li><b>3. Sortiment</b> Was der Betrieb verkauft und zu welchem Preis: Bier 0,5 l für 4,60 €, Schnitzel mit Pommes für 15,90 €.</li>
+          <li><b>4. Kalkulation</b> Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.</li>
+          <li><b>5. Bericht</b> Der kalkulierte Umsatz neben dem erklärten, als PDF.</li>
+          </ol>
+
+          ![Die Kopfzeile einer geöffneten Prüfung mit ihren Reitern](img/pruefung-kopf.png)
+      - card:
+          kicker: 1. Rechnungen
+          title: Was eingekauft wurde
+          text: Die Eingangsrechnungen, meist als Scan.
+        say: >-
+          Zuerst die Rechnungen. Das sind die Eingangsrechnungen vom Betrieb, also
+          alles, was er eingekauft hat. Die liest das Programm selbst ein, auch
+          wenn sie nur eingescannt sind.
+      - card:
+          kicker: 2. Zuordnung
+          title: "„Frankenbräu Pils Fass 50 l“ ist Fassbier"
+          text: Das Programm schlägt vor, Sie bestätigen.
+        say: >-
+          Dann die Zuordnung. Auf der Rechnung steht halt „Frankenbräu Pils Fass
+          fünfzig Liter“, gerechnet wird aber mit Fassbier. Das Programm schlägt
+          vor, was gemeint ist, und Sie schauen drüber und bestätigen oder
+          korrigieren.
+      - card:
+          kicker: 3. Sortiment
+          title: Was verkauft wird, und um wie viel
+          list:
+            - Bier 0,5 l um 4,60 €
+            - Schnitzel mit Pommes um 15,90 €
+        say: >-
+          Als Drittes das Sortiment: Was verkauft das Gasthaus, und zu welchem
+          Preis? Die Halbe um vier Euro sechzig, das Schnitzel mit Pommes um
+          fünfzehn Euro neunzig, und so weiter.
+      - card:
+          kicker: 4. Kalkulation
+          title: Was der Einkauf ergeben müsste
+          text: Aus Zutaten, Rezepten und Preisen.
+        say: >-
+          In der Kalkulation rechnet das Programm dann aus Zutaten, Rezepten und
+          Preisen zusammen, wie viel Umsatz bei dem Einkauf herauskommen müsste.
+      - card:
+          kicker: 5. Bericht
+          title: Gerechnet neben erklärt
+          text: Als PDF.
+        say: >-
+          Und zum Schluss der Bericht: der gerechnete Umsatz neben dem erklärten,
+          schön als PDF zum Ausdrucken oder Ablegen.
+
+  - title: Die wichtigsten Begriffe
+    beats:
+      - card:
+          kicker: Ein paar Wörter
+          title: Zutat und Produkt
+          list:
+            - "Zutat: Fassbier"
+            - "Produkt: Bier 0,5 l vom Fass"
+        say: >-
+          Ein paar Wörter kommen dabei immer wieder vor. Eine Zutat ist das, was
+          eingekauft wird, also Fassbier, Schweinefleisch oder Rotwein. Ein Produkt
+          ist das, was verkauft wird, zum Beispiel die Halbe vom Fass oder das
+          Schnitzel mit Pommes.
+      - card:
+          kicker: Ein paar Wörter
+          title: Rezept und Sortiment
+          list:
+            - "Rezept: 500 ml Fassbier je Halbe"
+            - "Sortiment: Produkte mit Preisen"
+        say: >-
+          Das Rezept sagt, wie viel von welcher Zutat in ein Produkt geht. In eine
+          Halbe gehen, wenig überraschend, fünfhundert Milliliter Fassbier. Und das
+          Sortiment sind die Produkte, die genau dieser Betrieb führt, mit seinen
+          eigenen Preisen.
+      - card:
+          kicker: Ein paar Wörter
+          title: Zuordnung und Regeln
+          list:
+            - "Zuordnung: Position zu Zutat"
+            - "Regeln: das Gedächtnis des Programms"
+        say: >-
+          Die Zuordnung kennen wir schon, das ist die Verbindung zwischen einer
+          Rechnungsposition und einer Zutat. Und die Regeln sind sozusagen das
+          Gedächtnis vom Programm: Zutaten, Produkte, Rezepte und alle bestätigten
+          Zuordnungen. Die gehören nicht zu einer Prüfung, sondern zum Programm
+          selbst, und werden mit jeder Prüfung ein Stückerl mehr.
+        text: |-
+          Ein paar Wörter kommen dabei immer wieder vor:
+
+          | Begriff | Bedeutung |
+          |---|---|
+          | **Zutat** | Eine Ware, wie sie eingekauft wird: Fassbier, Schweinefleisch, Rotwein. |
+          | **Produkt** | Etwas, das verkauft wird: Bier 0,5 l vom Fass, Schnitzel mit Pommes. |
+          | **Rezept** | Wie viel von welcher Zutat in ein Produkt geht: In ein Bier 0,5 l gehen 500 ml Fassbier. |
+          | **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen. |
+          | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat. |
+          | **Regeln** | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
+
+  - title: Das Gasthaus Zur Linde
+    beats:
+      - card:
+          kicker: Das Beispiel
+          title: Gasthaus Zur Linde, 2025
+          list:
+            - 196.418 € netto erklärt
+            - 106 Rechnungen als Scan
+            - Speisekarte als Tabelle
+        say: >-
+          Geprüft wird in allen Übungen dasselbe Beispiel, das Gasthaus Zur Linde,
+          für das Jahr zweitausendfünfundzwanzig. Erklärt hat es
+          hundertsechsundneunzigtausendvierhundertachtzehn Euro Umsatz, netto. Dazu
+          gibt es hundertsechs Eingangsrechnungen, alle eingescannt, und die
+          Speisekarte als Tabelle.
+        text: |-
+          Geprüft wird das **Gasthaus Zur Linde** für das Jahr 2025. Es hat einen Umsatz
+          von 196.418 € netto erklärt. Es liegen 106 Eingangsrechnungen vor, alle als Scan,
+          dazu die Speisekarte als Tabelle. Beide Dateien sind an der Stelle verlinkt, an
+          der sie gebraucht werden.
+      - say: >-
+          Das hier ist das Programm, so wie es nach dem Start ausschaut. Die Liste
+          der Prüfungen ist noch leer.
+        show: { text: "Noch keine Prüfungen" }
+      - say: >-
+          Und mit dem Knopf Neue Prüfung geht es in der nächsten Übung los.
+        show: { text: "Neue Prüfung" }
+
+  - title: Zeitbedarf
+    beats:
+      - card:
+          kicker: Zeitbedarf
+          title: Rund eine Stunde
+          text: Am längsten dauert das Einlesen der Scans.
+        say: >-
+          Für die ganze Prüfung braucht man ungefähr eine Stunde. Am längsten dauert
+          das Einlesen der hundertsechs Scans, je nach Rechner ein paar Minuten
+          oder auch eine halbe Stunde. Da kann man sich ruhig einen Kaffee holen.
+        text: |-
+          Rund eine Stunde. Das Einlesen der 106 Scans dauert je nach Rechner wenige
+          Minuten bis eine halbe Stunde.
+
+          !!! tip "Mitmachen"
+              Am meisten bringt die Anleitung, wenn jeder Schritt gleich im Programm
+              mitgemacht wird. Am Ende jeder Seite steht, woran zu erkennen ist, dass
+              der Schritt geklappt hat.
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So rechnet das Programm
+          list:
+            - Rechnungen einlesen
+            - Zuordnen
+            - Sortiment anlegen
+            - Kalkulation, Bericht
+        say: >-
+          Der ganze Weg ist also: Rechnungen einlesen, die Positionen den Zutaten
+          zuordnen, das Sortiment mit den Preisen anlegen, die Kalkulation anschauen,
+          und am Ende der Bericht.
+      - card:
+          kicker: Gut zu wissen
+          title: Mitmachen bringt am meisten
+          text: Jeden Schritt gleich selbst machen.
+        say: >-
+          Am meisten bringt es übrigens, wenn Sie jeden Schritt gleich selbst mitmachen.
+          Am Ende sieht man immer, ob es geklappt hat. Also, auf geht's zur nächsten
+          Übung!

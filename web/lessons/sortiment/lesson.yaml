@@ -1,0 +1,256 @@
+course: Umsatzschätzung Schritt für Schritt
+number: 4
+title: Sortiment anlegen
+summary: >-
+  Was das Gasthaus verkauft und zu welchem Preis: ein Produkt aus dem Katalog von Hand
+  ins Sortiment, mit Preis, und wie der Rest per Tabelle dazukommt.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+  text: >-
+    Das erste Produkt steht mit Preis im Sortiment. Mit einer echten Speisekarte
+    geht es genauso.
+
+guide:
+  page: web/docs/pages/guide/sortiment.md
+  title: Sortiment anlegen
+  intro: |-
+    <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><a href="../zuordnung/">2. Zuordnung</a><span class="here">3. Sortiment</span><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
+
+    Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht
+    es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist
+    das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und
+    Zutaten rechnet die Kalkulation den Umsatz.
+
+    Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der
+    [Regel-Datenbank](../verwaltung.md#regel-datenbank) und gelten für jede Prüfung.
+    Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was
+    fehlt, legt man unter [Regeln → Produkte](../regeln.md#produkte) an, und so
+    wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment
+    zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser
+    Prüfung.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - 28 Produkte in der Liste stehen
+        - bei keinem **Preis fehlt** steht
+
+    !!! tip "Wieder derselbe Betrieb"
+        Wird ein Betrieb ein zweites oder drittes Mal geprüft, muss das Sortiment nicht neu entstehen:
+        in der alten Prüfung **CSV exportieren**, in der neuen dieselbe Datei
+        importieren. Danach nur noch geänderte Preise anpassen und löschen, was
+        nicht mehr auf der Karte steht.
+
+    !!! tip "Die Tabelle von einer KI schreiben lassen"
+        Aus einer Speisekarte, als Foto oder von der Website des Betriebs, macht
+        eine KI wie Claude, Gemini oder ChatGPT die passende Tabelle. Die Karte
+        einfügen und dazu schreiben:
+
+        > Mach aus dieser Speisekarte eine CSV-Datei mit Semikolon als
+        > Trennzeichen und den Spalten Produkt, Bruttopreis und USt, Preise mit
+        > Komma. Den Steuersatz je Produkt nach deutschem Umsatzsteuerrecht für
+        > Verzehr im Lokal im Jahr 2025. Jedes Gericht nur mit seinem üblichen
+        > Namen, ohne Nummer auf der Karte und ohne Beschreibung.
+
+        Der Import findet ein Produkt nur über seinen Namen im Katalog. Aus
+        „7. Elsässer Flammkuchen, hauchdünn, mit Speck und Zwiebeln“ wird kein
+        Treffer, aus „Flammkuchen“ schon. Ohne diesen Hinweis übernimmt die KI
+        meist die Karte wörtlich.
+
+        Das Jahr auf den Prüfungszeitraum setzen: Der Satz für Speisen im Lokal
+        hat sich mehrfach geändert, der für Getränke nicht.
+
+        Das Ergebnis als `.csv` speichern und importieren. Namen, die der Katalog
+        anders führt, überspringt der Import und meldet sie danach; diese in der
+        Datei umbenennen oder über **Produkt hinzufügen …** ergänzen.
+
+        Nur mit öffentlichen Angaben wie der Karte aus dem Internet: Was aus der
+        Akte stammt, unterliegt dem Steuergeheimnis und gehört in keine KI.
+
+    !!! nachlesen "Zum Nachlesen"
+        Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen
+        Produkten geschieht, steht unter
+        [Sortiment importieren und exportieren](../import-export.md#sortiment).
+        Was ein Produkt mit seinem Rezept ist, steht unter
+        [Produkte](../regeln.md#produkte).
+
+    [Weiter: 4. Kalkulation <span>Den Umsatz aus dem Einkauf berechnen</span>](kalkulation.md){ .us-next }
+
+chapters:
+  - title: Die Speisekarte mit Preisen
+    beats:
+      - card:
+          kicker: Umsatzschätzung · Übung 4
+          title: Sortiment anlegen
+          text: Ein paar Minuten zum Mitklicken.
+        say: >-
+          Willkommen! Bis jetzt weiß das Programm, was das Gasthaus
+          eingekauft hat. In dieser Übung kommt die andere Seite dazu, nämlich was das
+          Gasthaus verkauft, und um wie viel.
+      - card:
+          kicker: Was ist das Sortiment?
+          title: Die Speisekarte mit Preisen
+          text: Was der Betrieb verkauft, jedes mit Preis.
+        say: >-
+          Das Sortiment ist im Grunde die Speisekarte, mit den Preisen. Aus dem,
+          was eingekauft wurde, und dem, was verkauft wird, rechnet die
+          Kalkulation später den Umsatz aus.
+      - card:
+          kicker: Woher die Produkte kommen
+          title: Das Rezept ist schon da, der Preis nicht
+          text: Rezept aus der Regel-Datenbank, Preis vom Betrieb.
+        say: >-
+          Letztes Mal haben wir gesehen, dass sich das Programm die Zuordnungen in
+          der Regel-Datenbank merkt. Dort stehen auch die Produkte, jedes mit
+          seinem Rezept, also zum Beispiel, wie viel Bier in ein Glas kommt. Ein
+          paar Grundrezepte bringt das Programm mit, damit man gleich loslegen kann.
+          Was fehlt, legt man selbst dazu an, und so wächst der Katalog mit jeder
+          Prüfung. Für unser Gasthaus reicht der Grundstock: Wir suchen uns aus, was
+          es führt, und tragen den Preis ein. Der gehört nämlich zum Betrieb und gilt
+          nur für diese Prüfung.
+
+  - title: Das erste Produkt von Hand
+    beats:
+      - say: >-
+          Das Sortiment hat oben einen eigenen Reiter, da gehen wir hin.
+        click: { text: "3. Sortiment", type: TabItem }
+        act: [{ do: tab, header: "3. Sortiment" }]
+        rounds: 8
+        task: Auf „3. Sortiment“ klicken.
+        hint: Die Reiter stehen oben, gleich rechts neben „2. Zuordnung“.
+        text: |-
+          In der Prüfung auf **3. Sortiment** wechseln. Rechts oben steht das
+          Suchfeld **Produkt hinzufügen …**; über dieses Feld kommt ein Produkt
+          aus dem Katalog ins Sortiment.
+      - say: >-
+          Rechts oben ist ein Suchfeld, da steht Produkt hinzufügen. Da klicken
+          wir hinein und tippen Bier null Komma fünf.
+        type: { at: { name: CatalogBox }, text: "Bier 0,5" }
+        act: []
+        rounds: 2
+        accept: ["Bier 0,5 l", "Bier 0.5"]
+        task: "Produkt hinzufügen: Bier 0,5"
+        hint: Das Feld steht ganz rechts oben, über der Liste.
+      - say: >-
+          Schon klappt darunter eine Liste auf, mit allem, was im Katalog dazu
+          passt. Wir nehmen das Bier null Komma fünf Liter vom Fass.
+        click: { text: "Bier 0,5 l vom Fass" }
+        act:
+          - { do: choose, at: { name: CatalogBox }, text: "Bier 0,5", item: "Bier 0,5 l vom Fass" }
+          - { do: focus }
+        allow: [{ text: "Bier 0,5 l vom Fass" }, { text: "Bier 0,5 l vom Fass", up: ListBoxItem }]
+        done: { at: { text: "Bier 0,5 l vom Fass", up: DataGridRow } }
+        rounds: 8
+        task: Auf „Bier 0,5 l vom Fass“ klicken.
+        hint: Es steht in der Liste unter dem Suchfeld.
+        text: |-
+          In das Suchfeld `Bier 0,5`{.copy} tippen. Darunter erscheint eine Liste
+          passender Produkte aus dem Katalog; **Bier 0,5 l vom Fass** anklicken. Das
+          Produkt steht jetzt im Sortiment, noch mit dem Hinweis **Preis fehlt**:
+        shot:
+          name: sortiment-erstes
+          at: { text: "Produkt", up: DataGrid }
+          clip: DataGridRow
+          trim: { top: 5 }
+          below: true
+          alt: Das erste Produkt, noch ohne Preis
+      - say: >-
+          Da steht es jetzt im Sortiment. Daneben steht noch Preis fehlt, denn den
+          Preis weiß halt nur das Gasthaus.
+        show: { text: "Preis fehlt" }
+      - say: >-
+          Auf der Karte steht das Bier um vier Euro sechzig. Wir klicken also ins
+          Feld beim Bruttopreis und tippen vier Komma sechzig ein.
+        type: { at: { text: "Bier 0,5 l vom Fass", up: DataGridRow, column: Bruttopreis }, text: "4,60" }
+        task: "Bruttopreis: 4,60"
+        hint: Das Feld steht in der Zeile vom Bier, in der Spalte „Bruttopreis“.
+        text: |-
+          In das Feld **Bruttopreis** `4,60`{.copy} eintragen, also den Preis auf der
+          Karte, mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.
+      - say: >-
+          Der Bruttopreis ist der Preis, wie er auf der Karte steht, also mit der
+          Umsatzsteuer. Die steht daneben schon auf neunzehn Prozent, und so passt
+          das auch.
+        show: { text: "USt", type: TextBlock }
+        through: { text: "19 %" }
+        hold: 0.5
+
+  - title: Der Rest per Tabelle
+    beats:
+      - say: >-
+          Siebenundzwanzig Produkte hat das Gasthaus noch auf der Karte. Die tippen
+          wir nicht alle einzeln ein, dafür gibt es eine Tabelle, eine sogenannte
+          CSV-Datei, mit einem Produkt pro Zeile und dem Preis daneben.
+        text: |-
+          Die übrigen 27 Produkte des Gasthauses stehen mit ihren Preisen in einer
+          Tabelle: [sortiment-gasthaus.csv](sortiment-gasthaus.csv){ download="sortiment-gasthaus.csv" }
+          [](../hilfe/csv.md){ title="Was ist eine CSV-Datei?" aria-label="Was ist eine CSV-Datei?" }.
+          Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der
+          beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das
+          rechte, **CSV exportieren**, schreibt das Sortiment in eine solche Datei.
+        shot:
+          name: sortiment-kopf
+          at: { tip: "CSV importieren", up: Grid }
+          trim: { bottom: 5 }
+          below: true
+          alt: Die Kopfzeile des Sortiments
+      - say: >-
+          Dafür sind die zwei Knöpferl links neben dem Suchfeld da.
+        show: { tip: "CSV importieren" }
+        through: { tip: "CSV exportieren" }
+      - say: >-
+          Der linke liest so eine Tabelle ein: draufklicken, die Datei aussuchen,
+          und schon stehen alle Produkte mit ihren Preisen in der Liste.
+        show: { tip: "CSV importieren" }
+      - say: >-
+          Der rechte schreibt das Sortiment in so eine Tabelle hinaus.
+        show: { tip: "CSV exportieren" }
+      - say: >-
+          In der Übung lassen wir das Einlesen aus, weil die Datei ja nicht auf
+          diesem Rechner liegt. In der Anleitung kann man sie aber herunterladen.
+        show: { tip: "CSV importieren" }
+        act:
+          - { do: pick, files: ["web/docs/pages/guide/sortiment-gasthaus.csv"] }
+          - { do: click, at: { tip: "CSV importieren" } }
+        rounds: 2
+        text: |-
+          Die Produkte werden über ihren Namen im Katalog gefunden und mit Preis und
+          Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste:
+        shot:
+          name: sortiment-liste
+          at: { text: "Produkt", up: DataGrid }
+          clip: DataGridRow
+          trim: { top: 5, bottom: 465 }
+          alt: Das Sortiment nach dem CSV-Import
+      - say: >-
+          Gefunden werden die Produkte über ihren Namen im Katalog. Kennt das
+          Programm einen Namen nicht, lässt es die Zeile aus und sagt einem danach,
+          welche das waren. Die kann man dann in der Tabelle umbenennen.
+        show: { tip: "CSV importieren" }
+      - say: >-
+          Oder man fügt sie von Hand hinzu, so wie vorhin das Bier.
+        show: { name: CatalogBox }
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So entsteht das Sortiment
+          list:
+            - Reiter „3. Sortiment“
+            - Produkt suchen und anklicken
+            - Bruttopreis eintragen
+            - Den Rest per CSV einlesen
+        say: >-
+          So einfach geht das: auf den Reiter Sortiment gehen, ein Produkt suchen und
+          anklicken, den Preis von der Karte eintragen, und den Rest als Tabelle
+          einlesen.
+      - card:
+          kicker: Gut zu wissen
+          title: Nächstes Jahr geht es schneller
+          text: Alte Prüfung exportieren, in der neuen einlesen.
+        say: >-
+          Praktisch ist das auch im Jahr darauf. Kommt derselbe Betrieb wieder dran,
+          fängt man nicht von vorne an. In der alten Prüfung schreibt man das Sortiment
+          hinaus, liest es in der neuen wieder ein, und passt nur noch die Preise an,
+          die sich geändert haben.

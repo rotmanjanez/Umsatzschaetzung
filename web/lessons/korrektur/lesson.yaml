@@ -1,0 +1,424 @@
+course: Umsatzschätzung Schritt für Schritt
+number: 2
+title: Eine Rechnung korrigieren
+summary: >-
+  Beim Einlesen eines Scans geht manchmal etwas verloren. Das Programm merkt es und
+  legt die Rechnung zur Durchsicht vor. Hier die Rechnung des Tiefkühllieferanten, bei
+  der ein Stempel eine ganze Zeile verdeckt hat.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+  text: >-
+    Die Rechnung ist korrigiert: die fehlende Zeile abgeschrieben, den Lieferanten
+    ergänzt, die Steuersätze eingetragen. Keine Rechnung ist mehr offen.
+
+guide:
+  page: web/docs/pages/guide/korrektur.md
+  title: Rechnungen korrigieren
+  intro: |-
+    <p class="us-steps"><a href="../start/">Prüfung</a><span class="here">1. Rechnungen</span><a href="../zuordnung/">2. Zuordnung</a><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
+
+    <div class="us-side" markdown>
+    <div markdown>
+
+    Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das
+    Programm rechnet deshalb jede Rechnung nach: Menge mal Einzelpreis muss den
+    Zeilenbetrag ergeben, die Zeilen den Nettobetrag, Netto und Steuer den
+    Bruttobetrag. Was nicht aufgeht oder unvollständig ist, steht mit
+    **Durchsicht offen** ganz oben in der Liste. Im Beispiel ist das eine
+    Rechnung, an der gleich mehreres schiefgegangen ist:
+
+    </div>
+
+    ![Eine Rechnung mit „Durchsicht offen“](img/rechnungen-liste.png)
+
+    </div>
+
+    Was das Programm nicht zusammenbringt, ist markiert: Das Feld ist orange
+    hinterlegt, und auf dem Beleg ist dieselbe Stelle orange umrandet. Wer mit der
+    Maus auf das Feld zeigt, sieht den Grund, etwa „Einheit fehlt“.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - über der Liste `0 offen, 105 automatisch, 1 manuell` steht
+        - keine Rechnung mehr **Durchsicht offen** trägt
+
+    !!! nachlesen "Zum Nachlesen"
+        Wann ein Scan ohne Durchsicht übernommen wird und was das Fenster im
+        Einzelnen prüft, steht unter [Durchsicht](../rechnungen.md#durchsicht).
+
+    [Weiter: 2. Zuordnung <span>Eingekaufte Waren den Zutaten zuordnen</span>](zuordnung.md){ .us-next }
+
+chapters:
+  - title: Die Rechnungsliste
+    beats:
+      - card:
+          kicker: Umsatzschätzung · Übung 2
+          title: Eine Rechnung korrigieren
+          text: Ein paar Minuten zum Mitklicken.
+        say: >-
+          Servus und willkommen! In dieser Übung geht es darum, wie man eine Rechnung
+          korrigiert, die das Programm nicht ganz richtig lesen konnte. Jeden Klick
+          machen Sie dabei selbst.
+      - card:
+          kicker: Was heißt Durchsicht?
+          title: Das Programm rechnet nach
+          text: Geht eine Summe nicht auf, legt es die Rechnung vor.
+        say: >-
+          Eine eingescannte Rechnung liest ja kein Mensch, sondern die Maschine, und
+          dabei geht halt manchmal was schief. Darum rechnet das Programm jede Rechnung
+          nach: Menge mal Einzelpreis muss den Zeilenbetrag ergeben, alle Zeilen
+          zusammen den Nettobetrag, und Netto mit Steuer den Bruttobetrag. Wenn da etwas
+          nicht aufgeht, legt es uns die Rechnung zur Durchsicht vor.
+      - say: >-
+          Offen ist gerade noch die Prüfung. Die Rechnungen stehen auf dem Reiter
+          daneben, klicken wir ihn an.
+        click: { text: "1. Rechnungen", type: TabItem }
+        act: [{ do: tab, header: "1. Rechnungen" }]
+        rounds: 8
+        task: Auf „1. Rechnungen“ klicken.
+        hint: Die Reiter stehen oben, unter dem Namen des Gasthauses.
+      - say: >-
+          Links oben steht, wie es ausschaut: Eine Rechnung ist noch offen,
+          hundertfünf hat das Programm selbst übernommen.
+        show: { starts: "1 offen" }
+      - say: >-
+          Die offene steht immer ganz oben, mit dem Vermerk Durchsicht offen. Es ist
+          die Rechnung vom Tiefkühllieferanten, und bei der ist gleich mehreres
+          schiefgegangen.
+        show: { text: "Durchsicht offen" }
+
+  - title: Die Rechnung TK25-1583
+    beats:
+      - say: >-
+          Machen wir sie auf, mit einem Doppelklick auf die Zeile.
+        click: { text: "TK25-1583", up: DataGridRow }
+        act:
+          - { do: open, number: TK25-1583 }
+          - { do: wait, rounds: 2 }
+          - { do: shot, name: korrektur-tk, window: dialog }
+        rounds: 2
+        done: { at: { name: ScanPane } }
+        task: Doppelklick auf „TK25-1583“.
+        hint: Es ist die oberste Zeile, die mit „Durchsicht offen“.
+        text: |-
+          <div class="us-side" markdown>
+          <div markdown>
+
+          Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit
+          dem Symbol **Öffnen** rechts in der Zeile). Sie öffnet sich in einem eigenen
+          Fenster: links die gelesenen Werte, rechts der Beleg. Quer über der Tabelle
+          liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:
+
+          - „Summe der Positionen 821,80 € weicht vom Nettobetrag 842,80 € ab“: Es fehlt
+            eine Zeile.
+          - „Netto 842,80 € zzgl. 0 % MwSt ergibt 842,80 €, Bruttobetrag ist 912,12 €“:
+            Die Steuersätze fehlen.
+
+          Dazu ist der Lieferant nur halb gelesen: `FROSTW`.
+
+          </div>
+
+          ![Die Rechnung TK25-1583 nach dem Import](img/korrektur-tk.png)
+
+          </div>
+      - say: >-
+          Die Rechnung geht in einem eigenen Fenster auf. Links stehen die Werte, die
+          das Programm gelesen hat.
+        show: { name: FormPane }
+      - say: >-
+          Rechts ist der Beleg selbst, also der Scan.
+        show: { name: ScanPane }
+      - say: >-
+          Oben stehen zwei Hinweise. Der erste sagt: Die Positionen ergeben
+          zusammen achthunderteinundzwanzig Euro achtzig, auf dem Beleg stehen aber
+          achthundertzweiundvierzig Euro achtzig als Nettobetrag. Da fehlt also eine
+          Zeile.
+        show: { starts: "Summe der Positionen" }
+      - say: >-
+          Der zweite sagt: Mit null Prozent Steuer kommt man nicht auf den
+          Bruttobetrag vom Beleg. Da fehlen also die Steuersätze.
+        show: { starts: "Netto 842,80" }
+      - say: >-
+          Und beim Lieferanten hat das Programm auch nur die Hälfte erwischt. Was
+          orange hinterlegt ist, passt nicht zusammen.
+        show: { name: SupplierBox }
+
+  - title: Die fehlende Zeile
+    beats:
+      - say: >-
+          Schauen wir uns den Beleg genauer an. Da stehen acht Positionen, gelesen
+          hat das Programm aber nur sieben. Die letzte liegt genau unter dem Stempel
+          Zweitschrift, und da ist sie beim Lesen verloren gegangen.
+        show: { name: ScanPane }
+        act:
+          - do: shot
+            name: korrektur-tk-beleg
+            window: dialog
+            at: { name: ScanPane }
+            trim: { top: 540, bottom: 190 }
+        rounds: 2
+        text: |-
+          <div class="us-side" markdown>
+          <div markdown>
+
+          Auf dem Beleg stehen acht Positionen, in den gelesenen Werten nur sieben. Die
+          letzte liegt unter dem Stempel und ist beim Lesen verloren gegangen:
+
+          Dort steht *Thermobox Leihgebühr je Woche*, 6 Stk zu 3,50 €, zusammen 21,00 €.
+          Das Plus unter den Positionen (**Zeile hinzufügen**) legt eine leere Zeile an.
+          Mit einem Doppelklick (oder F2) wird eine Zelle bearbeitbar; eintragen:
+
+          </div>
+
+          ![Der Beleg: Position 8 unter dem Stempel](img/korrektur-tk-beleg.png){ width="690" }
+
+          </div>
+
+          | Menge | Einheit | Position | Einzelpreis | Netto |
+          |---|---|---|---|---|
+          | `6`{.copy} | `Stück`{.copy} | `Thermobox Leihgebühr je Woche`{.copy} | `3,50`{.copy} | `21,00`{.copy} |
+      - say: >-
+          Dort steht: Thermobox Leihgebühr je Woche, sechs Stück zu drei Euro
+          fünfzig, zusammen einundzwanzig Euro. Die tragen wir jetzt selbst nach.
+          Zuerst unter den Positionen auf das Plus klicken, das legt eine leere Zeile
+          an.
+        click: { tip: "Zeile hinzufügen" }
+        act: [{ do: click, window: dialog, at: { tip: "Zeile hinzufügen" } }]
+        rounds: 1
+        done: { at: { text: "0,00 €", up: DataGridRow } }
+        task: Auf das Plus klicken.
+        hint: Das Plus steht rechts unter der letzten Position.
+      - say: >-
+          Ganz unten ist jetzt eine leere Zeile. Mit einem Doppelklick auf eine Zelle
+          kann man hineinschreiben. Fangen wir mit der Menge an: ein Doppelklick
+          unter Menge, und dann sechs eintippen.
+        type: { at: { text: "0,00 €", up: DataGridRow, column: Menge }, text: "6" }
+        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Menge, text: "6" }]
+        rounds: 1
+        task: "Menge: 6"
+        hint: Doppelklick auf die Zelle ganz links in der untersten Zeile.
+      - say: >-
+          Daneben die Einheit, das ist Stück.
+        type: { at: { text: "0,00 €", up: DataGridRow, column: Einheit }, text: "Stück" }
+        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Einheit, text: "Stück" }]
+        rounds: 1
+        accept: ["Stk"]
+        task: "Einheit: Stück"
+      - say: >-
+          Dann die Bezeichnung, so wie sie auf dem Beleg steht: Thermobox
+          Leihgebühr je Woche.
+        type: { at: { text: "0,00 €", up: DataGridRow, column: Position }, text: "Thermobox Leihgebühr je Woche" }
+        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Position, text: "Thermobox Leihgebühr je Woche" }]
+        rounds: 1
+        task: "Position: Thermobox Leihgebühr je Woche"
+      - say: >-
+          Der Einzelpreis, drei Euro fünfzig.
+        type: { at: { text: "Thermobox Leihgebühr je Woche", up: DataGridRow, column: Einzelpreis }, text: "3,50" }
+        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Einzelpreis, text: "3,50" }]
+        rounds: 1
+        task: "Einzelpreis: 3,50"
+      - say: >-
+          Und zum Schluss der Betrag der Zeile, einundzwanzig Euro.
+        type: { at: { text: "Thermobox Leihgebühr je Woche", up: DataGridRow, column: Netto }, text: "21,00" }
+        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Netto, text: "21,00" }]
+        rounds: 1
+        task: "Netto: 21,00"
+      - say: >-
+          Jetzt noch der Lieferant, oben links. Da steht nur Frostw. Ins Feld
+          klicken, das Halbe löschen und den ganzen Namen eintippen, wie er auf dem
+          Beleg steht: Frostwerk Tiefkühl-Service GmbH.
+        type: { at: { name: SupplierBox }, text: "Frostwerk Tiefkühl-Service GmbH" }
+        act:
+          - { do: type, window: dialog, at: { name: SupplierBox }, text: "Frostwerk Tiefkühl-Service GmbH" }
+          - { do: focus, window: dialog }
+          - { do: deselect, window: dialog, at: { name: Lines } }
+          - { do: wait, rounds: 2 }
+          - do: shot
+            name: korrektur-tk-zeile
+            window: dialog
+            at: { name: FormPane }
+            clip: DataGridRow
+            trim: { bottom: -16 }
+        rounds: 1
+        accept: ["Frostwerk Tiefkühl-Service", "Frostwerk Tiefkühl Service GmbH"]
+        task: "Lieferant: Frostwerk Tiefkühl-Service GmbH"
+        hint: Das Feld „Lieferant“ steht links oben im Fenster.
+        text: |-
+          Dann oben den **Lieferanten** vervollständigen: `Frostwerk Tiefkühl-Service GmbH`{.copy}.
+
+          ![Acht Zeilen, der Lieferant ist eingetragen](img/korrektur-tk-zeile.png)
+
+          Die Summe der Positionen stimmt jetzt mit dem Nettobetrag überein, der erste
+          Hinweis ist verschwunden.
+      - say: >-
+          Schauen wir, was sich getan hat: Die Positionen ergeben jetzt genau den
+          Nettobetrag vom Beleg, und der erste Hinweis ist weg. Schon besser.
+        show: { text: "Netto", up: DataGridRow }
+
+  - title: Die Steuersätze
+    beats:
+      - say: >-
+          Bleibt der zweite Hinweis. Netto geht jetzt auf, Brutto aber nicht, und der
+          Unterschied ist genau die Umsatzsteuer. Alle Zeilen stehen nämlich auf null
+          Prozent.
+        show: { text: "USt" }
+        text: |-
+          <div class="us-side" markdown>
+          <div markdown>
+
+          Bleibt der zweite Hinweis: Netto geht auf, Brutto aber nicht. Laut Beleg sind
+          es 912,12 €, aus den Positionen nur 842,80 €. Die Differenz ist genau die
+          Umsatzsteuer: Alle Zeilen stehen auf 0 %, denn der Beleg druckt den Satz nicht
+          in eine eigene Spalte, sondern klein unter jeden Artikel („MwSt. 7 %“).
+
+          In der Spalte **USt** für die Lebensmittel `7`{.copy} eintragen, für Trockeneis und
+          Thermobox `19`{.copy}. Danach ergeben auch die Positionen 912,12 €.
+
+          </div>
+
+          ![Die korrigierte Rechnung: beide Summen gleich](img/korrektur-tk-fertig.png){ width="836" }
+
+          </div>
+      - say: >-
+          Auf dem Beleg steht der Steuersatz nicht in einer eigenen Spalte, sondern
+          ganz klein unter jedem Artikel. Deshalb hat ihn das Programm übersehen.
+        show: { name: ScanPane }
+      - say: >-
+          Die ersten sechs Zeilen sind Lebensmittel, von den Pommes bis zur
+          Beerenmischung, und die haben sieben Prozent. Fangen wir mit den Pommes an:
+          ein Doppelklick in die Spalte USt, und sieben eintippen.
+        type: { at: { text: "18,90 €", up: DataGridRow, column: USt }, text: "7" }
+        act: [{ do: edit, window: dialog, at: { text: "18,90 €" }, column: USt, text: "7" }]
+        rounds: 1
+        task: "Pommes frites: USt 7"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Dann der Blattspinat, auch sieben.
+        type: { at: { text: "23,40 €", up: DataGridRow, column: USt }, text: "7" }
+        act: [{ do: edit, window: dialog, at: { text: "23,40 €" }, column: USt, text: "7" }]
+        rounds: 1
+        task: "Blattspinat: USt 7"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Das Buttergemüse.
+        type: { at: { text: "25,80 €", up: DataGridRow, column: USt }, text: "7" }
+        act: [{ do: edit, window: dialog, at: { text: "25,80 €" }, column: USt, text: "7" }]
+        rounds: 1
+        task: "Buttergemüse: USt 7"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Das panierte Seelachsfilet.
+        type: { at: { text: "1,24 €", up: DataGridRow, column: USt }, text: "7" }
+        act: [{ do: edit, window: dialog, at: { text: "1,24 €" }, column: USt, text: "7" }]
+        rounds: 1
+        task: "Alaska-Seelachsfilet: USt 7"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Der Seelachs im Block.
+        type: { at: { text: "41,50 €", up: DataGridRow, column: USt }, text: "7" }
+        act: [{ do: edit, window: dialog, at: { text: "41,50 €" }, column: USt, text: "7" }]
+        rounds: 1
+        task: "Seelachsfilet: USt 7"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Und die Beerenmischung.
+        type: { at: { text: "26,40 €", up: DataGridRow, column: USt }, text: "7" }
+        act: [{ do: edit, window: dialog, at: { text: "26,40 €" }, column: USt, text: "7" }]
+        rounds: 1
+        task: "Beerenmischung: USt 7"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Trockeneis und die Thermobox sind keine Lebensmittel, die haben neunzehn
+          Prozent. Zuerst das Trockeneis.
+        type: { at: { text: "32,50 €", up: DataGridRow, column: USt }, text: "19" }
+        act: [{ do: edit, window: dialog, at: { text: "32,50 €" }, column: USt, text: "19" }]
+        rounds: 1
+        task: "Trockeneis: USt 19"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Und die Thermobox.
+        type: { at: { text: "Thermobox Leihgebühr je Woche", up: DataGridRow, column: USt }, text: "19" }
+        act:
+          - { do: edit, window: dialog, at: { text: "Thermobox Leihgebühr je Woche" }, column: USt, text: "19" }
+          - { do: deselect, window: dialog, at: { name: Lines } }
+          - { do: wait, rounds: 2 }
+          - do: shot
+            name: korrektur-tk-fertig
+            window: dialog
+            at: { name: FormPane }
+            clip: DataGridRow
+            trim: { bottom: -16 }
+        rounds: 1
+        task: "Thermobox: USt 19"
+        hint: Die Spalte „USt“ ist die ganz rechts, vor dem Mistkübel.
+      - say: >-
+          Und jetzt stimmen auch die Positionen mit dem Bruttobetrag überein:
+          neunhundertzwölf Euro zwölf, genau wie auf dem Beleg.
+        show: { text: "Brutto", up: DataGridRow }
+
+  - title: Bestätigen
+    beats:
+      - say: >-
+          Passt alles. Jetzt bestätigen wir die Rechnung, mit dem Häkchen oben
+          rechts. Das Fenster geht dann von selbst zu.
+        click: { name: AcceptInvoice }
+        act: [{ do: click, window: dialog, at: { name: AcceptInvoice } }]
+        rounds: 2
+        done: { at: { starts: "0 offen" } }
+        task: Auf das Häkchen klicken.
+        hint: Das Häkchen steht ganz oben rechts im Fenster der Rechnung.
+      - say: >-
+          In der Liste steht die Rechnung jetzt als manuell, und oben steht: keine
+          Rechnung mehr offen.
+        show: { starts: "0 offen" }
+        text: |-
+          Mit dem Häkchen oben rechts (**Bestätigen**) die Rechnung als durchgesehen
+          markieren; das Fenster schließt sich. In der Rechnungsliste steht sie jetzt mit
+          **Manuell**, und die Bilanz über der Liste zeigt keine offene Rechnung mehr:
+        act: [{ do: deselect, at: { text: "Lieferant", up: DataGrid } }]
+        rounds: 2
+        shot:
+          name: korrektur-liste-fertig
+          at: { starts: "0 offen", up: DockPanel }
+          below: true
+          alt: Keine Rechnung mehr offen
+
+  - title: Für eigene Rechnungen
+    beats:
+      - text: |-
+          Was bei Scans sonst noch schiefgeht, und woran es zu erkennen ist:
+
+          | Fehler | So zeigt es das Programm | Korrektur |
+          |---|---|---|
+          | Ein Wert fehlt | Das Feld ist markiert | Wert vom Beleg abschreiben |
+          | Eine Ziffer ist verlesen | Menge × Einzelpreis ergibt nicht den Zeilenbetrag; alle drei Felder sind markiert, das Häkchen sperrt nach dem ersten Klick | Auf dem Beleg nachsehen, im Zweifel zurückrechnen |
+          | Eine Zeile fehlt (Stempel, Knick) | Die Summe der Positionen weicht vom Nettobetrag ab | Die Zeile mit dem Plus anlegen und vom Beleg abschreiben |
+          | Eine Zeile ist zerrissen (Umbruch) | Eine Zeile ohne Namen oder mit 0,00 €, dazu fehlende Werte | Die Werte in einer Zeile zusammenführen, das Bruchstück löschen |
+          | Der Lieferant fehlt oder ist abgeschnitten | Leeres oder unvollständiges Feld | Eintragen |
+          | Der Steuersatz ist falsch gelesen | Brutto ist markiert, **Laut Beleg** und **Aus Positionen** weichen voneinander ab | Steuersatz je Zeile eintragen |
+
+          Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das
+          Bestätigen.
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So wird eine Rechnung korrigiert
+          list:
+            - Offene Rechnung öffnen
+            - Hinweise lesen
+            - Fehlendes vom Beleg abschreiben
+            - Mit dem Häkchen bestätigen
+        say: >-
+          Und das war's. Also noch einmal: die offene Rechnung mit einem Doppelklick
+          aufmachen, die Hinweise oben lesen, was fehlt, vom Beleg abschreiben, und zum
+          Schluss mit dem Häkchen bestätigen.
+      - card:
+          kicker: Gut zu wissen
+          title: Der Beleg hat recht
+          text: Die Zeilen passen zum Beleg, nicht umgekehrt.
+        say: >-
+          Und denken Sie daran, was auf dem Beleg steht, gilt. Die Zeilen müssen zum
+          Beleg passen, nicht umgekehrt.

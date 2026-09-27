@@ -4,7 +4,7 @@ import { hold, holding, onlive, pace, replay, skip } from './voice.js';
 import { player } from './player.js';
 
 let up;
-const lesson = player(await fetch('lesson.json', { cache: 'no-cache' }).then(r => r.json()), new Promise(r => { up = r; }));
+const lesson = player(await fetch(new URL('lesson.json', location.href), { cache: 'no-cache' }).then(r => r.json()), new Promise(r => { up = r; }));
 
 const pause = $('pause');
 const held = on => {

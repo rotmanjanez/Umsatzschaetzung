@@ -1,0 +1,301 @@
+course: Umsatzschätzung Schritt für Schritt
+number: 3
+title: Offene Positionen zuordnen
+summary: >-
+  Das Programm ordnet fast alle Rechnungspositionen selbst einer Zutat zu. Wo es sich
+  nicht sicher ist, fragt es nach. Drei Beispiele aus dem Gasthaus Zur Linde.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+  text: >-
+    Drei Positionen zugeordnet. Mit echten Rechnungen geht es genauso.
+
+guide:
+  page: web/docs/pages/guide/zuordnung.md
+  title: Zuordnung prüfen
+  intro: |-
+    <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><span class="here">2. Zuordnung</span><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
+
+    Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu
+    Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die
+    Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für
+    fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was
+    es nicht wusste.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - über der Liste `2 offen, 117 automatisch, 3 manuell` steht
+        - nur noch Leberkäse und Petersilie **Offen** sind
+
+    !!! nachlesen "Zum Nachlesen"
+        Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit
+        Pfand, Fracht und anderem umgegangen wird, das kein Wareneinsatz ist,
+        steht unter [Zuordnung](../zuordnung.md).
+
+    [Weiter: 3. Sortiment <span>Was das Gasthaus verkauft, und zu welchem Preis</span>](sortiment.md){ .us-next }
+
+chapters:
+  - title: Von der Rechnung zur Zutat
+    beats:
+      - card:
+          kicker: Umsatzschätzung · Übung 3
+          title: Offene Positionen zuordnen
+          text: Ein paar Minuten zum Mitklicken.
+        say: >-
+          Willkommen! In dieser Übung geht es um einen Handgriff, der in fast jeder
+          Prüfung gebraucht wird, nämlich das Zuordnen der offenen Positionen. Lange
+          dauert das nicht, und wie bei allen Übungen ist hier wieder Mitmachen
+          angesagt.
+      - say: >-
+          Und warum muss man da überhaupt etwas zuordnen? Schauen wir uns den Wein an.
+          Auf der Rechnung steht er so, wie ihn das Weingut nennt: zweitausendzweiundzwanzig
+          Domina trocken. Kommt im nächsten Jahr der neue Jahrgang, steht dort
+          zweitausenddreiundzwanzig Domina. Zwei Namen, aber im Glas ist beides einfach
+          Rotwein.
+      - say: >-
+          Auf der Karte steht nämlich nur ein Glas Rotwein, null Komma zwei Liter, und
+          das Rezept dahinter sagt: zweihundert Milliliter Rotwein. Welcher Jahrgang
+          gerade offen ist, ist ihm egal. Darum rechnet das Programm mit Zutaten, und so
+          passt ein Rezept in jedes Jahr und in jeden Betrieb.
+      - say: >-
+          Was es dafür braucht, ist die Brücke von der Rechnung zur Zutat, und das ist
+          die Zuordnung. Die meisten davon erledigt das Programm selbst, und nur wo es
+          sich nicht sicher ist, fragt es nach.
+
+  - title: Die Liste
+    beats:
+      - say: >-
+          Die Rechnungen sind schon eingelesen, jetzt gehen wir oben auf den Reiter
+          Zuordnung.
+        click: { text: "2. Zuordnung", type: TabItem }
+        act: [{ do: tab, header: "2. Zuordnung" }]
+        rounds: 8
+        task: Auf „2. Zuordnung“ klicken.
+        hint: Die Reiter stehen oben, unter dem Namen des Gasthauses.
+        text: |-
+          Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder
+          einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz:
+          `5 offen, 117 automatisch, 0 manuell`.
+      - say: >-
+          Links oben steht gleich, wie es ausschaut: Fünf Positionen sind noch
+          offen, und hundertsiebzehn hat das Programm schon selbst erledigt. Gar
+          nicht schlecht.
+        show: { starts: "5 offen" }
+      - say: >-
+          So wie die Liste sortiert ist, stehen die offenen ganz oben. Um genau die
+          kümmern wir uns jetzt.
+        show: { text: "Status", type: TextBlock }
+        through: { text: "Offen" }
+        text: |-
+          Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen
+          die offenen oben:
+
+          - **Offen**: Das Programm war sich bei keiner Zutat sicher genug. Hier ist
+            eine Entscheidung nötig.
+          - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
+          - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
+        shot:
+          name: zuordnung-liste
+          at: { name: Groups, up: MappingView }
+          trim: { bottom: 371 }
+          alt: Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen
+
+  - title: Ein Vorschlag, der nicht passt
+    beats:
+      - say: >-
+          Fangen wir mit dem Wein an, dem Domina vom Weingut Sommer. Einmal
+          draufklicken.
+        click: { starts: "2022 Domina" }
+        via: select
+        allow: [{ starts: "2022 Domina", up: DataGridRow }]
+        rounds: 20
+        task: Auf „2022 Domina trocken 0,75 l“ klicken.
+        hint: Es ist die fünfte Zeile, die letzte mit dem Status „Offen“.
+        text: |-
+          Die Zeile **2022 Domina trocken 0,75 l** anklicken. Rechts erscheint alles,
+          was zu diesem Artikel bekannt ist:
+
+          - **Aus der Rechnung**: Name, Lieferant, Artikelnummer und die Gesamtmenge
+            über alle Rechnungen, hier 158 Flaschen in 6 Positionen.
+          - **Aus den Regeln**: die Vorschläge des Programms mit einer Sicherheit in
+            Prozent.
+          - **Faktor**: wie viel in einem Gebinde steckt.
+          - **Belege**: die Rechnungszeilen, aus denen der Artikel stammt, als
+            Ausschnitt des Scans.
+        shot:
+          name: zuordnung-position
+          at: { name: Groups, up: MappingView }
+          alt: Die Position 2022 Domina mit den Vorschlägen des Programms
+      - say: >-
+          Rechts sieht man jetzt alles, was das Programm über diesen Artikel weiß.
+        show: { text: "AUS DEN REGELN", up: Border }
+      - say: >-
+          Darunter stehen seine Vorschläge, jeweils mit einer Sicherheit in Prozent.
+        show: { text: "Schaumwein × 750 ml", up: ItemsControl }
+      - say: >-
+          Es tippt auf Schaumwein, allerdings nur mit fünfundfünfzig Prozent, das
+          ist also eher geraten. Rotwein liegt knapp dahinter, und deshalb hat das
+          Programm nachgefragt.
+        show: { text: "Schaumwein × 750 ml" }
+        text: |-
+          Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht
+          sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die
+          Position offen geblieben.
+      - say: >-
+          Domina ist aber ein fränkischer Rotwein, also nehmen wir Rotwein.
+        click: { text: "Rotwein × 750 ml" }
+        allow: [{ text: "Rotwein × 750 ml", up: RadioButton }]
+        rounds: 2
+        task: Auf „Rotwein × 750 ml“ klicken.
+        hint: Der zweite Vorschlag, direkt unter „Schaumwein“.
+        text: |-
+          Ein Domina ist ein fränkischer Rotwein: den Vorschlag **Rotwein × 750 ml**
+          anklicken.
+      - say: >-
+          Der Faktor passt schon, siebenhundertfünfzig Milliliter pro Flasche, das
+          hat das Programm aus dem Namen gelesen.
+        show: { name: FactorFields }
+        text: |-
+          Der **Faktor** passt schon: Das Rezept für ein Glas Rotwein rechnet in
+          Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je
+          Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor:
+          158 Flaschen × 750 ml = 118,5 l.
+      - say: >-
+          Passt alles, also klicken wir auf Zuordnen.
+        click: { text: "Zuordnen" }
+        done: { at: { starts: "„2022 Domina" } }
+        rounds: 8
+        task: Auf „Zuordnen“ klicken.
+        text: |-
+          Dann **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung,
+          die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.
+        shot:
+          name: zuordnung-zugeordnet
+          at: { starts: "„2022 Domina", up: Border }
+          width: 428
+          alt: Die Bestätigung nach dem Zuordnen
+      - say: >-
+          Und das Programm merkt sich das. Die Zuordnung kommt in die
+          Regel-Datenbank, und taucht der Domina in einer späteren Prüfung wieder
+          auf, weiß es gleich, dass das ein Rotwein ist, und fragt nicht mehr nach.
+          In der Regel-Datenbank sammelt sich noch mehr, etwa die Rezepte und die
+          Ertragsregeln. Die kommen in den nächsten Übungen dran.
+        show: { starts: "„2022 Domina", up: Border }
+        hold: 0.5
+        text: |-
+          Das Programm merkt sich die Zuordnung in der
+          [Regel-Datenbank](../verwaltung.md#regel-datenbank): Kommt der Domina in
+          einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln
+          sich auch Rezepte und Ertragsregeln, siehe
+          [3. Sortiment](sortiment.md) und [5. Bericht](bericht.md).
+
+  - title: Wenn alles passt
+    beats:
+      - say: >-
+          Als Nächstes hat das Programm gleich die Frühkartoffeln aufgemacht, und da
+          passt schon alles: Kartoffeln, zwölfeinhalb Kilo der Sack. Also gleich auf
+          Zuordnen.
+        click: { text: "Zuordnen" }
+        done: { at: { starts: "„Frühkartoffeln" } }
+        rounds: 8
+        task: Auf „Zuordnen“ klicken.
+        text: |-
+          Nach dem Zuordnen wählt das Programm die nächste offene Position, hier
+          **Frühkartoffeln festkochend 12,5 kg**. **Kartoffeln × 12,5 kg** ist schon
+          gewählt, und der Faktor `12.500` stimmt. Das Programm war sich nur nicht
+          sicher genug, um es allein zu entscheiden. Einfach **Zuordnen**.
+
+  - title: Wenn eine Menge fehlt
+    beats:
+      - say: >-
+          Zum Schluss schauen wir uns noch die Kaffeesahne an, die steht fast ganz oben
+          in der Liste.
+        click: { starts: "Kaffeesahne" }
+        via: select
+        allow: [{ starts: "Kaffeesahne", up: DataGridRow }]
+        rounds: 20
+        task: Auf „Kaffeesahne Portionen“ klicken.
+        text: |-
+          Bei **Kaffeesahne Portionen 10 × 7,5 g 240er** ist die Zutat klar, **Sahne**
+          ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht
+          lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern
+          markiert, und darunter steht die Frage, die zu beantworten ist.
+        shot:
+          name: zuordnung-faktor-fehlt
+          at: { text: "AUS DEN REGELN", up: Border }
+          width: 630
+          alt: "Die Kaffeesahne: Zutat klar, Faktor fehlt"
+      - say: >-
+          Die Zutat ist hier klar, das ist Sahne. Beim Faktor ist aber ein
+          Sternchen, und das heißt: Diese Angabe braucht das Programm unbedingt. Darunter
+          fragt es, wie viel Sahne in einem Karton steckt. Aus dem Wort Karton allein
+          kann es das nämlich nicht wissen.
+        show: { name: FactorFields }
+      - say: >-
+          Im Artikelnamen steht es aber: zweihundertvierzig Portionen zu je
+          siebeneinhalb Gramm, das sind ungefähr achtzehnhundert Milliliter. Wir
+          klicken also ins Feld und tippen achtzehnhundert ein.
+        type: { at: { name: FactorBox }, text: "1800" }
+        task: "Faktor: 1800"
+        hint: 240 Portionen × 7,5 g sind rund 1.800 ml.
+        accept: ["1800 ml"]
+        text: |-
+          Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
+          1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800`{.copy}
+          eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
+        shot:
+          name: zuordnung-faktor
+          at: { text: "AUS DEN REGELN", up: Border }
+          width: 630
+          alt: Der Faktor ist eingetragen
+      - say: >-
+          Und dann wieder auf Zuordnen.
+        click: { text: "Zuordnen" }
+        done: { at: { starts: "„Kaffeesahne" } }
+        rounds: 8
+        task: Auf „Zuordnen“ klicken.
+
+  - title: Was offen bleiben darf
+    beats:
+      - text: |-
+          Bleiben **Leberkäse am Stück, ungebacken** und **Petersilie glatt, Bund**.
+          Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche
+          Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich
+          aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins
+          Gewicht.
+
+          Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum
+          Wareneinsatz, und die Kalkulation führt es unter **Nicht in der
+          Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht. Wo der Faktor
+          erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist
+          offen lassen die ehrlichere Antwort.
+
+          Am Ende steht über der Liste `2 offen`.
+        act: [{ do: top, at: { name: Groups } }, { do: deselect, at: { name: Groups } }]
+        shot:
+          name: zuordnung-fertig
+          at: { starts: "2 offen", up: DockPanel }
+          width: 610
+          below: true
+          alt: Nur Leberkäse und Petersilie sind noch offen
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So wird zugeordnet
+          list:
+            - Reiter „2. Zuordnung“
+            - Offene Zeile anklicken
+            - Zutat und Faktor prüfen
+            - „Zuordnen“ klicken
+        say: >-
+          Das war's schon. Man geht auf den Reiter Zuordnung, klickt eine offene Zeile
+          an, schaut sich die Vorschläge an, prüft den Faktor und ordnet zu.
+      - card:
+          kicker: Gut zu wissen
+          title: Offen lassen ist erlaubt
+          text: Die Kalkulation führt Offenes gesondert auf.
+        say: >-
+          Was man nicht sicher weiß, darf übrigens ruhig offen bleiben. Die Kalkulation
+          listet das extra auf, da geht also nichts verloren.
