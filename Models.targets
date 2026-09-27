@@ -56,15 +56,16 @@
   </PropertyGroup>
 
   <!-- Each project that imports this names its set: the text models go with
-       Umsatzschaetzung.Inference, the reader's with Umsatzschaetzung.Documents. -->
-  <Target Name="FetchModels" BeforeTargets="AssignTargetPaths">
+       Umsatzschaetzung.Inference, the reader's with Umsatzschaetzung.Documents; the page
+       takes every set, laid out by release. -->
+  <Target Name="ResolveModels">
     <ItemGroup>
-      <ModelFile Remove="@(ModelFile)" Condition="'%(ModelFile.Set)' != '$(ModelSet)'" />
-      <ModelFile>
-        <Path>$(ModelCacheDir)/%(ModelFile.Release)/%(ModelFile.Dir)/%(ModelFile.Identity)</Path>
-        <Url Condition="'%(ModelFile.Url)' == ''">$(ModelRepository)/%(ModelFile.Release)/%(ModelFile.Identity)</Url>
-      </ModelFile>
-      <MissingModel Include="@(ModelFile)" Condition="!Exists('%(ModelFile.Path)')" />
+      <ResolvedModel Include="@(ModelFile)" Condition="'$(ModelSet)' == '*' OR '%(ModelFile.Set)' == '$(ModelSet)'" />
+      <ResolvedModel>
+        <Path>$(ModelCacheDir)/%(ResolvedModel.Release)/%(ResolvedModel.Dir)/%(ResolvedModel.Identity)</Path>
+        <Url Condition="'%(ResolvedModel.Url)' == ''">$(ModelRepository)/%(ResolvedModel.Release)/%(ResolvedModel.Identity)</Url>
+      </ResolvedModel>
+      <MissingModel Include="@(ResolvedModel)" Condition="!Exists('%(ResolvedModel.Path)')" />
     </ItemGroup>
 
     <Error Condition="'@(MissingModel)' != '' AND '$(UMSATZ_MODEL_DIR)' != ''"
@@ -78,7 +79,7 @@
                   DestinationFileName="%(MissingModel.Identity)"
                   Retries="6" RetryDelayMilliseconds="15000" />
 
-    <GetFileHash Files="@(ModelFile->'%(Path)')" Algorithm="SHA256" HashEncoding="hex">
+    <GetFileHash Files="@(ResolvedModel->'%(Path)')" Algorithm="SHA256" HashEncoding="hex">
       <Output TaskParameter="Items" ItemName="HashedModel" />
     </GetFileHash>
     <ItemGroup>
@@ -87,10 +88,12 @@
     <Delete Files="@(CorruptModel)" Condition="'@(CorruptModel)' != ''" />
     <Error Condition="'@(CorruptModel)' != ''"
            Text="SHA256 mismatch, cached copy discarded — build again to re-fetch: @(CorruptModel->'%(Identity)', ', ')" />
+  </Target>
 
+  <Target Name="FetchModels" BeforeTargets="AssignTargetPaths" DependsOnTargets="ResolveModels" Condition="'$(ModelSet)' != '*'">
     <ItemGroup>
-      <ContentWithTargetPath Include="@(ModelFile->'%(Path)')"
-                             TargetPath="models/%(ModelFile.Dir)/%(ModelFile.Identity)"
+      <ContentWithTargetPath Include="@(ResolvedModel->'%(Path)')"
+                             TargetPath="models/%(ResolvedModel.Dir)/%(ResolvedModel.Identity)"
                              CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
   </Target>

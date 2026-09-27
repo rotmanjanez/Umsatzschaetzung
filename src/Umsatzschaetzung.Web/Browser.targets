@@ -1,0 +1,100 @@
+<Project>
+  <!-- What a page that runs the services needs beside its runtime: pdfium linked in, and the
+       weights, their runtime and the warmed embeddings published next to it. -->
+  <PropertyGroup>
+    <ModelSet>*</ModelSet>
+    <OrtVersion>1.30.0</OrtVersion>
+  </PropertyGroup>
+
+  <!-- The page's runtime, pinned like the weights and fetched into the same cache. -->
+  <ItemGroup>
+    <OrtFile Include="ort.webgpu.bundle.min.mjs" Sha256="0730816731ce2cdfb06f273da065d4a1c7091eb9d1756a83b2916c8a89d015e2" />
+    <OrtFile Include="ort-wasm-simd-threaded.asyncify.wasm" Sha256="39f9f0894d478800487ed9f7dbe92618498db320cf55c8e3d89adff8dce658da" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)../../Models.targets" />
+
+  <!-- pdfium for emscripten 3.1.56 with wasm exceptions and longjmp, as the runtime links; built by
+       tools/pdfium/build.sh and kept in a release like the weights. The archive's name is the
+       library name the imports ask for. -->
+  <PropertyGroup>
+    <PdfiumRelease>pdfium-wasm-8046</PdfiumRelease>
+    <PdfiumSha256>3b1d868e1b440fa836d2e9ac7241e5c03317fcc3ea7ee03286197d7e4dcf1c38</PdfiumSha256>
+    <PdfiumArchive>$(ModelCacheDir)/$(PdfiumRelease)/pdfium.a</PdfiumArchive>
+  </PropertyGroup>
+  <ItemGroup>
+    <NativeFileReference Include="$(PdfiumArchive)" />
+  </ItemGroup>
+
+  <Target Name="FetchPdfium" BeforeTargets="PrepareForBuild">
+    <DownloadFile Condition="!Exists('$(PdfiumArchive)')" SourceUrl="$(ModelRepository)/$(PdfiumRelease)/pdfium.a"
+                  DestinationFolder="$(ModelCacheDir)/$(PdfiumRelease)" Retries="6" RetryDelayMilliseconds="15000" />
+    <GetFileHash Files="$(PdfiumArchive)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Hash" PropertyName="PdfiumHash" />
+    </GetFileHash>
+    <Delete Files="$(PdfiumArchive)" Condition="'$(PdfiumHash)' != '$(PdfiumSha256)'" />
+    <Error Condition="'$(PdfiumHash)' != '$(PdfiumSha256)'" Text="SHA256 mismatch, cached copy discarded — build again to re-fetch: pdfium.a" />
+  </Target>
+
+  <!-- The shipped rules' embedding cache, warmed by the native encoder: a browser would take
+       minutes over it. Named by its hash, like everything the page keeps. -->
+  <PropertyGroup>
+    <WarmDir>$(MSBuildThisFileDirectory)obj/warm/</WarmDir>
+  </PropertyGroup>
+  <Target Name="WarmEmbeddings"
+          Inputs="$(MSBuildThisFileDirectory)../../tools/embeddings/Program.cs;$(MSBuildThisFileDirectory)../Umsatzschaetzung.Core/Rulestore/seed.json;$(MSBuildThisFileDirectory)../Umsatzschaetzung.Core/Suggest/*.cs;$(MSBuildThisFileDirectory)../Umsatzschaetzung.Inference/**/*.cs;$(MSBuildThisFileDirectory)../../Models.targets"
+          Outputs="$(WarmDir)embeddings.db">
+    <Exec Command="dotnet run --project &quot;$(MSBuildThisFileDirectory)../../tools/embeddings&quot; -c Release -- &quot;$(WarmDir)&quot;" />
+  </Target>
+
+  <!-- Every file under a path named for its release or version, so the page keeps what it
+       fetched for good; weights.json names them and their hashes. -->
+  <Target Name="ResolveWeights" DependsOnTargets="ResolveModels;WarmEmbeddings">
+    <GetFileHash Files="$(WarmDir)embeddings.db" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Hash" PropertyName="WarmHash" />
+    </GetFileHash>
+    <PropertyGroup>
+      <WarmHash>$(WarmHash.ToLowerInvariant())</WarmHash>
+    </PropertyGroup>
+    <ItemGroup>
+      <OrtFile>
+        <Path>$(ModelCacheDir)/onnxruntime-web-$(OrtVersion)/%(OrtFile.Identity)</Path>
+        <Url>https://cdn.jsdelivr.net/npm/onnxruntime-web@$(OrtVersion)/dist/%(OrtFile.Identity)</Url>
+      </OrtFile>
+      <MissingOrt Include="@(OrtFile)" Condition="!Exists('%(OrtFile.Path)')" />
+    </ItemGroup>
+    <DownloadFile Condition="'@(MissingOrt)' != ''" SourceUrl="%(MissingOrt.Url)"
+                  DestinationFolder="$(ModelCacheDir)/onnxruntime-web-$(OrtVersion)" DestinationFileName="%(MissingOrt.Identity)"
+                  Retries="6" RetryDelayMilliseconds="15000" />
+    <GetFileHash Files="@(OrtFile->'%(Path)')" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedOrt" />
+    </GetFileHash>
+    <ItemGroup>
+      <CorruptOrt Include="@(HashedOrt)" Condition="'%(HashedOrt.FileHash)' != '%(HashedOrt.Sha256)'" />
+    </ItemGroup>
+    <Delete Files="@(CorruptOrt)" Condition="'@(CorruptOrt)' != ''" />
+    <Error Condition="'@(CorruptOrt)' != ''" Text="SHA256 mismatch, cached copy discarded — build again to re-fetch: @(CorruptOrt->'%(Identity)', ', ')" />
+
+    <ItemGroup>
+      <Weight Include="@(ResolvedModel->'%(Path)')" Name="%(ResolvedModel.Dir)/%(ResolvedModel.Identity)" Served="models/%(ResolvedModel.Release)/%(ResolvedModel.Identity)" Sha256="%(ResolvedModel.Sha256)" />
+      <Weight Include="@(OrtFile->'%(Path)')" Name="ort/%(OrtFile.Identity)" Served="ort/$(OrtVersion)/%(OrtFile.Identity)" Sha256="%(OrtFile.Sha256)" />
+      <Weight Include="$(WarmDir)embeddings.db" Name="seed/embeddings.db" Served="models/embeddings-$(WarmHash.Substring(0, 16))/embeddings.db" Sha256="$(WarmHash)" />
+      <WeightLine Include="@(Weight->'&quot;%(Name)&quot;: { &quot;url&quot;: &quot;%(Served)&quot;, &quot;sha256&quot;: &quot;%(Sha256)&quot; }')" />
+    </ItemGroup>
+    <PropertyGroup>
+      <WeightsJson>{
+&quot;runtime&quot;: { &quot;module&quot;: &quot;ort/$(OrtVersion)/ort.webgpu.bundle.min.mjs&quot;, &quot;wasm&quot;: &quot;ort/ort-wasm-simd-threaded.asyncify.wasm&quot; },
+&quot;files&quot;: {
+@(WeightLine, ',%0A')
+}
+}
+</WeightsJson>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="PublishWeights" AfterTargets="Publish" DependsOnTargets="ResolveWeights">
+    <Copy SourceFiles="@(Weight)" DestinationFiles="@(Weight->'$(PublishDir)wwwroot/%(Served)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(WarmDir)embeddings.db.br" DestinationFiles="$(PublishDir)wwwroot/models/embeddings-$(WarmHash.Substring(0, 16))/embeddings.db.br" SkipUnchangedFiles="true" />
+    <WriteLinesToFile File="$(PublishDir)wwwroot/weights.json" Lines="$(WeightsJson)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+</Project>

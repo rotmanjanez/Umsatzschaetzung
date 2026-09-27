@@ -1,0 +1,50 @@
+AddType application/wasm .wasm
+AddType text/javascript .js .mjs
+AddType application/octet-stream .onnx .dat .db
+
+RewriteEngine On
+
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} !^app\.umsatzschaetzung\.amtstools\.de$ [NC]
+RewriteRule ^(.*)$ https://app.umsatzschaetzung.amtstools.de/$1 [R=301,L]
+
+RewriteCond %{HTTP:Accept-Encoding} br
+RewriteCond %{REQUEST_FILENAME}.br -s
+RewriteRule ^(.*)$ $1.br [L]
+
+<FilesMatch "\.wasm\.br$">
+  ForceType application/wasm
+</FilesMatch>
+<FilesMatch "\.m?js\.br$">
+  ForceType text/javascript
+</FilesMatch>
+<FilesMatch "\.json\.br$">
+  ForceType application/json
+</FilesMatch>
+<FilesMatch "\.html\.br$">
+  ForceType text/html
+</FilesMatch>
+<FilesMatch "\.(dat|db)\.br$">
+  ForceType application/octet-stream
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.br$">
+    Header set Content-Encoding br
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+
+  # Isolated, so the runtime's CPU fallback may run on several threads.
+  Header set Cross-Origin-Opener-Policy "same-origin"
+  Header set Cross-Origin-Embedder-Policy "require-corp"
+
+  # Weights and runtime sit under their release; the framework's files carry their hash.
+  # What names them is asked again on every visit.
+  Header set Cache-Control "no-cache"
+  <If "%{REQUEST_URI} =~ m#^/(models|ort)/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+  <ElseIf "%{REQUEST_URI} =~ m#^/_framework/# && %{REQUEST_URI} !~ m#/dotnet\.js(\.br)?$#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </ElseIf>
+</IfModule>

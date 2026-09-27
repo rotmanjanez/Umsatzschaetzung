@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     tags: ['v*']
-    paths: ['web/**', 'src/**', 'tools/headless/**', '.github/workflows/deploy-web.yml']
+    paths: ['web/**', 'src/**', 'tools/headless/**', 'tools/embeddings/**', '.github/workflows/deploy-web.yml']
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +26,32 @@ jobs:
         with:
           source: web/landing/dist
           deploy-path: ${{ vars.LANDING_DEPLOY_PATH }}
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: ~/.local/share/umsatzschaetzung/models
+          key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Web/Browser.targets') }}
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet workload install wasm-tools
+      - run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
+      # The weights and the runtime sit under their release and never change there: what the
+      # server has is kept, only what is new goes up.
+      - uses: ./.github/actions/netcup-deploy
+        if: github.event_name != 'pull_request'
+        with:
+          source: publish/wwwroot
+          deploy-path: ${{ vars.APP_DEPLOY_PATH }}
+          keep: models/* ort/*
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}

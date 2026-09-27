@@ -172,7 +172,7 @@ public sealed class Imports
 
     async Task<(PickedFile File, Task<OcrResp>? Ocr)> Read(ImportJob job, string path)
     {
-        var file = new PickedFile(Path.GetFileName(path), await File.ReadAllBytesAsync(path, job.Ct));
+        var file = new PickedFile(Path.GetFileName(path), await Session.ReadPicked(path, job.Ct));
         return (file, InvoiceParser.Detect(file.Data) is Kind.Pdf or Kind.Image
             ? session.Service.Invoices.Ocr(job.CaseId, file.Name, file.Data, job.Ct)
             : null);

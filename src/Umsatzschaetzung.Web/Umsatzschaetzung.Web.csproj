@@ -2,9 +2,20 @@
   <Import Project="Browser.props" />
   <PropertyGroup>
     <RootNamespace>Umsatzschaetzung.Web</RootNamespace>
+    <EmccExtraLDFlags>$(EmccExtraLDFlags) -lidbfs.js</EmccExtraLDFlags>
+    <RunAOTCompilation Condition="'$(Configuration)' == 'Release'">true</RunAOTCompilation>
+    <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
     <PackageReference Include="Avalonia.Browser" Version="12.1.2" />
   </ItemGroup>
+
+  <Import Project="Browser.targets" />
+
+  <Target Name="PublishHtaccess" AfterTargets="Publish">
+    <Copy SourceFiles="htaccess" DestinationFiles="$(PublishDir)wwwroot/.htaccess" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

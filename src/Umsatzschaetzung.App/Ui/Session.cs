@@ -15,14 +15,19 @@ public enum SaveState { Idle, Slow, Stuck }
 
 public sealed class Session : Observable
 {
+    // A browser's dialog filters by MIME type alone.
     public static readonly FilePickerFileType[] InvoiceFilter =
     [
-        new("Rechnungen") { Patterns = ["*.xml", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff"] },
+        new("Rechnungen")
+        {
+            Patterns = ["*.xml", "*.pdf", "*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff"],
+            MimeTypes = ["application/xml", "application/pdf", "image/png", "image/jpeg", "image/tiff"],
+        },
         new("Alle Dateien") { Patterns = ["*"] },
     ];
-    public static readonly FilePickerFileType[] CaseFilter = [new("Prüfung") { Patterns = ["*.db"] }];
-    public static readonly FilePickerFileType[] PdfFilter = [new("PDF") { Patterns = ["*.pdf"] }];
-    public static readonly FilePickerFileType[] CsvFilter = [new("CSV") { Patterns = ["*.csv"] }];
+    public static readonly FilePickerFileType[] CaseFilter = [new("Prüfung") { Patterns = ["*.db"], MimeTypes = ["application/vnd.sqlite3"] }];
+    public static readonly FilePickerFileType[] PdfFilter = [new("PDF") { Patterns = ["*.pdf"], MimeTypes = ["application/pdf"] }];
+    public static readonly FilePickerFileType[] CsvFilter = [new("CSV") { Patterns = ["*.csv"], MimeTypes = ["text/csv"] }];
 
     static readonly Dictionary<string, string> NoCategories = [];
 
@@ -422,7 +427,20 @@ public sealed class Session : Observable
         await using var from = await file.OpenReadAsync();
         await using var to = File.Create(path);
         await from.CopyToAsync(to);
+        lock (copies) copies.Add(path);
         return path;
+    }
+
+    // A browser's file system lives in memory: a copy is gone once it is read.
+    static readonly HashSet<string> copies = [];
+
+    public static async Task<byte[]> ReadPicked(string path, CancellationToken ct = default)
+    {
+        var data = await File.ReadAllBytesAsync(path, ct);
+        bool copied;
+        lock (copies) copied = copies.Remove(path);
+        if (copied) Directory.Delete(Path.GetDirectoryName(path)!, true);
+        return data;
     }
 
     public async Task<List<PickedFile>> ReadFiles(IEnumerable<string> paths)
@@ -432,7 +450,7 @@ public sealed class Session : Observable
         {
             try
             {
-                files.Add(new PickedFile(Path.GetFileName(path), await File.ReadAllBytesAsync(path)));
+                files.Add(new PickedFile(Path.GetFileName(path), await ReadPicked(path)));
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {

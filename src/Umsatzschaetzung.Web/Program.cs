@@ -1,11 +1,15 @@
 using System.Runtime.Versioning;
-using Umsatzschaetzung.App.Platform;
-using Umsatzschaetzung.Casefile;
-using Umsatzschaetzung.Rulestore;
 using Umsatzschaetzung.Service;
 using Umsatzschaetzung.Web;
 
 [assembly: SupportedOSPlatform("browser")]
 
-// No reader, tagger or model runs in the page: invoices come in as e-invoices, wares are mapped by hand.
-await Host.Start(Services.Local(new RuleStore("/work/rules", RuleStore.Seed()), new CaseStore("/work/cases"), Release.Version), args[0]);
+// The page runs the interface alone; the services run in a worker of their own, started with
+// "service", and the weights in one of theirs, fetched the first time a model is asked for.
+if (args[0] == "service")
+    await Serve.Start();
+else
+{
+    await WorkerTransport.Start();
+    await Host.Start(Remote.Over(new WorkerTransport()), args[0]);
+}

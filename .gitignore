@@ -14,3 +14,5 @@ web/docs/pages/img/
 web/docs/pages/guide/img/
 .env
 beispiel-rechnungen/
+tools/pdfium/work/
+tools/pdfium/pdfium.a
