@@ -189,34 +189,14 @@ chapters:
           sich auch Rezepte und Ertragsregeln, siehe
           [3. Sortiment](sortiment.md) und [5. Bericht](bericht.md).
 
-  - title: Wenn alles passt
-    beats:
-      - say: >-
-          Als Nächstes hat das Programm gleich die Frühkartoffeln aufgemacht, und da
-          passt schon alles: Kartoffeln, zwölfeinhalb Kilo der Sack. Also gleich auf
-          Zuordnen.
-        click: { text: "Zuordnen" }
-        done: { at: { starts: "„Frühkartoffeln" } }
-        rounds: 8
-        task: Auf „Zuordnen“ klicken.
-        text: |-
-          Nach dem Zuordnen wählt das Programm die nächste offene Position, hier
-          **Frühkartoffeln festkochend 12,5 kg**. **Kartoffeln × 12,5 kg** ist schon
-          gewählt, und der Faktor `12.500` stimmt. Das Programm war sich nur nicht
-          sicher genug, um es allein zu entscheiden. Einfach **Zuordnen**.
-
   - title: Wenn eine Menge fehlt
     beats:
       - say: >-
-          Zum Schluss schauen wir uns noch die Kaffeesahne an, die steht fast ganz oben
+          Als Nächstes hat das Programm die Kaffeesahne aufgemacht, die steht ganz oben
           in der Liste.
-        click: { starts: "Kaffeesahne" }
-        via: select
-        allow: [{ starts: "Kaffeesahne", up: DataGridRow }]
-        rounds: 20
-        task: Auf „Kaffeesahne Portionen“ klicken.
         text: |-
-          Bei **Kaffeesahne Portionen 10 × 7,5 g 240er** ist die Zutat klar, **Sahne**
+          Nach dem Zuordnen wählt das Programm die nächste offene Position, hier
+          **Kaffeesahne Portionen 10 × 7,5 g 240er**. Die Zutat ist klar, **Sahne**
           ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht
           lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern
           markiert, und darunter steht die Frage, die zu beantworten ist.
@@ -254,6 +234,22 @@ chapters:
         done: { at: { starts: "„Kaffeesahne" } }
         rounds: 8
         task: Auf „Zuordnen“ klicken.
+
+  - title: Wenn alles passt
+    beats:
+      - say: >-
+          Als Nächstes hat das Programm gleich die Frühkartoffeln aufgemacht, und da
+          passt schon alles: Kartoffeln, zwölfeinhalb Kilo der Sack. Also gleich auf
+          Zuordnen.
+        click: { text: "Zuordnen" }
+        done: { at: { starts: "„Frühkartoffeln" } }
+        rounds: 8
+        task: Auf „Zuordnen“ klicken.
+        text: |-
+          Danach ist **Frühkartoffeln festkochend 12,5 kg** dran. **Kartoffeln × 12,5
+          kg** ist schon gewählt, und der Faktor `12.500` stimmt. Das Programm war
+          sich nur nicht sicher genug, um es allein zu entscheiden. Einfach
+          **Zuordnen**.
 
   - title: Was offen bleiben darf
     beats:
