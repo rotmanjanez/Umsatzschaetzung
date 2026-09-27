@@ -150,6 +150,8 @@ select.tool option { background: var(--card); color: var(--ink); }
   min-height: 56px; padding: 0 30px; border-radius: 14px; border: 0; font-weight: 600; font-size: 1.1rem;
   background: var(--blue); color: var(--on-blue);
 }
+a.primary { display: inline-flex; align-items: center; text-decoration: none; }
+.quiet { min-height: 56px; padding: 0 8px; border: 0; background: none; color: var(--blue); font-weight: 600; font-size: 1.1rem; text-decoration: none; display: inline-flex; align-items: center; }
 .load { width: min(320px, 100%); display: grid; gap: 10px; color: var(--muted); font-size: 1rem; }
 .load .track { height: 8px; border-radius: 4px; background: var(--rule); overflow: hidden; }
 .load i { display: block; height: 100%; background: var(--blue); transform: scaleX(0); transform-origin: left; transition: transform .3s; }

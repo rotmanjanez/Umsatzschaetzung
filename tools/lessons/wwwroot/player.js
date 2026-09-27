@@ -111,6 +111,13 @@ export function player(lesson, running) {
     $('start').hidden = false;
     $('start').textContent = 'Noch einmal von vorn';
     $('start').onclick = () => location.reload();
+    $('all').hidden = false;
+    if (lesson.next) {
+      $('next').href = lesson.next.href;
+      $('next').textContent = `Weiter: ${lesson.next.title}  ▶`;
+      $('next').hidden = false;
+      $('start').className = 'quiet';
+    }
     $('card').hidden = true;
     $('stage').classList.remove('gone');
   }

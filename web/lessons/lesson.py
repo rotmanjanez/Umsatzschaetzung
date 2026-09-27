@@ -386,18 +386,28 @@ def site(ep: Lesson):
     beats = [{**b, "audio": clips.get(b["say"])} for b in ep.beats]
     lesson = {key: ep.spec[key] for key in ("course", "number", "title", "summary", "done")}
     (target / "lesson.json").write_text(json.dumps({**lesson, "beats": beats}, ensure_ascii=False, indent=1))
-    overview(ep.spec["course"])
+    overview()
     print(target / "index.html")
 
 
-# The site's own page lists every lesson it holds, in their order.
-def overview(course: str):
-    lessons = sorted(({**json.loads(p.read_text()), "name": p.parent.name} for p in SITE.glob("*/lesson.json")),
-                     key=itemgetter("number"))
-    items = "\n".join(f'    <li><a href="{l["name"]}/"><p class="kicker">Übung {l["number"]}</p>'
-                      f'<h2>{escape(l["title"])}</h2><p>{escape(l["summary"])}</p></a></li>' for l in lessons)
+# The site's own page lists its lessons by course, each course in its order, and every lesson
+# ends on a way on to the next one in its course.
+def overview():
+    lessons = sorted(((p, json.loads(p.read_text())) for p in SITE.glob("*/lesson.json")), key=lambda l: l[1]["number"])
+    courses = {}
+    for path, lesson in lessons:
+        courses.setdefault(lesson["course"], []).append((path, lesson))
+    for course in courses.values():
+        for (path, lesson), after in zip(course, course[1:] + [None]):
+            lesson["next"] = after and {"href": f"{after[0].parent.name}/", "title": after[1]["title"]}
+            path.write_text(json.dumps(lesson, ensure_ascii=False, indent=1))
+    listed = "\n".join(
+        f'  <section>\n    <h2>{escape(name)}</h2>\n    <ol>\n'
+        + "".join(f'      <li><a href="{path.parent.name}/"><span>{lesson["number"]}</span>{escape(lesson["title"])}</a></li>\n'
+                  for path, lesson in course)
+        + '    </ol>\n  </section>' for name, course in courses.items())
     page = (ROOT / "web" / "lessons" / "uebersicht.html").read_text()
-    (SITE / "index.html").write_text(page.replace("{course}", escape(course)).replace("{lessons}", items))
+    (SITE / "index.html").write_text(page.replace("{courses}", listed))
 
 
 # A weight never changes under its release, so one already there is the same file.
