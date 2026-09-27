@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <!-- The program in a page with its services in a worker: what every head in a browser shares.
+       Its scripts are served to the app under _content/Umsatzschaetzung.Browser/; an app imports
+       Browser.props and Browser.targets for the runtime and the weights beside it. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+    <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+      <_Parameter1>browser</_Parameter1>
+    </AssemblyAttribute>
+    <ProjectReference Include="../Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
+    <PackageReference Include="Avalonia.Browser" Version="12.1.2" />
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 // The services in a runtime of their own: the stores, the reading of documents and the matching
-// never hold up the page. /work is read from IndexedDB before they start.
-import { dotnet } from './_framework/dotnet.js';
-import { mount } from './store.js';
+// never hold up the page. /work is laid out before they start, as the page's first message says.
+import { dotnet } from '../../_framework/dotnet.js';
+import { load, mount } from './store.js';
 
 // What goes wrong here shows in the page's console, where it is looked for.
 for (const level of ['error', 'warn']) {
@@ -15,9 +15,9 @@ for (const level of ['error', 'warn']) {
 const calls = new Map();
 let exports, flush = () => { };
 
-async function start() {
+async function start({ from }) {
     const runtime = await dotnet.create();
-    flush = await mount(runtime.Module.FS, '/work');
+    flush = from ? await load(runtime.Module.FS, '/work', from) : await mount(runtime.Module.FS, '/work');
     runtime.setModuleImports('nets', await import('./nets.js'));
     runtime.setModuleImports('service', {
         blob: (id, index, into) => into.set(calls.get(id).blobs[index]),
@@ -25,12 +25,16 @@ async function start() {
         attach: (id, data) => calls.get(id).answer.push(data.slice()),
     });
     await runtime.runMain(runtime.getConfig().mainAssemblyName, ['service']);
-    exports = (await runtime.getAssemblyExports(runtime.getConfig().mainAssemblyName)).Umsatzschaetzung.Web.Serve;
+    exports = (await runtime.getAssemblyExports('Umsatzschaetzung.Browser')).Umsatzschaetzung.Browser.Serve;
 }
 
-const ready = start().then(() => postMessage({ started: true }), e => postMessage({ started: false, error: String(e?.message ?? e) }));
+let ready;
 
 onmessage = async ({ data }) => {
+    if (data.start) {
+        ready = start(data.start).then(() => postMessage({ started: true }), e => postMessage({ started: false, error: String(e?.message ?? e) }));
+        return;
+    }
     await ready;
     if (data.flush) return flush();
     if (data.cancel !== undefined) return exports.Cancel(data.cancel);

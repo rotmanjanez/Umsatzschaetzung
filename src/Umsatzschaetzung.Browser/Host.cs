@@ -9,7 +9,7 @@ using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.App.Ui;
 using Umsatzschaetzung.Service;
 
-namespace Umsatzschaetzung.Web;
+namespace Umsatzschaetzung.Browser;
 
 // The program as one view in the page element with the given id, over whatever services its head composes.
 public static partial class Host

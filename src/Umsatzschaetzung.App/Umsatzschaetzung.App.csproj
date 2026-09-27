@@ -24,7 +24,7 @@
     <InternalsVisibleTo Include="headless" />
     <InternalsVisibleTo Include="Umsatzschaetzung.Lessons" />
     <InternalsVisibleTo Include="Umsatzschaetzung.Tests" />
-    <InternalsVisibleTo Include="Umsatzschaetzung.Web" />
+    <InternalsVisibleTo Include="Umsatzschaetzung.Browser" />
   </ItemGroup>
 
   <ItemGroup>

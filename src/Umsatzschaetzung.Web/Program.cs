@@ -1,6 +1,6 @@
 using System.Runtime.Versioning;
+using Umsatzschaetzung.Browser;
 using Umsatzschaetzung.Service;
-using Umsatzschaetzung.Web;
 
 [assembly: SupportedOSPlatform("browser")]
 

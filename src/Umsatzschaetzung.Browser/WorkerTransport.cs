@@ -2,7 +2,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using Umsatzschaetzung.Service;
 
-namespace Umsatzschaetzung.Web;
+namespace Umsatzschaetzung.Browser;
 
 // The page's calls to the services in their worker. Attachments are handed over as they are
 // staged, the answer's taken straight into arrays here.

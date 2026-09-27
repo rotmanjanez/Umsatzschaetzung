@@ -3,14 +3,18 @@
 // against its hash once and kept in the cache for good.
 const store = 'umsatz-weights';
 
-const manifest = fetch('weights.json', { cache: 'no-cache' }).then(r => {
+// This script is served from _content/Umsatzschaetzung.Browser/; the weights sit at the app's root.
+const root = new URL('../../', location.href);
+const at = url => new URL(url, root).href;
+
+const manifest = fetch(at('weights.json'), { cache: 'no-cache' }).then(r => {
     if (!r.ok) throw new Error(`weights.json: ${r.status}`);
     return r.json();
 });
 
 const kept = manifest.then(async m => {
     const cache = await caches.open(store);
-    const wanted = new Set(Object.values(m.files).map(f => new URL(f.url, location.href).href));
+    const wanted = new Set(Object.values(m.files).map(f => at(f.url)));
     for (const r of await cache.keys()) if (!wanted.has(r.url)) await cache.delete(r);
     return cache;
 });
@@ -21,14 +25,15 @@ async function bytes(name) {
     const f = (await manifest).files[name];
     if (!f) throw new Error(`Unbekannte Modelldatei: ${name}`);
     const cache = await kept;
-    const hit = await cache.match(f.url);
+    const url = at(f.url);
+    const hit = await cache.match(url);
     if (hit) return new Uint8Array(await hit.arrayBuffer());
-    const r = await fetch(f.url);
+    const r = await fetch(url);
     if (!r.ok) throw new Error(`${f.url}: ${r.status}`);
     const data = await r.arrayBuffer();
     const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', data)), b => b.toString(16).padStart(2, '0')).join('');
     if (hash !== f.sha256) throw new Error(`${f.url}: Prüfsumme stimmt nicht`);
-    await cache.put(f.url, new Response(data, { headers: { 'content-type': 'application/octet-stream' } }));
+    await cache.put(url, new Response(data, { headers: { 'content-type': 'application/octet-stream' } }));
     return new Uint8Array(data);
 }
 
@@ -42,7 +47,7 @@ let adapter, runtime;
 function ort() {
     return runtime ??= (async () => {
         const m = await manifest;
-        const [lib, wasm] = await Promise.all([import(new URL(m.runtime.module, location.href).href), once(m.runtime.wasm)]);
+        const [lib, wasm] = await Promise.all([import(at(m.runtime.module)), once(m.runtime.wasm)]);
         lib.env.wasm.wasmBinary = wasm;
         lib.env.wasm.numThreads = crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
         if (adapter) lib.env.webgpu.adapter = adapter;

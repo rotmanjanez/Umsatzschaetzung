@@ -2,7 +2,7 @@ using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Suggest;
 
-namespace Umsatzschaetzung.Web;
+namespace Umsatzschaetzung.Browser;
 
 // The browser runs the encoder at a fraction of native speed, and a first index over the
 // shipped rules would wait minutes for it: their embedding cache is warmed when the page is

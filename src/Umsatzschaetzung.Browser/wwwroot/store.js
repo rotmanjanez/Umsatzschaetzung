@@ -33,6 +33,19 @@ export async function mount(FS, dir) {
     return flush;
 }
 
+// /work laid out in memory from the files a listing `{ files }` names beside it, fetched anew each
+// time: nothing written there outlives the tab.
+export async function load(FS, dir, from) {
+    const { files } = await fetch(from, { cache: 'no-cache' }).then(r => r.json());
+    await Promise.all(files.map(async f => {
+        const data = new Uint8Array(await fetch(new URL(f, from), { cache: 'no-cache' }).then(r => r.arrayBuffer()));
+        const path = `${dir}/${f}`;
+        FS.mkdirTree(path.slice(0, path.lastIndexOf('/')));
+        FS.writeFile(path, data);
+    }));
+    return () => { };
+}
+
 function sync(FS, populate) {
     return new Promise((resolve, reject) => FS.syncfs(populate, e => e ? reject(e) : resolve()));
 }

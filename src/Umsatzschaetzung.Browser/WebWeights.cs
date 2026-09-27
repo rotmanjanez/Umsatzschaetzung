@@ -3,7 +3,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using Umsatzschaetzung.Nets;
 
-namespace Umsatzschaetzung.Web;
+namespace Umsatzschaetzung.Browser;
 
 // onnxruntime-web in the page: WebGPU where the browser has an adapter and a model asks for
 // it, WebAssembly otherwise. Inputs are staged and outputs taken straight from and into the

@@ -1,19 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk.WebAssembly">
-  <Import Project="Browser.props" />
+  <Import Project="../Umsatzschaetzung.Browser/Browser.props" />
   <PropertyGroup>
     <RootNamespace>Umsatzschaetzung.Web</RootNamespace>
-    <EmccExtraLDFlags>$(EmccExtraLDFlags) -lidbfs.js</EmccExtraLDFlags>
     <RunAOTCompilation Condition="'$(Configuration)' == 'Release'">true</RunAOTCompilation>
     <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
-    <PackageReference Include="Avalonia.Browser" Version="12.1.2" />
+    <ProjectReference Include="../Umsatzschaetzung.Browser/Umsatzschaetzung.Browser.csproj" />
   </ItemGroup>
 
-  <Import Project="Browser.targets" />
+  <Import Project="../Umsatzschaetzung.Browser/Browser.targets" />
 
   <Target Name="PublishHtaccess" AfterTargets="Publish">
     <Copy SourceFiles="htaccess" DestinationFiles="$(PublishDir)wwwroot/.htaccess" SkipUnchangedFiles="true" />

@@ -8,7 +8,7 @@ using Umsatzschaetzung.Service;
 using Umsatzschaetzung.Suggest;
 using Umsatzschaetzung.Tagging;
 
-namespace Umsatzschaetzung.Web;
+namespace Umsatzschaetzung.Browser;
 
 // The worker's side: the page's calls answered by the services composed there.
 public static partial class Serve

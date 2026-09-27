@@ -6,5 +6,6 @@
     <WasmBuildNative>true</WasmBuildNative>
     <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
     <PublishTrimmed>false</PublishTrimmed>
+    <EmccExtraLDFlags>$(EmccExtraLDFlags) -lidbfs.js</EmccExtraLDFlags>
   </PropertyGroup>
 </Project>
