@@ -47,6 +47,15 @@ RewriteRule ^(.*)$ $1.br [L]
   Header set Cross-Origin-Opener-Policy "same-origin"
   Header set Cross-Origin-Embedder-Policy "require-corp"
 
+  # Nothing leaves for another host, whatever a script asks.
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self'; worker-src 'self' blob:; object-src 'none'; form-action 'none'; base-uri 'self'; frame-ancestors 'self'"
+  Header set Referrer-Policy "no-referrer"
+
+  # The page the Bericht's frames fill: its own styles apply, nothing loads.
+  <FilesMatch "^bericht\.html(\.br)?$">
+    Header set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; form-action 'none'; base-uri 'none'; frame-ancestors 'self'"
+  </FilesMatch>
+
   # Weights and runtime sit under their release; the framework's files carry their hash, and
   # a lesson's clips are named by what they say. What names them is asked again on every visit.
   Header set Cache-Control "no-cache"

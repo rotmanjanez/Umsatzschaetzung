@@ -408,6 +408,7 @@ def overview():
         + '    </ol>\n  </section>' for name, course in courses.items())
     page = (ROOT / "web" / "lessons" / "uebersicht.html").read_text()
     (SITE / "index.html").write_text(page.replace("{courses}", listed))
+    shutil.copy(ROOT / "web" / "lessons" / "uebersicht.css", SITE)
 
 
 # A weight never changes under its release, so one already there is the same file.

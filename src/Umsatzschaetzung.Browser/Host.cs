@@ -53,8 +53,11 @@ public static partial class Host
     static List<KeyGesture> Cmd(List<KeyGesture> gestures) =>
         [.. gestures.Select(g => g.KeyModifiers.HasFlag(KeyModifiers.Control) ? new KeyGesture(g.Key, g.KeyModifiers & ~KeyModifiers.Control | KeyModifiers.Meta) : g)];
 
-    [JSImport("globalThis.document.createElement")]
-    private static partial JSObject Element(string tag);
+    [JSImport("preview", "page")]
+    private static partial JSObject Preview();
+
+    [JSImport("show", "page")]
+    private static partial void Show(JSObject preview, string html);
 
     // Same origin so the page may ask it to print, still no script of its own.
     [JSImport("print", "page")]
@@ -63,7 +66,7 @@ public static partial class Host
     [JSImport("forget", "service")]
     public static partial Task Forget();
 
-    // The Bericht in a frame of the page that runs no script and, by the sealed-in policy, fetches nothing.
+    // The Bericht in a frame of the page that runs no script and, by its policy, fetches nothing.
     sealed class Iframe : NativeControlHost, IHtmlPreview
     {
         JSObject? frame;
@@ -72,17 +75,16 @@ public static partial class Host
         public Task<bool> Show(string html, TimeSpan timeout, CancellationToken ct)
         {
             this.html = WebPages.Seal(html);
-            frame?.SetProperty("srcdoc", this.html);
+            if (frame is not null) Host.Show(frame, this.html);
             return Task.FromResult(true);
         }
 
         protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
         {
-            frame = Element("iframe");
-            frame.SetProperty("sandbox", "");
+            frame = Preview();
             frame.SetProperty("title", "Berichtsvorschau");
             frame.GetPropertyAsJSObject("style")?.SetProperty("border", "0");
-            frame.SetProperty("srcdoc", html);
+            Host.Show(frame, html);
             return new JSObjectControlHandle(frame);
         }
 
