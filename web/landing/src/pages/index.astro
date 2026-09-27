@@ -7,6 +7,7 @@ import '@fontsource/sora/700.css';
 
 const docs = 'https://docs.umsatzschaetzung.amtstools.de/';
 const guide = docs + 'dev/guide/';
+const app = 'https://app.umsatzschaetzung.amtstools.de/';
 const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest/download/';
 ---
 
@@ -26,6 +27,7 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
           <div class="acts">
             <a href={release + 'umsatzschaetzung-win-x64.msi'} data-os="windows">Für Windows</a>
             <a href={release + 'umsatzschaetzung-osx-arm64.dmg'} data-os="macos">Für macOS</a>
+            <a class="web" href={app}>Im Browser öffnen</a>
             <a class="doc" href={docs}>Dokumentation</a>
           </div>
           <div class="guide" hidden>
@@ -68,6 +70,8 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
   .acts { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
   .acts a { text-decoration: none; font-weight: 600; background: var(--fg); color: var(--bg); padding: 14px 24px; transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
   .acts a:hover { background: var(--blue); }
+  .acts a.web { background: none; color: var(--fg); padding: 12px 22px; border: 2px solid var(--fg); }
+  .acts a.web:hover { color: var(--blue); border-color: var(--blue); }
   .acts a.doc { background: none; color: var(--fg); padding: 0; border-bottom: 2px solid var(--fg); }
   .acts a.doc:hover { background: none; color: var(--blue); border-color: var(--blue); }
   .guide { margin: 32px 0 0; padding: 20px 24px; max-width: 44ch; background: var(--raised); border-left: 4px solid var(--blue); animation: rise 0.4s ease-out; }
