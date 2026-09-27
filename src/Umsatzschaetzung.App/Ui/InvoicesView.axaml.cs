@@ -225,7 +225,7 @@ public partial class InvoicesView : Screen
 
     async void AddFiles(object? sender, RoutedEventArgs e)
     {
-        StartImport(await Session.PickPaths(Session.InvoiceFilter, true));
+        StartImport(await Session.PickSources(Session.InvoiceFilter, true));
     }
 
     void DragOverFiles(object? sender, DragEventArgs e)
@@ -238,15 +238,15 @@ public partial class InvoicesView : Screen
 
     void DragLeft(object? sender, RoutedEventArgs e) => model.Dragging = false;
 
-    async void Dropped(object? sender, DragEventArgs e)
+    void Dropped(object? sender, DragEventArgs e)
     {
         model.Dragging = false;
         if (e.DataTransfer.TryGetFiles() is not { } items) return;
-        StartImport(await Session.Paths(items));
+        StartImport(Session.Files(items));
     }
 
-    void StartImport(List<string> paths)
+    void StartImport(List<FileSource> files)
     {
-        if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, paths);
+        if (Session.Case is { } k) Session.Imports.Add(k.Id, k.Label, files);
     }
 }

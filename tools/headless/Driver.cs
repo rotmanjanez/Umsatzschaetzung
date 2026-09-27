@@ -203,7 +203,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     void Import(List<string> paths)
     {
         var kase = shell.Session.Case ?? throw new InvalidOperationException("import without an open case");
-        shell.Session.Imports.Add(kase.Id, kase.Label, [.. paths.SelectMany(Files).Select(Path.GetFullPath)]);
+        shell.Session.Imports.Add(kase.Id, kase.Label, [.. paths.SelectMany(Files).Select(Path.GetFullPath).Select(FileSource.Of)]);
         var job = shell.Session.Imports.Jobs.Single(j => j.CaseId == kase.Id);
         while (shell.Session.Imports.Jobs.Count > 0) Settle();
         if (job.Failed.Count > 0) throw new InvalidOperationException("import failed: " + string.Join("; ", job.Failed));

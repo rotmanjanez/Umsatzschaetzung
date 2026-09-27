@@ -9,6 +9,23 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed record PickedFile(string Name, byte[] Data);
 
+// A picked file, read only once its turn comes: a browser hands out its files without a path.
+public sealed record FileSource(string Name, Func<CancellationToken, Task<byte[]>> Read)
+{
+    public static FileSource Of(string path) => new(Path.GetFileName(path), ct => File.ReadAllBytesAsync(path, ct));
+
+    public static FileSource Of(IStorageFile file) => file.TryGetLocalPath() is { } path ? Of(path) : new(file.Name, async ct =>
+    {
+        using (file)
+        {
+            await using var stream = await file.OpenReadAsync();
+            var data = new byte[stream.Length];
+            await stream.ReadExactlyAsync(data, ct);
+            return data;
+        }
+    });
+}
+
 public enum Tab { Case, Invoices, Mapping, Products, Calc, Report }
 
 public enum SaveState { Idle, Slow, Stuck }
@@ -402,59 +419,30 @@ public sealed class Session : Observable
         Rules is not null && Rules.Ingredients.TryGetValue(id, out var i) ? i.Name : "";
 
     public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi) =>
-        await ReadFiles(await PickPaths(filter, multi));
+        await ReadFiles(await PickSources(filter, multi));
 
-    public async Task<List<string>> PickPaths(IReadOnlyList<FilePickerFileType> filter, bool multi)
+    public async Task<List<FileSource>> PickSources(IReadOnlyList<FilePickerFileType> filter, bool multi)
     {
-        if (Picked is { } answer) return [.. answer()];
+        if (Picked is { } answer) return [.. answer().Select(FileSource.Of)];
         if (Owner?.StorageProvider is not { } storage) return [];
-        return await Paths(await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter }));
+        return Files(await storage.OpenFilePickerAsync(new FilePickerOpenOptions { AllowMultiple = multi, FileTypeFilter = filter }));
     }
 
-    // A browser hands out files without a path; they are copied into its file system first.
-    public static async Task<List<string>> Paths(IEnumerable<IStorageItem> items)
-    {
-        var paths = new List<string>();
-        foreach (var item in items)
-            if (item.TryGetLocalPath() is { } path) paths.Add(path);
-            else if (item is IStorageFile file) paths.Add(await Copy(file));
-        return paths;
-    }
+    public static List<FileSource> Files(IEnumerable<IStorageItem> items) =>
+        [.. items.OfType<IStorageFile>().Select(FileSource.Of)];
 
-    static async Task<string> Copy(IStorageFile file)
-    {
-        var path = Path.Combine(Directory.CreateTempSubdirectory("picked").FullName, file.Name);
-        await using var from = await file.OpenReadAsync();
-        await using var to = File.Create(path);
-        await from.CopyToAsync(to);
-        lock (copies) copies.Add(path);
-        return path;
-    }
-
-    // A browser's file system lives in memory: a copy is gone once it is read.
-    static readonly HashSet<string> copies = [];
-
-    public static async Task<byte[]> ReadPicked(string path, CancellationToken ct = default)
-    {
-        var data = await File.ReadAllBytesAsync(path, ct);
-        bool copied;
-        lock (copies) copied = copies.Remove(path);
-        if (copied) Directory.Delete(Path.GetDirectoryName(path)!, true);
-        return data;
-    }
-
-    public async Task<List<PickedFile>> ReadFiles(IEnumerable<string> paths)
+    public async Task<List<PickedFile>> ReadFiles(IEnumerable<FileSource> sources)
     {
         var files = new List<PickedFile>();
-        foreach (var path in paths)
+        foreach (var source in sources)
         {
             try
             {
-                files.Add(new PickedFile(Path.GetFileName(path), await ReadPicked(path)));
+                files.Add(new PickedFile(source.Name, await source.Read(CancellationToken.None)));
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
-                Fail("Datei konnte nicht gelesen werden: " + Path.GetFileName(path));
+                Fail("Datei konnte nicht gelesen werden: " + source.Name);
             }
         }
         return files;

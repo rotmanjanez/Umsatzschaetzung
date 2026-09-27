@@ -16,7 +16,7 @@ public sealed class ImportJob(string caseId, string label) : Observable
 
     public string CaseId { get; } = caseId;
     public string Label { get; } = label;
-    public Queue<string> Queue { get; } = new();
+    public Queue<FileSource> Queue { get; } = new();
     public CancellationToken Ct => cts.Token;
 
     public ImportProgress Progress { get; } = new();
@@ -74,7 +74,7 @@ public sealed class Imports
 
     public ObservableCollection<ImportJob> Jobs { get; } = [];
 
-    public void Add(string caseId, string label, List<string> files)
+    public void Add(string caseId, string label, List<FileSource> files)
     {
         if (files.Count == 0) return;
         var job = Jobs.FirstOrDefault(j => j.CaseId == caseId && !j.Ct.IsCancellationRequested);
@@ -127,7 +127,7 @@ public sealed class Imports
         var reading = new Queue<(string Name, Task<(PickedFile File, Task<OcrResp>? Ocr)> Read)>();
         while (!job.Ct.IsCancellationRequested)
         {
-            while (reading.Count <= Ahead && job.Queue.TryDequeue(out var next)) reading.Enqueue((Path.GetFileName(next), Read(job, next)));
+            while (reading.Count <= Ahead && job.Queue.TryDequeue(out var next)) reading.Enqueue((next.Name, Read(job, next)));
             if (!reading.TryDequeue(out var item)) break;
             job.File = item.Name;
             try
@@ -170,9 +170,9 @@ public sealed class Imports
         }
     }
 
-    async Task<(PickedFile File, Task<OcrResp>? Ocr)> Read(ImportJob job, string path)
+    async Task<(PickedFile File, Task<OcrResp>? Ocr)> Read(ImportJob job, FileSource source)
     {
-        var file = new PickedFile(Path.GetFileName(path), await Session.ReadPicked(path, job.Ct));
+        var file = new PickedFile(source.Name, await source.Read(job.Ct));
         return (file, InvoiceParser.Detect(file.Data) is Kind.Pdf or Kind.Image
             ? session.Service.Invoices.Ocr(job.CaseId, file.Name, file.Data, job.Ct)
             : null);
