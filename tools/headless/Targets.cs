@@ -39,10 +39,14 @@ public static class Targets
     // Also hands back the control that matched, before `up` led to its ancestor.
     public static Visual? Seek(Visual root, Target target, out Visual? hit)
     {
-        hit = root.GetVisualDescendants().FirstOrDefault(v => Is(v, target));
-        if (hit is null) return null;
-        var found = target.Up is { } up ? Up(hit, up) : hit;
-        return target.Column is { } column ? Cell(found, column) : found;
+        foreach (var v in root.GetVisualDescendants().Where(v => Is(v, target)))
+        {
+            if ((target.Up is { } up ? Above(v, up) : v) is not { } found) continue;
+            hit = v;
+            return target.Column is { } column ? Cell(found, column) : found;
+        }
+        hit = null;
+        return null;
     }
 
     static Visual? Cell(Visual inside, string column)
@@ -75,9 +79,11 @@ public static class Targets
         return false;
     }
 
+    public static Visual? Above(Visual inner, string type) =>
+        inner.GetVisualAncestors().FirstOrDefault(v => v.GetType().Name == type);
+
     public static Visual Up(Visual inner, string type) =>
-        inner.GetVisualAncestors().FirstOrDefault(v => v.GetType().Name == type)
-        ?? throw new InvalidOperationException("no " + type + " above " + inner.GetType().Name);
+        Above(inner, type) ?? throw new InvalidOperationException("no " + type + " above " + inner.GetType().Name);
 
     public static string? Label(Visual visual) => visual switch
     {
