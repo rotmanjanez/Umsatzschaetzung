@@ -45,7 +45,7 @@
                             <TextBlock Text="{Binding Summary}" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" IsVisible="{Binding !Mapping}"
                                        AutomationProperties.LiveSetting="Polite"/>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding Mapping}">
-                                <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0" AutomationProperties.AccessibilityView="Raw"/>
+                                <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0" IsVisible="{Binding Mapping}" AutomationProperties.AccessibilityView="Raw"/>
                                 <TextBlock Text="Wird zugeordnet …" Theme="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                            AutomationProperties.LiveSetting="Polite"/>
                             </StackPanel>

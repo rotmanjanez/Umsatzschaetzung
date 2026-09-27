@@ -164,7 +164,7 @@
                                         <DataTemplate x:DataType="ui:SnippetRow">
                                             <Panel Margin="4" AutomationProperties.Name="{Binding Spoken}">
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding Loading}">
-                                                    <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0" AutomationProperties.AccessibilityView="Raw"/>
+                                                    <PathIcon Theme="{StaticResource Spinner}" Margin="0,0,6,0" IsVisible="{Binding Loading}" AutomationProperties.AccessibilityView="Raw"/>
                                                     <TextBlock Text="Auszug wird geladen …" Theme="{StaticResource Muted}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                                 <TextBlock Text="Kein Auszug verfügbar" Theme="{StaticResource Muted}" VerticalAlignment="Center" IsVisible="{Binding Missing}"/>

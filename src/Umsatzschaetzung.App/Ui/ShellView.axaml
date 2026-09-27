@@ -34,7 +34,7 @@
                         </StackPanel>
                         <Border x:Name="SaveBadge" DockPanel.Dock="Right" Theme="{StaticResource Badge}" Margin="0,0,12,0" IsVisible="False">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <PathIcon Theme="{StaticResource Spinner}" Width="12" Height="12"/>
+                                <PathIcon Theme="{StaticResource Spinner}" Width="12" Height="12" IsVisible="{Binding #SaveBadge.IsVisible}"/>
                                 <TextBlock x:Name="SaveText" Theme="{StaticResource BadgeText}" AutomationProperties.AutomationId="SaveState"/>
                             </StackPanel>
                         </Border>
