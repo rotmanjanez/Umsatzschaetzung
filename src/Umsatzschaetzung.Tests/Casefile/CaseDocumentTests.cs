@@ -237,6 +237,99 @@ public class CaseDocumentTests
         Assert.Equal("a.pdf", store.LoadFile("fall-1", "re-1").Name);
     }
 
+    [Theory]
+    [InlineData("re-2", true)]
+    [InlineData("re-1", false)]
+    [InlineData("re-3", false)]
+    [InlineData("re-3", true)]
+    public void AnInvoiceSavedAloneLeavesTheCaseAsAFullSaveWould(string invoiceId, bool unmapped)
+    {
+        using var full = new TempDir();
+        using var alone = new TempDir();
+        var before = Cases.Full("fall-1");
+        before.MappedStore = "regeln";
+        var expected = new CaseStore(full.Path);
+        var store = new CaseStore(alone.Path);
+        expected.Save(before);
+        store.Save(before);
+        expected.SaveFile("fall-1", "re-2", "alt.jpg", [9]);
+        store.SaveFile("fall-1", "re-2", "alt.jpg", [9]);
+        var at = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.FromHours(1));
+        var made = new Dictionary<string, ArticleMapping>
+        {
+            ["map-neu"] = new() { Id = "map-neu", SupplierName = "Rheinland", Name = "Weizen", IngredientId = "ing.weizen", Factor = 500 },
+            ["map-pils"] = new() { Id = "map-pils", Name = "Pils neu", IngredientId = "ing.bier.fass" },
+        };
+        var add = new Attachment(invoiceId, "neu.pdf", [4, 5, 6], [Page(), Page()], [[7], [8, 8]]);
+
+        var c = expected.Load("fall-1");
+        foreach (var (id, m) in made) c.Mappings[id] = m;
+        var i = c.Invoices.FindIndex(x => x.Id == invoiceId);
+        if (i >= 0) c.Invoices[i] = Invoice(invoiceId, unmapped);
+        else c.Invoices.Add(Invoice(invoiceId, unmapped));
+        if (unmapped) c.MappedStore = null;
+        c.UpdatedAt = at;
+        expected.Save(c, add);
+
+        var kept = store.SaveInvoice("fall-1", Invoice(invoiceId, unmapped), made, add, at);
+
+        var want = expected.Load("fall-1");
+        var got = store.Load("fall-1");
+        Cases.Same(want, got);
+        Assert.Equal(unmapped ? null : "regeln", kept);
+        Assert.Equal((want.MappedStore, want.MappedAt), (got.MappedStore, got.MappedAt));
+        foreach (var id in (string[])["re-1", "re-2", "re-3"])
+        {
+            Assert.Equal(expected.LoadReading("fall-1", id)?.Select(Text), store.LoadReading("fall-1", id)?.Select(Text));
+            Assert.Equal(expected.LoadImages("fall-1", id), store.LoadImages("fall-1", id));
+        }
+        Cases.HoldsFile(store, "fall-1", invoiceId, "neu.pdf", [4, 5, 6]);
+        if (invoiceId != "re-2") Cases.HoldsFile(store, "fall-1", "re-2", "alt.jpg", [9]);
+    }
+
+    [Fact]
+    public void AnInvoiceSavedAloneKeepsItsPlaceOrComesLast()
+    {
+        using var tmp = new TempDir();
+        var store = Store(tmp);
+        var at = DateTimeOffset.UnixEpoch;
+
+        store.SaveInvoice("fall-1", Invoice("re-3", false), [], new Attachment("re-3", "", [], null), at);
+        store.SaveInvoice("fall-1", Invoice("re-2", false), [], new Attachment("re-2", "", [], null), at);
+
+        Assert.Equal(["re-2", "re-1", "re-3"], store.Load("fall-1").Invoices.Select(i => i.Id));
+    }
+
+    [Fact]
+    public void AnInvoiceSavedAloneNeedsAnExistingCaseAndASafeId()
+    {
+        using var tmp = new TempDir();
+        var store = new CaseStore(tmp.Path);
+        var add = new Attachment("re-1", "a.pdf", [1], null);
+
+        Assert.Throws<CaseNotFoundException>(() => store.SaveInvoice("fall-1", Invoice("re-1", false), [], add, DateTimeOffset.UnixEpoch));
+        Assert.False(File.Exists(tmp.Sub("fall-1.db")));
+
+        Store(tmp);
+        Assert.Throws<CaseInvalidException>(() =>
+            store.SaveInvoice("fall-1", Invoice("../re-1", false), [], add with { InvoiceId = "../re-1" }, DateTimeOffset.UnixEpoch));
+        Cases.Same(Cases.Full("fall-1"), store.Load("fall-1"));
+    }
+
+    static Invoice Invoice(string id, bool unmapped) => new()
+    {
+        Id = id, Source = Source.Scan, FileName = "neu.pdf", SupplierName = "Rheinland", Number = "N-" + id,
+        Date = new DateOnly(2024, 7, 1), Currency = "EUR", NetTotal = 500, GrossTotal = 595,
+        Verification = new() { At = new DateTimeOffset(2025, 2, 1, 9, 0, 0, TimeSpan.Zero), Auto = false },
+        Lines =
+        [
+            new() { No = 1, Name = "Weizen", Quantity = 1000, UnitCode = "XBO", UnitPrice = 500, PriceBaseQty = 1, LineNet = 500, Vat = 1900,
+                MappingId = "map-neu" },
+            new() { No = 2, Name = "Pils", Quantity = 1000, UnitCode = "XBO", UnitPrice = 0, PriceBaseQty = 1, LineNet = 0, Vat = 1900,
+                MappingId = unmapped ? null : "map-pils" },
+        ],
+    };
+
     static OcrPage Page() => new()
     {
         Image = new Raster(1, 1, [1, 2, 3, 4]),

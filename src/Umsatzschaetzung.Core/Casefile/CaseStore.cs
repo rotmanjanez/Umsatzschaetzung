@@ -265,15 +265,7 @@ public sealed partial class CaseStore(string dir)
                 using var tx = db.BeginTransaction(deferred: false);
                 foreach (var t in CaseTables) Exec(db, tx, "DELETE FROM " + t);
                 Write(db, tx, c);
-                if (add is { Data.Length: > 0 }) PutDocument(db, tx, key, name, add.Data);
-                if (add?.Reading is { Count: > 0 } pages)
-                {
-                    DropReading(db, tx, key);
-                    WriteReading(db, tx, key, pages);
-                    for (var p = 0; p < (add.Images?.Count ?? 0); p++)
-                        Exec(db, tx, "INSERT INTO reading_image(invoice_id, page, data) VALUES(@id, @page, @data)",
-                            ("@id", key), ("@page", p), ("@data", add.Images![p]));
-                }
+                if (add is not null) PutAttachment(db, tx, key, name, add);
                 tx.Commit();
             }
             if (current is not null && current != target) File.Move(current, target);
@@ -281,6 +273,46 @@ public sealed partial class CaseStore(string dir)
         }
         return 0;
     });
+
+    // Ein neuer Beleg kommt ans Ende, ein ersetzter behält seinen Platz.
+    public string? SaveInvoice(string caseId, Invoice inv, Dictionary<string, ArticleMapping> mappings, Attachment add, DateTimeOffset at) => Guarded(() =>
+    {
+        lock (gate)
+        {
+            using var db = Attached(caseId);
+            inv.Lines ??= [];
+            Validate(inv);
+            var key = InvoiceKey(caseId, add.InvoiceId);
+            var name = add is { Data.Length: > 0 } ? DocumentName(add.FileName) : "";
+            using var tx = db.BeginTransaction(deferred: false);
+            long ord;
+            using (var cmd = Command(db, tx, "SELECT coalesce((SELECT ord FROM invoice WHERE id = @id), (SELECT max(ord) + 1 FROM invoice), 0)",
+                ("@id", inv.Id)))
+                ord = (long)cmd.ExecuteScalar()!;
+            Exec(db, tx, "DELETE FROM invoice_line WHERE invoice_id = @id", ("@id", inv.Id));
+            WriteInvoice(db, tx, inv, ord);
+            foreach (var (id, m) in mappings) WriteMapping(db, tx, id, m);
+            PutAttachment(db, tx, key, name, add);
+            string? store;
+            using (var cmd = Command(db, tx, "UPDATE fall SET updated_at = @updated, app_version = @app, "
+                + "mapped_store = CASE WHEN @unmapped THEN NULL ELSE mapped_store END RETURNING mapped_store",
+                ("@updated", Stamp(at)), ("@app", Schema.App), ("@unmapped", inv.Lines.Exists(l => string.IsNullOrEmpty(l.MappingId)))))
+                store = cmd.ExecuteScalar() as string;
+            tx.Commit();
+            return store;
+        }
+    });
+
+    static void PutAttachment(SqliteConnection db, SqliteTransaction tx, string key, string name, Attachment add)
+    {
+        if (add.Data.Length > 0) PutDocument(db, tx, key, name, add.Data);
+        if (add.Reading is not { Count: > 0 } pages) return;
+        DropReading(db, tx, key);
+        WriteReading(db, tx, key, pages);
+        for (var p = 0; p < (add.Images?.Count ?? 0); p++)
+            Exec(db, tx, "INSERT INTO reading_image(invoice_id, page, data) VALUES(@id, @page, @data)",
+                ("@id", key), ("@page", p), ("@data", add.Images![p]));
+    }
 
     public void Delete(string id) => Guarded(() =>
     {
@@ -491,31 +523,31 @@ public sealed partial class CaseStore(string dir)
         foreach (var id in c.NoRevenue)
             Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(ingredient_id) VALUES(@id)", ("@id", id));
 
-        foreach (var (id, m) in c.Mappings)
-            Exec(db, tx, "INSERT INTO case_mapping(id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, factor) "
-                + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor)",
-                ("@id", id), ("@supplier", m.SupplierName), ("@article", m.SupplierArticleId), ("@gtin", m.Gtin), ("@name", m.Name),
-                ("@observed", m.Observed), ("@unit", m.UnitCode), ("@ingredient", m.IngredientId), ("@factor", m.Factor));
+        foreach (var (id, m) in c.Mappings) WriteMapping(db, tx, id, m);
 
-        for (var i = 0; i < c.Invoices.Count; i++)
-        {
-            var inv = c.Invoices[i];
-            Exec(db, tx, "INSERT INTO invoice(id, ord, source, file_name, supplier_name, number, date, currency, "
-                + "net_total, gross_total, stated_net, stated_gross, verified_at, verified_auto) "
-                + "VALUES(@id, @ord, @source, @file, @supplier, @number, @date, @currency, @net, @gross, @snet, @sgross, @vat, @vauto)",
-                ("@id", inv.Id), ("@ord", i), ("@source", Json.Name(inv.Source)), ("@file", inv.FileName),
-                ("@supplier", inv.SupplierName), ("@number", inv.Number), ("@date", inv.Date is { } d ? Day(d) : null),
-                ("@currency", inv.Currency), ("@net", inv.NetTotal), ("@gross", inv.GrossTotal),
-                ("@snet", inv.StatedNet), ("@sgross", inv.StatedGross),
-                ("@vat", inv.Verification is { } v ? Stamp(v.At) : null), ("@vauto", inv.Verification?.Auto));
+        for (var i = 0; i < c.Invoices.Count; i++) WriteInvoice(db, tx, c.Invoices[i], i);
+    }
 
-            for (var j = 0; j < inv.Lines.Count; j++)
-            {
-                var l = inv.Lines[j];
-                Exec(db, tx, $"INSERT INTO invoice_line(invoice_id, ord, {LineColumns}, mapping_id) VALUES(@id, @ord, {LineValues}, @mapping)",
-                    LineArgs(l, ("@id", inv.Id), ("@ord", j)));
-            }
-        }
+    static void WriteMapping(SqliteConnection db, SqliteTransaction tx, string id, ArticleMapping m) =>
+        Exec(db, tx, "INSERT OR REPLACE INTO case_mapping(id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, factor) "
+            + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor)",
+            ("@id", id), ("@supplier", m.SupplierName), ("@article", m.SupplierArticleId), ("@gtin", m.Gtin), ("@name", m.Name),
+            ("@observed", m.Observed), ("@unit", m.UnitCode), ("@ingredient", m.IngredientId), ("@factor", m.Factor));
+
+    static void WriteInvoice(SqliteConnection db, SqliteTransaction tx, Invoice inv, long ord)
+    {
+        Exec(db, tx, "INSERT OR REPLACE INTO invoice(id, ord, source, file_name, supplier_name, number, date, currency, "
+            + "net_total, gross_total, stated_net, stated_gross, verified_at, verified_auto) "
+            + "VALUES(@id, @ord, @source, @file, @supplier, @number, @date, @currency, @net, @gross, @snet, @sgross, @vat, @vauto)",
+            ("@id", inv.Id), ("@ord", ord), ("@source", Json.Name(inv.Source)), ("@file", inv.FileName),
+            ("@supplier", inv.SupplierName), ("@number", inv.Number), ("@date", inv.Date is { } d ? Day(d) : null),
+            ("@currency", inv.Currency), ("@net", inv.NetTotal), ("@gross", inv.GrossTotal),
+            ("@snet", inv.StatedNet), ("@sgross", inv.StatedGross),
+            ("@vat", inv.Verification is { } v ? Stamp(v.At) : null), ("@vauto", inv.Verification?.Auto));
+
+        for (var j = 0; j < inv.Lines.Count; j++)
+            Exec(db, tx, $"INSERT INTO invoice_line(invoice_id, ord, {LineColumns}, mapping_id) VALUES(@id, @ord, {LineValues}, @mapping)",
+                LineArgs(inv.Lines[j], ("@id", inv.Id), ("@ord", j)));
     }
 
     static Case Read(SqliteConnection db)
@@ -918,8 +950,7 @@ public sealed partial class CaseStore(string dir)
         var invoices = new HashSet<string>(StringComparer.Ordinal);
         foreach (var inv in c.Invoices)
         {
-            if (string.IsNullOrEmpty(inv.Id)) throw new CaseInvalidException("Beleg ohne ID");
-            if (!ValidId(inv.Id)) throw new CaseInvalidException($"ungültige Beleg-ID \"{inv.Id}\"");
+            Validate(inv);
             if (!invoices.Add(inv.Id)) throw new CaseInvalidException($"Beleg \"{inv.Id}\" mehrfach angegeben");
         }
         foreach (var y in c.Yields)
@@ -929,6 +960,12 @@ public sealed partial class CaseStore(string dir)
         }
         if (c.CreatedAt == default) throw new CaseInvalidException("Erstellungszeitpunkt fehlt");
         if (c.UpdatedAt == default) throw new CaseInvalidException("Änderungszeitpunkt fehlt");
+    }
+
+    static void Validate(Invoice inv)
+    {
+        if (string.IsNullOrEmpty(inv.Id)) throw new CaseInvalidException("Beleg ohne ID");
+        if (!ValidId(inv.Id)) throw new CaseInvalidException($"ungültige Beleg-ID \"{inv.Id}\"");
     }
 
     static string Day(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);

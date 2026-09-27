@@ -79,4 +79,12 @@ sealed class LocalCases(RuleStore rules, CaseStore cases) : ICases
         cases.Save(c, add);
         if (add is not null) Excerpts.Forget(c.Id, add.InvoiceId);
     }
+
+    public string? SaveInvoice(string caseId, Invoice inv, Dictionary<string, ArticleMapping> mappings, Attachment add)
+    {
+        if (caseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");
+        var store = cases.SaveInvoice(caseId, inv, mappings, add, Clock.Now());
+        Excerpts.Forget(caseId, add.InvoiceId);
+        return store;
+    }
 }

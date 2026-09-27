@@ -145,15 +145,6 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
         return c;
     });
 
-    Stored Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> made, List<OcrPage>? reading = null, List<byte[]>? images = null)
-    {
-        var c = cases.Load(caseId);
-        foreach (var (id, m) in made) c.Mappings[id] = m;
-        var i = c.Invoices.FindIndex(x => x.Id == inv.Id);
-        if (i >= 0) c.Invoices[i] = inv;
-        else c.Invoices.Add(inv);
-        if (inv.Lines.Any(l => string.IsNullOrEmpty(l.MappingId))) c.MappedStore = null;
-        cases.Save(c, new Attachment(inv.Id, fileName, data, reading, images));
-        return new Stored(made, c.MappedStore);
-    }
+    Stored Attach(string caseId, Invoice inv, string fileName, byte[] data, Dictionary<string, ArticleMapping> made, List<OcrPage>? reading = null, List<byte[]>? images = null) =>
+        new(made, cases.SaveInvoice(caseId, inv, made, new Attachment(inv.Id, fileName, data, reading, images)));
 }
