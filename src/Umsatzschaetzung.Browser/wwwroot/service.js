@@ -76,3 +76,18 @@ export function take(id, index, into) {
 export function done(id) {
     answers.delete(id);
 }
+
+// Everything this origin keeps, the stores and the weights, gone; the page starts over without them.
+// The worker goes first: its open stores would hold up their deletion and write back after it.
+export async function forget() {
+    worker?.terminate();
+    worker = null;
+    const bases = await indexedDB.databases();
+    await Promise.all(bases.map(b => new Promise((resolve, reject) => {
+        const r = indexedDB.deleteDatabase(b.name);
+        r.onsuccess = resolve;
+        r.onerror = () => reject(r.error);
+    })));
+    await Promise.all((await caches.keys()).map(k => caches.delete(k)));
+    location.reload();
+}

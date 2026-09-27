@@ -11,5 +11,6 @@ if (args[0] == "service")
 else
 {
     await WorkerTransport.Start();
+    Umsatzschaetzung.App.App.SingleViewForget = Host.Forget;
     await Host.Start(Remote.Over(new WorkerTransport()), args[0]);
 }

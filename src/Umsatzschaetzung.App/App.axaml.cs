@@ -42,6 +42,9 @@ public partial class App : Application
     // Nor a printer that hands back a PDF: its host opens the browser's print dialog on the Bericht.
     public static Action<string>? SingleViewPrint { get; set; }
 
+    // Nor a folder of its own to clear: the web head forgets what the browser keeps for it.
+    public static Func<Task>? SingleViewForget { get; set; }
+
     internal static IHtmlPreview HtmlPreview() =>
         Current?.ApplicationLifetime is ISingleViewApplicationLifetime ? SingleViewPreview?.Invoke() ?? new NoHtmlPreview() : new HtmlView();
 

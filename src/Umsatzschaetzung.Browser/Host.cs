@@ -60,6 +60,9 @@ public static partial class Host
     [JSImport("print", "page")]
     private static partial void Print(string html);
 
+    [JSImport("forget", "service")]
+    public static partial Task Forget();
+
     // The Bericht in a frame of the page that runs no script and, by the sealed-in policy, fetches nothing.
     sealed class Iframe : NativeControlHost, IHtmlPreview
     {

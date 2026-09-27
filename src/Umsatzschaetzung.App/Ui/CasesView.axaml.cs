@@ -48,6 +48,7 @@ public partial class CasesView : Screen
         fields = [NewLabel, NewFrom.Box, NewTo.Box, NewName, NewTaxNumber, NewPab];
         foreach (var field in fields) field.TextChanged += (s, _) => ((TextBox)s!).Classes.Set("invalid", false);
         NewGewerbe.PropertyChanged += (_, e) => { if (e.Property == GewerbeBox.KennzahlProperty) NewGewerbe.Classes.Set("invalid", false); };
+        Forget.IsVisible = App.SingleViewForget is not null;
     }
 
     void ShowRules(object? sender, RoutedEventArgs e) => Session.ShowRules();
@@ -184,6 +185,15 @@ public partial class CasesView : Screen
             await Session.Service.Cases.Delete(row.Case.Id, Ct);
             await Reload();
         });
+    }
+
+    async void ForgetAll(object? sender, RoutedEventArgs e)
+    {
+        if (App.SingleViewForget is not { } forget) return;
+        var answer = await Dialog.Confirm(this,
+            "Alle Prüfungen mit ihren Rechnungen, die Regeln und die geladenen Modelle werden aus diesem Browser unwiderruflich gelöscht. Die Seite wird danach neu geladen.",
+            "Alle Daten löschen", "Löschen", "Abbrechen");
+        if (answer) await Session.Run(forget);
     }
 
     async void Export(object? sender, RoutedEventArgs e)
