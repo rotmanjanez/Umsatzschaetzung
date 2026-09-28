@@ -1,7 +1,7 @@
 # Prüfungen
 
-Die Startseite listet alle Prüfungen aud die das Program zugriff hat. Ein Klick auf eine Zeile
-öffnet sie. Über `Neue Prüfung` kann eine neue Prüfung in der Datenbank angelegt werden.
+Die Startseite listet alle Prüfungen im Ordner für Prüfungen. Ein Klick auf
+eine Zeile öffnet sie. **Neue Prüfung** legt eine neue an.
 
 ![Filtern, Regeln, Importieren und Neue Prüfung über der Liste](img/pruefungen-leiste.png){ width="621" }
 
@@ -16,10 +16,11 @@ Ertragsregeln, Bestand, erklärte Umsätze.
 Das Suchfeld filtert nach Bezeichnung, Zeitraum und Namen des
 Steuerpflichtigen.
 
-## Wo ist eine Prüfung gespeicher?
+## Wo ist eine Prüfung gespeichert?
 
 Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter
-`Umsatzschätzung`, etwa `fall-20250502-080000-a1b2c3d4.db`. Alle informationen zu diesem Fall, darunter auch die Belege und Scan, Sind darin gespeicher.
+`Umsatzschätzung` und heißt wie ihre Bezeichnung, etwa `Bäckerei Muster 2024.db`.
+Alles zu dieser Prüfung steht darin, auch die Belege und Scans.
 
 !!! note "Verwaltete Installationen"
     Unter Windows kann der Ordner per Gruppenrichtlinie umgelegt sein, etwa auf
@@ -40,7 +41,7 @@ wollen. Genaueres unter [Import und Export](import-export.md).
 <div markdown>
 
 Das Papierkorbsymbol am Ende der Zeile löscht eine Prüfung mitsamt Rechnungen und Belegen.
-Löschen kann i.d.R. nicht rückgängig gemacht werden.
+Im Programm lässt sich das nicht rückgängig machen.
 
 </div>
 

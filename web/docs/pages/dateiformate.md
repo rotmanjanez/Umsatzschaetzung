@@ -18,10 +18,18 @@ auf die neue hebt. Ein veröffentlichter Schritt wird nie mehr geändert.
   sie die neue Datei wieder.
 - Eine neuere Datei, als das Programm kennt, wird nicht geöffnet und nicht
   verändert.
-- `rules.db` läuft im Rollback-Journal (`journal_mode = DELETE`), weil sie auf
-  einer Netzwerkfreigabe liegen kann, wo WAL nicht funktioniert. Vor jedem
-  Start legt das Programm eine Kopie in `snapshots` ab, siehe
-  [Sicherungen](verwaltung.md#sicherungen).
+- `rules.db` wird nie an Ort und Stelle beschrieben, denn die Sperren von
+  SQLite halten nicht auf jeder Netzwerkfreigabe. Das Programm liest die Datei
+  ganz in den Speicher, ändert sie dort und schreibt sie als `rules.db.neu`
+  daneben, die dann `rules.db` durch Umbenennen ersetzt. Ein Leser bekommt so
+  die alte oder die neue Datei, nie ein Gemisch. Wer schreibt, hält dabei
+  `rules.lock` exklusiv geöffnet, siehe
+  [Gleichzeitige Nutzung](verwaltung.md#gleichzeitige-nutzung). Neben
+  `rules.db` entsteht deshalb weder `-journal` noch `-wal`; ein
+  `rules.db-journal`, das eine ältere Programmversion bei einem Absturz
+  hinterlassen hat, spielt SQLite beim nächsten Start einmal zurück.
+- Bei jedem Start legt das Programm eine Kopie von `rules.db` in `snapshots`
+  ab, siehe [Sicherungen](verwaltung.md#sicherungen).
 
 ## Werte
 
