@@ -35,6 +35,14 @@ jobs:
           user: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+      - name: Ping IndexNow
+        if: github.event_name != 'pull_request'
+        working-directory: web/landing
+        run: |
+          grep -o '<loc>[^<]*' dist/sitemap.xml | cut -c6- |
+            jq -Rs --arg key "$(cat dist/indexnow.txt)" '{host: "umsatzschaetzung.amtstools.de", key: $key, keyLocation: "https://umsatzschaetzung.amtstools.de/indexnow.txt", urlList: split("\n")[:-1]}' |
+            curl -fsS -H 'Content-Type: application/json; charset=utf-8' --data-binary @- https://api.indexnow.org/indexnow ||
+            echo "::warning::IndexNow did not take the ping"
 
   app:
     runs-on: ubuntu-latest
