@@ -569,11 +569,11 @@ Für IT und Datenschutzbeauftragte. Sicherheitslücken meldet man wie in [SECURI
 
 ## Was wo liegt
 
-| Ort                              | Inhalt                                                                                | Zugriff              |
-| -------------------------------- | ------------------------------------------------------------------------------------- | -------------------- |
-| `Dokumente\Umsatzschätzung`      | eine Datei je Prüfung: Rechnungen, Scans, Name, Steuernummer, PAB-Nummer, Kalkulation | die Person           |
-| Ordner der Regel-Datenbank       | `rules.db`, `embeddings.db`, `snapshots\`                                             | alle, die ihn teilen |
-| `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `pages\` mit dem gerade angezeigten Bericht           | die Person           |
+| Ort                              | Inhalt                                                                                       | Zugriff              |
+| -------------------------------- | -------------------------------------------------------------------------------------------- | -------------------- |
+| `Dokumente\Umsatzschätzung`      | eine Datei je Prüfung: Rechnungen, Scans, Name, Steuernummer, PAB-Nummer, Kalkulation        | die Person           |
+| Ordner der Regel-Datenbank       | `rules.db`, `snapshots\`                                                                     | alle, die ihn teilen |
+| `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `embeddings.db`, `pages\` mit dem gerade angezeigten Bericht | die Person           |
 
 Eine Prüfung unterliegt dem Steuergeheimnis. Sie verlässt den Rechner nur, wenn jemand sie [weitergibt](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben), dann als vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md).
 
@@ -587,7 +587,7 @@ Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den Li
 
 Nicht gespeichert werden Daten der geprüften Person, Mengen, Preise und Daten der Rechnungen und aus welcher Prüfung eine Zuordnung stammt. Die Regel-Datenbank beschreibt, was Lieferanten verkaufen, nicht was ein Betrieb eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist, und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis unterliegen.
 
-`embeddings.db` enthält Rechenwerte zu denselben Texten und lässt sich jederzeit löschen. `snapshots\` hält die letzten zehn Stände von `rules.db`.
+`embeddings.db` enthält Rechenwerte zu denselben Texten, liegt bei jeder Person selbst und lässt sich jederzeit löschen. Die Werte zu den mitgelieferten Regeln bringt das Programm mit. `snapshots\` hält die letzten zehn Stände von `rules.db`.
 
 ## Verschlüsselung
 
@@ -685,7 +685,7 @@ Jede Regel trägt `valid_from`, `valid_to`, `changed_at`, `changed_by` und `rev`
 | `template`                                                                            | Berichtsvorlagen                                           | `is_default` bei genau einer                                                                                                                                                         |
 | `sammlung`, `klasse`, `klasse_kennzahl`, `staffel`, `satz`, `synonym`, `pauschbetrag` | Richtsatzsammlungen je Jahr                                | `staffel.von` ausschließlich, `bis` einschließlich, in Cent, leer: offen; `satz` in ganzen Prozent, `von` und `bis` leer, wo nur ein Mittelsatz gedruckt ist; `pauschbetrag` in Cent |
 
-`embeddings.db` enthält nur Rechenwerte für Vorschläge und wird bei Bedarf neu erzeugt; sie ist kein Austauschformat.
+`embeddings.db` enthält nur Rechenwerte für Vorschläge und liegt nicht in diesem Ordner, sondern bei jeder Person selbst; sie wird bei Bedarf neu erzeugt und ist kein Austauschformat.
 
 ## Datei einer Prüfung
 

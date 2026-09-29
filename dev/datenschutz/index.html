@@ -1342,12 +1342,12 @@ beschrieben.</p>
 </tr>
 <tr>
 <td>Ordner der Regel-Datenbank</td>
-<td><code>rules.db</code>, <code>embeddings.db</code>, <code>snapshots\</code></td>
+<td><code>rules.db</code>, <code>snapshots\</code></td>
 <td>alle, die ihn teilen</td>
 </tr>
 <tr>
 <td><code>%LOCALAPPDATA%\Umsatzschätzung</code></td>
-<td>Einstellungen, Fehlerprotokoll, <code>pages\</code> mit dem gerade angezeigten Bericht</td>
+<td>Einstellungen, Fehlerprotokoll, <code>embeddings.db</code>, <code>pages\</code> mit dem gerade angezeigten Bericht</td>
 <td>die Person</td>
 </tr>
 </tbody>
@@ -1375,8 +1375,9 @@ eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist,
 und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen
 sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis
 unterliegen.</p>
-<p><code>embeddings.db</code> enthält Rechenwerte zu denselben Texten und lässt sich
-jederzeit löschen. <code>snapshots\</code> hält die letzten zehn Stände von <code>rules.db</code>.</p>
+<p><code>embeddings.db</code> enthält Rechenwerte zu denselben Texten, liegt bei jeder Person
+selbst und lässt sich jederzeit löschen. Die Werte zu den mitgelieferten Regeln
+bringt das Programm mit. <code>snapshots\</code> hält die letzten zehn Stände von <code>rules.db</code>.</p>
 <h2 id="verschlusselung">Verschlüsselung</h2>
 <p>Das Programm verschlüsselt nicht selbst. Vorausgesetzt werden BitLocker oder
 eine gleichwertige Datenträgerverschlüsselung, NTFS-Rechte auf den Ordnern und

@@ -53,7 +53,7 @@ Jede Regel trägt `valid_from`, `valid_to`, `changed_at`, `changed_by` und `rev`
 | `template`                                                                            | Berichtsvorlagen                                           | `is_default` bei genau einer                                                                                                                                                         |
 | `sammlung`, `klasse`, `klasse_kennzahl`, `staffel`, `satz`, `synonym`, `pauschbetrag` | Richtsatzsammlungen je Jahr                                | `staffel.von` ausschließlich, `bis` einschließlich, in Cent, leer: offen; `satz` in ganzen Prozent, `von` und `bis` leer, wo nur ein Mittelsatz gedruckt ist; `pauschbetrag` in Cent |
 
-`embeddings.db` enthält nur Rechenwerte für Vorschläge und wird bei Bedarf neu erzeugt; sie ist kein Austauschformat.
+`embeddings.db` enthält nur Rechenwerte für Vorschläge und liegt nicht in diesem Ordner, sondern bei jeder Person selbst; sie wird bei Bedarf neu erzeugt und ist kein Austauschformat.
 
 ## Datei einer Prüfung
 
