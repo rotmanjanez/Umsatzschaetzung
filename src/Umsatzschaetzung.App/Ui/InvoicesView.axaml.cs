@@ -104,6 +104,7 @@ public partial class InvoicesView : Screen
         AddHandler(DragDrop.DragLeaveEvent, DragLeft);
         AddHandler(DragDrop.DropEvent, Dropped);
         Session.CaseChanged += Refresh;
+        Session.CaseChanged += Outdated;
         Session.CaseClosed += CaseClosed;
         Session.InvoiceRequested += id => { if (Session.Case?.Invoices.Find(i => i.Id == id) is { } inv) Show(new InvoiceRow(inv)); };
     }
@@ -196,6 +197,15 @@ public partial class InvoicesView : Screen
         view.Leave();
         // Only reviews in progress stay cached; a read invoice would just hold on to its page images.
         if (!view.Keep) editors.Remove(id);
+    }
+
+    // A review kept while its window is closed is dropped once the case holds another version of the
+    // invoice, as after an undo, so opening it again shows what the case now says.
+    void Outdated()
+    {
+        foreach (var (id, view) in editors.ToList())
+            if (!windows.ContainsKey(id) && (Session.Case?.Invoices.Find(i => i.Id == id) is not { } invoice || !view.Holds(invoice)))
+                editors.Remove(id);
     }
 
     InvoiceView EditorFor(InvoiceRow row)

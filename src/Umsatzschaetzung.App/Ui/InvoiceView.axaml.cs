@@ -299,6 +299,8 @@ public partial class InvoiceView : Screen
 
     public string Id => invoice.Id;
 
+    public bool Holds(Invoice stored) => Snapshot(stored) == recorded;
+
     protected override History History => history;
 
     // Worth keeping around once the user leaves it: edits on their way, or a review still to be done.
