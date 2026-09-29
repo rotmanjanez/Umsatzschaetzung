@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Umsatzschaetzung.Browser/Umsatzschaetzung.Browser.csproj" />
     <Compile Include="../headless/Targets.cs" />
+    <Compile Include="../headless/Steps.cs" />
   </ItemGroup>
 
   <Import Project="../../src/Umsatzschaetzung.Browser/Browser.targets" />

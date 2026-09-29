@@ -140,6 +140,7 @@ chapters:
           Einmal auf Neue Prüfung klicken, bitte.
         click: { text: "Neue Prüfung" }
         then: [{ do: focus }]
+        undo: [{ do: click, at: { text: "Abbrechen" } }]
         done: { at: { name: NewLabel } }
         task: Auf „Neue Prüfung“ klicken.
         hint: Der Knopf steht in der Mitte, rechts neben „Importieren“.
@@ -214,6 +215,7 @@ chapters:
           Die Gewerbekennzahl lassen wir für das Beispiel leer. Alles andere ist
           ausgefüllt, also klicken wir auf Anlegen.
         click: { text: "Anlegen" }
+        undo: [{ do: click, at: { text: "Neue Prüfung" } }]
         done: { at: { name: CaseLabel } }
         task: Auf „Anlegen“ klicken.
         hint: Der Knopf steht ganz unten im Formular.

@@ -67,7 +67,16 @@ def written(chapter: str, spec: dict) -> dict:
     return {"allow": spec.get("allow", [target] if target else []), "done": done,
             "chapter": chapter, "say": spec.get("say", "").strip(), "card": spec.get("card"),
             "note": spec.get("note", ""), "task": spec.get("task", ""), "hint": spec.get("hint", ""),
-            "show": spec.get("show"), "through": spec.get("through"), "hold": spec.get("hold", 0.0)}
+            "show": spec.get("show"), "through": spec.get("through"), "hold": spec.get("hold", 0.0),
+            "do": instead(spec), "undo": spec.get("undo", [])}
+
+
+# What the page does in the learner's place when the slider passes a beat they act in: what the
+# headless program does, without its photographs, its waiting and its second windows.
+def instead(spec: dict) -> list[dict]:
+    if "click" not in spec and "type" not in spec:
+        return []
+    return [{k: v for k, v in s.items() if k != "window"} for s in steps(spec) if s["do"] not in ("shot", "wait", "pick")]
 
 
 # --- zustand -------------------------------------------------------------------------

@@ -1,0 +1,265 @@
+using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json;
+using Avalonia;
+using Avalonia.Automation;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+using Umsatzschaetzung.App.Ui;
+using Umsatzschaetzung.Headless;
+using Umsatzschaetzung.Model;
+
+namespace Umsatzschaetzung.Lessons;
+
+// The slider of a lesson goes back and forth over the steps the learner acts in. Before one begins
+// the program is marked: its case and rules, the invoices open, and what the screen shows, the page
+// of every tab, the row of every list, the option checked and the text of every field. Passing a
+// step forwards does what the learner would have; going back over it puts the marked program back.
+public static partial class Coach
+{
+    static readonly JsonSerializerOptions StepOptions = new(JsonSerializerDefaults.Web) { AllowOutOfOrderMetadataProperties = true };
+    static readonly Stack<Marked> marks = [];
+    static Session? session;
+
+    sealed record Marked(
+        string? Case, string Rules, List<string> Invoices,
+        List<(SelectingItemsControl List, int Index)> Chosen, List<string> Checked, List<(TextBox Box, string? Text)> Typed,
+        List<Step> Undo);
+
+    [JSExport]
+    public static async Task Mark(string undo)
+    {
+        if (top is null || session is null) return;
+        await Stored();
+        var shown = top.GetVisualDescendants().Where(v => v.IsEffectivelyVisible).ToList();
+        marks.Push(new Marked(
+            session.Case is { } kase ? Json.Serialize(kase) : null,
+            session.Rules is { } rules ? Json.Serialize(rules) : "",
+            [.. shown.OfType<InvoiceView>().Select(v => v.Id)],
+            [.. shown.OfType<SelectingItemsControl>().Select(l => (l, l.SelectedIndex))],
+            [.. shown.OfType<RadioButton>().Where(r => r.IsChecked == true).Select(AutomationProperties.GetName).OfType<string>()],
+            [.. shown.OfType<TextBox>().Where(b => b.FindAncestorOfType<DataGrid>() is null).Select(b => (b, b.Text))],
+            Load(undo)));
+    }
+
+    // Done as the learner would have done it, then given the time the program takes to show it. A field
+    // typed in reads right at once, and once left no longer shows as the learner's check expects.
+    [JSExport]
+    public static async Task Do(string steps, string? done)
+    {
+        foreach (var step in Load(steps)) await Act(step);
+        await Settle();
+        if (string.IsNullOrEmpty(done) || JsonSerializer.Deserialize<Done>(done, Options) is not { Text: null } goal) return;
+        for (var i = 0; i < 60 && !(Find(goal.At) is { } hit && Met(hit, goal)); i++) await Settle();
+    }
+
+    // An invoice open while its case changes back is closed first, so it stores nothing over the
+    // case put back, and opened again on it.
+    // A step the learner did not finish needs only the program put back, not its own `undo`.
+    [JSExport]
+    public static async Task Undo(bool done)
+    {
+        if (top is null || session is null || !marks.TryPop(out var mark)) return;
+        await Stored();
+        var kase = session.Case is { } now ? Json.Serialize(now) : null;
+        foreach (var view in top.GetVisualDescendants().OfType<InvoiceView>().ToList())
+            if (kase != mark.Case || !mark.Invoices.Contains(view.Id)) Frame.Of(view)?.Close();
+        await Settle();
+        if (kase != mark.Case) await Return(mark.Case);
+        await Revert(mark.Rules);
+        await Settle();
+        foreach (var id in mark.Invoices)
+            if (!top.GetVisualDescendants().OfType<InvoiceView>().Any(v => v.Id == id)) session.OpenInvoice(id);
+        foreach (var step in done ? mark.Undo : []) await Act(step);
+        if (mark.Chosen.Where(c => c.List is TabControl).Count(Choose) > 0) await Settle(4);
+        if (mark.Chosen.Where(c => c.List is not TabControl).Count(Choose) > 0) await Settle(4);
+        foreach (var radio in top.GetVisualDescendants().OfType<RadioButton>())
+            if (mark.Checked.Contains(AutomationProperties.GetName(radio) ?? "")) radio.IsChecked = true;
+        foreach (var (box, text) in mark.Typed)
+            if (box.IsAttachedToVisualTree() && box.Text != text) box.Text = text;
+        await Settle();
+    }
+
+    // An invoice stores its edits a moment after they are made, and only then are they in the case.
+    static async Task Stored()
+    {
+        for (var i = 0; i < 100 && top!.GetVisualDescendants().OfType<InvoiceView>().Any(v => v.DataContext is InvoiceModel { Dirty: true }); i++)
+            await Settle();
+        await Settle();
+    }
+
+    static bool Choose((SelectingItemsControl List, int Index) chosen)
+    {
+        var (list, index) = chosen;
+        if (!list.IsAttachedToVisualTree() || list.SelectedIndex == index || index >= list.ItemCount) return false;
+        list.SelectedIndex = index;
+        return true;
+    }
+
+    // A case that was not there yet is deleted and left, so the list of cases no longer shows it; one
+    // that was left is opened again.
+    static async Task Return(string? json)
+    {
+        if (json is null)
+        {
+            if (session!.Case is not { } made) return;
+            await session.Service.Cases.Delete(made.Id, CancellationToken.None);
+            Click(await Reach(new Target { Name = "BackButton" }));
+            return;
+        }
+        var kase = Json.Deserialize<Case>(json);
+        if (session!.Case is null) session.Open(kase);
+        await session.Restore(kase);
+    }
+
+    static async Task Revert(string rules)
+    {
+        if (rules == "" || session!.Rules is not { } now) return;
+        var then = Json.Deserialize<RuleSet>(rules);
+        foreach (var (kind, id, rule) in Entries(then).Where(e => Text(now.Find(e.Kind, e.Id)) != Text(e.Rule)))
+            await session.Restore(kind, id, rule);
+        foreach (var (kind, id, _) in Entries(now).AsEnumerable().Reverse().Where(e => then.Find(e.Kind, e.Id) is null))
+            await session.Restore(kind, id, null);
+    }
+
+    static string? Text(IRuleEntity? rule) => rule is null ? null : JsonSerializer.Serialize(rule, rule.GetType(), ModelJsonContext.Default);
+
+    static List<(Entity Kind, string Id, IRuleEntity Rule)> Entries(RuleSet r) =>
+        [.. new IEnumerable<IRuleEntity>[] { r.Categories.Values, r.Ingredients.Values, r.Products.Values, r.Mappings.Values, r.YieldRules.Values, r.Gewerbezweige.Values, r.Templates.Values }
+            .SelectMany(e => e)
+            .Select(e => (RuleChange.KindOf(e), e.Id, e))];
+
+    static List<Step> Load(string json) =>
+        string.IsNullOrEmpty(json) ? [] : JsonSerializer.Deserialize<List<Step>>(json, StepOptions) ?? [];
+
+    // The actions of the headless driver, on the one view the browser has.
+    static async Task Act(Step step)
+    {
+        var at = step.GetType().GetProperty("At")?.GetValue(step) is Target target ? await Reach(target) : null;
+        switch (step)
+        {
+            case ClickStep:
+                Click(at!);
+                break;
+            case TypeStep s:
+                Type(at!, s.Text);
+                break;
+            case FocusStep:
+                if (at is InputElement input) input.Focus();
+                else top!.FocusManager?.Focus(null);
+                break;
+            case DeselectStep:
+                Select(at!, null);
+                break;
+            case SelectStep:
+                Select(at!, (at as StyledElement)?.DataContext);
+                break;
+            case TopStep:
+                var grid = at as DataGrid ?? (DataGrid)Targets.Up(at!, "DataGrid");
+                if (grid.ItemsSource?.Cast<object>().FirstOrDefault() is { } first) grid.ScrollIntoView(first, null);
+                break;
+            case EditStep s:
+                await Edit(at!, s.Column, s.Text);
+                break;
+            case OpenStep s:
+                if (session!.Case?.Invoices.Find(i => i.Number == s.Number) is { } invoice) session.OpenInvoice(invoice.Id);
+                break;
+            case TabStep s:
+                var item = await Reach(new Target { Text = s.Header, Type = "TabItem" });
+                ((TabControl)Targets.Up(item, "TabControl")).SelectedItem = item;
+                break;
+            case ChooseStep s:
+                await Pick((AutoCompleteBox)at!, s.Text, s.Item);
+                break;
+            case WaitStep s:
+                await Settle(s.Rounds);
+                break;
+            default:
+                throw new NotSupportedException("not in the browser: " + step.GetType().Name);
+        }
+        await Settle();
+    }
+
+    // The program may take seconds to show it, while the matcher's model opens.
+    static async Task<Visual> Reach(Target target)
+    {
+        for (var i = 0; i < 400; i++)
+        {
+            if (Targets.Seek(top!, target) is { } hit) return hit;
+            Targets.Reveal(top!, target);
+            await Settle();
+        }
+        throw new InvalidOperationException("not found: " + target);
+    }
+
+    static void Click(Visual visual)
+    {
+        var button = visual as Button ?? visual.GetVisualAncestors().OfType<Button>().FirstOrDefault()
+            ?? visual.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.IsEffectivelyVisible)
+            ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
+        if (button is RadioButton radio) radio.IsChecked = true;
+        else button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+    }
+
+    // A field, or the first text box inside what `at` found (the price in a row).
+    static void Type(Visual visual, string text)
+    {
+        if (AvaloniaPropertyRegistry.Instance.GetRegistered(visual).FirstOrDefault(p => p.Name == "Text") is { } property)
+            visual.SetValue(property, text);
+        else
+            (visual.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsEffectivelyVisible)
+             ?? throw new InvalidOperationException("no text field in " + visual.GetType().Name)).Text = text;
+    }
+
+    static void Select(Visual row, object? item)
+    {
+        switch (row.GetSelfAndVisualAncestors().FirstOrDefault(v => v is DataGrid or SelectingItemsControl))
+        {
+            case DataGrid grid: grid.SelectedItem = item; break;
+            case SelectingItemsControl list: list.SelectedItem = item; break;
+            default: throw new InvalidOperationException("no list above " + row.GetType().Name);
+        }
+    }
+
+    static async Task Edit(Visual cell, string column, string? text)
+    {
+        var grid = (DataGrid)Targets.Up(cell, "DataGrid");
+        grid.SelectedItem = (cell as StyledElement)?.DataContext;
+        grid.CurrentColumn = grid.Columns.FirstOrDefault(c => c.Header as string == column)
+            ?? throw new InvalidOperationException("no column " + column);
+        if (text is null) return;
+        grid.BeginEdit();
+        await Settle();
+        var box = grid.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsFocused)
+            ?? throw new InvalidOperationException("no editor in column " + column);
+        box.Text = text;
+        grid.CommitEdit(DataGridEditingUnit.Cell, true);
+        grid.CommitEdit(DataGridEditingUnit.Row, true);
+    }
+
+    // Typed into the search box, and the entry that reads `item` taken from its drop-down.
+    static async Task Pick(AutoCompleteBox box, string text, string item)
+    {
+        box.Focus();
+        await Settle();
+        box.GetVisualDescendants().OfType<TextBox>().First().Text = text;
+        for (var i = 0; i < 60; i++)
+        {
+            await Settle();
+            var entry = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child?
+                .GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item);
+            if (entry is null) continue;
+            box.SelectedItem = entry.DataContext;
+            return;
+        }
+        throw new InvalidOperationException("not offered: " + item);
+    }
+
+    static async Task Settle(int rounds = 1)
+    {
+        for (var i = 0; i < rounds; i++) await Task.Delay(50);
+        if (session is not null) await session.Saved;
+    }
+}

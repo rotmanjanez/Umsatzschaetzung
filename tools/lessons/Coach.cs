@@ -39,9 +39,10 @@ public static partial class Coach
     static Goal? task;
     static bool swallowed, acted;
 
-    public static void Attach(TopLevel host)
+    public static void Attach(TopLevel host, Session work)
     {
         top = host;
+        session = work;
         // Class handlers run before the program's own, which also listen on the top level.
         Gate(InputElement.PointerPressedEvent, Press);
         Gate(InputElement.PointerReleasedEvent, Release);

@@ -57,6 +57,7 @@ button:focus-visible, a:focus-visible { outline: 4px solid var(--blue); outline-
 }
 #caption.top { bottom: auto; top: 20px; }
 
+
 /* The one card: where the lesson is and what to do now. It keeps clear of what it points at. */
 #card {
   position: fixed; z-index: 2; width: 400px; max-width: calc(100% - 32px); padding: 14px 18px 16px; border-radius: 16px;
@@ -108,11 +109,19 @@ select.tool option { background: var(--card); color: var(--ink); }
 #line.note { font-weight: 400; color: var(--muted); font-size: .95rem; }
 #card.act::before { background: var(--act-soft); border: 2px solid var(--act); }
 #card.act #chapter { visibility: hidden; }
-#card.act #count { display: none; }
 #card.act #line { margin-top: 0; font-size: 1.25rem; }
 #hint { margin: 8px 0 0; color: var(--amber); font-size: .92rem; }
 #hint:empty { display: none; }
-#count { margin: 6px 0 -4px; text-align: right; color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
+
+/* The whole lesson as a line across the bottom of the card, its chapters marked, to drag either way.
+   It waits while the program is brought to where it was let go. */
+#time { position: relative; margin: 10px -18px -16px; padding: 0 8px 6px; }
+#slider { display: block; width: 100%; margin: 0; accent-color: var(--blue); cursor: pointer; }
+#card.act #slider { accent-color: var(--act); }
+#time.busy #slider { cursor: progress; opacity: .6; }
+#ticks { position: absolute; inset: 0 16px 6px; pointer-events: none; }
+#ticks i { position: absolute; top: 50%; width: 2px; height: 10px; margin: -5px 0 0 -1px; border-radius: 1px; background: var(--muted); opacity: .5; }
+
 
 /* A card of the lesson covers the program. */
 #stage {

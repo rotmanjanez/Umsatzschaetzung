@@ -104,6 +104,7 @@ one sentence or a few, together with what happens on screen:
 | `allow` | the targets whose presses and keys reach the program in that beat (default: the `click` or `type` target) |
 | `text` | markdown for the guide page; everything written up to a `shot` stands beside its image |
 | `shot` | `{ name, at, trim?, clip?, alt, width?, below? }`: the guide's image after the beat's step, beside the text or, with `below`, under it |
+| `undo` | steps that take back what going back over the beat does not by itself: the case and rules, the invoices open, tabs, rows, options and fields are put back as they were; a form the click opened is not |
 | `done` | what the program shows once the learner has done it: `{ at }` is there, with `selected: true` its row, tab or option is chosen, with `text: [...]` its field reads one of them. Default: a click chooses its target, a typed field reads the `type` text or one of `accept` |
 
 The window size is set once per lesson (`window`).
@@ -124,7 +125,10 @@ fetches them, the first time they are needed, and kept by the browser for every 
 
 It runs `lesson.json` beat by beat: each beat speaks its clip and moves on when it ends,
 cards cover the program, `show` puts a spotlight on the live control, and one small card
-says who speaks, which chapter this is, how far along, and what to do. The ring around
+says who speaks, which chapter this is and what to do, with a slider along its bottom that
+follows the lesson and can be dragged either way at any time. Dragged past a beat the
+learner acts in, the coach acts in their place, as the headless program would; dragged
+back over one, the program is put back where it stood before that beat began. The ring around
 the speaker's face follows the voice while it talks. Subtitles can be switched on there
 and stay on for the next visit; the card and subtitles keep clear of what is pointed at.
 

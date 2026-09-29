@@ -4,7 +4,7 @@ const CHARS_PER_SECOND = 14;
 const LINE = 84;
 const voice = $('voice');
 let hush = null, go = null, clip = null, held = false, cues = [], progress = () => 0, left = () => NaN, force = false, showing = null, soon = null;
-let live = () => {}, rate = 1;
+let live = () => {}, rate = 1, said = 0;
 const dachs = $('dachs');
 const changed = () => {
   live(held || !!go || !voice.paused);
@@ -43,6 +43,7 @@ function follow() {
 // shown and given the time it takes to read. Held, neither starts nor goes on.
 export function speak({ say = '', audio = null }) {
   clip = audio;
+  said = 0;
   cues = subtitles(say);
   force = false;
   showing = null;
@@ -51,6 +52,7 @@ export function speak({ say = '', audio = null }) {
     const end = () => {
       if (hush !== end) return;
       hush = go = null;
+      said = 1;
       clearTimeout(timer);
       voice.onended = null;
       caption(showing = null);
@@ -60,6 +62,7 @@ export function speak({ say = '', audio = null }) {
     };
     hush = end;
     const silent = () => {
+      if (hush !== end) return;
       if (!say) return end();
       const length = say.length / (CHARS_PER_SECOND * rate) * 1000;
       let spent = 0, since = 0;
@@ -115,6 +118,9 @@ export function pace(r) {
 export const onlive = f => { live = f; };
 
 export const holding = () => held;
+
+// How much of the sentence is spoken, from 0 to 1.
+export const heard = () => hush ? Math.min(progress(), 1) || 0 : said;
 
 export const skip = () => hush?.();
 

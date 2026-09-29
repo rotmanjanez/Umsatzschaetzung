@@ -25,7 +25,7 @@ if (!view.IsLoaded)
     view.Loaded += (_, _) => loaded.TrySetResult();
     await loaded.Task;
 }
-Coach.Attach(TopLevel.GetTopLevel(view)!);
+Coach.Attach(TopLevel.GetTopLevel(view)!, view.Session);
 if (args.Length > 1) view.Session.Open(await service.Cases.Get(args[1], CancellationToken.None));
 Ready();
 

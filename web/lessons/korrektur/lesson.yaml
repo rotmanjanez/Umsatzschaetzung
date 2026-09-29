@@ -215,13 +215,13 @@ chapters:
       - say: >-
           Der Einzelpreis, drei Euro fünfzig.
         type: { at: { text: "Thermobox Leihgebühr je Woche", up: DataGridRow, column: Einzelpreis }, text: "3,50" }
-        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Einzelpreis, text: "3,50" }]
+        act: [{ do: edit, window: dialog, at: { text: "Thermobox Leihgebühr je Woche" }, column: Einzelpreis, text: "3,50" }]
         rounds: 1
         task: "Einzelpreis: 3,50"
       - say: >-
           Und zum Schluss der Betrag der Zeile, einundzwanzig Euro.
         type: { at: { text: "Thermobox Leihgebühr je Woche", up: DataGridRow, column: Netto }, text: "21,00" }
-        act: [{ do: edit, window: dialog, at: { text: "0,00 €" }, column: Netto, text: "21,00" }]
+        act: [{ do: edit, window: dialog, at: { text: "Thermobox Leihgebühr je Woche" }, column: Netto, text: "21,00" }]
         rounds: 1
         task: "Netto: 21,00"
       - say: >-
