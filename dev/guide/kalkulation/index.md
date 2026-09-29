@@ -2,6 +2,8 @@
 
 Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den Umsatz. Was dabei nicht über Rezept und Preis hineinfindet, steht gesondert auf der Seite **Übrige Einkäufe**. Bevor das Ergebnis zählt, wird dort aufgeräumt.
 
+[Übung 5: Die Kalkulation Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/einkaeufe/)
+
 ## Übrige Einkäufe
 
 Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
@@ -30,7 +32,7 @@ In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauf
 1. **Handspülmittel Konzentrat 5 l**
 1. **Versandkostenpauschale**
 
-Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten auch Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
+Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger, Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
 
 Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
@@ -39,6 +41,18 @@ Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. All
 - **Schweineschnitzel natur** nicht mehr in den Listen steht
 - Servietten, CO2, Handspülmittel und Versandkostenpauschale unter **Nicht in der Umsatzschätzung** stehen
 - neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `4.350,66 € (6,52 % der Einkäufe)` steht
+
+## Vom Einkauf zum Umsatz
+
+Wie das Programm rechnet, zeigt ein Produkt am besten. Auf **3. Sortiment** steht **Schnitzel mit Pommes** mit dem Preis von der Karte, 15,90 € brutto.
+
+Auf **4. Kalkulation** die Seite **Portionen** öffnen und **Schnitzel mit Pommes** anklicken. Rechts steht, wie es gerechnet ist:
+
+- **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es ist die Zutat, von der am wenigsten da ist.
+- **Portionen**: Das Schweinefleisch könnte auch in den Braten des Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht; das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+- **Umsatz (netto)**: 3.039 Portionen zu 15,90 € brutto, ohne 19 % Umsatzsteuer, ergeben 40.601,04 €.
+
+So rechnet die Kalkulation jedes Produkt des Sortiments.
 
 ## Ertragsregeln
 

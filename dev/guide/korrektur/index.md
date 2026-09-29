@@ -4,6 +4,8 @@ Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das Progr
 
 Was das Programm nicht zusammenbringt, ist markiert: Das Feld ist orange hinterlegt, und auf dem Beleg ist dieselbe Stelle orange umrandet. Wer mit der Maus auf das Feld zeigt, sieht den Grund, etwa „Einheit fehlt“.
 
+[Übung 2: Eine Rechnung korrigieren Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/korrektur/)
+
 ## Die Rechnung TK25-1583
 
 Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit dem Symbol **Öffnen** rechts in der Zeile). Sie öffnet sich in einem eigenen Fenster: links die gelesenen Werte, rechts der Beleg. Quer über der Tabelle liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:

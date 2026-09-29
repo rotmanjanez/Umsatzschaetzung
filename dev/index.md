@@ -2,7 +2,7 @@
 
 Das Programm rechnet aus den Eingangsrechnungen eines Betriebs nach, welchen Umsatz er damit hätte machen müssen, und stellt ihn dem erklärten Umsatz gegenüber. Wer 600 Liter Fassbier einkauft und das Glas zu 4,60 € verkauft, kann nicht nur 2.000 € mit Bier umgesetzt haben.
 
-[**Neu hier** Die Beispielprüfung führt in rund einer Stunde durch eine vollständige Prüfung, mit Beispielrechnungen zum Herunterladen.](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md) [**Nachschlagen** Jeder Reiter des Programms, Feld für Feld: was er zeigt und was er rechnet.](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md) [**Etwas klappt nicht** Häufige Fragen, nach Arbeitsschritt geordnet.](https://docs.umsatzschaetzung.amtstools.de/dev/faq/index.md)
+[**Neu hier** Die Beispielprüfung führt in rund 45 Minuten durch eine vollständige Prüfung, mit Beispielrechnungen zum Herunterladen.](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md) [**Nachschlagen** Jeder Reiter des Programms, Feld für Feld: was er zeigt und was er rechnet.](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md) [**Selbst ausprobieren** Übungen im Browser, in denen jeder Schritt selbst geklickt wird.](https://docs.umsatzschaetzung.amtstools.de/dev/uebungen/index.md) [**Etwas klappt nicht** Häufige Fragen, nach Arbeitsschritt geordnet.](https://docs.umsatzschaetzung.amtstools.de/dev/faq/index.md)
 
 ## Der Ablauf einer Prüfung
 

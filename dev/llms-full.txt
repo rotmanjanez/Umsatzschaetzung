@@ -8,7 +8,7 @@ Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Ei
 
 Das Programm rechnet aus den Eingangsrechnungen eines Betriebs nach, welchen Umsatz er damit hätte machen müssen, und stellt ihn dem erklärten Umsatz gegenüber. Wer 600 Liter Fassbier einkauft und das Glas zu 4,60 € verkauft, kann nicht nur 2.000 € mit Bier umgesetzt haben.
 
-[**Neu hier** Die Beispielprüfung führt in rund einer Stunde durch eine vollständige Prüfung, mit Beispielrechnungen zum Herunterladen.](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md) [**Nachschlagen** Jeder Reiter des Programms, Feld für Feld: was er zeigt und was er rechnet.](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md) [**Etwas klappt nicht** Häufige Fragen, nach Arbeitsschritt geordnet.](https://docs.umsatzschaetzung.amtstools.de/dev/faq/index.md)
+[**Neu hier** Die Beispielprüfung führt in rund 45 Minuten durch eine vollständige Prüfung, mit Beispielrechnungen zum Herunterladen.](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md) [**Nachschlagen** Jeder Reiter des Programms, Feld für Feld: was er zeigt und was er rechnet.](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md) [**Selbst ausprobieren** Übungen im Browser, in denen jeder Schritt selbst geklickt wird.](https://docs.umsatzschaetzung.amtstools.de/dev/uebungen/index.md) [**Etwas klappt nicht** Häufige Fragen, nach Arbeitsschritt geordnet.](https://docs.umsatzschaetzung.amtstools.de/dev/faq/index.md)
 
 ## Der Ablauf einer Prüfung
 
@@ -39,7 +39,7 @@ Das **?** rechts oben und die Taste **F1** öffnen die Seite dieses Handbuchs, d
 
 # Prüfungen
 
-Die Startseite listet alle Prüfungen aud die das Program zugriff hat. Ein Klick auf eine Zeile öffnet sie. Über `Neue Prüfung` kann eine neue Prüfung in der Datenbank angelegt werden.
+Die Startseite listet alle Prüfungen im Ordner für Prüfungen. Ein Klick auf eine Zeile öffnet sie. **Neue Prüfung** legt eine neue an.
 
 In der Prüfung liegen ihre Rechnungen und Belege und die Entscheidungen zu diesem Betrieb: Zuordnung der Rechnungszeilen, Verkaufspreise, gewählte Ertragsregeln, Bestand, erklärte Umsätze.
 
@@ -47,9 +47,9 @@ In der Prüfung liegen ihre Rechnungen und Belege und die Entscheidungen zu dies
 
 Das Suchfeld filtert nach Bezeichnung, Zeitraum und Namen des Steuerpflichtigen.
 
-## Wo ist eine Prüfung gespeicher?
+## Wo ist eine Prüfung gespeichert?
 
-Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter `Umsatzschätzung`, etwa `fall-20250502-080000-a1b2c3d4.db`. Alle informationen zu diesem Fall, darunter auch die Belege und Scan, Sind darin gespeicher.
+Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter `Umsatzschätzung` und heißt wie ihre Bezeichnung, etwa `Bäckerei Muster 2024.db`. Alles zu dieser Prüfung steht darin, auch die Belege und Scans.
 
 **Verwaltete Installationen**
 
@@ -63,11 +63,11 @@ Das Pfeilsymbol in der Zeile legt umgekehrt eine Kopie der Prüfung ab, wo Sie w
 
 ## Löschen
 
-Das Papierkorbsymbol am Ende der Zeile löscht eine Prüfung mitsamt Rechnungen und Belegen. Löschen kann i.d.R. nicht rückgängig gemacht werden.
+Das Papierkorbsymbol am Ende der Zeile löscht eine Prüfung mitsamt Rechnungen und Belegen. Im Programm lässt sich das nicht rückgängig machen.
 
 # Prüfung
 
-Der Reiter **Prüfung** sammelt alles, was nicht aus den Rechnungen kommt: wer geprüft wird, für welchen Zeitraum, was der Betrieb erklärt hat und was am Lager lag. Nichts davon muss vor den Rechnungen feststehen; jede Angabe lässt sich jederzeit nachtragen, die Kalkulation rechnet dann neu.
+Der Reiter **Prüfung** hält die Kerndaten der Prüfung: wer geprüft wird, für welchen Zeitraum, was der Betrieb erklärt hat und was am Lager lag. Nichts davon muss vor den Rechnungen feststehen; jede Angabe lässt sich jederzeit nachtragen, die Kalkulation rechnet dann neu.
 
 ## Eckdaten
 
@@ -102,7 +102,7 @@ Bestand lohnt sich nur bei Waren, die ins Gewicht fallen und lange lagern: Getr�
 
 # Rechnungen importieren
 
-Die Datengrundlage einer Prüfung sind die Eingangsrechnungen des Betriebs. Das Programm nimmt sie als E-Rechnung oder als Scan entgegen. E-Rechnungen sind maschinell fehlerfrei lesbar. Ein Scan ist allerdings zunächst nur ein Bild; das Programm liest den Scan ein und versucht die Daten aus dem Bild herauszulesen. In einigen Fällen kann das Program so Scans direkt in die Prüfung aufnehmen. Das klappt leider nicht immer. Wenn das Program den Inhalt der Rechnung nicht fehlerfrei erkennt, wird eine Rechnung nicht direkt übernommen und muss erst von dem Benutzer korrigiert werden.
+Die Datengrundlage einer Prüfung sind die Eingangsrechnungen des Betriebs. Das Programm nimmt sie als E-Rechnung oder als Scan entgegen. Eine E-Rechnung lässt sich maschinell fehlerfrei lesen. Ein Scan ist zunächst nur ein Bild; das Programm liest die Daten aus dem Bild heraus. Gehen die gelesenen Beträge vollständig auf, übernimmt es den Scan direkt in die Prüfung. Sonst wartet die Rechnung auf eine [Durchsicht](#durchsicht), in der Sie die gelesenen Felder korrigieren.
 
 ## Formate
 
@@ -114,9 +114,7 @@ Die Datengrundlage einer Prüfung sind die Eingangsrechnungen des Betriebs. Das 
 
 ## Hinzufügen
 
-Sie können neue Rechnungen über then "+" knopf hinzufügen. Der Import läuft im Hintergrund und zeigt den Fortschritt. Die abschaezung wie lange ein Import benoetigt kann sich Am Ende steht, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht warten.
-
-! ""Sie koennen alternativ auch klick and drag verwenden""
+Rechnungen fügen Sie über die Schaltfläche **Rechnungen hinzufügen** oben rechts über der Liste hinzu oder ziehen die Dateien in die Liste. Der Import läuft im Hintergrund und zeigt den Fortschritt und die verbleibende Zeit. Diese ist anfangs eine Schätzung und wird mit jeder gelesenen Datei genauer, denn ein Scan braucht ein Vielfaches einer E-Rechnung. Am Ende steht, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht warten.
 
 Eine Datei ist eine Rechnung. Mehrseitige Rechnungen als eine PDF mit allen Seiten in Reihenfolge; ein Bild ist immer genau eine Seite.
 
@@ -374,9 +372,9 @@ Eine Zutat hat keine eigene Einheit. Worin sie gemessen wird, legt das Rezept fe
 
 ## Produkte
 
-Ein Produkt ist etwas, das verkauft wird, mit seinem **Rezept**: welche Zutaten in einer Portion stecken und wie viel davon. Bei Getränken ist das meist eine Zeile, bei Speisen mehrere: Ein Cordon Bleu sind 200 g Schweinefleisch, 30 g Schinken, 30 g Käse und 200 g Pommes.
+Ein Produkt ist etwas, das verkauft wird, mit seinem **Rezept**: welche Zutaten in einer Portion stecken und wie viel davon. Bei Getränken ist das meist eine Zeile, bei Speisen mehrere: Ein Cordon Bleu sind 200 g Schweinefleisch, 30 g Schinken, 40 g Käse, 30 g Paniermehl und 25 g Ei.
 
-Eine Zeile des Rezepts kann statt einer Zutat ein anderes Produkt nennen, in Portionen: Schnitzel mit Pommes ist ein Schnitzel und eine Portion Pommes, Beilage. So steht die Beilage einmal im Katalog, und jedes Gericht, das sie mitbringt, rechnet mit derselben Menge. Die Kalkulation löst das auf und rechnet mit den Zutaten; ein Rezept darf sich dabei nicht selbst enthalten.
+Eine Zeile des Rezepts kann statt einer Zutat ein anderes Produkt nennen, in Portionen: Schnitzel mit Pommes ist ein Schnitzel und eine Portion Pommes, Beilage, also 180 g Pommes frites und 100 ml Pflanzenöl, das Altöl aus der Fritteuse eingerechnet. So steht die Beilage einmal im Katalog, und jedes Gericht, das sie mitbringt, rechnet mit derselben Menge. Die Kalkulation löst das auf und rechnet mit den Zutaten; ein Rezept darf sich dabei nicht selbst enthalten.
 
 Nur was in einem Rezept vorkommt, zählt in der Kalkulation. Eine Zutat ohne Rezept landet im Bericht unter **in keiner Rezeptur**. Ein Rezept ist ein Durchschnitt, keine Feststellung; es soll die übliche Portion treffen, nicht jede. Weicht ein einzelner Betrieb belegbar ab, wird das Rezept in dessen Prüfung [angepasst](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur), nicht hier.
 
@@ -491,9 +489,19 @@ Auf einem Terminalserver und in einer nicht dauerhaften VDI übersteht ein Ordne
 
 Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten. Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine Zuordnung bestätigt oder eine Zutat, ein Produkt oder eine Ertragsregel ändert, und jede Änderung betrifft nur diesen einen Eintrag.
 
+Das Programm verlässt sich dabei nicht auf die Sperren von SQLite, die nicht jede Freigabe zuverlässig durchsetzt. Es liest `rules.db` immer ganz und ersetzt sie ganz durch Umbenennen. Neu gelesen wird die Datei, sobald sich ihre Größe oder ihr Änderungszeitpunkt geändert hat. Ein Start ohne Änderung schreibt nichts.
+
+Wer schreibt, hält währenddessen die Datei `rules.lock` im selben Ordner exklusiv geöffnet. Diese Sperre setzt der Dateiserver selbst durch. Eine Änderung dauert Millisekunden; wer in dieser Zeit ebenfalls schreiben will, wartet. Ist die Sperre nach zehn Sekunden noch belegt, bricht die Änderung ab und das Programm meldet:
+
+> Die Regel-Datenbank wird seit 10 Sekunden an einem anderen Arbeitsplatz geändert: `\\server\umsatzschaetzung\regeln`
+>
+> Ist das Programm dort abgestürzt oder die Netzverbindung abgerissen, gibt der Server die Sperre nach einigen Minuten frei.
+
+Die Meldung betrifft keine Rechte, sondern eine offene Sperre. Hält sie an, lässt sich `rules.lock` auf dem Dateiserver unter **Computerverwaltung → Freigegebene Ordner → Geöffnete Dateien** schließen. Die Datei selbst bleibt leer im Ordner liegen und wird nicht gelöscht.
+
 ### Sicherungen
 
-Bei jedem Start legt das Programm eine Kopie der Datenbank im Unterordner `snapshots` an und behält die letzten zehn. Ist `rules.db` beim Start beschädigt, stellt es die jüngste Kopie wieder her und meldet das.
+Bei jedem Start legt das Programm eine Kopie der Datenbank im Unterordner `snapshots` an und behält die letzten zehn. Ist `rules.db` beim Start beschädigt, liest es sie nach einer Sekunde noch einmal. Bleibt sie beschädigt, legt es sie unter der Sperre als `rules.db.defekt-<Zeitpunkt>` beiseite, stellt die jüngste Kopie wieder her und meldet das.
 
 Lässt sich im Ordner keine Kopie anlegen, startet das Programm nicht, sondern nennt den Ordner und die fehlenden Rechte. Der ganze Ordner gehört in die Datensicherung.
 
@@ -567,7 +575,7 @@ Für IT und Datenschutzbeauftragte. Sicherheitslücken meldet man wie in [SECURI
 | Ordner der Regel-Datenbank       | `rules.db`, `embeddings.db`, `snapshots\`                                             | alle, die ihn teilen |
 | `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `pages\` mit dem gerade angezeigten Bericht           | die Person           |
 
-Eine Prüfung unterliegt dem Abgabengeheimnis. Sie verlässt den Rechner nur, wenn jemand sie [weitergibt](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben), dann als vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md).
+Eine Prüfung unterliegt dem Steuergeheimnis. Sie verlässt den Rechner nur, wenn jemand sie [weitergibt](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben), dann als vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md).
 
 Die Datei einer Prüfung heißt wie ihre Bezeichnung. Nennt diese den Betrieb, steht der Name auch in Ordneransichten, Sicherungskatalogen und Suchindizes. Den Aufbau der Dateien beschreibt [Dateiformate](https://docs.umsatzschaetzung.amtstools.de/dev/dateiformate/index.md).
 
@@ -577,7 +585,7 @@ Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt un
 
 Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den Lieferanten, die Artikelnummer, die GTIN, den Wortlaut der Rechnungszeile und die Zutat. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank teilen. Zuordnungen, die das Programm selbst trifft, bleiben in der Prüfung.
 
-Nicht gespeichert werden Daten der geprüften Person, Mengen, Preise und Daten der Rechnungen und aus welcher Prüfung eine Zuordnung stammt. Die Regel-Datenbank beschreibt, was Lieferanten verkaufen, nicht was ein Betrieb eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist, und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen sollen sie deshalb nur Personen derselben Stelle, die dem Abgabengeheimnis unterliegen.
+Nicht gespeichert werden Daten der geprüften Person, Mengen, Preise und Daten der Rechnungen und aus welcher Prüfung eine Zuordnung stammt. Die Regel-Datenbank beschreibt, was Lieferanten verkaufen, nicht was ein Betrieb eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist, und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis unterliegen.
 
 `embeddings.db` enthält Rechenwerte zu denselben Texten und lässt sich jederzeit löschen. `snapshots\` hält die letzten zehn Stände von `rules.db`.
 
@@ -632,7 +640,8 @@ Beide Dateien sind SQLite-Datenbanken. `PRAGMA user_version` im Dateikopf nennt 
 
 - Eine ältere Datei hebt das Programm beim Öffnen in einer einzigen Transaktion auf die aktuelle Fassung. Eine Prüfung wird davor als `<Name>.db.v<n>.bak` kopiert; die Kopie wird gelöscht, sobald die neue Datei die Integritätsprüfung besteht und sich vollständig lesen lässt, sonst ersetzt sie die neue Datei wieder.
 - Eine neuere Datei, als das Programm kennt, wird nicht geöffnet und nicht verändert.
-- `rules.db` läuft im Rollback-Journal (`journal_mode = DELETE`), weil sie auf einer Netzwerkfreigabe liegen kann, wo WAL nicht funktioniert. Vor jedem Start legt das Programm eine Kopie in `snapshots` ab, siehe [Sicherungen](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#sicherungen).
+- `rules.db` wird nie an Ort und Stelle beschrieben, denn die Sperren von SQLite halten nicht auf jeder Netzwerkfreigabe. Das Programm liest die Datei ganz in den Speicher, ändert sie dort und schreibt sie als `rules.db.neu` daneben, die dann `rules.db` durch Umbenennen ersetzt. Ein Leser bekommt so die alte oder die neue Datei, nie ein Gemisch. Wer schreibt, hält dabei `rules.lock` exklusiv geöffnet, siehe [Gleichzeitige Nutzung](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#gleichzeitige-nutzung). Neben `rules.db` entsteht deshalb weder `-journal` noch `-wal`; ein `rules.db-journal`, das eine ältere Programmversion bei einem Absturz hinterlassen hat, spielt SQLite beim nächsten Start einmal zurück.
+- Bei jedem Start legt das Programm eine Kopie von `rules.db` in `snapshots` ab, siehe [Sicherungen](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#sicherungen).
 
 ## Werte
 
@@ -1519,17 +1528,19 @@ Was im Programm als CSV hinein- und herausgeht, steht unter [Import und Export](
 
 Diese Anleitung führt Schritt für Schritt durch eine vollständige Prüfung: von der Installation über die Rechnungen bis zum fertigen Bericht. Vorkenntnisse mit dem Programm sind nicht nötig, eigene Belege auch nicht. Alles, was gebraucht wird, steht hier zum Herunterladen.
 
+[Übung 0: Die Grundlagen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/ueberblick/)
+
 ## Was das Programm rechnet
 
-Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt sich aus dem Einkauf nachrechnen: Wer 600 Liter Fassbier einkauft, schenkt daraus rund 1.100 Gläser zu 0,5 l aus, ein Teil geht als Schankverlust verloren. Mal 4,60 € je Glas ergibt das den Umsatz allein mit Fassbier. Das Programm macht diese Rechnung für jede eingekaufte Ware und stellt die Summe dem erklärten Umsatz gegenüber.
+Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt sich aus dem Einkauf nachrechnen: Gehen 547 kg des eingekauften Schweinefleischs ins Schnitzel, mit 180 g je Schnitzel, sind das rund 3.040 Schnitzel. Mal 15,90 € je Teller ergibt das den Umsatz allein mit Schnitzel. Das Programm macht diese Rechnung für jede eingekaufte Ware und stellt die Summe dem erklärten Umsatz gegenüber.
 
 ## Fünf Schritte, fünf Reiter
 
 Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfung:
 
 1. **1. Rechnungen** Die Eingangsrechnungen des Betriebs: was er eingekauft hat.
-1. **2. Zuordnung** Jede Rechnungsposition wird einer Zutat zugeordnet, etwa „Frankenbräu Pils Fass 50 l“ zu Fassbier. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.
-1. **3. Sortiment** Was der Betrieb verkauft und zu welchem Preis: Bier 0,5 l für 4,60 €, Schnitzel mit Pommes für 15,90 €.
+1. **2. Zuordnung** Jede Rechnungsposition wird einer Zutat zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.
+1. **3. Sortiment** Was der Betrieb verkauft und zu welchem Preis: Schnitzel mit Pommes für 15,90 €, Bier 0,5 l für 4,60 €.
 1. **4. Kalkulation** Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
 1. **5. Bericht** Der kalkulierte Umsatz neben dem erklärten, als PDF.
 
@@ -1539,9 +1550,9 @@ Ein paar Wörter kommen dabei immer wieder vor:
 
 | Begriff       | Bedeutung                                                                                                                                                                    |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zutat**     | Eine Ware, wie sie eingekauft wird: Fassbier, Schweinefleisch, Rotwein.                                                                                                      |
-| **Produkt**   | Etwas, das verkauft wird: Bier 0,5 l vom Fass, Schnitzel mit Pommes.                                                                                                         |
-| **Rezept**    | Wie viel von welcher Zutat in ein Produkt geht: In ein Bier 0,5 l gehen 500 ml Fassbier.                                                                                     |
+| **Zutat**     | Eine Ware, wie sie eingekauft wird: Schweinefleisch, Fassbier, Rotwein.                                                                                                      |
+| **Produkt**   | Etwas, das verkauft wird: Schnitzel mit Pommes, Bier 0,5 l vom Fass.                                                                                                         |
+| **Rezept**    | Wie viel von welcher Zutat in ein Produkt geht: In ein Schnitzel gehen 180 g Schweinefleisch.                                                                                |
 | **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen.                                                                                                                  |
 | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat.                                                                                                             |
 | **Regeln**    | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
@@ -1552,7 +1563,7 @@ Geprüft wird das **Gasthaus Zur Linde** für das Jahr 2025. Es hat einen Umsatz
 
 ## Zeitbedarf
 
-Rund eine Stunde. Das Einlesen der 106 Scans dauert je nach Rechner wenige Minuten bis eine halbe Stunde.
+Rund 45 Minuten. Das Einlesen der 106 Scans dauert je nach Rechner wenige Minuten bis eine halbe Stunde.
 
 **Mitmachen**
 
@@ -1626,6 +1637,8 @@ ______________________________________________________________________
 # Prüfung anlegen
 
 Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was dazugehört.
+
+[Übung 1: Prüfung anlegen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/pruefung/)
 
 ## Die Liste der Prüfungen
 
@@ -1743,6 +1756,8 @@ Ein Scan wird von der Maschine gelesen, und dabei geht manches schief. Das Progr
 
 Was das Programm nicht zusammenbringt, ist markiert: Das Feld ist orange hinterlegt, und auf dem Beleg ist dieselbe Stelle orange umrandet. Wer mit der Maus auf das Feld zeigt, sieht den Grund, etwa „Einheit fehlt“.
 
+[Übung 2: Eine Rechnung korrigieren Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/korrektur/)
+
 ## Die Rechnung TK25-1583
 
 Die Rechnung des Tiefkühllieferanten mit einem Doppelklick öffnen (oder mit dem Symbol **Öffnen** rechts in der Zeile). Sie öffnet sich in einem eigenen Fenster: links die gelesenen Werte, rechts der Beleg. Quer über der Tabelle liegt der Stempel „ZWEITSCHRIFT“, und oben stehen zwei Hinweise:
@@ -1805,6 +1820,8 @@ Wann ein Scan ohne Durchsicht übernommen wird und was das Fenster im Einzelnen 
 # Zuordnung prüfen
 
 Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was es nicht wusste.
+
+[Übung 3: Offene Positionen zuordnen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/zuordnung/)
 
 ## Die Liste
 
@@ -1870,17 +1887,19 @@ Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht e
 
 Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank) und gelten für jede Prüfung. Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was fehlt, legt man unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte) an, und so wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser Prüfung.
 
+[Übung 4: Sortiment anlegen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/sortiment/)
+
 ## Das erste Produkt von Hand
 
 In der Prüfung auf **3. Sortiment** wechseln. Rechts oben steht das Suchfeld **Produkt hinzufügen …**; über dieses Feld kommt ein Produkt aus dem Katalog ins Sortiment.
 
-In das Suchfeld `Bier 0,5` tippen. Darunter erscheint eine Liste passender Produkte aus dem Katalog; **Bier 0,5 l vom Fass** anklicken. Das Produkt steht jetzt im Sortiment, noch mit dem Hinweis **Preis fehlt**:
+In das Suchfeld `Schnitzel` tippen. Darunter erscheint eine Liste passender Produkte aus dem Katalog; **Schnitzel mit Pommes** anklicken. Das Produkt steht jetzt im Sortiment, noch mit dem Hinweis **Preis fehlt**:
 
-In das Feld **Bruttopreis** `4,60` eintragen, also den Preis auf der Karte, mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.
+In das Feld **Bruttopreis** `15,90` eintragen, also den Preis auf der Karte, mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.
 
-## Der Rest per Tabelle
+## Die übrigen Produkte
 
-Die übrigen 27 Produkte des Gasthauses stehen mit ihren Preisen in einer Tabelle: [sortiment-gasthaus.csv](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment-gasthaus.csv) . Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das rechte, **CSV exportieren**, schreibt das Sortiment in eine solche Datei.
+Die übrigen 27 Produkte werden hier nicht einzeln abgetippt. Für die folgenden Schritte liegen sie mit den Preisen des Beispiels in einer vorbereiteten Datei: [sortiment-gasthaus.csv](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment-gasthaus.csv) . Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das rechte, **CSV exportieren**, schreibt das Sortiment in eine solche Datei.
 
 Die Produkte werden über ihren Namen im Katalog gefunden und mit Preis und Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste:
 
@@ -1917,6 +1936,8 @@ Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen Produkten ge
 
 Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den Umsatz. Was dabei nicht über Rezept und Preis hineinfindet, steht gesondert auf der Seite **Übrige Einkäufe**. Bevor das Ergebnis zählt, wird dort aufgeräumt.
 
+[Übung 5: Die Kalkulation Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/einkaeufe/)
+
 ## Übrige Einkäufe
 
 Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
@@ -1945,7 +1966,7 @@ In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauf
 1. **Handspülmittel Konzentrat 5 l**
 1. **Versandkostenpauschale**
 
-Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten auch Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
+Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger, Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
 
 Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
@@ -1954,6 +1975,18 @@ Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. All
 - **Schweineschnitzel natur** nicht mehr in den Listen steht
 - Servietten, CO2, Handspülmittel und Versandkostenpauschale unter **Nicht in der Umsatzschätzung** stehen
 - neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `4.350,66 € (6,52 % der Einkäufe)` steht
+
+## Vom Einkauf zum Umsatz
+
+Wie das Programm rechnet, zeigt ein Produkt am besten. Auf **3. Sortiment** steht **Schnitzel mit Pommes** mit dem Preis von der Karte, 15,90 € brutto.
+
+Auf **4. Kalkulation** die Seite **Portionen** öffnen und **Schnitzel mit Pommes** anklicken. Rechts steht, wie es gerechnet ist:
+
+- **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es ist die Zutat, von der am wenigsten da ist.
+- **Portionen**: Das Schweinefleisch könnte auch in den Braten des Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht; das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+- **Umsatz (netto)**: 3.039 Portionen zu 15,90 € brutto, ohne 19 % Umsatzsteuer, ergeben 40.601,04 €.
+
+So rechnet die Kalkulation jedes Produkt des Sortiments.
 
 ## Ertragsregeln
 
@@ -1999,6 +2032,8 @@ Den Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz und
 
 Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben dem kalkulierten, mit allem, was zur Rechnung dazugehört. Vorher gibt es auf **4. Kalkulation** noch zwei Seiten anzusehen: die **Ertragsregeln**, die festlegen, wie viel vom Einkauf als verkauft gilt, und das **Ergebnis**.
 
+[Übung 6: Ergebnis und Bericht Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/bericht/)
+
 ## Ertragsregeln
 
 Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Sie legt fest, wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird, wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das Personal isst mit.
@@ -2017,8 +2052,8 @@ Für das Beispiel bleibt es bei **Kein Abzug**.
 
 Die letzte Seite, **Ergebnis**, öffnen. Jede Korrektur auf den anderen Seiten ist hier schon eingerechnet, ebenso jede spätere Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder Ertragsregeln. Die Seite hat drei Teile:
 
-- **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418,00 € neben dem kalkulierten von knapp 300.000 €, mit der Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der Prüfung.
-- **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund 340 %. Ermittelt wird der Satz nur an Portionen mit Preis.
+- **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418,00 € neben dem kalkulierten von gut 300.000 €, mit der Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der Prüfung.
+- **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund 350 %. Ermittelt wird der Satz nur an Portionen mit Preis.
 - **Zusammenfassung**: die Brücke von den erfassten Einkäufen über den Wareneinsatz zum Einsatz der verkauften Portionen und zum geschätzten Umsatz. **davon Schwund und Abzüge** steht auf `0,00 €`, weil keine Ertragsregel gewählt ist.
 
 ## Der Bericht in der Vorschau
@@ -2043,7 +2078,7 @@ Der Pfeil links oben führt zurück zur Liste der Prüfungen. Dort steht das Gas
 
 **Geschafft, wenn …**
 
-- auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €` der kalkulierte Umsatz nach BP steht, knapp 300.000 €
+- auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €` der kalkulierte Umsatz nach BP steht, gut 300.000 €
 - das PDF gespeichert ist und sich öffnen lässt
 
 **Zum Nachlesen**
@@ -2085,3 +2120,20 @@ Sie läuft genauso wie das Beispiel. Drei Dinge sind anders:
 ## Hilfe im Programm
 
 Das **?** rechts oben auf jeder Seite und die Taste **F1** öffnen die Seite des Handbuchs, die zum gerade geöffneten Reiter gehört.
+# Übungen
+
+# Übungen
+
+Didi hat [Maxie Bichmann](https://bichmann.net) gezeichnet.
+
+In den Übungen läuft das Programm im Browser, und Didi erklärt jeden Schritt. Geklickt und getippt wird selbst, am Beispiel der [Beispielprüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md). Installiert werden muss nichts, und eigene Daten braucht es keine.
+
+## Umsatzschätzung Schritt für Schritt
+
+1. [0**Die Grundlagen**Was das Programm rechnet, die fünf Schritte einer Prüfung und die Wörter, die dabei immer wieder vorkommen. Dazu das Beispiel, das durch alle Übungen führt: das Gasthaus Zur Linde.](https://app.umsatzschaetzung.amtstools.de/lektionen/ueberblick/)
+1. [1**Prüfung anlegen**Jede Arbeit im Programm beginnt mit einer Prüfung: ein Betrieb, ein Zeitraum und alles, was dazugehört. Angelegt wird das Beispiel, das Gasthaus Zur Linde, mit dem Umsatz, den es erklärt hat.](https://app.umsatzschaetzung.amtstools.de/lektionen/pruefung/)
+1. [2**Eine Rechnung korrigieren**Beim Einlesen eines Scans geht manchmal etwas verloren. Das Programm merkt es und legt die Rechnung zur Durchsicht vor. Hier die Rechnung des Tiefkühllieferanten, bei der ein Stempel eine ganze Zeile verdeckt hat.](https://app.umsatzschaetzung.amtstools.de/lektionen/korrektur/)
+1. [3**Offene Positionen zuordnen**Das Programm ordnet fast alle Rechnungspositionen selbst einer Zutat zu. Wo es sich nicht sicher ist, fragt es nach. Drei Beispiele aus dem Gasthaus Zur Linde.](https://app.umsatzschaetzung.amtstools.de/lektionen/zuordnung/)
+1. [4**Sortiment anlegen**Was das Gasthaus verkauft und zu welchem Preis: ein Produkt aus dem Katalog von Hand ins Sortiment, mit Preis, und wie es beim nächsten Mal übernommen wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/sortiment/)
+1. [5**Die Kalkulation**Bevor das Ergebnis zählt, wird aufgeräumt: Einkäufe, die in kein Rezept eingehen, und solche, die gar keinen Umsatz bringen. Danach, am Schnitzel, wie aus Einkauf, Rezept und Preis der Umsatz wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/einkaeufe/)
+1. [6**Ergebnis und Bericht**Zum Schluss das Ergebnis: wie viel vom Einkauf als verkauft gilt, was das Gasthaus Zur Linde danach hätte umsetzen müssen, und wie daraus der Bericht für die Akte wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/bericht/)

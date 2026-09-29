@@ -28,9 +28,19 @@ Auf einem Terminalserver und in einer nicht dauerhaften VDI übersteht ein Ordne
 
 Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten. Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine Zuordnung bestätigt oder eine Zutat, ein Produkt oder eine Ertragsregel ändert, und jede Änderung betrifft nur diesen einen Eintrag.
 
+Das Programm verlässt sich dabei nicht auf die Sperren von SQLite, die nicht jede Freigabe zuverlässig durchsetzt. Es liest `rules.db` immer ganz und ersetzt sie ganz durch Umbenennen. Neu gelesen wird die Datei, sobald sich ihre Größe oder ihr Änderungszeitpunkt geändert hat. Ein Start ohne Änderung schreibt nichts.
+
+Wer schreibt, hält währenddessen die Datei `rules.lock` im selben Ordner exklusiv geöffnet. Diese Sperre setzt der Dateiserver selbst durch. Eine Änderung dauert Millisekunden; wer in dieser Zeit ebenfalls schreiben will, wartet. Ist die Sperre nach zehn Sekunden noch belegt, bricht die Änderung ab und das Programm meldet:
+
+> Die Regel-Datenbank wird seit 10 Sekunden an einem anderen Arbeitsplatz geändert: `\\server\umsatzschaetzung\regeln`
+>
+> Ist das Programm dort abgestürzt oder die Netzverbindung abgerissen, gibt der Server die Sperre nach einigen Minuten frei.
+
+Die Meldung betrifft keine Rechte, sondern eine offene Sperre. Hält sie an, lässt sich `rules.lock` auf dem Dateiserver unter **Computerverwaltung → Freigegebene Ordner → Geöffnete Dateien** schließen. Die Datei selbst bleibt leer im Ordner liegen und wird nicht gelöscht.
+
 ### Sicherungen
 
-Bei jedem Start legt das Programm eine Kopie der Datenbank im Unterordner `snapshots` an und behält die letzten zehn. Ist `rules.db` beim Start beschädigt, stellt es die jüngste Kopie wieder her und meldet das.
+Bei jedem Start legt das Programm eine Kopie der Datenbank im Unterordner `snapshots` an und behält die letzten zehn. Ist `rules.db` beim Start beschädigt, liest es sie nach einer Sekunde noch einmal. Bleibt sie beschädigt, legt es sie unter der Sperre als `rules.db.defekt-<Zeitpunkt>` beiseite, stellt die jüngste Kopie wieder her und meldet das.
 
 Lässt sich im Ordner keine Kopie anlegen, startet das Programm nicht, sondern nennt den Ordner und die fehlenden Rechte. Der ganze Ordner gehört in die Datensicherung.
 

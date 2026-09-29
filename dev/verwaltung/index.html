@@ -1308,6 +1308,28 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uebungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Übungen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
         </div>
@@ -1375,10 +1397,32 @@ Freigabe.</p>
 Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine
 Zuordnung bestätigt oder eine Zutat, ein Produkt oder eine Ertragsregel ändert,
 und jede Änderung betrifft nur diesen einen Eintrag.</p>
+<p>Das Programm verlässt sich dabei nicht auf die Sperren von SQLite, die nicht
+jede Freigabe zuverlässig durchsetzt. Es liest <code>rules.db</code> immer ganz und
+ersetzt sie ganz durch Umbenennen. Neu gelesen wird die Datei, sobald sich
+ihre Größe oder ihr Änderungszeitpunkt geändert hat. Ein Start ohne Änderung
+schreibt nichts.</p>
+<p>Wer schreibt, hält währenddessen die Datei <code>rules.lock</code> im selben Ordner
+exklusiv geöffnet. Diese Sperre setzt der Dateiserver selbst durch. Eine
+Änderung dauert Millisekunden; wer in dieser Zeit ebenfalls schreiben will,
+wartet. Ist die Sperre nach zehn Sekunden noch belegt, bricht die Änderung ab
+und das Programm meldet:</p>
+<blockquote>
+<p>Die Regel-Datenbank wird seit 10 Sekunden an einem anderen Arbeitsplatz
+geändert: <code>\\server\umsatzschaetzung\regeln</code></p>
+<p>Ist das Programm dort abgestürzt oder die Netzverbindung abgerissen, gibt
+der Server die Sperre nach einigen Minuten frei.</p>
+</blockquote>
+<p>Die Meldung betrifft keine Rechte, sondern eine offene Sperre. Hält sie an,
+lässt sich <code>rules.lock</code> auf dem Dateiserver unter <strong>Computerverwaltung →
+Freigegebene Ordner → Geöffnete Dateien</strong> schließen. Die Datei selbst bleibt
+leer im Ordner liegen und wird nicht gelöscht.</p>
 <h3 id="sicherungen">Sicherungen</h3>
 <p>Bei jedem Start legt das Programm eine Kopie der Datenbank im Unterordner
 <code>snapshots</code> an und behält die letzten zehn. Ist <code>rules.db</code> beim Start
-beschädigt, stellt es die jüngste Kopie wieder her und meldet das.</p>
+beschädigt, liest es sie nach einer Sekunde noch einmal. Bleibt sie beschädigt,
+legt es sie unter der Sperre als <code>rules.db.defekt-&lt;Zeitpunkt&gt;</code> beiseite,
+stellt die jüngste Kopie wieder her und meldet das.</p>
 <p>Lässt sich im Ordner keine Kopie anlegen, startet das Programm nicht, sondern
 nennt den Ordner und die fehlenden Rechte. Der ganze Ordner gehört in die
 Datensicherung.</p>

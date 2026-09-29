@@ -2,6 +2,8 @@
 
 Eine Prüfung ist im Programm ein Fall: ein Betrieb, ein Zeitraum und alles, was dazugehört.
 
+[Übung 1: Prüfung anlegen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/pruefung/)
+
 ## Die Liste der Prüfungen
 
 Nach dem Start zeigt das Programm die Liste der Prüfungen. Beim ersten Mal ist sie leer.

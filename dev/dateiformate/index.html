@@ -1248,6 +1248,28 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uebungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Übungen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
         </div>
@@ -1280,10 +1302,18 @@ auf die neue hebt. Ein veröffentlichter Schritt wird nie mehr geändert.</p>
   sie die neue Datei wieder.</li>
 <li>Eine neuere Datei, als das Programm kennt, wird nicht geöffnet und nicht
   verändert.</li>
-<li><code>rules.db</code> läuft im Rollback-Journal (<code>journal_mode = DELETE</code>), weil sie auf
-  einer Netzwerkfreigabe liegen kann, wo WAL nicht funktioniert. Vor jedem
-  Start legt das Programm eine Kopie in <code>snapshots</code> ab, siehe
-  <a href="../verwaltung/#sicherungen">Sicherungen</a>.</li>
+<li><code>rules.db</code> wird nie an Ort und Stelle beschrieben, denn die Sperren von
+  SQLite halten nicht auf jeder Netzwerkfreigabe. Das Programm liest die Datei
+  ganz in den Speicher, ändert sie dort und schreibt sie als <code>rules.db.neu</code>
+  daneben, die dann <code>rules.db</code> durch Umbenennen ersetzt. Ein Leser bekommt so
+  die alte oder die neue Datei, nie ein Gemisch. Wer schreibt, hält dabei
+  <code>rules.lock</code> exklusiv geöffnet, siehe
+  <a href="../verwaltung/#gleichzeitige-nutzung">Gleichzeitige Nutzung</a>. Neben
+  <code>rules.db</code> entsteht deshalb weder <code>-journal</code> noch <code>-wal</code>; ein
+  <code>rules.db-journal</code>, das eine ältere Programmversion bei einem Absturz
+  hinterlassen hat, spielt SQLite beim nächsten Start einmal zurück.</li>
+<li>Bei jedem Start legt das Programm eine Kopie von <code>rules.db</code> in <code>snapshots</code>
+  ab, siehe <a href="../verwaltung/#sicherungen">Sicherungen</a>.</li>
 </ul>
 <h2 id="werte">Werte</h2>
 <p>Beträge und Mengen sind ganze Zahlen mit festem Maßstab, nie Gleitkomma:</p>

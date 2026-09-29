@@ -1,6 +1,6 @@
 # Prüfung
 
-Der Reiter **Prüfung** sammelt alles, was nicht aus den Rechnungen kommt: wer geprüft wird, für welchen Zeitraum, was der Betrieb erklärt hat und was am Lager lag. Nichts davon muss vor den Rechnungen feststehen; jede Angabe lässt sich jederzeit nachtragen, die Kalkulation rechnet dann neu.
+Der Reiter **Prüfung** hält die Kerndaten der Prüfung: wer geprüft wird, für welchen Zeitraum, was der Betrieb erklärt hat und was am Lager lag. Nichts davon muss vor den Rechnungen feststehen; jede Angabe lässt sich jederzeit nachtragen, die Kalkulation rechnet dann neu.
 
 ## Eckdaten
 

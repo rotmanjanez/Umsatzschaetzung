@@ -43,3 +43,7 @@ Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Ei
 - [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md): Vorschau prüfen und den Bericht als PDF speichern
 - [Danach](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md): Was für die nächste eigene Prüfung gut zu wissen ist
 
+## Übungen
+
+- [Übungen](https://docs.umsatzschaetzung.amtstools.de/dev/uebungen/index.md): Interaktive Übungen, in denen das Programm im Browser läuft und jeder Schritt selbst geklickt wird
+

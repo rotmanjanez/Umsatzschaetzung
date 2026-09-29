@@ -2,6 +2,8 @@
 
 Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben dem kalkulierten, mit allem, was zur Rechnung dazugehört. Vorher gibt es auf **4. Kalkulation** noch zwei Seiten anzusehen: die **Ertragsregeln**, die festlegen, wie viel vom Einkauf als verkauft gilt, und das **Ergebnis**.
 
+[Übung 6: Ergebnis und Bericht Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/bericht/)
+
 ## Ertragsregeln
 
 Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Sie legt fest, wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird, wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das Personal isst mit.
@@ -20,8 +22,8 @@ Für das Beispiel bleibt es bei **Kein Abzug**.
 
 Die letzte Seite, **Ergebnis**, öffnen. Jede Korrektur auf den anderen Seiten ist hier schon eingerechnet, ebenso jede spätere Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder Ertragsregeln. Die Seite hat drei Teile:
 
-- **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418,00 € neben dem kalkulierten von knapp 300.000 €, mit der Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der Prüfung.
-- **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund 340 %. Ermittelt wird der Satz nur an Portionen mit Preis.
+- **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418,00 € neben dem kalkulierten von gut 300.000 €, mit der Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der Prüfung.
+- **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund 350 %. Ermittelt wird der Satz nur an Portionen mit Preis.
 - **Zusammenfassung**: die Brücke von den erfassten Einkäufen über den Wareneinsatz zum Einsatz der verkauften Portionen und zum geschätzten Umsatz. **davon Schwund und Abzüge** steht auf `0,00 €`, weil keine Ertragsregel gewählt ist.
 
 ## Der Bericht in der Vorschau
@@ -46,7 +48,7 @@ Der Pfeil links oben führt zurück zur Liste der Prüfungen. Dort steht das Gas
 
 **Geschafft, wenn …**
 
-- auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €` der kalkulierte Umsatz nach BP steht, knapp 300.000 €
+- auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €` der kalkulierte Umsatz nach BP steht, gut 300.000 €
 - das PDF gespeichert ist und sich öffnen lässt
 
 **Zum Nachlesen**

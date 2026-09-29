@@ -25,9 +25,9 @@ Eine Zutat hat keine eigene Einheit. Worin sie gemessen wird, legt das Rezept fe
 
 ## Produkte
 
-Ein Produkt ist etwas, das verkauft wird, mit seinem **Rezept**: welche Zutaten in einer Portion stecken und wie viel davon. Bei Getränken ist das meist eine Zeile, bei Speisen mehrere: Ein Cordon Bleu sind 200 g Schweinefleisch, 30 g Schinken, 30 g Käse und 200 g Pommes.
+Ein Produkt ist etwas, das verkauft wird, mit seinem **Rezept**: welche Zutaten in einer Portion stecken und wie viel davon. Bei Getränken ist das meist eine Zeile, bei Speisen mehrere: Ein Cordon Bleu sind 200 g Schweinefleisch, 30 g Schinken, 40 g Käse, 30 g Paniermehl und 25 g Ei.
 
-Eine Zeile des Rezepts kann statt einer Zutat ein anderes Produkt nennen, in Portionen: Schnitzel mit Pommes ist ein Schnitzel und eine Portion Pommes, Beilage. So steht die Beilage einmal im Katalog, und jedes Gericht, das sie mitbringt, rechnet mit derselben Menge. Die Kalkulation löst das auf und rechnet mit den Zutaten; ein Rezept darf sich dabei nicht selbst enthalten.
+Eine Zeile des Rezepts kann statt einer Zutat ein anderes Produkt nennen, in Portionen: Schnitzel mit Pommes ist ein Schnitzel und eine Portion Pommes, Beilage, also 180 g Pommes frites und 100 ml Pflanzenöl, das Altöl aus der Fritteuse eingerechnet. So steht die Beilage einmal im Katalog, und jedes Gericht, das sie mitbringt, rechnet mit derselben Menge. Die Kalkulation löst das auf und rechnet mit den Zutaten; ein Rezept darf sich dabei nicht selbst enthalten.
 
 Nur was in einem Rezept vorkommt, zählt in der Kalkulation. Eine Zutat ohne Rezept landet im Bericht unter **in keiner Rezeptur**. Ein Rezept ist ein Durchschnitt, keine Feststellung; es soll die übliche Portion treffen, nicht jede. Weicht ein einzelner Betrieb belegbar ab, wird das Rezept in dessen Prüfung [angepasst](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur), nicht hier.
 

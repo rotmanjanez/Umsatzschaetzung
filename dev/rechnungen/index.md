@@ -1,6 +1,6 @@
 # Rechnungen importieren
 
-Die Datengrundlage einer Prüfung sind die Eingangsrechnungen des Betriebs. Das Programm nimmt sie als E-Rechnung oder als Scan entgegen. E-Rechnungen sind maschinell fehlerfrei lesbar. Ein Scan ist allerdings zunächst nur ein Bild; das Programm liest den Scan ein und versucht die Daten aus dem Bild herauszulesen. In einigen Fällen kann das Program so Scans direkt in die Prüfung aufnehmen. Das klappt leider nicht immer. Wenn das Program den Inhalt der Rechnung nicht fehlerfrei erkennt, wird eine Rechnung nicht direkt übernommen und muss erst von dem Benutzer korrigiert werden.
+Die Datengrundlage einer Prüfung sind die Eingangsrechnungen des Betriebs. Das Programm nimmt sie als E-Rechnung oder als Scan entgegen. Eine E-Rechnung lässt sich maschinell fehlerfrei lesen. Ein Scan ist zunächst nur ein Bild; das Programm liest die Daten aus dem Bild heraus. Gehen die gelesenen Beträge vollständig auf, übernimmt es den Scan direkt in die Prüfung. Sonst wartet die Rechnung auf eine [Durchsicht](#durchsicht), in der Sie die gelesenen Felder korrigieren.
 
 ## Formate
 
@@ -12,9 +12,7 @@ Die Datengrundlage einer Prüfung sind die Eingangsrechnungen des Betriebs. Das 
 
 ## Hinzufügen
 
-Sie können neue Rechnungen über then "+" knopf hinzufügen. Der Import läuft im Hintergrund und zeigt den Fortschritt. Die abschaezung wie lange ein Import benoetigt kann sich Am Ende steht, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht warten.
-
-! ""Sie koennen alternativ auch klick and drag verwenden""
+Rechnungen fügen Sie über die Schaltfläche **Rechnungen hinzufügen** oben rechts über der Liste hinzu oder ziehen die Dateien in die Liste. Der Import läuft im Hintergrund und zeigt den Fortschritt und die verbleibende Zeit. Diese ist anfangs eine Schätzung und wird mit jeder gelesenen Datei genauer, denn ein Scan braucht ein Vielfaches einer E-Rechnung. Am Ende steht, wie viele Rechnungen übernommen wurden und wie viele zur Durchsicht warten.
 
 Eine Datei ist eine Rechnung. Mehrseitige Rechnungen als eine PDF mit allen Seiten in Reihenfolge; ein Bild ist immer genau eine Seite.
 
