@@ -7,6 +7,8 @@ every click themselves.
 
     uv run --with-requirements web/lessons/requirements.txt web/lessons/lesson.py web/lessons/zuordnung/lesson.yaml
 
+Without a lesson named, every published one is built.
+
 The lessons are one site, `web/lessons/out/lektionen/`: the page once, a folder per lesson
 with its `lesson.json` and the stores it starts from, and the clips of every lesson in
 `ton/`. The page takes its weights from the web app's `models/` and `ort/` one level up, as
@@ -20,26 +22,26 @@ the guide's page of a lesson listed there opens with a link to it. It needs a we
 will do, with the lesson at `localhost:8000/lektionen/zuordnung/`; a page opened as a
 file cannot load WebAssembly.
 
-`deploy-web` publishes the lessons named in its `LESSONS`: the `shots` job keeps their
+`deploy-web` publishes the lessons named in its `LESSONS`: the `zustand` job keeps their
 stores, and the `lessons` job fetches their clips from the store and deploys the site into
 the app. A sentence missing from the store fails that job, so a lesson is spoken with
 `voice --elevenlabs` before it is added there.
 
 ## Stages
 
-Each stage can be run alone, named after the lesson:
+Each stage can be run alone, named after the lessons:
 
 | stage | does | needs |
 |---|---|---|
 | `guide` | writes the lesson's page of the guide (`guide.page`), the documentation's `uebungen.md` and the guide's script `web/docs/shots/guide.jsonl` from the steps of every lesson in `GUIDE`, so the screenshots are taken on the same steps | nothing |
-| `zustand` | drives the real program headlessly to where the lesson starts and keeps the stores there, in `zustand/` | .NET, the example invoices (fetched on first use) |
+| `zustand` | plays the guide once on the real program, headlessly, and keeps the stores in each lesson's `zustand/` where it starts | .NET, the example invoices (fetched on first use) |
 | `voice` | speaks every sentence into `ton/`: as a draft with the Mac's `say`, or with `--elevenlabs` in the host's voice, one take per chapter cut between the beats | macOS; with `--elevenlabs`, `ELEVENLABS_API_KEY` in the environment or in `.env` |
-| `site` | publishes the program into `lektionen/`, with the lesson's `zustand/` and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | .NET with the `wasm-tools` workload |
+| `site` | publishes the program once into `lektionen/`, with each lesson's `zustand/` and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | .NET with the `wasm-tools` workload |
 
 The guide's pages and its script are not checked in: `deploy-web` writes them with `guide`
 before it takes the screenshots and builds the documentation. Locally, before either:
 
-    for l in web/lessons/*/lesson.yaml; do uv run --with-requirements web/lessons/requirements.txt web/lessons/lesson.py $l guide; done
+    uv run --with-requirements web/lessons/requirements.txt web/lessons/lesson.py web/lessons/*/lesson.yaml guide
 
 Text, pacing and what the learner is asked to do are read from `lesson.yaml` by `site`,
 so a changed hint needs only `site`, a changed sentence `voice site`. Only a change to

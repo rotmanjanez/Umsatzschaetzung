@@ -2,10 +2,11 @@
 started where the lesson starts, with a voice that explains and the learner doing every
 click themselves, and the page of the guide that walks the same steps in text and images.
 
-    uv run --with-requirements web/lessons/requirements.txt web/lessons/lesson.py web/lessons/zuordnung/lesson.yaml [stage ...] [--elevenlabs]
+    uv run --with-requirements web/lessons/requirements.txt web/lessons/lesson.py [lesson.yaml ...] [stage ...] [--elevenlabs]
 
-Stages: guide, zustand, voice, site (default: all four in that order). The voice drafts with
-the Mac's `say` unless --elevenlabs asks for the host's own.
+Stages: guide, zustand, voice, site (default: all four in that order), for the lessons named
+or else every published one. The voice drafts with the Mac's `say` unless --elevenlabs asks
+for the host's own.
 """
 
 import argparse
@@ -83,23 +84,30 @@ def instead(spec: dict) -> list[dict]:
 
 # --- zustand -------------------------------------------------------------------------
 
-# The headless program is driven to where the lesson starts and the stores are kept there.
-def zustand(ep: Lesson):
+# A lesson starts where the lessons before it in the guide stop, so both show the same case: the
+# headless program plays the guide once, and the stores are kept wherever one of the lessons
+# starts.
+def zustand(lessons: list[Lesson]):
     examples()
-    lines = setup(ep) + [{"do": "keep", "to": str(ep.out / "zustand")}]
-    script = ep.out / "zustand.jsonl"
+    starts = {}
+    for ep in lessons:
+        name = ep.path.parent.name
+        starts.setdefault(GUIDE.index(name) if name in GUIDE else 0, []).append(ep)
+    lines = []
+    for i in range(max(starts) + 1):
+        lines += replayed(GUIDE[i - 1]) if i else []
+        lines += [{"do": "keep", "to": str(ep.out / "zustand")} for ep in starts.get(i, [])]
+    out = ROOT / "web" / "lessons" / "out"
+    script = out / "zustand.jsonl"
     script.write_text("\n".join(json.dumps(l, ensure_ascii=False) for l in lines) + "\n")
-    w, h = ep.spec["window"]
+    w, h = lessons[0].spec["window"]
     subprocess.run(["dotnet", "run", "--project", ROOT / "tools" / "headless", "-c", "Release", "--",
-                    script, "--width", str(w), "--height", str(h), "--out", ep.out / "headless",
+                    script, "--width", str(w), "--height", str(h), "--out", out / "headless",
                     "--readings", CACHE / "readings"], cwd=CACHE, check=True)
 
 
-# The lesson starts where the lessons before it in the guide stop, so both show the same case.
-def setup(ep: Lesson) -> list[dict]:
-    name = ep.path.parent.name
-    before = GUIDE[:GUIDE.index(name)] if name in GUIDE else []
-    return [rooted(s) for n in before for beat in beats(n) for s in steps(beat) if s["do"] != "shot"]
+def replayed(name: str) -> list[dict]:
+    return [rooted(s) for beat in beats(name) for s in steps(beat) if s["do"] != "shot"]
 
 
 # The program runs in the cache, so a file the repository holds is named from its root.
@@ -390,7 +398,7 @@ def digest(value) -> str:
 SITE = ROOT / "web" / "lessons" / "out" / "lektionen"
 
 
-def site(ep: Lesson):
+def site(lessons: list[Lesson]):
     app = ROOT / "tools" / "lessons"
     subprocess.run(["dotnet", "publish", app, "-c", "Release"], check=True)
     published = app / "bin" / "Release" / "net10.0" / "publish" / "wwwroot"
@@ -408,21 +416,25 @@ def site(ep: Lesson):
         shutil.copy(f, SITE / "fonts")
     for f in ("dachs-zu.png", "dachs-halb.png", "dachs-offen.png", "favicon.svg"):
         shutil.copy(ROOT / "web" / "docs" / "pages" / "assets" / f, SITE)
+    page = (published / "index.html").read_text().replace("<head>", '<head>\n<base href="../">', 1)
+    (SITE / "ton").mkdir(exist_ok=True)
+    for ep in lessons:
+        placed(ep, page)
+    onward()
 
+
+def placed(ep: Lesson, page: str):
     target = SITE / ep.path.parent.name
     shutil.rmtree(target, ignore_errors=True)
     shutil.copytree(ep.out / "zustand", target / "zustand")
-    page = (published / "index.html").read_text()
-    (target / "index.html").write_text(page.replace("<head>", '<head>\n<base href="../">', 1))
+    (target / "index.html").write_text(page)
     spoken = ep.out / "stimme.json"
     clips = json.loads(spoken.read_text()) if spoken.exists() else {}
-    (SITE / "ton").mkdir(exist_ok=True)
     for clip in clips.values():
         shutil.copy(ep.out / clip, SITE / clip)
     beats = [{**b, "audio": clips.get(b["say"])} for b in ep.beats]
     lesson = {key: ep.spec[key] for key in ("course", "number", "title", "summary", "done")}
     (target / "lesson.json").write_text(json.dumps({**lesson, "beats": beats}, ensure_ascii=False, indent=1))
-    onward()
     print(target / "index.html")
 
 
@@ -447,15 +459,21 @@ def linked(source: str, target: str):
 if __name__ == "__main__":
     load_dotenv()
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("lesson", type=Path)
-    parser.add_argument("stages", nargs="*", choices=["guide", "zustand", "voice", "site"])
+    parser.add_argument("items", nargs="*", metavar="lesson.yaml|stage")
     parser.add_argument("--elevenlabs", action="store_true")
     args = parser.parse_args()
-    lesson = Lesson(args.lesson.resolve())
-    lesson.out.mkdir(parents=True, exist_ok=True)
-    stages = {"guide": guide, "zustand": zustand, "voice": partial(voice, eleven=args.elevenlabs), "site": site}
-    for stage in args.stages or stages:
-        if stage != "guide" and not lesson.beats:
-            continue
+    each = {"guide": guide, "voice": partial(voice, eleven=args.elevenlabs)}
+    course = {"zustand": zustand, "site": site}
+    stages = [i for i in args.items if i in each or i in course] or ["guide", "zustand", "voice", "site"]
+    paths = [Path(i).resolve() for i in args.items if i not in each and i not in course]
+    lessons = [Lesson(p) for p in paths or (ROOT / "web" / "lessons" / n / "lesson.yaml" for n, _ in published())]
+    for lesson in lessons:
+        lesson.out.mkdir(parents=True, exist_ok=True)
+    for stage in stages:
         print(f"== {stage}", flush=True)
-        stages[stage](lesson)
+        playable = [l for l in lessons if stage == "guide" or l.beats]
+        if stage in course:
+            course[stage](playable)
+        else:
+            for lesson in playable:
+                each[stage](lesson)

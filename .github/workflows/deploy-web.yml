@@ -132,9 +132,9 @@ jobs:
           name: shots
           path: shots-out
 
-  # Each lesson starts where the ones before it in the guide stop; the program is driven there
-  # headlessly and its stores kept. Apart from the screenshots, so a guide page that fails
-  # its image does not hold back the lessons.
+  # Each lesson starts where the ones before it in the guide stop; the program plays the guide
+  # once headlessly and its stores are kept where each lesson starts. Apart from the
+  # screenshots, so a guide page that fails its image does not hold back the lessons.
   zustand:
     runs-on: macos-latest
     steps:
@@ -167,7 +167,7 @@ jobs:
       - name: Keep the stores each lesson starts from
         env:
           UMSATZ_LESSON_CACHE: ${{ github.workspace }}
-        run: for name in $LESSONS; do python web/lessons/lesson.py "web/lessons/$name/lesson.yaml" zustand; done
+        run: python web/lessons/lesson.py zustand
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: zustand
@@ -220,7 +220,7 @@ jobs:
         env:
           UMSATZ_LESSON_STORE: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:umsatzschaetzung-stimme
           UMSATZ_LESSON_STORE_KEY: ~/.ssh/store_key
-        run: for name in $LESSONS; do python web/lessons/lesson.py "web/lessons/$name/lesson.yaml" voice site --elevenlabs; done
+        run: python web/lessons/lesson.py voice site --elevenlabs
       - uses: ./.github/actions/netcup-deploy
         if: github.event_name != 'pull_request'
         with:
