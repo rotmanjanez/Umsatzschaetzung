@@ -59,7 +59,7 @@ chapters:
         say: >-
           Servus und willkommen! In dieser Übung geht es darum, wie man eine Rechnung
           korrigiert, die das Programm nicht ganz richtig lesen konnte. Jeden Klick
-          machen Sie dabei selbst.
+          machst du dabei selbst.
       - card:
           kicker: Was heißt Durchsicht?
           title: Das Programm rechnet nach
@@ -420,5 +420,5 @@ chapters:
           title: Der Beleg hat recht
           text: Die Zeilen passen zum Beleg, nicht umgekehrt.
         say: >-
-          Und denken Sie daran, was auf dem Beleg steht, gilt. Die Zeilen müssen zum
+          Und denk daran, was auf dem Beleg steht, gilt. Die Zeilen müssen zum
           Beleg passen, nicht umgekehrt.

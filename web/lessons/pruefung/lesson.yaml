@@ -38,7 +38,7 @@ chapters:
           title: Prüfung anlegen
           text: Ein paar Minuten zum Mitklicken.
         say: >-
-          Willkommen! Schön, dass Sie da sind. Bevor wir loslegen, erkläre ich kurz,
+          Willkommen! Schön, dass du da bist. Bevor wir loslegen, erkläre ich kurz,
           wie diese Übungen funktionieren.
         hold: 0.5
       - card:
@@ -84,15 +84,15 @@ chapters:
           text: Es geht weiter, wenn es erledigt ist.
           pad: true
         say: >-
-          Und dann sind Sie dran. Das erkennt man an der Farbe: Es wird orange, oben
-          steht „Sie sind dran“, und darunter genau, was zu tun ist. Die Stelle im
+          Und dann bist du dran. Das erkennst du an der Farbe: Es wird orange, oben
+          steht „Du bist dran“, und darunter genau, was zu tun ist. Die Stelle im
           Programm bekommt dann einen orangen Ring.
         show: { page: card, act: true }
-        note: So schaut es aus, wenn Sie dran sind.
+        note: So schaut es aus, wenn du dran bist.
       - card: *dran
         say: >-
-          Lassen Sie sich ruhig Zeit, es geht erst weiter, wenn es erledigt ist. Und
-          wenn man einmal danebenklickt, macht das gar nichts, dann kommt halt ein
+          Lass dir ruhig Zeit, es geht erst weiter, wenn es erledigt ist. Und
+          wenn du einmal danebenklickst, macht das gar nichts, dann kommt halt ein
           kleiner Tipp.
         hold: 0.5
       - card:
@@ -136,7 +136,7 @@ chapters:
   - title: Die Eckdaten
     beats:
       - say: >-
-          Und jetzt sind Sie zum ersten Mal dran, Sie sehen es schon orange.
+          Und jetzt bist du zum ersten Mal dran, du siehst es schon orange.
           Einmal auf Neue Prüfung klicken, bitte.
         click: { text: "Neue Prüfung" }
         then: [{ do: focus }]
@@ -169,7 +169,7 @@ chapters:
           width: 552
           alt: Das leere Formular für eine neue Prüfung
       - say: >-
-          Jetzt geht ein Formular auf. Die Werte stehen gleich unter „Sie sind dran“.
+          Jetzt geht ein Formular auf. Die Werte stehen gleich unter „Du bist dran“.
         show: { name: NewLabel, up: StackPanel }
         hold: 1
       - say: >-
