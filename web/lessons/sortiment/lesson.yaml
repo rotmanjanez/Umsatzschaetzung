@@ -3,7 +3,7 @@ number: 4
 title: Sortiment anlegen
 summary: >-
   Was das Gasthaus verkauft und zu welchem Preis: ein Produkt aus dem Katalog von Hand
-  ins Sortiment, mit Preis, und wie der Rest per Tabelle dazukommt.
+  ins Sortiment, mit Preis, und wie es beim nächsten Mal übernommen wird.
 window: [1440, 810]
 
 done:
@@ -102,7 +102,7 @@ chapters:
         say: >-
           Letztes Mal haben wir gesehen, dass sich das Programm die Zuordnungen in
           der Regel-Datenbank merkt. Dort stehen auch die Produkte, jedes mit
-          seinem Rezept, also zum Beispiel, wie viel Bier in ein Glas kommt. Ein
+          seinem Rezept, also zum Beispiel, wie viel Fleisch in ein Schnitzel kommt. Ein
           paar Grundrezepte bringt das Programm mit, damit man gleich loslegen kann.
           Was fehlt, legt man selbst dazu an, und so wächst der Katalog mit jeder
           Prüfung. Für unser Gasthaus reicht der Grundstock: Wir suchen uns aus, was
@@ -124,28 +124,28 @@ chapters:
           aus dem Katalog ins Sortiment.
       - say: >-
           Rechts oben ist ein Suchfeld, da steht Produkt hinzufügen. Da klicken
-          wir hinein und tippen Bier null Komma fünf.
-        type: { at: { name: CatalogBox }, text: "Bier 0,5" }
+          wir hinein und tippen Schnitzel.
+        type: { at: { name: CatalogBox }, text: "Schnitzel" }
         act: []
         rounds: 2
-        accept: ["Bier 0,5 l", "Bier 0.5"]
-        task: "Produkt hinzufügen: Bier 0,5"
+        accept: ["Schnitzel", "Schnitzel mit"]
+        task: "Produkt hinzufügen: Schnitzel"
         hint: Das Feld steht ganz rechts oben, über der Liste.
       - say: >-
           Schon klappt darunter eine Liste auf, mit allem, was im Katalog dazu
-          passt. Wir nehmen das Bier null Komma fünf Liter vom Fass.
-        click: { text: "Bier 0,5 l vom Fass" }
+          passt. Wir nehmen das Schnitzel mit Pommes.
+        click: { text: "Schnitzel mit Pommes" }
         act:
-          - { do: choose, at: { name: CatalogBox }, text: "Bier 0,5", item: "Bier 0,5 l vom Fass" }
+          - { do: choose, at: { name: CatalogBox }, text: "Schnitzel", item: "Schnitzel mit Pommes" }
           - { do: focus }
-        allow: [{ text: "Bier 0,5 l vom Fass" }, { text: "Bier 0,5 l vom Fass", up: ListBoxItem }]
-        done: { at: { text: "Bier 0,5 l vom Fass", up: DataGridRow } }
+        allow: [{ text: "Schnitzel mit Pommes" }, { text: "Schnitzel mit Pommes", up: ListBoxItem }]
+        done: { at: { text: "Schnitzel mit Pommes", up: DataGridRow } }
         rounds: 8
-        task: Auf „Bier 0,5 l vom Fass“ klicken.
+        task: Auf „Schnitzel mit Pommes“ klicken.
         hint: Es steht in der Liste unter dem Suchfeld.
         text: |-
-          In das Suchfeld `Bier 0,5`{.copy} tippen. Darunter erscheint eine Liste
-          passender Produkte aus dem Katalog; **Bier 0,5 l vom Fass** anklicken. Das
+          In das Suchfeld `Schnitzel`{.copy} tippen. Darunter erscheint eine Liste
+          passender Produkte aus dem Katalog; **Schnitzel mit Pommes** anklicken. Das
           Produkt steht jetzt im Sortiment, noch mit dem Hinweis **Preis fehlt**:
         shot:
           name: sortiment-erstes
@@ -159,13 +159,13 @@ chapters:
           Preis weiß halt nur das Gasthaus.
         show: { text: "Preis fehlt" }
       - say: >-
-          Auf der Karte steht das Bier um vier Euro sechzig. Wir klicken also ins
-          Feld beim Bruttopreis und tippen vier Komma sechzig ein.
-        type: { at: { text: "Bier 0,5 l vom Fass", up: DataGridRow, column: Bruttopreis }, text: "4,60" }
-        task: "Bruttopreis: 4,60"
-        hint: Das Feld steht in der Zeile vom Bier, in der Spalte „Bruttopreis“.
+          Auf der Karte steht das Schnitzel mit Pommes um fünfzehn Euro neunzig. Wir
+          klicken also ins Feld beim Bruttopreis und tippen fünfzehn Komma neunzig ein.
+        type: { at: { text: "Schnitzel mit Pommes", up: DataGridRow, column: Bruttopreis }, text: "15,90" }
+        task: "Bruttopreis: 15,90"
+        hint: Das Feld steht in der Zeile vom Schnitzel, in der Spalte „Bruttopreis“.
         text: |-
-          In das Feld **Bruttopreis** `4,60`{.copy} eintragen, also den Preis auf der
+          In das Feld **Bruttopreis** `15,90`{.copy} eintragen, also den Preis auf der
           Karte, mit Umsatzsteuer. Die Umsatzsteuer bleibt bei 19 %.
       - say: >-
           Der Bruttopreis ist der Preis, wie er auf der Karte steht, also mit der
@@ -175,15 +175,16 @@ chapters:
         through: { text: "19 %" }
         hold: 0.5
 
-  - title: Der Rest per Tabelle
+  - title: Die übrigen Produkte
     beats:
       - say: >-
           Siebenundzwanzig Produkte hat das Gasthaus noch auf der Karte. Die tippen
-          wir nicht alle einzeln ein, dafür gibt es eine Tabelle, eine sogenannte
-          CSV-Datei, mit einem Produkt pro Zeile und dem Preis daneben.
+          wir nicht alle ab, das geht ja bei jedem genauso wie beim Schnitzel. In
+          den nächsten Übungen sind sie schon für uns eingetragen, mit ihren Preisen.
         text: |-
-          Die übrigen 27 Produkte des Gasthauses stehen mit ihren Preisen in einer
-          Tabelle: [sortiment-gasthaus.csv](sortiment-gasthaus.csv){ download="sortiment-gasthaus.csv" }
+          Die übrigen 27 Produkte werden hier nicht einzeln abgetippt. Für die
+          folgenden Schritte liegen sie mit den Preisen des Beispiels in einer
+          vorbereiteten Datei: [sortiment-gasthaus.csv](sortiment-gasthaus.csv){ download="sortiment-gasthaus.csv" }
           [](../hilfe/csv.md){ title="Was ist eine CSV-Datei?" aria-label="Was ist eine CSV-Datei?" }.
           Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der
           beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das
@@ -195,21 +196,21 @@ chapters:
           below: true
           alt: Die Kopfzeile des Sortiments
       - say: >-
-          Dafür sind die zwei Knöpferl links neben dem Suchfeld da.
+          Zwei Knöpferl links neben dem Suchfeld sollte man aber kennen. Die
+          braucht man, wenn derselbe Betrieb wieder geprüft wird.
         show: { tip: "CSV importieren" }
         through: { tip: "CSV exportieren" }
       - say: >-
-          Der linke liest so eine Tabelle ein: draufklicken, die Datei aussuchen,
-          und schon stehen alle Produkte mit ihren Preisen in der Liste.
-        show: { tip: "CSV importieren" }
-      - say: >-
-          Der rechte schreibt das Sortiment in so eine Tabelle hinaus.
+          Der rechte schreibt das Sortiment in eine Datei hinaus, alle Produkte mit
+          ihren Preisen. Das macht man am Ende der Prüfung.
         show: { tip: "CSV exportieren" }
       - say: >-
-          In der Übung lassen wir das Einlesen aus, weil die Datei ja nicht auf
-          diesem Rechner liegt. In der Anleitung kann man sie aber herunterladen.
+          Kommt der Betrieb später wieder dran, liest man diese Datei mit dem linken
+          in der neuen Prüfung ein, und schon steht das Sortiment von damals da.
+          Dann passt man nur noch die Preise an, die sich geändert haben, und löscht,
+          was nicht mehr auf der Karte steht.
         show: { tip: "CSV importieren" }
-        act:
+      - act:
           - { do: pick, files: ["web/docs/pages/guide/sortiment-gasthaus.csv"] }
           - { do: click, at: { tip: "CSV importieren" } }
         rounds: 2
@@ -223,12 +224,12 @@ chapters:
           trim: { top: 5, bottom: 465 }
           alt: Das Sortiment nach dem CSV-Import
       - say: >-
-          Gefunden werden die Produkte über ihren Namen im Katalog. Kennt das
-          Programm einen Namen nicht, lässt es die Zeile aus und sagt einem danach,
-          welche das waren. Die kann man dann in der Tabelle umbenennen.
+          Gefunden werden die Produkte dabei über ihren Namen im Katalog. Kennt das
+          Programm einen Namen nicht mehr, lässt es die Zeile aus und sagt einem
+          danach, welche das waren.
         show: { tip: "CSV importieren" }
       - say: >-
-          Oder man fügt sie von Hand hinzu, so wie vorhin das Bier.
+          Die fügt man dann von Hand hinzu, so wie vorhin das Schnitzel.
         show: { name: CatalogBox }
 
   - title: Zusammenfassung
@@ -240,17 +241,9 @@ chapters:
             - Reiter „3. Sortiment“
             - Produkt suchen und anklicken
             - Bruttopreis eintragen
-            - Den Rest per CSV einlesen
+            - Bei der nächsten Prüfung exportieren und einlesen
         say: >-
           So einfach geht das: auf den Reiter Sortiment gehen, ein Produkt suchen und
-          anklicken, den Preis von der Karte eintragen, und den Rest als Tabelle
-          einlesen.
-      - card:
-          kicker: Gut zu wissen
-          title: Nächstes Jahr geht es schneller
-          text: Alte Prüfung exportieren, in der neuen einlesen.
-        say: >-
-          Praktisch ist das auch im Jahr darauf. Kommt derselbe Betrieb wieder dran,
-          fängt man nicht von vorne an. In der alten Prüfung schreibt man das Sortiment
-          hinaus, liest es in der neuen wieder ein, und passt nur noch die Preise an,
-          die sich geändert haben.
+          anklicken, und den Preis von der Karte eintragen. Und wird der Betrieb
+          wieder geprüft, nimmt man das Sortiment einfach mit, hinaus aus der alten
+          Prüfung und hinein in die neue.

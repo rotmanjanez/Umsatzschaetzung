@@ -1,17 +1,17 @@
 course: Umsatzschätzung Schritt für Schritt
 number: 5
-title: Übrige Einkäufe aufräumen
+title: Die Kalkulation
 summary: >-
   Bevor das Ergebnis zählt, wird aufgeräumt: Einkäufe, die in kein Rezept eingehen,
-  und solche, die gar keinen Umsatz bringen. Das Schnitzelfleisch und vier
-  Kleinigkeiten aus dem Gasthaus Zur Linde.
+  und solche, die gar keinen Umsatz bringen. Danach, am Schnitzel, wie aus Einkauf,
+  Rezept und Preis der Umsatz wird.
 window: [1440, 810]
 
 done:
   title: Geschafft!
   text: >-
-    Das Schnitzelfleisch zählt jetzt zum Schnitzel, und was keinen Umsatz bringt,
-    ist aussortiert.
+    Das Schnitzelfleisch zählt jetzt zum Schnitzel, was keinen Umsatz bringt, ist
+    aussortiert, und du weißt, wie aus dem Einkauf der Umsatz wird.
 
 guide:
   page: web/docs/pages/guide/kalkulation.md
@@ -36,11 +36,12 @@ chapters:
     beats:
       - card:
           kicker: Umsatzschätzung · Übung 5
-          title: Übrige Einkäufe aufräumen
+          title: Die Kalkulation
           text: Ein paar Minuten zum Mitklicken.
         say: >-
-          Servus! In dieser Übung räumen wir auf, bevor gerechnet wird. Es geht um die
-          Einkäufe, die in kein Rezept hineinpassen. Klicken dürfen Sie wieder selbst.
+          Servus! In dieser Übung räumen wir zuerst auf, die Einkäufe, die in kein
+          Rezept hineinpassen. Und dann schauen wir am Schnitzel, wie das Programm den
+          Umsatz rechnet. Klicken darfst du wieder selbst.
       - card:
           kicker: Worum geht es?
           title: Nicht jeder Einkauf wird ein Gericht
@@ -176,9 +177,10 @@ chapters:
         task: Kreuz bei „Servietten 1/4 Falz“ klicken.
         hint: Das Kreuz steht ganz rechts in der Zeile, neben dem Betrag.
       - say: >-
-          Die Servietten sind nach unten gewandert, und ein paar andere Zeilen gleich
-          mit, die Handtuchrollen und die Müllbeutel zum Beispiel. Das Kreuz gilt
-          nämlich für die ganze Zutat, nicht nur für die eine Zeile.
+          Die Servietten sind nach unten gewandert, und zwei andere Zeilen gleich
+          mit: die Müllbeutel und das Filterpapier für den Kaffee. Die hat das
+          Programm alle derselben Zutat zugeordnet, nämlich Verpackung und Einweg.
+          Und das Kreuz gilt für die ganze Zutat, nicht nur für die eine Zeile.
         show: { name: OmittedGrid }
       - say: >-
           Als Nächstes die Kohlensäure für die Schankanlage, die CO2-Flasche.
@@ -208,10 +210,11 @@ chapters:
         hint: Das Kreuz steht ganz rechts in der Zeile.
         text: |-
           Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position.
-          Alle Positionen derselben Zutat wandern mit: mit den Servietten auch
-          Handtuchrollen, Müllbeutel und Handschuhe, mit dem Handspülmittel der
-          Spülmaschinen-Reiniger und der Klarspüler, mit der Versandkostenpauschale
-          die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der
+          Alle Positionen derselben Zutat wandern mit: mit den Servietten
+          (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem
+          Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger,
+          Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale
+          (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der
           Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort
           nimmt die Festlegung wieder zurück.
         shot:
@@ -240,6 +243,91 @@ chapters:
                 **Nicht in der Umsatzschätzung** stehen
               - neben **Nicht Teil der Ermittlung des Aufschlagsatzes** `4.350,66 €
                 (6,52 % der Einkäufe)` steht
+
+  - title: Vom Einkauf zum Umsatz
+    beats:
+      - say: >-
+          Jetzt, wo das Fleisch beim Schnitzel ist, schauen wir uns an, wie das
+          Programm daraus den Umsatz rechnet. Zuerst das, was hineingeht: das
+          Sortiment. Klick oben auf den Reiter Sortiment.
+        click: { text: "3. Sortiment", type: TabItem }
+        act: [{ do: tab, header: "3. Sortiment" }]
+        rounds: 8
+        task: Auf „3. Sortiment“ klicken.
+        hint: Die Reiter stehen oben, links neben „4. Kalkulation“.
+        text: |-
+          Wie das Programm rechnet, zeigt ein Produkt am besten. Auf **3. Sortiment**
+          steht **Schnitzel mit Pommes** mit dem Preis von der Karte, 15,90 € brutto.
+      - say: >-
+          Da ist unser Schnitzel mit Pommes, um fünfzehn Euro neunzig, so wie es auf
+          der Karte steht. Das ist der Preis. Das Rezept dazu kommt aus dem Katalog,
+          und das Fleisch von den Rechnungen.
+        show: { text: "Schnitzel mit Pommes", up: DataGridRow }
+        hold: 0.5
+      - say: >-
+          Und jetzt schauen wir, was die Kalkulation daraus macht. Zurück auf den
+          Reiter Kalkulation.
+        click: { text: "4. Kalkulation", type: TabItem }
+        act: [{ do: tab, header: "4. Kalkulation" }]
+        rounds: 8
+        task: Auf „4. Kalkulation“ klicken.
+        hint: Die Reiter stehen oben, rechts neben „3. Sortiment“.
+      - say: >-
+          In der zweiten Reihe ganz links ist die Seite Portionen.
+        click: { text: "Portionen", type: TabItem }
+        act: [{ do: tab, header: "Portionen" }]
+        rounds: 4
+        task: Auf „Portionen“ klicken.
+        hint: Sie steht in der zweiten Reihe ganz links.
+      - say: >-
+          Hier steht jedes Produkt aus dem Sortiment, mit seinen Portionen und dem
+          Umsatz. Klick auf das Schnitzel mit Pommes.
+        click: { text: "Schnitzel mit Pommes" }
+        via: select
+        allow: [{ text: "Schnitzel mit Pommes", up: DataGridRow }]
+        rounds: 4
+        task: Auf „Schnitzel mit Pommes“ klicken.
+        hint: Es steht weiter unten in der Liste, nach dem Alphabet.
+        text: |-
+          Auf **4. Kalkulation** die Seite **Portionen** öffnen und **Schnitzel mit
+          Pommes** anklicken. Rechts steht, wie es gerechnet ist:
+
+          - **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und
+            Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es
+            ist die Zutat, von der am wenigsten da ist.
+          - **Portionen**: Das Schweinefleisch teilt sich das Schnitzel mit dem
+            Braten des Mittagstischs. Auf das Schnitzel entfallen rund 190 kg, bei
+            180 g je Stück 1.061 Portionen.
+          - **Umsatz (netto)**: 1.061 Portionen zu 15,90 € brutto, ohne 19 %
+            Umsatzsteuer, ergeben 14.174,96 €.
+
+          So rechnet die Kalkulation jedes Produkt des Sortiments.
+        shot:
+          name: kalkulation-portionen
+          at: { name: ProductGrid, up: Grid }
+          alt: Die Seite „Portionen“ mit dem Schnitzel und seinem Rezept
+      - say: >-
+          Rechts steht das Rezept: hundertachtzig Gramm Schweinefleisch pro
+          Schnitzel, dazu Pommes und Öl. Beim Schweinefleisch steht, begrenzt die
+          Portionen. Das Fleisch bestimmt also, wie viele Schnitzel es werden.
+        show: { text: "Schweinefleisch", up: StackPanel }
+      - say: >-
+          Das Schweinefleisch teilt sich das Schnitzel mit dem Braten vom
+          Mittagstisch. Fürs Schnitzel bleiben rund hundertneunzig Kilo, und bei
+          hundertachtzig Gramm pro Stück sind das tausendeinundsechzig Schnitzel.
+        show: { text: "Einsatz je Portion", up: ItemsControl }
+      - say: >-
+          Mal fünfzehn Euro neunzig sind das knapp sechzehntausendneunhundert Euro.
+          Ohne die Umsatzsteuer bleiben gut vierzehntausendeinhundert Euro Umsatz,
+          netto, allein mit dem Schnitzel.
+        show: { text: "Einsatz je Portion", up: ItemsControl }
+        hold: 0.5
+      - say: >-
+          Und genau so rechnet das Programm jedes Produkt im Sortiment. Alles
+          zusammengezählt ist der Umsatz, den der Einkauf hergibt. Den schauen wir
+          uns in der letzten Übung an.
+        show: { name: ProductGrid }
+        hold: 0.5
 
   - title: Ertragsregeln
     beats:
@@ -304,17 +392,18 @@ chapters:
     beats:
       - card:
           kicker: Zusammenfassung
-          title: So wird aufgeräumt
+          title: Aufräumen, dann rechnen
           list:
-            - „Übrige Einkäufe“ öffnen
-            - Große Beträge anschauen
-            - Falsches neu zuordnen
-            - Ohne Umsatz: Kreuz
+            - Große Beträge unter „Übrige Einkäufe“ anschauen
+            - Falsches neu zuordnen, ohne Umsatz: Kreuz
+            - Einkauf durch Rezept gibt Portionen
+            - Portionen mal Preis gibt Umsatz
         say: >-
-          Schon ist aufgeräumt. Wenn Sie sich eins merken, dann das: unter Übrige
-          Einkäufe die großen Beträge oben anschauen, was falsch zugeordnet ist, gleich
-          rechts richtig zuordnen, und was keinen Umsatz bringt, mit dem Kreuz nach
-          unten schicken.
+          Das war's. Zuerst unter Übrige Einkäufe die großen Beträge anschauen, was
+          falsch zugeordnet ist, gleich rechts richtig zuordnen, und was keinen Umsatz
+          bringt, mit dem Kreuz nach unten schicken. Und gerechnet wird dann ganz
+          einfach: der Einkauf durchs Rezept gibt die Portionen, und die Portionen mal
+          den Preis den Umsatz.
       - card:
           kicker: Gut zu wissen
           title: Passt ein Rezept nicht?
