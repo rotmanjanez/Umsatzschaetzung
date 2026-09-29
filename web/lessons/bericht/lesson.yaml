@@ -201,25 +201,23 @@ chapters:
     beats:
       - say: >-
           Aus all dem macht das Programm den Bericht, der in die Akte kommt. Den
-          findet man oben auf dem letzten Reiter, Bericht. In dieser Übung bleibt er
-          zu, auf dem eigenen Rechner einfach draufklicken.
-        show: { text: "5. Bericht", type: TabItem }
+          findet man oben auf dem letzten Reiter, Bericht, klicken wir ihn an.
+        click: { text: "5. Bericht", type: TabItem }
+        act: [{ do: tab, header: "5. Bericht" }]
+        rounds: 8
+        task: Auf „5. Bericht“ klicken.
+        hint: Der letzte Reiter oben, rechts neben „4. Kalkulation“.
         text: |-
           Auf **5. Bericht** wechseln. Der Reiter zeigt den fertigen Bericht so, wie
           er als PDF gespeichert wird.
-      - card:
-          kicker: Der Bericht
-          title: Was drinsteht
-          list:
-            - Umsätze vor und nach BP
-            - Rohgewinnaufschlag
-            - Anhang zum Nachrechnen
-        say: >-
-          Vorne steht dasselbe wie auf der Seite Ergebnis: der erklärte Umsatz neben
-          dem kalkulierten, und der Rohgewinnaufschlagsatz, dazu jedes Produkt mit
+      - say: >-
+          Das ist der Bericht, genau so, wie er gespeichert wird. Vorne steht
+          dasselbe wie auf der Seite Ergebnis: der erklärte Umsatz neben dem
+          kalkulierten, und der Rohgewinnaufschlagsatz, dazu jedes Produkt mit
           seinem Einsatz und seinem Preis. Dahinter kommt ein Anhang mit jeder
           Rechnungszeile, jedem Rezept und jeder Ertragsregel. So lässt sich jede
           Zahl bis zur einzelnen Rechnung zurückverfolgen.
+        show: { name: Preview }
         text: |-
           1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von
              196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
@@ -230,9 +228,9 @@ chapters:
              damit jede Zahl des Berichts nachvollziehbar bleibt.
       - say: >-
           Stimmt noch etwas nicht, fehlt zum Beispiel bei einem Produkt der Preis,
-          dann steht auf diesem Reiter ganz vorne in der Vorschau ein Hinweis. Ins PDF kommen diese
-          Hinweise aber nicht mit.
-        show: { text: "5. Bericht", type: TabItem }
+          dann steht hier ganz vorne in der Vorschau ein Hinweis. Ins PDF kommen
+          diese Hinweise aber nicht mit.
+        show: { name: Preview }
         text: |-
           Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg
           **Hinweise**. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF
@@ -241,13 +239,11 @@ chapters:
 
   - title: Als PDF speichern
     beats:
-      - card:
-          kicker: Als PDF speichern
-          title: Das Pfeilsymbol rechts oben
-          text: Auf „5. Bericht“, rechts oben.
-        say: >-
-          Gespeichert wird der Bericht mit dem Pfeilsymbol rechts oben auf dem
-          Reiter Bericht. Dann fragt das Programm, wo das PDF hin soll, und fertig.
+      - say: >-
+          Gespeichert wird der Bericht mit dem Pfeilsymbol hier rechts oben. Dann
+          fragt das Programm, wo das PDF hin soll, und fertig.
+        show: { tip: "Als PDF speichern" }
+        hold: 0.5
         text: |-
           Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht als
           PDF ab, wo man will.
