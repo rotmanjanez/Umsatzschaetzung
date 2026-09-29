@@ -9,8 +9,8 @@ beschrieben.
 | Ort | Inhalt | Zugriff |
 |---|---|---|
 | `Dokumente\Umsatzschätzung` | eine Datei je Prüfung: Rechnungen, Scans, Name, Steuernummer, PAB-Nummer, Kalkulation | die Person |
-| Ordner der Regel-Datenbank | `rules.db`, `embeddings.db`, `snapshots\` | alle, die ihn teilen |
-| `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `pages\` mit dem gerade angezeigten Bericht | die Person |
+| Ordner der Regel-Datenbank | `rules.db`, `snapshots\` | alle, die ihn teilen |
+| `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `embeddings.db`, `pages\` mit dem gerade angezeigten Bericht | die Person |
 
 Eine Prüfung unterliegt dem Steuergeheimnis. Sie verlässt den Rechner nur,
 wenn jemand sie [weitergibt](import-export.md#prufung-weitergeben), dann als
@@ -41,8 +41,9 @@ und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen
 sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis
 unterliegen.
 
-`embeddings.db` enthält Rechenwerte zu denselben Texten und lässt sich
-jederzeit löschen. `snapshots\` hält die letzten zehn Stände von `rules.db`.
+`embeddings.db` enthält Rechenwerte zu denselben Texten, liegt bei jeder Person
+selbst und lässt sich jederzeit löschen. Die Werte zu den mitgelieferten Regeln
+bringt das Programm mit. `snapshots\` hält die letzten zehn Stände von `rules.db`.
 
 ## Verschlüsselung
 

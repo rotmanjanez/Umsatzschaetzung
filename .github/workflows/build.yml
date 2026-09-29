@@ -33,6 +33,7 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
+      - uses: ./.github/actions/warm-embeddings
       - run: dotnet build
       - run: dotnet test --no-build
 
@@ -72,6 +73,7 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
+      - uses: ./.github/actions/warm-embeddings
 
       # v7 gates builds behind the Open Source Maintenance Fee EULA; v6 does not
       # and reads the same v4 schema the .wxs uses.
@@ -111,6 +113,7 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
+      - uses: ./.github/actions/warm-embeddings
 
       # Ein eigener Schlüsselbund, damit der Lauf nichts am Runner-Standardbund
       # ändert; ohne Zertifikat wird ad-hoc signiert und nicht notarisiert.

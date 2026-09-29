@@ -23,15 +23,10 @@ sealed class Prewarmed(IWeights weights, string dir, Func<IRanking> open) : IRan
     {
         var path = Path.Combine(dir, "embeddings.db");
         if (!System.IO.File.Exists(path))
-            try
-            {
-                await System.IO.File.WriteAllBytesAsync(path + ".part", await weights.Read(File));
-                System.IO.File.Move(path + ".part", path);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Vorgewärmte Einbettungen nicht geladen: " + e.Message);
-            }
+        {
+            await System.IO.File.WriteAllBytesAsync(path + ".part", await weights.Read(File));
+            System.IO.File.Move(path + ".part", path);
+        }
         return open();
     }
 }

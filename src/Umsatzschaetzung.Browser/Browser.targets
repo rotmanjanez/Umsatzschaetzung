@@ -36,16 +36,7 @@
     <Error Condition="'$(PdfiumHash)' != '$(PdfiumSha256)'" Text="SHA256 mismatch, cached copy discarded — build again to re-fetch: pdfium.a" />
   </Target>
 
-  <!-- The shipped rules' embedding cache, warmed by the native encoder: a browser would take
-       minutes over it. Named by its hash, like everything the page keeps. -->
-  <PropertyGroup>
-    <WarmDir>$(MSBuildThisFileDirectory)obj/warm/</WarmDir>
-  </PropertyGroup>
-  <Target Name="WarmEmbeddings"
-          Inputs="$(MSBuildThisFileDirectory)../../tools/embeddings/Program.cs;$(MSBuildThisFileDirectory)../Umsatzschaetzung.Core/Rulestore/seed.json;$(MSBuildThisFileDirectory)../Umsatzschaetzung.Core/Suggest/*.cs;$(MSBuildThisFileDirectory)../Umsatzschaetzung.Inference/**/*.cs;$(MSBuildThisFileDirectory)../../Models.targets"
-          Outputs="$(WarmDir)embeddings.db">
-    <Exec Command="dotnet run --project &quot;$(MSBuildThisFileDirectory)../../tools/embeddings&quot; -c Release -- &quot;$(WarmDir)&quot;" />
-  </Target>
+  <Import Project="../../Embeddings.targets" />
 
   <!-- Every file under a path named for its release or version, so the page keeps what it
        fetched for good; weights.json names them and their hashes. -->

@@ -176,6 +176,6 @@ public partial class App : Application
             CrashLog.Clear();
         }
         return Services.Local(rules, cases, Release.Version,
-            documents: new Documents(ocr, new PdfiumPages()), tagger: tagger, ranking: new EncoderRanking(encoder, new EmbeddingStore(rules.Dir)), printer: printer);
+            documents: new Documents(ocr, new PdfiumPages()), tagger: tagger, ranking: new EncoderRanking(encoder, new EmbeddingStore(AppData.Dir, AppFiles.Beside(EmbeddingStore.Shipped))), printer: printer);
     }
 }

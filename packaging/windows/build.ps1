@@ -72,7 +72,7 @@ foreach ($required in "umsatzschätzung.exe", "e_sqlite3.dll", "pdfium.dll", "on
     if (-not (Test-Path (Join-Path $dist $required))) { throw "$required missing from $dist" }
 }
 foreach ($required in "belegtagger\belegtagger.int8.onnx", "belegtagger\vocab.json", "belegtagger\merges.txt",
-                      "belegtagger\byte_to_unicode.json", "belegtagger\spec.json", "v6\PP-OCRv6_det_small.onnx") {
+                      "belegtagger\byte_to_unicode.json", "belegtagger\spec.json", "v6\PP-OCRv6_det_small.onnx", "embeddings.db") {
     if (-not (Test-Path (Join-Path $models $required))) { throw "models\$required missing from $dist; the build fetches it, see Models.targets" }
 }
 Sign (Get-ChildItem $dist -Include *.exe, *.dll -Recurse).FullName

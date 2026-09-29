@@ -37,7 +37,7 @@ public class Host : IDisposable
         Store = new RuleStore(Sub("store"), TestData.Seed());
         Cases = new CaseStore(Sub("cases"));
         Service = Services.Local(Store, Cases, "test",
-            documents: new Documents(ocr, pdf), tagger: Tagger, ranking: new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir)), printer: printer, readings: readings);
+            documents: new Documents(ocr, pdf), tagger: Tagger, ranking: new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir, AppFiles.Beside(EmbeddingStore.Shipped))), printer: printer, readings: readings);
     }
 
     public RuleStore Store { get; }

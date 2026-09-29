@@ -1,0 +1,31 @@
+<Project>
+  <!-- The shipped rules' embedding cache, warmed once by the native encoder: the program
+       ships it read-only and only embeds what is new since, where the first case would
+       otherwise keep every core busy for minutes. Named by the hash of what goes into it,
+       so every checkout and every job with the same seed and model takes the same file
+       instead of warming its own. -->
+  <PropertyGroup>
+    <WarmCacheDir Condition="'$(WarmCacheDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.LocalApplicationData))/umsatzschaetzung/warm</WarmCacheDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <WarmInput Include="$(MSBuildThisFileDirectory)tools/embeddings/Program.cs;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Core/Rulestore/seed.json;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Core/Suggest/*.cs;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Inference/**/*.cs;$(MSBuildThisFileDirectory)Models.targets" />
+  </ItemGroup>
+
+  <Target Name="WarmEmbeddings">
+    <GetFileHash Files="@(WarmInput)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="HashedWarmInput" />
+    </GetFileHash>
+    <PropertyGroup>
+      <WarmStamp>@(HashedWarmInput->'%(RecursiveDir)%(Filename)%(Extension)=%(FileHash)', ';')</WarmStamp>
+      <WarmDir>$(WarmCacheDir)/$([MSBuild]::StableStringHash($(WarmStamp), 'Sha256').Substring(0, 16).ToLowerInvariant())/</WarmDir>
+    </PropertyGroup>
+    <Exec Condition="!Exists('$(WarmDir)embeddings.db')"
+          Command="dotnet run --project &quot;$(MSBuildThisFileDirectory)tools/embeddings&quot; -c Release -- &quot;$(WarmDir)&quot;" />
+  </Target>
+
+  <Target Name="ShipEmbeddings" BeforeTargets="AssignTargetPaths" DependsOnTargets="WarmEmbeddings" Condition="'$(ShipEmbeddings)' == 'true'">
+    <ItemGroup>
+      <ContentWithTargetPath Include="$(WarmDir)embeddings.db" TargetPath="models/embeddings.db" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+</Project>

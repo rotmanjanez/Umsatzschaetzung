@@ -1,0 +1,13 @@
+name: warm-embeddings
+description: Keep the shipped rules' embedding cache, which Embeddings.targets warms once per seed and model, from one job to the next.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ~/.local/share/umsatzschaetzung/warm
+          ~/AppData/Local/umsatzschaetzung/warm
+          ~/Library/Application Support/umsatzschaetzung/warm
+        key: warm-${{ runner.os }}-${{ hashFiles('tools/embeddings/Program.cs', 'src/Umsatzschaetzung.Core/Rulestore/seed.json', 'src/Umsatzschaetzung.Core/Suggest/*.cs', 'src/Umsatzschaetzung.Inference/**/*.cs', 'Models.targets') }}

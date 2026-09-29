@@ -13,6 +13,7 @@
     <!-- Views take a Session and are only ever constructed in code, never fetched
          from the runtime XAML loader by URI, which is all AVLN3001 warns about. -->
     <NoWarn>AVLN3001</NoWarn>
+    <ShipEmbeddings>true</ShipEmbeddings>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
@@ -43,4 +44,6 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
     <PackageReference Include="Avalonia.Controls.WebView" Version="12.1.0" />
   </ItemGroup>
+
+  <Import Project="../../Embeddings.targets" />
 </Project>

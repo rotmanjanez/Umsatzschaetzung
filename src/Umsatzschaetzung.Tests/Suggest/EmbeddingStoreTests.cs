@@ -83,6 +83,38 @@ public sealed class EmbeddingStoreTests : IDisposable
         Assert.Equal(["gut"], store.Read(Model, ["kurz", "gut", "leer"]).Keys);
     }
 
+    string Shipped(params (string, float[])[] rows)
+    {
+        var at = dir.Sub("programm");
+        new EmbeddingStore(at).Write(Model, rows);
+        return Path.Combine(at, "embeddings.db");
+    }
+
+    [Fact]
+    public void TheShippedVectorsAreReadAndNeverWritten()
+    {
+        var shipped = Shipped(("Pils", V(1)));
+        var before = File.ReadAllBytes(shipped);
+        var store = new EmbeddingStore(dir.Sub("person"), shipped);
+        store.Write(Model, [("Weizen", V(2))]);
+        var got = store.Read(Model, ["Pils", "Weizen"]);
+        Assert.Equal(V(1), got["Pils"]);
+        Assert.Equal(V(2), got["Weizen"]);
+        Assert.Equal(before, File.ReadAllBytes(shipped));
+    }
+
+    [Fact]
+    public void TheUsersVectorComesBeforeTheShippedOne()
+    {
+        var store = new EmbeddingStore(dir.Sub("person"), Shipped(("Pils", V(1))));
+        store.Write(Model, [("Pils", V(3))]);
+        Assert.Equal(V(3), store.Read(Model, ["Pils"])["Pils"]);
+    }
+
+    [Fact]
+    public void AMissingShippedCacheFailsAtOnce() =>
+        Assert.Throws<SqliteException>(() => new EmbeddingStore(dir.Sub("person"), Path.Combine(dir.Path, "fehlt.db")));
+
     [Fact]
     public void NothingAskedNothingWritten()
     {

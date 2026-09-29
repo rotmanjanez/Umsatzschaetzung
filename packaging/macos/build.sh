@@ -62,7 +62,7 @@ do
 done
 for required in models/belegtagger/belegtagger.int8.onnx models/belegtagger/vocab.json \
                 models/belegtagger/merges.txt models/belegtagger/byte_to_unicode.json \
-                models/belegtagger/spec.json models/v6/PP-OCRv6_det_small.onnx
+                models/belegtagger/spec.json models/v6/PP-OCRv6_det_small.onnx models/embeddings.db
 do
     [ -f "$contents/Resources/$required" ] || { echo "$required fehlt; der Build holt es, siehe Models.targets" >&2; exit 1; }
 done
