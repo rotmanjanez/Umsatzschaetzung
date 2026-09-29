@@ -21,6 +21,9 @@ tagged draft, is kept under the hash of its bytes and the readers. Later runs re
 instead of reading the page again, so the images no longer depend on how fast or how
 exactly the machine reads. The `shots` job keeps that folder in the Actions cache.
 
+`web/docs/shots/guide.jsonl` is written from the lessons by the `guide` stage of
+`web/lessons/lesson.py` and not checked in.
+
 Files named in a script live where they live: absolute, or relative to the working
 directory.
 
