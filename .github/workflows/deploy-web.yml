@@ -14,7 +14,7 @@ concurrency:
 # The lessons that are published; each is in `web/lessons/<name>/lesson.yaml`, and all its
 # sentences are in the clip store.
 env:
-  LESSONS: pruefung korrektur zuordnung
+  LESSONS: ueberblick pruefung korrektur zuordnung sortiment einkaeufe bericht
 
 jobs:
   landing:
