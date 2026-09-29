@@ -4,8 +4,8 @@
 { "do": "type", "at": { "name": "NewLabel" }, "text": "Gasthaus Zur Linde, Bp 2025" }
 { "do": "type", "at": { "name": "NewFrom" }, "text": "01.01.2025" }
 { "do": "type", "at": { "name": "NewTo" }, "text": "31.12.2025" }
-{ "do": "type", "at": { "name": "NewName" }, "text": "Gasthaus Zur Linde, Inh. Renate Vogel e.K." }
-{ "do": "type", "at": { "name": "NewTaxNumber" }, "text": "203/128/40507" }
+{ "do": "type", "at": { "name": "NewName" }, "text": "Renate Vogel" }
+{ "do": "type", "at": { "name": "NewTaxNumber" }, "text": "123/456/789" }
 { "do": "type", "at": { "name": "NewPab" }, "text": "PAB 2025/0417" }
 { "do": "choose", "at": { "name": "NewGewerbe" }, "text": "56101", "item": "56101.0" }
 { "do": "click", "at": { "text": "Anlegen" } }
