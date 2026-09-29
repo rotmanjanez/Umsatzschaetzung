@@ -43,7 +43,9 @@ One step per line, JSONL. Blank lines and `//` separate and explain:
     { "do": "shot", "name": "neue-pruefung", "at": { "name": "NewLabel", "up": "StackPanel" } }
 
 Every step has a `do`, may set `"window": "dialog"` (it then applies to the topmost
-window above the main window) and waits afterwards until the interface has settled.
+window above the main window) and waits afterwards until the interface has settled: until
+nothing is queued, no pool thread works and no debounce or frame is still to come, for at most
+half a second. A `shot` waits the whole half second first, so what fades or moves has come to rest.
 
 | `do`       | fields | does |
 |------------|--------|------|
@@ -90,8 +92,8 @@ A `shot` crops to `at`. `trim` shrinks that frame beforehand (`{ "top": 16 }`),
 ## Timing
 
 Several scripts run one after the other in the same app. With `--perf` every step waits
-until the interface and the pool have been idle for a few rounds, instead of a fixed number
-of rounds, and writes one line: how long the step itself ran, UI jobs and frames, the
+until the interface and the pool have been idle for a few rounds, however long that takes,
+and writes one line: how long the step itself ran, UI jobs and frames, the
 longest of them, the time until the app was quiet again, the CPU of all threads, what was
 allocated and how many gen-0 collections. The driver's own waiting is left out.
 

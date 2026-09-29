@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
@@ -44,6 +45,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         switch (step)
         {
             case ShotStep s when perf is null:
+                Settle(full: true);
                 Shot(window, s);
                 break;
             case ClickStep s:
@@ -317,19 +319,34 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     static PixelSize Pixels(Size size, int scale) =>
         new((int)(size.Width * scale), (int)(size.Height * scale));
 
-    public static void Settle()
+    public static void Settle() => Settle(full: false);
+
+    // Until nothing is left to run, for at most half a second; a photograph waits the whole half
+    // second, so what fades or moves has come to rest.
+    static void Settle(bool full)
     {
         if (timing is { } perf)
         {
             perf.Settle();
             return;
         }
-        for (var i = 0; i < 25; i++)
+        for (int i = 0, quiet = 0; i < 25 && (full || quiet < 3); i++)
         {
             Dispatcher.UIThread.RunJobs();
             Thread.Sleep(20);
             Dispatcher.UIThread.RunJobs();
             AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            quiet = Quiet() ? quiet + 1 : 0;
         }
     }
+
+    // Nothing queued, no pool thread at work and no timer counting down: a debounce or a frame
+    // still to come. Avalonia keeps two timers of a second running for good.
+    static bool Quiet() =>
+        !Perf.PoolBusy()
+        && !Dispatcher.UIThread.HasJobsWithPriority(DispatcherPriority.SystemIdle)
+        && Timers(Dispatcher.UIThread).TrueForAll(t => t.Interval >= TimeSpan.FromSeconds(1));
+
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_timers")]
+    static extern ref List<DispatcherTimer> Timers(Dispatcher dispatcher);
 }

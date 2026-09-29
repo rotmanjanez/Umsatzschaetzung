@@ -75,7 +75,7 @@ public sealed class Perf(TextWriter output)
         tails += Ms(idleSince, Stopwatch.GetTimestamp());
     }
 
-    static bool PoolBusy()
+    internal static bool PoolBusy()
     {
         ThreadPool.GetAvailableThreads(out var workers, out _);
         ThreadPool.GetMaxThreads(out var max, out _);
