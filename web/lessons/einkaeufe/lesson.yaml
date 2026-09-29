@@ -295,11 +295,13 @@ chapters:
           - **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und
             Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es
             ist die Zutat, von der am wenigsten da ist.
-          - **Portionen**: Das Schweinefleisch teilt sich das Schnitzel mit dem
-            Braten des Mittagstischs. Auf das Schnitzel entfallen rund 190 kg, bei
-            180 g je Stück 1.061 Portionen.
-          - **Umsatz (netto)**: 1.061 Portionen zu 15,90 € brutto, ohne 19 %
-            Umsatzsteuer, ergeben 14.174,96 €.
+          - **Portionen**: Das Schweinefleisch könnte auch in den Braten des
+            Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich
+            mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht;
+            das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle
+            rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+          - **Umsatz (netto)**: 3.039 Portionen zu 15,90 € brutto, ohne 19 %
+            Umsatzsteuer, ergeben 40.601,04 €.
 
           So rechnet die Kalkulation jedes Produkt des Sortiments.
         shot:
@@ -312,13 +314,16 @@ chapters:
           Portionen. Das Fleisch bestimmt also, wie viele Schnitzel es werden.
         show: { text: "Schweinefleisch", up: StackPanel }
       - say: >-
-          Das Schweinefleisch teilt sich das Schnitzel mit dem Braten vom
-          Mittagstisch. Fürs Schnitzel bleiben rund hundertneunzig Kilo, und bei
-          hundertachtzig Gramm pro Stück sind das tausendeinundsechzig Schnitzel.
+          Das Schweinefleisch könnte auch in den Braten vom Mittagstisch gehen.
+          Das Programm verteilt es aber so, dass möglichst viel vom Einkauf
+          aufgeht, und zum Schnitzel gehören ja auch noch Pommes und Öl. Also geht
+          das ganze Fleisch ins Schnitzel, rund fünfhundertsiebenundvierzig Kilo,
+          und bei hundertachtzig Gramm pro Stück sind das dreitausendneununddreißig
+          Schnitzel.
         show: { text: "Einsatz je Portion", up: ItemsControl }
       - say: >-
-          Mal fünfzehn Euro neunzig sind das knapp sechzehntausendneunhundert Euro.
-          Ohne die Umsatzsteuer bleiben gut vierzehntausendeinhundert Euro Umsatz,
+          Mal fünfzehn Euro neunzig sind das gut achtundvierzigtausenddreihundert
+          Euro. Ohne die Umsatzsteuer bleiben gut vierzigtausendsechshundert Euro Umsatz,
           netto, allein mit dem Schnitzel.
         show: { text: "Einsatz je Portion", up: ItemsControl }
         hold: 0.5

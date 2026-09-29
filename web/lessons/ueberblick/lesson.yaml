@@ -52,16 +52,17 @@ chapters:
           wird, wird ja auch irgendwann verkauft.
       - card:
           kicker: Ein Beispiel
-          title: 190 kg Schweinefleisch fürs Schnitzel
+          title: 547 kg Schweinefleisch fürs Schnitzel
           list:
             - 180 g je Schnitzel
-            - rund 1.060 Schnitzel
+            - rund 3.040 Schnitzel
             - je 15,90 €
             - = Umsatz mit Schnitzel
         say: >-
           Nehmen wir das Schnitzel. Vom Schweinefleisch, das das Gasthaus eingekauft
-          hat, gehen rund hundertneunzig Kilo ins Schnitzel. Für ein Schnitzel braucht
-          es ungefähr hundertachtzig Gramm, macht also rund tausendsechzig Schnitzel.
+          hat, gehen rund fünfhundertsiebenundvierzig Kilo ins Schnitzel. Für ein
+          Schnitzel braucht es ungefähr hundertachtzig Gramm, macht also rund
+          dreitausendvierzig Schnitzel.
           Mal fünfzehn Euro neunzig pro Teller, und schon weißt du, was allein das
           Schnitzel an Umsatz bringen müsste.
       - card:
@@ -74,8 +75,8 @@ chapters:
           und stellt es dem Umsatz gegenüber, den der Betrieb erklärt hat.
         text: |-
           Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt
-          sich aus dem Einkauf nachrechnen: Gehen 190 kg des eingekauften
-          Schweinefleischs ins Schnitzel, mit 180 g je Schnitzel, sind das rund 1.060
+          sich aus dem Einkauf nachrechnen: Gehen 547 kg des eingekauften
+          Schweinefleischs ins Schnitzel, mit 180 g je Schnitzel, sind das rund 3.040
           Schnitzel. Mal 15,90 € je
           Teller ergibt das den Umsatz allein mit Schnitzel. Das Programm macht diese Rechnung für jede eingekaufte Ware und stellt die Summe
           dem erklärten Umsatz gegenüber.

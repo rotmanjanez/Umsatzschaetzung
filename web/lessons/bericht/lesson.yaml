@@ -14,7 +14,7 @@ guide:
   end: |-
     !!! geschafft "Geschafft, wenn …"
         - auf **4. Kalkulation → Ergebnis** neben den erklärten `196.418,00 €`
-          der kalkulierte Umsatz nach BP steht, knapp 300.000 €
+          der kalkulierte Umsatz nach BP steht, gut 300.000 €
         - das PDF gespeichert ist und sich öffnen lässt
 
     !!! nachlesen "Zum Nachlesen"
@@ -162,25 +162,25 @@ chapters:
         show: { text: "Umsatz vor BP" }
       - say: >-
           Daneben, unter Umsatz nach BP, der Umsatz, den der Einkauf hergibt,
-          knapp dreihunderttausend.
+          gut dreihunderttausend.
         show: { text: "Umsatz nach BP" }
       - say: >-
-          Das sind rund hunderttausend Euro mehr, als erklärt wurden.
+          Das sind gut hunderttausend Euro mehr, als erklärt wurden.
         show: { text: "Differenz" }
         text: |-
           - **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von
-            196.418,00 € neben dem kalkulierten von knapp 300.000 €, mit der
+            196.418,00 € neben dem kalkulierten von gut 300.000 €, mit der
             Differenz, je Steuersatz und in Summe. Das ist das Ergebnis der
             Prüfung.
       - say: >-
           Darunter der Rohgewinnaufschlagsatz, getrennt nach Getränken und Speisen. Der
           sagt, wie viel der Wirt auf seinen Einkauf draufschlägt. Beim Gasthaus
-          sind es insgesamt rund dreihundertvierzig Prozent.
+          sind es insgesamt rund dreihundertfünfzig Prozent.
         show: { text: "Rohgewinnaufschlag" }
         text: |-
           - **Rohgewinnaufschlag**: Einsatz der Portionen, Umsatz, Rohgewinn und
             Aufschlagsatz je Sparte, hier Getränke und Speisen, zusammen rund
-            340 %. Ermittelt wird der Satz nur an Portionen mit Preis.
+            350 %. Ermittelt wird der Satz nur an Portionen mit Preis.
       - say: >-
           Und ganz unten die Zusammenfassung: vom Einkauf über den Wareneinsatz bis
           zu dem Teil, dessen Umsatz nur geschätzt ist. Da sieht man auch, dass
