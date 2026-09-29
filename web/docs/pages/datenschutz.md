@@ -12,7 +12,7 @@ beschrieben.
 | Ordner der Regel-Datenbank | `rules.db`, `embeddings.db`, `snapshots\` | alle, die ihn teilen |
 | `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `pages\` mit dem gerade angezeigten Bericht | die Person |
 
-Eine Prüfung unterliegt dem Abgabengeheimnis. Sie verlässt den Rechner nur,
+Eine Prüfung unterliegt dem Steuergeheimnis. Sie verlässt den Rechner nur,
 wenn jemand sie [weitergibt](import-export.md#prufung-weitergeben), dann als
 vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe
 [Verwaltete Installation](verwaltung.md).
@@ -38,7 +38,7 @@ der Rechnungen und aus welcher Prüfung eine Zuordnung stammt. Die
 Regel-Datenbank beschreibt, was Lieferanten verkaufen, nicht was ein Betrieb
 eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist,
 und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen
-sollen sie deshalb nur Personen derselben Stelle, die dem Abgabengeheimnis
+sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis
 unterliegen.
 
 `embeddings.db` enthält Rechenwerte zu denselben Texten und lässt sich
