@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     tags: ['v*']
-    paths: ['web/**', 'src/**', 'tools/headless/**', 'tools/lessons/**', 'tools/embeddings/**', '.github/actions/**', '.github/workflows/deploy-web.yml']
+    paths: ['web/**', 'src/**', 'data/**', 'tools/headless/**', 'tools/lessons/**', 'tools/embeddings/**', '*.props', '*.targets', 'global.json', '.github/actions/**', '.github/workflows/deploy-web.yml']
   workflow_dispatch:
 
 concurrency:
@@ -12,9 +12,13 @@ concurrency:
   cancel-in-progress: false
 
 # The lessons that are published; each is in `web/lessons/<name>/lesson.yaml`, and all its
-# sentences are in the clip store.
+# sentences are in the clip store. PROGRAM names, as git pathspecs, what the program is built
+# from and this workflow that builds it: every job keeps what it built in the cache under the hash
+# of all it is built from, and takes it from there instead of building it again when none of that
+# changed.
 env:
   LESSONS: ueberblick pruefung korrektur zuordnung sortiment einkaeufe bericht
+  PROGRAM: data src tools/embeddings Directory.Build.props Models.targets Embeddings.targets global.json :!src/Umsatzschaetzung.Tests .github/workflows/deploy-web.yml
 
 jobs:
   landing:
@@ -48,28 +52,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.local/share/umsatzschaetzung/models
-          key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Browser/Browser.targets') }}
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
+      - id: key
+        run: echo "key=web-app-$(dotnet --version)-$(git ls-files -s -- $PROGRAM | git hash-object --stdin)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: built
+        with:
+          path: publish/wwwroot
+          key: ${{ steps.key.outputs.key }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.built.outputs.cache-hit != 'true'
+        with:
+          path: ~/.local/share/umsatzschaetzung/models
+          key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Browser/Browser.targets') }}
       - uses: ./.github/actions/warm-embeddings
-      - run: dotnet workload install wasm-tools
+        if: steps.built.outputs.cache-hit != 'true'
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: dotnet workload install wasm-tools
       - id: toolchain
+        if: steps.built.outputs.cache-hit != 'true'
         run: echo "wasm=$(dotnet workload list | grep wasm-tools | tr -s ' ' '_')" >> "$GITHUB_OUTPUT"
       # The AOT compiler skips an assembly whose trimmed IL it compiled before; keyed by the
       # toolchain, since a new compiler would take the old output for current.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           path: src/Umsatzschaetzung.Web/obj/Release/net10.0/wasm/for-publish
           key: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-${{ github.sha }}
           restore-keys: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
-      - run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
       # The weights and the runtime sit under their release and never change there: what the
-      # server has is kept, only what is new goes up. The lessons are deployed into the app
-      # by their own job.
+      # server has is kept, only what is new goes up. So the cache leaves them out, once they
+      # are up. The lessons are deployed into the app by their own job.
       - uses: ./.github/actions/netcup-deploy
         if: github.event_name != 'pull_request'
         with:
@@ -80,32 +97,18 @@ jobs:
           user: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: rm -rf publish/wwwroot/models publish/wwwroot/ort
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.built.outputs.cache-hit != 'true'
+        with:
+          path: publish/wwwroot
+          key: ${{ steps.key.outputs.key }}
 
   shots:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/Library/Application Support/umsatzschaetzung/models
-          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: 10.0.x
-      - uses: ./.github/actions/warm-embeddings
-      - name: Fetch the example invoices
-        run: |
-          curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
-          unzip -q beispiel.zip -d beispiel-rechnungen
-      - name: Key the recorded readings
-        id: code
-        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: readings
-        with:
-          path: readings
-          key: ${{ steps.code.outputs.key }}
-          restore-keys: ${{ steps.code.outputs.key }}
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
@@ -113,21 +116,60 @@ jobs:
           cache-dependency-path: web/lessons/requirements.txt
       - run: pip install -r web/lessons/requirements.txt
       - name: Write the guide's script from the lessons
-        run: for lesson in web/lessons/*/lesson.yaml; do python web/lessons/lesson.py "$lesson" guide; done
+        run: python web/lessons/lesson.py web/lessons/*/lesson.yaml guide
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+      - id: key
+        run: echo "key=shots-$(dotnet --version)-$({ git ls-files -s -- $PROGRAM tools/headless 'web/docs/pages/guide/*.csv'; cat web/docs/shots/*.jsonl; } | git hash-object --stdin)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: taken
+        with:
+          path: shots-out
+          key: ${{ steps.key.outputs.key }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.taken.outputs.cache-hit != 'true'
+        with:
+          path: ~/Library/Application Support/umsatzschaetzung/models
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
+      - uses: ./.github/actions/warm-embeddings
+        if: steps.taken.outputs.cache-hit != 'true'
+      - name: Fetch the example invoices
+        if: steps.taken.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
+          unzip -q beispiel.zip -d beispiel-rechnungen
+      - name: Key the recorded readings
+        if: steps.taken.outputs.cache-hit != 'true'
+        id: code
+        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.taken.outputs.cache-hit != 'true'
+        id: readings
+        with:
+          path: readings
+          key: ${{ steps.code.outputs.key }}
+          restore-keys: ${{ steps.code.outputs.key }}
       - name: Take screenshots of the interface
+        if: steps.taken.outputs.cache-hit != 'true'
         run: |
           for script in web/docs/shots/*.jsonl; do
             name=$(basename "$script" .jsonl)
             out=shots-out/img
             [ -d "web/docs/pages/$name" ] && out="shots-out/$name/img"
-            dotnet run --project tools/headless -- "$script" \
+            dotnet run --project tools/headless -c Release -- "$script" \
               --width 1320 --height 860 --out "$out" --readings readings
           done
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        if: always() && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
+        if: always() && steps.taken.outputs.cache-hit != 'true' && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
         with:
           path: readings
           key: ${{ steps.code.outputs.key }}-${{ hashFiles('readings/*.json') }}
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.taken.outputs.cache-hit != 'true'
+        with:
+          path: shots-out
+          key: ${{ steps.key.outputs.key }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
@@ -136,82 +178,121 @@ jobs:
 
   # Each lesson starts where the ones before it in the guide stop; the program plays the guide
   # once headlessly and its stores are kept where each lesson starts. Apart from the
-  # screenshots, so a guide page that fails its image does not hold back the lessons.
+  # screenshots, so a guide page that fails its image does not hold back the lessons. The
+  # script it plays is the guide's without the photographs, at the lessons' window, with the
+  # stores kept where the lessons named in LESSONS start; what a lesson says does not change it.
   zustand:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/Library/Application Support/umsatzschaetzung/models
-          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: 10.0.x
-      - uses: ./.github/actions/warm-embeddings
-      - name: Fetch the example invoices
-        run: |
-          curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
-          unzip -q beispiel.zip -d beispiel-rechnungen
-      - name: Key the recorded readings
-        id: code
-        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: readings
-          key: ${{ steps.code.outputs.key }}
-          restore-keys: ${{ steps.code.outputs.key }}
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
           cache: pip
           cache-dependency-path: web/lessons/requirements.txt
       - run: pip install -r web/lessons/requirements.txt
+      - name: Write the guide's script from the lessons
+        run: python web/lessons/lesson.py web/lessons/*/lesson.yaml guide
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+      - id: key
+        run: |
+          windows=$(python -c 'import glob, yaml; print([yaml.safe_load(open(p)).get("window") for p in sorted(glob.glob("web/lessons/*/lesson.yaml"))])')
+          echo "key=zustand-$(dotnet --version)-$({ git ls-files -s -- $PROGRAM tools/headless web/lessons/lesson.py 'web/docs/pages/guide/*.csv'; cat web/docs/shots/guide.jsonl; echo "$windows"; } | git hash-object --stdin)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: kept
+        with:
+          path: web/lessons/out/*/zustand
+          key: ${{ steps.key.outputs.key }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.kept.outputs.cache-hit != 'true'
+        with:
+          path: ~/Library/Application Support/umsatzschaetzung/models
+          key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
+      - uses: ./.github/actions/warm-embeddings
+        if: steps.kept.outputs.cache-hit != 'true'
+      - name: Fetch the example invoices
+        if: steps.kept.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
+          unzip -q beispiel.zip -d beispiel-rechnungen
+      - name: Key the recorded readings
+        if: steps.kept.outputs.cache-hit != 'true'
+        id: code
+        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.kept.outputs.cache-hit != 'true'
+        with:
+          path: readings
+          key: ${{ steps.code.outputs.key }}
+          restore-keys: ${{ steps.code.outputs.key }}
       - name: Keep the stores each lesson starts from
+        if: steps.kept.outputs.cache-hit != 'true'
         env:
           UMSATZ_LESSON_CACHE: ${{ github.workspace }}
         run: python web/lessons/lesson.py zustand
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.kept.outputs.cache-hit != 'true'
+        with:
+          path: web/lessons/out/*/zustand
+          key: ${{ steps.key.outputs.key }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: zustand
           path: web/lessons/out/*/zustand
           if-no-files-found: error
 
-  # The lessons take their weights from the app beside them, so they go up after it. Clips
-  # come from the store only: a sentence nobody has spoken yet fails the build, and is
-  # spoken locally with `voice --elevenlabs`.
+  # Clips come from the store only: a sentence nobody has spoken yet fails the build, and is
+  # spoken locally with `voice --elevenlabs`. Built beside the app and deployed after it.
   lessons:
-    needs: [zustand, app]
+    needs: zustand
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.local/share/umsatzschaetzung/models
-          key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Browser/Browser.targets') }}
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
+      - id: key
+        run: echo "key=lessons-$(dotnet --version)-$(git ls-files -s -- $PROGRAM tools/headless tools/lessons web/lessons web/docs/pages/assets 'web/docs/pages/guide/*.csv' | git hash-object --stdin)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: built
+        with:
+          path: web/lessons/out/lektionen
+          key: ${{ steps.key.outputs.key }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.built.outputs.cache-hit != 'true'
+        with:
+          path: ~/.local/share/umsatzschaetzung/models
+          key: web-models-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Browser/Browser.targets') }}
       - uses: ./.github/actions/warm-embeddings
-      - run: dotnet workload install wasm-tools
+        if: steps.built.outputs.cache-hit != 'true'
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: dotnet workload install wasm-tools
       - id: toolchain
+        if: steps.built.outputs.cache-hit != 'true'
         run: echo "wasm=$(dotnet workload list | grep wasm-tools | tr -s ' ' '_')" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           path: tools/lessons/obj/Release/net10.0/wasm/for-publish
           key: lessons-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('tools/lessons/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-${{ github.sha }}
           restore-keys: lessons-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('tools/lessons/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           python-version: '3.12'
           cache: pip
           cache-dependency-path: web/lessons/requirements.txt
-      - run: pip install -r web/lessons/requirements.txt
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: pip install -r web/lessons/requirements.txt
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        if: steps.built.outputs.cache-hit != 'true'
         with:
           name: zustand
           path: web/lessons/out
       - name: Reach the clip store
+        if: steps.built.outputs.cache-hit != 'true'
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
@@ -221,14 +302,38 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/store_key
           chmod 600 ~/.ssh/store_key
       - name: Build the lessons
+        if: steps.built.outputs.cache-hit != 'true'
         env:
           UMSATZ_LESSON_STORE: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:umsatzschaetzung-stimme
           UMSATZ_LESSON_STORE_KEY: ~/.ssh/store_key
         run: python web/lessons/lesson.py voice site --elevenlabs
-      - uses: ./.github/actions/netcup-deploy
-        if: github.event_name != 'pull_request'
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: steps.built.outputs.cache-hit != 'true'
         with:
-          source: web/lessons/out/lektionen
+          path: web/lessons/out/lektionen
+          key: ${{ steps.key.outputs.key }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lektionen
+          path: web/lessons/out/lektionen
+          if-no-files-found: error
+
+  # The lessons take their weights from the app beside them, and the app's deploy moves them
+  # aside and back, so they go up after it.
+  lessons-deploy:
+    needs: [lessons, app]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/actions
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: lektionen
+          path: lektionen
+      - uses: ./.github/actions/netcup-deploy
+        with:
+          source: lektionen
           deploy-path: ${{ vars.APP_DEPLOY_PATH }}/lektionen
           create: 'true'
           host: ${{ secrets.SSH_HOST }}
@@ -256,7 +361,7 @@ jobs:
         working-directory: web/docs
       - run: pip install -r web/lessons/requirements.txt
       - name: Write the guide's pages from the lessons
-        run: for lesson in web/lessons/*/lesson.yaml; do python web/lessons/lesson.py "$lesson" guide; done
+        run: python web/lessons/lesson.py web/lessons/*/lesson.yaml guide
 
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:

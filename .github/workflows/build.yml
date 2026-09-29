@@ -48,17 +48,14 @@ jobs:
       - run: dotnet tool install --global wix --version 6.0.2
       - run: pwsh packaging/windows/test-upgrade.ps1
 
+  # Packaged beside the tests, not after them: a release waits for both. The arm64 package is
+  # cross-built on the x64 runner, which takes half as long, and compressed hard only for a release.
   msi:
-    needs: test
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-            arch: win-x64
-          - os: windows-11-arm
-            arch: win-arm64
-    runs-on: ${{ matrix.os }}
+        arch: [win-x64, win-arm64]
+    runs-on: windows-latest
     env:
       PFX_BASE64: ${{ secrets.PFX_BASE64 }}
     steps:
@@ -84,7 +81,7 @@ jobs:
           [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\publisher.pfx", [Convert]::FromBase64String($env:PFX_BASE64))
           "PFX=$env:RUNNER_TEMP\publisher.pfx" >> $env:GITHUB_ENV
         shell: pwsh
-      - run: pwsh packaging/windows/build.ps1 -Version ${{ inputs.version || github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX"
+      - run: pwsh packaging/windows/build.ps1 -Version ${{ inputs.version || github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX" -Compression ${{ startsWith(github.ref, 'refs/tags/v') && 'high' || 'mszip' }}
         env:
           UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -97,7 +94,6 @@ jobs:
             dist/msi/SHA256SUMS.txt
 
   dmg:
-    needs: test
     runs-on: macos-latest
     env:
       CERT_BASE64: ${{ secrets.MACOS_CERT_BASE64 }}
@@ -148,7 +144,7 @@ jobs:
             dist/dmg/SHA256SUMS.txt
 
   release:
-    needs: [msi, dmg]
+    needs: [test, msi-upgrade, msi, dmg]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:

@@ -10,7 +10,7 @@
            InstallerVersion="500">
 
     <MajorUpgrade DowngradeErrorMessage="Eine neuere Version der Umsatzschätzung ist bereits installiert." />
-    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+    <MediaTemplate EmbedCab="yes" />
 
     <Property Id="STORE" Secure="yes" />
     <Property Id="STORELOCAL" Secure="yes" />

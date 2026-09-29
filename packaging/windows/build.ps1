@@ -6,6 +6,7 @@ param(
     [string]$PfxPassword = $env:UMSATZ_PFX_PASSWORD,
     [string[]]$SignArgs = @(),
     [string]$Timestamp = "http://timestamp.digicert.com",
+    [ValidateSet("high", "medium", "low", "mszip", "none")][string]$Compression = "high",
     [switch]$NoInstaller
 )
 $ErrorActionPreference = "Stop"
@@ -90,7 +91,7 @@ foreach ($ext in "WixToolset.UI.wixext") {
     wix extension add -g "$ext/$wixVersion"
     if ($LASTEXITCODE -ne 0) { throw "wix extension add $ext failed" }
 }
-wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext `
+wix build -arch $wixArch -culture de-DE -ext WixToolset.UI.wixext -dcl $Compression `
     -d "Version=$msiVersion" -d "Manufacturer=$Manufacturer" -d "Dist=$dist" -d "Models=$models" -d "LicenseRtf=$licenseRtf" `
     -o (Join-Path $out "umsatzschaetzung-$Arch.msi") (Join-Path $PSScriptRoot "umsatzschätzung.wxs")
 if ($LASTEXITCODE -ne 0) { throw "wix failed" }
