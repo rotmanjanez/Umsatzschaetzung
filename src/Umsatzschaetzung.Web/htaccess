@@ -8,6 +8,9 @@ RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} !^app\.umsatzschaetzung\.amtstools\.de$ [NC]
 RewriteRule ^(.*)$ https://app.umsatzschaetzung.amtstools.de/$1 [R=301,L]
 
+# The lessons are listed in the documentation.
+RewriteRule ^lektionen/?$ https://docs.umsatzschaetzung.amtstools.de/uebungen/ [R=302,L]
+
 RewriteCond %{HTTP:Accept-Encoding} br
 RewriteCond %{REQUEST_FILENAME}.br -s
 RewriteRule ^(.*)$ $1.br [L]

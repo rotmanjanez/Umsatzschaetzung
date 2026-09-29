@@ -15,6 +15,10 @@ Prüfung, mit Beispielrechnungen zum Herunterladen.
 <b>Nachschlagen</b>
 Jeder Reiter des Programms, Feld für Feld: was er zeigt und was er rechnet.
 </a>
+<a href="uebungen/">
+<b>Selbst ausprobieren</b>
+Übungen im Browser, in denen jeder Schritt selbst geklickt wird.
+</a>
 <a href="faq/">
 <b>Etwas klappt nicht</b>
 Häufige Fragen, nach Arbeitsschritt geordnet.

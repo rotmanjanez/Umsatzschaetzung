@@ -40,6 +40,8 @@ EXAMPLES = "https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/be
 # before stops; a lesson not among them starts on an empty program.
 GUIDE = ["pruefung", "rechnungen", "korrektur", "zuordnung", "sortiment", "einkaeufe", "bericht"]
 SCRIPT = ROOT / "web" / "docs" / "shots" / "guide.jsonl"
+EXERCISES = ROOT / "web" / "docs" / "pages" / "uebungen.md"
+APP = "https://app.umsatzschaetzung.amtstools.de/lektionen/"
 
 
 class Lesson:
@@ -143,6 +145,9 @@ def guide(ep: Lesson):
         print("no guide in", ep.path)
         return
     parts = [f"<!-- written from {ep.path.relative_to(ROOT)} -->", f"# {spec['title']}", spec.get("intro", "")]
+    if ep.path.parent.name in dict(published()):
+        parts.append(f'[Übung {ep.spec["number"]}: {ep.spec["title"]} <span>Im Programm mitmachen, direkt im Browser</span>]'
+                     f'({APP}{ep.path.parent.name}/){{ .us-exercise }}')
     for chapter in ep.spec["chapters"]:
         blocks, texts = [], []
         for beat in chapter["beats"]:
@@ -156,6 +161,29 @@ def guide(ep: Lesson):
     parts.append(spec.get("end", ""))
     (ROOT / spec["page"]).write_text("\n\n".join(p.strip() for p in parts if p.strip()) + "\n")
     script()
+    exercises()
+
+
+# The lessons published beside the app, as the deploy names them in LESSONS; without it,
+# every lesson in a course.
+def published() -> list[tuple[str, dict]]:
+    specs = {p.parent.name: yaml.safe_load(p.read_text()) for p in (ROOT / "web" / "lessons").glob("*/lesson.yaml")}
+    names = os.environ.get("LESSONS", "").split() or [n for n, s in specs.items() if "course" in s]
+    return sorted(((n, specs[n]) for n in names), key=lambda l: l[1]["number"])
+
+
+# The documentation's page of the exercises lists the published lessons by course.
+def exercises():
+    courses = {}
+    for name, spec in published():
+        courses.setdefault(spec["course"], []).append((name, spec))
+    listed = "\n".join(
+        f'<h2>{escape(course)}</h2>\n<ol class="us-exercises">\n'
+        + "".join(f'<li><a href="{APP}{name}/"><span>{spec["number"]}</span><b>{escape(spec["title"])}</b>'
+                  f'{escape(spec["summary"])}</a></li>\n' for name, spec in lessons)
+        + "</ol>" for course, lessons in courses.items())
+    page = (ROOT / "web" / "lessons" / "uebungen.md").read_text()
+    EXERCISES.write_text(page.replace("{courses}", listed))
 
 
 # The text beside its image, or above it where the image wants the whole width.
@@ -380,7 +408,6 @@ def site(ep: Lesson):
         shutil.copy(f, SITE / "fonts")
     for f in ("dachs-zu.png", "dachs-halb.png", "dachs-offen.png", "favicon.svg"):
         shutil.copy(ROOT / "web" / "docs" / "pages" / "assets" / f, SITE)
-    shutil.copy(ROOT / "web" / "docs" / "pages" / "assets" / "dachs.png", SITE / "didi.png")
 
     target = SITE / ep.path.parent.name
     shutil.rmtree(target, ignore_errors=True)
@@ -395,13 +422,12 @@ def site(ep: Lesson):
     beats = [{**b, "audio": clips.get(b["say"])} for b in ep.beats]
     lesson = {key: ep.spec[key] for key in ("course", "number", "title", "summary", "done")}
     (target / "lesson.json").write_text(json.dumps({**lesson, "beats": beats}, ensure_ascii=False, indent=1))
-    overview()
+    onward()
     print(target / "index.html")
 
 
-# The site's own page lists its lessons by course, each course in its order, and every lesson
-# ends on a way on to the next one in its course.
-def overview():
+# Every lesson ends on a way on to the next one in its course.
+def onward():
     lessons = sorted(((p, json.loads(p.read_text())) for p in SITE.glob("*/lesson.json")), key=lambda l: l[1]["number"])
     courses = {}
     for path, lesson in lessons:
@@ -410,14 +436,6 @@ def overview():
         for (path, lesson), after in zip(course, course[1:] + [None]):
             lesson["next"] = after and {"href": f"{after[0].parent.name}/", "title": after[1]["title"]}
             path.write_text(json.dumps(lesson, ensure_ascii=False, indent=1))
-    listed = "\n".join(
-        f'  <section>\n    <h2>{escape(name)}</h2>\n    <ol>\n'
-        + "".join(f'      <li><a href="{path.parent.name}/"><span>{lesson["number"]}</span>{escape(lesson["title"])}</a></li>\n'
-                  for path, lesson in course)
-        + '    </ol>\n  </section>' for name, course in courses.items())
-    page = (ROOT / "web" / "lessons" / "uebersicht.html").read_text()
-    (SITE / "index.html").write_text(page.replace("{courses}", listed))
-    shutil.copy(ROOT / "web" / "lessons" / "uebersicht.css", SITE)
 
 
 # A weight never changes under its release, so one already there is the same file.

@@ -11,10 +11,12 @@ The lessons are one site, `web/lessons/out/lektionen/`: the page once, a folder 
 with its `lesson.json` and the stores it starts from, and the clips of every lesson in
 `ton/`. The page takes its weights from the web app's `models/` and `ort/` one level up, as
 it does beside the app at `app.umsatzschaetzung.amtstools.de/lektionen/<lesson>/`; `site`
-links them into `out/`. Its own page, `lektionen/`, lists the lessons it holds by `course`,
-in the order of their `number`, from `uebersicht.html`, and each lesson ends on a way on to
-the next one in its course. The page shows Didi, the badger who speaks in them, drawn by Maxie Bichmann
-(bichmann.net). It needs a web server, `python3 -m http.server -d web/lessons/out`
+links them into `out/`. Each lesson ends on a way on to the next one in its course. The
+documentation lists them on its page `uebungen.md`, which `guide` writes from `uebungen.md`
+here with the lessons named in `LESSONS` by `course`, in the order of their `number`, or
+every lesson in a course where `LESSONS` is not set; `lektionen/` itself leads there. The
+page shows Didi, the badger who speaks in them, drawn by Maxie Bichmann (bichmann.net), and
+the guide's page of a lesson listed there opens with a link to it. It needs a web server, `python3 -m http.server -d web/lessons/out`
 will do, with the lesson at `localhost:8000/lektionen/zuordnung/`; a page opened as a
 file cannot load WebAssembly.
 
@@ -29,7 +31,7 @@ Each stage can be run alone, named after the lesson:
 
 | stage | does | needs |
 |---|---|---|
-| `guide` | writes the lesson's page of the guide (`guide.page`) and the guide's script `web/docs/shots/guide.jsonl` from the steps of every lesson in `GUIDE`, so the screenshots are taken on the same steps | nothing |
+| `guide` | writes the lesson's page of the guide (`guide.page`), the documentation's `uebungen.md` and the guide's script `web/docs/shots/guide.jsonl` from the steps of every lesson in `GUIDE`, so the screenshots are taken on the same steps | nothing |
 | `zustand` | drives the real program headlessly to where the lesson starts and keeps the stores there, in `zustand/` | .NET, the example invoices (fetched on first use) |
 | `voice` | speaks every sentence into `ton/`: as a draft with the Mac's `say`, or with `--elevenlabs` in the host's voice, one take per chapter cut between the beats | macOS; with `--elevenlabs`, `ELEVENLABS_API_KEY` in the environment or in `.env` |
 | `site` | publishes the program into `lektionen/`, with the lesson's `zustand/` and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | .NET with the `wasm-tools` workload |

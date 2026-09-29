@@ -73,6 +73,8 @@ plugins:
           - guide/kalkulation.md: Übrige Einkäufe aufräumen und das Ergebnis prüfen
           - guide/bericht.md: Vorschau prüfen und den Bericht als PDF speichern
           - guide/danach.md: Was für die nächste eigene Prüfung gut zu wissen ist
+        Übungen:
+          - uebungen.md: Interaktive Übungen, in denen das Programm im Browser läuft und jeder Schritt selbst geklickt wird
 
 extra:
   version:
@@ -125,3 +127,4 @@ nav:
       - 4. Kalkulation: guide/kalkulation.md
       - 5. Bericht: guide/bericht.md
       - Danach: guide/danach.md
+  - Übungen: uebungen.md
