@@ -8,7 +8,7 @@ kann nicht nur 2.000 € mit Bier umgesetzt haben.
 <div class="us-paths">
 <a href="guide/">
 <b>Neu hier</b>
-Die Beispielprüfung führt in rund einer Stunde durch eine vollständige
+Die Beispielprüfung führt in rund 45 Minuten durch eine vollständige
 Prüfung, mit Beispielrechnungen zum Herunterladen.
 </a>
 <a href="pruefungen/">
