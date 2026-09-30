@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Avalonia.Platform;
 
-namespace Umsatzschaetzung.App.Platform;
+namespace Umsatzschaetzung.Desktop;
 
 // The engine itself refuses page script, beneath the page's policy: a bericht never needs any.
 static class NoScript

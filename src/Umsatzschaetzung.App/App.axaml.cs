@@ -36,17 +36,18 @@ public partial class App : Application
     // A browser has no windows: its host composes the service and gets the program as one view.
     public static Func<Services>? SingleViewService { get; set; }
 
-    // Nor a native web view: its host brings the Bericht's preview, or there is none.
-    public static Func<IHtmlPreview>? SingleViewPreview { get; set; }
-
     // Nor a printer that hands back a PDF: its host opens the browser's print dialog on the Bericht.
     public static Action<string>? SingleViewPrint { get; set; }
 
     // Nor a folder of its own to clear: the web head forgets what the browser keeps for it.
     public static Func<Task>? SingleViewForget { get; set; }
 
-    internal static IHtmlPreview HtmlPreview() =>
-        Current?.ApplicationLifetime is ISingleViewApplicationLifetime ? SingleViewPreview?.Invoke() ?? new NoHtmlPreview() : new HtmlView();
+    // The Bericht's preview comes with the head, the desktop's native web view or a browser's frame,
+    // and on the desktop also what prints it to a PDF; without, there is none.
+    public static Func<IHtmlPreview>? Preview { get; set; }
+    public static Func<IPdfPrinter>? Printer { get; set; }
+
+    internal static IHtmlPreview HtmlPreview() => Preview?.Invoke() ?? new NoHtmlPreview();
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -121,8 +122,6 @@ public partial class App : Application
             return;
         }
         desktop.ShutdownRequested += (_, _) => { foreach (var d in owned) d.Dispose(); };
-        var printer = new WebViewPdfPrinter();
-        owned.Add(printer);
         var shell = new Shell(service);
         desktop.MainWindow = shell;
         if (show) shell.Show();
@@ -166,8 +165,8 @@ public partial class App : Application
         owned.Add(tagger);
         var encoder = new Encoder(weights);
         owned.Add(encoder);
-        var printer = new WebViewPdfPrinter();
-        owned.Add(printer);
+        var printer = Printer?.Invoke();
+        if (printer is IDisposable disposable) owned.Add(disposable);
         var cases = new CaseStore(config.CaseDir);
         if (purge)
         {

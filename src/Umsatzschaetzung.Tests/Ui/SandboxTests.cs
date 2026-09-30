@@ -5,6 +5,7 @@ using System.Text;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Umsatzschaetzung.App.Platform;
+using Umsatzschaetzung.Desktop;
 
 namespace Umsatzschaetzung.Tests.Ui;
 

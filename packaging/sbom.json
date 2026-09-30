@@ -60,6 +60,9 @@
     ]
   },
   "projects": {
+    "Umsatzschaetzung.App": {
+      "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
+    },
     "Umsatzschaetzung.Core": {
       "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
     },

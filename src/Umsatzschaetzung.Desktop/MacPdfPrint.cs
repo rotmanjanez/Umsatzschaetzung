@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace Umsatzschaetzung.App.Platform;
+namespace Umsatzschaetzung.Desktop;
 
 // WKWebView.createPDF snapshots the screen layout onto one tall page; a save-to-file
 // NSPrintOperation runs WebKit's print layout, so @media print, @page size and breaks apply.

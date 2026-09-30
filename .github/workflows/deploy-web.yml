@@ -18,7 +18,7 @@ concurrency:
 # changed.
 env:
   LESSONS: ueberblick pruefung korrektur zuordnung sortiment einkaeufe bericht
-  PROGRAM: data src tools/embeddings Directory.Build.props Models.targets Embeddings.targets global.json :!src/Umsatzschaetzung.Tests .github/workflows/deploy-web.yml
+  PROGRAM: data src tools/embeddings Directory.Build.props Models.targets Embeddings.targets global.json :!src/Umsatzschaetzung.Tests :!src/Umsatzschaetzung.Desktop .github/workflows/deploy-web.yml
 
 jobs:
   landing:

@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Avalonia.Platform;
 
-namespace Umsatzschaetzung.App.Platform;
+namespace Umsatzschaetzung.Desktop;
 
 // The engine itself has no network, beneath the page's policy and the navigation guard. WebView2
 // sends every request to a proxy nobody answers, loopback included, and a fixed proxy never falls

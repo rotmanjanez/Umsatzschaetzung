@@ -18,7 +18,7 @@ public static partial class Host
     public static async Task<ShellView> Start(Services service, string element)
     {
         App.App.SingleViewService = () => service;
-        App.App.SingleViewPreview = () => new Iframe();
+        App.App.Preview = () => new Iframe();
         App.App.SingleViewPrint = html => Print(WebPages.Seal(html));
         await AppBuilder.Configure<App.App>().WithInterFont().StartBrowserAppAsync(element);
         if (Mac()) CommandKey();

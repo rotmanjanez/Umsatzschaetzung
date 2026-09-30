@@ -1,24 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- The interface every head shares; the desktop's start and its web view are Umsatzschaetzung.Desktop's. -->
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <RuntimeIdentifiers>win-x64;win-arm64;osx-arm64</RuntimeIdentifiers>
     <RootNamespace>Umsatzschaetzung.App</RootNamespace>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- codesign findet Dateien mit Umlaut im Namen nicht wieder: im Info.plist
-         stehen sie normalisiert, auf der Platte nicht. Auf macOS also ohne. -->
-    <AssemblyName>umsatzschaetzung</AssemblyName>
-    <InvariantGlobalization>false</InvariantGlobalization>
-    <ApplicationIcon>Ui/Assets/app.ico</ApplicationIcon>
     <!-- Views take a Session and are only ever constructed in code, never fetched
          from the runtime XAML loader by URI, which is all AVLN3001 warns about. -->
     <NoWarn>AVLN3001</NoWarn>
     <ShipEmbeddings>true</ShipEmbeddings>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
-    <AssemblyName>umsatzschätzung</AssemblyName>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,11 +26,9 @@
     <ProjectReference Include="../Umsatzschaetzung.Documents/Umsatzschaetzung.Documents.csproj" />
     <ProjectReference Include="../Umsatzschaetzung.Inference/Umsatzschaetzung.Inference.csproj" />
     <PackageReference Include="Avalonia" Version="12.1.2" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
-    <PackageReference Include="Avalonia.Controls.WebView" Version="12.1.0" />
   </ItemGroup>
 
   <Import Project="../../Embeddings.targets" />

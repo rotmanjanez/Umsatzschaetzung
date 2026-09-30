@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Avalonia;
+using Umsatzschaetzung.Desktop;
 
 namespace Umsatzschaetzung.Tests.Ui;
 
@@ -27,7 +28,7 @@ static class Desktop
             try
             {
                 if (Application.Current is null)
-                    AppBuilder.Configure<App.App>().UsePlatformDetect().WithInterFont().SetupWithoutStarting();
+                    Program.BuildAvaloniaApp().SetupWithoutStarting();
                 result.SetResult(body());
             }
             catch (Exception e)

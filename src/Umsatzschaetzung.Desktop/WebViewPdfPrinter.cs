@@ -1,9 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.Service;
 
-namespace Umsatzschaetzung.App.Platform;
+namespace Umsatzschaetzung.Desktop;
 
 public sealed class WebViewPdfPrinter : IPdfPrinter, IDisposable
 {
