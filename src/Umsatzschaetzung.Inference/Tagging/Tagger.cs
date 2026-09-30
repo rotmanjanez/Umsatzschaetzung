@@ -31,8 +31,9 @@ public sealed class Tagger(IWeights weights) : ITagger, IDisposable
     const string Dir = "belegtagger";
     const string ModelFile = Dir + "/belegtagger.int8.onnx";
 
-    // Eight threads measured 2.3x slower than four on an M1 Pro (efficiency cores).
-    static readonly NetOptions Options = new(Threads: 4);
+    // Eight threads measured 2.3x slower than four on an M1 Pro (efficiency cores). A thread
+    // spinning idle takes its core from the reader, which reads the next scan meanwhile.
+    static readonly NetOptions Options = new(Threads: 4, Spin: false);
 
     readonly SemaphoreSlim gate = new(1, 1);
     INet? net;

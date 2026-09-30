@@ -23,8 +23,8 @@ public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
     const string CalibrationFile = "zuordnung/calibration.json";
     const string TokenizerDir = "belegtagger";
 
-    // Eight threads measured slower than four on an M1 Pro, as for the tagger.
-    static readonly NetOptions Options = new(Threads: 4);
+    // Eight threads measured slower than four on an M1 Pro, and no spinning, as for the tagger.
+    static readonly NetOptions Options = new(Threads: 4, Spin: false);
 
     readonly SemaphoreSlim gate = new(1, 1);
     INet? net;
