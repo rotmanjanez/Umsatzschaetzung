@@ -40,7 +40,7 @@ plistversion=$(printf '%s' "$version" | sed -n 's/^v\{0,1\}\([0-9]\{1,\}\.[0-9]\
 
 rm -rf "$dist"
 "$dotnet" publish "$root/src/Umsatzschaetzung.App" -c Release -f net10.0 -r "$arch" \
-    --self-contained -p:PublishSingleFile=true -p:DebugType=none -p:Version="$plistversion" -o "$contents/MacOS"
+    --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishReadyToRunComposite=false -p:DebugType=none -p:Version="$plistversion" -o "$contents/MacOS"
 
 # In Contents/MacOS darf nur Code liegen: alles andere dort hält codesign für
 # verschachtelte Bundles und verlangt für jedes eine eigene Signatur. Deshalb
