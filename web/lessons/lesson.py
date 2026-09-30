@@ -123,7 +123,7 @@ def beats(name: str) -> list[dict]:
 
 
 # What the headless program does for a beat: the learner's click or typing, or `act`
-# where a plain click does not fit.
+# where a plain click does not fit, and further rounds only where settling is not enough.
 def steps(spec: dict) -> list[dict]:
     if "act" in spec:
         acts = spec["act"]
@@ -133,7 +133,7 @@ def steps(spec: dict) -> list[dict]:
         acts = [{"do": "type", "at": spec["type"]["at"], "text": str(spec["type"]["text"])}, {"do": "focus"}]
     else:
         return []
-    return acts + spec.get("then", []) + [{"do": "wait", "rounds": spec.get("rounds", 8)}]
+    return acts + spec.get("then", []) + ([{"do": "wait", "rounds": spec["rounds"]}] if "rounds" in spec else [])
 
 
 def examples():
@@ -426,7 +426,8 @@ def site(lessons: list[Lesson]):
 def placed(ep: Lesson, page: str):
     target = SITE / ep.path.parent.name
     shutil.rmtree(target, ignore_errors=True)
-    shutil.copytree(ep.out / "zustand", target / "zustand")
+    if (ep.out / "zustand").exists():
+        shutil.copytree(ep.out / "zustand", target / "zustand")
     (target / "index.html").write_text(page)
     spoken = ep.out / "stimme.json"
     clips = json.loads(spoken.read_text()) if spoken.exists() else {}

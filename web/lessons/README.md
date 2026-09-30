@@ -23,8 +23,9 @@ will do, with the lesson at `localhost:8000/lektionen/zuordnung/`; a page opened
 file cannot load WebAssembly.
 
 `deploy-web` publishes the lessons named in its `LESSONS`: the `zustand` job keeps their
-stores, and the `lessons` job fetches their clips from the store and deploys the site into
-the app. A sentence missing from the store fails that job, so a lesson is spoken with
+stores, the `lessons` job fetches their clips from the store and builds the site beside it,
+and `lessons-deploy` puts the stores into the site and deploys it into the app. A sentence
+missing from the store fails the `lessons` job, so a lesson is spoken with
 `voice --elevenlabs` before it is added there.
 
 ## Stages
@@ -36,7 +37,7 @@ Each stage can be run alone, named after the lessons:
 | `guide` | writes the lesson's page of the guide (`guide.page`), the documentation's `uebungen.md` and the guide's script `web/docs/shots/guide.jsonl` from the steps of every lesson in `GUIDE`, so the screenshots are taken on the same steps | nothing |
 | `zustand` | plays the guide once on the real program, headlessly, and keeps the stores in each lesson's `zustand/` where it starts | .NET, the example invoices (fetched on first use) |
 | `voice` | speaks every sentence into `ton/`: as a draft with the Mac's `say`, or with `--elevenlabs` in the host's voice, one take per chapter cut between the beats | macOS; with `--elevenlabs`, `ELEVENLABS_API_KEY` in the environment or in `.env` |
-| `site` | publishes the program once into `lektionen/`, with each lesson's `zustand/` and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | .NET with the `wasm-tools` workload |
+| `site` | publishes the program once into `lektionen/`, with each lesson's `zustand/`, where one was kept, and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | .NET with the `wasm-tools` workload |
 
 The guide's pages and its script are not checked in: `deploy-web` writes them with `guide`
 before it takes the screenshots and builds the documentation. Locally, before either:

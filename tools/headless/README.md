@@ -45,7 +45,8 @@ One step per line, JSONL. Blank lines and `//` separate and explain:
 Every step has a `do`, may set `"window": "dialog"` (it then applies to the topmost
 window above the main window) and waits afterwards until the interface has settled: until
 nothing is queued, no pool thread works and no debounce or frame is still to come, for at most
-half a second. A `shot` waits the whole half second first, so what fades or moves has come to rest.
+half a second. A `shot` first waits for the interface to come to rest, for at most four seconds, then the whole half
+second, so what fades or moves has come to rest.
 
 | `do`       | fields | does |
 |------------|--------|------|
@@ -62,7 +63,7 @@ half a second. A `shot` waits the whole half second first, so what fades or move
 | `open`     | `number` | opens the invoice with this number in its own window |
 | `tab`      | `header` | switches to the tab with this caption |
 | `import`   | `files` | imports these files, or every file of a folder named here, into the open case and waits for them |
-| `wait`     | `rounds?` | waits further rounds, in case one is not enough |
+| `wait`     | `rounds?` | settles again while the interface has not come to rest, at most `rounds` times in all |
 | `restart`  | | quits the app, deletes the rule store, starts it again on the same cases and opens the case that was open |
 | `keep`     | `to` | copies the rule store and the cases as they stand, without the scans, into `to` with a `zustand.json` naming the open case, for a lesson in the browser |
 | `push`     | | starts noting what the ranking answers |

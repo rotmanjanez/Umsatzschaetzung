@@ -46,6 +46,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         switch (step)
         {
             case ShotStep s when perf is null:
+                for (var i = 0; i < 8 && !Settle(full: false); i++) { }
                 Settle(full: true);
                 Shot(window, s);
                 break;
@@ -99,7 +100,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
                 window.Close();
                 break;
             case WaitStep s:
-                for (var i = 1; i < s.Rounds; i++) Settle();
+                for (var i = 1; i < s.Rounds && !Settle(full: false); i++) { }
                 break;
         }
         perf?.Acted();
@@ -323,15 +324,16 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     public static void Settle() => Settle(full: false);
 
     // Until nothing is left to run, for at most half a second; a photograph waits the whole half
-    // second, so what fades or moves has come to rest.
-    static void Settle(bool full)
+    // second, so what fades or moves has come to rest. Says whether it came to rest.
+    static bool Settle(bool full)
     {
         if (timing is { } perf)
         {
             perf.Settle();
-            return;
+            return true;
         }
-        for (int i = 0, quiet = 0; i < 25 && (full || quiet < 3); i++)
+        var quiet = 0;
+        for (var i = 0; i < 25 && (full || quiet < 3); i++)
         {
             Dispatcher.UIThread.RunJobs();
             Thread.Sleep(20);
@@ -339,6 +341,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
             AvaloniaHeadlessPlatform.ForceRenderTimerTick();
             quiet = Quiet() ? quiet + 1 : 0;
         }
+        return quiet >= 3;
     }
 
     // Nothing queued, no pool thread at work and no timer counting down: a debounce or a frame

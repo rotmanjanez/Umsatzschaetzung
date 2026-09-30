@@ -150,16 +150,23 @@ jobs:
           path: readings
           key: ${{ steps.code.outputs.key }}
           restore-keys: ${{ steps.code.outputs.key }}
+      # One program per script, side by side: each waits on the interface far more than it works.
       - name: Take screenshots of the interface
         if: steps.taken.outputs.cache-hit != 'true'
         run: |
+          dotnet build tools/headless -c Release
+          taking=()
           for script in web/docs/shots/*.jsonl; do
             name=$(basename "$script" .jsonl)
             out=shots-out/img
             [ -d "web/docs/pages/$name" ] && out="shots-out/$name/img"
-            dotnet run --project tools/headless -c Release -- "$script" \
-              --width 1320 --height 860 --out "$out" --readings readings
+            dotnet run --project tools/headless -c Release --no-build -- "$script" \
+              --width 1320 --height 860 --out "$out" --readings readings &
+            taking+=($!)
           done
+          failed=0
+          for pid in "${taking[@]}"; do wait "$pid" || failed=1; done
+          exit $failed
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always() && steps.taken.outputs.cache-hit != 'true' && hashFiles('readings/*.json') != '' && steps.readings.outputs.cache-matched-key != format('{0}-{1}', steps.code.outputs.key, hashFiles('readings/*.json'))
         with:
@@ -244,9 +251,9 @@ jobs:
           if-no-files-found: error
 
   # Clips come from the store only: a sentence nobody has spoken yet fails the build, and is
-  # spoken locally with `voice --elevenlabs`. Built beside the app and deployed after it.
+  # spoken locally with `voice --elevenlabs`. Built beside the app and the stores, which join
+  # the lessons when they are deployed after the app.
   lessons:
-    needs: zustand
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -254,7 +261,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - id: key
-        run: echo "key=lessons-$(dotnet --version)-$(git ls-files -s -- $PROGRAM tools/headless tools/lessons web/lessons web/docs/pages/assets 'web/docs/pages/guide/*.csv' | git hash-object --stdin)" >> "$GITHUB_OUTPUT"
+        run: echo "key=lessons-$(dotnet --version)-$(git ls-files -s -- $PROGRAM tools/headless tools/lessons web/lessons web/docs/pages/assets | git hash-object --stdin)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: built
         with:
@@ -286,11 +293,6 @@ jobs:
           cache-dependency-path: web/lessons/requirements.txt
       - if: steps.built.outputs.cache-hit != 'true'
         run: pip install -r web/lessons/requirements.txt
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        if: steps.built.outputs.cache-hit != 'true'
-        with:
-          name: zustand
-          path: web/lessons/out
       - name: Reach the clip store
         if: steps.built.outputs.cache-hit != 'true'
         env:
@@ -321,7 +323,7 @@ jobs:
   # The lessons take their weights from the app beside them, and the app's deploy moves them
   # aside and back, so they go up after it.
   lessons-deploy:
-    needs: [lessons, app]
+    needs: [lessons, zustand, app]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -330,6 +332,10 @@ jobs:
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: lektionen
+          path: lektionen
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: zustand
           path: lektionen
       - uses: ./.github/actions/netcup-deploy
         with:
