@@ -13,7 +13,7 @@ CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICult
 if (args[0] == "service")
     await Serve.Start();
 else if (args[0] == "lesson")
-    await Coach.Start(args[1], args.ElementAtOrDefault(2));
+    await Coach.Start(args[1], args.Length > 2 ? args[2] : null);
 else
 {
     await WorkerTransport.Start();
