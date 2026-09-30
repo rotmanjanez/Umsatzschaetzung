@@ -6,6 +6,8 @@
     <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+    <!-- The deploy compresses what the server hands out, every file on a core of its own. -->
+    <CompressionEnabled>false</CompressionEnabled>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Umsatzschaetzung.Browser/Umsatzschaetzung.Browser.csproj" />

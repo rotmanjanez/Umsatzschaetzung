@@ -84,6 +84,13 @@ jobs:
           restore-keys: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
       - if: steps.built.outputs.cache-hit != 'true'
         run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
+      # Beside each file the server hands out compressed, all at once: brotli's best level takes
+      # two minutes on one core for the runtime's 60 MB, the next one takes one for 5 % more.
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: |
+          find publish/wwwroot \( -path publish/wwwroot/models -o -path publish/wwwroot/ort \) -prune -o -type f \
+            \( -name '*.wasm' -o -name '*.js' -o -name '*.mjs' -o -name '*.map' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.ico' \) -print0 |
+            xargs -0 -n 1 -P "$(nproc)" brotli -f -q 10
       # The weights and the runtime sit under their release and never change there: what the
       # server has is kept, only what is new goes up. So the cache leaves them out, once they
       # are up. The lessons are deployed into the app by their own job.
