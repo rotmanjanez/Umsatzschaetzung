@@ -84,9 +84,9 @@ chapters:
           text: Es geht weiter, wenn es erledigt ist.
           pad: true
         say: >-
-          Und dann bist du dran. Das erkennst du an der Farbe: Es wird orange, oben
-          steht „Du bist dran“, und darunter genau, was zu tun ist. Die Stelle im
-          Programm bekommt dann einen orangen Ring.
+          Und dann bist du dran. Das erkennst du an der Farbe: Die Box unter mir wird
+          orange, und da steht genau, was zu tun ist. Die Stelle im Programm bekommt
+          dann einen orangen Ring.
         show: { page: card, act: true }
         note: So schaut es aus, wenn du dran bist.
       - card: *dran
@@ -169,7 +169,7 @@ chapters:
           width: 552
           alt: Das leere Formular für eine neue Prüfung
       - say: >-
-          Jetzt geht ein Formular auf. Die Werte stehen gleich unter „Du bist dran“.
+          Jetzt geht ein Formular auf. Was hineinkommt, steht immer in der Box unter mir.
         show: { name: NewLabel, up: StackPanel }
         hold: 1
       - say: >-
