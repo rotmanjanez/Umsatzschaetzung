@@ -10,4 +10,4 @@ runs:
           ~/.local/share/umsatzschaetzung/warm
           ~/AppData/Local/umsatzschaetzung/warm
           ~/Library/Application Support/umsatzschaetzung/warm
-        key: warm-${{ runner.os }}-${{ hashFiles('tools/embeddings/Program.cs', 'src/Umsatzschaetzung.Core/Rulestore/seed.json', 'src/Umsatzschaetzung.Core/Suggest/*.cs', 'src/Umsatzschaetzung.Inference/**/*.cs', 'Models.targets') }}
+        key: warm-${{ runner.os }}-${{ hashFiles('Embeddings.targets', 'tools/embeddings/Program.cs', 'src/Umsatzschaetzung.Core/Rulestore/seed.json', 'src/Umsatzschaetzung.Core/Suggest/*.cs', 'src/Umsatzschaetzung.Inference/**/*.cs', 'Models.targets') }}

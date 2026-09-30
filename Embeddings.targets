@@ -8,7 +8,8 @@
     <WarmCacheDir Condition="'$(WarmCacheDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.LocalApplicationData))/umsatzschaetzung/warm</WarmCacheDir>
   </PropertyGroup>
   <ItemGroup>
-    <WarmInput Include="$(MSBuildThisFileDirectory)tools/embeddings/Program.cs;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Core/Rulestore/seed.json;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Core/Suggest/*.cs;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Inference/**/*.cs;$(MSBuildThisFileDirectory)Models.targets" />
+    <WarmInput Include="$(MSBuildThisFileDirectory)tools/embeddings/Program.cs;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Core/Rulestore/seed.json;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Core/Suggest/*.cs;$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Inference/**/*.cs;$(MSBuildThisFileDirectory)Models.targets"
+               Exclude="$(MSBuildThisFileDirectory)src/Umsatzschaetzung.Inference/obj/**" />
   </ItemGroup>
 
   <Target Name="WarmEmbeddings">

@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Input;
@@ -341,12 +342,16 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     }
 
     // Nothing queued, no pool thread at work and no timer counting down: a debounce or a frame
-    // still to come. Avalonia keeps two timers of a second running for good.
+    // still to come. Avalonia keeps two timers of a second running for good, and the caret blinks
+    // for as long as a field has the focus.
     static bool Quiet() =>
         !Perf.PoolBusy()
         && !Dispatcher.UIThread.HasJobsWithPriority(DispatcherPriority.SystemIdle)
-        && Timers(Dispatcher.UIThread).TrueForAll(t => t.Interval >= TimeSpan.FromSeconds(1));
+        && Timers(Dispatcher.UIThread).TrueForAll(t => t.Interval >= TimeSpan.FromSeconds(1) || Tick(t)?.Target is TextPresenter);
 
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_timers")]
     static extern ref List<DispatcherTimer> Timers(Dispatcher dispatcher);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "Tick")]
+    static extern ref EventHandler? Tick(DispatcherTimer timer);
 }
