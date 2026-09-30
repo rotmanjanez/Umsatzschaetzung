@@ -7,7 +7,6 @@ namespace Umsatzschaetzung.Service;
 // as delivered, otherwise cleaned, straightened or turned.
 public interface IOcr
 {
-    Task<OcrPage> Recognize(byte[] image, CancellationToken ct);
     Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct);
 
     // A cut of a page read as it is, nothing straightened or turned; boxes in the cut's pixels.

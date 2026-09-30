@@ -138,6 +138,10 @@ public sealed record Raster(int Width, int Height, byte[] Pixels);
 public sealed class OcrPage
 {
     public Raster? Image { get; set; }
+
+    // The page as it is kept beside the reading, made from the pixels that were read.
+    public byte[]? Kept { get; set; }
+
     public int Width { get; set; }
     public int Height { get; set; }
     public Correction Correction { get; set; } = new();

@@ -84,12 +84,6 @@ public sealed class RapidOcr(IWeights weights, int threads = 0) : IOcr, IDisposa
         await Read(blank);
     });
 
-    public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => Task.Run(async () =>
-    {
-        using var decoded = Decode(image);
-        return await Recognize(decoded);
-    }, ct);
-
     public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => Task.Run(() => Recognize(page), ct);
 
     public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.Run(async () =>
@@ -114,8 +108,10 @@ public sealed class RapidOcr(IWeights weights, int threads = 0) : IOcr, IDisposa
     // page only shows its lean once its lines run across, so it is straightened again and,
     // if that moves it, detected again. The page carries no image: the correction renders it
     // again from the document when it is looked at.
-    async Task<OcrPage> Recognize(SKBitmap decoded)
+    async Task<OcrPage> Recognize(SKBitmap source)
     {
+        using var converted = Bgra(source);
+        var decoded = converted ?? source;
         using var cleaned = Deink.Apply(decoded);
         var read = cleaned ?? decoded;
         using var straightened = Deskew.Apply(read, out var skew);
@@ -303,17 +299,9 @@ public sealed class RapidOcr(IWeights weights, int threads = 0) : IOcr, IDisposa
     }
 
     // The detector reads straight off the pixel buffer and accepts only this layout.
-    internal static SKBitmap Decode(byte[] image)
-    {
-        using var data = SKData.CreateCopy(image);
-        using var codec = SKCodec.Create(data);
-        var decoded = (codec is null ? null : SKBitmap.Decode(codec))
-            ?? throw new InvalidOperationException("Das Seitenbild konnte nicht gelesen werden.");
-        if (decoded.ColorType == SKColorType.Bgra8888) return decoded;
-        using (decoded)
-            return decoded.Copy(SKColorType.Bgra8888)
-                ?? throw new InvalidOperationException("Das Seitenbild konnte nicht umgewandelt werden.");
-    }
+    static SKBitmap? Bgra(SKBitmap page) =>
+        page.ColorType == SKColorType.Bgra8888 ? null
+            : page.Copy(SKColorType.Bgra8888) ?? throw new InvalidOperationException("Das Seitenbild konnte nicht umgewandelt werden.");
 
     internal static SKBitmap Rotate(SKBitmap source, int degrees)
     {

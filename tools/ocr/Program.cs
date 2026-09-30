@@ -59,7 +59,7 @@ static class Program
                 var started = Stopwatch.GetTimestamp();
                 try
                 {
-                    var pages = await Scan.Read(ocr, pdf, file, await File.ReadAllBytesAsync(file, ct), dpi, ct);
+                    var pages = await Scan.Read(ocr, pdf, file, await File.ReadAllBytesAsync(file, ct), dpi, 0, ct);
                     Dump.Of(pages).Write(Dump.PathFor(file));
                     var found = pages.Sum(p => p.Words.Count);
                     Interlocked.Add(ref words, found);

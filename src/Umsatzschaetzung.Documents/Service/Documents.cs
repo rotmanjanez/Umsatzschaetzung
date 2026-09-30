@@ -12,10 +12,10 @@ public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
     const int PreviewDpi = 150;
     const float KeptScale = 0.5f;
 
-    public string Reader => $"{RapidOcr.Name}|{RapidOcr.MaxImageDimension}|{Scan.Dpi}";
+    public string Reader => $"{RapidOcr.Name}|{RapidOcr.MaxImageDimension}|{Scan.Dpi}|{KeptScale}";
 
     public Task<List<OcrPage>> Read(string fileName, byte[] data, CancellationToken ct) =>
-        Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, ct);
+        Scan.Read(ocr, pdf, fileName, data, Scan.Dpi, KeptScale, ct);
 
     public async Task<List<List<OcrWord>>> Reread(byte[] data, OcrPage reading, int page, IReadOnlyList<Box> regions, CancellationToken ct)
     {
@@ -43,15 +43,20 @@ public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
             }
     }
 
-    public async IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<Correction> reading, [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<OcrPage> reading, [EnumeratorCancellation] CancellationToken ct)
     {
+        if (reading.All(p => p.Kept is not null))
+        {
+            foreach (var page in reading) yield return page.Kept!;
+            yield break;
+        }
         if (pdf is null && InvoiceParser.Detect(data) != Kind.Image) yield break;
         var i = 0;
         await foreach (var image in Scan.Pages(pdf, data, Scan.Dpi, ct))
             using (image)
             {
                 if (i >= reading.Count) yield break;
-                var c = reading[i++];
+                var c = reading[i++].Correction;
                 yield return await Task.Run(() => Scan.Keep(image, c, KeptScale), ct);
             }
     }

@@ -6,7 +6,7 @@ namespace Umsatzschaetzung.Tests.Service;
 
 public sealed class ReadingsTests : IDisposable
 {
-    static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3];
+    static readonly byte[] Png = Encode();
 
     readonly TempDir dir = new();
     readonly Ocr ocr = new();
@@ -14,11 +14,17 @@ public sealed class ReadingsTests : IDisposable
 
     public void Dispose() => dir.Dispose();
 
+    static byte[] Encode()
+    {
+        using var page = Tests.Scan.Sheets.Blank(20, 30);
+        return Tests.Scan.Sheets.Png(page);
+    }
+
     sealed class Ocr : IOcr
     {
         public int Calls { get; private set; }
 
-        public Task<OcrPage> Recognize(byte[] image, CancellationToken ct)
+        public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct)
         {
             Calls++;
             return Task.FromResult(new OcrPage
@@ -29,8 +35,6 @@ public sealed class ReadingsTests : IDisposable
                 Words = [new OcrWord { Text = "Rechnung", Box = new Box(200, 300, 400, 60), Confidence = 0.98f }],
             });
         }
-
-        public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) => throw new NotSupportedException();
 
         public Task<List<OcrWord>> Read(Raster crop, CancellationToken ct) => Task.FromResult<List<OcrWord>>([]);
     }

@@ -20,17 +20,9 @@ public class ScanTests
 
     sealed class Ocr(Action<int>? onPage = null) : IOcr
     {
-        public List<byte[]> Images { get; } = [];
         public List<SKBitmap> Pages { get; } = [];
         public List<bool> Alive { get; } = [];
         public List<CancellationToken> Tokens { get; } = [];
-
-        public Task<OcrPage> Recognize(byte[] image, CancellationToken ct)
-        {
-            Images.Add(image);
-            Tokens.Add(ct);
-            return Task.FromResult(new OcrPage());
-        }
 
         public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct)
         {
@@ -48,8 +40,6 @@ public class ScanTests
     {
         public TaskCompletionSource<OcrPage> First { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int Started { get; private set; }
-
-        public Task<OcrPage> Recognize(byte[] image, CancellationToken ct) => throw new NotSupportedException();
 
         public Task<OcrPage> Recognize(SKBitmap page, CancellationToken ct) =>
             ++Started == 1 ? First.Task : Task.FromResult(new OcrPage { Width = page.Width });
@@ -81,12 +71,36 @@ public class ScanTests
     }
 
     [Fact]
-    public async Task AnImageGoesStraightToTheRecogniser()
+    public async Task AnImageIsDecodedAndReadAsItsOnePage()
     {
         var ocr = new Ocr();
-        var pages = await Reader.Read(ocr, null, "scan.png", Png, Reader.Dpi, Ct);
-        Assert.Same(Png, Assert.Single(ocr.Images));
-        Assert.Empty(ocr.Pages);
+        var pages = await Reader.Read(ocr, null, "scan.png", Png, Reader.Dpi, 0, Ct);
+        Assert.Equal((20, 30), (Assert.Single(pages).Width, pages[0].Height));
+        Assert.Equal(IntPtr.Zero, Assert.Single(ocr.Pages).Handle);
+    }
+
+    [Fact]
+    public async Task AnUndecodableImageFailsWithItsOwnMessage()
+    {
+        var e = await Assert.ThrowsAsync<InvalidDataException>(() => Reader.Read(new Ocr(), null, "kaputt.png", [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0], Reader.Dpi, 0, Ct));
+        Assert.Equal("Das Seitenbild konnte nicht gelesen werden.", e.Message);
+    }
+
+    [Fact]
+    public async Task AGreyPageIsKeptFromItsReadingAsItIsKeptFromTheDocument()
+    {
+        using var grey = new SKBitmap(new SKImageInfo(40, 60, SKColorType.Gray8, SKAlphaType.Opaque));
+        for (var y = 0; y < grey.Height; y++)
+            for (var x = 0; x < grey.Width; x++)
+                grey.SetPixel(x, y, new SKColor((byte)(x * 6), (byte)(x * 6), (byte)(x * 6)));
+        using var encoded = grey.Encode(SKEncodedImageFormat.Png, 100);
+        var png = encoded.ToArray();
+        var documents = new Documents(new Ocr(), null);
+
+        var read = await documents.Read("grau.png", png, Ct);
+        var kept = await documents.Keep(png, [new OcrPage { Correction = read[0].Correction }], Ct).ToListAsync(Ct);
+
+        Assert.Equal(Assert.Single(kept), read[0].Kept);
     }
 
     [Fact]
@@ -95,7 +109,7 @@ public class ScanTests
         var pdf = new Pages(3);
         var produced = new List<int>();
         var reader = new Ocr(_ => produced.Add(pdf.Produced));
-        var pages = await Reader.Read(reader, pdf, "scan.pdf", Pdf, 200, Ct);
+        var pages = await Reader.Read(reader, pdf, "scan.pdf", Pdf, 200, 0, Ct);
         Assert.Equal([10, 11, 12], pages.Select(p => p.Width));
         Assert.Equal([1, 2, 3], produced);
         Assert.Equal(200, pdf.Dpi);
@@ -107,7 +121,7 @@ public class ScanTests
     public async Task TheNextPageIsReadWhileTheOneBeforeIsStillBeingRead()
     {
         var ocr = new Held();
-        var reading = Reader.Read(ocr, new Pages(2), "scan.pdf", Pdf, Reader.Dpi, Ct);
+        var reading = Reader.Read(ocr, new Pages(2), "scan.pdf", Pdf, Reader.Dpi, 0, Ct);
         Assert.True(SpinWait.SpinUntil(() => ocr.Started == 2, TimeSpan.FromSeconds(5)));
         ocr.First.SetResult(new OcrPage { Width = 10 });
         Assert.Equal([10, 11], (await reading).Select(p => p.Width));
@@ -117,21 +131,21 @@ public class ScanTests
     public async Task AZugferdPdfIsReadAsAScanToo()
     {
         var ocr = new Ocr();
-        var pages = await Reader.Read(ocr, new PdfiumPages(), "zugferd.pdf", File.ReadAllBytes(TestData.File("zugferd.pdf")), 72, Ct);
+        var pages = await Reader.Read(ocr, new PdfiumPages(), "zugferd.pdf", File.ReadAllBytes(TestData.File("zugferd.pdf")), 72, 0, Ct);
         Assert.Equal((595, 842), (Assert.Single(pages).Width, pages[0].Height));
     }
 
     [Fact]
     public async Task WithoutARecogniserNothingIsUnsupported()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Read(null, new Pages(1), "scan.png", Png, Reader.Dpi, Ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Read(null, new Pages(1), "scan.png", Png, Reader.Dpi, 0, Ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 
     [Fact]
     public async Task APdfWithoutARendererIsUnsupported()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Read(new Ocr(), null, "scan.pdf", Pdf, Reader.Dpi, Ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Read(new Ocr(), null, "scan.pdf", Pdf, Reader.Dpi, 0, Ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
     }
 
@@ -143,7 +157,7 @@ public class ScanTests
     {
         var ocr = new Ocr();
         var e = await Assert.ThrowsAsync<ServiceError>(() =>
-            Reader.Read(ocr, new Pages(1), "x.txt", System.Text.Encoding.UTF8.GetBytes(content), Reader.Dpi, Ct));
+            Reader.Read(ocr, new Pages(1), "x.txt", System.Text.Encoding.UTF8.GetBytes(content), Reader.Dpi, 0, Ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
         Assert.Contains("x.txt", e.Message);
         Assert.Empty(ocr.Tokens);
@@ -152,7 +166,7 @@ public class ScanTests
     [Fact]
     public async Task APdfWithoutPagesIsUnsupported()
     {
-        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Read(new Ocr(), new Pages(0), "leer.pdf", Pdf, Reader.Dpi, Ct));
+        var e = await Assert.ThrowsAsync<ServiceError>(() => Reader.Read(new Ocr(), new Pages(0), "leer.pdf", Pdf, Reader.Dpi, 0, Ct));
         Assert.Equal(ErrorCode.Unsupported, e.Code);
         Assert.Contains("leer.pdf", e.Message);
     }
@@ -163,7 +177,7 @@ public class ScanTests
         using var cts = new CancellationTokenSource();
         var ocr = new Ocr();
         var pdf = new Pages(2);
-        await Reader.Read(ocr, pdf, "scan.pdf", Pdf, Reader.Dpi, cts.Token);
+        await Reader.Read(ocr, pdf, "scan.pdf", Pdf, Reader.Dpi, 0, cts.Token);
         Assert.Equal(cts.Token, pdf.Token);
         Assert.All(ocr.Tokens, t => Assert.Equal(cts.Token, t));
     }
@@ -174,7 +188,7 @@ public class ScanTests
         using var cts = new CancellationTokenSource();
         var ocr = new Ocr(_ => cts.Cancel());
         var pdf = new Pages(3);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Reader.Read(ocr, pdf, "scan.pdf", Pdf, Reader.Dpi, cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Reader.Read(ocr, pdf, "scan.pdf", Pdf, Reader.Dpi, 0, cts.Token));
         Assert.Equal(1, pdf.Produced);
         Assert.Equal(IntPtr.Zero, Assert.Single(ocr.Pages).Handle);
     }
@@ -185,7 +199,7 @@ public class ScanTests
         using var cts = new CancellationTokenSource();
         cts.Cancel();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            Reader.Read(new Ocr(), new PdfiumPages(), "zugferd.pdf", File.ReadAllBytes(TestData.File("zugferd.pdf")), 72, cts.Token));
+            Reader.Read(new Ocr(), new PdfiumPages(), "zugferd.pdf", File.ReadAllBytes(TestData.File("zugferd.pdf")), 72, 0, cts.Token));
     }
 
     [Fact]

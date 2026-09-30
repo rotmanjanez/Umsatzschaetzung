@@ -11,36 +11,33 @@ public static class Scan
     public const int Dpi = 300;
 
     // A page is rendered and detected while the one before it is read on the cores; no more
-    // than two are held at a time.
-    public static async Task<List<OcrPage>> Read(IOcr? ocr, IPdfPages? pdf, string fileName, byte[] data, int dpi, CancellationToken ct)
+    // than two are held at a time. With a scale, each page is also kept from the same pixels.
+    public static async Task<List<OcrPage>> Read(IOcr? ocr, IPdfPages? pdf, string fileName, byte[] data, int dpi, float keep, CancellationToken ct)
     {
         if (ocr is null) throw new ServiceError(ErrorCode.Unsupported, "Texterkennung nicht verfügbar");
+        if (InvoiceParser.Detect(data) is not (Kind.Image or Kind.Pdf or Kind.Zugferd))
+            throw new ServiceError(ErrorCode.Unsupported, $"\"{fileName}\" ist kein Scan");
         var pages = new List<OcrPage>();
-        switch (InvoiceParser.Detect(data))
+        Task<OcrPage>? reading = null;
+        await foreach (var page in Pages(pdf, data, dpi, ct))
         {
-            case Kind.Image:
-                pages.Add(await ocr.Recognize(data, ct));
-                break;
-            case Kind.Pdf or Kind.Zugferd:
-                Task<OcrPage>? reading = null;
-                await foreach (var page in Rasterize(pdf, data, dpi, ct))
-                {
-                    var next = Recognize(ocr, page, ct);
-                    if (reading is not null) pages.Add(await reading);
-                    reading = next;
-                }
-                if (reading is not null) pages.Add(await reading);
-                break;
-            default:
-                throw new ServiceError(ErrorCode.Unsupported, $"\"{fileName}\" ist kein Scan");
+            var next = Recognize(ocr, page, keep, ct);
+            if (reading is not null) pages.Add(await reading);
+            reading = next;
         }
+        if (reading is not null) pages.Add(await reading);
         if (pages.Count == 0) throw new ServiceError(ErrorCode.Unsupported, $"keine Seiten in \"{fileName}\" gefunden");
         return pages;
     }
 
-    static async Task<OcrPage> Recognize(IOcr ocr, SKBitmap page, CancellationToken ct)
+    static async Task<OcrPage> Recognize(IOcr ocr, SKBitmap page, float keep, CancellationToken ct)
     {
-        using (page) return await ocr.Recognize(page, ct);
+        using (page)
+        {
+            var read = await ocr.Recognize(page, ct);
+            if (keep > 0) read.Kept = await Task.Run(() => Keep(page, read.Correction, keep), ct);
+            return read;
+        }
     }
 
     // A fresh render of the document is brought into the frame the reading's boxes sit in.
@@ -144,8 +141,12 @@ public static class Scan
             ? index == 0 ? Task.Run(() => Decode(data), ct) : throw new InvalidDataException($"Bild hat keine Seite {index + 1}")
             : pdf?.Page(data, index, dpi, ct) ?? throw new ServiceError(ErrorCode.Unsupported, "PDF-Darstellung nicht verfügbar");
 
-    static SKBitmap Decode(byte[] image) =>
-        SKBitmap.Decode(image) ?? throw new InvalidDataException("Das Seitenbild konnte nicht gelesen werden.");
+    static SKBitmap Decode(byte[] image)
+    {
+        using var data = SKData.CreateCopy(image);
+        using var codec = SKCodec.Create(data);
+        return (codec is null ? null : SKBitmap.Decode(codec)) ?? throw new InvalidDataException("Das Seitenbild konnte nicht gelesen werden.");
+    }
 
     static IAsyncEnumerable<SKBitmap> Rasterize(IPdfPages? pdf, byte[] data, int dpi, CancellationToken ct) =>
         pdf?.Rasterize(data, dpi, ct) ?? throw new ServiceError(ErrorCode.Unsupported, "PDF-Darstellung nicht verfügbar");

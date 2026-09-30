@@ -20,7 +20,7 @@ public interface IDocuments
     IAsyncEnumerable<Raster> Preview(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
 
     // The pages kept beside the reading, as many as it has: upright as it saw them, smaller, compressed.
-    IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<Correction> reading, CancellationToken ct);
+    IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<OcrPage> reading, CancellationToken ct);
 
     Raster Show(byte[] kept);
 

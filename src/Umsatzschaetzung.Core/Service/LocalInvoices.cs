@@ -77,7 +77,7 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
         if (!store) return resp;
         inv.Verification = confirm ? new Verification { At = Clock.Now(), Auto = req.Intent == Intent.Auto } : null;
         var images = req is { Reading: { } reading, Data: { } data } && documents is not null
-            ? await documents.Keep(data, [.. reading.Select(p => p.Correction)], ct).ToListAsync(ct)
+            ? await documents.Keep(data, reading, ct).ToListAsync(ct)
             : null;
         var stored = Attach(req.CaseId, inv, req.FileName ?? inv.FileName, req.Data ?? [], made, req.Reading, images);
         return resp with { Stored = stored, Accepted = confirm };

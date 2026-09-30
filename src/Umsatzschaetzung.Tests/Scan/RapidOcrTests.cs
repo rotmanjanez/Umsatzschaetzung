@@ -17,6 +17,8 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
 {
     static CancellationToken Ct => TestContext.Current.CancellationToken;
 
+    async Task<OcrPage> Read(byte[] image) => Assert.Single(await Reader.Read(fixture.Ocr, null, "scan.png", image, Reader.Dpi, 0, Ct));
+
     // 12 pt at 300 dpi.
     static SKBitmap Line(string text, int width = 1000, int height = 240)
     {
@@ -57,7 +59,7 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
     public async Task AnEncodedImageIsReadTheSame()
     {
         using var line = Line("Rechnung 4711");
-        Plausible(await fixture.Ocr.Recognize(Sheets.Png(line), Ct), line.Width, line.Height);
+        Plausible(await Read(Sheets.Png(line)), line.Width, line.Height);
     }
 
     [Fact]
@@ -72,7 +74,7 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
         }
         var png = Sheets.Png(flipped);
 
-        var page = await fixture.Ocr.Recognize(png, Ct);
+        var page = await Read(png);
 
         Assert.Equal(180, page.Correction.Turn);
         Plausible(page, line.Width, line.Height);
@@ -92,18 +94,9 @@ public class RapidOcrTests(OcrFixture fixture) : IClassFixture<OcrFixture>
     public async Task ABlankPageHasNoWordsAndNoImage()
     {
         using var blank = Sheets.Blank(400, 300);
-        var page = await fixture.Ocr.Recognize(Sheets.Png(blank), Ct);
+        var page = await Read(Sheets.Png(blank));
         Assert.Empty(page.Words);
         Assert.Null(page.Image);
         Assert.Equal((400, 300), (page.Width, page.Height));
-    }
-
-    [Theory]
-    [InlineData(new byte[] { 1, 2, 3 })]
-    [InlineData(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0 })]
-    public async Task AnUndecodableImageFailsWithItsOwnMessage(byte[] image)
-    {
-        var e = await Assert.ThrowsAsync<InvalidOperationException>(() => fixture.Ocr.Recognize(image, Ct));
-        Assert.Equal("Das Seitenbild konnte nicht gelesen werden.", e.Message);
     }
 }
