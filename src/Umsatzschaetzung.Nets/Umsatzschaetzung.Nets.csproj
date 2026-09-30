@@ -8,7 +8,7 @@
        runs and would not show up in any diff here. The WebGPU plugin sits beside it: DirectX 12
        on Windows, Metal on macOS. -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.EP.WebGpu" Version="0.3.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.30.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.EP.WebGpu" Version="0.4.0" />
   </ItemGroup>
 </Project>

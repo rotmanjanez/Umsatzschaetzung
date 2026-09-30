@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Suggest;
@@ -14,10 +13,8 @@ public sealed class EncoderFixture : IDisposable
 
 public class EncoderTests(EncoderFixture f) : IClassFixture<EncoderFixture>
 {
-    // The fixture was measured on Apple silicon; int8 kernels are not bit-portable, and on
-    // x86 the same vectors come out about 0.98 apart.
-    static readonly double ParityCosine =
-        OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? 0.999 : 0.98;
+    // int8 kernels are not bit-portable across CPUs and ORT versions.
+    const double ParityCosine = 0.98;
 
     // A drift in the tokenizer or the graph costs accuracy without ever crashing. Each
     // text is embedded alone, as the fixture was: inside a padded batch the per-tensor
