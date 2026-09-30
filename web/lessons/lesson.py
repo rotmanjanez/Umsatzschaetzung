@@ -426,6 +426,7 @@ def site(lessons: list[Lesson]):
 def placed(ep: Lesson, page: str):
     target = SITE / ep.path.parent.name
     shutil.rmtree(target, ignore_errors=True)
+    target.mkdir(parents=True)
     if (ep.out / "zustand").exists():
         shutil.copytree(ep.out / "zustand", target / "zustand")
     (target / "index.html").write_text(page)
