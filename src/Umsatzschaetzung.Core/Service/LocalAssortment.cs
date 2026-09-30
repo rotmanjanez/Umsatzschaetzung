@@ -1,3 +1,4 @@
+using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Reports;
 using Umsatzschaetzung.Rulestore;
@@ -14,4 +15,19 @@ sealed class LocalAssortment(RuleStore rules, LocalCases cases) : IAssortment
     });
 
     public Task<AssortmentImport> Read(byte[] data, CancellationToken ct) => Guard(ct, () => Csv.ReadAssortment(data, rules.Load()));
+
+    public Task<List<string>> Suggest(string caseId, List<string> dismissed, CancellationToken ct) =>
+        Guard(ct, () =>
+        {
+            var c = cases.Load(caseId);
+            var rs = rules.Load();
+            try
+            {
+                return Suggestions.For(c, rs, dismissed.ToHashSet());
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                throw new ServiceError(ErrorCode.Invalid, "Kalkulation: " + e.Message, inner: e);
+            }
+        });
 }

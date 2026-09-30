@@ -74,6 +74,7 @@ public static class Remote
     {
         public Task<ExportResp> Export(string caseId, CancellationToken ct) => at.Call<CaseArg, ExportResp>("assortment.export", new(caseId), ct);
         public Task<AssortmentImport> Read(byte[] data, CancellationToken ct) => at.Call<DataArg, AssortmentImport>("assortment.read", new(data), ct);
+        public Task<List<string>> Suggest(string caseId, List<string> dismissed, CancellationToken ct) => at.Call<DismissedArg, List<string>>("assortment.suggest", new(caseId, dismissed), ct);
     }
 
     sealed class Mapping(Caller at) : IMapping
@@ -140,6 +141,7 @@ public sealed class Dispatch(Services s)
 
         "assortment.export" => In<CaseArg, ExportResp>(m, a => s.Assortment.Export(a.CaseId, ct)),
         "assortment.read" => In<DataArg, AssortmentImport>(m, a => s.Assortment.Read(a.Data, ct)),
+        "assortment.suggest" => In<DismissedArg, List<string>>(m, a => s.Assortment.Suggest(a.CaseId, a.Dismissed, ct)),
 
         "mapping.suggest" => In<SuggestArg, List<MappingCandidate>>(m, a => s.Mapping.Suggest(a.CaseId, a.Line, a.Supplier, ct)),
         "mapping.map" => In<CaseArg, Case>(m, a => s.Mapping.Map(a.CaseId, ct)),

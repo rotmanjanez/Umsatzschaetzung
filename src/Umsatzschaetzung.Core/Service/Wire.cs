@@ -33,6 +33,7 @@ public sealed record InvoiceArg(string CaseId, string InvoiceId);
 public sealed record SnippetArg(string CaseId, string InvoiceId, int Line, string Name);
 public sealed record UnifyArg(string CaseId, List<string> InvoiceIds);
 public sealed record SuggestArg(string CaseId, InvoiceLine Line, string? Supplier);
+public sealed record DismissedArg(string CaseId, List<string> Dismissed);
 public sealed record RenderArg(string CaseId, bool Pdf);
 public sealed record DeleteRuleArg(Entity Kind, string Id);
 public sealed record RulesSeen(string? Store, long Version);
@@ -73,6 +74,8 @@ public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezwe
 [JsonSerializable(typeof(SnippetArg))]
 [JsonSerializable(typeof(UnifyArg))]
 [JsonSerializable(typeof(SuggestArg))]
+[JsonSerializable(typeof(DismissedArg))]
+[JsonSerializable(typeof(List<string>))]
 [JsonSerializable(typeof(RenderArg))]
 [JsonSerializable(typeof(DeleteRuleArg))]
 [JsonSerializable(typeof(RulesSeen))]

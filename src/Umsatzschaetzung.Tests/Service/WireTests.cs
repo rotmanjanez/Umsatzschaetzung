@@ -81,6 +81,20 @@ public sealed class WireTests : IDisposable
     }
 
     [Fact]
+    public async Task WhatTheListedProductsLeaveOverIsSuggested()
+    {
+        var kase = Vorlage.Load();
+        kase.Products.RemoveAll(p => p.ProductId.StartsWith("prod.korn"));
+        await svc.Cases.Put(kase, ct);
+
+        var suggested = await svc.Assortment.Suggest(kase.Id, [], ct);
+        Assert.Contains(suggested, id => id.StartsWith("prod.korn"));
+        Assert.Equal(suggested, await host.Service.Assortment.Suggest(kase.Id, [], ct));
+        Assert.DoesNotContain(suggested, id => kase.Products.Exists(p => p.ProductId == id));
+        Assert.DoesNotContain(suggested[0], await svc.Assortment.Suggest(kase.Id, [suggested[0]], ct));
+    }
+
+    [Fact]
     public async Task AnUnknownCallIsRefused()
     {
         var answer = await new Dispatch(host.Service).Handle("cases.shred", Message.Empty, ct);

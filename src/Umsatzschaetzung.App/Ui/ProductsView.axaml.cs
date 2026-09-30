@@ -162,16 +162,13 @@ public partial class ProductsView : Screen
         model.Suggesting = withInvoices;
         var saving = Session.SaveCase(At(edited), Ct);
         var stamp = Session.Stamp;
-        if (await saving && withInvoices && g == generation) await Session.Run(async () =>
+        if (await saving && withInvoices && g == generation
+            && await Assortment.Suggest(Session, kase.Id, rs, dismissed, Ct) is { } suggestions && g == generation)
         {
-            var sold = await Assortment.Calculate(Session, kase, rs, Ct);
-            if (sold is null || g != generation) return;
-            var suggestions = await Assortment.Suggest(Session, kase, rs, sold, dismissed, Ct);
-            if (suggestions is null || g != generation) return;
             model.Suggestions.Clear();
             foreach (var s in suggestions) model.Suggestions.Add(s);
             drawn = stamp;
-        });
+        }
         if (g == generation) model.Suggesting = false;
     }
 

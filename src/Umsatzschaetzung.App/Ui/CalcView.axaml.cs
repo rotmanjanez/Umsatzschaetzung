@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -199,7 +200,7 @@ public partial class CalcView : Screen
         var g = ++generation;
         drawn = null;
         model.Busy = model.HasResult;
-        var report = await Assortment.Calculate(Session, kase, rs, Ct);
+        var report = await Assortment.Calculate(Session, kase.Id, Ct);
         if (g != generation) return false;
         if (report is not null) ShowResult(kase, rs, report);
         model.Busy = false;
@@ -231,7 +232,7 @@ public partial class CalcView : Screen
     void ShowResult(Case kase, RuleSet catalog, Report r)
     {
         var rs = Recipes.Effective(kase, catalog);
-        var listed = Assortment.Listed(kase);
+        var listed = Suggestions.Listed(kase);
         var sold = r.Products.Where(p => listed.Contains(p.ProductId))
             .OrderBy(p => Names.Product(rs, p.ProductId), StringComparer.CurrentCulture).ToList();
         var wanted = Session.WantedProduct;

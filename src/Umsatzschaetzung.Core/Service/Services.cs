@@ -70,6 +70,7 @@ public interface IAssortment
 {
     Task<ExportResp> Export(string caseId, CancellationToken ct);                                                           // GET  /cases/{id}/assortment/export   the listed products as CSV
     Task<AssortmentImport> Read(byte[] data, CancellationToken ct);                                                         // POST /assortment/read   the products of the CSV with their price, nothing is saved; resp.Unknown names the rows no product matched
+    Task<List<string>> Suggest(string caseId, List<string> dismissed, CancellationToken ct);                                // POST /cases/{id}/assortment/suggest   the ids of catalog products worth listing, best first
 }
 
 public interface IMapping
