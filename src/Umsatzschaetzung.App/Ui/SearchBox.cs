@@ -7,6 +7,7 @@ using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Threading;
 
 namespace Umsatzschaetzung.App.Ui;
 
@@ -31,6 +32,8 @@ public sealed class SearchBox : Grid
         Padding = new Thickness(8, 4),
     };
     readonly List<(DataGridCollectionView View, IEnumerable Source)> views = [];
+    readonly DispatcherTimer typing = new() { Interval = TimeSpan.FromMilliseconds(150) };
+    string[] terms = [];
 
     public SearchBox()
     {
@@ -48,14 +51,19 @@ public sealed class SearchBox : Grid
         box.InnerRightContent = clear;
         Children.Add(box);
         Children.Add(hint);
+        // The lists are filtered once typing pauses, not again for every key on the way.
         box.TextChanged += (_, _) =>
         {
-            foreach (var v in views) v.View.Refresh();
-            Update();
+            Hint();
+            typing.Stop();
+            typing.Start();
         };
+        typing.Tick += (_, _) => Apply();
         clear.Click += (_, _) => Reset();
+        box.LostFocus += (_, _) => Flush();
         box.KeyDown += (_, e) =>
         {
+            if (e.Key is Key.Enter or Key.Tab or Key.Up or Key.Down) Flush();
             if (e.Key != Key.Escape || box.Text is null or "") return;
             e.Handled = true;
             Reset();
@@ -81,22 +89,35 @@ public sealed class SearchBox : Grid
     public void Reset()
     {
         box.Text = "";
+        Apply();
         box.Focus();
     }
 
-    void Update()
+    // A key that moves on to the list finds it filtered by what was typed.
+    void Flush()
+    {
+        if (typing.IsEnabled) Apply();
+    }
+
+    void Apply()
+    {
+        typing.Stop();
+        terms = (box.Text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var v in views) v.View.Refresh();
+        Update();
+    }
+
+    void Hint()
     {
         var filtering = box.Text is not (null or "");
         hint.IsVisible = !filtering;
         clear.IsVisible = filtering;
-        NoMatches = filtering && views.All(v => v.View.Count == 0) && views.Any(v => v.Source.Cast<object>().Any());
     }
 
-    bool Match(string s)
-    {
-        var terms = (box.Text ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return terms.Length == 0 || terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));
-    }
+    void Update() =>
+        NoMatches = terms.Length > 0 && views.All(v => v.View.Count == 0) && views.Any(v => v.Source.Cast<object>().Any());
+
+    bool Match(string s) => terms.All(t => s.Contains(t, StringComparison.OrdinalIgnoreCase));
 
     sealed class Peer(SearchBox owner) : NoneAutomationPeer(owner)
     {
