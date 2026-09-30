@@ -9,7 +9,7 @@
     <ProjectReference Include="../../src/Umsatzschaetzung.App/Umsatzschaetzung.App.csproj" />
     <PackageReference Include="Avalonia.Headless" Version="12.1.2" />
     <PackageReference Include="Avalonia.Skia" Version="12.1.2" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.621003" />
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.745401" />
     <Compile Include="../../src/Umsatzschaetzung.Web/Lessons/Steps.cs" />
     <Compile Include="../../src/Umsatzschaetzung.Web/Lessons/Targets.cs" />
   </ItemGroup>
