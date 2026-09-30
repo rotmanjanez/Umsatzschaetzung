@@ -49,7 +49,6 @@ public partial class ReportView : Screen
     public ReportView(Session session) : base(session)
     {
         InitializeComponent();
-        Preview.Content = Web as Control;
         DataContext = model;
         Session.CaseChanged += () => { if (IsActive && Session.Case?.TemplateId != model.Template?.Id) Load(); };
         model.PropertyChanged += (_, e) =>
@@ -58,7 +57,12 @@ public partial class ReportView : Screen
         };
     }
 
-    protected override void OnEnter() => Load();
+    // The web view starts with the first visit to the Bericht, not with every case opened.
+    protected override void OnEnter()
+    {
+        Preview.Content ??= Web as Control;
+        Load();
+    }
 
     protected override void Render(RuleSet rules) => Load();
 

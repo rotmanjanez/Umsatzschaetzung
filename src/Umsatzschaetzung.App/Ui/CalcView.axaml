@@ -73,7 +73,7 @@
                        Text="Die Kalkulation leitet Portionen und Umsätze aus den zugeordneten Rechnungspositionen ab. Ohne Rechnungen gibt es nichts zu rechnen."/>
             <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices" AutomationProperties.AutomationId="CalcGoInvoices"/>
         </StackPanel>
-        <TabControl x:Name="Pages" Background="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding HasResult}"
+        <TabControl x:Name="Pages" Theme="{StaticResource KeptTabs}" Background="Transparent" BorderThickness="0" Padding="0" IsVisible="{Binding HasResult}"
                     AutomationProperties.Name="Kalkulation" AutomationProperties.AutomationId="CalcPages">
             <TabItem x:Name="PortionsPage" Header="Portionen" AutomationProperties.AutomationId="CalcPortionsTab">
                 <Grid Margin="0,16,0,0">

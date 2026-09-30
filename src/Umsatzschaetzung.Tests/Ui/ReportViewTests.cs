@@ -1,5 +1,6 @@
 using System.Text;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using Umsatzschaetzung.App.Platform;
 using Umsatzschaetzung.App.Ui;
@@ -40,7 +41,7 @@ public class ReportViewTests
         {
             shell.Session.Open(kase);
             shell.Session.Go(Tab.Report);
-            var view = (ReportView)((TabItem)shell.Tabs.SelectedItem!).Content!;
+            var view = shell.GetLogicalDescendants().OfType<ReportView>().Single();
             model = (ReportModel)view.DataContext!;
             model.PropertyChanged += async (_, e) =>
             {

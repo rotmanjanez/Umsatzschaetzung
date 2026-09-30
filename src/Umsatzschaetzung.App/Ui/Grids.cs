@@ -36,7 +36,7 @@ public static class Grids
 
     static void Stretch(object? sender, EventArgs e)
     {
-        if (sender is not DataGrid grid) return;
+        if (sender is not DataGrid { IsEffectivelyVisible: true } grid) return;
 
         var index = GetFlex(grid);
         if (index < 0 || index >= grid.Columns.Count) return;

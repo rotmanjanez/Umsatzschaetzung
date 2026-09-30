@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui">
 
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
@@ -349,6 +350,22 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
         <Setter Property="FocusAdorner" Value="{StaticResource FocusInset}"/>
+    </ControlTheme>
+
+    <ControlTheme x:Key="KeptTabs" TargetType="TabControl" BasedOn="{StaticResource {x:Type TabControl}}">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" VerticalAlignment="{TemplateBinding VerticalAlignment}">
+                    <DockPanel>
+                        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" DockPanel.Dock="{TemplateBinding TabStripPlacement}"/>
+                        <Panel ClipToBounds="True">
+                            <ui:TabPages Margin="{TemplateBinding Padding}"/>
+                        </Panel>
+                    </DockPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
     </ControlTheme>
 
     <ControlTheme x:Key="DropZone" TargetType="Rectangle">

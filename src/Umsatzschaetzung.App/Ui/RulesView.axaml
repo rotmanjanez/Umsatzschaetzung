@@ -8,7 +8,7 @@
     <DockPanel>
         <Button DockPanel.Dock="Right" VerticalAlignment="Top" Theme="{StaticResource HelpButton}" Click="ShowHelp"
                 AutomationProperties.Name="Hilfe" AutomationProperties.AcceleratorKey="F1" AutomationProperties.AutomationId="RulesHelp"/>
-        <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" KeyboardNavigation.TabIndex="0"
+        <TabControl x:Name="Tabs" Theme="{StaticResource KeptTabs}" Background="Transparent" BorderThickness="0" KeyboardNavigation.TabIndex="0"
                     AutomationProperties.Name="Regelbereiche" AutomationProperties.AutomationId="RulesTabs">
 
             <TabItem Header="Zutaten" AutomationProperties.AutomationId="RulesIngredientsTab">

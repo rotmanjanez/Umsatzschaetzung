@@ -176,9 +176,12 @@ public partial class ShellView : UserControl
     {
         current?.Leave();
         current = null;
-        CaseUi.IsEnabled = false;
-        await session.Saved;
-        CaseUi.IsEnabled = true;
+        if (!session.Saved.IsCompleted)
+        {
+            CaseUi.IsEnabled = false;
+            await session.Saved;
+            CaseUi.IsEnabled = true;
+        }
         session.CloseCase();
         CaseUi.IsVisible = false;
         CasesHost.IsVisible = true;

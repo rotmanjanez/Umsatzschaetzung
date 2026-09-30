@@ -43,7 +43,7 @@
                             <TextBlock x:Name="CasePeriod" Theme="{StaticResource Muted}" TextTrimming="CharacterEllipsis" AutomationProperties.AutomationId="CasePeriod"/>
                         </StackPanel>
                     </DockPanel>
-                    <TabControl x:Name="Tabs" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged" AutomationProperties.Name="Schritte der Prüfung" AutomationProperties.LandmarkType="Navigation" AutomationProperties.AutomationId="CaseTabs">
+                    <TabControl x:Name="Tabs" Theme="{StaticResource KeptTabs}" Background="Transparent" BorderThickness="0" SelectionChanged="TabChanged" AutomationProperties.Name="Schritte der Prüfung" AutomationProperties.LandmarkType="Navigation" AutomationProperties.AutomationId="CaseTabs">
                         <TabItem Header="Prüfung" AutomationProperties.AutomationId="CaseTab"/>
                         <TabItem Header="1. Rechnungen" AutomationProperties.AutomationId="InvoicesTab"/>
                         <TabItem Header="2. Zuordnung" AutomationProperties.AutomationId="MappingTab"/>
