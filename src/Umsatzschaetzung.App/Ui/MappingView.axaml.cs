@@ -106,7 +106,7 @@ public partial class MappingView : Screen
         if (drawn == stamp) return;
         var at = ++refreshes;
         var (kase, rs) = (Session.Case, Session.Rules);
-        var groups = await Task.Run(() => LineGroup.Of(kase, rs));
+        var groups = await Task.Run(LineGroup.Later(kase, rs));
         if (at != refreshes) return;
         drawn = stamp;
         var kept = Groups.SelectedItem as LineGroup;

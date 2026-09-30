@@ -28,14 +28,24 @@ public sealed class LineGroup
     // Open positions first, then the machine's decisions, then what a person already settled.
     public int Rank => State == Checked.Pending ? 0 : State == Checked.Automatic ? 1 : 2;
 
-    public static List<LineGroup> Of(Case? c, RuleSet? rs)
+    public static List<LineGroup> Of(Case? c, RuleSet? rs) => c is null ? [] : Of(c.Invoices, c.Mappings, rs);
+
+    // Copies what an import adds to, for groups made on another thread.
+    public static Func<List<LineGroup>> Later(Case? c, RuleSet? rs)
+    {
+        if (c is null) return () => [];
+        List<Invoice> invoices = [.. c.Invoices];
+        Dictionary<string, ArticleMapping> mappings = new(c.Mappings);
+        return () => Of(invoices, mappings, rs);
+    }
+
+    static List<LineGroup> Of(List<Invoice> invoices, Dictionary<string, ArticleMapping> mappings, RuleSet? rs)
     {
         var groups = new Dictionary<string, LineGroup>();
-        if (c is null) return [];
-        rs = rs?.With(c.Mappings);
-        for (var i = 0; i < c.Invoices.Count; i++)
+        rs = rs?.With(mappings);
+        for (var i = 0; i < invoices.Count; i++)
         {
-            var inv = c.Invoices[i];
+            var inv = invoices[i];
             for (var j = 0; j < inv.Lines.Count; j++)
             {
                 var l = inv.Lines[j];
@@ -51,8 +61,8 @@ public sealed class LineGroup
         }
         foreach (var g in groups.Values)
         {
-            g.State = g.StateOf(c, rs);
-            g.Search = g.SearchOf(c, rs);
+            g.State = g.StateOf(invoices, rs);
+            g.Search = g.SearchOf(invoices, rs);
         }
         return [.. groups.Values];
     }
@@ -64,10 +74,10 @@ public sealed class LineGroup
         : "n:" + ArticleName.Canonical(l.Name);
 
     // Besides its own wording a group is found by what it maps to: "Bier" finds the Pils.
-    string SearchOf(Case c, RuleSet? rs)
+    string SearchOf(List<Invoice> invoices, RuleSet? rs)
     {
         var mapped = Lines
-            .Select(p => c.Invoices[p.Invoice].Lines[p.Line].MappingId)
+            .Select(p => invoices[p.Invoice].Lines[p.Line].MappingId)
             .Select(id => string.IsNullOrEmpty(id) ? null : rs?.Mappings.GetValueOrDefault(id))
             .Select(m => m is null ? null : rs!.Ingredients.GetValueOrDefault(m.IngredientId))
             .OfType<Ingredient>()
@@ -78,12 +88,12 @@ public sealed class LineGroup
 
     // A group is settled by the weakest of its lines: one open line keeps it open, one
     // machine decision keeps it automatic.
-    Checked StateOf(Case c, RuleSet? rs)
+    Checked StateOf(List<Invoice> invoices, RuleSet? rs)
     {
         var state = Checked.Manual;
         foreach (var (inv, line) in Lines)
         {
-            var l = c.Invoices[inv].Lines[line];
+            var l = invoices[inv].Lines[line];
             if (string.IsNullOrEmpty(l.MappingId) || rs?.Mappings.GetValueOrDefault(l.MappingId) is not { } m) return Checked.Pending;
             if (m.Factor is null && Scale.NeedsFactor(rs, m.IngredientId, l)) return Checked.Pending;
             MappingId ??= l.MappingId;
