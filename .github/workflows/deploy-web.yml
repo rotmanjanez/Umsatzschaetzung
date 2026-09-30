@@ -74,14 +74,19 @@ jobs:
       - id: toolchain
         if: steps.built.outputs.cache-hit != 'true'
         run: echo "wasm=$(dotnet workload list | grep wasm-tools | tr -s ' ' '_')" >> "$GITHUB_OUTPUT"
-      # The AOT compiler skips an assembly whose trimmed IL it compiled before; keyed by the
-      # toolchain, since a new compiler would take the old output for current.
+      # The AOT compiler keeps the code of an assembly whose content has not changed, so its
+      # native object is not built again; keyed by the toolchain, since a new compiler would take
+      # the old output for current.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.built.outputs.cache-hit != 'true'
         with:
           path: src/Umsatzschaetzung.Web/obj/Release/net10.0/wasm/for-publish
           key: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-${{ github.sha }}
           restore-keys: web-aot-${{ steps.toolchain.outputs.wasm }}-${{ hashFiles('src/Umsatzschaetzung.Web/*.csproj', 'src/Umsatzschaetzung.Browser/Browser.props') }}-
+      # Stripping the IL goes by date, and a newer package's assembly keeps its older date, so
+      # the page would load the old assembly beside code compiled for the new one.
+      - if: steps.built.outputs.cache-hit != 'true'
+        run: rm -rf src/Umsatzschaetzung.Web/obj/Release/net10.0/wasm/for-publish/stripped
       - if: steps.built.outputs.cache-hit != 'true'
         run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
       # Beside each file the server hands out compressed, all at once: brotli's best level takes
