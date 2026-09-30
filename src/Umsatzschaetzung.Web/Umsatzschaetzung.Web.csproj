@@ -4,7 +4,9 @@
     <RootNamespace>Umsatzschaetzung.Web</RootNamespace>
     <RunAOTCompilation Condition="'$(Configuration)' == 'Release'">true</RunAOTCompilation>
     <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
+    <!-- Everything trimmed but the program's own assemblies, which reflect over their rows and
+         steps and are kept whole: a tenth off the runtime's download. -->
+    <TrimMode>full</TrimMode>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
     <!-- The deploy compresses what the server hands out, every file on a core of its own. -->
     <CompressionEnabled>false</CompressionEnabled>
@@ -17,6 +19,12 @@
   </ItemGroup>
 
   <Import Project="../Umsatzschaetzung.Browser/Browser.targets" />
+
+  <Target Name="KeepOwnAssemblies" AfterTargets="PrepareForILLink">
+    <ItemGroup>
+      <ManagedAssemblyToLink Condition="'%(ManagedAssemblyToLink.ReferenceSourceTarget)' == 'ProjectReference' or '%(Filename)' == '$(AssemblyName)'" TrimMode="copy" />
+    </ItemGroup>
+  </Target>
 
   <Target Name="PublishHtaccess" AfterTargets="Publish">
     <Copy SourceFiles="htaccess" DestinationFiles="$(PublishDir)wwwroot/.htaccess" SkipUnchangedFiles="true" />

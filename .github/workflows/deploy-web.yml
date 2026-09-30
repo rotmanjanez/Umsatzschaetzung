@@ -93,15 +93,20 @@ jobs:
         run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
       # Beside each file the server hands out compressed, all at once: brotli's best level takes
       # two minutes on one core for the runtime's 60 MB, the next one takes one for 5 % more.
-      - if: steps.built.outputs.cache-hit != 'true'
+      # Meanwhile the app and a lesson on its program start in Chrome, served as the server
+      # serves them, each file compressed once its copy is whole: nothing goes up that does not.
+      - timeout-minutes: 8
+        env:
+          COMPRESS: ${{ steps.built.outputs.cache-hit != 'true' }}
         run: |
-          find publish/wwwroot \( -path publish/wwwroot/models -o -path publish/wwwroot/ort \) -prune -o -type f \
-            \( -name '*.wasm' -o -name '*.js' -o -name '*.mjs' -o -name '*.map' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.ico' -o -name '*.dat' \) -print0 |
-            xargs -0 -n 1 -P "$(nproc)" brotli -f -q 10
-      # Nothing goes up that does not start: the app, and a lesson on its program, in Chrome,
-      # served as the server serves them.
-      - timeout-minutes: 5
-        run: python3 tools/boot/boot.py publish/wwwroot
+          if $COMPRESS; then
+            find publish/wwwroot \( -path publish/wwwroot/models -o -path publish/wwwroot/ort \) -prune -o -type f \
+              \( -name '*.wasm' -o -name '*.js' -o -name '*.mjs' -o -name '*.map' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.ico' -o -name '*.dat' \) -print0 |
+              nice -n 19 xargs -0 -n 1 -P "$(nproc)" sh -c 'brotli -f -q 10 -o "$0.part" "$0" && mv "$0.part" "$0.br"' &
+          fi
+          python3 tools/boot/boot.py publish/wwwroot
+          wait $!
+          find publish/wwwroot -name '*.br' -print0 | xargs -0 -n 1 -P "$(nproc)" sh -c 'brotli -dc "$0" | cmp -s - "${0%.br}"'
       # The weights and the runtime sit under their release and never change there: what the
       # server has is kept, only what is new goes up. So the cache leaves them out, once they
       # are up. The lessons are deployed into the app by their own job.
@@ -207,9 +212,13 @@ jobs:
   # screenshots, so a guide page that fails its image does not hold back the lessons. The
   # script it plays is the guide's without the photographs, at the lessons' window, with the
   # stores kept where the lessons named in LESSONS start; what a lesson says does not change it.
+  # On arm64 Linux, which reckons the weights to the same bits as the Macs and plays the guide in
+  # a fifth of their time; on x64 they come out apart and the guide fails.
   zustand:
-    runs-on: macos-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    env:
+      UMSATZSCHAETZUNG_CPU: 1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -235,7 +244,7 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.kept.outputs.cache-hit != 'true'
         with:
-          path: ~/Library/Application Support/umsatzschaetzung/models
+          path: ~/.local/share/umsatzschaetzung/models
           key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
       - uses: ./.github/actions/warm-embeddings
         if: steps.kept.outputs.cache-hit != 'true'
@@ -244,10 +253,12 @@ jobs:
         run: |
           curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
           unzip -q beispiel.zip -d beispiel-rechnungen
+      # The readings the screenshots recorded on the Mac; stores from any invoice read here go up
+      # but are not kept, and are made again from the Mac's readings on the next run.
       - name: Key the recorded readings
         if: steps.kept.outputs.cache-hit != 'true'
         id: code
-        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+        run: echo "key=readings-macOS-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.kept.outputs.cache-hit != 'true'
         with:
@@ -256,11 +267,19 @@ jobs:
           restore-keys: ${{ steps.code.outputs.key }}
       - name: Keep the stores each lesson starts from
         if: steps.kept.outputs.cache-hit != 'true'
+        id: stores
         env:
           UMSATZ_LESSON_CACHE: ${{ github.workspace }}
-        run: python web/lessons/lesson.py zustand
+        run: |
+          recorded=$(find readings -name '*.json' 2>/dev/null | wc -l)
+          python web/lessons/lesson.py zustand
+          if [ "$(find readings -name '*.json' | wc -l)" = "$recorded" ]; then
+            echo "mac=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::invoices the Mac has not read were read here; the stores go up but are not kept"
+          fi
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        if: steps.kept.outputs.cache-hit != 'true'
+        if: steps.stores.outputs.mac == 'true'
         with:
           path: web/lessons/out/*/zustand
           key: ${{ steps.key.outputs.key }}
