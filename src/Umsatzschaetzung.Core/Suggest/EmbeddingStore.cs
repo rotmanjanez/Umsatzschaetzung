@@ -45,19 +45,21 @@ public sealed class EmbeddingStore : IEmbeddingCache
         return found;
     }
 
+    // An index asks for thousands at once.
     static void Find(string at, string model, IReadOnlyCollection<string> texts, Dictionary<string, float[]> found)
     {
         if (texts.Count == 0) return;
         using var db = Open(at);
-        using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT vec FROM embedding WHERE model = @model AND text = @text";
-        cmd.Parameters.AddWithValue("@model", model);
-        var text = cmd.Parameters.AddWithValue("@text", "");
-        foreach (var t in texts)
+        foreach (var batch in texts.Chunk(500))
         {
-            text.Value = t;
-            if (cmd.ExecuteScalar() is byte[] { Length: IEncoder.Width * 4 } blob)
-                found[t] = MemoryMarshal.Cast<byte, float>(blob).ToArray();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = $"SELECT text, vec FROM embedding WHERE model = @model AND text IN ({string.Join(',', batch.Select((_, i) => "@t" + i))})";
+            cmd.Parameters.AddWithValue("@model", model);
+            for (var i = 0; i < batch.Length; i++) cmd.Parameters.AddWithValue("@t" + i, batch[i]);
+            using var rows = cmd.ExecuteReader();
+            while (rows.Read())
+                if (rows.GetValue(1) is byte[] { Length: IEncoder.Width * 4 } blob)
+                    found[rows.GetString(0)] = MemoryMarshal.Cast<byte, float>(blob).ToArray();
         }
     }
 

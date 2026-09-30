@@ -1,3 +1,5 @@
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Suggest;
@@ -103,12 +105,19 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
 
     static readonly char[] Separators = [' ', ',', ';', '/', '(', ')'];
 
+    // Each product in float, summed as doubles.
     double Dot(float[] query, int entry)
     {
-        var at = entry * IEncoder.Width;
-        var sum = 0.0;
-        for (var i = 0; i < IEncoder.Width; i++) sum += query[i] * vectors[at + i];
-        return sum;
+        var stored = MemoryMarshal.Cast<float, Vector<float>>(vectors.AsSpan(entry * IEncoder.Width, IEncoder.Width));
+        var asked = MemoryMarshal.Cast<float, Vector<float>>(query);
+        Vector<double> low = default, high = default;
+        for (var i = 0; i < stored.Length; i++)
+        {
+            Vector.Widen(asked[i] * stored[i], out var l, out var h);
+            low += l;
+            high += h;
+        }
+        return Vector.Sum(low + high);
     }
 
     // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never

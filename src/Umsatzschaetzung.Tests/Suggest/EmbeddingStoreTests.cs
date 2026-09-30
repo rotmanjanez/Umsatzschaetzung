@@ -39,6 +39,18 @@ public sealed class EmbeddingStoreTests : IDisposable
     }
 
     [Fact]
+    public void ThousandsAreReadAtOnce()
+    {
+        var store = new EmbeddingStore(dir.Path);
+        var texts = Enumerable.Range(0, 1234).Select(i => "Ware " + i).ToList();
+        var stored = texts.Where((_, i) => i % 3 > 0).ToList();
+        store.Write(Model, [.. stored.Select(t => (t, V(t.Length)))]);
+        var got = store.Read(Model, texts);
+        Assert.Equal(stored.Order(StringComparer.Ordinal), got.Keys.Order(StringComparer.Ordinal));
+        Assert.All(got, p => Assert.Equal(V(p.Key.Length), p.Value));
+    }
+
+    [Fact]
     public void TheModelIsPartOfTheKey()
     {
         var store = new EmbeddingStore(dir.Path);
