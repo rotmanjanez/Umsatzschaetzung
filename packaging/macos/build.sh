@@ -45,6 +45,9 @@ rm -rf "$dist"
 # In Contents/MacOS darf nur Code liegen: alles andere dort hält codesign für
 # verschachtelte Bundles und verlangt für jedes eine eigene Signatur. Deshalb
 # auch der Einzeldatei-Build - die .NET-Assemblies wären sonst genau das.
+# Wärmt der Build die Embeddings vor, baut er die Bibliotheken dafür in dieselben Ordner,
+# aber mit .pdb, und die kämen mit.
+find "$contents/MacOS" -name '*.pdb' -delete
 mkdir -p "$contents/Resources"
 mv "$contents/MacOS/models" "$contents/Resources/models"
 sed "s/@VERSION@/$plistversion/g" "$here/Info.plist" > "$contents/Info.plist"
