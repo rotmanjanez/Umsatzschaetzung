@@ -13,7 +13,8 @@ public sealed class Perf(TextWriter output)
     const int QuietRounds = 8;
 
     long start, lastBusy;
-    double action, jobs, frames, longest, tails, tailsAtBusy;
+    double action, jobs, frames, longest, tails, tailsAtBusy, settling;
+    bool acted;
     TimeSpan cpu;
     long allocated;
     int gcs;
@@ -24,17 +25,22 @@ public sealed class Perf(TextWriter output)
     public void Begin()
     {
         start = lastBusy = Stopwatch.GetTimestamp();
-        action = jobs = frames = longest = tails = tailsAtBusy = 0;
+        action = jobs = frames = longest = tails = tailsAtBusy = settling = 0;
+        acted = false;
         cpu = Process.GetCurrentProcess().TotalProcessorTime;
         allocated = GC.GetTotalAllocatedBytes();
         gcs = GC.CollectionCount(0);
     }
 
+    // What the step ran itself, without the settling it waited for in between (an import waits for
+    // all of its invoices); the jobs and frames of those waits count as slices of their own.
     public void Acted()
     {
         lastBusy = Stopwatch.GetTimestamp();
-        action = longest = Ms(start, lastBusy) - tails;
+        action = Ms(start, lastBusy) - settling;
+        longest = Math.Max(longest, action);
         tailsAtBusy = tails;
+        acted = true;
     }
 
     public void End(int index, string kind, string what)
@@ -47,22 +53,25 @@ public sealed class Perf(TextWriter output)
         output.Flush();
     }
 
-    // Runs until the UI thread and the pool have stayed idle for a few rounds in a row. Those
-    // idle rounds are the driver waiting, not the app, and are left out of every time.
+    // Runs until the UI thread and the pool have stayed idle for a few rounds in a row, with no
+    // debounce left to fire. Those idle rounds are the driver waiting, not the app, and are left
+    // out of every time.
     public void Settle()
     {
+        var began = Stopwatch.GetTimestamp();
         var quiet = 0;
         var idleSince = Stopwatch.GetTimestamp();
         var deadline = Stopwatch.GetTimestamp() + Stopwatch.Frequency * 60;
         while (quiet < QuietRounds && Stopwatch.GetTimestamp() < deadline)
         {
+            Driver.Due();
             var job = Time(() => Dispatcher.UIThread.RunJobs());
             var frame = Time(() => AvaloniaHeadlessPlatform.ForceRenderTimerTick());
             job += Time(() => Dispatcher.UIThread.RunJobs());
             jobs += job;
             frames += frame;
             longest = Math.Max(longest, Math.Max(job, frame));
-            if (job + frame > Idle || PoolBusy())
+            if (job + frame > Idle || PoolBusy() || Driver.Counting())
             {
                 quiet = 0;
                 lastBusy = Stopwatch.GetTimestamp();
@@ -73,6 +82,7 @@ public sealed class Perf(TextWriter output)
             if (quiet == 0) idleSince = Stopwatch.GetTimestamp();
         }
         tails += Ms(idleSince, Stopwatch.GetTimestamp());
+        if (!acted) settling += Ms(began, Stopwatch.GetTimestamp());
     }
 
     internal static bool PoolBusy()

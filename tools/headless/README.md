@@ -93,8 +93,9 @@ A `shot` crops to `at`. `trim` shrinks that frame beforehand (`{ "top": 16 }`),
 ## Timing
 
 Several scripts run one after the other in the same app. With `--perf` every step waits
-until the interface and the pool have been idle for a few rounds, however long that takes,
-and writes one line: how long the step itself ran, UI jobs and frames, the
+until the interface and the pool have been idle for a few rounds and no debounce is still to
+fire, however long that takes, and writes one line: how long the step itself ran (without the
+waiting inside it, as an import's), UI jobs and frames, the
 longest of them, the time until the app was quiet again, the CPU of all threads, what was
 allocated and how many gen-0 collections. The driver's own waiting is left out.
 

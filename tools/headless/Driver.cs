@@ -306,7 +306,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         var box = Box(window, visual);
         if (step.Clip is { } type)
         {
-            var bottom = visual.GetVisualDescendants().Where(v => v.GetType().Name == type)
+            var bottom = visual.GetVisualDescendants().Where(v => v.IsEffectivelyVisible && v.GetType().Name == type)
                 .Select(v => Box(window, v).Bottom)
                 .DefaultIfEmpty(box.Bottom)
                 .Max();
@@ -335,6 +335,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         var quiet = 0;
         for (var i = 0; i < 25 && (full || quiet < 3); i++)
         {
+            Due();
             Dispatcher.UIThread.RunJobs();
             Thread.Sleep(20);
             Dispatcher.UIThread.RunJobs();
@@ -350,7 +351,17 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     static bool Quiet() =>
         !Perf.PoolBusy()
         && !Dispatcher.UIThread.HasJobsWithPriority(DispatcherPriority.SystemIdle)
-        && Timers(Dispatcher.UIThread).TrueForAll(t => t.Interval >= TimeSpan.FromSeconds(1) || Tick(t)?.Target is TextPresenter);
+        && !Counting();
+
+    internal static bool Counting() =>
+        !Timers(Dispatcher.UIThread).TrueForAll(t => t.Interval >= TimeSpan.FromSeconds(1) || Tick(t)?.Target is TextPresenter);
+
+    // The dispatcher fires a timer that is due only after it ran a job; with nothing else to run a
+    // debounce would wait for ever, where a window's own loop fires it on time.
+    internal static void Due() => PromoteTimers(Dispatcher.UIThread);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "PromoteTimers")]
+    static extern void PromoteTimers(Dispatcher dispatcher);
 
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_timers")]
     static extern ref List<DispatcherTimer> Timers(Dispatcher dispatcher);
