@@ -58,6 +58,7 @@ public partial class MappingView : Screen
     readonly MappingModel model = new();
     bool refreshing;
     int refreshes;
+    Stamp? drawn;
 
     public MappingView(Session session) : base(session)
     {
@@ -101,10 +102,13 @@ public partial class MappingView : Screen
     // the hint about what was just assigned stays until another position is picked.
     async Task Refresh()
     {
+        var stamp = Session.Stamp;
+        if (drawn == stamp) return;
         var at = ++refreshes;
         var (kase, rs) = (Session.Case, Session.Rules);
         var groups = await Task.Run(() => LineGroup.Of(kase, rs));
         if (at != refreshes) return;
+        drawn = stamp;
         var kept = Groups.SelectedItem as LineGroup;
         var focused = Groups.IsKeyboardFocusWithin;
         Detail.Refresh();

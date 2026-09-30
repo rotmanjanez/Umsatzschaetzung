@@ -75,6 +75,7 @@ public partial class ProductsView : Screen
     int generation;
     string dismissedCase = "", edited = "";
     HashSet<string> dismissed = [];
+    Stamp? drawn;
 
     public ProductsView(Session session) : base(session)
     {
@@ -109,6 +110,7 @@ public partial class ProductsView : Screen
 
     protected override void Render(RuleSet rules)
     {
+        if (drawn == Session.Stamp && !timer.IsEnabled) return;
         model.Catalog = Session.Products();
         Load();
     }
@@ -155,9 +157,12 @@ public partial class ProductsView : Screen
     {
         if (Session.Case is not { } kase || Session.Rules is not { } rs) return;
         var g = ++generation;
+        drawn = null;
         var withInvoices = kase.Invoices.Count > 0;
         model.Suggesting = withInvoices;
-        if (await Session.SaveCase(At(edited), Ct) && withInvoices && g == generation) await Session.Run(async () =>
+        var saving = Session.SaveCase(At(edited), Ct);
+        var stamp = Session.Stamp;
+        if (await saving && withInvoices && g == generation) await Session.Run(async () =>
         {
             var sold = await Assortment.Calculate(Session, kase, rs, Ct);
             if (sold is null || g != generation) return;
@@ -165,6 +170,7 @@ public partial class ProductsView : Screen
             if (suggestions is null || g != generation) return;
             model.Suggestions.Clear();
             foreach (var s in suggestions) model.Suggestions.Add(s);
+            drawn = stamp;
         });
         if (g == generation) model.Suggesting = false;
     }

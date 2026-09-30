@@ -85,6 +85,7 @@ public partial class CalcView : Screen
     bool filling, choosing;
     string edited = "", revealing = "";
     (Case Case, RuleSet Rules, RuleSet Catalog, Report Report, List<ProductRow> Sold)? shown;
+    Stamp? drawn;
 
     public CalcView(Session session) : base(session)
     {
@@ -105,7 +106,8 @@ public partial class CalcView : Screen
 
     protected override async void Render(RuleSet rs)
     {
-        if (Session.Case is not { } kase) return;
+        if (Session.Case is not { } kase || Drawn()) return;
+        var stamp = Session.Stamp;
         IngredientBox.SetCategoryNames(this, Session.CategoryNames);
         IngredientBox.SetSimilar(this, Session.SimilarIngredients);
         Mapping.Refresh();
@@ -123,9 +125,11 @@ public partial class CalcView : Screen
         }
         var item = revealing;
         revealing = "";
-        await Recalculate(kase, rs);
+        if (await Recalculate(kase, rs)) drawn = stamp;
         if (IsActive) Show(item);
     }
+
+    bool Drawn() => drawn == Session.Stamp && revealing == "" && Session.WantedProduct is null && !timer.IsEnabled;
 
     // The product an undo came back to is picked in the result; the others are looked up here.
     void Show(string item)
@@ -190,13 +194,16 @@ public partial class CalcView : Screen
         if (Session.Case is { } kase && Session.Rules is { } rs && IsActive) await Recalculate(kase, rs);
     }
 
-    async Task Recalculate(Case kase, RuleSet rs)
+    async Task<bool> Recalculate(Case kase, RuleSet rs)
     {
         var g = ++generation;
+        drawn = null;
         model.Busy = model.HasResult;
         var report = await Assortment.Calculate(Session, kase, rs, Ct);
-        if (report is not null && g == generation) ShowResult(kase, rs, report);
-        if (g == generation) model.Busy = false;
+        if (g != generation) return false;
+        if (report is not null) ShowResult(kase, rs, report);
+        model.Busy = false;
+        return report is not null;
     }
 
     void ShowYields(Case kase, RuleSet rs)

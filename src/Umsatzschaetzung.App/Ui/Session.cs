@@ -31,6 +31,8 @@ public enum Tab { Case, Invoices, Mapping, Products, Calc, Report }
 
 public enum SaveState { Idle, Slow, Stuck }
 
+public readonly record struct Stamp(int Revision, string? Store, long Version);
+
 public sealed class Session : Observable
 {
     // A browser's dialog filters by MIME type alone.
@@ -58,6 +60,8 @@ public sealed class Session : Observable
     Dictionary<string, string> recorded = [];
     bool stored = true;
     int stores;
+    // Counts every change of the case this window took in or recorded.
+    int revision;
 
     public Session(Services service)
     {
@@ -80,6 +84,9 @@ public sealed class Session : Observable
     public Services Service { get; }
     public Imports Imports { get; }
     public Case? Case { get; private set; }
+
+    // A page drawn at the same stamp still shows what it would draw again.
+    public Stamp Stamp => new(revision, Rules?.Store, Rules?.Version ?? -1);
     public RuleSet? Rules { get; private set; }
     public StatusResp? Status { get; private set; }
     // What a scan was read as, freshly from an import or fetched back from the case it was stored with.
@@ -218,6 +225,7 @@ public sealed class Session : Observable
     {
         Case = kase;
         recorded = CaseParts.Of(kase);
+        revision++;
         CaseChanged?.Invoke();
     }
 
@@ -232,6 +240,7 @@ public sealed class Session : Observable
         foreach (var (id, m) in stored.Mappings) kase.Mappings[id] = m;
         kase.MappedStore = stored.MappedStore;
         CaseParts.Take(recorded, kase, invoice, stored.Mappings.Count > 0);
+        revision++;
         CaseChanged?.Invoke();
     }
 
@@ -239,6 +248,7 @@ public sealed class Session : Observable
     {
         Case = null;
         recorded = [];
+        revision++;
         History.Clear();
         CaseClosed?.Invoke();
     }
@@ -259,7 +269,11 @@ public sealed class Session : Observable
         if (Case is not { } kase) return Task.FromResult(false);
         var now = CaseParts.Of(kase);
         var change = CaseChange.Between(this, recorded, now);
-        if (change is not null) at.History.Record(at, change);
+        if (change is not null)
+        {
+            at.History.Record(at, change);
+            revision++;
+        }
         recorded = now;
         return change is null && stored ? Task.FromResult(true) : Store(kase, ct);
     }
