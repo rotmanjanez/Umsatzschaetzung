@@ -1,4 +1,7 @@
+using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 
@@ -7,14 +10,24 @@ namespace Umsatzschaetzung.App.Ui;
 // What an undo or redo set back blinks where it is shown.
 public static class Reveal
 {
-    static readonly TimeSpan Blink = TimeSpan.FromSeconds(1.3);
+    // Run on the one control it is for: as a style's animation every control built would set it up.
+    static readonly Animation Blink = new()
+    {
+        Duration = TimeSpan.FromSeconds(0.3),
+        IterationCount = new IterationCount(4),
+        PlaybackDirection = PlaybackDirection.Alternate,
+        Children =
+        {
+            new KeyFrame { Cue = new Cue(0), Setters = { new Setter(Visual.OpacityProperty, 1.0) } },
+            new KeyFrame { Cue = new Cue(1), Setters = { new Setter(Visual.OpacityProperty, 0.3) } },
+        },
+    };
 
     public static void Flash(Control? control)
     {
         if (control is null) return;
         control.BringIntoView();
-        control.Classes.Add("revealed");
-        DispatcherTimer.RunOnce(() => control.Classes.Remove("revealed"), Blink);
+        _ = Blink.RunAsync(control);
     }
 
     // The outermost visual showing the item, once layout has placed it.
