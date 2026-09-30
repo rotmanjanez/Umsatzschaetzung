@@ -136,7 +136,7 @@ public static partial class Coach
     // The actions of the headless driver, on the one view the browser has.
     static async Task Act(Step step)
     {
-        var at = step.GetType().GetProperty("At")?.GetValue(step) is Target target ? await Reach(target) : null;
+        var at = step is IAimed { At: { } target } ? await Reach(target) : null;
         switch (step)
         {
             case ClickStep:

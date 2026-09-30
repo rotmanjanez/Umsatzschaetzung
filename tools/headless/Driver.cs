@@ -39,8 +39,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
     {
         var window = Window(step.Window);
         timing = perf;
-        var at = step.GetType().GetProperty("At")?.GetValue(step) is Target target && step is not ShotStep
-            ? Find(window, target) : null;
+        var at = step is not ShotStep and IAimed { At: { } target } ? Find(window, target) : null;
         var trace = step.Trace is { } name ? tracing?.Start(name) : null;
         perf?.Begin();
         switch (step)
@@ -119,7 +118,8 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         EditStep s => $"{s.Column}={s.Text} @ {Say(s.At)}",
         TypeStep s => $"{s.Text} @ {Say(s.At)}",
         ChooseStep s => $"{s.Item} @ {Say(s.At)}",
-        _ => step.GetType().GetProperty("At")?.GetValue(step) is Target t ? Say(t) : "",
+        IAimed { At: { } t } => Say(t),
+        _ => "",
     };
 
     static string Say(Target t) => t.Name ?? t.Text ?? t.Starts ?? t.Tip ?? t.Type ?? "";

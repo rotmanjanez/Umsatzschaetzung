@@ -38,7 +38,12 @@ public abstract record Step
     public string? Trace { get; init; }
 }
 
-public sealed record ShotStep : Step
+public interface IAimed
+{
+    Target? At { get; }
+}
+
+public sealed record ShotStep : Step, IAimed
 {
     public required string Name { get; init; }
     public Target? At { get; init; }
@@ -47,38 +52,38 @@ public sealed record ShotStep : Step
     public string? Clip { get; init; }
 }
 
-public sealed record ClickStep : Step
+public sealed record ClickStep : Step, IAimed
 {
     public required Target At { get; init; }
 }
 
-public sealed record TypeStep : Step
+public sealed record TypeStep : Step, IAimed
 {
     public required Target At { get; init; }
     public required string Text { get; init; }
 }
 
-public sealed record FocusStep : Step
+public sealed record FocusStep : Step, IAimed
 {
     public Target? At { get; init; }
 }
 
-public sealed record DeselectStep : Step
+public sealed record DeselectStep : Step, IAimed
 {
     public required Target At { get; init; }
 }
 
-public sealed record SelectStep : Step
+public sealed record SelectStep : Step, IAimed
 {
     public required Target At { get; init; }
 }
 
-public sealed record TopStep : Step
+public sealed record TopStep : Step, IAimed
 {
     public required Target At { get; init; }
 }
 
-public sealed record EditStep : Step
+public sealed record EditStep : Step, IAimed
 {
     public required Target At { get; init; }
     public required string Column { get; init; }
@@ -105,7 +110,7 @@ public sealed record PickStep : Step
     public required List<string> Files { get; init; }
 }
 
-public sealed record ChooseStep : Step
+public sealed record ChooseStep : Step, IAimed
 {
     public required Target At { get; init; }
     public required string Text { get; init; }
@@ -124,7 +129,7 @@ public sealed record KeepStep : Step
     public required string To { get; init; }
 }
 
-public sealed record PressStep : Step
+public sealed record PressStep : Step, IAimed
 {
     public required Target At { get; init; }
 }
