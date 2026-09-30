@@ -35,6 +35,7 @@ public sealed record UnifyArg(string CaseId, List<string> InvoiceIds);
 public sealed record SuggestArg(string CaseId, InvoiceLine Line, string? Supplier);
 public sealed record RenderArg(string CaseId, bool Pdf);
 public sealed record DeleteRuleArg(Entity Kind, string Id);
+public sealed record RulesSeen(string? Store, long Version);
 
 // One of them is set.
 public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezweig = null, Ingredient? Ingredient = null,
@@ -74,6 +75,7 @@ public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezwe
 [JsonSerializable(typeof(SuggestArg))]
 [JsonSerializable(typeof(RenderArg))]
 [JsonSerializable(typeof(DeleteRuleArg))]
+[JsonSerializable(typeof(RulesSeen))]
 [JsonSerializable(typeof(RuleArg))]
 [JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(RuleSet))]

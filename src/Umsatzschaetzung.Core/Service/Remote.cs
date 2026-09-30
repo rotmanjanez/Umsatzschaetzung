@@ -28,12 +28,16 @@ public static class Remote
         }
     }
 
+    // The set crosses only when it changed since the one held here, as the local store hands out the one it keeps.
     sealed class Rules(Caller at) : IRules
     {
+        RuleSet? held;
+
         public Task<StatusResp> Status(CancellationToken ct) => at.Call<StatusResp>("rules.status", ct);
-        public Task<RuleSet> Load(CancellationToken ct) => at.Call<RuleSet>("rules.load", ct);
-        public Task<RuleSet> Save(IRuleEntity rule, CancellationToken ct) => at.Call<RuleArg, RuleSet>("rules.save", RuleArg.Of(rule), ct);
-        public Task<RuleSet> Delete(Entity kind, string id, CancellationToken ct) => at.Call<DeleteRuleArg, RuleSet>("rules.delete", new(kind, id), ct);
+        public async Task<RuleSet> Load(CancellationToken ct) =>
+            held = await at.Call<RulesSeen?, RuleSet?>("rules.load", held is null ? null : new(held.Store, held.Version), ct) ?? held!;
+        public async Task<RuleSet> Save(IRuleEntity rule, CancellationToken ct) => held = await at.Call<RuleArg, RuleSet>("rules.save", RuleArg.Of(rule), ct);
+        public async Task<RuleSet> Delete(Entity kind, string id, CancellationToken ct) => held = await at.Call<DeleteRuleArg, RuleSet>("rules.delete", new(kind, id), ct);
     }
 
     sealed class Sammlungen(Caller at) : ISammlungen
@@ -109,7 +113,7 @@ public sealed class Dispatch(Services s)
     Task<Message> Answer(string method, Message m, CancellationToken ct) => method switch
     {
         "rules.status" => Out(s.Rules.Status(ct)),
-        "rules.load" => Out(s.Rules.Load(ct)),
+        "rules.load" => In<RulesSeen?, RuleSet?>(m, async seen => await s.Rules.Load(ct) is var rs && seen == new RulesSeen(rs.Store, rs.Version) ? null : rs),
         "rules.save" => Out(s.Rules.Save(Wire.Read<RuleArg>(m).Rule, ct)),
         "rules.delete" => In<DeleteRuleArg, RuleSet>(m, a => s.Rules.Delete(a.Kind, a.Id, ct)),
 

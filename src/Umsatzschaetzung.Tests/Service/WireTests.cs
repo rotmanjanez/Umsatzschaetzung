@@ -62,6 +62,25 @@ public sealed class WireTests : IDisposable
     }
 
     [Fact]
+    public async Task TheRulesCrossOnlyWhenTheyChanged()
+    {
+        var calls = new Counting(new Dispatch(host.Service));
+        var rules = Remote.Over(calls).Rules;
+        var first = await rules.Load(ct);
+        Assert.Same(first, await rules.Load(ct));
+        Assert.Equal([true, false], calls.Sets);
+
+        await host.Service.Rules.Save(Json.Copy(first.Categories.Values.First()), ct);
+        var changed = await rules.Load(ct);
+        Assert.True(changed.Version > first.Version);
+        Assert.Equal(Json.Serialize(await host.Service.Rules.Load(ct)), Json.Serialize(changed));
+
+        var saved = await rules.Save(Json.Copy(changed.Categories.Values.First()), ct);
+        Assert.Same(saved, await rules.Load(ct));
+        Assert.Equal([true, false, true, false], calls.Sets);
+    }
+
+    [Fact]
     public async Task AnUnknownCallIsRefused()
     {
         var answer = await new Dispatch(host.Service).Handle("cases.shred", Message.Empty, ct);
@@ -74,6 +93,18 @@ public sealed class WireTests : IDisposable
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => svc.Cases.List(cancelled.Token));
+    }
+}
+
+sealed class Counting(Dispatch to) : ITransport
+{
+    public List<bool> Sets { get; } = [];
+
+    public async Task<Message> Call(string method, Message request, CancellationToken ct)
+    {
+        var answer = await to.Handle(method, request, ct);
+        if (method == "rules.load") Sets.Add(answer.Json != "null");
+        return answer;
     }
 }
 
