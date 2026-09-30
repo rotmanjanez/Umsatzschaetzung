@@ -8,6 +8,9 @@
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
     <!-- The deploy compresses what the server hands out, every file on a core of its own. -->
     <CompressionEnabled>false</CompressionEnabled>
+    <!-- The program reads, writes and sorts German, as on a German desktop. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <BlazorIcuDataFileName>icudt_EFIGS.dat</BlazorIcuDataFileName>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Umsatzschaetzung.Browser/Umsatzschaetzung.Browser.csproj" />

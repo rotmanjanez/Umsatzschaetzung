@@ -388,35 +388,25 @@ def digest(value) -> str:
 
 # --- site ----------------------------------------------------------------------------
 
-# The lessons are one site beside the web app: the page and its runtime once, a folder per
-# lesson with its script and the stores it starts from, and the clips of every lesson in one
-# `ton/`, where a sentence two lessons share is one file. The page is the web app itself, its
-# services started on the stores kept where the lesson begins, with the lesson played over
-# it: every beat speaks its clip, cards and spotlights are drawn over the live interface,
-# and a click or type waits for the learner. It takes its weights from the app's own folders
-# one level up, so they are served once and a learner who used the app already has them.
+# The lessons are one site inside the web app: the page once, a folder per lesson with its
+# script and the stores it starts from, and the clips of every lesson in one `ton/`, where a
+# sentence two lessons share is one file. The page is the web app itself, its runtime, its
+# services and its weights taken from the app one level up, the services started on the stores
+# kept where the lesson begins, with the lesson played over it: every beat speaks its clip,
+# cards and spotlights are drawn over the live interface, and a click or type waits for the
+# learner. To try it, put the site into a published app's wwwroot.
 SITE = ROOT / "web" / "lessons" / "out" / "lektionen"
+PAGE = ROOT / "web" / "lessons" / "page"
 
 
 def site(lessons: list[Lesson]):
-    app = ROOT / "tools" / "lessons"
-    subprocess.run(["dotnet", "publish", app, "-c", "Release"], check=True)
-    published = app / "bin" / "Release" / "net10.0" / "publish" / "wwwroot"
-    shutil.copytree(published, SITE, dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns("models", "ort", "weights.json*", "index.html*"))
-    for weights in ("models", "ort"):
-        shutil.copytree(published / weights, SITE.parent / weights, copy_function=linked, dirs_exist_ok=True)
-    weights = json.loads((published / "weights.json").read_text())
-    weights["runtime"]["module"] = f"../{weights['runtime']['module']}"
-    for f in weights["files"].values():
-        f["url"] = f"../{f['url']}"
-    (SITE / "weights.json").write_text(json.dumps(weights, indent=1))
+    shutil.copytree(PAGE, SITE, dirs_exist_ok=True, ignore=shutil.ignore_patterns("index.html"))
     (SITE / "fonts").mkdir(exist_ok=True)
     for f in (ROOT / "web" / "docs" / "pages" / "assets" / "fonts").glob("sora-latin-*.woff2"):
         shutil.copy(f, SITE / "fonts")
     for f in ("dachs-zu.png", "dachs-halb.png", "dachs-offen.png", "favicon.svg"):
         shutil.copy(ROOT / "web" / "docs" / "pages" / "assets" / f, SITE)
-    page = (published / "index.html").read_text().replace("<head>", '<head>\n<base href="../">', 1)
+    page = (PAGE / "index.html").read_text().replace("<head>", '<head>\n<base href="../">', 1)
     (SITE / "ton").mkdir(exist_ok=True)
     for ep in lessons:
         placed(ep, page)
@@ -450,12 +440,6 @@ def onward():
         for (path, lesson), after in zip(course, course[1:] + [None]):
             lesson["next"] = after and {"href": f"{after[0].parent.name}/", "title": after[1]["title"]}
             path.write_text(json.dumps(lesson, ensure_ascii=False, indent=1))
-
-
-# A weight never changes under its release, so one already there is the same file.
-def linked(source: str, target: str):
-    if not os.path.exists(target):
-        os.link(source, target)
 
 
 if __name__ == "__main__":

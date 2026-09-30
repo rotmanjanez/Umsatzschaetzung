@@ -33,8 +33,6 @@ public sealed record Done
 // say about it is the page's business; this only reports misses and success.
 public static partial class Coach
 {
-    static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
-
     static TopLevel? top;
     static Goal? task;
     static bool swallowed, acted;
@@ -59,7 +57,7 @@ public static partial class Coach
     [JSExport]
     public static void Step(string? json)
     {
-        task = string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<Goal>(json, Options);
+        task = string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize(json, LessonJson.Default.Goal);
         acted = false;
     }
 
@@ -69,7 +67,7 @@ public static partial class Coach
     [JSExport]
     public static string Box(string json, bool show)
     {
-        var target = JsonSerializer.Deserialize<Target>(json, Options);
+        var target = JsonSerializer.Deserialize(json, LessonJson.Default.Target);
         if (top is null || target is null) return "";
         if (Find(target) is not { } hit)
         {
@@ -78,7 +76,7 @@ public static partial class Coach
         }
         if (show) Show(hit);
         var box = Targets.Box(top, hit);
-        return JsonSerializer.Serialize(new[] { box.X, box.Y, box.Width, box.Height });
+        return JsonSerializer.Serialize([box.X, box.Y, box.Width, box.Height], LessonJson.Default.DoubleArray);
     }
 
     // Every control that reads as asked, as far as its list shows it: rows a grid keeps for
@@ -86,13 +84,13 @@ public static partial class Coach
     [JSExport]
     public static string Span(string json)
     {
-        var target = JsonSerializer.Deserialize<Target>(json, Options);
+        var target = JsonSerializer.Deserialize(json, LessonJson.Default.Target);
         if (top is null || target is null) return "";
         Rect? span = null;
         foreach (var hit in top.GetVisualDescendants().Where(v => Targets.Is(v, target)))
             if ((target.Up is { } up ? Targets.Above(hit, up) : hit) is { } visual && Shown(visual) is { } box)
                 span = span?.Union(box) ?? box;
-        return span is { } r ? JsonSerializer.Serialize(new[] { r.X, r.Y, r.Width, r.Height }) : "";
+        return span is { } r ? JsonSerializer.Serialize([r.X, r.Y, r.Width, r.Height], LessonJson.Default.DoubleArray) : "";
     }
 
     static Rect? Shown(Visual visual)

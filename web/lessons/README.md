@@ -11,19 +11,21 @@ Without a lesson named, every published one is built.
 
 The lessons are one site, `web/lessons/out/lektionen/`: the page once, a folder per lesson
 with its `lesson.json` and the stores it starts from, and the clips of every lesson in
-`ton/`. The page takes its weights from the web app's `models/` and `ort/` one level up, as
-it does beside the app at `app.umsatzschaetzung.amtstools.de/lektionen/<lesson>/`; `site`
-links them into `out/`. Each lesson ends on a way on to the next one in its course. The
+`ton/`. The page runs the web app's own program, its runtime, services and weights one level
+up, as it does inside the app at `app.umsatzschaetzung.amtstools.de/lektionen/<lesson>/`.
+Each lesson ends on a way on to the next one in its course. The
 documentation lists them on its page `uebungen.md`, which `guide` writes from `uebungen.md`
 here with the lessons named in `LESSONS` by `course`, in the order of their `number`, or
 every lesson in a course where `LESSONS` is not set; `lektionen/` itself leads there. The
 page shows Didi, the badger who speaks in them, drawn by Maxie Bichmann (bichmann.net), and
-the guide's page of a lesson listed there opens with a link to it. It needs a web server, `python3 -m http.server -d web/lessons/out`
-will do, with the lesson at `localhost:8000/lektionen/zuordnung/`; a page opened as a
-file cannot load WebAssembly.
+the guide's page of a lesson listed there opens with a link to it. To try it, publish the app
+with `dotnet publish src/Umsatzschaetzung.Web -c Release -o publish`, copy `out/lektionen` into
+`publish/wwwroot`, and serve that with the headers `Cross-Origin-Opener-Policy: same-origin`
+and `Cross-Origin-Embedder-Policy: require-corp`, as the app's `.htaccess` sets them; a page
+opened as a file cannot load WebAssembly.
 
 `deploy-web` publishes the lessons named in its `LESSONS`: the `zustand` job keeps their
-stores, the `lessons` job fetches their clips from the store and builds the site beside it,
+stores, the `lessons` job fetches their clips from the store and builds the site,
 and `lessons-deploy` puts the stores into the site and deploys it into the app. A sentence
 missing from the store fails the `lessons` job, so a lesson is spoken with
 `voice --elevenlabs` before it is added there.
@@ -37,7 +39,7 @@ Each stage can be run alone, named after the lessons:
 | `guide` | writes the lesson's page of the guide (`guide.page`), the documentation's `uebungen.md` and the guide's script `web/docs/shots/guide.jsonl` from the steps of every lesson in `GUIDE`, so the screenshots are taken on the same steps | nothing |
 | `zustand` | plays the guide once on the real program, headlessly, and keeps the stores in each lesson's `zustand/` where it starts | .NET, the example invoices (fetched on first use) |
 | `voice` | speaks every sentence into `ton/`: as a draft with the Mac's `say`, or with `--elevenlabs` in the host's voice, one take per chapter cut between the beats | macOS; with `--elevenlabs`, `ELEVENLABS_API_KEY` in the environment or in `.env` |
-| `site` | publishes the program once into `lektionen/`, with each lesson's `zustand/`, where one was kept, and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | .NET with the `wasm-tools` workload |
+| `site` | puts the page into `lektionen/`, with each lesson's `zustand/`, where one was kept, and `lesson.json` in `lektionen/<lesson>/` and its clips in `lektionen/ton/` | nothing |
 
 The guide's pages and its script are not checked in: `deploy-web` writes them with `guide`
 before it takes the screenshots and builds the documentation. Locally, before either:
@@ -122,7 +124,8 @@ nothing written becomes no heading there.
 
 ## Page
 
-The page is `tools/lessons`: the web app as `src/Umsatzschaetzung.Web` hosts it, with a coach over it.
+The page is `web/lessons/page`: the web app's own program, `src/Umsatzschaetzung.Web` compiled ahead
+of time, taken from the app one level up and started with `lesson`, with a coach over it.
 Its services run in their worker as in the app, reader, tagger and ranking included, over the
 stores `zustand` kept, which are laid into memory instead of the browser's storage, so every
 visit starts the lesson afresh. The weights and the warmed embeddings are fetched as the app

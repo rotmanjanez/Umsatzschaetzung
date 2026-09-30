@@ -65,7 +65,7 @@ RewriteRule ^(.*)$ $1.br [L]
   <If "%{REQUEST_URI} =~ m#^/(models|ort|lektionen/ton)/#">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </If>
-  <ElseIf "%{REQUEST_URI} =~ m#^/(lektionen/)?_framework/# && %{REQUEST_URI} !~ m#/dotnet\.js(\.br)?$#">
+  <ElseIf "%{REQUEST_URI} =~ m#^/_framework/# && %{REQUEST_URI} !~ m#/dotnet\.js(\.br)?$#">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </ElseIf>
 </IfModule>

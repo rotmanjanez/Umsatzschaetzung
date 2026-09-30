@@ -19,7 +19,6 @@ namespace Umsatzschaetzung.Lessons;
 // step forwards does what the learner would have; going back over it puts the marked program back.
 public static partial class Coach
 {
-    static readonly JsonSerializerOptions StepOptions = new(JsonSerializerDefaults.Web) { AllowOutOfOrderMetadataProperties = true };
     static readonly Stack<Marked> marks = [];
     static Session? session;
 
@@ -51,7 +50,7 @@ public static partial class Coach
     {
         foreach (var step in Load(steps)) await Act(step);
         await Settle();
-        if (string.IsNullOrEmpty(done) || JsonSerializer.Deserialize<Done>(done, Options) is not { Text: null } goal) return;
+        if (string.IsNullOrEmpty(done) || JsonSerializer.Deserialize(done, LessonJson.Default.Done) is not { Text: null } goal) return;
         for (var i = 0; i < 60 && !(Find(goal.At) is { } hit && Met(hit, goal)); i++) await Settle();
     }
 
@@ -132,7 +131,7 @@ public static partial class Coach
             .Select(e => (RuleChange.KindOf(e), e.Id, e))];
 
     static List<Step> Load(string json) =>
-        string.IsNullOrEmpty(json) ? [] : JsonSerializer.Deserialize<List<Step>>(json, StepOptions) ?? [];
+        string.IsNullOrEmpty(json) ? [] : JsonSerializer.Deserialize(json, LessonJson.Default.ListStep) ?? [];
 
     // The actions of the headless driver, on the one view the browser has.
     static async Task Act(Step step)

@@ -1,4 +1,4 @@
-import { dotnet } from './_framework/dotnet.js';
+import { dotnet } from '../_framework/dotnet.js';
 import { $ } from './overlay.js';
 import { hold, holding, onlive, pace, replay, skip } from './voice.js';
 import { player } from './player.js';
@@ -52,7 +52,7 @@ addEventListener('pointerdown', own, true);
 // The stores the lesson starts from, laid out in the services' memory, and the case it opens.
 const zustand = new URL('zustand/zustand.json', location.href).href;
 const { case: open } = await fetch(zustand, { cache: 'no-cache' }).then(r => r.json());
-const service = await import('./_content/Umsatzschaetzung.Browser/service.js');
+const service = await import('../_content/Umsatzschaetzung.Browser/service.js');
 service.serve(zustand);
 
 // The downloads are the first part of the bar; the rest is the program and its services
@@ -67,7 +67,7 @@ const runtime = await dotnet
 $('load').classList.add('starting');
 loaded(.95);
 runtime.setModuleImports('service', service);
-runtime.setModuleImports('page', await import('./_content/Umsatzschaetzung.Browser/page.js'));
+runtime.setModuleImports('page', await import('../_content/Umsatzschaetzung.Browser/page.js'));
 runtime.setModuleImports('coach', {
   ...lesson.events,
   ready() {
@@ -77,4 +77,4 @@ runtime.setModuleImports('coach', {
 });
 const name = runtime.getConfig().mainAssemblyName;
 lesson.attach((await runtime.getAssemblyExports(name)).Umsatzschaetzung.Lessons.Coach);
-await runtime.runMain(name, open ? ['out', open] : ['out']);
+await runtime.runMain(name, open ? ['lesson', 'out', open] : ['lesson', 'out']);
