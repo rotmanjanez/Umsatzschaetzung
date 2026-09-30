@@ -82,10 +82,10 @@ codesign --verify --strict "$app"
 notarise() {
     [ "$identity" != "-" ] || return 0
     if [ -n "$profile" ]; then
-        xcrun notarytool submit "$1" --keychain-profile "$profile" --wait
+        xcrun notarytool submit "$1" --keychain-profile "$profile" --wait --timeout 20m
     elif [ -n "${APPLE_ID-}" ]; then
         xcrun notarytool submit "$1" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" \
-            --password "$APPLE_APP_PASSWORD" --wait
+            --password "$APPLE_APP_PASSWORD" --wait --timeout 20m
     else
         return 0
     fi

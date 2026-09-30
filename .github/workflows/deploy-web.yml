@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     tags: ['v*']
-    paths: ['web/**', 'src/**', 'data/**', 'tools/headless/**', 'tools/embeddings/**', '*.props', '*.targets', 'global.json', '.github/actions/**', '.github/workflows/deploy-web.yml']
+    paths: ['web/**', 'src/**', 'data/**', 'tools/headless/**', 'tools/embeddings/**', 'tools/boot/**', 'tools/corpus/cdp.py', '*.props', '*.targets', 'global.json', '.github/actions/**', '.github/workflows/deploy-web.yml']
   workflow_dispatch:
 
 concurrency:
@@ -23,6 +23,7 @@ env:
 jobs:
   landing:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -50,6 +51,7 @@ jobs:
 
   app:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
@@ -96,6 +98,10 @@ jobs:
           find publish/wwwroot \( -path publish/wwwroot/models -o -path publish/wwwroot/ort \) -prune -o -type f \
             \( -name '*.wasm' -o -name '*.js' -o -name '*.mjs' -o -name '*.map' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.ico' -o -name '*.dat' \) -print0 |
             xargs -0 -n 1 -P "$(nproc)" brotli -f -q 10
+      # Nothing goes up that does not start: the app, and a lesson on its program, in Chrome,
+      # served as the server serves them.
+      - timeout-minutes: 5
+        run: python3 tools/boot/boot.py publish/wwwroot
       # The weights and the runtime sit under their release and never change there: what the
       # server has is kept, only what is new goes up. So the cache leaves them out, once they
       # are up. The lessons are deployed into the app by their own job.
@@ -119,6 +125,7 @@ jobs:
 
   shots:
     runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -202,6 +209,7 @@ jobs:
   # stores kept where the lessons named in LESSONS start; what a lesson says does not change it.
   zustand:
     runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -267,6 +275,7 @@ jobs:
   # the stores join them when they go up into the app after it.
   lessons:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: key
@@ -316,6 +325,7 @@ jobs:
   lessons-deploy:
     needs: [lessons, zustand, app]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -341,6 +351,7 @@ jobs:
   docs:
     needs: shots
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
