@@ -44,6 +44,33 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
       </div>
       <footer><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></footer>
     </main>
+    <script>
+      const hint = document.querySelector('.guide');
+      const doc = document.querySelector('.acts a.doc');
+      for (const link of document.querySelectorAll('.acts a[data-os]')) {
+        link.addEventListener('click', () => {
+          hint.querySelector('a').search = 'os=' + link.dataset.os;
+          hint.hidden = false;
+          doc.hidden = true;
+        });
+      }
+
+      const type = document.querySelector('.type');
+      const out = type?.querySelector('.out');
+      if (out && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const typo = 'abtippne';
+        const steps = [...typo].map((_, i) => [typo.slice(0, i + 1), 200]);
+        steps.push(['abtippn', 700], ['abtipp', 130], ['abtippe', 240], ['abtippen', 240], ['abtippen.', 900]);
+        out.textContent = '';
+        document.querySelector('.dot').style.visibility = 'hidden';
+        let at = 100;
+        for (const [text, wait] of steps) {
+          at += wait;
+          setTimeout(() => { out.textContent = text; }, at);
+        }
+        setTimeout(() => type.classList.add('done'), at + 500);
+      }
+    </script>
   </body>
 </html>
 
@@ -105,31 +132,3 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
     .mark svg { width: min(72%, 300px); }
   }
 </style>
-
-<script>
-  const hint = document.querySelector('.guide');
-  const doc = document.querySelector('.acts a.doc');
-  for (const link of document.querySelectorAll('.acts a[data-os]')) {
-    link.addEventListener('click', () => {
-      hint.querySelector('a').search = 'os=' + link.dataset.os;
-      hint.hidden = false;
-      doc.hidden = true;
-    });
-  }
-
-  const type = document.querySelector('.type');
-  const out = type?.querySelector('.out');
-  if (out && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const typo = 'abtippne';
-    const steps = [...typo].map((_, i) => [typo.slice(0, i + 1), 200]);
-    steps.push(['abtippn', 700], ['abtipp', 130], ['abtippe', 240], ['abtippen', 240], ['abtippen.', 900]);
-    out.textContent = '';
-    document.querySelector('.dot').style.visibility = 'hidden';
-    let at = 100;
-    for (const [text, wait] of steps) {
-      at += wait;
-      setTimeout(() => { out.textContent = text; }, at);
-    }
-    setTimeout(() => type.classList.add('done'), at + 500);
-  }
-</script>
