@@ -109,47 +109,48 @@ public sealed class CaseModel : Observable
     }
 
     // Eine unbekannte Kennzahl, die schon in der Prüfung stand, hält das Speichern nicht auf.
+    // Die Prüfung übernimmt das Formular nur ganz und gültig.
     public bool Collect(Case k)
     {
-        var gewerbeOk = !GewerbeInvalid || Gewerbe == k.Taxpayer.Gewerbe;
-        k.Label = Label.Trim();
+        var label = Label.Trim();
         var from = Input.Date(From);
         var to = Input.Date(To);
-        if (from is { } f) k.PeriodFrom = f;
-        if (to is { } t) k.PeriodTo = t;
-        k.Taxpayer = new Taxpayer
+        var taxpayer = new Taxpayer
         {
             Name = Name.Trim(),
             TaxNumber = TaxNumber.Trim(),
             PabNumber = Pab.Trim(),
             Gewerbe = Gewerbe,
         };
-        var valid = k.Label != "" && from is not null && to is not null
-            && k.Taxpayer.Name != "" && k.Taxpayer.TaxNumber != "" && k.Taxpayer.PabNumber != ""
-            && gewerbeOk;
-        k.Declared = [];
+        if (label == "" || from is null || to is null || taxpayer.Name == "" || taxpayer.TaxNumber == "" || taxpayer.PabNumber == ""
+            || GewerbeInvalid && Gewerbe != k.Taxpayer.Gewerbe)
+            return false;
+        List<DeclaredRevenue> revenue = [];
         for (var i = 0; i < declared.Length; i++)
         {
             if (declared[i].Trim() == "") continue;
-            var cents = Input.Cents(declared[i]);
-            valid &= cents is not null;
-            if (cents is > 0 or < 0) k.Declared.Add(new DeclaredRevenue { Vat = VatValues[i], Net = cents.Value });
+            if (Input.Cents(declared[i]) is not { } cents) return false;
+            if (cents != 0) revenue.Add(new DeclaredRevenue { Vat = VatValues[i], Net = cents });
         }
-        k.Inventory = [];
+        List<InventoryEntry> inventory = [];
         foreach (var row in Stock)
         {
-            var opening = Input.Int(row.Opening);
-            var closing = Input.Int(row.Closing);
-            if (row.Ingredient is null || opening is null || closing is null) return false;
-            k.Inventory.Add(new InventoryEntry
+            if (row.Ingredient is null || Input.Int(row.Opening) is not { } opening || Input.Int(row.Closing) is not { } closing) return false;
+            inventory.Add(new InventoryEntry
             {
                 IngredientId = row.Ingredient.Id,
-                Opening = opening.Value,
-                Closing = closing.Value,
+                Opening = opening,
+                Closing = closing,
                 Unit = RulesView.RecipeUnits[row.UnitIndex],
             });
         }
-        return valid;
+        k.Label = label;
+        k.PeriodFrom = from.Value;
+        k.PeriodTo = to.Value;
+        k.Taxpayer = taxpayer;
+        k.Declared = revenue;
+        k.Inventory = inventory;
+        return true;
     }
 }
 
