@@ -35,7 +35,7 @@ Das Programm merkt sich die Zuordnung in der [Regel-Datenbank](https://docs.umsa
 
 ## Wenn eine Menge fehlt
 
-Nach dem Zuordnen wählt das Programm die nächste offene Position, hier **Kaffeesahne Portionen 10 × 7,5 g 240er**. Die Zutat ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
+Als Nächstes **Kaffeesahne Portionen 10 × 7,5 g 240er** anklicken. Die Zutat ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
 
 Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
 
