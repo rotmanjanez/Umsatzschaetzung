@@ -194,12 +194,12 @@ chapters:
       - say: >-
           Als Nächstes hat das Programm die Kaffeesahne aufgemacht, die steht ganz oben
           in der Liste.
+        set: [{ do: select, at: { starts: "Kaffeesahne", up: DataGridRow } }]
         text: |-
-          Nach dem Zuordnen wählt das Programm die nächste offene Position, hier
-          **Kaffeesahne Portionen 10 × 7,5 g 240er**. Die Zutat ist klar, **Sahne**
-          ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht
-          lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern
-          markiert, und darunter steht die Frage, die zu beantworten ist.
+          Als Nächstes **Kaffeesahne Portionen 10 × 7,5 g 240er** anklicken. Die Zutat
+          ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“
+          lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit
+          einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
         shot:
           name: zuordnung-faktor-fehlt
           at: { text: "AUS DEN REGELN", up: Border }

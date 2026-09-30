@@ -71,7 +71,7 @@ def written(chapter: str, spec: dict) -> dict:
             "chapter": chapter, "say": spec.get("say", "").strip(), "card": spec.get("card"),
             "note": spec.get("note", ""), "task": spec.get("task", ""), "hint": spec.get("hint", ""),
             "show": spec.get("show"), "through": spec.get("through"), "hold": spec.get("hold", 0.0),
-            "do": instead(spec), "undo": spec.get("undo", [])}
+            "set": spec.get("set", []), "do": instead(spec), "undo": spec.get("undo", [])}
 
 
 # What the page does in the learner's place when the slider passes a beat they act in: what the
@@ -79,7 +79,7 @@ def written(chapter: str, spec: dict) -> dict:
 def instead(spec: dict) -> list[dict]:
     if "click" not in spec and "type" not in spec:
         return []
-    return [{k: v for k, v in s.items() if k != "window"} for s in steps(spec) if s["do"] not in ("shot", "wait", "pick")]
+    return [{k: v for k, v in s.items() if k != "window"} for s in acted(spec) if s["do"] not in ("shot", "wait", "pick")]
 
 
 # --- zustand -------------------------------------------------------------------------
@@ -122,9 +122,14 @@ def beats(name: str) -> list[dict]:
     return [beat for chapter in spec["chapters"] for beat in chapter["beats"]]
 
 
-# What the headless program does for a beat: the learner's click or typing, or `act`
-# where a plain click does not fit, and further rounds only where settling is not enough.
+# What the headless program does for a beat: what `set` puts in place, then the learner's part.
 def steps(spec: dict) -> list[dict]:
+    return spec.get("set", []) + acted(spec)
+
+
+# The learner's click or typing, or `act` where a plain click does not fit, and further rounds
+# only where settling is not enough.
+def acted(spec: dict) -> list[dict]:
     if "act" in spec:
         acts = spec["act"]
     elif "click" in spec:

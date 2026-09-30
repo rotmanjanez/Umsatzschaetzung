@@ -49,7 +49,7 @@ export function player(lesson, running) {
 
   // The opening cards need no program, so they play while it still starts; the first beat
   // that shows or asks for it waits for it on the last card, with the bar.
-  const live = b => !b.card || b.done || (b.show && !b.show.page);
+  const live = b => !b.card || b.done || b.set.length || (b.show && !b.show.page);
   function boot() {
     return booted ??= (async () => {
       $('card').hidden = true;
@@ -83,6 +83,8 @@ export function player(lesson, running) {
       $('stage').classList.toggle('gone', !beat.card);
       pin(!!beat.show?.page);
       dodge(null);
+      if (beat.set.length) await coach.Do(JSON.stringify(beat.set), null).catch(e => console.error('[lesson]', e));
+      if (g !== run) return;
       await (beat.done ? task(beat, g) : tell(beat, g));
       if (g !== run) return;
     }
@@ -173,10 +175,11 @@ export function player(lesson, running) {
     hint();
     $('card').classList.remove('act');
     $('time').classList.add('busy');
-    if (!up && beats.slice(0, to).some(b => b.done)) await boot();
+    if (!up && beats.slice(0, to).some(b => b.done || b.set.length)) await boot();
     try {
       while (marked.length && marked.at(-1).at >= to) await coach.Undo(marked.pop().done);
       for (let j = 0; j < to; j++) {
+        if (beats[j].set.length && !(marked.at(-1)?.at >= j)) await coach.Do(JSON.stringify(beats[j].set), null);
         if (!beats[j].done) continue;
         let mark = marked.find(m => m.at === j);
         if (!mark) {

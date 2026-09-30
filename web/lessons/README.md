@@ -103,6 +103,7 @@ one sentence or a few, together with what happens on screen:
 | `card` | a full-screen card over the program: `kicker`, `title`, `text`, `list`, `pad: true` for the trackpad |
 | `click` | the learner clicks there |
 | `act` | headless steps that perform the click, where a plain click does not fit (a tab) |
+| `set` | steps the page and the headless run take before the beat, where the lesson needs the program somewhere it may not have gone by itself; the slider may take them again, so they choose (a row, a tab) rather than toggle |
 | `type` | `{ at, text }`: the learner clicks into a field and types |
 | `show` | spotlights a control without touching it; `through` stretches the spotlight over every shown control that matches a second target |
 | `note` | a line on the card for the beat |
