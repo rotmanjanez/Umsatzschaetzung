@@ -21,3 +21,11 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+
+  - package-ecosystem: bun
+    directory: /web/landing
+    schedule:
+      interval: monthly
+    groups:
+      landing:
+        patterns: ["*"]
