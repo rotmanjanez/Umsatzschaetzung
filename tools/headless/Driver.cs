@@ -131,7 +131,13 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         _ => throw new ArgumentException("unknown window: " + which),
     };
 
-    static Visual Find(Visual root, Target target) => Targets.Find(root, target, Settle);
+    // What the program is still at work on may not be shown yet, on a busy machine for longer
+    // than one settling takes.
+    static Visual Find(Visual root, Target target)
+    {
+        for (var i = 0; i < 40 && Targets.Seek(root, target) is null && !Settle(full: false); i++) { }
+        return Targets.Find(root, target, Settle);
+    }
 
     static Visual Up(Visual inner, string type) => Targets.Up(inner, type);
 
