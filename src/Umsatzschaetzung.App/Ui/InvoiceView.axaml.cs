@@ -264,7 +264,7 @@ public partial class InvoiceView : Screen
         sideBySide = side;
         Panes.RowDefinitions = side
             ? [new RowDefinition(GridLength.Star)]
-            : [new RowDefinition(11, GridUnitType.Star) { MinHeight = 240 },
+            : [new RowDefinition(11, GridUnitType.Star) { MinHeight = 480 },
                new RowDefinition(new GridLength(6)),
                new RowDefinition(9, GridUnitType.Star) { MinHeight = 120 }];
         Panes.ColumnDefinitions = side

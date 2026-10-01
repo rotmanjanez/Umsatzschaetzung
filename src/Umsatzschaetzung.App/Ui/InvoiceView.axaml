@@ -38,7 +38,7 @@
     </ui:Screen.Styles>
     <Grid x:Name="Panes">
         <Grid.RowDefinitions>
-            <RowDefinition Height="11*" MinHeight="240"/>
+            <RowDefinition Height="11*" MinHeight="480"/>
             <RowDefinition Height="6"/>
             <RowDefinition Height="9*" MinHeight="120"/>
         </Grid.RowDefinitions>

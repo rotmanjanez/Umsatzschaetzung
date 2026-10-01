@@ -19,7 +19,7 @@ public partial class InvoicePane : UserControl
     public static Frame Open(Control owner, InvoiceView editor, string title)
     {
         var pane = new InvoicePane(editor);
-        var frame = Frame.For(pane, title, 1500, 940, 900, 600, fit: true);
+        var frame = Frame.For(pane, title, 1500, 940, 900, 640, fit: true);
         editor.Enter();
         Help.OnF1(frame.Input, () => editor.Topic);
         History.Keys(frame.Input, editor.Move);

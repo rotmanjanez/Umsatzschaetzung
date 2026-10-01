@@ -241,6 +241,8 @@ public static partial class Coach
         grid.CurrentColumn = grid.Columns.FirstOrDefault(c => c.Header as string == column)
             ?? throw new InvalidOperationException("no column " + column);
         if (text is null) return;
+        grid.ScrollIntoView(grid.SelectedItem, grid.CurrentColumn);
+        await Settle();
         grid.BeginEdit();
         await Settle();
         var box = grid.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsFocused)

@@ -188,6 +188,8 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         grid.CurrentColumn = grid.Columns.FirstOrDefault(c => c.Header as string == column)
             ?? throw new InvalidOperationException("no column " + column);
         if (text is null) return;
+        grid.ScrollIntoView(grid.SelectedItem, grid.CurrentColumn);
+        Settle();
         grid.BeginEdit();
         Settle();
         var box = grid.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsFocused)
