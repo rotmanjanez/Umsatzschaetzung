@@ -28,14 +28,13 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
         var c = cases.Load(caseId);
         var rs = rules.Load();
         if (c.MappedTo(rs)) return c;
-        var before = c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).ToList();
+        var was = Json.Copy(c);
         // One read of the rules serves every invoice: what a line maps on its own is in the set for the next.
         rs = rs.With(c.Mappings);
         foreach (var inv in c.Invoices) rs = (await Lines(rs, inv, c.Taxpayer.Gewerbe, true, c.Mappings, ct)).Rules;
         c.MappedStore = rs.Store;
         c.MappedAt = rs.Version;
-        if (!c.Invoices.SelectMany(i => i.Lines).Select(l => l.MappingId).SequenceEqual(before)) cases.Save(c);
-        else cases.Store.SaveMappedAt(c.Id, c.MappedStore, c.MappedAt);
+        cases.Amend(was, c);
         return c;
     });
 

@@ -300,6 +300,42 @@ public class CaseDocumentTests
         Assert.Equal(["re-2", "re-1", "re-3"], store.Load("fall-1").Invoices.Select(i => i.Id));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AnAmendLandsOnTheCaseAsItIsByThen(bool meanwhile)
+    {
+        using var tmp = new TempDir();
+        var store = Store(tmp);
+        var at = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.Zero);
+        store.SaveInvoice("fall-1", Invoice("re-7", true), [], new Attachment("re-7", "", [], null), at);
+        var was = store.Load("fall-1");
+        var now = store.Load("fall-1");
+        var mine = now.Invoices.Find(i => i.Id == "re-7")!;
+        mine.SupplierName = "Rheinland Getränke";
+        mine.Lines[1].MappingId = "map-auto";
+        now.Mappings["map-auto"] = new ArticleMapping { Id = "map-auto", Name = "Pils", IngredientId = "ing.bier.fass" };
+        (now.MappedStore, now.MappedAt) = ("regeln", 9);
+        if (meanwhile)
+        {
+            var edited = Invoice("re-7", true);
+            edited.Lines[1].Name = "Pils dunkel";
+            store.SaveInvoice("fall-1", edited, [], new Attachment("re-7", "", [], null), at.AddSeconds(1));
+            store.SaveInvoice("fall-1", Invoice("re-8", true), [], new Attachment("re-8", "", [], null), at.AddSeconds(2));
+        }
+
+        store.Amend(was, now, at.AddMinutes(1));
+
+        var got = store.Load("fall-1");
+        var line = got.Invoices.Find(i => i.Id == "re-7")!.Lines[1];
+        Assert.Equal("Rheinland Getränke", got.Invoices.Find(i => i.Id == "re-7")!.SupplierName);
+        Assert.Equal(meanwhile, got.Invoices.Exists(i => i.Id == "re-8"));
+        Assert.Equal(meanwhile ? ("Pils dunkel", null) : ("Pils", "map-auto"), (line.Name, line.MappingId));
+        Assert.Equal(!meanwhile, got.Mappings.ContainsKey("map-auto"));
+        Assert.Equal(meanwhile ? (null, 0) : ("regeln", 9), (got.MappedStore, got.MappedAt));
+        Assert.Equal((got.MappedStore, got.MappedAt, at.AddMinutes(1)), (now.MappedStore, now.MappedAt, now.UpdatedAt));
+    }
+
     [Fact]
     public void AnInvoiceSavedAloneNeedsAnExistingCaseAndASafeId()
     {

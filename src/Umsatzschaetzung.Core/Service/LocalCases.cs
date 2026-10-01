@@ -80,6 +80,8 @@ sealed class LocalCases(RuleStore rules, CaseStore cases) : ICases
         if (add is not null) Excerpts.Forget(c.Id, add.InvoiceId);
     }
 
+    public void Amend(Case was, Case now) => cases.Amend(was, now, Clock.Now());
+
     public string? SaveInvoice(string caseId, Invoice inv, Dictionary<string, ArticleMapping> mappings, Attachment add)
     {
         if (caseId == "") throw new ServiceError(ErrorCode.Invalid, "Fall-ID fehlt");

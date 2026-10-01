@@ -32,12 +32,15 @@ public sealed class MappingModel : Observable
     async Task Map(Session session, Case k, CancellationToken ct)
     {
         Mapping = true;
-        Case? mapped = null;
-        await session.Run(async () => mapped = await session.Service.Mapping.Map(k.Id, ct));
+        var adopted = false;
+        await session.Run(async () => adopted = await session.Adopt(async () =>
+        {
+            var mapped = await session.Service.Mapping.Map(k.Id, ct);
+            await session.LoadRules(ct);
+            return mapped;
+        }, ct));
         Mapping = false;
-        if (mapped is null || session.Case != k || !await session.LoadRules(ct)) return;
-        session.SetCase(mapped);
-        caughtUp = (session.Case, session.Rules);
+        if (adopted) caughtUp = (session.Case, session.Rules);
     }
 
     public void Counted()

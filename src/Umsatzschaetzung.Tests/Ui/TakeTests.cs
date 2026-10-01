@@ -29,10 +29,55 @@ public class TakeTests
         var stored = await service.Invoices.Verify(new VerifyReq(kase.Id, Paper(), Intent.Store, null, null), ct);
         held.Go.SetResult();
         await writing;
+        await session.Saved;
         session.Take(kase.Id, stored.Invoice, stored.Stored!, since);
         await session.Saved;
 
         Assert.Contains((await service.Cases.Get(kase.Id, ct)).Invoices, i => i.Id == stored.Invoice.Id);
+    }
+
+    // Mapping or unifying hands back the case as it loaded it; an invoice taken in meanwhile stays.
+    [Fact]
+    public async Task AnInvoiceTakenWhileTheServiceWorkedStaysInTheWindow()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var host = new Host();
+        var kase = await host.PutVorlage("case.adopt");
+        var session = new Session(host.Service);
+        session.SetCase(await host.Service.Cases.Get(kase.Id, ct));
+        string? taken = null;
+
+        Assert.True(await session.Adopt(async () =>
+        {
+            var loaded = await host.Service.Cases.Get(kase.Id, ct);
+            var stored = await host.Service.Invoices.Verify(new VerifyReq(kase.Id, Paper(), Intent.Store, null, null), ct);
+            session.Take(kase.Id, stored.Invoice, stored.Stored!, session.Puts);
+            taken = stored.Invoice.Id;
+            return loaded;
+        }, ct));
+
+        Assert.Contains(session.Case!.Invoices, i => i.Id == taken);
+    }
+
+    // The service loads the case only once the window's own writes went through.
+    [Fact]
+    public async Task AnEditStillBeingWrittenWhenTheServiceStartsIsKept()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var host = new Host();
+        var kase = await host.PutVorlage("case.adopt");
+        var held = new Held(host.Service.Cases);
+        var session = new Session(host.Service with { Cases = held });
+        session.SetCase(await host.Service.Cases.Get(kase.Id, ct));
+
+        session.Case!.Taxpayer.Name = "Gasthaus Neu";
+        var writing = session.SaveCase(new Place(session.History, 0), ct);
+        var adopting = session.Adopt(() => host.Service.Cases.Get(kase.Id, ct), ct);
+        held.Go.SetResult();
+        await writing;
+
+        Assert.True(await adopting);
+        Assert.Equal("Gasthaus Neu", session.Case!.Taxpayer.Name);
     }
 
     static Invoice Paper() => new()

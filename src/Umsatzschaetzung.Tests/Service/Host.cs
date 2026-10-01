@@ -30,14 +30,14 @@ public class Host : IDisposable
 
     readonly TempDir dir = new();
 
-    public Host(IOcr? ocr = null, IPdfPages? pdf = null, IPdfPrinter? printer = null, Readings? readings = null)
+    public Host(IOcr? ocr = null, IPdfPages? pdf = null, IPdfPrinter? printer = null, Readings? readings = null, IRanking? ranking = null)
     {
         Directory.CreateDirectory(Sub("store"));
         File.Copy(Seeded.Value, Path.Combine(Sub("store"), "rules.db"));
         Store = new RuleStore(Sub("store"), TestData.Seed());
         Cases = new CaseStore(Sub("cases"));
         Service = Services.Local(Store, Cases, "test",
-            documents: new Documents(ocr, pdf), tagger: Tagger, ranking: new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir, AppFiles.Beside(EmbeddingStore.Shipped))), printer: printer, readings: readings);
+            documents: new Documents(ocr, pdf), tagger: Tagger, ranking: ranking ?? new EncoderRanking(Encoder, new EmbeddingStore(Store.Dir, AppFiles.Beside(EmbeddingStore.Shipped))), printer: printer, readings: readings);
     }
 
     public RuleStore Store { get; }

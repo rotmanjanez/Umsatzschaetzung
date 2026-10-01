@@ -138,9 +138,10 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
     public Task<Case> UnifySuppliers(string caseId, List<string> invoiceIds, CancellationToken ct) => Guard(ct, () =>
     {
         var c = cases.Load(caseId);
+        var was = Json.Copy(c);
         if (!Suppliers.Unify(c, invoiceIds.ToHashSet())) return c;
         c.MappedStore = null;
-        cases.Save(c);
+        cases.Amend(was, c);
         return c;
     });
 

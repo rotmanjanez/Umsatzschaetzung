@@ -425,12 +425,70 @@ public sealed partial class CaseStore(string dir)
         return dropped;
     }
 
-    public void SaveMappedAt(string caseId, string? store, long version) => Guarded(() =>
+    // Writes what a long operation changed on a case it loaded, onto the case as it is by then: an
+    // invoice stored meanwhile stays, a name or line changed meanwhile keeps that change, and the
+    // case counts as mapped only if every line still open is one the matcher was asked about.
+    // now takes the stamps the file ends up with.
+    public void Amend(Case was, Case now, DateTimeOffset at) => Guarded(() =>
     {
-        using var db = Attached(caseId);
-        Exec(db, null, "UPDATE fall SET mapped_store = @store, mapped_at = @v", ("@store", store), ("@v", version));
+        lock (gate)
+        {
+            using var db = Attached(now.Id);
+            using var tx = db.BeginTransaction(deferred: false);
+            var before = was.Invoices.ToDictionary(i => i.Id, StringComparer.Ordinal);
+            var changed = false;
+            foreach (var inv in now.Invoices)
+            {
+                if (!before.TryGetValue(inv.Id, out var old)) continue;
+                if (inv.SupplierName != old.SupplierName)
+                    changed |= Exec(db, tx, "UPDATE invoice SET supplier_name = @now WHERE id = @id AND supplier_name = @was",
+                        ("@id", inv.Id), ("@now", inv.SupplierName), ("@was", old.SupplierName)) > 0;
+                for (var j = 0; j < inv.Lines.Count; j++)
+                {
+                    var l = inv.Lines[j];
+                    if (l.MappingId == old.Lines[j].MappingId
+                        || Exec(db, tx, $"UPDATE invoice_line SET mapping_id = @mapping WHERE invoice_id = @id AND ord = @ord "
+                            + $"AND mapping_id IS @was AND ({LineColumns}) IS ({LineValues}) "
+                            + "AND EXISTS (SELECT 1 FROM invoice WHERE id = @id AND supplier_name = @supplier AND date IS @date)",
+                            LineArgs(l, ("@id", inv.Id), ("@ord", j), ("@was", old.Lines[j].MappingId),
+                                ("@supplier", inv.SupplierName), ("@date", inv.Date is { } d ? Day(d) : null))) == 0) continue;
+                    changed = true;
+                    if (l.MappingId is { } id && !was.Mappings.ContainsKey(id) && now.Mappings.TryGetValue(id, out var m)) WriteMapping(db, tx, id, m);
+                }
+            }
+            using (var cmd = Command(db, tx, "UPDATE fall SET "
+                + "mapped_store = CASE WHEN @stamp THEN @store ELSE mapped_store END, "
+                + "mapped_at = CASE WHEN @stamp THEN @mapped ELSE mapped_at END, "
+                + "app_version = CASE WHEN @changed THEN @app ELSE app_version END, "
+                + "updated_at = CASE WHEN @changed THEN @updated ELSE updated_at END "
+                + "RETURNING mapped_store, mapped_at, updated_at",
+                ("@stamp", now.MappedStore is null || OnlyAsked(db, tx, now)), ("@store", now.MappedStore), ("@mapped", now.MappedAt),
+                ("@changed", changed), ("@app", Schema.App), ("@updated", Stamp(at))))
+            using (var r = cmd.ExecuteReader())
+            {
+                r.Read();
+                (now.MappedStore, now.MappedAt, now.UpdatedAt) = (Str(r, 0), r.GetInt64(1), When(r, 2));
+            }
+            tx.Commit();
+        }
         return 0;
     });
+
+    static bool OnlyAsked(SqliteConnection db, SqliteTransaction tx, Case now)
+    {
+        var asked = now.Invoices
+            .SelectMany(i => i.Lines.Select((l, j) => (i, l, j)))
+            .Where(x => string.IsNullOrEmpty(x.l.MappingId))
+            .Select(x => (x.i.Id, (long)x.j, x.i.SupplierName, x.i.Date is { } d ? Day(d) : null, x.l.Name, x.l.SellerArticleId, x.l.Gtin, x.l.UnitCode))
+            .ToHashSet();
+        using var cmd = Command(db, tx, "SELECT l.invoice_id, l.ord, i.supplier_name, i.date, l.name, l.seller_article_id, l.gtin, l.unit_code "
+            + "FROM invoice_line l JOIN invoice i ON i.id = l.invoice_id WHERE coalesce(l.mapping_id, '') = ''");
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            if (!asked.Contains((r.GetString(0), r.GetInt64(1), r.GetString(2), Str(r, 3), r.GetString(4), Str(r, 5), Str(r, 6), r.GetString(7))))
+                return false;
+        return true;
+    }
 
     public void SaveReading(string caseId, string invoiceId, List<OcrPage> pages) => Guarded(() =>
     {
@@ -999,10 +1057,10 @@ public sealed partial class CaseStore(string dir)
         return cmd;
     }
 
-    static void Exec(SqliteConnection db, SqliteTransaction? tx, string sql, params (string Name, object? Value)[] args)
+    static int Exec(SqliteConnection db, SqliteTransaction? tx, string sql, params (string Name, object? Value)[] args)
     {
         using var cmd = Command(db, tx, sql, args);
-        cmd.ExecuteNonQuery();
+        return cmd.ExecuteNonQuery();
     }
 
     static object? Scalar(SqliteConnection db, string sql, params (string Name, object? Value)[] args)

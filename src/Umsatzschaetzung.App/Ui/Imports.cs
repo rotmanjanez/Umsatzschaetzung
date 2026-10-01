@@ -150,11 +150,7 @@ public sealed class Imports
             job.Progress.EndFile();
             job.Done++;
         }
-        if (job.Imported.Count > 0)
-        {
-            await session.Saved;
-            await Unify(job);
-        }
+        if (job.Imported.Count > 0) await Unify(job);
         job.Running = false;
         Finish(job);
     }
@@ -163,7 +159,7 @@ public sealed class Imports
     {
         try
         {
-            Adopt(job, await session.Service.Invoices.UnifySuppliers(job.CaseId, job.Imported, job.Ct));
+            await session.Adopt(() => session.Service.Invoices.UnifySuppliers(job.CaseId, job.Imported, job.Ct), job.Ct);
         }
         catch (OperationCanceledException)
         {
@@ -209,11 +205,6 @@ public sealed class Imports
             return;
         }
         job.Drafts++;
-    }
-
-    void Adopt(ImportJob job, Case? kase)
-    {
-        if (kase is not null && session.Case?.Id == job.CaseId) session.SetCase(kase);
     }
 
     void Finish(ImportJob job)

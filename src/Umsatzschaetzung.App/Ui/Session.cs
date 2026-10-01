@@ -231,6 +231,25 @@ public sealed class Session : Observable
         CaseChanged?.Invoke();
     }
 
+    // What the service changes on the case at length, it hands back as it loaded the case. That is
+    // taken unless this window changed or took in something meanwhile: then the case is taken as the
+    // service has it once this window's writes went through, and not at all while one of them failed.
+    public async Task<bool> Adopt(Func<Task<Case>> work, CancellationToken ct)
+    {
+        await Saved;
+        var since = revision;
+        var kase = await work();
+        while (revision != since && Case?.Id == kase.Id)
+        {
+            await Saved;
+            since = revision;
+            kase = await Service.Cases.Get(kase.Id, ct);
+        }
+        if (Case?.Id != kase.Id || !stored) return false;
+        SetCase(kase);
+        return true;
+    }
+
     // Taken before a call that stores an invoice, and handed to Take with what it stored.
     public int Puts => puts;
 
@@ -312,15 +331,10 @@ public sealed class Session : Observable
             }
             kase.CreatedAt = saved.CreatedAt;
             kase.UpdatedAt = saved.UpdatedAt;
+            if (n == stores) stored = true;
             if (Case == kase) CaseChanged?.Invoke();
         }, CancellationToken.None);
-        _ = Settled(write, n);
         return ct.CanBeCanceled ? Outcome(write, ct) : write;
-    }
-
-    async Task Settled(Task<bool> write, int n)
-    {
-        if (await write && n == stores) stored = true;
     }
 
     public async Task<bool> Put(IRuleEntity data, Place at, CancellationToken ct)
