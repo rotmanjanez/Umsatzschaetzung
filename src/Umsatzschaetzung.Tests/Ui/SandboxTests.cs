@@ -60,6 +60,7 @@ public class SandboxTests
 
     // The control request comes from outside the web view and proves the sink is reachable, so the
     // silence means something; the unsealed page shows the web view has no network even without the policy.
+    // The pages' clocks start once the web view is up, which on a cold runner takes longer than a page.
     public static Seen Probe()
     {
         using var sink = new Sink();
@@ -67,6 +68,8 @@ public class SandboxTests
         var view = new HtmlView();
         var window = new Window { Width = 800, Height = 600, Content = view };
         ConcurrentQueue<string> navigations = [];
+        var adapter = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        view.AdapterCreated += (_, _) => adapter.TrySetResult();
         view.NavigationStarted += (_, e) => navigations.Enqueue(e.Request?.ToString() ?? "");
         var loaded = true;
         string? failure = null;
@@ -75,6 +78,7 @@ public class SandboxTests
             try
             {
                 using (var http = new HttpClient()) await http.GetAsync(sink.Url + "/control", done.Token);
+                await adapter.Task.WaitAsync(done.Token);
                 loaded &= await Raw(view, $"<img src=\"{sink.Url}/web-view\">", done.Token);
                 loaded &= await Raw(view, $"<script>location.href = \"{sink.Url}/ran\";</script>", done.Token);
                 view.Navigate(new Uri(sink.Url + "/navigate"));
