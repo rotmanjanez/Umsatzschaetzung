@@ -22,17 +22,11 @@ jobs:
         os: [windows-latest, windows-11-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      # A throwaway build starts MSBuild and the compiler while the job checks out, for the real one to
-      # find them warm: on a fresh Windows runner their first start took 10 to 60 s. The runner's own
-      # NVMe disk, D: on x64 and left unformatted on arm, takes the packages and the tests' stores: on
-      # the system disk restoring and testing take two to three times as long.
-      - name: warm up
+      # The runner's own NVMe disk, D: on x64 and left unformatted on arm, takes the packages and the
+      # tests' stores: on the system disk restoring and testing take two to three times as long.
+      - name: local disk
         if: runner.os == 'Windows'
         run: |
-          $warm = New-Item -ItemType Directory "$env:RUNNER_TEMP\warm"
-          Set-Content "$warm\warm.csproj" '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Exe</OutputType></PropertyGroup></Project>'
-          Set-Content "$warm\warm.cs" 'class Warm { static void Main() { } }'
-          Start-Process dotnet "build", "$warm" -NoNewWindow -RedirectStandardOutput "$warm\build.log"
           if (-not (Test-Path D:\)) {
             $raw = "list disk" | diskpart | Select-String '^\s*Disk (\d+)\s+Online\s+(\d+ .B)\s+\2\s*$' | Select-Object -First 1
             if ($raw) { "select disk $($raw.Matches[0].Groups[1])", "convert gpt", "create partition primary", "format fs=ntfs quick", "assign letter=D" | diskpart | Out-Null }
