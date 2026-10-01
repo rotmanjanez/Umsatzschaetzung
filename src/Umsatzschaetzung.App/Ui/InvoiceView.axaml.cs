@@ -524,6 +524,7 @@ public partial class InvoiceView : Screen
         var req = new VerifyReq(Session.Case.Id, Copy(Current()), Intent.Store, null, null);
         await Session.Run(async () =>
         {
+            var since = Session.Puts;
             var v = await Session.Service.Invoices.Verify(req, CancellationToken.None);
             invoice.Verification = v.Invoice.Verification;
             model.State = Checks.Of(invoice);
@@ -533,7 +534,7 @@ public partial class InvoiceView : Screen
                 ApplyTotals(v);
                 model.Dirty = false;
             }
-            if (v.Stored is not null) Session.Take(req.CaseId, v.Invoice, v.Stored);
+            if (v.Stored is not null) Session.Take(req.CaseId, v.Invoice, v.Stored, since);
         });
     }
 
@@ -584,6 +585,7 @@ public partial class InvoiceView : Screen
         var req = new VerifyReq(kase.Id, Copy(Current()), Intent.Confirm, null, null);
         await Session.Run(async () =>
         {
+            var since = Session.Puts;
             var v = await Session.Service.Invoices.Verify(req, Ct);
             Apply(v);
             if (!v.Accepted || v.Stored is null)
@@ -592,7 +594,7 @@ public partial class InvoiceView : Screen
                 return;
             }
             model.Dirty = false;
-            Session.Take(req.CaseId, v.Invoice, v.Stored);
+            Session.Take(req.CaseId, v.Invoice, v.Stored, since);
             Frame.Of(this)?.Close();
         });
         model.Saving = false;

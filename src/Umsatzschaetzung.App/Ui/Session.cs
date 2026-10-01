@@ -60,6 +60,8 @@ public sealed class Session : Observable
     Dictionary<string, string> recorded = [];
     bool stored = true;
     int stores;
+    // Counts each write of the whole case as it starts and as it ends: odd while one is under way.
+    int puts;
     // Counts every change of the case this window took in or recorded.
     int revision;
 
@@ -229,9 +231,13 @@ public sealed class Session : Observable
         CaseChanged?.Invoke();
     }
 
+    // Taken before a call that stores an invoice, and handed to Take with what it stored.
+    public int Puts => puts;
+
     // An invoice the service stored is taken into the case with what storing it changed; the rest
-    // of the case stays as this window has it.
-    public void Take(string caseId, Invoice invoice, Stored stored)
+    // of the case stays as this window has it. A write of the whole case that ran meanwhile wrote
+    // it without that invoice, so the case is written again with it.
+    public void Take(string caseId, Invoice invoice, Stored stored, int since)
     {
         if (Case is not { } kase || kase.Id != caseId) return;
         var i = kase.Invoices.FindIndex(x => x.Id == invoice.Id);
@@ -242,6 +248,7 @@ public sealed class Session : Observable
         CaseParts.Take(recorded, kase, invoice, stored.Mappings.Count > 0);
         revision++;
         CaseChanged?.Invoke();
+        if (since != puts || since % 2 == 1) _ = Store(kase, CancellationToken.None);
     }
 
     public void CloseCase()
@@ -292,7 +299,16 @@ public sealed class Session : Observable
         stored = false;
         var write = Enqueue(kase, async () =>
         {
-            var saved = await Service.Cases.Put(Json.Copy(kase), CancellationToken.None);
+            puts++;
+            Case saved;
+            try
+            {
+                saved = await Service.Cases.Put(Json.Copy(kase), CancellationToken.None);
+            }
+            finally
+            {
+                puts++;
+            }
             kase.CreatedAt = saved.CreatedAt;
             kase.UpdatedAt = saved.UpdatedAt;
             if (Case == kase) CaseChanged?.Invoke();

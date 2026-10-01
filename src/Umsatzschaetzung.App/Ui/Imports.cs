@@ -150,7 +150,11 @@ public sealed class Imports
             job.Progress.EndFile();
             job.Done++;
         }
-        if (job.Imported.Count > 0) await Unify(job);
+        if (job.Imported.Count > 0)
+        {
+            await session.Saved;
+            await Unify(job);
+        }
         job.Running = false;
         Finish(job);
     }
@@ -181,10 +185,12 @@ public sealed class Imports
     async Task Import(ImportJob job, PickedFile file, Task<OcrResp>? reading)
     {
         job.Progress.Begin(ImportStage.Parse);
+        await session.Saved;
+        var since = session.Puts;
         var parsed = await session.Service.Invoices.Parse(job.CaseId, file.Name, file.Data, job.Ct);
         if (!parsed.NeedsOcr)
         {
-            if (parsed.Stored is not null) session.Take(job.CaseId, parsed.Invoice, parsed.Stored);
+            if (parsed.Stored is not null) session.Take(job.CaseId, parsed.Invoice, parsed.Stored, since);
             job.Imported.Add(parsed.Invoice.Id);
             job.Stored++;
             return;
@@ -192,8 +198,10 @@ public sealed class Imports
         job.Progress.Begin(ImportStage.Ocr);
         var ocr = await (reading ?? session.Service.Invoices.Ocr(job.CaseId, file.Name, file.Data, job.Ct));
         job.Progress.Begin(ImportStage.Verify);
+        await session.Saved;
+        since = session.Puts;
         var v = await session.Service.Invoices.Verify(new VerifyReq(job.CaseId, ocr.Draft, Intent.Auto, file.Name, file.Data, ocr.Pages), job.Ct);
-        if (v.Stored is not null) session.Take(job.CaseId, v.Invoice, v.Stored);
+        if (v.Stored is not null) session.Take(job.CaseId, v.Invoice, v.Stored, since);
         job.Imported.Add(v.Invoice.Id);
         if (v.Accepted)
         {
