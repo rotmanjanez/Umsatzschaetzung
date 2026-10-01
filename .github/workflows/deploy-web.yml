@@ -117,6 +117,7 @@ jobs:
           source: publish/wwwroot
           deploy-path: ${{ vars.APP_DEPLOY_PATH }}
           keep: models/* ort/* lektionen
+          compress: models/*/*
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}

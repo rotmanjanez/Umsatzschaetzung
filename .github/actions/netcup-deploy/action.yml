@@ -18,6 +18,10 @@ inputs:
     description: Directories below the document root, as shell globs, whose files never change once there; the previous deploy's files stay and only those the new one adds go up.
     required: false
     default: ''
+  compress:
+    description: Files below the kept directories, as shell globs, that the server hands out compressed; one whose compressed copy the server has not got yet is compressed before it goes up, so a file is compressed once.
+    required: false
+    default: ''
   create:
     description: Create the deploy path when it is not there yet, for a folder inside another deploy that keeps it.
     required: false
@@ -34,6 +38,7 @@ runs:
         DEPLOY_PATH: ${{ inputs.deploy-path }}
         SOURCE: ${{ inputs.source }}
         KEEP: ${{ inputs.keep }}
+        COMPRESS: ${{ inputs.compress }}
         CREATE: ${{ inputs.create }}
       run: |
         set -euo pipefail
@@ -49,11 +54,18 @@ runs:
         SSH_OPTS=(-i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes)
 
         EXCLUDE=(--no-wildcards --exclude='./.git')
+        declare -A PRESENT=()
         BROUGHT=$(cd "$SOURCE" && for d in $KEEP; do [ -d "$d" ] && printf '%s ' "$d"; done; true)
         if [ -n "$BROUGHT" ]; then
           while IFS= read -r present; do
-            [ -n "$present" ] && EXCLUDE+=(--exclude="./$present")
+            [ -n "$present" ] && EXCLUDE+=(--exclude="./$present") && PRESENT["$present"]=1
           done < <(ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "cd '$DEPLOY_PATH' && for d in $BROUGHT; do [ -d \"\$d\" ] && find \"\$d\" -type f; done; true")
+        fi
+        if [ -n "$COMPRESS" ]; then
+          (cd "$SOURCE" && for f in $COMPRESS; do
+            [ -f "$f" ] && [ "${f%.br}" = "$f" ] && [ ! -e "$f.br" ] && [ -z "${PRESENT[$f.br]:-}" ] && printf '%s\0' "$f"
+          done; true) |
+            (cd "$SOURCE" && xargs -0 -r -n 1 -P "$(nproc)" sh -c 'brotli -f -q 5 -o "$0.part" "$0" && brotli -dc "$0.part" | cmp -s - "$0" && mv "$0.part" "$0.br"')
         fi
 
         STAGE="$(dirname "$DEPLOY_PATH")/.deploy-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"

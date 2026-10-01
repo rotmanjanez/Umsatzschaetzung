@@ -37,7 +37,10 @@ RewriteRule ^(.*)$ $1.br [L]
 <FilesMatch "\.svg\.br$">
   ForceType image/svg+xml
 </FilesMatch>
-<FilesMatch "\.(dat|db)\.br$">
+<FilesMatch "\.txt\.br$">
+  ForceType text/plain
+</FilesMatch>
+<FilesMatch "\.(dat|db|onnx)\.br$">
   ForceType application/octet-stream
 </FilesMatch>
 
