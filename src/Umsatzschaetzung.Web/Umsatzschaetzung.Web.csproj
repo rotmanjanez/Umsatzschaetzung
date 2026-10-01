@@ -3,6 +3,10 @@
   <PropertyGroup>
     <RootNamespace>Umsatzschaetzung.Web</RootNamespace>
     <RunAOTCompilation Condition="'$(Configuration)' == 'Release'">true</RunAOTCompilation>
+    <!-- The compiled code optimised as before, the linked module by binaryen's -O1 instead of -O2:
+         70 to 105 s less on the deploy's runner, 8 % more bytes but as many brotli'd, and in the
+         browser as fast to boot, to click through and to play the lessons. -->
+    <EmccLinkOptimizationFlag Condition="'$(Configuration)' == 'Release'">-O1</EmccLinkOptimizationFlag>
     <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
     <!-- Everything trimmed but the program's own assemblies, which reflect over their rows and
          steps and are kept whole: a tenth off the runtime's download. -->

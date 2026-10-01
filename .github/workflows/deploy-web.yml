@@ -49,11 +49,17 @@ jobs:
             curl -fsS -H 'Content-Type: application/json; charset=utf-8' --data-binary @- https://api.indexnow.org/indexnow ||
             echo "::warning::IndexNow did not take the ping"
 
+  # On arm64 Linux, which compiles and links the program's files as x64 does byte for byte, the
+  # slowest of them in four fifths of the time, and warms the shipped embeddings as the lessons'
+  # stores are made, on arm64. It has no browser: the boot check's is Chrome for Testing as
+  # Playwright builds it for arm64, pinned by its hash and fetched while the program builds.
   app:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: nohup sh -c 'curl -fsSL -o chrome.zip https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-linux-arm64.zip && echo "7d8a4b4ff289efe44a06501a519df142c4c18fff7aaf1c1401a3fbb12b3bd069  chrome.zip" | sha256sum -c && unzip -q chrome.zip; echo $? > chrome' > chrome.log 2>&1 &
+        working-directory: ${{ runner.temp }}
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
@@ -105,7 +111,9 @@ jobs:
               \( -name '*.wasm' -o -name '*.js' -o -name '*.mjs' -o -name '*.map' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.ico' -o -name '*.dat' \) -print0 |
               nice -n 19 xargs -0 -n 1 -P "$(nproc)" sh -c 'brotli -f -q 7 -o "$0.part" "$0" && mv "$0.part" "$0.br"' &
           fi
-          python3 tools/boot/boot.py publish/wwwroot
+          timeout 120 sh -c 'until [ -s "$RUNNER_TEMP/chrome" ]; do sleep 1; done' && [ "$(cat "$RUNNER_TEMP/chrome")" = 0 ] ||
+            { cat "$RUNNER_TEMP/chrome.log"; exit 1; }
+          PATH="$RUNNER_TEMP/chrome-linux-arm64:$PATH" python3 tools/boot/boot.py publish/wwwroot
           wait $!
           find publish/wwwroot -name '*.br' -print0 | xargs -0 -n 1 -P "$(nproc)" sh -c 'brotli -dc "$0" | cmp -s - "${0%.br}"'
       # The weights and the runtime sit under their release and never change there: what the
