@@ -5,7 +5,7 @@
         <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
             <DockPanel>
                 <Button DockPanel.Dock="Right" Theme="{StaticResource ErrorBannerClose}" Click="DismissError"
-                        AutomationProperties.Name="Fehlermeldung schließen" AutomationProperties.AutomationId="RulesErrorClose"/>
+                        AutomationProperties.AutomationId="RulesErrorClose"/>
                 <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}" AutomationProperties.LiveSetting="Assertive" AutomationProperties.AutomationId="RulesError"/>
             </DockPanel>
         </Border>
