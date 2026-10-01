@@ -10,6 +10,9 @@ public sealed partial class WorkerTransport : ITransport
 {
     int calls;
 
+    // Calls not answered yet: while there are any, the services are still at work.
+    public int Running { get; private set; }
+
     public static Task Start() => StartJs();
 
     public async Task<Message> Call(string method, Message request, CancellationToken ct)
@@ -18,6 +21,7 @@ public sealed partial class WorkerTransport : ITransport
         var id = ++calls;
         foreach (var b in request.Blobs) Attach(b);
         using var cancel = ct.Register(() => Cancel(id));
+        Running++;
         try
         {
             await CallJs(id, method, request.Json);
@@ -25,6 +29,10 @@ public sealed partial class WorkerTransport : ITransport
         catch (JSException) when (ct.IsCancellationRequested)
         {
             throw new OperationCanceledException(ct);
+        }
+        finally
+        {
+            Running--;
         }
         try
         {

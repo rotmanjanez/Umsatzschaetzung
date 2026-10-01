@@ -209,8 +209,8 @@ public sealed class Session : Observable
         _ = Warm(kase.Id);
     }
 
-    // The matcher's model takes seconds to open in the browser; it opens with the case instead of
-    // with the first line asked about. What fails here fails again there, where it is shown.
+    // The matcher readies itself as a case with open lines opens instead of with the first line asked
+    // about. What fails here fails again there, where it is shown.
     async Task Warm(string caseId)
     {
         try

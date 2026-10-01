@@ -9,10 +9,12 @@ namespace Umsatzschaetzung.Lessons;
 // headless run kept where the lesson starts (see the `keep` step), and the page opens its case.
 public static partial class Coach
 {
+    static readonly WorkerTransport transport = new();
+
     public static async Task Start(string element, string? open)
     {
         await WorkerTransport.Start();
-        var service = Remote.Over(new WorkerTransport());
+        var service = Remote.Over(transport);
         var view = await Host.Start(service, element);
         if (!view.IsLoaded)
         {

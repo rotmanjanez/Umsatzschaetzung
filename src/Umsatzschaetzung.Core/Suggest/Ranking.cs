@@ -12,11 +12,13 @@ public interface IRanking
 {
     Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default);
 
-    // Pays ahead what the first Rank would: the model opened and the wares indexed.
+    // Pays ahead what the first Rank would: the wares indexed and, eager, the model opened.
     Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default);
 }
 
-public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = null) : IRanking
+// Eager, Warm opens the model too, so the first line asked about does not wait for it; where
+// opening it means downloading it, it opens only once a line is not in the cache.
+public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = null, bool eager = true) : IRanking
 {
     const double Mismatch = 0.1;
     const int MostLines = 4096;
@@ -84,7 +86,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
         try
         {
             await Index(rs, gewerbe, ct);
-            await encoder.Embed([], ct);
+            if (eager) await encoder.Embed([], ct);
             await encoder.Load(ct);
         }
         finally

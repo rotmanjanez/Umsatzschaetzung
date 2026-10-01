@@ -51,7 +51,7 @@ public static partial class Coach
         foreach (var step in Load(steps)) await Act(step);
         await Settle();
         if (string.IsNullOrEmpty(done) || JsonSerializer.Deserialize(done, LessonJson.Default.Done) is not { Text: null } goal) return;
-        for (var i = 0; i < 60 && !(Find(goal.At) is { } hit && Met(hit, goal)); i++) await Settle();
+        await Until(() => Find(goal.At) is { } hit && Met(hit, goal), 60);
     }
 
     // An invoice open while its case changes back is closed first, so it stores nothing over the
@@ -181,16 +181,28 @@ public static partial class Coach
         await Settle();
     }
 
-    // The program may take seconds to show it, while the matcher's model opens.
     static async Task<Visual> Reach(Target target)
     {
-        for (var i = 0; i < 400; i++)
+        Visual? hit = null;
+        bool Found()
         {
-            if (Targets.Seek(top!, target) is { } hit) return hit;
-            Targets.Reveal(top!, target);
+            hit = Targets.Seek(top!, target);
+            if (hit is null) Targets.Reveal(top!, target);
+            return hit is not null;
+        }
+        return await Until(Found, 400) ? hit! : throw new InvalidOperationException("not found: " + target);
+    }
+
+    // Rounds in which the services work, as while the matcher's cache loads over a slow line, count
+    // a twentieth: the program is not late yet, but a call that never answers ends it too.
+    static async Task<bool> Until(Func<bool> met, int rounds)
+    {
+        for (var waited = 0; waited < 20 * rounds; waited += transport.Running > 0 ? 1 : 20)
+        {
+            if (met()) return true;
             await Settle();
         }
-        throw new InvalidOperationException("not found: " + target);
+        return met();
     }
 
     static void Click(Visual visual)
@@ -244,16 +256,11 @@ public static partial class Coach
         box.Focus();
         await Settle();
         box.GetVisualDescendants().OfType<TextBox>().First().Text = text;
-        for (var i = 0; i < 60; i++)
-        {
-            await Settle();
-            var entry = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child?
-                .GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item);
-            if (entry is null) continue;
-            box.SelectedItem = entry.DataContext;
-            return;
-        }
-        throw new InvalidOperationException("not offered: " + item);
+        TextBlock? entry = null;
+        bool Offered() => (entry = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child?
+            .GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item)) is not null;
+        if (!await Until(Offered, 60)) throw new InvalidOperationException("not offered: " + item);
+        box.SelectedItem = entry!.DataContext;
     }
 
     static async Task Settle(int rounds = 1)

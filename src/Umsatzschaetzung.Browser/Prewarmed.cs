@@ -6,10 +6,13 @@ namespace Umsatzschaetzung.Browser;
 
 // The browser runs the encoder at a fraction of native speed, and a first index over the
 // shipped rules would wait minutes for it: their embedding cache is warmed when the page is
-// published and fetched with the weights the first time a line is ranked.
-sealed class Prewarmed(IWeights weights, string dir, Func<IRanking> open) : IRanking
+// published and fetched with the weights the first time a line is ranked. It is laid out beside
+// /work, not in it, so the stores keep only what was embedded here and a new release's cache
+// takes the old one's place.
+sealed class Prewarmed(IWeights weights, Func<string, IRanking> open) : IRanking
 {
     public const string File = "seed/embeddings.db";
+    const string Seed = "/seed/embeddings.db";
 
     Task<IRanking>? ranking;
 
@@ -19,14 +22,19 @@ sealed class Prewarmed(IWeights weights, string dir, Func<IRanking> open) : IRan
     public async Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default) =>
         await (await (ranking ??= Open())).Warm(rs, gewerbe, ct);
 
+    // A failed fetch is tried again by the next line asked about.
     async Task<IRanking> Open()
     {
-        var path = Path.Combine(dir, "embeddings.db");
-        if (!System.IO.File.Exists(path))
+        try
         {
-            await System.IO.File.WriteAllBytesAsync(path + ".part", await weights.Read(File));
-            System.IO.File.Move(path + ".part", path);
+            Directory.CreateDirectory(Path.GetDirectoryName(Seed)!);
+            await System.IO.File.WriteAllBytesAsync(Seed, await weights.Read(File));
+            return open(Seed);
         }
-        return open();
+        catch
+        {
+            ranking = null;
+            throw;
+        }
     }
 }

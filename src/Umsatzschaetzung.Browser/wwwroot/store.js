@@ -38,7 +38,9 @@ export async function mount(FS, dir) {
 export async function load(FS, dir, from) {
     const { files } = await fetch(from, { cache: 'no-cache' }).then(r => r.json());
     await Promise.all(files.map(async f => {
-        const data = new Uint8Array(await fetch(new URL(f, from), { cache: 'no-cache' }).then(r => r.arrayBuffer()));
+        const r = await fetch(new URL(f, from), { cache: 'no-cache' });
+        if (!r.ok) throw new Error(`${f}: ${r.status}`);
+        const data = new Uint8Array(await r.arrayBuffer());
         const path = `${dir}/${f}`;
         FS.mkdirTree(path.slice(0, path.lastIndexOf('/')));
         FS.writeFile(path, data);

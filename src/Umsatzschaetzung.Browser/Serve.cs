@@ -16,15 +16,17 @@ public static partial class Serve
     static Dispatch? dispatch;
     static readonly Dictionary<int, CancellationTokenSource> running = [];
 
-    // Everything the program asks for, over /work and the weights.
+    // Everything the program asks for, over /work and the weights. Earlier releases kept a copy of
+    // the shipped embeddings among the rules, where it would be read before the current one.
     public static async Task Start()
     {
         var weights = await WebWeights.Start();
         var rules = new RuleStore("/work/rules", RuleStore.Seed());
+        File.Delete(Path.Combine(rules.Dir, "embeddings.db"));
         dispatch = new(Services.Local(rules, new CaseStore("/work/cases"), Release.Version,
             documents: new Documents(new RapidOcr(weights), new PdfiumPages()),
             tagger: new Tagger(weights),
-            ranking: new Prewarmed(weights, rules.Dir, () => new EncoderRanking(new Encoder(weights), new EmbeddingStore(rules.Dir)))));
+            ranking: new Prewarmed(weights, seed => new EncoderRanking(new Encoder(weights), new EmbeddingStore("/work/embeddings", seed), eager: false))));
     }
 
     [JSExport]
