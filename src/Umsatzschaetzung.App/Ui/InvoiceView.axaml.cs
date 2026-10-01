@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Reports;
@@ -729,7 +730,7 @@ public partial class InvoiceView : Screen
         if (index == currentPage || index < 0 || index >= pages.Count) return;
         currentPage = index;
         var page = pages[index];
-        PageImage.Source = null;
+        Shown(null);
         AutomationProperties.SetName(PageImage, $"Rechnungsseite {index + 1} von {pages.Count}");
         AutomationProperties.SetHelpText(PageImage, string.Join(" ", page.Words.Select(w => w.Text)));
         if (page.Width > 0 && page.Height > 0) Place(page.Width, page.Height);
@@ -748,10 +749,21 @@ public partial class InvoiceView : Screen
             image.Dispose();
             return;
         }
-        PageImage.Source = image;
+        Shown(image);
         if (page.Width > 0 && page.Height > 0) return;
         Place(image.PixelSize.Width, image.PixelSize.Height);
         FitPage();
+    }
+
+    // A page is decoded at full size; what is no longer shown is let go at once, not when the
+    // collector comes by.
+    public void Release() => Shown(null);
+
+    void Shown(Bitmap? image)
+    {
+        var shown = PageImage.Source as Bitmap;
+        PageImage.Source = image;
+        shown?.Dispose();
     }
 
     void Place(double w, double h)

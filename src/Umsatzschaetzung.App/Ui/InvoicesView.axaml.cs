@@ -126,8 +126,7 @@ public partial class InvoicesView : Screen
     void CaseClosed()
     {
         foreach (var w in windows.Values.ToList()) w.Close();
-        foreach (var e in editors.Values) e.Leave();
-        editors.Clear();
+        foreach (var id in editors.Keys.ToList()) Drop(id)?.Leave();
     }
 
     void Refresh()
@@ -199,7 +198,14 @@ public partial class InvoicesView : Screen
         if (!windows.Remove(id) || !editors.TryGetValue(id, out var view)) return;
         view.Leave();
         // Only reviews in progress stay cached; a read invoice would just hold on to its page images.
-        if (!view.Keep) editors.Remove(id);
+        if (!view.Keep) Drop(id);
+    }
+
+    InvoiceView? Drop(string id)
+    {
+        if (!editors.Remove(id, out var view)) return null;
+        view.Release();
+        return view;
     }
 
     // A review kept while its window is closed is dropped once the case holds another version of the
@@ -208,7 +214,7 @@ public partial class InvoicesView : Screen
     {
         foreach (var (id, view) in editors.ToList())
             if (!windows.ContainsKey(id) && (Session.Case?.Invoices.Find(i => i.Id == id) is not { } invoice || !view.Holds(invoice)))
-                editors.Remove(id);
+                Drop(id);
     }
 
     InvoiceView EditorFor(InvoiceRow row)
@@ -243,7 +249,7 @@ public partial class InvoicesView : Screen
         Session.Readings.Remove(id);
         Session.Sources.Remove(id);
         if (windows.Remove(id, out var window)) window.Close();
-        if (editors.Remove(id, out var gone)) gone.Leave();
+        Drop(id)?.Leave();
     }
 
     async void AddFiles(object? sender, RoutedEventArgs e)
