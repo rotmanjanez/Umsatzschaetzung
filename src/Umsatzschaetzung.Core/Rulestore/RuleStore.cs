@@ -849,10 +849,14 @@ public sealed class RuleStore
         raw.sqlite3_free(p);
         if (before is not null && image.AsSpan().SequenceEqual(before)) return;
         var next = file + ".neu";
+        // Readers notice a change by length and time, and a change of the same length within one tick
+        // of the file system's clock would look like none: the new file is dated after the one it replaces.
         using (var s = new FileStream(next, FileMode.Create, FileAccess.Write, FileShare.None))
         {
             s.Write(image);
             s.Flush(flushToDisk: true);
+            if (File.GetLastWriteTimeUtc(s.SafeFileHandle) <= seen.Written)
+                File.SetLastWriteTimeUtc(s.SafeFileHandle, seen.Written.AddTicks(1));
         }
         // Windows refuses to replace a file while a reader copies it.
         for (var tries = 40; ; tries--)
