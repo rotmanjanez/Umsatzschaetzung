@@ -91,8 +91,9 @@ jobs:
         run: rm -rf src/Umsatzschaetzung.Web/obj/Release/net10.0/wasm/for-publish/stripped
       - if: steps.built.outputs.cache-hit != 'true'
         run: dotnet publish src/Umsatzschaetzung.Web -c Release -o publish
-      # Beside each file the server hands out compressed, all at once: brotli's best level takes
-      # two minutes on one core for the runtime's 60 MB, the next one takes one for 5 % more.
+      # Beside each file the server hands out compressed, all at once, the runtime of the weights
+      # too: brotli's level 10 takes 75 s on one core for the runtime's 54 MB, level 7 takes 5 s
+      # for 11 % more.
       # Meanwhile the app and a lesson on its program start in Chrome, served as the server
       # serves them, each file compressed once its copy is whole: nothing goes up that does not.
       - timeout-minutes: 8
@@ -100,9 +101,9 @@ jobs:
           COMPRESS: ${{ steps.built.outputs.cache-hit != 'true' }}
         run: |
           if $COMPRESS; then
-            find publish/wwwroot \( -path publish/wwwroot/models -o -path publish/wwwroot/ort \) -prune -o -type f \
+            find publish/wwwroot -path publish/wwwroot/models -prune -o -type f \
               \( -name '*.wasm' -o -name '*.js' -o -name '*.mjs' -o -name '*.map' -o -name '*.css' -o -name '*.html' -o -name '*.svg' -o -name '*.ico' -o -name '*.dat' \) -print0 |
-              nice -n 19 xargs -0 -n 1 -P "$(nproc)" sh -c 'brotli -f -q 10 -o "$0.part" "$0" && mv "$0.part" "$0.br"' &
+              nice -n 19 xargs -0 -n 1 -P "$(nproc)" sh -c 'brotli -f -q 7 -o "$0.part" "$0" && mv "$0.part" "$0.br"' &
           fi
           python3 tools/boot/boot.py publish/wwwroot
           wait $!
@@ -334,7 +335,8 @@ jobs:
           if-no-files-found: error
 
   # The lessons run the app's program and take its weights, and the app's deploy moves them
-  # aside and back, so they go up after it.
+  # aside and back, so they go up after it; their stores beside a copy the server hands out
+  # compressed.
   lessons-deploy:
     needs: [lessons, zustand, app]
     runs-on: ubuntu-latest
@@ -351,6 +353,7 @@ jobs:
         with:
           name: zustand
           path: lektionen
+      - run: find lektionen -path '*/zustand/*' -name '*.db' -print0 | xargs -0 -r -n 1 -P "$(nproc)" brotli -k -q 7
       - uses: ./.github/actions/netcup-deploy
         with:
           source: lektionen

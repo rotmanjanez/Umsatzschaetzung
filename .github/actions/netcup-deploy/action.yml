@@ -15,7 +15,7 @@ inputs:
   known-hosts:
     required: true
   keep:
-    description: Directories below the document root, as shell globs, that never change once there; the previous deploy's copy stays unless the new one brings its own.
+    description: Directories below the document root, as shell globs, whose files never change once there; the previous deploy's files stay and only those the new one adds go up.
     required: false
     default: ''
   create:
@@ -48,11 +48,12 @@ runs:
         chmod 600 ~/.ssh/deploy_key
         SSH_OPTS=(-i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes)
 
-        EXCLUDE=(--exclude='./.git')
-        if [ -n "$KEEP" ]; then
-          while read -r present; do
+        EXCLUDE=(--no-wildcards --exclude='./.git')
+        BROUGHT=$(cd "$SOURCE" && for d in $KEEP; do [ -d "$d" ] && printf '%s ' "$d"; done; true)
+        if [ -n "$BROUGHT" ]; then
+          while IFS= read -r present; do
             [ -n "$present" ] && EXCLUDE+=(--exclude="./$present")
-          done < <(ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "cd '$DEPLOY_PATH' && for d in $KEEP; do [ -d \"\$d\" ] && echo \"\$d\"; done; true")
+          done < <(ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "cd '$DEPLOY_PATH' && for d in $BROUGHT; do [ -d \"\$d\" ] && find \"\$d\" -type f; done; true")
         fi
 
         STAGE="$(dirname "$DEPLOY_PATH")/.deploy-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
@@ -65,7 +66,10 @@ runs:
           find '$DEPLOY_PATH' -mindepth 1 -maxdepth 1 -exec mv -t '$STAGE/old' {} +
           cd '$STAGE/old'
           for kept in $KEEP; do
-            [ -d \"\$kept\" ] && [ ! -e \"../new/\$kept\" ] && mkdir -p \"../new/\$(dirname \"\$kept\")\" && mv \"\$kept\" \"../new/\$kept\"
+            [ -d \"\$kept\" ] || continue
+            if [ -e \"../new/\$kept\" ]; then cp -a \"../new/\$kept/.\" \"\$kept/\"; rm -rf \"../new/\$kept\"; fi
+            mkdir -p \"../new/\$(dirname \"\$kept\")\"
+            mv \"\$kept\" \"../new/\$kept\"
           done
           cd - >/dev/null
           find '$STAGE/new' -mindepth 1 -maxdepth 1 -exec mv -t '$DEPLOY_PATH' {} +

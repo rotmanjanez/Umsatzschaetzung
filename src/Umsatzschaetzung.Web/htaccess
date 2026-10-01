@@ -1,6 +1,7 @@
 AddType application/wasm .wasm
 AddType text/javascript .js .mjs
 AddType application/octet-stream .onnx .dat .db
+RemoveLanguage .br
 
 RewriteEngine On
 
