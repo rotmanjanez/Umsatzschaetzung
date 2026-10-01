@@ -22,6 +22,24 @@ jobs:
         os: [windows-latest, windows-11-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      # A throwaway build starts MSBuild and the compiler while the job checks out, for the real one to
+      # find them warm: on a fresh Windows runner their first start took 10 to 60 s. The runner's own
+      # NVMe disk, D: on x64 and left unformatted on arm, takes the packages and the tests' stores: on
+      # the system disk restoring and testing take two to three times as long.
+      - name: warm up
+        if: runner.os == 'Windows'
+        run: |
+          $warm = New-Item -ItemType Directory "$env:RUNNER_TEMP\warm"
+          Set-Content "$warm\warm.csproj" '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Exe</OutputType></PropertyGroup></Project>'
+          Set-Content "$warm\warm.cs" 'class Warm { static void Main() { } }'
+          Start-Process dotnet "build", "$warm" -NoNewWindow -RedirectStandardOutput "$warm\build.log"
+          if (-not (Test-Path D:\)) {
+            $raw = "list disk" | diskpart | Select-String '^\s*Disk (\d+)\s+Online\s+(\d+ .B)\s+\2\s*$' | Select-Object -First 1
+            if ($raw) { "select disk $($raw.Matches[0].Groups[1])", "convert gpt", "create partition primary", "format fs=ntfs quick", "assign letter=D" | diskpart | Out-Null }
+          }
+          $root = if (Test-Path D:\) { "D:" } else { $env:RUNNER_TEMP }
+          New-Item -ItemType Directory -Force "$root\nuget", "$root\temp" | Out-Null
+          "NUGET_PACKAGES=$root\nuget", "TEMP=$root\temp", "TMP=$root\temp" >> $env:GITHUB_ENV
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -34,8 +52,16 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - uses: ./.github/actions/warm-embeddings
-      - run: dotnet build
-      - run: dotnet test --no-build
+
+      # Windows builds only the tests and what they reference, macOS everything, warnings as errors.
+      # The outputs link to the packages and models instead of copying them, 1.5 GB into each.
+      - run: dotnet build ${{ runner.os == 'Windows' && 'src/Umsatzschaetzung.Tests' || '' }}
+        env:
+          CreateHardLinksForCopyLocalIfPossible: true
+          CreateHardLinksForAdditionalFilesIfPossible: true
+          CreateSymbolicLinksForCopyLocalIfPossible: true
+          CreateSymbolicLinksForAdditionalFilesIfPossible: true
+      - run: dotnet test --no-build --project src/Umsatzschaetzung.Tests
 
   msi-upgrade:
     runs-on: windows-latest
@@ -85,9 +111,13 @@ jobs:
       - run: pwsh packaging/windows/build.ps1 -Version ${{ inputs.version || github.ref_name }} -Arch ${{ matrix.arch }} -Pfx "$env:PFX" -Compression ${{ startsWith(github.ref, 'refs/tags/v') && 'high' || 'mszip' }}
         env:
           UMSATZ_PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
+          NUGET_PACKAGES: ${{ runner.temp }}\nuget
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: umsatzschätzung-${{ matrix.arch }}-msi
+          compression-level: 0
           path: |
             dist/msi/*.msi
             dist/msi/publisher.cer
@@ -143,6 +173,7 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: umsatzschätzung-osx-arm64-dmg
+          compression-level: 0
           path: |
             dist/dmg/*.dmg
             dist/dmg/*.cdx.json
