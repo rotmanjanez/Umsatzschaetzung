@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.OnnxRuntime.EP.WebGpu;
@@ -14,10 +15,17 @@ public sealed class OrtWeights(string dir) : IWeights
     {
         var path = Path.Combine(dir, model);
         if (!File.Exists(path)) throw new FileNotFoundException($"Modelldatei fehlt: '{path}'.", path);
-        using var so = Options(options);
-        var gate = options.Accelerated && Accelerator.Available ? Accelerator.Gate : null;
-        if (gate is null) return Task.FromResult<INet>(new OrtNet(new InferenceSession(path, so), null));
-        lock (gate) return Task.FromResult<INet>(new OrtNet(new InferenceSession(path, so), gate));
+        return Task.FromResult<INet>(Native.Call(() =>
+        {
+            using var so = Options(options);
+            var gate = options.Accelerated && Accelerator.Available ? Accelerator.Gate : null;
+            if (gate is null) return new OrtNet(new InferenceSession(path, so), null);
+            lock (gate)
+            {
+                Native.Check();
+                return new OrtNet(new InferenceSession(path, so), gate);
+            }
+        }));
     }
 
     public Task<byte[]> Read(string file, CancellationToken ct = default) => File.ReadAllBytesAsync(Path.Combine(dir, file), ct);
@@ -54,20 +62,28 @@ sealed class OrtNet : INet
     public Task<Tensor[]> Run(IReadOnlyList<Tensor> inputs, CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
-        var values = inputs.Select(Value).ToArray();
-        try
+        return Task.FromResult(Native.Call(() =>
         {
-            using var options = new RunOptions();
-            var names = inputs.Select(t => t.Name).ToArray();
-            IDisposableReadOnlyCollection<OrtValue> results;
-            if (gate is null) results = session.Run(options, names, values, outputNames);
-            else lock (gate) results = session.Run(options, names, values, outputNames);
-            using (results) return Task.FromResult(outputNames.Select((n, i) => Read(n, results[i])).ToArray());
-        }
-        finally
-        {
-            foreach (var v in values) v.Dispose();
-        }
+            var values = inputs.Select(Value).ToArray();
+            try
+            {
+                using var options = new RunOptions();
+                var names = inputs.Select(t => t.Name).ToArray();
+                IDisposableReadOnlyCollection<OrtValue> results;
+                if (gate is null) results = session.Run(options, names, values, outputNames);
+                else
+                    lock (gate)
+                    {
+                        Native.Check();
+                        results = session.Run(options, names, values, outputNames);
+                    }
+                using (results) return outputNames.Select((n, i) => Read(n, results[i])).ToArray();
+            }
+            finally
+            {
+                foreach (var v in values) v.Dispose();
+            }
+        }));
     }
 
     public void Dispose() => session.Dispose();
@@ -113,13 +129,67 @@ static class Accelerator
         if (Environment.GetEnvironmentVariable("UMSATZSCHAETZUNG_CPU") == "1") return null;
         try
         {
-            var env = OrtEnv.Instance();
-            env.RegisterExecutionProviderLibrary("webgpu", WebGpuEp.GetLibraryPath());
-            return env.GetEpDevices().FirstOrDefault(d => d.EpName == WebGpuEp.GetEpName());
+            return Native.Call(() =>
+            {
+                var env = OrtEnv.Instance();
+                env.RegisterExecutionProviderLibrary("webgpu", WebGpuEp.GetLibraryPath());
+                return env.GetEpDevices().FirstOrDefault(d => d.EpName == WebGpuEp.GetEpName());
+            });
         }
         catch (Exception e) when (e is OnnxRuntimeException or IOException or PlatformNotSupportedException or DllNotFoundException)
         {
             return null;
         }
     }
+}
+
+// Every call into the runtime goes through here. Before the first, its telemetry is switched off: on
+// macOS it sends usage to Microsoft from a thread of its own, which aborts the process when an answer
+// comes in after the runtime's statics are gone, and it reads the switch from the C library, which
+// .NET's own environment does not reach. The process's exit, which tears those statics down under a
+// model still loading or running on the pool, waits for the calls under way and lets none begin, also
+// none that queued for the GPU.
+static class Native
+{
+    static int busy, closing;
+
+    static Native()
+    {
+        if (OperatingSystem.IsMacOS())
+            try
+            {
+                SetEnv("ORT_DISABLE_TELEMETRY", "1", 1);
+            }
+            catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
+            {
+            }
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            Interlocked.Exchange(ref closing, 1);
+            for (var until = Environment.TickCount64 + 10_000; Volatile.Read(ref busy) > 0 && Environment.TickCount64 < until;)
+                Thread.Sleep(10);
+        };
+    }
+
+    public static T Call<T>(Func<T> call)
+    {
+        Interlocked.Increment(ref busy);
+        try
+        {
+            Check();
+            return call();
+        }
+        finally
+        {
+            Interlocked.Decrement(ref busy);
+        }
+    }
+
+    public static void Check()
+    {
+        if (Volatile.Read(ref closing) == 1) throw new OperationCanceledException("Das Programm wird beendet.");
+    }
+
+    [DllImport("libc", EntryPoint = "setenv")]
+    static extern int SetEnv(string name, string value, int overwrite);
 }
