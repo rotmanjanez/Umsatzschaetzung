@@ -126,9 +126,8 @@ sealed class LocalInvoices(RuleStore rules, LocalCases cases, LocalMapping mappi
     public Task<InvoiceReadingResp> Reading(string caseId, string invoiceId, CancellationToken ct) => Guard(ct, () =>
     {
         if (cases.Store.LoadReading(caseId, invoiceId) is not { } pages) return new InvoiceReadingResp([]);
-        if (documents is not null)
-            foreach (var (page, kept) in pages.Zip(cases.Store.LoadImages(caseId, invoiceId)))
-                page.Image = documents.Show(kept);
+        foreach (var (page, kept) in pages.Zip(cases.Store.LoadImages(caseId, invoiceId)))
+            page.Kept = kept;
         return new InvoiceReadingResp(pages);
     });
 

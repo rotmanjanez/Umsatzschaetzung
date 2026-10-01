@@ -22,8 +22,6 @@ public interface IDocuments
     // The pages kept beside the reading, as many as it has: upright as it saw them, smaller, compressed.
     IAsyncEnumerable<byte[]> Keep(byte[] data, IReadOnlyList<OcrPage> reading, CancellationToken ct);
 
-    Raster Show(byte[] kept);
-
     // A region of the reading's frame, cut from a kept page.
     Raster? Cut(byte[] kept, Box region);
 

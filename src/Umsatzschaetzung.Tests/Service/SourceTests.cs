@@ -84,7 +84,7 @@ public sealed class SourceTests : IDisposable
         var read = (await svc.Invoices.Reading(at[0], at[1], ct)).Pages;
 
         Assert.Equal([2, 4], read.Select(p => p.Width));
-        Assert.Equal([1, 1], read.Select(p => p.Image!.Width));
+        Assert.All(read, p => Assert.NotEmpty(p.Kept!));
         Assert.Equal([Umsatzschaetzung.Service.Scan.Dpi], pages.Dpis);
     }
 

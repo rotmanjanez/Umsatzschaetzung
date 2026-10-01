@@ -8,6 +8,8 @@ namespace Umsatzschaetzung.App.Ui;
 
 public static class Images
 {
+    public static Bitmap From(byte[] encoded) => new(new MemoryStream(encoded));
+
     public static Bitmap From(Raster raster)
     {
         var pinned = GCHandle.Alloc(raster.Pixels, GCHandleType.Pinned);

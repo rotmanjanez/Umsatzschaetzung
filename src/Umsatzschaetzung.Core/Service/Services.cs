@@ -61,7 +61,7 @@ public interface IInvoices
     Task<Case> Delete(string caseId, string invoiceId, CancellationToken ct);                                               // DELETE /cases/{id}/invoices/{inv}   drops the invoice, its stored file stays until CaseStore.Purge, resp is the saved case
     Task<ExportResp> Export(string caseId, string invoiceId, CancellationToken ct);                                         // GET  /cases/{id}/invoices/{inv}/export   the read invoice as CSV
     Task<InvoiceSourceResp> Source(string caseId, string invoiceId, CancellationToken ct);                                  // GET  /cases/{id}/invoices/{inv}/source
-    Task<InvoiceReadingResp> Reading(string caseId, string invoiceId, CancellationToken ct);                                // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading, images rendered again
+    Task<InvoiceReadingResp> Reading(string caseId, string invoiceId, CancellationToken ct);                                // GET  /cases/{id}/invoices/{inv}/reading   pages of the stored reading with the pages kept
     Task<Raster?> Snippet(string caseId, string invoiceId, int line, string name, CancellationToken ct);                    // GET  /cases/{id}/invoices/{inv}/lines/{n}/snippet?name=   the row of the scan the line was read from
     Task<Case> UnifySuppliers(string caseId, List<string> invoiceIds, CancellationToken ct);                                // POST /cases/{id}/suppliers/unify    renames only the given invoices, see Suppliers.Unify
 }

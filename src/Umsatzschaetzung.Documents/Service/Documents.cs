@@ -61,8 +61,6 @@ public sealed class Documents(IOcr? ocr, IPdfPages? pdf) : IDocuments
             }
     }
 
-    public Raster Show(byte[] kept) => Scan.Crop(kept, new SKRectI(0, 0, int.MaxValue, int.MaxValue))!;
-
     public Raster? Cut(byte[] kept, Box region) =>
         Scan.Crop(kept, SKRectI.Round(new SKRect(region.X * KeptScale, region.Y * KeptScale,
             (region.X + region.W) * KeptScale, (region.Y + region.H) * KeptScale)));
