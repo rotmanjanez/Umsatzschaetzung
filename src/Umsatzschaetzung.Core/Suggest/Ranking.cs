@@ -12,8 +12,9 @@ public interface IRanking
 {
     Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default);
 
-    // Pays ahead what the first Rank would: the wares indexed and, eager, the model opened.
-    Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default);
+    // Pays ahead what the first Rank would: the wares indexed and, eager, the model opened. A ranking
+    // that pays dearly for it may wait while the case has no line open.
+    Task Warm(RuleSet rs, string gewerbe, bool open, CancellationToken ct = default);
 }
 
 // Eager, Warm opens the model too, so the first line asked about does not wait for it; where
@@ -80,7 +81,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
         }
     }
 
-    public async Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default)
+    public async Task Warm(RuleSet rs, string gewerbe, bool open, CancellationToken ct = default)
     {
         await gate.WaitAsync(ct);
         try

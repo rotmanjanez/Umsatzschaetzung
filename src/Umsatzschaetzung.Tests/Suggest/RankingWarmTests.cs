@@ -52,7 +52,7 @@ public class RankingWarmTests
         var encoder = new Counting();
         var ranking = new EncoderRanking(encoder);
 
-        await ranking.Warm(Wares(), "", ct);
+        await ranking.Warm(Wares(), "", true, ct);
         Assert.Equal([2, 0], encoder.Calls);
 
         await ranking.Rank(Wares(), "", new InvoiceLine { Name = "Ware" }, Day, 5, ct);
@@ -64,12 +64,12 @@ public class RankingWarmTests
     {
         var ct = TestContext.Current.CancellationToken;
         var cache = new Kept();
-        await new EncoderRanking(new Counting(), cache).Warm(Wares(), "", ct);
+        await new EncoderRanking(new Counting(), cache).Warm(Wares(), "", true, ct);
         cache.Write("zählend", [("Pils", Vec.Axis(0))]);
 
         var encoder = new Counting();
         var ranking = new EncoderRanking(encoder, cache, eager: false);
-        await ranking.Warm(Wares(), "", ct);
+        await ranking.Warm(Wares(), "", true, ct);
         await ranking.Rank(Wares(), "", new InvoiceLine { Name = "Pils" }, Day, 5, ct);
         Assert.Empty(encoder.Calls);
     }

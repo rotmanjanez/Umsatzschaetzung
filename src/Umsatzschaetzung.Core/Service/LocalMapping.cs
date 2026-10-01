@@ -39,12 +39,11 @@ sealed class LocalMapping(RuleStore rules, LocalCases cases, IRanking? ranking) 
         return c;
     });
 
-    // A case with every line mapped asks nothing of the ranking until someone does.
     public Task Warm(string caseId, CancellationToken ct) => ranking is null ? Task.CompletedTask : Guard(ct, async () =>
     {
         var c = cases.Find(caseId);
-        if (c is not null && c.Invoices.SelectMany(i => i.Lines).All(l => !string.IsNullOrEmpty(l.MappingId))) return c;
-        await ranking.Warm(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", ct);
+        var open = c?.Invoices.SelectMany(i => i.Lines).Any(l => string.IsNullOrEmpty(l.MappingId)) ?? true;
+        await ranking.Warm(rules.Load().With(c?.Mappings), c?.Taxpayer.Gewerbe ?? "", open, ct);
         return c;
     });
 

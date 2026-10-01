@@ -19,8 +19,10 @@ sealed class Prewarmed(IWeights weights, Func<string, IRanking> open) : IRanking
     public async Task<IReadOnlyList<Ranked>> Rank(RuleSet rs, string gewerbe, InvoiceLine line, DateOnly date, int count, CancellationToken ct = default) =>
         await (await (ranking ??= Open())).Rank(rs, gewerbe, line, date, count, ct);
 
-    public async Task Warm(RuleSet rs, string gewerbe, CancellationToken ct = default) =>
-        await (await (ranking ??= Open())).Warm(rs, gewerbe, ct);
+    public async Task Warm(RuleSet rs, string gewerbe, bool open, CancellationToken ct = default)
+    {
+        if (open) await (await (ranking ??= Open())).Warm(rs, gewerbe, true, ct);
+    }
 
     // A failed fetch is tried again by the next line asked about.
     async Task<IRanking> Open()
