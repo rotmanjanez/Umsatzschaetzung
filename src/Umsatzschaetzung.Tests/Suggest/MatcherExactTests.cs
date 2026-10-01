@@ -12,9 +12,9 @@ public class MatcherExactTests
 
     static async Task<Suggestion?> Hit(RuleSet rs, string? supplier, InvoiceLine line)
     {
-        var cache = new FixedCache().Apart([.. rs.Ingredients.Values.Select(i => Matcher.Normal(i.Name))]).Apart(Matcher.Normal(line.Name));
+        var cache = new FixedCache().Apart([.. rs.Ingredients.Values.Select(i => Wares.Normal(i.Name))]).Apart(Wares.Normal(line.Name));
         foreach (var m in rs.Mappings.Values)
-            if (Matcher.Wording(m) is { } w) cache.Apart(Matcher.Normal(w));
+            if (Wares.Wording(m) is { } w) cache.Apart(Wares.Normal(w));
         var matcher = new Matcher(Encoders.Shipped, cache);
         var s = await matcher.Suggest(rs, "", supplier, line);
         Assert.All(s.Skip(1), x => Assert.Equal(OriginKind.Encoder, x.Kind));

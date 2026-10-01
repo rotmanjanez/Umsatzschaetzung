@@ -154,7 +154,7 @@ public class WordingTests
     [InlineData("123", "123")]
     [InlineData("", "")]
     public void OnlyAWordingWithoutLowerCaseIsReadInTitleCase(string text, string normal) =>
-        Assert.Equal(normal, Matcher.Normal(text));
+        Assert.Equal(normal, Wares.Normal(text));
 
     [Theory]
     [InlineData("Beobachtet", "Name", "Beobachtet")]
@@ -163,5 +163,5 @@ public class WordingTests
     [InlineData(null, "", null)]
     [InlineData(null, null, null)]
     public void AMappingIsKnownByTheWordingItWasMadeFromBeforeItsName(string? observed, string? name, string? wording) =>
-        Assert.Equal(wording, Matcher.Wording(new ArticleMapping { Observed = observed, Name = name }));
+        Assert.Equal(wording, Wares.Wording(new ArticleMapping { Observed = observed, Name = name }));
 }

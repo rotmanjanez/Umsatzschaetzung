@@ -53,7 +53,7 @@ public sealed class Lesson(string store, string cases, string embedded)
     public async Task Finish(IEncoder encoder)
     {
         var names = kept.SelectMany(to => Directory.EnumerateFiles(Path.Combine(to, "cases"), "*.db")).SelectMany(Names)
-            .Select(Matcher.Normal).Distinct(StringComparer.Ordinal).ToList();
+            .Select(Wares.Normal).Distinct(StringComparer.Ordinal).ToList();
         var known = Embedded.Read(encoder.Model, names);
         foreach (var name in names.Where(n => !known.ContainsKey(n)))
             Embedded.Write(encoder.Model, [(name, (await encoder.Embed([name]))[0])]);

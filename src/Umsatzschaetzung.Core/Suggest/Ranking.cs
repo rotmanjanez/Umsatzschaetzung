@@ -25,18 +25,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
     const int MostLines = 4096;
 
     readonly SemaphoreSlim gate = new(1, 1);
-
-    // A RuleSet is known by its version, not by reference, so the version is the key: one
-    // ranking belongs to one rule store and reindexes only once a save bumps it or a
-    // case from another Gewerbe asks. Validity is a question of the invoice's date and
-    // is asked per query, not baked into the index.
-    long indexed = -1;
-    string indexedGewerbe = "";
-    string[] owner = [];
-    Meta[] ware = [];
-    Meta?[] rule = [];
-    string[] wording = [];
-    float[] vectors = [];
+    readonly Wares wares = new(encoder, cache);
 
     // A line is asked about again with every selection and every mapping that changes the rules.
     readonly Dictionary<string, float[]> lines = new(StringComparer.Ordinal);
@@ -46,18 +35,19 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
         await gate.WaitAsync(ct);
         try
         {
-            await Index(rs, gewerbe, ct);
-            var text = Matcher.Normal(line.Name);
+            await wares.Index(rs, gewerbe, ct);
+            var text = Wares.Normal(line.Name);
             if (!lines.TryGetValue(text, out var query))
             {
                 if (lines.Count >= MostLines) lines.Clear();
-                lines[text] = query = (await Embed([text], keep: false, ct))[0];
+                lines[text] = query = (await wares.Embed([text], keep: false, ct))[0];
             }
             var best = new Dictionary<string, double>(StringComparer.Ordinal);
+            var (owner, ware, rule, vectors) = (wares.Owner, wares.Ware, wares.Rule, wares.Vectors);
             for (var i = 0; i < owner.Length; i++)
             {
                 if (!ware[i].ValidOn(date) || rule[i]?.ValidOn(date) == false) continue;
-                var cos = Dot(query, i);
+                var cos = Dot(query, vectors, i);
                 if (!best.TryGetValue(owner[i], out var b) || cos > b) best[owner[i]] = cos;
             }
 
@@ -86,7 +76,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
         await gate.WaitAsync(ct);
         try
         {
-            await Index(rs, gewerbe, ct);
+            await wares.Index(rs, gewerbe, ct);
             if (eager) await encoder.Embed([], ct);
             await encoder.Load(ct);
         }
@@ -109,7 +99,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
     static readonly char[] Separators = [' ', ',', ';', '/', '(', ')'];
 
     // Each product in float, summed as doubles.
-    double Dot(float[] query, int entry)
+    static double Dot(float[] query, float[] vectors, int entry)
     {
         var stored = MemoryMarshal.Cast<float, Vector<float>>(vectors.AsSpan(entry * IEncoder.Width, IEncoder.Width));
         var asked = MemoryMarshal.Cast<float, Vector<float>>(query);
@@ -121,86 +111,5 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
             high += h;
         }
         return Vector.Sum(low + high);
-    }
-
-    // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never
-    // offered Blondierpulver. Every name a ware is known under is its own entry — the
-    // ingredient is whichever of its wordings comes closest, not their average.
-    async Task Index(RuleSet rs, string gewerbe, CancellationToken ct)
-    {
-        if (indexed == rs.Version && indexedGewerbe == gewerbe) return;
-        var covered = rs.Ingredients.Values
-            .Where(i => !rs.Categories.TryGetValue(i.CategoryId, out var c) || c.Covers(gewerbe))
-            .OrderBy(i => i.Id, StringComparer.Ordinal)
-            .ToDictionary(i => i.Id, StringComparer.Ordinal);
-
-        var texts = new List<string>();
-        var owners = new List<string>();
-        var wares = new List<Meta>();
-        var rules = new List<Meta?>();
-        var seen = new HashSet<(string, string, Meta?)>();
-        void Add(Ingredient ing, Meta? by, string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            text = Matcher.Normal(text);
-            if (by is not null && seen.Contains((ing.Id, text, null))) return;
-            if (!seen.Add((ing.Id, text, by))) return;
-            owners.Add(ing.Id);
-            wares.Add(ing.Meta);
-            rules.Add(by);
-            texts.Add(text);
-        }
-
-        foreach (var ing in covered.Values)
-        {
-            Add(ing, null, ing.Name);
-            foreach (var alias in ing.Aliases) Add(ing, null, alias);
-        }
-        // A confirmed mapping is a wording a human tied to a ware; the next line that
-        // reads like it lands on the same ware without asking again.
-        foreach (var id in rs.Mappings.Keys.Order(StringComparer.Ordinal))
-        {
-            var m = rs.Mappings[id];
-            if (m.Confirmed && covered.TryGetValue(m.IngredientId, out var ing)) Add(ing, m.Meta, Matcher.Wording(m));
-        }
-
-        // A save bumps the version for every mapping the import proposes, and almost none
-        // of them adds a wording: the vectors stay as they are, or what the last index holds
-        // is carried over, not read again.
-        if (!texts.SequenceEqual(wording, StringComparer.Ordinal))
-        {
-            var prior = new Dictionary<string, int>(wording.Length, StringComparer.Ordinal);
-            for (var i = 0; i < wording.Length; i++) prior.TryAdd(wording[i], i);
-            var fresh = texts.Where(t => !prior.ContainsKey(t)).Distinct(StringComparer.Ordinal).ToList();
-            var embedded = fresh.Zip(await Embed(fresh, keep: true, ct)).ToDictionary(StringComparer.Ordinal);
-            var next = new float[texts.Count * IEncoder.Width];
-            for (var i = 0; i < texts.Count; i++)
-            {
-                var into = next.AsSpan(i * IEncoder.Width, IEncoder.Width);
-                if (prior.TryGetValue(texts[i], out var at)) vectors.AsSpan(at * IEncoder.Width, IEncoder.Width).CopyTo(into);
-                else embedded[texts[i]].CopyTo(into);
-            }
-            vectors = next;
-            wording = [.. texts];
-        }
-        owner = [.. owners];
-        ware = [.. wares];
-        rule = [.. rules];
-        indexed = rs.Version;
-        indexedGewerbe = gewerbe;
-    }
-
-    async Task<float[][]> Embed(IReadOnlyList<string> texts, bool keep, CancellationToken ct)
-    {
-        var want = texts.Distinct(StringComparer.Ordinal).ToList();
-        var known = cache?.Read(encoder.Model, want) ?? [];
-        var missing = want.FindAll(t => !known.ContainsKey(t));
-        if (missing.Count > 0)
-        {
-            var fresh = await encoder.Embed(missing, ct);
-            for (var i = 0; i < missing.Count; i++) known[missing[i]] = fresh[i];
-            if (keep) cache?.Write(encoder.Model, [.. missing.Select((t, i) => (t, fresh[i]))]);
-        }
-        return [.. texts.Select(t => known[t])];
     }
 }

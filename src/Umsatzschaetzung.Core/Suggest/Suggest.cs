@@ -53,26 +53,6 @@ public sealed class Matcher(IRanking? ranking)
         return sugs;
     }
 
-    // Invoices shout, catalogues do not, and the encoder learnt from catalogues: a
-    // wording without a lower-case letter is read as if it were written in title case.
-    // Measured on 600 labelled rows, upper case keeps 9 % of the auto-mappings, title
-    // case 39 % of the 41 % the original spelling gets.
-    public static string Normal(string text)
-    {
-        if (text.Any(char.IsLower)) return text;
-        var b = new System.Text.StringBuilder(text.Length);
-        var start = true;
-        foreach (var c in text)
-        {
-            b.Append(start ? c : char.ToLowerInvariant(c));
-            start = !char.IsLetter(c);
-        }
-        return b.ToString();
-    }
-
-    public static string? Wording(ArticleMapping m) =>
-        !string.IsNullOrEmpty(m.Observed) ? m.Observed : !string.IsNullOrEmpty(m.Name) ? m.Name : null;
-
     static ArticleMapping Mapping(string? supplier, InvoiceLine line, string ingredientId, long? factor)
     {
         var m = new ArticleMapping
