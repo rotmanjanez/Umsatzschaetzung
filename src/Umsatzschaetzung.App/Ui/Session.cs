@@ -254,6 +254,7 @@ public sealed class Session : Observable
     public void CloseCase()
     {
         Case = null;
+        Sources.Clear();
         recorded = [];
         revision++;
         History.Clear();

@@ -106,7 +106,11 @@ public partial class InvoicesView : Screen
         Session.CaseChanged += Refresh;
         Session.CaseChanged += Outdated;
         Session.CaseClosed += CaseClosed;
-        Session.InvoiceRequested += id => { if (Session.Case?.Invoices.Find(i => i.Id == id) is { } inv) Show(new InvoiceRow(inv)); };
+    }
+
+    public void Open(string id)
+    {
+        if (Session.Case?.Invoices.Find(i => i.Id == id) is { } inv) Show(new InvoiceRow(inv));
     }
 
     static string Text(InvoiceRow r) => r.Supplier + " " + r.Number + " " + r.Date + " " + r.NetTotal + " " + r.FileName + " " + r.StateText;
@@ -121,7 +125,6 @@ public partial class InvoicesView : Screen
 
     void CaseClosed()
     {
-        Session.Sources.Clear();
         foreach (var w in windows.Values.ToList()) w.Close();
         foreach (var e in editors.Values) e.Leave();
         editors.Clear();

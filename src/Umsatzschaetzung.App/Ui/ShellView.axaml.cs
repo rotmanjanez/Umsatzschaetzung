@@ -15,7 +15,7 @@ public partial class ShellView : UserControl
 {
     readonly Session session;
     readonly CasesView cases;
-    readonly Screen[] screens;
+    readonly Screen?[] screens = new Screen?[Builds.Length];
     readonly Dictionary<ImportJob, Frame> imports = [];
     Screen? current;
     RulesPane? rules;
@@ -42,16 +42,6 @@ public partial class ShellView : UserControl
         session.Imports.Jobs.CollectionChanged += ImportsChanged;
         cases = new CasesView(session);
         CasesHost.Content = cases;
-        screens =
-        [
-            new CaseView(session),
-            new InvoicesView(session),
-            new MappingView(session),
-            new ProductsView(session),
-            new CalcView(session),
-            new ReportView(session),
-        ];
-        for (var i = 0; i < screens.Length; i++) ((TabItem)Tabs.Items[i]!).Content = screens[i];
         session.CaseOpened += OpenCase;
         session.CaseChanged += RefreshContext;
         session.StatusChanged += RefreshError;
@@ -59,6 +49,7 @@ public partial class ShellView : UserControl
         session.ProductRequested += (name, created) => ShowRules().NewProduct(name, created);
         session.ProductEditRequested += (id, recipe) => ShowRules().EditProduct(id, recipe);
         session.TabRequested += tab => Tabs.SelectedIndex = (int)tab;
+        session.InvoiceRequested += id => ((InvoicesView)Page((int)Tab.Invoices)).Open(id);
         session.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(Session.Error)) RefreshError(); };
         session.Indicate(this, SaveBadge, SaveText);
         MenuBar.IsVisible = !OperatingSystem.IsMacOS() && !OperatingSystem.IsBrowser();
@@ -77,6 +68,25 @@ public partial class ShellView : UserControl
     }
 
     internal Session Session => session;
+
+    // A page is built on its first visit and kept from then on.
+    static readonly Func<Session, Screen>[] Builds =
+    [
+        s => new CaseView(s),
+        s => new InvoicesView(s),
+        s => new MappingView(s),
+        s => new ProductsView(s),
+        s => new CalcView(s),
+        s => new ReportView(s),
+    ];
+
+    Screen Page(int tab)
+    {
+        if (screens[tab] is { } built) return built;
+        var screen = screens[tab] = Builds[tab](session);
+        ((TabItem)Tabs.Items[tab]!).Content = screen;
+        return screen;
+    }
 
     public event Action<string>? Titled;
 
@@ -149,7 +159,7 @@ public partial class ShellView : UserControl
         if (!CaseUi.IsVisible) return;
         if (place is not null) tab = place.Page;
         current?.Leave();
-        current = screens[tab];
+        current = Page(tab);
         current.Enter(place?.Item);
         Tabs.SelectedIndex = tab;
     }
@@ -157,7 +167,7 @@ public partial class ShellView : UserControl
     void TabChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (e.Source != Tabs || Tabs.SelectedIndex < 0 || !CaseUi.IsVisible) return;
-        Show(screens[Tabs.SelectedIndex]);
+        Show(Page(Tabs.SelectedIndex));
         if (Tabs.SelectedItem is TabItem { Header: string page, IsFocused: false }) Accessible.Announce(this, "Seite " + page);
     }
 
@@ -167,7 +177,7 @@ public partial class ShellView : UserControl
         CasesHost.IsVisible = false;
         CaseUi.IsVisible = true;
         Tabs.SelectedIndex = 0;
-        Show(screens[0]);
+        Show(Page(0));
         Tabs.ContainerFromIndex(0)?.Focus();
         Accessible.Announce(this, "Prüfung " + resp.Label + " geöffnet");
     }
