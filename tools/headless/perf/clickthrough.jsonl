@@ -50,10 +50,8 @@
 
 // Sortiment: prices typed into rows
 { "do": "tab", "header": "3. Sortiment" }
-{ "do": "type", "at": { "text": "Bier 0,5 l vom Fass", "up": "DataGridRow" }, "text": "4,70" }
-{ "do": "focus" }
-{ "do": "type", "at": { "text": "Bier 0,5 l vom Fass", "up": "DataGridRow" }, "text": "4,80" }
-{ "do": "focus" }
+{ "do": "edit", "at": { "text": "Bier 0,5 l vom Fass" }, "column": "Bruttopreis", "text": "4,70" }
+{ "do": "edit", "at": { "text": "Bier 0,5 l vom Fass" }, "column": "Bruttopreis", "text": "4,80" }
 
 // Kalkulation: its pages, rows picked on each
 { "do": "tab", "header": "4. Kalkulation" }

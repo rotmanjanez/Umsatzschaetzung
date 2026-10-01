@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
@@ -32,8 +31,8 @@ public sealed class ExclusionModel : Observable
     string omittedSummary = "", unusedSummary = "", deposit = "";
     bool hasOmitted, hasUnused;
 
-    public ObservableCollection<ExcludedRow> Omitted { get; } = [];
-    public ObservableCollection<ExcludedRow> Unused { get; } = [];
+    public Rows<ExcludedRow> Omitted { get; } = [];
+    public Rows<ExcludedRow> Unused { get; } = [];
     public string OmittedSummary { get => omittedSummary; set => Set(ref omittedSummary, value); }
     public string UnusedSummary { get => unusedSummary; set => Set(ref unusedSummary, value); }
     public bool HasOmitted { get => hasOmitted; set { if (Set(ref hasOmitted, value)) RaiseExcluded(); } }
@@ -78,9 +77,9 @@ public sealed class ExclusionModel : Observable
             Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.NoRevenue, l.IngredientId, Names.Ingredient(rs, l.IngredientId)));
         foreach (var l in r.Unused)
             Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.Unused, l.IngredientId, Names.Ingredient(rs, l.IngredientId)));
-        Omitted.Clear();
-        Unused.Clear();
-        foreach (var row in rows.Values.OrderByDescending(x => x.Net)) (row.Why == Exclusion.Unused ? Unused : Omitted).Add(row);
+        var sorted = rows.Values.OrderByDescending(x => x.Net).ToList();
+        Omitted.Replace(sorted.Where(x => x.Why != Exclusion.Unused));
+        Unused.Replace(sorted.Where(x => x.Why == Exclusion.Unused));
         HasOmitted = Omitted.Count > 0;
         HasUnused = Unused.Count > 0;
     }

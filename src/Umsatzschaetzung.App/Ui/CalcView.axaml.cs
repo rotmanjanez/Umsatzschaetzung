@@ -47,10 +47,10 @@ public sealed class CalcModel : Observable
     ProductDetail? detail;
     RecipeEditor? editor;
 
-    public ObservableCollection<ResultRow> Products { get; } = [];
-    public ObservableCollection<RevenueRow> Revenue { get; } = [];
-    public ObservableCollection<MarkupRow> Markups { get; } = [];
-    public ObservableCollection<KV> Summary { get; } = [];
+    public Rows<ResultRow> Products { get; } = [];
+    public Rows<RevenueRow> Revenue { get; } = [];
+    public Rows<MarkupRow> Markups { get; } = [];
+    public Rows<KV> Summary { get; } = [];
     public ObservableCollection<YieldKindGroup> Yields { get; } = [];
     public ExclusionModel Exclusions { get; } = new();
     public bool HasYields => Yields.Count > 0;
@@ -240,15 +240,14 @@ public partial class CalcView : Screen
         var selected = wanted ?? (ProductGrid.SelectedItem as ResultRow)?.ProductId;
         shown = (kase, rs, catalog, r, sold);
         filling = true;
-        model.Products.Clear();
-        foreach (var p in sold)
+        model.Products.Replace(sold.Select(p =>
         {
             var own = kase.Products.Find(x => x.ProductId == p.ProductId);
-            model.Products.Add(new ResultRow(p.ProductId, Names.Product(rs, p.ProductId), Format.Group(p.Portions), p.Portions,
+            return new ResultRow(p.ProductId, Names.Product(rs, p.ProductId), Format.Group(p.Portions), p.Portions,
                 Format.Cents(p.CostPerPortion), p.PriceMissing ? "" : Format.Cents(p.RevenueNet), p.RevenueNet,
                 p.CostOfGoods > 0 && !p.PriceMissing ? Format.Bp(p.Markup) : "", p.PriceMissing,
-                own?.Recipe is not null, own is null ? "" : RecipeTip(rs, own)));
-        }
+                own?.Recipe is not null, own is null ? "" : RecipeTip(rs, own));
+        }));
         ProductGrid.SelectedItem = model.Products.FirstOrDefault(p => p.ProductId == selected);
         filling = false;
         ProductSelected(null, null);
@@ -259,12 +258,9 @@ public partial class CalcView : Screen
             Reveal.Flash(ProductGrid, item);
         }
         var vat = VatRow.Of(kase, r);
-        model.Revenue.Clear();
-        foreach (var v in Revenue(vat)) model.Revenue.Add(v);
-        model.Markups.Clear();
-        foreach (var m in Markups(r)) model.Markups.Add(m);
-        model.Summary.Clear();
-        foreach (var kv in Summary(r)) model.Summary.Add(kv);
+        model.Revenue.Replace(Revenue(vat));
+        model.Markups.Replace(Markups(r));
+        model.Summary.Replace(Summary(r));
         ShowExclusions(kase, catalog, r);
         model.HasResult = true;
     }

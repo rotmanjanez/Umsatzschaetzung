@@ -192,8 +192,10 @@ public static partial class Coach
         hit.GetSelfAndVisualAncestors().OfType<StyledElement>().FirstOrDefault(v => v is ToggleButton or ISelectable or DataGridRow)
             is { } chosen && (chosen.Classes.Contains(":selected") || chosen.Classes.Contains(":checked"));
 
+    // A cell shows its editor only while it is edited; once taken, it shows the text.
     static string? Field(Visual hit) =>
-        (hit as TextBox ?? hit.GetVisualDescendants().OfType<TextBox>().FirstOrDefault())?.Text;
+        (hit as TextBox ?? hit.GetVisualDescendants().OfType<TextBox>().FirstOrDefault())?.Text
+        ?? (hit is DataGridCell ? hit.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault()?.Text : null);
 
     // An amount reads right at the value the program keeps from it, as 4,6 does for 4,60.
     static bool Same(string a, string b) =>

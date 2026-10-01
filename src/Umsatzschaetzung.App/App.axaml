@@ -11,10 +11,6 @@
     <Application.Styles>
         <FluentTheme/>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
-        <!-- A ControlTheme may not carry descendant selectors, so the cell alignment lives here. -->
-        <Style Selector="DataGridCell">
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
         <Style Selector="DataGridColumnHeader /template/ Path#SortIcon">
             <Setter Property="Margin" Value="4,0,10,0"/>
         </Style>

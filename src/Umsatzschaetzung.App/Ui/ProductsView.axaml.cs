@@ -9,17 +9,27 @@ namespace Umsatzschaetzung.App.Ui;
 
 public sealed class AssortmentRow(string productId) : Observable
 {
-    public static readonly string[] VatNamesList = ["19 %", "7 %", "0 %"];
+    static readonly string[] VatNames = ["19 %", "7 %", "0 %"];
 
     string name = "", price = "";
     int vatIndex;
     bool priceMissing;
 
     public string ProductId { get; } = productId;
-    public string[] VatNames => VatNamesList;
     public string Name { get => name; set { if (Set(ref name, value)) Raise(nameof(Spoken)); } }
     public string Price { get => price; set => Set(ref price, value); }
-    public int VatIndex { get => vatIndex; set => Set(ref vatIndex, value); }
+    public int VatIndex { get => vatIndex; set { if (Set(ref vatIndex, value)) Raise(nameof(Vat)); } }
+
+    // Typed as 7, 7 % or 7,0; a rate the program does not know leaves the one before.
+    public string Vat
+    {
+        get => VatNames[vatIndex];
+        set
+        {
+            var at = Input.Bp(value) is { } bp ? Array.IndexOf(CaseModel.VatValues, bp) : -1;
+            if (at >= 0) VatIndex = at;
+        }
+    }
     public bool PriceMissing
     {
         get => priceMissing;
@@ -128,6 +138,7 @@ public partial class ProductsView : Screen
 
     protected override void OnLeave()
     {
+        ProductGrid.CommitEdit(DataGridEditingUnit.Row, true);
         timer.Stop();
         if (Session.Case is not null) _ = Session.SaveCase(At(edited), CancellationToken.None);
     }
@@ -298,9 +309,16 @@ public partial class ProductsView : Screen
         if ((sender as Control)?.DataContext is AssortmentRow row) Remove(row);
     }
 
+    void EditStarted(object? sender, DataGridPreparingCellForEditEventArgs e)
+    {
+        if (e.EditingElement is not TextBox box) return;
+        box.Focus();
+        box.SelectAll();
+    }
+
     void ProductKey(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Delete || e.Source is TextBox or ComboBox || ProductGrid.SelectedItem is not AssortmentRow row) return;
+        if (e.Key != Key.Delete || e.Source is TextBox || ProductGrid.SelectedItem is not AssortmentRow row) return;
         Remove(row);
         e.Handled = true;
     }

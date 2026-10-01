@@ -162,6 +162,7 @@ chapters:
           Auf der Karte steht das Schnitzel mit Pommes um fünfzehn Euro neunzig. Wir
           klicken also ins Feld beim Bruttopreis und tippen fünfzehn Komma neunzig ein.
         type: { at: { text: "Schnitzel mit Pommes", up: DataGridRow, column: Bruttopreis }, text: "15,90" }
+        act: [{ do: edit, at: { text: "Schnitzel mit Pommes" }, column: Bruttopreis, text: "15,90" }, { do: focus }]
         task: "Bruttopreis: 15,90"
         hint: Das Feld steht in der Zeile vom Schnitzel, in der Spalte „Bruttopreis“.
         text: |-
@@ -221,7 +222,7 @@ chapters:
           name: sortiment-liste
           at: { text: "Produkt", up: DataGrid }
           clip: DataGridRow
-          trim: { top: 5, bottom: 465 }
+          trim: { top: 5, bottom: 160 }
           alt: Das Sortiment nach dem CSV-Import
       - say: >-
           Gefunden werden die Produkte dabei über ihren Namen im Katalog. Kennt das

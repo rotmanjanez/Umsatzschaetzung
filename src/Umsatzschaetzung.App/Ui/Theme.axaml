@@ -349,6 +349,57 @@
         <Setter Property="FocusAdorner" Value="{StaticResource FocusInset}"/>
     </ControlTheme>
 
+    <!-- Fluent's row and cell, without what these grids never show: row headers, row details, marks of
+         invalid values, vertical grid lines and a current-cell frame drawn in transparent. A grid builds
+         every cell of every row it shows, so each visual left out is one less per cell. -->
+    <ControlTheme x:Key="{x:Type DataGridCell}" TargetType="DataGridCell">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="MinHeight" Value="32"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="CellBorder" Background="Transparent" BorderThickness="2">
+                    <ContentPresenter Margin="-2" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center"/>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:focus /template/ Border#CellBorder">
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridCellFocusVisualPrimaryBrush}"/>
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type DataGridRow}" TargetType="DataGridRow">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DataGridFrozenGrid Name="PART_Root" ColumnDefinitions="Auto,*" RowDefinitions="*,Auto,Auto">
+                    <Rectangle Name="BackgroundRectangle" Fill="{DynamicResource DataGridRowBackgroundBrush}" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+                    <DataGridCellsPresenter Name="PART_CellsPresenter" Grid.Column="1" DataGridFrozenGrid.IsFrozen="True"/>
+                    <Rectangle Name="PART_BottomGridLine" Grid.Row="2" Grid.Column="1" Height="1" HorizontalAlignment="Stretch"/>
+                </DataGridFrozenGrid>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="Fill" Value="{DynamicResource DataGridRowHoveredBackgroundColor}"/>
+        </Style>
+        <Style Selector="^:selected">
+            <Style Selector="^ /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedUnfocusedBackgroundBrush}"/>
+                <Setter Property="Opacity" Value="{DynamicResource DataGridRowSelectedUnfocusedBackgroundOpacity}"/>
+            </Style>
+            <Style Selector="^:pointerover /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedHoveredUnfocusedBackgroundBrush}"/>
+                <Setter Property="Opacity" Value="{DynamicResource DataGridRowSelectedHoveredUnfocusedBackgroundOpacity}"/>
+            </Style>
+            <Style Selector="^:focus /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedBackgroundBrush}"/>
+                <Setter Property="Opacity" Value="{DynamicResource DataGridRowSelectedBackgroundOpacity}"/>
+            </Style>
+            <Style Selector="^:pointerover:focus /template/ Rectangle#BackgroundRectangle">
+                <Setter Property="Fill" Value="{DynamicResource DataGridRowSelectedHoveredBackgroundBrush}"/>
+                <Setter Property="Opacity" Value="{DynamicResource DataGridRowSelectedHoveredBackgroundOpacity}"/>
+            </Style>
+        </Style>
+    </ControlTheme>
+
     <ControlTheme x:Key="KeptTabs" TargetType="TabControl" BasedOn="{StaticResource {x:Type TabControl}}">
         <Setter Property="Template">
             <ControlTemplate>

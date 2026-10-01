@@ -5,7 +5,7 @@
            xmlns:m="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:ProductsModel"
            Margin="0,12,0,0">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,16,0">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,12">
                 <TextBlock Text="Sortiment" Theme="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center" AutomationProperties.HeadingLevel="2"/>
@@ -50,15 +50,17 @@
             <StackPanel Margin="0,0,0,24">
                 <TextBlock Theme="{StaticResource Muted}" TextWrapping="Wrap" IsVisible="{Binding EmptyAssortment}"
                            Text="Noch keine Produkte im Sortiment."/>
-                <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsReadOnly="True" IsVisible="{Binding !EmptyAssortment}"
-                          KeyDown="ProductKey" AutomationProperties.Name="Sortiment" AutomationProperties.HelpText="Entf nimmt das gewählte Produkt aus dem Sortiment" AutomationProperties.AutomationId="ProductsGrid">
+                <DataGrid x:Name="ProductGrid" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Rows}" IsVisible="{Binding !EmptyAssortment}"
+                          MaxHeight="{Binding #Scroller.Viewport.Height}"
+                          KeyDown="ProductKey" PreparingCellForEdit="EditStarted"
+                          AutomationProperties.Name="Sortiment" AutomationProperties.HelpText="F2 bearbeitet die Zelle, Entf nimmt das gewählte Produkt aus dem Sortiment" AutomationProperties.AutomationId="ProductsGrid">
                     <DataGrid.Styles>
                         <Style Selector="DataGridRow" x:DataType="ui:AssortmentRow">
                             <Setter Property="AutomationProperties.Name" Value="{Binding Spoken}"/>
                         </Style>
                     </DataGrid.Styles>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Produkt" Width="320" MinWidth="120" SortMemberPath="Name">
+                        <DataGridTemplateColumn Header="Produkt" Width="320" MinWidth="120" SortMemberPath="Name" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:AssortmentRow">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
@@ -68,20 +70,30 @@
                         <DataGridTemplateColumn Header="Bruttopreis" Width="130">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:AssortmentRow">
-                                    <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Price, Mode=TwoWay}" Margin="2"
-                                             AutomationProperties.Name="{Binding Name, StringFormat='Bruttopreis {0}'}" AutomationProperties.AutomationId="ProductPrice"/>
+                                    <TextBlock Text="{Binding Price}" Theme="{StaticResource Cell}" Margin="8,0"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Price, Mode=TwoWay}"
+                                             AutomationProperties.Name="{Binding Name, StringFormat='Bruttopreis {0}'}" AutomationProperties.AutomationId="ProductPrice"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="USt" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="ui:AssortmentRow">
-                                    <ComboBox ItemsSource="{Binding VatNames}" SelectedIndex="{Binding VatIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch"
-                                              AutomationProperties.Name="{Binding Name, StringFormat='Umsatzsteuer {0}'}" AutomationProperties.AutomationId="ProductVat"/>
+                                    <TextBlock Text="{Binding Vat}" Theme="{StaticResource Cell}" Margin="8,0"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate x:DataType="ui:AssortmentRow">
+                                    <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Vat, Mode=TwoWay}"
+                                             AutomationProperties.Name="{Binding Name, StringFormat='Umsatzsteuer {0}'}" AutomationProperties.HelpText="19, 7 oder 0" AutomationProperties.AutomationId="ProductVat"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="230">
+                        <DataGridTemplateColumn Width="230" IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
                                 <Panel AutomationProperties.Name="Hinweise"/>
                             </DataGridTemplateColumn.Header>
@@ -102,7 +114,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="50">
+                        <DataGridTemplateColumn Width="50" IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
                                 <Panel AutomationProperties.Name="Entfernen"/>
                             </DataGridTemplateColumn.Header>

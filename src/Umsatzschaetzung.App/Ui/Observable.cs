@@ -28,8 +28,9 @@ public sealed class Rows<T> : ObservableCollection<T>
 {
     public void Replace(IEnumerable<T> items)
     {
+        var next = items.ToList();
         Items.Clear();
-        foreach (var item in items) Items.Add(item);
+        foreach (var item in next) Items.Add(item);
         OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
         OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
