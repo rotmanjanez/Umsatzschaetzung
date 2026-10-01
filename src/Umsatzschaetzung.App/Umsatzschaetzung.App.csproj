@@ -19,6 +19,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Ui/Assets/logo.svg" />
     <AvaloniaResource Include="Ui/Assets/logo-256.png" />
+    <AvaloniaResource Include="Ui/Assets/Fonts/*.ttf" />
   </ItemGroup>
 
   <ItemGroup>

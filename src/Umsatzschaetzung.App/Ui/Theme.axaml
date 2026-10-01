@@ -37,7 +37,7 @@
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
-    <FontFamily x:Key="MonoFont">Cascadia Mono, Menlo, Consolas, Courier New</FontFamily>
+    <FontFamily x:Key="MonoFont">avares://Umsatzschaetzung.App/Ui/Assets/Fonts#JetBrains Mono NL, fonts:Inter#Inter</FontFamily>
 
     <StreamGeometry x:Key="DeleteIcon">M6,2 H10 V3 H14 V4.5 H2 V3 H6 Z M3.4,6 H12.6 L11.9,14.6 H4.1 Z</StreamGeometry>
 
@@ -289,16 +289,13 @@
         <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="8,0"/>
-        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Padding" Value="8,4"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Template">
             <ControlTemplate TargetType="Button">
                 <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                    <ContentPresenter Content="{TemplateBinding Content}"
-                                      ContentTemplate="{TemplateBinding ContentTemplate}"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <PathIcon Data="{StaticResource ClearIcon}" Width="11" Height="11" Foreground="{TemplateBinding Foreground}"/>
                 </Border>
             </ControlTemplate>
         </Setter>

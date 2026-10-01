@@ -61,7 +61,13 @@
   },
   "projects": {
     "Umsatzschaetzung.App": {
-      "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]
+      "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }],
+      "components": [
+        { "type": "data", "bom-ref": "project:Umsatzschaetzung.App#JetBrains Mono", "name": "JetBrains Mono", "version": "2.304",
+          "description": "The NL cut, Regular and SemiBold, subset to the characters the program shows.",
+          "licenses": [{ "license": { "id": "OFL-1.1" } }],
+          "externalReferences": [{ "type": "vcs", "url": "https://github.com/JetBrains/JetBrainsMono" }] }
+      ]
     },
     "Umsatzschaetzung.Core": {
       "type": "library", "licenses": [{ "license": { "id": "EUPL-1.2" } }]

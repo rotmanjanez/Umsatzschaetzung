@@ -15,7 +15,7 @@
             </Menu>
             <Border x:Name="ErrorBanner" DockPanel.Dock="Top" Theme="{StaticResource ErrorBanner}" IsVisible="False">
                 <DockPanel>
-                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Content="✕" Theme="{StaticResource ErrorBannerClose}" Click="DismissError" AutomationProperties.AutomationId="ShellErrorClose"/>
+                    <Button x:Name="ErrorClose" DockPanel.Dock="Right" Theme="{StaticResource ErrorBannerClose}" Click="DismissError" AutomationProperties.AutomationId="ShellErrorClose"/>
                     <TextBlock x:Name="ErrorText" Theme="{StaticResource ErrorBannerText}" AutomationProperties.AutomationId="ShellError"/>
                 </DockPanel>
             </Border>

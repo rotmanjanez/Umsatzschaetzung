@@ -90,6 +90,8 @@ Shell Launch(bool forget)
         ranking: new EncoderRanking(new Kept(encoder, lesson.Embedded), new EmbeddingStore(store, AppFiles.Beside(EmbeddingStore.Shipped))),
         readings: options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
+    // Photographed as on macOS, whose menu sits at the top of the screen: the same on every platform.
+    shell.View.MenuBar.IsVisible = false;
     if (Number("width") is { } width) shell.Width = width;
     if (Number("height") is { } height) shell.Height = height;
     shell.Show();

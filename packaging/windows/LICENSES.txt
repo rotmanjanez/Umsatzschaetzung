@@ -20,6 +20,11 @@ https://chromium.googlesource.com/angle/angle/+/main/LICENSE
 Die mitgelieferte Schriftart. "Inter" ist ein Reserved Font Name im Sinne der OFL.
 https://github.com/rsms/inter/blob/master/LICENSE.txt
 
+==== JetBrains Mono (SIL Open Font License 1.1) ====
+Die mitgelieferte Schrift der Zahlen, auf die Zeichen des Programms beschränkt;
+Lizenz und Urheber stehen auch in der Schriftdatei.
+https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt
+
 ==== Microsoft Edge WebView2 SDK ====
 https://www.nuget.org/packages/Microsoft.Web.WebView2 (Microsoft Software License Terms)
 

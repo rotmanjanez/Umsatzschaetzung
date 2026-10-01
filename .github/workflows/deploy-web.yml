@@ -128,9 +128,13 @@ jobs:
           path: publish/wwwroot
           key: ${{ steps.key.outputs.key }}
 
+  # On arm64 Linux, which plays the guide in a fifth of a Mac's time; the window draws only in the
+  # program's own fonts, so it looks the same there as anywhere else.
   shots:
-    runs-on: macos-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    env:
+      UMSATZSCHAETZUNG_CPU: 1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -154,7 +158,7 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.taken.outputs.cache-hit != 'true'
         with:
-          path: ~/Library/Application Support/umsatzschaetzung/models
+          path: ~/.local/share/umsatzschaetzung/models
           key: models-${{ runner.os }}-${{ hashFiles('Models.targets') }}
       - uses: ./.github/actions/warm-embeddings
         if: steps.taken.outputs.cache-hit != 'true'
@@ -166,7 +170,7 @@ jobs:
       - name: Key the recorded readings
         if: steps.taken.outputs.cache-hit != 'true'
         id: code
-        run: echo "key=readings-${{ runner.os }}-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+        run: echo "key=readings-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Models.targets', 'data/units.json', 'src/Umsatzschaetzung.Core/*.csproj', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Core/Model/**', 'src/Umsatzschaetzung.Core/Suggest/**', 'src/Umsatzschaetzung.Core/Invoices/**', 'src/Umsatzschaetzung.Core/Service/Readings.cs', 'src/Umsatzschaetzung.Core/Service/LocalInvoices.cs', 'src/Umsatzschaetzung.Core/Service/Platform.cs', 'src/Umsatzschaetzung.Core/Service/Types.cs', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/*.csproj', 'src/Umsatzschaetzung.Inference/Tagging/**', 'src/Umsatzschaetzung.Nets/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.taken.outputs.cache-hit != 'true'
         id: readings
@@ -212,8 +216,8 @@ jobs:
   # screenshots, so a guide page that fails its image does not hold back the lessons. The
   # script it plays is the guide's without the photographs, at the lessons' window, with the
   # stores kept where the lessons named in LESSONS start; what a lesson says does not change it.
-  # On arm64 Linux, which reckons the weights to the same bits as the Macs and plays the guide in
-  # a fifth of their time; on x64 they come out apart and the guide fails.
+  # On arm64 Linux like the screenshots, whose readings it replays: x64 reckons the weights apart
+  # and the guide fails there.
   zustand:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 20
@@ -253,12 +257,10 @@ jobs:
         run: |
           curl -fsSL -o beispiel.zip https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/beispiel-rechnungen-2025/beispiel-rechnungen-2025.zip
           unzip -q beispiel.zip -d beispiel-rechnungen
-      # The readings the screenshots recorded on the Mac; stores from any invoice read here go up
-      # but are not kept, and are made again from the Mac's readings on the next run.
       - name: Key the recorded readings
         if: steps.kept.outputs.cache-hit != 'true'
         id: code
-        run: echo "key=readings-macOS-${{ hashFiles('Models.targets', 'src/Umsatzschaetzung.Core/Service/**', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
+        run: echo "key=readings-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Models.targets', 'data/units.json', 'src/Umsatzschaetzung.Core/*.csproj', 'src/Umsatzschaetzung.Core/Extract/**', 'src/Umsatzschaetzung.Core/Tagging/**', 'src/Umsatzschaetzung.Core/Model/**', 'src/Umsatzschaetzung.Core/Suggest/**', 'src/Umsatzschaetzung.Core/Invoices/**', 'src/Umsatzschaetzung.Core/Service/Readings.cs', 'src/Umsatzschaetzung.Core/Service/LocalInvoices.cs', 'src/Umsatzschaetzung.Core/Service/Platform.cs', 'src/Umsatzschaetzung.Core/Service/Types.cs', 'src/Umsatzschaetzung.Documents/**', 'src/Umsatzschaetzung.Inference/*.csproj', 'src/Umsatzschaetzung.Inference/Tagging/**', 'src/Umsatzschaetzung.Nets/**', 'src/RapidOcrNet/**') }}" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.kept.outputs.cache-hit != 'true'
         with:
@@ -267,19 +269,11 @@ jobs:
           restore-keys: ${{ steps.code.outputs.key }}
       - name: Keep the stores each lesson starts from
         if: steps.kept.outputs.cache-hit != 'true'
-        id: stores
         env:
           UMSATZ_LESSON_CACHE: ${{ github.workspace }}
-        run: |
-          recorded=$(find readings -name '*.json' 2>/dev/null | wc -l)
-          python web/lessons/lesson.py zustand
-          if [ "$(find readings -name '*.json' | wc -l)" = "$recorded" ]; then
-            echo "mac=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::invoices the Mac has not read were read here; the stores go up but are not kept"
-          fi
+        run: python web/lessons/lesson.py zustand
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        if: steps.stores.outputs.mac == 'true'
+        if: steps.kept.outputs.cache-hit != 'true'
         with:
           path: web/lessons/out/*/zustand
           key: ${{ steps.key.outputs.key }}
