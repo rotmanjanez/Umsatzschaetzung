@@ -68,11 +68,16 @@ public class RuleStoreTests
         var here = Open(tmp);
         var read = here.Load();
         Assert.Same(read, here.Load());
+        var file = Path.Combine(tmp.Path, "rules.db");
+        var length = new FileInfo(file).Length;
+        var written = File.GetLastWriteTimeUtc(file);
 
         var there = Open(tmp);
         var korn = there.Load().Products["prod.korn.4cl"];
         korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
         var saved = there.Save(korn);
+        File.SetLastWriteTimeUtc(file, written);
+        Assert.Equal(length, new FileInfo(file).Length);
 
         var now = here.Load();
         Assert.NotSame(read, now);

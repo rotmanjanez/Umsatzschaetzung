@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Globalization;
 using System.Text.Json;
 using System.Runtime.InteropServices;
@@ -103,7 +104,7 @@ public sealed class RuleStore
     readonly TimeSpan lockWait;
     readonly Lock gate = new();
     SqliteConnection? db;
-    (long Length, DateTime Written) seen;
+    (long Length, uint Changes, DateTime Written) seen;
     RuleSet? loaded;
 
     public string Dir { get; }
@@ -795,11 +796,27 @@ public sealed class RuleStore
         catch (SqliteException e) when (e.SqliteErrorCode is 11 or 26) { }
     }
 
-    (long, DateTime) Stat()
+    (long, uint, DateTime) Stat()
     {
-        var f = new FileInfo(file);
-        return f.Exists ? (f.Length, f.LastWriteTimeUtc) : default;
+        try
+        {
+            using var h = File.OpenHandle(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            Span<byte> head = stackalloc byte[28];
+            return (RandomAccess.GetLength(h), Changes(head[..RandomAccess.Read(h, head, 0)]), File.GetLastWriteTimeUtc(h));
+        }
+        catch (FileNotFoundException)
+        {
+            return default;
+        }
+        catch (IOException e) when (Held(e))
+        {
+            return seen;
+        }
     }
+
+    // SQLite counts each write to a freshly read image in its header, so a change of the same length
+    // within one tick of the file system's clock still shows.
+    static uint Changes(ReadOnlySpan<byte> image) => image.Length < 28 ? 0 : BinaryPrimitives.ReadUInt32BigEndian(image[24..]);
 
     byte[]? Fetch()
     {
@@ -808,7 +825,7 @@ public sealed class RuleStore
             using var s = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             var image = new byte[RandomAccess.GetLength(s.SafeFileHandle)];
             s.ReadExactly(image);
-            seen = (image.Length, File.GetLastWriteTimeUtc(s.SafeFileHandle));
+            seen = (image.Length, Changes(image), File.GetLastWriteTimeUtc(s.SafeFileHandle));
             return image;
         }
         catch (FileNotFoundException)
@@ -849,14 +866,10 @@ public sealed class RuleStore
         raw.sqlite3_free(p);
         if (before is not null && image.AsSpan().SequenceEqual(before)) return;
         var next = file + ".neu";
-        // Readers notice a change by length and time, and a change of the same length within one tick
-        // of the file system's clock would look like none: the new file is dated after the one it replaces.
         using (var s = new FileStream(next, FileMode.Create, FileAccess.Write, FileShare.None))
         {
             s.Write(image);
             s.Flush(flushToDisk: true);
-            if (File.GetLastWriteTimeUtc(s.SafeFileHandle) <= seen.Written)
-                File.SetLastWriteTimeUtc(s.SafeFileHandle, seen.Written.AddTicks(1));
         }
         // Windows refuses to replace a file while a reader copies it.
         for (var tries = 40; ; tries--)
