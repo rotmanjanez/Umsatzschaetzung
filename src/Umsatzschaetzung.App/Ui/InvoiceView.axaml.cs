@@ -257,10 +257,15 @@ public partial class InvoiceView : Screen
     }
 
     // Stacked the scan and the lines share the height; once the window is wide enough both get all
-    // of it and split the width instead.
+    // of it and split the width instead, the lines keeping room for every column.
     void Arrange(bool side)
     {
-        if (side == sideBySide) return;
+        if (side != sideBySide) Rearrange(side);
+        if (side) Panes.ColumnDefinitions[0].MinWidth = FormPane.Bounds.Width - Lines.Bounds.Width + Grids.Least(Lines);
+    }
+
+    void Rearrange(bool side)
+    {
         sideBySide = side;
         Panes.RowDefinitions = side
             ? [new RowDefinition(GridLength.Star)]
@@ -268,7 +273,7 @@ public partial class InvoiceView : Screen
                new RowDefinition(new GridLength(6)),
                new RowDefinition(9, GridUnitType.Star) { MinHeight = 120 }];
         Panes.ColumnDefinitions = side
-            ? [new ColumnDefinition(11, GridUnitType.Star) { MinWidth = 520 },
+            ? [new ColumnDefinition(11, GridUnitType.Star),
                new ColumnDefinition(new GridLength(6)),
                new ColumnDefinition(9, GridUnitType.Star) { MinWidth = 340 }]
             : [new ColumnDefinition(GridLength.Star)];

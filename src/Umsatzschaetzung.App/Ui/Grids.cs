@@ -31,6 +31,24 @@ public static class Grids
         grid.LayoutUpdated += Stretch;
     });
 
+    // Every column whole, the flex one at its floor, beside the scrollbar.
+    public static double Least(DataGrid grid)
+    {
+        var flex = grid.Columns[GetFlex(grid)];
+        return Others(grid, flex) + Floor(grid, flex) + (grid.GetValue(ScrollbarProperty)?.Width ?? 0) + Slack;
+    }
+
+    static double Floor(DataGrid grid, DataGridColumn flex) => Math.Max(flex.MinWidth, grid.MinColumnWidth);
+
+    static double Others(DataGrid grid, DataGridColumn flex)
+    {
+        var used = 0.0;
+        foreach (var column in grid.Columns)
+            if (column != flex && column.IsVisible)
+                used += column.ActualWidth;
+        return used;
+    }
+
     static void Capture(object? sender, TemplateAppliedEventArgs e) =>
         ((DataGrid)sender!).SetValue(ScrollbarProperty, e.NameScope.Find<ScrollBar>("PART_VerticalScrollbar"));
 
@@ -49,20 +67,9 @@ public static class Grids
             return;
         }
 
-        var used = 0.0;
-        foreach (var column in grid.Columns)
-            if (column != flex && column.IsVisible)
-                used += column.ActualWidth;
-
         var bar = grid.GetValue(ScrollbarProperty);
-        var room = grid.Bounds.Width - used - (bar is { IsVisible: true } ? bar.Bounds.Width : 0) - Slack;
-        if (room < Math.Max(flex.MinWidth, grid.MinColumnWidth) || Math.Abs(room - flex.ActualWidth) < 1)
-        {
-            grid.SetValue(AppliedProperty, flex.ActualWidth);
-            return;
-        }
-
-        flex.Width = new DataGridLength(room);
+        var room = Math.Max(grid.Bounds.Width - Others(grid, flex) - (bar is { IsVisible: true } ? bar.Bounds.Width : 0) - Slack, Floor(grid, flex));
+        if (Math.Abs(room - flex.ActualWidth) >= 1) flex.Width = new DataGridLength(room);
         grid.SetValue(AppliedProperty, flex.ActualWidth);
     }
 }
