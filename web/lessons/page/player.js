@@ -19,7 +19,6 @@ function union(a, b) {
 export function player(lesson, running) {
   const beats = lesson.beats;
   const chapters = [...new Set(beats.map(b => b.chapter))];
-  const kicker = `${lesson.course} · Übung ${lesson.number}`;
   const length = beats.map(b => Math.max(b.say.length, 40));
   const starts = length.map((_, i) => length.slice(0, i).reduce((a, b) => a + b, 0));
   const slider = $('slider');
@@ -29,7 +28,7 @@ export function player(lesson, running) {
   running.then(() => { up = true; });
 
   document.title = `${lesson.title} · ${lesson.course}`;
-  sheet(beats[0]?.card || { kicker, title: lesson.title, text: lesson.summary }, true);
+  sheet(beats[0].card, true);
   slider.max = starts.at(-1) + length.at(-1);
   $('ticks').replaceChildren(...chapters.slice(1).map(c => {
     const tick = document.createElement('i');
@@ -155,7 +154,7 @@ export function player(lesson, running) {
     untrack();
     stop();
     line();
-    sheet({ kicker, title: lesson.done?.title || 'Gut gemacht!', text: lesson.done?.text }, true);
+    sheet({ title: lesson.done?.title || 'Gut gemacht!', text: lesson.done?.text }, true);
     $('all').hidden = false;
     if (lesson.next) {
       $('next').href = lesson.next.href;
