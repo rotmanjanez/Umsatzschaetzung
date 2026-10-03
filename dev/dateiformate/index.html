@@ -852,6 +852,8 @@
       
         
       
+        
+      
     
     
     
@@ -1241,6 +1243,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1410,19 +1614,14 @@ Start wiederkommt.</p>
 <td>keine Zeile in <code>category_gewerbe</code> oder <code>category_gebinde</code> heißt: alle</td>
 </tr>
 <tr>
-<td><code>ingredient</code>, <code>ingredient_alias</code></td>
-<td>Zutaten und die Warenarten, unter denen sie gebucht werden</td>
-<td><code>piece_amount</code> in g oder ml je Stück, in <code>piece_unit</code>; leer: kein Richtwert</td>
+<td><code>product</code>, <code>product_alias</code>, <code>recipe_line</code></td>
+<td>Produkte, die Warenarten, unter denen sie gebucht werden, und ihre Rezepturen aus anderen Produkten</td>
+<td>gezählt in <code>unit</code>; ein Rezept ergibt <code>batch</code> davon; <code>piece_amount</code> in g oder ml je Stück, in <code>piece_unit</code>, leer: kein Richtwert; eine Zeile nennt <code>amount</code> von <code>part_id</code> in <code>unit</code></td>
 </tr>
 <tr>
 <td><code>mapping</code></td>
-<td>bestätigte Zuordnungen von Rechnungszeilen zu Zutaten</td>
-<td><code>factor</code> ist der Inhalt eines Gebindes in ml, g oder Stück; leer, wo die Einheit selbst umrechnet</td>
-</tr>
-<tr>
-<td><code>product</code>, <code>recipe_line</code></td>
-<td>Produkte und ihre Rezepturen</td>
-<td><code>amount</code> in <code>unit</code>; mit <code>sub_product_id</code> ist die Zeile ein Teilrezept in Stück</td>
+<td>bestätigte Zuordnungen von Rechnungszeilen zu Produkten</td>
+<td><code>factor</code> ist der Inhalt eines Gebindes in der Einheit des Produkts; leer, wo die Einheit selbst umrechnet</td>
 </tr>
 <tr>
 <td><code>yield_rule</code></td>
@@ -1483,7 +1682,7 @@ hat dasselbe Format.</p>
 </tr>
 <tr>
 <td><code>yield_choice</code></td>
-<td>gewählte Ertragsregel je Zutat oder Kategorie</td>
+<td>gewählte Ertragsregel je Produkt oder Kategorie</td>
 <td><code>yield_rule_id</code> leer: kein Abzug</td>
 </tr>
 <tr>
@@ -1493,7 +1692,7 @@ hat dasselbe Format.</p>
 </tr>
 <tr>
 <td><code>no_revenue</code></td>
-<td>Zutaten ohne Umsatz, etwa Reinigungsmittel</td>
+<td>Produkte ohne Umsatz, etwa Reinigungsmittel</td>
 <td></td>
 </tr>
 <tr>

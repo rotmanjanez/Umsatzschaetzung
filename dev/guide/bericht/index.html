@@ -776,6 +776,8 @@
       
         
       
+        
+      
     
     
     
@@ -1250,6 +1252,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1311,14 +1515,14 @@ festlegen, wie viel vom Einkauf als verkauft gilt, und das <strong>Ergebnis</str
 wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird,
 wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das
 Personal isst mit.</p>
-<p>Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es
-eine Ertragsregel gibt, <strong>Nach Kategorie</strong> und <strong>Nach Zutat</strong>. Je Zeile
-wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer
-Kategorie vor. Die Kalkulation rechnet sofort neu.</p>
+<p>Die Seite führt nur die Kategorien und Produkte dieser Prüfung, für die es
+eine Ertragsregel gibt, <strong>Nach Kategorie</strong> und <strong>Nach Produkt</strong>. Je Zeile
+wird gewählt, welche Regel gilt; die Wahl für ein Produkt geht der für
+seine Kategorie vor. Die Kalkulation rechnet sofort neu.</p>
 </div>
 <p><img alt="Die Seite „Ertragsregeln“ des Gasthauses, überall „Kein Abzug“" src="../img/bericht-ertragsregeln.png" width="330" /></p>
 </div>
-<p>Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es
+<p>Voreingestellt ist die Standardregel des Produkts oder der Kategorie, gibt es
 keine, <strong>Kein Abzug</strong>. Beim Gasthaus steht überall <strong>Kein Abzug</strong>. Für
 <strong>Bier vom Fass</strong> stehen drei Regeln <strong>Schankverlust</strong> mit 3 %, 5 % und
 8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte
@@ -1328,7 +1532,7 @@ gewählt.</p>
 ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz,
 sondern auch, warum er gilt.</p>
 <p>Die Ertragsregeln stehen in der
-<a href="../../verwaltung/#regel-datenbank">Regel-Datenbank</a>, neben Zutaten,
+<a href="../../verwaltung/#regel-datenbank">Regel-Datenbank</a>, neben Produkten,
 Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das
 Reglersymbol (<strong>Regeln</strong>) unter <strong>Ertragsregeln</strong> angelegt, mit Namen und
 Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe
@@ -1370,7 +1574,7 @@ er als PDF gespeichert wird.</p>
 <li><strong>Rohgewinnaufschlag</strong>: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
    Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.</li>
 <li><strong>Anhang</strong>: die Eingangspositionen, die Rezepturen je Produkt, die
-   Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat,
+   Ausbeute mit der angewandten Ertragsregel und die Portionen je Ware,
    damit jede Zahl des Berichts nachvollziehbar bleibt.</li>
 </ol>
 <p>Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg

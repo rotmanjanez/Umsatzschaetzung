@@ -52,21 +52,21 @@ Wie oft ein solcher Vorschlag stimmt: Von hundert Vorschlägen mit 90 % treffen 
 
 ### Was ist der Faktor, und warum fehlt er?
 
-Der Inhalt eines Gebindes in der Einheit des Rezepts, etwa 3000 für einen 3-kg-Block zu einem Rezept in Gramm. Steht die Packungsgröße nicht im Artikeltext und hat die Zutat kein Stückgewicht, kann das Programm ihn nicht ermitteln. Ohne Faktor lässt sich die Menge nicht in Portionen umrechnen. → [Eine Position zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#eine-position-zuordnen)
+Der Inhalt eines Gebindes in der Einheit des Produkts, etwa 3000 für einen 3-kg-Block Käse, der in Gramm gezählt wird. Steht die Packungsgröße nicht im Artikeltext und hat das Produkt kein Stückgewicht, kann das Programm ihn nicht ermitteln. Ohne Faktor lässt sich die Menge nicht in Portionen umrechnen. → [Eine Position zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#eine-position-zuordnen)
 
 ### Wohin mit Pfand, Fracht, Reinigungsmitteln?
 
-Auf eine Zutat der Kategorie **Kein Wareneinsatz**, Pfand auf **Pfand und Leergut**. Sie sind damit erledigt und gehen in keine Kalkulation ein. → [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#kein-wareneinsatz)
+Auf ein Produkt der Kategorie **Kein Wareneinsatz**, Pfand auf **Pfand und Leergut**. Pfand zählt dann nicht mit. Das Übrige wird über den Aufschlagsatz geschätzt, bis es unter **Übrige Einkäufe** mit dem × aus der Schätzung genommen wird. → [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#kein-wareneinsatz)
 
 ### Dieselbe Ware wird immer wieder zur Durchsicht vorgelegt.
 
-Bei der Zutat unter **Regeln → Zutaten** die Warenart ergänzen, etwa „Gouda“ bei Schnittkäse. → [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten)
+Beim Produkt unter **Regeln → Produkte** die Warenart ergänzen, etwa „Gouda“ bei Schnittkäse. → [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten)
 
 ## Sortiment und Kalkulation
 
 ### Ein Produkt hat 0 Portionen.
 
-Die Kalkulation verteilt den Einkauf so auf die Produkte, dass möglichst wenig übrig bleibt. Ein Produkt geht leer aus, wenn eine seiner Zutaten gar nicht eingekauft wurde oder schon in anderen Produkten aufgeht. Rechts steht seine Rezeptur; ob jede Zutat darin im Einkauf vorkommt, zeigt die Zuordnung. → [Portionen](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#portionen)
+Die Kalkulation verteilt den Einkauf so auf die Produkte, dass möglichst wenig übrig bleibt. Ein Produkt geht leer aus, wenn etwas aus seinem Rezept weder eingekauft noch aus Eingekauftem gemacht werden kann oder schon in anderen Produkten aufgeht. Rechts steht seine Rezeptur; ob jede Zeile darin im Einkauf vorkommt, zeigt die Zuordnung. → [Portionen](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#portionen)
 
 ### Ein Produkt hat Portionen, aber keinen Umsatz.
 
@@ -74,7 +74,7 @@ Ihm fehlt der Preis. Es steht mit **Preis fehlt** im Sortiment, bis er nachgetra
 
 ### Bei den Ertragsregeln steht „Kein Abzug“.
 
-Für diese Zutat oder Kategorie ist keine Ertragsregel gewählt und keine Standardregel hinterlegt, es wird also nichts abgezogen, auch kein Schankverlust. Eine Regel wird unter **Regeln → Ertragsregeln** angelegt und steht dann in jeder Prüfung zur Wahl. → [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln)
+Für dieses Produkt oder diese Kategorie ist keine Ertragsregel gewählt und keine Standardregel hinterlegt, es wird also nichts abgezogen, auch kein Schankverlust. Eine Regel wird unter **Regeln → Ertragsregeln** angelegt und steht dann in jeder Prüfung zur Wahl. → [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln)
 
 ### Kann ich einen Schwund von 8 % direkt eintragen?
 
@@ -86,11 +86,11 @@ Das Rezept für diese Prüfung anpassen. Der Katalog bleibt unverändert, der Be
 
 ### Eine Ware bringt keinen Umsatz, wird aber geschätzt.
 
-Unter **Übrige Einkäufe** mit dem × am Ende der Zeile aus der Schätzung nehmen. Das gilt für die ganze Zutat, bei Sammelzutaten wie „Reinigung und Hygiene“ also für alles, was ihr zugeordnet ist. Das ↺ nimmt es zurück. → [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt)
+Unter **Übrige Einkäufe** mit dem × am Ende der Zeile aus der Schätzung nehmen. Das gilt für das ganze Produkt, bei Sammelprodukten wie „Reinigung und Hygiene“ also für alles, was ihm zugeordnet ist. Das ↺ nimmt es zurück. → [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt)
 
 ### Eine Ware fehlt unter „Übrige Einkäufe“.
 
-Dann steht ihre Zutat in einem Rezept des Sortiments und geht über Portionen in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie verwenden, steht unter **Regeln → Produkte**. → [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte)
+Dann steht sie selbst im Sortiment oder in einem Rezept des Sortiments und geht über Portionen in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie verwenden, steht unter **Regeln → Produkte**. → [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte)
 
 ### Pfand und Leergut gleichen sich nicht aus.
 
@@ -98,7 +98,7 @@ Dann steht ihre Zutat in einem Rezept des Sortiments und geht über Portionen in
 
 ### Die Lagerbestände zu Beginn und Ende waren sehr verschieden.
 
-Unter **Prüfung → Bestand** Anfangs- und Endbestand je Zutat eintragen. Das lohnt sich bei Getränken, Tiefkühlware und Wein, nicht bei Frischware. → [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand)
+Unter **Prüfung → Bestand** Anfangs- und Endbestand je Produkt eintragen. Das lohnt sich bei Getränken, Tiefkühlware und Wein, nicht bei Frischware. → [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand)
 
 ## Bericht und Weitergabe
 
@@ -116,6 +116,6 @@ In der Prüfung ist keine Gewerbekennzahl eingetragen. → [Eckdaten](https://do
 
 ### Ein Kollege sieht in meiner Prüfung andere Zahlen.
 
-Die Prüfung nimmt Rechnungen, Preise und Entscheidungen mit, aber nicht die Regeln: Zutaten, Produkte, bestätigte Zuordnungen und Ertragsregeln liegen auf dem eigenen Rechner. Auf einem anderen Rechner ordnet das Programm neu zu, was es dort nicht kennt, und was offen bleibt, fehlt in der Kalkulation.
+Die Prüfung nimmt Rechnungen, Preise und Entscheidungen mit, aber nicht die Regeln: Produkte, Rezepte, bestätigte Zuordnungen und Ertragsregeln liegen auf dem eigenen Rechner. Auf einem anderen Rechner ordnet das Programm neu zu, was es dort nicht kennt, und was offen bleibt, fehlt in der Kalkulation.
 
 In verwalteten Installationen liegen die Regeln oft für alle gemeinsam auf einer Freigabe, unter Windows per Gruppenrichtlinie **Gemeinsame Regel-Datenbank**. Dann rechnen alle mit denselben Regeln, und was einer bestätigt, gilt beim nächsten Start auch für die anderen. Ob das so eingerichtet ist, weiß die IT. → [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#regeln-gehen-nicht-mit), [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank)

@@ -776,6 +776,8 @@
       
         
       
+        
+      
     
     
     
@@ -1123,6 +1125,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#was-kein-wareneinsatz-ist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Was kein Wareneinsatz ist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#wenn-eine-menge-fehlt" class="md-nav__link">
     <span class="md-ellipsis">
       Wenn eine Menge fehlt
@@ -1250,6 +1261,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1300,7 +1513,7 @@
 <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><span class="here">2. Zuordnung</span><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
 <p>Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu
-Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die
+Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Produkten: Fassbier. Die
 Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für
 fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was
 es nicht wusste.</p>
@@ -1310,17 +1523,17 @@ es nicht wusste.</p>
 <div>
 <p>Auf <strong>2. Zuordnung</strong> wechseln. Links stehen alle Artikel der Prüfung, jeder
 einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz:
-<code>5 offen, 117 automatisch, 0 manuell</code>.</p>
+<code>7 offen, 115 automatisch, 0 manuell</code>.</p>
 <p>Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen
 die offenen oben:</p>
 <ul>
-<li><strong>Offen</strong>: Das Programm war sich bei keiner Zutat sicher genug. Hier ist
+<li><strong>Offen</strong>: Das Programm war sich bei keinem Produkt sicher genug, oder es fehlt der Faktor. Hier ist
   eine Entscheidung nötig.</li>
 <li><strong>Automatisch</strong>: Das Programm hat zugeordnet, niemand hat es bestätigt.</li>
 <li><strong>Manuell</strong>: Ein Mensch hat die Zuordnung gewählt oder bestätigt.</li>
 </ul>
 </div>
-<p><img alt="Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen" src="../img/zuordnung-liste.png" /></p>
+<p><img alt="Der Reiter „2. Zuordnung“ nach dem Import, sieben Positionen offen" src="../img/zuordnung-liste.png" /></p>
 </div>
 <h2 id="ein-vorschlag-der-nicht-passt">Ein Vorschlag, der nicht passt</h2>
 <div class="us-side">
@@ -1341,13 +1554,13 @@ was zu diesem Artikel bekannt ist:</p>
 </div>
 <div class="us-side">
 <div>
-<p>Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht
-sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die
+<p>Das Programm hält den Wein für Schaumwein, mit 57 % ist es sich aber nicht
+sicher, und Rotwein steht mit 51 % gleich dahinter. Genau deshalb ist die
 Position offen geblieben.</p>
 <p>Ein Domina ist ein fränkischer Rotwein: den Vorschlag <strong>Rotwein × 750 ml</strong>
 anklicken.</p>
-<p>Der <strong>Faktor</strong> passt schon: Das Rezept für ein Glas Rotwein rechnet in
-Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je
+<p>Der <strong>Faktor</strong> passt schon: Rotwein wird in Millilitern gezählt, die
+Rechnung in Flaschen, und das Programm hat 750 ml je
 Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor:
 158 Flaschen × 750 ml = 118,5 l.</p>
 <p>Dann <strong>Zuordnen</strong>. Rechts oben bestätigt ein grüner Hinweis die Zuordnung,
@@ -1360,20 +1573,27 @@ die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.</p>
 einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln
 sich auch Rezepte und Ertragsregeln, siehe
 <a href="../sortiment/">3. Sortiment</a> und <a href="../bericht/">5. Bericht</a>.</p>
+<h2 id="was-kein-wareneinsatz-ist">Was kein Wareneinsatz ist</h2>
+<p>Als Nächstes <strong>CO2-Flasche 10 kg Füllung</strong> anklicken. Vorgeschlagen ist
+<strong>Ausstattung und Bedarf</strong> mit 79 %, knapp unter der Schwelle. Die
+Kohlensäure braucht die Schankanlage, verkauft wird sie nicht: Sie gehört
+zu den Waren ohne Wareneinsatz, siehe
+<a href="../../zuordnung/#kein-wareneinsatz">Kein Wareneinsatz</a>. Der Vorschlag passt,
+also <strong>Zuordnen</strong>.</p>
 <h2 id="wenn-eine-menge-fehlt">Wenn eine Menge fehlt</h2>
 <div class="us-side">
 <div>
-<p>Als Nächstes <strong>Kaffeesahne Portionen 10 × 7,5 g 240er</strong> anklicken. Die Zutat
+<p>Als Nächstes <strong>Kaffeesahne Portionen 10 × 7,5 g 240er</strong> anklicken. Das Produkt
 ist klar, <strong>Sahne</strong> ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“
 lässt sich nicht lesen, wie viel drin ist. Das Feld <strong>Faktor</strong> ist dann mit
 einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.</p>
 </div>
-<p><img alt="Die Kaffeesahne: Zutat klar, Faktor fehlt" src="../img/zuordnung-faktor-fehlt.png" width="630" /></p>
+<p><img alt="Die Kaffeesahne: Produkt klar, Faktor fehlt" src="../img/zuordnung-faktor-fehlt.png" width="630" /></p>
 </div>
 <div class="us-side">
 <div>
 <p>Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
-1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. <code class="copy">1800</code>
+1,8 l je Karton, Sahne wird in Millilitern gezählt. <code class="copy">1800</code>
 eintragen, die Zeile darunter rechnet vor. Dann <strong>Zuordnen</strong>.</p>
 </div>
 <p><img alt="Der Faktor ist eingetragen" src="../img/zuordnung-faktor.png" width="630" /></p>
@@ -1384,9 +1604,11 @@ kg</strong> ist schon gewählt, und der Faktor <code>12.500</code> stimmt. Das P
 sich nur nicht sicher genug, um es allein zu entscheiden. Einfach
 <strong>Zuordnen</strong>.</p>
 <h2 id="was-offen-bleiben-darf">Was offen bleiben darf</h2>
-<p>Bleiben <strong>Leberkäse am Stück, ungebacken</strong> und <strong>Petersilie glatt, Bund</strong>.
-Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche
-Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich
+<p>Bleiben <strong>Petersilie glatt, Bund</strong>, <strong>Leberkäse am Stück, ungebacken</strong> und
+<strong>Putenbrustfilet frisch</strong>. Beim Leberkäse hat der Scan die Einheit als „K8“
+gelesen, beim Putenbrustfilet auf einer Rechnung „kg“ als „Keg“, also Fass;
+ohne verlässliche Einheit gibt es keinen verlässlichen Faktor. Die übrigen
+Rechnungen beider Artikel sind richtig gelesen und zugeordnet. Bei der Petersilie lässt sich
 aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins
 Gewicht.</p>
 <p>Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum
@@ -1394,13 +1616,13 @@ Wareneinsatz, und die Kalkulation führt es unter <strong>Nicht in der
 Umsatzschätzung</strong> auf, damit es nicht unbemerkt verloren geht. Wo der Faktor
 erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist
 offen lassen die ehrlichere Antwort.</p>
-<p>Am Ende steht über der Liste <code>2 offen</code>.</p>
-<p><img alt="Nur Leberkäse und Petersilie sind noch offen" src="../img/zuordnung-fertig.png" width="610" /></p>
+<p>Am Ende steht über der Liste <code>3 offen</code>.</p>
+<p><img alt="Nur Petersilie, Leberkäse und Putenbrustfilet sind noch offen" src="../img/zuordnung-fertig.png" width="610" /></p>
 <div class="admonition geschafft">
 <p class="admonition-title">Geschafft, wenn …</p>
 <ul>
-<li>über der Liste <code>2 offen, 117 automatisch, 3 manuell</code> steht</li>
-<li>nur noch Leberkäse und Petersilie <strong>Offen</strong> sind</li>
+<li>über der Liste <code>3 offen, 115 automatisch, 4 manuell</code> steht</li>
+<li>nur noch Petersilie, Leberkäse und Putenbrustfilet <strong>Offen</strong> sind</li>
 </ul>
 </div>
 <div class="admonition nachlesen">

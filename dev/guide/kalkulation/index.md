@@ -8,7 +8,7 @@ Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den Umsatz
 
 Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
-- **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.
+- **Nicht Teil der Ermittlung des Aufschlagsatzes**: Kein Produkt des Sortiments braucht die Ware, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Waren, die ein Rezept nicht aufs Gramm genau abbildet.
 - **Nicht in der Umsatzschätzung**: Einkäufe, die keinen Umsatz bringen, etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.
 
 Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut stehen nicht in den Listen, sie gleichen sich über die Zeit aus.
@@ -17,7 +17,7 @@ Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche
 
 In **Nicht Teil der Ermittlung des Aufschlagsatzes** steht ganz oben **Schweineschnitzel natur, ausgelöst**, mit fast 3.500 € netto. Das Programm hat es als **Schnitzel, paniert, je Stück** zugeordnet, als fertig paniertes Schnitzel. Das Gasthaus kauft das Fleisch aber roh, 427 kg im Jahr, und paniert selbst; im Sortiment steht **Schnitzel mit Pommes**, und dessen Rezept rechnet mit Schweinefleisch.
 
-Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die Zutat, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und **Zuordnen**.
+Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die Ware, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und **Zuordnen**.
 
 Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.
 
@@ -32,7 +32,7 @@ In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauf
 1. **Handspülmittel Konzentrat 5 l**
 1. **Versandkostenpauschale**
 
-Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger, Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
+Die Festlegung gilt für das Produkt, nicht nur für die angeklickte Position. Alle Positionen desselben Produkts wandern mit: mit den Servietten (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger, Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
 
 Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
@@ -48,15 +48,15 @@ Wie das Programm rechnet, zeigt ein Produkt am besten. Auf **3. Sortiment** steh
 
 Auf **4. Kalkulation** die Seite **Portionen** öffnen und **Schnitzel mit Pommes** anklicken. Rechts steht, wie es gerechnet ist:
 
-- **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es ist die Zutat, von der am wenigsten da ist.
-- **Portionen**: Das Schweinefleisch könnte auch in den Braten des Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht; das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+- **Rezeptur je Portion**: ein **Schnitzel, ohne Beilage** und eine Portion **Pommes, Beilage**, jedes ein eigenes Produkt mit eigenem Rezept. Im Schnitzel stecken 180 g Schweinefleisch, in der Beilage Pommes frites und Pflanzenöl. Beim Schnitzel steht **begrenzt die Portionen**: Sein Schweinefleisch ist die Ware, von der am wenigsten da ist.
+- **Portionen**: Das Schweinefleisch könnte auch in den Braten des Mittagstischs gehen. Die Kalkulation verteilt eine Ware, die sich mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht; das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen. Weil sich viele Gerichte dieselben Waren teilen, steht darunter **Näherungsweise verteilt**: Das Programm hat die Aufteilung nicht bis aufs letzte Stück durchgerechnet.
 - **Umsatz (netto)**: 3.039 Portionen zu 15,90 € brutto, ohne 19 % Umsatzsteuer, ergeben 40.601,04 €.
 
 So rechnet die Kalkulation jedes Produkt des Sortiments.
 
 ## Ertragsregeln
 
-Auf der Seite **Ertragsregeln** stehen die Kategorien und Zutaten der Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch. Je Zutat oder Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort neu. Für das Beispiel bleiben die Voreinstellungen.
+Auf der Seite **Ertragsregeln** stehen die Kategorien und Produkte der Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch. Je Produkt oder Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort neu. Für das Beispiel bleiben die Voreinstellungen.
 
 ## Rezeptur anpassen
 
@@ -67,7 +67,7 @@ Passt ein Rezept nicht, gibt es zwei Wege:
 - **Im Katalog bearbeiten** öffnet die Regeln auf diesem Produkt. Die Änderung gilt für alle Prüfungen.
 - **Für diese Prüfung anpassen** kopiert das Rezept in die Prüfung. Der Katalog bleibt, wie er ist.
 
-Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit, dazu fügt das Plus (**Zutat hinzufügen**) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was er vorsieht, etwa **Katalog: 200 g**. Eine Zutat wird in jedem Rezept in derselben Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort neu; unter **Portionen** steht beim Produkt **angepasst**, auf **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.
+Angepasst lassen sich die Zeilen bearbeiten: Produkt, Menge und Einheit, dazu fügt das Plus (**Produkt hinzufügen**) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was er vorsieht, etwa **Katalog: 200 g**. Ein Produkt wird in jedem Rezept in seiner Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort neu; unter **Portionen** steht beim Produkt **angepasst**, auf **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.
 
 Der Bericht druckt das angepasste Rezept so, wie es gerechnet ist.
 

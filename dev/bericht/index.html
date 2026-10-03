@@ -843,6 +843,8 @@
       
         
       
+        
+      
     
     
     
@@ -1232,6 +1234,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1284,7 +1488,7 @@ jede Zahl bis zur einzelnen Rechnungszeile zurückzuverfolgen.</p>
 steht auf der <a href="../kalkulation/#nicht-berucksichtigt">Kalkulation</a>, nicht hier.</p>
 <h2 id="aufbau">Aufbau</h2>
 <p><strong>Hinweise</strong> stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne
-Preis, eine Zutat, die nur über ein geschätztes Stückgewicht umgerechnet wurde,
+Preis, eine Ware, die nur über ein geschätztes Stückgewicht umgerechnet wurde,
 eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen
 Punkte. Ins PDF gehen die Hinweise nicht mit.</p>
 <ol>
@@ -1304,10 +1508,14 @@ Punkte. Ins PDF gehen die Hinweise nicht mit.</p>
 <li><strong>A: Eingangspositionen</strong>: jede Rechnungszeile, die eingegangen ist.</li>
 <li><strong>B: Rezepturen</strong>: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und
   Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet
-  sind.</li>
-<li><strong>C: Ausbeute</strong>: je Zutat, wie viel vom Einkauf verkaufsfähig ist, dazu die
+  sind; ein Rezept für mehr als eine Portion nennt, was es ergibt, etwa
+  „ergibt 20 Stück“, ein Produkt ohne Rezept steht „wie eingekauft“. Kommen
+  Portionen aus mehr als einer Herkunft, etwa aus gekauften und selbst
+  gemachten Pommes, zeigt <strong>Portionen je Herkunft</strong> jede mit ihren Portionen und
+  ihrem Einsatz.</li>
+<li><strong>C: Ausbeute</strong>: je Ware, wie viel vom Einkauf verkaufsfähig ist, dazu die
   angewandte Ertragsregel.</li>
-<li><strong>D: Portionen je Zutat</strong>: je Zutat die Produkte, in die die verkaufsfähige
+<li><strong>D: Portionen je Ware</strong>: je Ware die Produkte, in die die verkaufsfähige
   Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.</li>
 <li><strong>E: Umsatz über den Rohgewinnaufschlagsatz</strong>: die einzelnen Positionen ohne Portion
   und Preis, jede mit dem Satz, der für sie gilt. Es gilt der Satz der

@@ -1,6 +1,6 @@
 # Umsatzschätzung
 
-Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Zutaten zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
+Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Produkten zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
 
 # Start
 
@@ -14,7 +14,7 @@ Das Programm rechnet aus den Eingangsrechnungen eines Betriebs nach, welchen Ums
 
 1. **[Prüfung anlegen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/index.md)** Betrieb, Zeitraum, erklärter Umsatz, auf Wunsch Bestand und Gewerbekennzahl.
 1. **[Rechnungen](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/index.md)** E-Rechnungen und Scans einlesen, falsch gelesene Scans korrigieren.
-1. **[Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md)** Jede Rechnungsposition einer Zutat zuordnen. Das meiste schlägt das Programm vor.
+1. **[Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md)** Jede Rechnungsposition einem Produkt zuordnen. Das meiste schlägt das Programm vor.
 1. **[Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#sortiment)** Was der Betrieb verkauft und zu welchem Preis.
 1. **[Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md)** Vom Einkauf über Rezepte und Preise zum Umsatz, den der Einkauf ergibt.
 1. **[Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md)** Erklärter neben kalkuliertem Umsatz, jede Zahl bis zur Rechnungszeile belegt, als PDF.
@@ -29,7 +29,7 @@ Die Browserversion ist noch in Erprobung. Sie kann langsamer sein als das Progra
 
 ## Grundlagen
 
-- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Zutaten, Produkte, Rezepte und Ertragsregeln. Sie gehören zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.
+- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Produkte, Rezepte und Ertragsregeln. Sie gehören zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.
 - [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md): Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV.
 
 ## Hilfe im Programm
@@ -77,7 +77,7 @@ Name, Steuernummer und PAB-Nr. des Steuerpflichtigen stehen nur im Kopf des Beri
 
 Die **Gewerbekennzahl** der Richtsatzsammlung, etwa `56101.0` für eine Gaststätte, wirkt an zwei Stellen:
 
-- Die Zuordnung schlägt nur Zutaten vor, die zu dieser Gewerbeklasse passen. Einer Gaststätte wird kein Friseurbedarf angeboten.
+- Die Zuordnung schlägt nur Produkte vor, die zu dieser Gewerbeklasse passen. Einer Gaststätte wird kein Friseurbedarf angeboten.
 - Der Bericht stellt den kalkulierten Rohgewinnaufschlag dem Rahmen der Richtsatzsammlung gegenüber.
 
 Ohne Kennzahl bleibt der Vergleich aus, und die Kalkulation trennt nach Getränken und Speisen wie bei einer Gaststätte.
@@ -90,7 +90,7 @@ Der Umsatz, den der Betrieb erklärt hat, netto und getrennt nach Steuersatz. Er
 
 Ohne Angaben gilt alles, was im Zeitraum eingekauft wurde, als verbraucht. Das ist richtig, solange das Lager zu Beginn und Ende etwa gleich voll war.
 
-Liegt eine Inventur vor, trägt das Plus unter der Tabelle (**Zutat hinzufügen**) Anfangs- und Endbestand je Zutat ein. Verbraucht ist dann
+Liegt eine Inventur vor, trägt das Plus unter der Tabelle (**Produkt hinzufügen**) Anfangs- und Endbestand je Produkt ein. Verbraucht ist dann
 
 ```
 Anfangsbestand + Einkauf − Endbestand
@@ -160,7 +160,7 @@ Die Lesung ist so gut wie der Scan. Was der Scanner nicht mitgebracht hat, läss
 
 # Zuordnung
 
-Eine Rechnung nennt Waren so, wie der Lieferant sie nennt: „GOUDA JUNG 48% BLOCK ca 3kg“. Die Kalkulation rechnet mit Zutaten: Schnittkäse. Die Zuordnung ist die Verbindung dazwischen. Sie gilt ab dann für jede weitere Rechnung desselben Artikels, auch in späteren Prüfungen.
+Eine Rechnung nennt Waren so, wie der Lieferant sie nennt: „GOUDA JUNG 48% BLOCK ca 3kg“. Die Kalkulation rechnet mit Produkten: Schnittkäse. Die Zuordnung ist die Verbindung dazwischen. Sie gilt ab dann für jede weitere Rechnung desselben Artikels, auch in späteren Prüfungen.
 
 Zugeordnet wird je Artikel, nicht je Rechnungszeile. Steht derselbe Gouda auf zwölf Lieferscheinen, ist er einmal zuzuordnen.
 
@@ -168,7 +168,7 @@ Zugeordnet wird je Artikel, nicht je Rechnungszeile. Steht derselbe Gouda auf zw
 
 Nach dem Import sind die meisten Positionen bereits zugeordnet. Offen bleibt, was das Programm nicht sicher genug einschätzt. Unter **Zuordnung** stehen alle Artikel der Prüfung in der Liste links, mit ihrem Stand in der ersten Spalte:
 
-- **Offen** — noch keine Zutat, die Position wartet auf eine Entscheidung.
+- **Offen** — noch kein Produkt, die Position wartet auf eine Entscheidung.
 - **Automatisch** — das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell** — ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
@@ -182,11 +182,13 @@ Solange eine Position offen ist, zählt sie nicht zum Wareneinsatz. Die Kalkulat
 
 ## Woher die Vorschläge kommen
 
-Das Programm vergleicht den Text der Rechnungsposition mit dem, was über die Zutaten bekannt ist:
+Das Programm vergleicht den Text der Rechnungsposition mit dem, was über die Produkte bekannt ist:
 
-- dem **Namen** der Zutat,
-- ihren **Warenarten**, also dem, was unter ihr gebucht wird,
+- dem **Namen** des Produkts,
+- seinen **Warenarten**, also dem, was unter ihm gebucht wird,
 - und **jeder Zuordnung, die schon bestätigt wurde**.
+
+Vorgeschlagen werden nur Produkte, die als Ware eingekauft werden: solche mit Kategorie, mit Warenarten oder mit einer bestätigten Zuordnung. Ein Gericht wie Schnitzel mit Pommes kommt nicht auf eine Rechnung und wird darum nicht vorgeschlagen; von Hand lässt sich aber jedes Produkt wählen.
 
 Der dritte Punkt ist der wichtigste. Jede bestätigte Zuordnung ist ein Beispiel, an dem das Programm die Sprache der Lieferanten lernt — Abkürzungen, Gebindeangaben, Schreibweisen. Wer die ersten zwanzig Positionen eines neuen Lieferanten von Hand zuordnet, bekommt den Rest weitgehend geschenkt.
 
@@ -200,45 +202,45 @@ Liegt der beste Vorschlag über der Schwelle, ordnet das Programm die Position s
 
 Position links auswählen. Rechts stehen der Rechnungstext, Artikelnummer, Einheit und Menge, darunter die Vorschläge. Den richtigen wählen und **Zuordnen**.
 
-Passt keiner, **Manuell zuordnen** und die Zutat selbst wählen. Bei Gebinden ist zusätzlich der **Faktor** anzugeben: der Inhalt eines Gebindes in der Einheit des Rezepts, etwa 3000 bei einem 3-kg-Block zu einem Rezept in Gramm. Bei kg, l und Stück rechnet das Programm selbst um.
+Passt keiner, **Manuell zuordnen** und das Produkt selbst wählen. Bei Gebinden ist zusätzlich der **Faktor** anzugeben: der Inhalt eines Gebindes in der Einheit des Produkts, etwa 3000 bei einem 3-kg-Block Schnittkäse, der in Gramm gezählt wird. Bei kg, l und Stück rechnet das Programm selbst um.
 
-Steht die Packungsgröße im Artikeltext („12 × 400 g“) oder hat die Zutat ein **Stückgewicht**, ist der Faktor schon ausgefüllt; darunter steht, woher er kommt, und der Preis je kg oder l, der sich daraus ergibt. Das Stückgewicht ist ein Richtwert — rechnet ein Großmarkt einen 10-kg-Sack als „1 Stk“ ab, verrät ihn der viel zu hohe Kilopreis. Dann den Faktor überschreiben.
+Steht die Packungsgröße im Artikeltext („12 × 400 g“) oder hat das Produkt ein **Stückgewicht**, ist der Faktor schon ausgefüllt; darunter steht, woher er kommt, und der Preis je kg oder l, der sich daraus ergibt. Das Stückgewicht ist ein Richtwert — rechnet ein Großmarkt einen 10-kg-Sack als „1 Stk“ ab, verrät ihn der viel zu hohe Kilopreis. Dann den Faktor überschreiben.
 
-Wird eine Position einzeln in Stück berechnet und das Rezept in g oder ml, ist der eingetragene Faktor das Gewicht eines Stücks. Er wird bei der Zutat gespeichert (**Regeln → Zutaten → Stückgewicht**) und gilt dann für jede Position dieser Zutat in Stück. Bei Gebinden wie Kiste oder Karton bleibt er bei der Zuordnung.
+Wird eine Position einzeln in Stück berechnet und das Produkt in g oder ml gezählt, ist der eingetragene Faktor das Gewicht eines Stücks. Er wird beim Produkt gespeichert (**Regeln → Produkte → Stückgewicht**) und gilt dann für jede Position dieses Produkts in Stück. Bei Gebinden wie Kiste oder Karton bleibt er bei der Zuordnung.
 
 ## Eine Zuordnung korrigieren
 
 Auch eine automatisch zugeordnete Position lässt sich auswählen. Rechts steht dann die aktuelle Zuordnung an erster Stelle, darunter die Alternativen. **Bestätigen** macht aus der automatischen eine manuelle Zuordnung; ein anderer Vorschlag oder **Manuell zuordnen** ersetzt sie. Die Regel für den Artikel wird dabei korrigiert, nicht verdoppelt: Jede weitere Rechnung mit diesem Artikel folgt der Korrektur.
 
-Wer stichprobenartig prüfen will, beginnt bei den größten Beträgen — die Kalkulation zeigt, welche Beträge auf welche Zutat entfallen, und dort fällt ein Fehler am meisten ins Gewicht.
+Wer stichprobenartig prüfen will, beginnt bei den größten Beträgen — die Kalkulation zeigt, welche Beträge auf welches Produkt entfallen, und dort fällt ein Fehler am meisten ins Gewicht.
 
 ## Warenarten pflegen
 
-Warenarten stehen bei der Zutat unter **Regeln → Zutaten**, eine je Zeile. Bei Schnittkäse etwa Gouda, Emmentaler, Edamer, Tilsiter.
+Warenarten stehen beim Produkt unter **Regeln → Produkte**, eine je Zeile. Bei Schnittkäse etwa Gouda, Emmentaler, Edamer, Tilsiter.
 
-Eine gute Warenart ist die Ware, nicht der Artikeltext des Lieferanten. „Gouda“ gehört dazu, „GOUDA JUNG 48% BLOCK ca 3kg“ nicht — diesen Fall deckt die Zuordnung selbst ab, sobald sie einmal bestätigt ist. Es lohnt sich, Warenarten dann zu ergänzen, wenn eine Warenart immer wieder zur Durchsicht vorgelegt wird, obwohl sie eindeutig zu einer Zutat gehört.
+Eine gute Warenart ist die Ware, nicht der Artikeltext des Lieferanten. „Gouda“ gehört dazu, „GOUDA JUNG 48% BLOCK ca 3kg“ nicht — diesen Fall deckt die Zuordnung selbst ab, sobald sie einmal bestätigt ist. Es lohnt sich, Warenarten dann zu ergänzen, wenn eine Warenart immer wieder zur Durchsicht vorgelegt wird, obwohl sie eindeutig zu einem Produkt gehört.
 
 Warenarten gelten betriebsübergreifend, weil sie zu den Regeln gehören und nicht zu einer einzelnen Prüfung.
 
 ## Kein Wareneinsatz
 
-Nicht alles auf einer Eingangsrechnung ist Wareneinsatz. Pfand, Fracht, Verpackung, Reinigungsmittel, Büromaterial: Diese Positionen sind Zutaten in der Kategorie **Kein Wareneinsatz** zuzuordnen.
+Nicht alles auf einer Eingangsrechnung ist Wareneinsatz. Pfand, Fracht, Verpackung, Reinigungsmittel, Büromaterial: Diese Positionen sind Produkten in der Kategorie **Kein Wareneinsatz** zuzuordnen.
 
-Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen, gehen aber in keine Kalkulation ein. Im Bericht erscheinen sie als **unberücksichtigt** — mit Betrag, damit erkennbar bleibt, was bewusst außen vor geblieben ist, und nicht bloß vergessen wurde.
+Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen. Weil sie in keinem Rezept vorkommen, stehen sie in der Kalkulation unter [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt), und ihr Umsatz wird wie bei jeder solchen Ware über den Rohgewinnaufschlagsatz geschätzt. Bringen sie in diesem Betrieb keinen Umsatz, nimmt das × am Ende der Zeile sie aus der Schätzung; sie stehen dann mit Betrag unter **Nicht in der Umsatzschätzung**, damit erkennbar bleibt, was bewusst außen vor geblieben ist.
 
-Pfand ist der häufigste Fall. Es steht als eigene Position auf fast jeder Getränkerechnung, wird zurückgezahlt und hat mit dem Einkauf von Ware nichts zu tun. Der Zutat **Pfand und Leergut** zugeordnet, zählt es auch nicht zu den erfassten Einkäufen und nicht zu den unberücksichtigten; der Bericht nennt nur die Summen von berechnetem Pfand und gutgeschriebenem Leergut.
+Pfand ist der häufigste Fall. Es steht als eigene Position auf fast jeder Getränkerechnung, wird zurückgezahlt und hat mit dem Einkauf von Ware nichts zu tun. Dem Produkt **Pfand und Leergut** zugeordnet, zählt es auch nicht zu den erfassten Einkäufen und nicht zu den unberücksichtigten; der Bericht nennt nur die Summen von berechnetem Pfand und gutgeschriebenem Leergut.
 
 # Kalkulation
 
-Die Kalkulation beantwortet eine Frage: Welchen Umsatz hätte der Betrieb mit dem, was er eingekauft hat, machen müssen? Sie rechnet dafür vom Einkauf zum Verkauf, Zutat für Zutat.
+Die Kalkulation beantwortet eine Frage: Welchen Umsatz hätte der Betrieb mit dem, was er eingekauft hat, machen müssen? Sie rechnet dafür vom Einkauf zum Verkauf, Ware für Ware.
 
 ## Der Rechenweg
 
-1. **Einkauf** Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit der Rezepte: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand) zählt nur, was verbraucht wurde.
+1. **Einkauf** Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit des Produkts: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand) zählt nur, was verbraucht wurde.
 1. **Verkaufsfähige Menge** Davon ab geht der Abzug der gewählten Ertragsregel, etwa für Schankverlust oder Bruch.
-1. **Portionen** Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt, nach deren Rezepten.
+1. **Portionen** Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt: was so verkauft wird, wie es eingekauft ist, direkt, alles andere nach seinem Rezept.
 1. **Umsatz** Portionen mal Preis, netto gerechnet. Aus diesen Portionen folgt der Rohgewinnaufschlagsatz.
-1. **Geschätzter Umsatz** Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Zutaten ohne Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.
+1. **Geschätzter Umsatz** Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Ware in keiner Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.
 
 Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder Ertragsregeln rechnet die Kalkulation sofort neu.
 
@@ -246,7 +248,7 @@ Der Reiter hat vier Seiten: **Portionen**, **Ertragsregeln**, **Übrige Einkäuf
 
 ## Sortiment
 
-Das Sortiment sind die Produkte, die der Betrieb führt, mit Bruttopreis und Steuersatz, wie sie auf der Karte stehen. Die Produkte und ihre Rezepte kommen aus den [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte), nur der Preis gehört zur Prüfung. Ein Rezept lässt sich zusätzlich für die Prüfung anpassen, siehe [Rezeptur anpassen](#rezeptur); das Produkt steht dann mit **Rezept angepasst** in der Liste.
+Das Sortiment sind die Produkte, die der Betrieb führt, mit Bruttopreis und Steuersatz, wie sie auf der Karte stehen. Die Produkte und ihre Rezepte kommen aus den [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte), nur der Preis gehört zur Prüfung. Auch ein Produkt ohne Rezept kann im Sortiment stehen, etwa eine Flasche Limonade, die so verkauft wird, wie sie eingekauft ist. Ein Rezept lässt sich zusätzlich für die Prüfung anpassen, siehe [Rezeptur anpassen](#rezeptur); das Produkt steht dann mit **Rezept angepasst** in der Liste.
 
 Nur Produkte im Sortiment bekommen Portionen. Führt das Gasthaus kein Bier 0,3 l, fließt das ganze Fassbier in die 0,5 l. Ein Produkt ohne Preis bekommt Portionen, aber keinen Umsatz; es steht mit **Preis fehlt** in der Liste, bis der Preis nachgetragen ist.
 
@@ -254,9 +256,13 @@ Die Speisekarte lässt sich auch als Tabelle übernehmen, siehe [Sortiment impor
 
 ## Portionen
 
-Dieselbe Zutat steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l, Schweinefleisch in Schnitzel und Cordon Bleu. Wie der Betrieb sie tatsächlich aufgeteilt hat, weiß niemand. Das Programm setzt dafür keine Quote, sondern rechnet die Aufteilung aus, die den Einkauf am vollständigsten aufbraucht, also am wenigsten Ware übrig lässt. Die Verkaufspreise spielen dabei keine Rolle.
+Dieselbe Ware steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l, Schweinefleisch in Schnitzel und Cordon Bleu. Wie der Betrieb sie tatsächlich aufgeteilt hat, weiß niemand. Das Programm setzt dafür keine Quote, sondern rechnet die Aufteilung aus, die den Einkauf am vollständigsten aufbraucht, also am wenigsten Ware übrig lässt. Die Verkaufspreise spielen dabei keine Rolle.
 
 Unter **Portionen** steht je Produkt, wie viele Portionen es bekommen hat und welcher Umsatz daraus folgt. Ein Klick auf ein Produkt zeigt rechts, was eine Portion im Einkauf kostet, und seine Rezeptur; für die Prüfung angepasste Produkte tragen **angepasst**.
+
+Kann ein Teil eingekauft oder selbst gemacht sein, rechnet die Kalkulation mit beidem. Pommes etwa können tiefgekühlt eingekauft oder aus Kartoffeln geschnitten sein, sobald Pommes frites ein Rezept aus Kartoffeln haben, siehe [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte). Auch dann verteilt die Kalkulation so, dass vom ganzen Einkauf möglichst wenig übrig bleibt. Kommen die Portionen eines Produkts so aus mehr als einer Herkunft, steht rechts je **Herkunft**, wie viele Portionen woraus entstanden sind; der Bericht zeigt dasselbe unter **Portionen je Herkunft**.
+
+Teilen sich mehrere Produkte dieselben Waren, auch über Beilagen und andere Teilrezepte, ist die genaue Aufteilung oft zu aufwendig; dann rechnet das Programm sie näherungsweise. Das kommt schon bei einer kleinen Speisekarte vor. Rechts steht dann **Näherungsweise verteilt**, im Bericht ein Hinweis.
 
 Die Aufteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
 
@@ -269,7 +275,7 @@ Die Seite zeigt:
 
 ## Ertragsregeln
 
-Auf der Seite **Ertragsregeln** stehen die Zutaten und Kategorien der Prüfung, für die es eine [Ertragsregel](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln) gibt. Voreingestellt ist die Standardregel, gibt es keine, **Kein Abzug**. Hat der Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt; die Wahl einer Zutat geht der ihrer Kategorie vor.
+Auf der Seite **Ertragsregeln** stehen die Produkte und Kategorien der Prüfung, für die es eine [Ertragsregel](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln) gibt. Voreingestellt ist die Standardregel, gibt es keine, **Kein Abzug**. Hat der Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt; die Wahl für ein Produkt geht der für seine Kategorie vor.
 
 Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug hat einen Namen, und der Bericht nennt ihn. Fehlt eine passende Regel, wird sie unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln) angelegt.
 
@@ -280,9 +286,9 @@ Rechts neben den Portionen steht unter **Rezeptur je Portion** das Rezept des ge
 - **Im Katalog bearbeiten** öffnet das Produkt unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte). Die Änderung gilt für alle Prüfungen.
 - **Für diese Prüfung anpassen** legt eine Abschrift des Rezepts in der Prüfung an. Der Katalog bleibt unverändert.
 
-Die Abschrift ist das ganze Rezept, nicht nur die Abweichung. Ihre Zeilen lassen sich bearbeiten (Zutat, Menge, Einheit, das Plus für **Zutat hinzufügen**); abweichende Zeilen zeigen grau den Katalogwert, etwa **Katalog: 200 g**. Jede Zutat bleibt in der Einheit, in der sie in allen Rezepten gemessen wird. Wird das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.
+Die Abschrift ist das ganze Rezept, nicht nur die Abweichung. Ihre Zeilen lassen sich bearbeiten (Produkt, Menge, Einheit, das Plus für **Produkt hinzufügen**); abweichende Zeilen zeigen grau den Katalogwert, etwa **Katalog: 200 g**. Jedes Produkt bleibt in seiner Einheit. Wird das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.
 
-**Auf Katalog zurücksetzen** verwirft die Anpassung. **In den Katalog übernehmen** öffnet die Regeln mit dem angepassten Rezept; ist es dort gespeichert, entfällt die Anpassung, und das Produkt steht wieder auf **Katalog**.
+**Auf Katalog zurücksetzen** verwirft die Anpassung. **In den Katalog übernehmen** öffnet die Regeln mit dem angepassten Rezept; ist es dort mit **Übernehmen** bestätigt, entfällt die Anpassung, und das Produkt steht wieder auf **Katalog**.
 
 Die Prüfung merkt sich, von welchem Stand des Katalogrezepts sie abgeschrieben hat. Ändert sich das Katalogrezept danach, wird nichts übernommen; beim Produkt steht **Katalogrezept seit der Anpassung geändert**, und die Prüferin entscheidet, ob die Anpassung bleibt oder zurückgesetzt wird.
 
@@ -292,15 +298,15 @@ Anders als bei den Ertragsregeln wird hier ein freier Wert in die Prüfung einge
 
 Diese Seite zeigt, was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
 
-**Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang E), sie verändern den Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine Zutat ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu Recht: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient einen zweiten Blick; dann ist oft die Zuordnung falsch, oder im Sortiment fehlt ein Produkt. Welche Produkte die Zutat verwenden, steht unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte).
+**Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang E), sie verändern den Satz selbst aber nicht. Entweder braucht kein Produkt des Sortiments diese Ware, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf ein Produkt ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu Recht: Kleinigkeiten, für die sich kein eigenes Produkt im Sortiment lohnt, oder Waren, die ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient einen zweiten Blick; dann ist oft die Zuordnung falsch, oder im Sortiment fehlt ein Produkt. Welche Produkte die Ware verwenden, steht unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte).
 
-**Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP ganz: Positionen, die unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md) noch offen sind, und Zutaten, die ohne Umsatz festgelegt sind.
+**Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP ganz: Positionen, die unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md) noch offen sind, und Produkte, die ohne Umsatz festgelegt sind.
 
 Pfand und Leergut stehen nicht in der Liste. Über die Zeit gleichen sie sich aus, darum zählen sie auch nicht zu den erfassten Einkäufen. Unter der Liste steht grau, was an Pfand berechnet und an Leergut gutgeschrieben wurde.
 
 Ein Klick auf eine Zeile öffnet rechts dieselbe Ansicht wie unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md): die Position aus der Rechnung, ihre Zuordnung mit Vorschlägen und die Belege. Eine falsche Zuordnung lässt sich dort direkt korrigieren; die Kalkulation und die Vorschau rechnen danach neu.
 
-Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht am Katalog. Das × am Ende einer Zeile unter **Nicht Teil der Ermittlung des Aufschlagsatzes** nimmt ihre Zutat aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt für alle Positionen dieser Zutat in dieser Prüfung, auch für später eingelesene Rechnungen; sie stehen dann unter **Nicht in der Umsatzschätzung**. Das ↺ am Ende der Zeile nimmt die Festlegung zurück.
+Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht am Katalog. Das × am Ende einer Zeile unter **Nicht Teil der Ermittlung des Aufschlagsatzes** nimmt ihr Produkt aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt für alle Positionen dieses Produkts in dieser Prüfung, auch für später eingelesene Rechnungen; sie stehen dann unter **Nicht in der Umsatzschätzung**. Das ↺ am Ende der Zeile nimmt die Festlegung zurück.
 
 Neben **Nicht in der Umsatzschätzung** steht ihr Anteil an allen Einkäufen. So viel vom Umsatz kann die Kalkulation gar nicht erklären; vor dem Speichern sollte er klein und begründet sein.
 
@@ -322,7 +328,7 @@ Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht,
 
 ## Aufbau
 
-**Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne Preis, eine Zutat, die nur über ein geschätztes Stückgewicht umgerechnet wurde, eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit.
+**Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne Preis, eine Ware, die nur über ein geschätztes Stückgewicht umgerechnet wurde, eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit.
 
 1. **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz netto je Steuersatz, mit Differenz. Das ist das Ergebnis. Der Umsatz nach BP umfasst den ganzen verkaufsfähigen Wareneinsatz: die Portionen mit Preis und dazu, was über den Aufschlagsatz geschätzt ist.
 1. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, ermittelt nur an Portionen mit Preis. Ist eine Gewerbekennzahl eingetragen, steht darunter der Rahmen der Richtsatzsammlung und ob der kalkulierte Satz darin liegt. Darunter die Kalkulation je Produkt, alles je Portion: Portionen, Einsatz je Portion, Nettopreis und Aufschlagsatz. In der Gastronomie eine Tabelle je Sparte, sonst eine für alle Produkte.
@@ -330,9 +336,9 @@ Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht,
 Der Anhang belegt, woher die Zahlen kommen:
 
 - **A: Eingangspositionen**: jede Rechnungszeile, die eingegangen ist.
-- **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet sind.
-- **C: Ausbeute**: je Zutat, wie viel vom Einkauf verkaufsfähig ist, dazu die angewandte Ertragsregel.
-- **D: Portionen je Zutat**: je Zutat die Produkte, in die die verkaufsfähige Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.
+- **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet sind; ein Rezept für mehr als eine Portion nennt, was es ergibt, etwa „ergibt 20 Stück“, ein Produkt ohne Rezept steht „wie eingekauft“. Kommen Portionen aus mehr als einer Herkunft, etwa aus gekauften und selbst gemachten Pommes, zeigt **Portionen je Herkunft** jede mit ihren Portionen und ihrem Einsatz.
+- **C: Ausbeute**: je Ware, wie viel vom Einkauf verkaufsfähig ist, dazu die angewandte Ertragsregel.
+- **D: Portionen je Ware**: je Ware die Produkte, in die die verkaufsfähige Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.
 - **E: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen ohne Portion und Preis, jede mit dem Satz, der für sie gilt. Es gilt der Satz der Sparte; hat die Sparte keinen, der Gesamtsatz. Auf die Steuersätze verteilt sich der geschätzte Umsatz wie der kalkulierte Umsatz derselben Sparte.
 - **F: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer Aufstellung.
 
@@ -347,36 +353,44 @@ Das Pfeilsymbol rechts oben (**Als PDF speichern**) legt den Bericht ab, wo man 
 
 # Regeln
 
+Schritt für Schritt am Beispiel: [Regeln pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/regeln/index.md).
+
 Regeln sind das Wissen, das nicht zu einem Betrieb gehört, sondern zum Handwerk: dass ein Bier 0,5 l aus 500 ml Fassbier besteht, dass beim Fassbier ein Teil als Schankverlust verloren geht, dass „Frankenbräu Pils Fass 50 l KEG“ Fassbier ist. Das Programm bringt einen Grundstock mit, jede Prüfung ergänzt ihn.
 
 Die Regeln liegen auf dem Rechner, nicht in der Prüfung. Eine Änderung wirkt deshalb auf jede Prüfung, die danach gerechnet wird. Geöffnet werden sie über das Reglersymbol (**Regeln**) in der [Liste der Prüfungen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md). Nur ein Rezept kann eine Prüfung zusätzlich für sich anpassen, siehe [Rezeptur anpassen](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur).
 
-| Regel               | Gepflegt unter                                                                                                                      |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Zutaten             | **Regeln → Zutaten**                                                                                                                |
-| Produkte mit Rezept | **Regeln → Produkte**                                                                                                               |
-| Ertragsregeln       | **Regeln → Ertragsregeln**                                                                                                          |
-| Gewerbekennzahlen   | **Regeln → Gewerbe**                                                                                                                |
-| Berichtsvorlagen    | **Regeln → Vorlagen**, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#berichtsvorlagen) |
-| Zuordnungen         | in der Prüfung unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md)                                 |
+Änderungen speichern sich von selbst, sobald eine kurze Pause im Tippen eintritt. Ein neues Produkt entsteht, sobald sein Name eingetragen ist und das Feld verlassen wird. Fehlt beim Schließen noch eine Angabe oder ist die Regel-Datenbank nicht erreichbar, bleibt das Fenster offen und fragt nach.
 
-## Zutaten
-
-Eine Zutat ist eine Ware, wie sie eingekauft wird: Fassbier, Schweinefleisch, Rotwein. Zutaten sind bewusst grob gefasst. Hähnchenschenkel und ganze Hähnchen sind beide Hähnchenfleisch; den Unterschied trägt das Rezept in der Menge.
-
-- **Kategorie**: die Warengruppe, etwa Bier oder Fleisch. Ertragsregeln gelten meist für eine ganze Kategorie, und die Kategorie bestimmt die Sparte im Rohgewinnaufschlag.
-- **Warenarten**: was unter dieser Zutat gebucht wird, eine je Zeile. Sie helfen der Zuordnung bei Artikeln, die sie noch nicht kennt, siehe [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten).
-- **Stückgewicht**: ein Richtwert für Waren, die in Stück berechnet, aber in Gramm verarbeitet werden, etwa 1 Gurke ≈ 400 g. Leer lassen, wenn es keinen sinnvollen Wert gibt.
-
-Eine Zutat hat keine eigene Einheit. Worin sie gemessen wird, legt das Rezept fest, und alle Rezepte müssen sie gleich messen. Pommes in Stück und Pommes in Gramm wären zwei Zutaten.
+| Regel                | Gepflegt unter                                                                                                                      |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Produkte und Rezepte | **Regeln → Produkte**                                                                                                               |
+| Ertragsregeln        | **Regeln → Ertragsregeln**                                                                                                          |
+| Gewerbekennzahlen    | **Regeln → Gewerbe**                                                                                                                |
+| Berichtsvorlagen     | **Regeln → Vorlagen**, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#berichtsvorlagen) |
+| Zuordnungen          | in der Prüfung unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md)                                 |
 
 ## Produkte
 
-Ein Produkt ist etwas, das verkauft wird, mit seinem **Rezept**: welche Zutaten in einer Portion stecken und wie viel davon. Bei Getränken ist das meist eine Zeile, bei Speisen mehrere: Ein Cordon Bleu sind 200 g Schweinefleisch, 30 g Schinken, 40 g Käse, 30 g Paniermehl und 25 g Ei.
+Alles, womit gerechnet wird, ist ein Produkt: Fassbier, Schweinefleisch und Kartoffeln ebenso wie Bier 0,5 l, Pommes und Schnitzel mit Pommes. Ein Produkt kann eingekauft werden, auf Lager liegen, nach seinem Rezept hergestellt und verkauft werden, auch ohne Rezept. Was davon im Betrieb geschieht, steht nicht im Produkt, sondern ergibt sich aus der Prüfung: aus den Rechnungen, dem [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand) und dem [Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#sortiment).
 
-Eine Zeile des Rezepts kann statt einer Zutat ein anderes Produkt nennen, in Portionen: Schnitzel mit Pommes ist ein Schnitzel und eine Portion Pommes, Beilage, also 180 g Pommes frites und 100 ml Pflanzenöl, das Altöl aus der Fritteuse eingerechnet. So steht die Beilage einmal im Katalog, und jedes Gericht, das sie mitbringt, rechnet mit derselben Menge. Die Kalkulation löst das auf und rechnet mit den Zutaten; ein Rezept darf sich dabei nicht selbst enthalten.
+Ein Beispiel: Pommes frites kommen meist tiefgekühlt vom Großhändler, manche Wirte schneiden sie aber selbst aus Kartoffeln. Die Kalkulation kann beides, sobald das Produkt Pommes frites ein Rezept aus Kartoffeln hat: Sie rechnet dann mit den eingekauften Pommes und mit Pommes aus den eingekauften Kartoffeln, so dass vom ganzen Einkauf möglichst wenig übrig bleibt. Verkauft wird die Portion Pommes, ein eigenes Produkt mit 180 g Pommes frites und 100 ml Pflanzenöl im Rezept, das Altöl aus der Fritteuse eingerechnet.
 
-Nur was in einem Rezept vorkommt, zählt in der Kalkulation. Eine Zutat ohne Rezept landet im Bericht unter **in keiner Rezeptur**. Ein Rezept ist ein Durchschnitt, keine Feststellung; es soll die übliche Portion treffen, nicht jede. Weicht ein einzelner Betrieb belegbar ab, wird das Rezept in dessen Prüfung [angepasst](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur), nicht hier.
+Produkte sind bewusst grob gefasst. Hähnchenschenkel und ganze Hähnchen sind beide Hähnchenfleisch; den Unterschied trägt das Rezept in der Menge.
+
+- **Einheit**: worin das Produkt gezählt wird, in Gramm, Milliliter oder Stück, in Einkäufen, im Bestand und in Rezepten gleich. Pommes in Stück und Pommes in Gramm wären zwei Produkte. Die Einheit ist fest, solange Rezepte oder Zuordnungen das Produkt verwenden.
+- **Kategorie**: die Warengruppe, etwa Bier oder Fleisch. Ertragsregeln gelten meist für eine ganze Kategorie, und die Kategorie bestimmt die Sparte im Rohgewinnaufschlag.
+- **Warenarten**: was unter diesem Produkt gebucht wird, eine je Zeile. Sie helfen der Zuordnung bei Artikeln, die sie noch nicht kennt, siehe [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten).
+- **Stückgewicht**: ein Richtwert für Waren, die in Stück berechnet, aber in Gramm verarbeitet werden, etwa 1 Gurke ≈ 400 g. Leer lassen, wenn es keinen sinnvollen Wert gibt.
+
+## Rezepte
+
+Das **Rezept** sagt, aus welchen anderen Produkten eines gemacht wird und wie viel davon. Bei Getränken ist das meist eine Zeile, bei Speisen mehrere: Ein Cordon Bleu sind 200 g Schweinefleisch, 30 g Schinken, 40 g Käse, 30 g Paniermehl und 25 g Ei. Ohne Rezept wird das Produkt eingekauft, nicht hergestellt.
+
+**Das Rezept ergibt** sagt, wie viel ein Rezept hervorbringt, in der Einheit des Produkts. Bei einer Portion ist das 1 Stück. Ein Kuchen ergibt 12 Stück, 1.200 g Kartoffeln ergeben 1.000 g Pommes frites.
+
+Eine Zeile kann jedes Produkt nennen, auch eines mit eigenem Rezept: Schnitzel mit Pommes ist ein Schnitzel und eine Portion Pommes, Beilage. So steht die Beilage einmal in den Regeln, und jedes Gericht, das sie mitbringt, rechnet mit derselben Menge. Die Kalkulation geht diese Kette bis zum Einkauf hinunter; ein Rezept darf sich dabei nicht selbst enthalten.
+
+Nur was ein verkauftes Produkt braucht, zählt in der Kalkulation. Ein eingekauftes Produkt, das weder im Sortiment steht noch in einem Rezept des Sortiments vorkommt, landet im Bericht unter **in keiner Rezeptur**. Ein Rezept ist ein Durchschnitt, keine Feststellung; es soll die übliche Portion treffen, nicht jede. Weicht ein einzelner Betrieb belegbar ab, wird das Rezept in dessen Prüfung [angepasst](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur), nicht hier.
 
 Preise stehen nicht hier. Sie gehören zum Betrieb und werden im [Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#sortiment) der Prüfung eingetragen.
 
@@ -384,9 +398,9 @@ Preise stehen nicht hier. Sie gehören zum Betrieb und werden im [Sortiment](htt
 
 Nicht alles, was eingekauft wird, wird verkauft. Eine Ertragsregel hat einen Namen und einen Abzug in Prozent, etwa „Ausschankverlust“ mit 2 %. Der Name sagt, wofür der Abzug steht: Schwund, Eigenverbrauch, Personalverpflegung, Freirunden, Bruch oder Verderb.
 
-Links stehen alle Kategorien und Zutaten, rechts die Regeln der gewählten als Tabelle. Eine neue Regel wird in die leere letzte Zeile geschrieben und ist gespeichert, sobald Name und Abzug stehen. Änderungen an bestehenden Zeilen speichern sich ebenso von selbst.
+Links stehen alle Kategorien und Produkte, rechts die Regeln der gewählten als Tabelle. Eine neue Regel wird in die leere letzte Zeile geschrieben und ist gespeichert, sobald Name und Abzug stehen. Änderungen an bestehenden Zeilen speichern sich ebenso von selbst.
 
-Eine Regel je Kategorie oder Zutat kann **Standard** sein. Sie gilt, solange in der Prüfung nichts anderes [gewählt](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#ertragsregeln) ist; die Standardregel der Zutat geht der ihrer Kategorie vor. Ohne Standardregel wird nichts abgezogen.
+Eine Regel je Kategorie oder Produkt kann **Standard** sein. Sie gilt, solange in der Prüfung nichts anderes [gewählt](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#ertragsregeln) ist; die Standardregel des Produkts geht der seiner Kategorie vor. Ohne Standardregel wird nichts abgezogen.
 
 Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres. Weicht ein Betrieb belegbar ab, bekommt er keine freie Prozentzahl, sondern eine eigene Regel mit sprechendem Namen. So steht im Bericht nicht nur der Satz, sondern auch, warum er gilt.
 
@@ -394,7 +408,7 @@ Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prü
 
 Die Liste der Gewerbekennzahlen, die eine Prüfung wählen kann, jede mit ihrer Bezeichnung aus der Richtsatzsammlung, etwa `56101.0` Gast-, Speise- und Schankwirtschaften. Mitgeliefert sind alle Kennzahlen der beiliegenden Sammlungen. Eine fehlende lässt sich mit **Neu** anlegen, eine Bezeichnung ändern oder eine Kennzahl löschen, die im Betrieb nie vorkommt.
 
-Die Kennzahl entscheidet, welche Zutaten die [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md) vorschlägt: Kategorien gelten nur für Kennzahlen, die mit einem ihrer Präfixe beginnen, etwa `561` für alle Gaststätten. Eine Prüfung übernimmt deshalb nur Kennzahlen aus dieser Liste.
+Die Kennzahl entscheidet, welche Produkte die [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md) vorschlägt: Kategorien gelten nur für Kennzahlen, die mit einem ihrer Präfixe beginnen, etwa `561` für alle Gaststätten. Eine Prüfung übernimmt deshalb nur Kennzahlen aus dieser Liste.
 
 # Import und Export
 
@@ -406,7 +420,7 @@ Das Pfeilsymbol in der Zeile der Liste legt eine Kopie dieser Datei ab, wo Sie w
 
 ## Regeln gehen nicht mit
 
-Zutaten, Produkte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung, sondern in der Regel-Datenbank des Rechners, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md). Die Prüfung verweist nur darauf.
+Produkte, Rezepte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung, sondern in der Regel-Datenbank des Rechners, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md). Die Prüfung verweist nur darauf.
 
 Auf einem Rechner mit anderen Regeln sucht das Programm deshalb für jede Rechnungszeile wieder selbst eine Zuordnung. Findet es keine, bleibt die Zeile ungeklärt und fällt aus der Kalkulation. Die Zahlen können also von denen des Absenders abweichen.
 
@@ -414,7 +428,7 @@ Auf einem Rechner mit anderen Regeln sucht das Programm deshalb für jede Rechnu
 
 Der Bericht der Prüfung geht über das Pfeilsymbol (**Als PDF speichern**) heraus, so wie er angezeigt wird.
 
-In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts (**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant, Nummer, Datum und Summen, darunter jede Position mit Menge, Preisen, Steuersatz und der Zutat, der sie zugeordnet ist. Das Symbol ist gesperrt, bis die letzte Änderung gespeichert ist — exportiert wird, was in der Prüfung steht.
+In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts (**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant, Nummer, Datum und Summen, darunter jede Position mit Menge, Preisen, Steuersatz und dem Produkt, dem sie zugeordnet ist. Das Symbol ist gesperrt, bis die letzte Änderung gespeichert ist — exportiert wird, was in der Prüfung steht.
 
 Trennzeichen ist das Semikolon, die Zahlen stehen so darin, wie sie am Bildschirm stehen, mit Komma und Einheit (`1.110,00 €`, `12 Keg`). Excel öffnet die Datei ohne Nachfrage.
 
@@ -473,7 +487,7 @@ Diese Seite richtet sich an die IT: wo das Programm seine Daten ablegt, wie sich
 
 Eine **Prüfung** ist eine einzelne Datei mit allen Rechnungen und Scans. Sie gehört einer Person und wird nicht geteilt, sondern bei Bedarf [weitergegeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
 
-Die **Regel-Datenbank** `rules.db` enthält Zutaten, Produkte, Rezepte, Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit aller Prüfungen und wächst mit jeder, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md).
+Die **Regel-Datenbank** `rules.db` enthält Produkte, Rezepte, Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit aller Prüfungen und wächst mit jeder, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md).
 
 ## Regel-Datenbank
 
@@ -487,7 +501,7 @@ Auf einem Terminalserver und in einer nicht dauerhaften VDI übersteht ein Ordne
 
 ### Gleichzeitige Nutzung
 
-Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten. Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine Zuordnung bestätigt oder eine Zutat, ein Produkt oder eine Ertragsregel ändert, und jede Änderung betrifft nur diesen einen Eintrag.
+Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten. Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine Zuordnung bestätigt oder ein Produkt oder eine Ertragsregel ändert, und jede Änderung betrifft nur diesen einen Eintrag.
 
 Das Programm verlässt sich dabei nicht auf die Sperren von SQLite, die nicht jede Freigabe zuverlässig durchsetzt. Es liest `rules.db` immer ganz und ersetzt sie ganz durch Umbenennen. Neu gelesen wird die Datei, sobald sich ihre Größe oder ihr Änderungszeitpunkt geändert hat. Ein Start ohne Änderung schreibt nichts.
 
@@ -583,7 +597,7 @@ Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt un
 
 ## Die gemeinsame Regel-Datenbank
 
-Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den Lieferanten, die Artikelnummer, die GTIN, den Wortlaut der Rechnungszeile und die Zutat. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank teilen. Zuordnungen, die das Programm selbst trifft, bleiben in der Prüfung.
+Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den Lieferanten, die Artikelnummer, die GTIN, den Wortlaut der Rechnungszeile und das Produkt. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank teilen. Zuordnungen, die das Programm selbst trifft, bleiben in der Prüfung.
 
 Nicht gespeichert werden Daten der geprüften Person, Mengen, Preise und Daten der Rechnungen und aus welcher Prüfung eine Zuordnung stammt. Die Regel-Datenbank beschreibt, was Lieferanten verkaufen, nicht was ein Betrieb eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist, und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis unterliegen.
 
@@ -622,11 +636,11 @@ Das Programm ist [quelloffen](https://github.com/rotmanjanez/Umsatzschaetzung). 
 
 Die Modelle laufen nur auf dem Rechner und lernen im Betrieb nicht dazu.
 
-| Modell              | Aufgabe                      | Trainiert auf                                                                                          |
-| ------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
-| PP-OCR (Apache-2.0) | Text auf dem Scan lesen      | unverändert übernommen                                                                                 |
-| Belegtagger (MIT)   | Kopf und Positionen erkennen | erzeugten Rechnungen mit erfundenen Daten                                                              |
-| Zuordnung (MIT)     | Positionen Zutaten zuordnen  | Artikeldaten von Lieferanten, von Sprachmodellen von OpenAI zugeordnet; keine Rechnungen aus Prüfungen |
+| Modell              | Aufgabe                       | Trainiert auf                                                                                          |
+| ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| PP-OCR (Apache-2.0) | Text auf dem Scan lesen       | unverändert übernommen                                                                                 |
+| Belegtagger (MIT)   | Kopf und Positionen erkennen  | erzeugten Rechnungen mit erfundenen Daten                                                              |
+| Zuordnung (MIT)     | Positionen Produkten zuordnen | Artikeldaten von Lieferanten, von Sprachmodellen von OpenAI zugeordnet; keine Rechnungen aus Prüfungen |
 
 Die Testrechnungen im Quellcode sind erfunden.
 
@@ -674,16 +688,15 @@ Weitere Regeln:
 
 Jede Regel trägt `valid_from`, `valid_to`, `changed_at`, `changed_by` und `rev`, den Stand von `version` bei ihrer letzten Änderung. Gelöschtes bleibt mit `deleted_at` stehen, damit eine mitgelieferte Regel nicht beim nächsten Start wiederkommt.
 
-| Tabelle                                                                               | Inhalt                                                     | Maßstab und Sonderwerte                                                                                                                                                              |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `category`, `category_gewerbe`, `category_gebinde`                                    | Kategorien, auf Gewerbekennzahlen und Packmittel begrenzt  | keine Zeile in `category_gewerbe` oder `category_gebinde` heißt: alle                                                                                                                |
-| `ingredient`, `ingredient_alias`                                                      | Zutaten und die Warenarten, unter denen sie gebucht werden | `piece_amount` in g oder ml je Stück, in `piece_unit`; leer: kein Richtwert                                                                                                          |
-| `mapping`                                                                             | bestätigte Zuordnungen von Rechnungszeilen zu Zutaten      | `factor` ist der Inhalt eines Gebindes in ml, g oder Stück; leer, wo die Einheit selbst umrechnet                                                                                    |
-| `product`, `recipe_line`                                                              | Produkte und ihre Rezepturen                               | `amount` in `unit`; mit `sub_product_id` ist die Zeile ein Teilrezept in Stück                                                                                                       |
-| `yield_rule`                                                                          | Ertragsregeln                                              | `deduction` in Basispunkten                                                                                                                                                          |
-| `gewerbe`                                                                             | wählbare Gewerbekennzahlen                                 |                                                                                                                                                                                      |
-| `template`                                                                            | Berichtsvorlagen                                           | `is_default` bei genau einer                                                                                                                                                         |
-| `sammlung`, `klasse`, `klasse_kennzahl`, `staffel`, `satz`, `synonym`, `pauschbetrag` | Richtsatzsammlungen je Jahr                                | `staffel.von` ausschließlich, `bis` einschließlich, in Cent, leer: offen; `satz` in ganzen Prozent, `von` und `bis` leer, wo nur ein Mittelsatz gedruckt ist; `pauschbetrag` in Cent |
+| Tabelle                                                                               | Inhalt                                                                                              | Maßstab und Sonderwerte                                                                                                                                                              |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `category`, `category_gewerbe`, `category_gebinde`                                    | Kategorien, auf Gewerbekennzahlen und Packmittel begrenzt                                           | keine Zeile in `category_gewerbe` oder `category_gebinde` heißt: alle                                                                                                                |
+| `product`, `product_alias`, `recipe_line`                                             | Produkte, die Warenarten, unter denen sie gebucht werden, und ihre Rezepturen aus anderen Produkten | gezählt in `unit`; ein Rezept ergibt `batch` davon; `piece_amount` in g oder ml je Stück, in `piece_unit`, leer: kein Richtwert; eine Zeile nennt `amount` von `part_id` in `unit`   |
+| `mapping`                                                                             | bestätigte Zuordnungen von Rechnungszeilen zu Produkten                                             | `factor` ist der Inhalt eines Gebindes in der Einheit des Produkts; leer, wo die Einheit selbst umrechnet                                                                            |
+| `yield_rule`                                                                          | Ertragsregeln                                                                                       | `deduction` in Basispunkten                                                                                                                                                          |
+| `gewerbe`                                                                             | wählbare Gewerbekennzahlen                                                                          |                                                                                                                                                                                      |
+| `template`                                                                            | Berichtsvorlagen                                                                                    | `is_default` bei genau einer                                                                                                                                                         |
+| `sammlung`, `klasse`, `klasse_kennzahl`, `staffel`, `satz`, `synonym`, `pauschbetrag` | Richtsatzsammlungen je Jahr                                                                         | `staffel.von` ausschließlich, `bis` einschließlich, in Cent, leer: offen; `satz` in ganzen Prozent, `von` und `bis` leer, wo nur ein Mittelsatz gedruckt ist; `pauschbetrag` in Cent |
 
 `embeddings.db` enthält nur Rechenwerte für Vorschläge und liegt nicht in diesem Ordner, sondern bei jeder Person selbst; sie wird bei Bedarf neu erzeugt und ist kein Austauschformat.
 
@@ -697,9 +710,9 @@ Die Datei heißt wie die Bezeichnung der Prüfung. Eine weitergegebene Prüfung 
 | `declared`                    | erklärter Umsatz je Steuersatz                     | `vat` in Basispunkten, `net` in Cent                                                                                                                                                                                        |
 | `inventory`                   | Anfangs- und Endbestand                            | `opening`, `closing` in ganzen `unit`                                                                                                                                                                                       |
 | `case_product`, `case_recipe` | Verkaufspreise und eigene Rezepturen               | `gross_price` in Cent, `0` oder weniger: Preis fehlt. `recipe_basis` ist die Prüfsumme der Katalogrezeptur, von der kopiert wurde; leer: es gilt die des Katalogs                                                           |
-| `yield_choice`                | gewählte Ertragsregel je Zutat oder Kategorie      | `yield_rule_id` leer: kein Abzug                                                                                                                                                                                            |
+| `yield_choice`                | gewählte Ertragsregel je Produkt oder Kategorie    | `yield_rule_id` leer: kein Abzug                                                                                                                                                                                            |
 | `pinned`                      | fest vorgegebene Portionen                         | ganze Portionen                                                                                                                                                                                                             |
-| `no_revenue`                  | Zutaten ohne Umsatz, etwa Reinigungsmittel         |                                                                                                                                                                                                                             |
+| `no_revenue`                  | Produkte ohne Umsatz, etwa Reinigungsmittel        |                                                                                                                                                                                                                             |
 | `case_mapping`                | Zuordnungen, die das Programm selbst getroffen hat | wie `mapping` in `rules.db`                                                                                                                                                                                                 |
 | `invoice`                     | Rechnungen                                         | Summen in Cent. `stated_net`, `stated_gross` leer: der Beleg druckt keine. `verified_at` leer: nicht durchgesehen                                                                                                           |
 | `invoice_line`                | Rechnungszeilen                                    | `quantity` in Tausendsteln, `unit_price` in Millionstel Euro je `price_base_qty`, `line_net` in Cent, `vat` in Basispunkten                                                                                                 |
@@ -718,7 +731,7 @@ Der [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md) i
 - Den Standard selbst kann man nicht löschen, erst muss eine andere Vorlage Standard werden.
 - Das Programm bringt die Vorlage **Bericht** mit. Solange sie niemand ändert, folgt sie jedem Update. Eine geänderte Vorlage bleibt dagegen, wie sie ist. Wer anpassen will, legt am besten mit **Neu** eine Kopie an und macht diese zum Standard. Dann bleibt das Original als Vergleich erhalten.
 
-Die Vorlage wird beim Speichern geprüft. Ein Fehler im Aufbau, etwa ein fehlendes `{% endif %}`, verhindert das Speichern. Ein Feld, das es nicht gibt, fällt erst beim Erzeugen des Berichts auf.
+Die Vorlage wird gespeichert und dabei geprüft, sobald das Feld verlassen wird. Ein Fehler im Aufbau, etwa ein fehlendes `{% endif %}`, verhindert das Speichern. Ein Feld, das es nicht gibt, fällt erst beim Erzeugen des Berichts auf.
 
 ## Was eine Vorlage darf
 
@@ -741,7 +754,7 @@ Eine Vorlage ist HTML mit drei Arten von Platzhaltern:
 {% if e.basis == "unbestimmt" %} … {% endif %}     Vergleich mit Text
 ```
 
-- Ein Pfad geht mit `.` in ein Objekt und mit `[…]` über einen anderen Wert: `rules.ingredients[l.ingredientId].name`. Eine Zahl in `[…]` wählt einen Eintrag einer Liste, gezählt ab 0: `revenue[0].vat`.
+- Ein Pfad geht mit `.` in ein Objekt und mit `[…]` über einen anderen Wert: `rules.products[l.partId].name`. Eine Zahl in `[…]` wählt einen Eintrag einer Liste, gezählt ab 0: `revenue[0].vat`.
 - Eingesetzte Werte werden für HTML maskiert. HTML aus den Daten ist deshalb nicht möglich.
 - Steht ein `{% … %}` allein auf seiner Zeile, verschwindet die Zeile im Ergebnis.
 - Leer, `0`, `false`, eine leere Liste und ein fehlender Wert gelten in `if` als nicht vorhanden.
@@ -772,29 +785,30 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Wurzel
 
-| Feld           | Typ                                               |                                                                                                   |
-| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `case`         | [Case](#m-case)                                   | Die Prüfung, wie sie gespeichert ist, mit allen Rechnungen und Zeilen.                            |
-| `rules`        | [RuleSet](#m-ruleset)                             | Die Regeln, mit denen gerechnet wurde; Rezepturen so, wie diese Prüfung sie anpasst.              |
-| `report`       | [Report](#m-report)                               | Das Ergebnis der Kalkulation.                                                                     |
-| `included`     | Liste von [Included](#m-included)                 | Rechnungen mit den Zeilen, die in den Wareneinsatz eingehen, nach Datum und Nummer.               |
-| `revenue`      | Liste von [VatRow](#m-vatrow)                     | Umsatz vor und nach Prüfung je Steuersatz; die letzte Zeile (total) ist die Summe.                |
-| `invoiceCount` | Zahl                                              | Anzahl der Rechnungen in included.                                                                |
-| `includedNet`  | Zahl                                              | Wareneinsatz samt Bestandsveränderung, in Cent.                                                   |
-| `excluded`     | Zahl                                              | Einkauf ohne Zuordnung oder ohne Umsatz, in Cent.                                                 |
-| `estimated`    | [EstimateGroups](#m-estimategroups)               | Über den Aufschlagsatz geschätzter Umsatz, getrennt nach Herkunft.                                |
-| `calculation`  | Liste von [CalculationGroup](#m-calculationgroup) | Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte. |
-| `rahmen`       | [Rahmen](#m-rahmen)?                              | Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.                        |
-| `lage`         | `"unter"` \| `"im"` \| `"über"`?                  | Lage des kalkulierten Aufschlagsatzes zum Rahmen.                                                 |
-| `anyYields`    | ja/nein                                           | Ob irgendeine Zutat eine Ertragsregel trägt.                                                      |
-| `gewerbe`      | [Gewerbezweig](#m-gewerbezweig)?                  | Die Gewerbekennzahl der Prüfung aus den Regeln.                                                   |
-| `richtsatz`    | [Richtsatzbasis](#m-richtsatzbasis)?              | Die verwendete Richtsatzsammlung mit der ganzen Gewerbeklasse der Prüfung und den Pauschbeträgen. |
-| `suppliers`    | Liste von [SupplierSum](#m-suppliersum)           | Je Lieferant Anzahl und Summe aller Rechnungen der Prüfung, in Cent.                              |
-| `marks`        | [PageMarks](#m-pagemarks)                         | Kopf- und Fußzeilen, die ins PDF gestempelt werden.                                               |
-| `template`     | [TemplateInfo](#m-templateinfo)                   | Die Vorlage, aus der dieser Bericht entsteht.                                                     |
-| `periodDays`   | Zahl                                              | Tage im Prüfungszeitraum, beide Enden eingeschlossen.                                             |
-| `generatedAt`  | Zeitpunkt                                         | Zeitpunkt, zu dem der Bericht erzeugt wurde.                                                      |
-| `appVersion`   | Text                                              | Version des Programms.                                                                            |
+| Feld           | Typ                                               |                                                                                                                           |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `case`         | [Case](#m-case)                                   | Die Prüfung, wie sie gespeichert ist, mit allen Rechnungen und Zeilen.                                                    |
+| `rules`        | [RuleSet](#m-ruleset)                             | Die Regeln, mit denen gerechnet wurde; Rezepturen so, wie diese Prüfung sie anpasst.                                      |
+| `report`       | [Report](#m-report)                               | Das Ergebnis der Kalkulation.                                                                                             |
+| `included`     | Liste von [Included](#m-included)                 | Rechnungen mit den Zeilen, die in den Wareneinsatz eingehen, nach Datum und Nummer.                                       |
+| `revenue`      | Liste von [VatRow](#m-vatrow)                     | Umsatz vor und nach Prüfung je Steuersatz; die letzte Zeile (total) ist die Summe.                                        |
+| `invoiceCount` | Zahl                                              | Anzahl der Rechnungen in included.                                                                                        |
+| `includedNet`  | Zahl                                              | Wareneinsatz samt Bestandsveränderung, in Cent.                                                                           |
+| `excluded`     | Zahl                                              | Einkauf ohne Zuordnung oder ohne Umsatz, in Cent.                                                                         |
+| `estimated`    | [EstimateGroups](#m-estimategroups)               | Über den Aufschlagsatz geschätzter Umsatz, getrennt nach Herkunft.                                                        |
+| `calculation`  | Liste von [CalculationGroup](#m-calculationgroup) | Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte.                         |
+| `routed`       | Liste von [ProductRow](#m-productrow)             | Produkte, deren Portionen auf mehr als einem Weg entstanden, etwa teils aus gekauften, teils aus selbst gemachten Pommes. |
+| `rahmen`       | [Rahmen](#m-rahmen)?                              | Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.                                                |
+| `lage`         | `"unter"` \| `"im"` \| `"über"`?                  | Lage des kalkulierten Aufschlagsatzes zum Rahmen.                                                                         |
+| `anyYields`    | ja/nein                                           | Ob irgendein Bestand eine Ertragsregel trägt.                                                                             |
+| `gewerbe`      | [Gewerbezweig](#m-gewerbezweig)?                  | Die Gewerbekennzahl der Prüfung aus den Regeln.                                                                           |
+| `richtsatz`    | [Richtsatzbasis](#m-richtsatzbasis)?              | Die verwendete Richtsatzsammlung mit der ganzen Gewerbeklasse der Prüfung und den Pauschbeträgen.                         |
+| `suppliers`    | Liste von [SupplierSum](#m-suppliersum)           | Je Lieferant Anzahl und Summe aller Rechnungen der Prüfung, in Cent.                                                      |
+| `marks`        | [PageMarks](#m-pagemarks)                         | Kopf- und Fußzeilen, die ins PDF gestempelt werden.                                                                       |
+| `template`     | [TemplateInfo](#m-templateinfo)                   | Die Vorlage, aus der dieser Bericht entsteht.                                                                             |
+| `periodDays`   | Zahl                                              | Tage im Prüfungszeitraum, beide Enden eingeschlossen.                                                                     |
+| `generatedAt`  | Zeitpunkt                                         | Zeitpunkt, zu dem der Bericht erzeugt wurde.                                                                              |
+| `appVersion`   | Text                                              | Version des Programms.                                                                                                    |
 
 ### Case
 
@@ -826,7 +840,6 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `store`         | Text?                                    |
 | `version`       | Zahl                                     |
 | `categories`    | ID → [Category](#m-category)             |
-| `ingredients`   | ID → [Ingredient](#m-ingredient)         |
 | `mappings`      | ID → [ArticleMapping](#m-articlemapping) |
 | `products`      | ID → [Product](#m-product)               |
 | `yieldRules`    | ID → [YieldRule](#m-yieldrule)           |
@@ -835,21 +848,21 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Report
 
-| Feld          | Typ                                         |
-| ------------- | ------------------------------------------- |
-| `caseId`      | Text                                        |
-| `computedAt`  | Zeitpunkt                                   |
-| `totals`      | [Totals](#m-totals)                         |
-| `ingredients` | Liste von [IngredientRow](#m-ingredientrow) |
-| `products`    | Liste von [ProductRow](#m-productrow)       |
-| `markups`     | Liste von [MarkupRow](#m-markuprow)         |
-| `unmapped`    | Liste von [UnmappedLine](#m-unmappedline)   |
-| `unused`      | Liste von [UnusedLine](#m-unusedline)       |
-| `deposits`    | Liste von [UnusedLine](#m-unusedline)       |
-| `noRevenue`   | Liste von [UnusedLine](#m-unusedline)       |
-| `estimated`   | Liste von [EstimateRow](#m-estimaterow)     |
-| `allocations` | Liste von [Allocation](#m-allocation)       |
-| `warnings`    | Liste von [Flag](#m-flag)                   |
+| Feld          | Typ                                       |
+| ------------- | ----------------------------------------- |
+| `caseId`      | Text                                      |
+| `computedAt`  | Zeitpunkt                                 |
+| `totals`      | [Totals](#m-totals)                       |
+| `supply`      | Liste von [SupplyRow](#m-supplyrow)       |
+| `products`    | Liste von [ProductRow](#m-productrow)     |
+| `markups`     | Liste von [MarkupRow](#m-markuprow)       |
+| `unmapped`    | Liste von [UnmappedLine](#m-unmappedline) |
+| `unused`      | Liste von [UnusedLine](#m-unusedline)     |
+| `deposits`    | Liste von [UnusedLine](#m-unusedline)     |
+| `noRevenue`   | Liste von [UnusedLine](#m-unusedline)     |
+| `estimated`   | Liste von [EstimateRow](#m-estimaterow)   |
+| `allocations` | Liste von [Allocation](#m-allocation)     |
+| `warnings`    | Liste von [Flag](#m-flag)                 |
 
 ### Included
 
@@ -886,6 +899,27 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `rows`   | Liste von [ProductRow](#m-productrow)                              |
 | `cost`   | Zahl                                                               |
 | `markup` | Zahl                                                               |
+
+### ProductRow
+
+| Feld             | Typ                                                               |
+| ---------------- | ----------------------------------------------------------------- |
+| `productId`      | Text                                                              |
+| `name`           | Text                                                              |
+| `binding`        | Liste von Text                                                    |
+| `pinReason`      | Text                                                              |
+| `sparte`         | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
+| `portions`       | Zahl                                                              |
+| `costPerPortion` | Zahl                                                              |
+| `costOfGoods`    | Zahl                                                              |
+| `pinned`         | ja/nein                                                           |
+| `grossPrice`     | Zahl                                                              |
+| `vat`            | Zahl                                                              |
+| `unitNet`        | Zahl                                                              |
+| `revenueNet`     | Zahl                                                              |
+| `markup`         | Zahl                                                              |
+| `priceMissing`   | ja/nein                                                           |
+| `routes`         | Liste von [RouteRow](#m-routerow)                                 |
 
 ### Rahmen
 
@@ -959,12 +993,12 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### InventoryEntry
 
-| Feld           | Typ  |
-| -------------- | ---- |
-| `ingredientId` | Text |
-| `opening`      | Zahl |
-| `closing`      | Zahl |
-| `unit`         | Text |
+| Feld        | Typ  |
+| ----------- | ---- |
+| `productId` | Text |
+| `opening`   | Zahl |
+| `closing`   | Zahl |
+| `unit`      | Text |
 
 ### Invoice
 
@@ -986,21 +1020,21 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### CaseProduct
 
-| Feld          | Typ                                    |
-| ------------- | -------------------------------------- |
-| `productId`   | Text                                   |
-| `grossPrice`  | Zahl                                   |
-| `vat`         | Zahl                                   |
-| `recipe`      | Liste von [RecipeLine](#m-recipeline)? |
-| `recipeBasis` | Zahl                                   |
+| Feld          | Typ                                |
+| ------------- | ---------------------------------- |
+| `productId`   | Text                               |
+| `grossPrice`  | Zahl                               |
+| `vat`         | Zahl                               |
+| `recipe`      | Liste von [PartLine](#m-partline)? |
+| `recipeBasis` | Zahl                               |
 
 ### YieldChoice
 
-| Feld           | Typ   |
-| -------------- | ----- |
-| `ingredientId` | Text? |
-| `categoryId`   | Text? |
-| `yieldRuleId`  | Text? |
+| Feld          | Typ   |
+| ------------- | ----- |
+| `productId`   | Text? |
+| `categoryId`  | Text? |
+| `yieldRuleId` | Text? |
 
 ### PinnedPortions
 
@@ -1021,7 +1055,7 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `name`              | Text?           |
 | `observed`          | Text?           |
 | `unitCode`          | Text?           |
-| `ingredientId`      | Text            |
+| `productId`         | Text            |
 | `factor`            | Zahl?           |
 | `confirmed`         | ja/nein         |
 | `meta`              | [Meta](#m-meta) |
@@ -1037,37 +1071,31 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `sparte`  | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
 | `meta`    | [Meta](#m-meta)                                                   |
 
-### Ingredient
-
-| Feld         | Typ                |
-| ------------ | ------------------ |
-| `id`         | Text               |
-| `name`       | Text               |
-| `categoryId` | Text               |
-| `aliases`    | Liste von Text     |
-| `piece`      | [Piece](#m-piece)? |
-| `meta`       | [Meta](#m-meta)    |
-
 ### Product
 
-| Feld     | Typ                                   |
-| -------- | ------------------------------------- |
-| `id`     | Text                                  |
-| `name`   | Text                                  |
-| `recipe` | Liste von [RecipeLine](#m-recipeline) |
-| `meta`   | [Meta](#m-meta)                       |
+| Feld         | Typ                               |
+| ------------ | --------------------------------- |
+| `id`         | Text                              |
+| `name`       | Text                              |
+| `unit`       | Text                              |
+| `batch`      | Zahl                              |
+| `categoryId` | Text?                             |
+| `aliases`    | Liste von Text                    |
+| `piece`      | [Piece](#m-piece)?                |
+| `recipe`     | Liste von [PartLine](#m-partline) |
+| `meta`       | [Meta](#m-meta)                   |
 
 ### YieldRule
 
-| Feld           | Typ             |
-| -------------- | --------------- |
-| `id`           | Text            |
-| `name`         | Text            |
-| `categoryId`   | Text?           |
-| `ingredientId` | Text?           |
-| `deduction`    | Zahl            |
-| `default`      | ja/nein         |
-| `meta`         | [Meta](#m-meta) |
+| Feld         | Typ             |
+| ------------ | --------------- |
+| `id`         | Text            |
+| `name`       | Text            |
+| `categoryId` | Text?           |
+| `productId`  | Text?           |
+| `deduction`  | Zahl            |
+| `default`    | ja/nein         |
+| `meta`       | [Meta](#m-meta) |
 
 ### ReportTemplate
 
@@ -1106,46 +1134,26 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `depositRefunded`      | Zahl |
 | `excludedShare`        | Zahl |
 
-### IngredientRow
+### SupplyRow
 
-| Feld           | Typ                                                 |
-| -------------- | --------------------------------------------------- |
-| `ingredientId` | Text                                                |
-| `name`         | Text                                                |
-| `unit`         | `"ml"` \| `"g"` \| `"piece"`                        |
-| `purchases`    | Liste von [Purchase](#m-purchase)                   |
-| `opening`      | Zahl                                                |
-| `closing`      | Zahl                                                |
-| `bought`       | Zahl                                                |
-| `cost`         | Zahl                                                |
-| `used`         | Zahl                                                |
-| `usedCost`     | Zahl                                                |
-| `yield`        | [YieldRule](#m-yieldrule)?                          |
-| `yieldRate`    | Zahl                                                |
-| `sellable`     | Zahl                                                |
-| `products`     | Liste von [IngredientProduct](#m-ingredientproduct) |
-| `leftover`     | Zahl                                                |
-| `binding`      | ja/nein                                             |
-
-### ProductRow
-
-| Feld             | Typ                                                               |
-| ---------------- | ----------------------------------------------------------------- |
-| `productId`      | Text                                                              |
-| `name`           | Text                                                              |
-| `binding`        | Liste von Text                                                    |
-| `pinReason`      | Text                                                              |
-| `sparte`         | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
-| `portions`       | Zahl                                                              |
-| `costPerPortion` | Zahl                                                              |
-| `costOfGoods`    | Zahl                                                              |
-| `pinned`         | ja/nein                                                           |
-| `grossPrice`     | Zahl                                                              |
-| `vat`            | Zahl                                                              |
-| `unitNet`        | Zahl                                                              |
-| `revenueNet`     | Zahl                                                              |
-| `markup`         | Zahl                                                              |
-| `priceMissing`   | ja/nein                                                           |
+| Feld        | Typ                                 |
+| ----------- | ----------------------------------- |
+| `productId` | Text                                |
+| `name`      | Text                                |
+| `unit`      | `"ml"` \| `"g"` \| `"piece"`        |
+| `purchases` | Liste von [Purchase](#m-purchase)   |
+| `opening`   | Zahl                                |
+| `closing`   | Zahl                                |
+| `bought`    | Zahl                                |
+| `cost`      | Zahl                                |
+| `used`      | Zahl                                |
+| `usedCost`  | Zahl                                |
+| `yield`     | [YieldRule](#m-yieldrule)?          |
+| `yieldRate` | Zahl                                |
+| `sellable`  | Zahl                                |
+| `usedBy`    | Liste von [SupplyUse](#m-supplyuse) |
+| `leftover`  | Zahl                                |
+| `binding`   | ja/nein                             |
 
 ### MarkupRow
 
@@ -1169,13 +1177,13 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### UnusedLine
 
-| Feld           | Typ  |
-| -------------- | ---- |
-| `invoiceId`    | Text |
-| `lineNo`       | Zahl |
-| `name`         | Text |
-| `lineNet`      | Zahl |
-| `ingredientId` | Text |
+| Feld        | Typ  |
+| ----------- | ---- |
+| `invoiceId` | Text |
+| `lineNo`    | Zahl |
+| `name`      | Text |
+| `lineNet`   | Zahl |
+| `productId` | Text |
 
 ### EstimateRow
 
@@ -1237,6 +1245,14 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `cost`       | Zahl                                    |
 | `revenueNet` | Zahl                                    |
 
+### RouteRow
+
+| Feld             | Typ                                 |
+| ---------------- | ----------------------------------- |
+| `portions`       | Zahl                                |
+| `costPerPortion` | Zahl                                |
+| `parts`          | Liste von [RoutePart](#m-routepart) |
+
 ### Satz
 
 | Feld     | Typ   |
@@ -1284,14 +1300,13 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `at`   | Zeitpunkt |
 | `auto` | ja/nein   |
 
-### RecipeLine
+### PartLine
 
-| Feld           | Typ   |
-| -------------- | ----- |
-| `ingredientId` | Text  |
-| `productId`    | Text? |
-| `amount`       | Zahl  |
-| `unit`         | Text  |
+| Feld     | Typ  |
+| -------- | ---- |
+| `partId` | Text |
+| `amount` | Zahl |
+| `unit`   | Text |
 
 ### Piece
 
@@ -1317,7 +1332,7 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `qty`       | Zahl                                             |
 | `net`       | Zahl                                             |
 
-### IngredientProduct
+### SupplyUse
 
 | Feld         | Typ  |
 | ------------ | ---- |
@@ -1337,10 +1352,19 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Leftover
 
-| Feld           | Typ  |
-| -------------- | ---- |
-| `ingredientId` | Text |
-| `qty`          | Zahl |
+| Feld        | Typ  |
+| ----------- | ---- |
+| `productId` | Text |
+| `qty`       | Zahl |
+
+### RoutePart
+
+| Feld         | Typ                          |
+| ------------ | ---------------------------- |
+| `productId`  | Text                         |
+| `name`       | Text                         |
+| `unit`       | `"ml"` \| `"g"` \| `"piece"` |
+| `perPortion` | Zahl                         |
 
 ### Staffel
 
@@ -1416,21 +1440,21 @@ Wie oft ein solcher Vorschlag stimmt: Von hundert Vorschlägen mit 90 % treffen 
 
 ### Was ist der Faktor, und warum fehlt er?
 
-Der Inhalt eines Gebindes in der Einheit des Rezepts, etwa 3000 für einen 3-kg-Block zu einem Rezept in Gramm. Steht die Packungsgröße nicht im Artikeltext und hat die Zutat kein Stückgewicht, kann das Programm ihn nicht ermitteln. Ohne Faktor lässt sich die Menge nicht in Portionen umrechnen. → [Eine Position zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#eine-position-zuordnen)
+Der Inhalt eines Gebindes in der Einheit des Produkts, etwa 3000 für einen 3-kg-Block Käse, der in Gramm gezählt wird. Steht die Packungsgröße nicht im Artikeltext und hat das Produkt kein Stückgewicht, kann das Programm ihn nicht ermitteln. Ohne Faktor lässt sich die Menge nicht in Portionen umrechnen. → [Eine Position zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#eine-position-zuordnen)
 
 ### Wohin mit Pfand, Fracht, Reinigungsmitteln?
 
-Auf eine Zutat der Kategorie **Kein Wareneinsatz**, Pfand auf **Pfand und Leergut**. Sie sind damit erledigt und gehen in keine Kalkulation ein. → [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#kein-wareneinsatz)
+Auf ein Produkt der Kategorie **Kein Wareneinsatz**, Pfand auf **Pfand und Leergut**. Pfand zählt dann nicht mit. Das Übrige wird über den Aufschlagsatz geschätzt, bis es unter **Übrige Einkäufe** mit dem × aus der Schätzung genommen wird. → [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#kein-wareneinsatz)
 
 ### Dieselbe Ware wird immer wieder zur Durchsicht vorgelegt.
 
-Bei der Zutat unter **Regeln → Zutaten** die Warenart ergänzen, etwa „Gouda“ bei Schnittkäse. → [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten)
+Beim Produkt unter **Regeln → Produkte** die Warenart ergänzen, etwa „Gouda“ bei Schnittkäse. → [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten)
 
 ## Sortiment und Kalkulation
 
 ### Ein Produkt hat 0 Portionen.
 
-Die Kalkulation verteilt den Einkauf so auf die Produkte, dass möglichst wenig übrig bleibt. Ein Produkt geht leer aus, wenn eine seiner Zutaten gar nicht eingekauft wurde oder schon in anderen Produkten aufgeht. Rechts steht seine Rezeptur; ob jede Zutat darin im Einkauf vorkommt, zeigt die Zuordnung. → [Portionen](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#portionen)
+Die Kalkulation verteilt den Einkauf so auf die Produkte, dass möglichst wenig übrig bleibt. Ein Produkt geht leer aus, wenn etwas aus seinem Rezept weder eingekauft noch aus Eingekauftem gemacht werden kann oder schon in anderen Produkten aufgeht. Rechts steht seine Rezeptur; ob jede Zeile darin im Einkauf vorkommt, zeigt die Zuordnung. → [Portionen](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#portionen)
 
 ### Ein Produkt hat Portionen, aber keinen Umsatz.
 
@@ -1438,7 +1462,7 @@ Ihm fehlt der Preis. Es steht mit **Preis fehlt** im Sortiment, bis er nachgetra
 
 ### Bei den Ertragsregeln steht „Kein Abzug“.
 
-Für diese Zutat oder Kategorie ist keine Ertragsregel gewählt und keine Standardregel hinterlegt, es wird also nichts abgezogen, auch kein Schankverlust. Eine Regel wird unter **Regeln → Ertragsregeln** angelegt und steht dann in jeder Prüfung zur Wahl. → [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln)
+Für dieses Produkt oder diese Kategorie ist keine Ertragsregel gewählt und keine Standardregel hinterlegt, es wird also nichts abgezogen, auch kein Schankverlust. Eine Regel wird unter **Regeln → Ertragsregeln** angelegt und steht dann in jeder Prüfung zur Wahl. → [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln)
 
 ### Kann ich einen Schwund von 8 % direkt eintragen?
 
@@ -1450,11 +1474,11 @@ Das Rezept für diese Prüfung anpassen. Der Katalog bleibt unverändert, der Be
 
 ### Eine Ware bringt keinen Umsatz, wird aber geschätzt.
 
-Unter **Übrige Einkäufe** mit dem × am Ende der Zeile aus der Schätzung nehmen. Das gilt für die ganze Zutat, bei Sammelzutaten wie „Reinigung und Hygiene“ also für alles, was ihr zugeordnet ist. Das ↺ nimmt es zurück. → [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt)
+Unter **Übrige Einkäufe** mit dem × am Ende der Zeile aus der Schätzung nehmen. Das gilt für das ganze Produkt, bei Sammelprodukten wie „Reinigung und Hygiene“ also für alles, was ihm zugeordnet ist. Das ↺ nimmt es zurück. → [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt)
 
 ### Eine Ware fehlt unter „Übrige Einkäufe“.
 
-Dann steht ihre Zutat in einem Rezept des Sortiments und geht über Portionen in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie verwenden, steht unter **Regeln → Produkte**. → [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte)
+Dann steht sie selbst im Sortiment oder in einem Rezept des Sortiments und geht über Portionen in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie verwenden, steht unter **Regeln → Produkte**. → [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte)
 
 ### Pfand und Leergut gleichen sich nicht aus.
 
@@ -1462,7 +1486,7 @@ Dann steht ihre Zutat in einem Rezept des Sortiments und geht über Portionen in
 
 ### Die Lagerbestände zu Beginn und Ende waren sehr verschieden.
 
-Unter **Prüfung → Bestand** Anfangs- und Endbestand je Zutat eintragen. Das lohnt sich bei Getränken, Tiefkühlware und Wein, nicht bei Frischware. → [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand)
+Unter **Prüfung → Bestand** Anfangs- und Endbestand je Produkt eintragen. Das lohnt sich bei Getränken, Tiefkühlware und Wein, nicht bei Frischware. → [Bestand](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/#bestand)
 
 ## Bericht und Weitergabe
 
@@ -1480,7 +1504,7 @@ In der Prüfung ist keine Gewerbekennzahl eingetragen. → [Eckdaten](https://do
 
 ### Ein Kollege sieht in meiner Prüfung andere Zahlen.
 
-Die Prüfung nimmt Rechnungen, Preise und Entscheidungen mit, aber nicht die Regeln: Zutaten, Produkte, bestätigte Zuordnungen und Ertragsregeln liegen auf dem eigenen Rechner. Auf einem anderen Rechner ordnet das Programm neu zu, was es dort nicht kennt, und was offen bleibt, fehlt in der Kalkulation.
+Die Prüfung nimmt Rechnungen, Preise und Entscheidungen mit, aber nicht die Regeln: Produkte, Rezepte, bestätigte Zuordnungen und Ertragsregeln liegen auf dem eigenen Rechner. Auf einem anderen Rechner ordnet das Programm neu zu, was es dort nicht kennt, und was offen bleibt, fehlt in der Kalkulation.
 
 In verwalteten Installationen liegen die Regeln oft für alle gemeinsam auf einer Freigabe, unter Windows per Gruppenrichtlinie **Gemeinsame Regel-Datenbank**. Dann rechnen alle mit denselben Regeln, und was einer bestätigt, gilt beim nächsten Start auch für die anderen. Ob das so eingerichtet ist, weiß die IT. → [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#regeln-gehen-nicht-mit), [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank)
 
@@ -1539,23 +1563,22 @@ Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt s
 Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfung:
 
 1. **1. Rechnungen** Die Eingangsrechnungen des Betriebs: was er eingekauft hat.
-1. **2. Zuordnung** Jede Rechnungsposition wird einer Zutat zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.
+1. **2. Zuordnung** Jede Rechnungsposition wird einem Produkt zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.
 1. **3. Sortiment** Was der Betrieb verkauft und zu welchem Preis: Schnitzel mit Pommes für 15,90 €, Bier 0,5 l für 4,60 €.
-1. **4. Kalkulation** Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
+1. **4. Kalkulation** Aus Einkäufen, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
 1. **5. Bericht** Der kalkulierte Umsatz neben dem erklärten, als PDF.
 
 ## Die wichtigsten Begriffe
 
 Ein paar Wörter kommen dabei immer wieder vor:
 
-| Begriff       | Bedeutung                                                                                                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zutat**     | Eine Ware, wie sie eingekauft wird: Schweinefleisch, Fassbier, Rotwein.                                                                                                      |
-| **Produkt**   | Etwas, das verkauft wird: Schnitzel mit Pommes, Bier 0,5 l vom Fass.                                                                                                         |
-| **Rezept**    | Wie viel von welcher Zutat in ein Produkt geht: In ein Schnitzel gehen 180 g Schweinefleisch.                                                                                |
-| **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen.                                                                                                                  |
-| **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat.                                                                                                             |
-| **Regeln**    | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
+| Begriff       | Bedeutung                                                                                                                                                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Produkt**   | Alles, womit gerechnet wird: was eingekauft wird, wie Schweinefleisch, Fassbier, Rotwein, und was verkauft wird, wie Schnitzel mit Pommes oder Bier 0,5 l vom Fass. Pommes können eingekauft oder, mit einem Rezept, aus Kartoffeln gemacht sein. |
+| **Rezept**    | Aus welchen Produkten ein anderes gemacht wird, und wie viel davon: In ein Schnitzel gehen 180 g Schweinefleisch.                                                                                                                                 |
+| **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen.                                                                                                                                                                                       |
+| **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einem Produkt.                                                                                                                                                                                |
+| **Regeln**    | Das Wissen des Programms: Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung.                                                                               |
 
 ## Das Gasthaus Zur Linde
 
@@ -1815,21 +1838,21 @@ Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das Best�
 
 Wann ein Scan ohne Durchsicht übernommen wird und was das Fenster im Einzelnen prüft, steht unter [Durchsicht](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/#durchsicht).
 
-[Weiter: 2. Zuordnung Eingekaufte Waren den Zutaten zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md)
+[Weiter: 2. Zuordnung Eingekaufte Waren den Produkten zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md)
 
 # Zuordnung prüfen
 
-Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was es nicht wusste.
+Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Produkten: Fassbier. Die Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was es nicht wusste.
 
 [Übung 3: Offene Positionen zuordnen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/zuordnung/)
 
 ## Die Liste
 
-Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz: `5 offen, 117 automatisch, 0 manuell`.
+Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz: `7 offen, 115 automatisch, 0 manuell`.
 
 Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen die offenen oben:
 
-- **Offen**: Das Programm war sich bei keiner Zutat sicher genug. Hier ist eine Entscheidung nötig.
+- **Offen**: Das Programm war sich bei keinem Produkt sicher genug, oder es fehlt der Faktor. Hier ist eine Entscheidung nötig.
 - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
 - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
 
@@ -1842,21 +1865,25 @@ Die Zeile **2022 Domina trocken 0,75 l** anklicken. Rechts erscheint alles, was 
 - **Faktor**: wie viel in einem Gebinde steckt.
 - **Belege**: die Rechnungszeilen, aus denen der Artikel stammt, als Ausschnitt des Scans.
 
-Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die Position offen geblieben.
+Das Programm hält den Wein für Schaumwein, mit 57 % ist es sich aber nicht sicher, und Rotwein steht mit 51 % gleich dahinter. Genau deshalb ist die Position offen geblieben.
 
 Ein Domina ist ein fränkischer Rotwein: den Vorschlag **Rotwein × 750 ml** anklicken.
 
-Der **Faktor** passt schon: Das Rezept für ein Glas Rotwein rechnet in Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor: 158 Flaschen × 750 ml = 118,5 l.
+Der **Faktor** passt schon: Rotwein wird in Millilitern gezählt, die Rechnung in Flaschen, und das Programm hat 750 ml je Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor: 158 Flaschen × 750 ml = 118,5 l.
 
 Dann **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.
 
 Das Programm merkt sich die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank): Kommt der Domina in einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln sich auch Rezepte und Ertragsregeln, siehe [3. Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/index.md) und [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md).
 
+## Was kein Wareneinsatz ist
+
+Als Nächstes **CO2-Flasche 10 kg Füllung** anklicken. Vorgeschlagen ist **Ausstattung und Bedarf** mit 79 %, knapp unter der Schwelle. Die Kohlensäure braucht die Schankanlage, verkauft wird sie nicht: Sie gehört zu den Waren ohne Wareneinsatz, siehe [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#kein-wareneinsatz). Der Vorschlag passt, also **Zuordnen**.
+
 ## Wenn eine Menge fehlt
 
-Als Nächstes **Kaffeesahne Portionen 10 × 7,5 g 240er** anklicken. Die Zutat ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
+Als Nächstes **Kaffeesahne Portionen 10 × 7,5 g 240er** anklicken. Das Produkt ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“ lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
 
-Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800` eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
+Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund 1,8 l je Karton, Sahne wird in Millilitern gezählt. `1800` eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
 
 ## Wenn alles passt
 
@@ -1864,16 +1891,16 @@ Danach ist **Frühkartoffeln festkochend 12,5 kg** dran. **Kartoffeln × 12,5 kg
 
 ## Was offen bleiben darf
 
-Bleiben **Leberkäse am Stück, ungebacken** und **Petersilie glatt, Bund**. Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins Gewicht.
+Bleiben **Petersilie glatt, Bund**, **Leberkäse am Stück, ungebacken** und **Putenbrustfilet frisch**. Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen, beim Putenbrustfilet auf einer Rechnung „kg“ als „Keg“, also Fass; ohne verlässliche Einheit gibt es keinen verlässlichen Faktor. Die übrigen Rechnungen beider Artikel sind richtig gelesen und zugeordnet. Bei der Petersilie lässt sich aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins Gewicht.
 
 Nicht jede Position muss zugeordnet sein: Was offen bleibt, zählt nicht zum Wareneinsatz, und die Kalkulation führt es unter **Nicht in der Umsatzschätzung** auf, damit es nicht unbemerkt verloren geht. Wo der Faktor erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist offen lassen die ehrlichere Antwort.
 
-Am Ende steht über der Liste `2 offen`.
+Am Ende steht über der Liste `3 offen`.
 
 **Geschafft, wenn …**
 
-- über der Liste `2 offen, 117 automatisch, 3 manuell` steht
-- nur noch Leberkäse und Petersilie **Offen** sind
+- über der Liste `3 offen, 115 automatisch, 4 manuell` steht
+- nur noch Petersilie, Leberkäse und Putenbrustfilet **Offen** sind
 
 **Zum Nachlesen**
 
@@ -1883,7 +1910,7 @@ Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit Pfand, Fra
 
 # Sortiment anlegen
 
-Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und Zutaten rechnet die Kalkulation den Umsatz.
+Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und Einkauf rechnet die Kalkulation den Umsatz.
 
 Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank) und gelten für jede Prüfung. Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was fehlt, legt man unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte) an, und so wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser Prüfung.
 
@@ -1942,7 +1969,7 @@ Die Kalkulation rechnet aus dem Einkauf, den Rezepten und den Preisen den Umsatz
 
 Auf **4. Kalkulation** wechseln und die Seite **Übrige Einkäufe** öffnen. Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz eingehen, in zwei Listen mit dem Grund je Position:
 
-- **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.
+- **Nicht Teil der Ermittlung des Aufschlagsatzes**: Kein Produkt des Sortiments braucht die Ware, oder der Zuordnung fehlt der Faktor. Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Waren, die ein Rezept nicht aufs Gramm genau abbildet.
 - **Nicht in der Umsatzschätzung**: Einkäufe, die keinen Umsatz bringen, etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.
 
 Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche Zuordnung lässt sich dort direkt korrigieren. Pfand und Leergut stehen nicht in den Listen, sie gleichen sich über die Zeit aus.
@@ -1951,7 +1978,7 @@ Ein Klick auf eine Zeile öffnet rechts die Zuordnung der Position; eine falsche
 
 In **Nicht Teil der Ermittlung des Aufschlagsatzes** steht ganz oben **Schweineschnitzel natur, ausgelöst**, mit fast 3.500 € netto. Das Programm hat es als **Schnitzel, paniert, je Stück** zugeordnet, als fertig paniertes Schnitzel. Das Gasthaus kauft das Fleisch aber roh, 427 kg im Jahr, und paniert selbst; im Sortiment steht **Schnitzel mit Pommes**, und dessen Rezept rechnet mit Schweinefleisch.
 
-Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die Zutat, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und **Zuordnen**.
+Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die Ware, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und **Zuordnen**.
 
 Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.
 
@@ -1966,7 +1993,7 @@ In derselben Liste stehen Einkäufe, die der Betrieb braucht, aber nicht verkauf
 1. **Handspülmittel Konzentrat 5 l**
 1. **Versandkostenpauschale**
 
-Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position. Alle Positionen derselben Zutat wandern mit: mit den Servietten (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger, Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
+Die Festlegung gilt für das Produkt, nicht nur für die angeklickte Position. Alle Positionen desselben Produkts wandern mit: mit den Servietten (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger, Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale (**Dienstleistung und Fracht**) die Leihgebühr der Thermobox. Sie stehen danach unter **Nicht in der Umsatzschätzung**, und auf sie wird kein Gewinn ermittelt. Das Symbol dort nimmt die Festlegung wieder zurück.
 
 Übrig bleiben in der oberen Liste gut 4.300 €, 6,52 % der Einkäufe: Kleinigkeiten, für die sich kein eigenes Produkt lohnt.
 
@@ -1982,15 +2009,15 @@ Wie das Programm rechnet, zeigt ein Produkt am besten. Auf **3. Sortiment** steh
 
 Auf **4. Kalkulation** die Seite **Portionen** öffnen und **Schnitzel mit Pommes** anklicken. Rechts steht, wie es gerechnet ist:
 
-- **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es ist die Zutat, von der am wenigsten da ist.
-- **Portionen**: Das Schweinefleisch könnte auch in den Braten des Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht; das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+- **Rezeptur je Portion**: ein **Schnitzel, ohne Beilage** und eine Portion **Pommes, Beilage**, jedes ein eigenes Produkt mit eigenem Rezept. Im Schnitzel stecken 180 g Schweinefleisch, in der Beilage Pommes frites und Pflanzenöl. Beim Schnitzel steht **begrenzt die Portionen**: Sein Schweinefleisch ist die Ware, von der am wenigsten da ist.
+- **Portionen**: Das Schweinefleisch könnte auch in den Braten des Mittagstischs gehen. Die Kalkulation verteilt eine Ware, die sich mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht; das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen. Weil sich viele Gerichte dieselben Waren teilen, steht darunter **Näherungsweise verteilt**: Das Programm hat die Aufteilung nicht bis aufs letzte Stück durchgerechnet.
 - **Umsatz (netto)**: 3.039 Portionen zu 15,90 € brutto, ohne 19 % Umsatzsteuer, ergeben 40.601,04 €.
 
 So rechnet die Kalkulation jedes Produkt des Sortiments.
 
 ## Ertragsregeln
 
-Auf der Seite **Ertragsregeln** stehen die Kategorien und Zutaten der Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch. Je Zutat oder Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort neu. Für das Beispiel bleiben die Voreinstellungen.
+Auf der Seite **Ertragsregeln** stehen die Kategorien und Produkte der Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch. Je Produkt oder Warengruppe lässt sich wählen, welche Regel gilt; die Kalkulation rechnet sofort neu. Für das Beispiel bleiben die Voreinstellungen.
 
 ## Rezeptur anpassen
 
@@ -2001,7 +2028,7 @@ Passt ein Rezept nicht, gibt es zwei Wege:
 - **Im Katalog bearbeiten** öffnet die Regeln auf diesem Produkt. Die Änderung gilt für alle Prüfungen.
 - **Für diese Prüfung anpassen** kopiert das Rezept in die Prüfung. Der Katalog bleibt, wie er ist.
 
-Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit, dazu fügt das Plus (**Zutat hinzufügen**) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was er vorsieht, etwa **Katalog: 200 g**. Eine Zutat wird in jedem Rezept in derselben Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort neu; unter **Portionen** steht beim Produkt **angepasst**, auf **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.
+Angepasst lassen sich die Zeilen bearbeiten: Produkt, Menge und Einheit, dazu fügt das Plus (**Produkt hinzufügen**) eine Zeile an. Weicht eine Zeile vom Katalog ab, steht grau daneben, was er vorsieht, etwa **Katalog: 200 g**. Ein Produkt wird in jedem Rezept in seiner Einheit gemessen, auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort neu; unter **Portionen** steht beim Produkt **angepasst**, auf **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.
 
 Der Bericht druckt das angepasste Rezept so, wie es gerechnet ist.
 
@@ -2038,13 +2065,13 @@ Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben d
 
 Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Sie legt fest, wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird, wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das Personal isst mit.
 
-Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es eine Ertragsregel gibt, **Nach Kategorie** und **Nach Zutat**. Je Zeile wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer Kategorie vor. Die Kalkulation rechnet sofort neu.
+Die Seite führt nur die Kategorien und Produkte dieser Prüfung, für die es eine Ertragsregel gibt, **Nach Kategorie** und **Nach Produkt**. Je Zeile wird gewählt, welche Regel gilt; die Wahl für ein Produkt geht der für seine Kategorie vor. Die Kalkulation rechnet sofort neu.
 
-Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt.
+Voreingestellt ist die Standardregel des Produkts oder der Kategorie, gibt es keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt.
 
 Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz, sondern auch, warum er gilt.
 
-Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), neben Zutaten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
+Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), neben Produkten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
 
 Für das Beispiel bleibt es bei **Kein Abzug**.
 
@@ -2062,7 +2089,7 @@ Auf **5. Bericht** wechseln. Der Reiter zeigt den fertigen Bericht so, wie er al
 
 1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
 1. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
-1. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat, damit jede Zahl des Berichts nachvollziehbar bleibt.
+1. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute mit der angewandten Ertragsregel und die Portionen je Ware, damit jede Zahl des Berichts nachvollziehbar bleibt.
 
 Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg **Hinweise**. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit. Gibt es mehrere Berichtsvorlagen, wählt die Auswahl über der Vorschau eine andere für diese Prüfung.
 
@@ -2107,19 +2134,300 @@ Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter `Umsatzschä
 
 **Zum Nachlesen**
 
-Die Regeln, also Zutaten, Produkte und bestätigte Zuordnungen, stehen nicht in der Datei. Was das für die Weitergabe bedeutet, steht unter [Prüfung weitergeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
+Die Regeln, also Produkte, Rezepte und bestätigte Zuordnungen, stehen nicht in der Datei. Was das für die Weitergabe bedeutet, steht unter [Prüfung weitergeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
 
 ## Die eigene Prüfung
 
 Sie läuft genauso wie das Beispiel. Drei Dinge sind anders:
 
 - **Die Scans sind eigene.** Wie gut das Programm sie liest, hängt an der Scanqualität, siehe [Scanqualität](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/#scanqualitat).
-- **Die Zuordnung hat gelernt.** Jede bestätigte Zuordnung gilt auch in späteren Prüfungen. Wer denselben Getränkehändler noch einmal prüft, hat weniger offene Positionen.
+- **Die Zuordnung hat gelernt.** Jede bestätigte Zuordnung gilt auch in späteren Prüfungen. Wer denselben Getränkehändler noch einmal prüft, hat weniger offene Positionen. Wie man die Regeln selbst pflegt, zeigt [Regeln pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/regeln/index.md).
 - **Das Sortiment kommt aus der Speisekarte.** Produkt für Produkt über **Produkt hinzufügen …**, oder als Tabelle wie hier per CSV.
 
 ## Hilfe im Programm
 
 Das **?** rechts oben auf jeder Seite und die Taste **F1** öffnen die Seite des Handbuchs, die zum gerade geöffneten Reiter gehört.
+# Regeln pflegen
+
+# Eine zweite Prüfung
+
+Was die Regeln können, zeigt sich erst an der nächsten Prüfung. Für dieses Kapitel bekommt das Gasthaus Zur Linde deshalb eine zweite: eine Umsatzsteuer-Sonderprüfung für Mai bis Juli 2025, mit den 26 Rechnungen aus diesen drei Monaten.
+
+## Zwei Prüfungen
+
+Angelegt wird sie wie die erste unter [Prüfung anlegen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/start/index.md): Bezeichnung `Gasthaus Zur Linde, USt-Sonderprüfung 2025`, Zeitraum `01.05.2025` bis `31.07.2025`, Name `Renate Vogel` und Steuernummer `123/456/789` wie gehabt, PAB-Nr. `PAB 2025/0611`. Auf **1. Rechnungen** kommen aus dem Ordner `beispiel-rechnungen-2025` die 26 Dateien, deren Name mit `2025-05`, `2025-06` oder `2025-07` beginnt. Auf **3. Sortiment** kommt **Bier 0,5 l vom Fass** mit `4,60` wie in der ersten. Einen erklärten Umsatz braucht es nicht. Zurück in der Liste stehen beide Prüfungen:
+
+**Geschafft, wenn …**
+
+- die Liste zwei Prüfungen des Gasthauses zeigt
+- die Sonderprüfung auf **1. Rechnungen** 26 Rechnungen hält und auf **3. Sortiment** **Bier 0,5 l vom Fass** mit `4,60`
+
+**Zum Nachlesen**
+
+Die Liste der Prüfungen beschreibt [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md), wo die Regeln liegen und wer sie teilt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank).
+
+[Weiter: Regeln pflegen Was das Programm aus der ersten Prüfung behalten hat](https://docs.umsatzschaetzung.amtstools.de/dev/guide/regeln/index.md)
+
+# Regeln pflegen
+
+Eine Prüfung endet mit ihrem Bericht, die Arbeit daran nicht: Jede bestätigte Zuordnung, jedes Produkt mit seinem Rezept und jede Ertragsregel steht in den [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md) und gilt für jede Prüfung danach. Dieses Kapitel zeigt an der zweiten Prüfung des Gasthauses, was die erste dort hinterlassen hat, und wie die Regeln selbst gepflegt werden. Im Mittelpunkt stehen die Produkte: Zusammen beschreiben sie eine Produktionskette, vom Einkauf bis zu dem, was verkauft wird.
+
+[Übung 1: Was das Programm sich merkt Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/regeln/)
+
+## Die zweite Prüfung
+
+In der Liste der Prüfungen steht neben der **Bp 2025** eine zweite Prüfung des Gasthauses, die **USt-Sonderprüfung 2025** für Mai bis Juli, mit den 26 Rechnungen dieser drei Monate, wie unter [Eine zweite Prüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sonderpruefung/index.md) angelegt. Das Reglersymbol rechts oben öffnet die **Regeln**, hier und in jeder geöffneten Prüfung.
+
+## Was die Zuordnung schon weiß
+
+Auf **2. Zuordnung** der Sonderprüfung steht über der Liste `3 offen, 74 automatisch, 2 manuell`. Bei der ersten Prüfung waren es vor der ersten Entscheidung `5 offen, 117 automatisch, 0 manuell`. Diesmal sind zwei Positionen **Manuell**, obwohl in dieser Prüfung noch niemand etwas zugeordnet hat.
+
+## Was offen blieb, kommt wieder
+
+Offen sind **Petersilie glatt, Bund** und **Leberkäse am Stück, ungebacken**, genau die zwei, die in der ersten Prüfung offen geblieben sind: Bei der Petersilie fehlt, wie viel ein Bund wiegt, beim Leberkäse hat der Scan vom 5. Juni die Einheit wieder als „K8“ gelesen. Was nicht beantwortet wurde, kann das Programm sich nicht merken.
+
+Bei der **Kaffeesahne** ist **Sahne** schon gewählt; gefragt wird nur, wie viel Sahne ein Karton enthält. Der Scan hat den Namen des Großmarkts diesmal als „GastroMarkt C+C Großhandei“ gelesen, darum greift die Regel nicht ganz.
+
+## Was gelernt ist
+
+Die zwei manuellen stehen am Ende der Liste: **Schweineschnitzel natur, ausgelöst** und **2022 Domina trocken 0,75 l**, die zwei Zuordnungen, die in der ersten Prüfung entschieden wurden, der Domina auf **2. Zuordnung**, das Schnitzel auf **4. Kalkulation**. Den Domina anklicken: Unter **Aus den Regeln** steht `Zugeordnet Rotwein × 750 ml · manuell`, der Vorschlag **Rotwein × 750 ml** trägt **Aktuelle Zuordnung**. Das ist keine Vermutung mit einer Sicherheit, sondern die Regel, die das **Zuordnen** damals angelegt hat. Sie gilt für die 62 Flaschen der zwei Rechnungen dieser Prüfung genauso.
+
+## Die Regel-Datenbank
+
+Eine Prüfung ist eine Datei: Rechnungen, Scans, Sortiment mit Preisen, der erklärte Umsatz. Die Regeln sind eine Datenbank daneben, die [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank): Produkte mit ihren Rezepten, Ertragsregeln, Gewerbekennzahlen und jede bestätigte Zuordnung. Die Prüfung verweist nur darauf.
+
+Alle, die sich am selben Rechner anmelden, arbeiten mit denselben Regeln. Liegt die Regel-Datenbank auf einer Freigabe im Netz, gilt das für alle, die darauf zeigen: Was jemand heute zuordnet oder anlegt, haben die anderen beim nächsten Start.
+
+Eine Prüfung, die an einen anderen Rechner geht, nimmt die Regeln nicht mit. Dort wird mit den Regeln dieses Rechners neu zugeordnet, siehe [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#regeln-gehen-nicht-mit). Mit einer gemeinsamen Regel-Datenbank stellt sich die Frage nicht.
+
+Mitgeliefert wird ein Grundstock von 1.067 Produkten, 696 davon mit Rezept, und 26 Ertragsregeln für jedes Gewerbe, vom Gasthaus bis zur Fahrradwerkstatt, auf kein Amt im Besonderen abgestimmt. Was im Amt anders gilt, wird dort geändert und gilt für jede Prüfung danach.
+
+## Die Reiter
+
+Das Reglersymbol rechts oben (**Regeln**) öffnet die Regeln, in der Liste der Prüfungen wie in jeder Prüfung. Sie haben vier Reiter:
+
+| Reiter            | Was dort steht                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Produkte**      | alles, womit gerechnet wird, was eingekauft und was verkauft wird, jedes Produkt mit seinen Warenarten und seinem Rezept |
+| **Ertragsregeln** | benannte Abzüge, etwa der Schankverlust beim Fassbier                                                                    |
+| **Gewerbe**       | die Gewerbekennzahlen, die eine Prüfung wählen kann                                                                      |
+| **Vorlagen**      | das Aussehen des Berichts, meist Sache der IT                                                                            |
+
+Was hier geändert wird, gilt sofort, für jede Prüfung.
+
+Die Produkte hängen über ihre Rezepte zusammen: **Schnitzel mit Pommes** ist ein **Schnitzel, ohne Beilage** und eine **Pommes, Beilage**; das Schnitzel sind 180 g **Schweinefleisch**, die Beilage **Pommes frites** und **Pflanzenöl**, und die werden eingekauft. Zusammen beschreiben die Produkte so eine Produktionskette, vom Einkauf bis zu dem, was verkauft wird.
+
+**Geschafft, wenn …**
+
+- auf **2. Zuordnung** der Sonderprüfung `3 offen, 74 automatisch, 2 manuell` steht
+- der Domina dort **Manuell** trägt, ohne dass er in dieser Prüfung zugeordnet wurde
+- die Regeln mit ihren vier Reitern einmal offen waren und wieder geschlossen sind
+
+**Zum Nachlesen**
+
+Was in den Regeln steht, beschreibt [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md), wo die Regel-Datenbank liegt und wer sie teilt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), was mit einer weitergegebenen Prüfung geschieht [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#regeln-gehen-nicht-mit).
+
+[Weiter: Die Produktionskette Ein Gericht bis zum Einkauf zurückverfolgen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md)
+
+# Die Produktionskette
+
+Unter **Regeln → Produkte** steht alles, womit gerechnet wird: was eingekauft wird, was daraus gemacht wird und was verkauft wird. Das **Rezept** eines Produkts nennt andere Produkte, und deren Rezepte wieder andere, bis zu Produkten ohne Rezept, die eingekauft werden. Zusammen beschreiben die Produkte so eine Produktionskette. Im Beispiel wird das Schnitzel mit Pommes bis zum Einkauf zurückverfolgt, und die Pommes frites bekommen ein Rezept aus Kartoffeln.
+
+[Übung 2: Die Produktionskette Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/kette/)
+
+## Oben in der Kette
+
+Rechts oben **Regeln** öffnen; der erste Reiter ist **Produkte**. In **Filtern** `Schnitzel mit Pommes` eintippen und **Schnitzel mit Pommes** anklicken. Sein **Rezept** hat zwei Zeilen, und beide nennen keinen Einkauf, sondern andere Produkte: **Schnitzel, ohne Beilage** und **Pommes, Beilage**, je 1 Stück. **Das Rezept ergibt** 1 Stück, eine Portion.
+
+## Eine Stufe tiefer
+
+Eine Stufe tiefer: `Pommes Beilage` filtern und **Pommes, Beilage** anklicken. Eine Portion sind 180 g **Pommes frites** und 100 ml **Pflanzenöl**, das Altöl aus der Fritteuse eingerechnet. Weil die Beilage ein eigenes Produkt ist, steht sie nur einmal in den Regeln, und jedes Gericht mit Pommes rechnet mit derselben Portion.
+
+## Unten in der Kette
+
+Die **Pommes frites** haben kein Rezept: **Ohne Rezept wird das Produkt eingekauft, nicht hergestellt.** Dafür haben sie **Warenarten**, die Namen, unter denen sie auf Rechnungen stehen. Hier beginnt die Kette: Was die Zuordnung den Pommes frites zuordnet, geht von hier nach oben in jedes Gericht, das sie braucht.
+
+Die Kalkulation geht diese Kette in jeder Prüfung durch, vom Einkauf unten bis zum verkauften Produkt oben. Ein Rezept darf sich dabei nicht selbst enthalten, auch nicht über andere Produkte.
+
+## Ein Glied mehr
+
+Das Gasthaus kauft Pommes frites beim Großmarkt und Frühkartoffeln bei der Gärtnerei. Damit die Kalkulation auch Pommes aus Kartoffeln kennt, bekommen die Pommes frites ein Rezept: unter **Rezept** das Plus (**Rezeptzeile hinzufügen**) anklicken.
+
+`Kartoffeln` tippen und aus der Liste **Kartoffeln** wählen, als **Menge** `1200`. Die Einheit steht schon auf Gramm, weil Kartoffeln in Gramm gezählt werden.
+
+**Das Rezept ergibt** sagt, wie viel das Rezept hervorbringt, in der Einheit des Produkts: hier `1000` Gramm Pommes frites aus 1.200 g Kartoffeln. Bei einer Portion ist es 1 Stück, bei einem Kuchen 12 Stück.
+
+Gespeichert wird von selbst, sobald jede Rezeptzeile Produkt und Menge hat und eine kurze Pause im Tippen eintritt.
+
+## Was das bringt
+
+Die Pommes frites werden jetzt eingekauft oder aus Kartoffeln gemacht. Die Kalkulation rechnet mit beidem und verteilt den Einkauf so, dass möglichst wenig übrig bleibt. Kauft ein Betrieb nur Kartoffeln und keine Pommes, zählt jede Portion Pommes trotzdem. Das gilt in jeder Prüfung danach, für jedes Gericht mit Pommes.
+
+**Geschafft, wenn …**
+
+- unter **Regeln → Produkte** die **Pommes frites** ein Rezept haben: `1200` Gramm **Kartoffeln**, **Das Rezept ergibt** `1000` Gramm
+
+**Zum Nachlesen**
+
+Was Produkte und Rezepte bedeuten, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte) und [Rezepte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#rezepte), wie die Kalkulation einen Einkauf auf die Produkte verteilt unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md).
+
+[Weiter: Warenarten Wo die Rechnungen in die Kette kommen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/warenarten/index.md)
+
+# Warenarten
+
+Unten in der [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md) stehen die Produkte, die eingekauft werden: Fassbier, Schweinefleisch, Rotwein. Jedes nennt unter **Warenarten** die Namen, unter denen es auf Rechnungen steht. Die helfen der Zuordnung bei Artikeln, die sie noch nicht kennt, und bringen so den Einkauf in die Kette. Im Beispiel bekommt der Rotwein eine dazu: Domina.
+
+[Übung 3: Warenarten Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/warenarten/)
+
+## Der Domina, noch einmal
+
+Die Zuordnung, die in der ersten Prüfung bestätigt wurde, gilt für genau diesen Artikel: **2022 Domina trocken 0,75 l** von Weingut Sommer. Was ein Domina ist, weiß das Programm damit noch nicht. Unter den Warenarten des Rotweins steht er nicht, und als nächsten Vorschlag nennt es Schaumwein.
+
+## Das Produkt finden
+
+Rechts oben **Regeln** öffnen und in **Filtern** `Rotwein` eintippen. Gesucht wird auch in Kategorie und Warenarten, darum steht nicht nur der Rotwein da: auch der Essig, mit „Rotweinessig“ unter seinen Warenarten, und **Rotwein 0,2 l**, das Glas Rotwein, ein Glied weiter oben in der Kette.
+
+Auf **Rotwein** klicken. Rechts steht, was zu ihm gehört:
+
+## Was zu einem Produkt gehört
+
+- **Name** und **Einheit**: Der Rotwein wird in Millilitern gezählt, im Einkauf, im Bestand und in jedem Rezept. Solange Rezepte oder Zuordnungen ihn verwenden, bleibt die Einheit fest.
+- **Kategorie**: hier Wein. Sie bestimmt, welche Ertragsregeln gelten, und die Sparte im Rohgewinnaufschlag.
+- **Warenarten**: unter welchen Namen das Produkt eingekauft wird, einer je Zeile, von Merlot bis Dornfelder. Sie helfen der Zuordnung bei Artikeln, die sie noch nicht kennt.
+- **Rezept**: keines. Der Rotwein wird eingekauft, nicht hergestellt; hier beginnt seine Kette.
+
+## Eine Warenart anfügen
+
+Ins Feld **Warenarten** klicken, ans Ende der Liste gehen und in einer neuen Zeile `Domina` eintragen. Gespeichert wird von selbst, sobald eine kurze Pause im Tippen eintritt.
+
+Zur Probe in **Filtern** `Domina` eintippen. Vorher stand dort „Keine Treffer“, jetzt findet die Suche genau ein Produkt: Rotwein.
+
+## Was das bringt
+
+Kommt ab jetzt ein Domina vor, von welchem Weingut und aus welchem Jahrgang auch immer, findet die Zuordnung das Wort beim Rotwein, und von dort geht der Einkauf die Kette hinauf, etwa ins Glas **Rotwein 0,2 l**. Das gilt für jede Prüfung danach und für alle, die dieselbe [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank) nutzen.
+
+Eine gute Warenart ist die Ware, nicht der Artikeltext: „Domina“ ja, „2022 Domina trocken 0,75 l“ nein. Den Artikel deckt die bestätigte Zuordnung schon ab.
+
+## Neu und Löschen
+
+Das Plus neben **Filtern** legt ein neues Produkt an. Für den Einkauf braucht es das selten: wenn eine Ware ganz fehlt, oder wenn sie anders gezählt wird. Pommes in Stück und Pommes in Gramm wären zwei Produkte.
+
+Der Mistkübel ganz unten löscht das Produkt, nach einer Rückfrage. Solange ein Rezept, eine Zuordnung oder eine Ertragsregel es noch braucht, lehnt das Programm ab und nennt, wer es verwendet. Beim Rotwein wären das unter anderem die Zuordnung des Domina und das Produkt „Rotwein 0,2 l“: Ein Glied mitten aus der Kette lässt sich nicht herausnehmen.
+
+## Die Regeln schließen
+
+Das Kreuz rechts oben (oder Esc) schließt die Regeln.
+
+**Geschafft, wenn …**
+
+- unter **Regeln → Produkte** beim Rotwein die letzte Warenart `Domina` ist
+- die Suche nach `Domina` genau ein Produkt findet: Rotwein
+
+**Zum Nachlesen**
+
+Was eine gute Warenart ist, steht unter [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten), was Einheit, Kategorie und Stückgewicht bedeuten unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte).
+
+[Weiter: Produkte Ein neues Gericht oben an die Kette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/produkte/index.md)
+
+# Ein neues Produkt
+
+Oben in der [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md) stehen die Produkte, die verkauft werden: Ihr **Rezept** sagt, aus welchen anderen Produkten sie gemacht werden und wie viel davon. Aus diesen Produkten stellt jede Prüfung ihr Sortiment zusammen. Im Beispiel fehlt ein Gericht des Gasthauses: das Schäufele.
+
+[Übung 4: Ein neues Produkt Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/produkte/)
+
+## Ein Produkt anlegen
+
+Auf der Karte des Gasthauses steht ein **Schäufele mit Kloß**. Unter **Regeln → Produkte** zeigt die Suche nach `Schäufele` **Keine Treffer**: Die Regeln kennen es nicht.
+
+Das Plus neben **Filtern** legt ein neues Produkt an. In **Name** `Schäufele mit Kloß` eintragen, so wie es auf der Karte heißt.
+
+Sobald der Name steht und das Feld verlassen wird, ist das Produkt angelegt und steht links in der Liste. Alles Weitere wird von selbst gespeichert, nach einer kurzen Pause im Tippen.
+
+Die **Einheit** steht auf **Stück**, und das passt: Verkauft wird das Schäufele portionsweise. Kartoffeln oder Rotwein werden in Gramm oder Millilitern gezählt, ein Gericht in Stück.
+
+## Das Rezept
+
+Das Plus unter **Rezept** fügt eine Zeile an; ein neues Produkt beginnt ohne. Ins Feld `Knochen` tippen und aus der Liste **Schweinefleisch mit Knochen** wählen. Gesucht wird in Name und Kategorie, dahinter folgen ähnliche Produkte.
+
+In **Menge** `450` eintragen: Ein Schäufele wiegt roh, mit Knochen, etwa 450 g.
+
+Die Einheit steht auf **Gramm**, denn Schweinefleisch mit Knochen wird in Gramm gezählt, im Einkauf wie in jedem Rezept.
+
+Jeder weitere Bestandteil bekommt mit dem Plus eine eigene Zeile. Für den Kloß: noch einmal das Plus, `Klöße` tippen, **Klöße und Knödel** wählen und `200` Gramm eintragen. **Das Rezept ergibt** bleibt bei 1 Stück: Das Rezept ist eine Portion.
+
+## Löschen
+
+Der Mistkübel unter dem Rezept löscht das Produkt, nach einer Rückfrage. Steckt es im Rezept eines anderen Produkts, lehnt das Programm ab und nennt dieses.
+
+Gelöscht wird nur, was im Amt nie vorkommt: Eine Prüfung, die das Produkt im Sortiment führt, rechnet danach ohne es. Schon gespeicherte Berichte bleiben unverändert.
+
+## Im Sortiment
+
+Die Regeln schließen und in der Prüfung auf **3. Sortiment** wechseln. In **Produkt hinzufügen …** `Schäufele` tippen: Das neue Produkt steht schon in der Liste darunter. Jede Prüfung kann es ab jetzt ins Sortiment nehmen, auch beim [Import des Sortiments](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#sortiment) aus einer CSV-Datei.
+
+Einen Preis hat das Produkt in den Regeln nicht: Der ist betriebsspezifisch und kommt erst mit dem Sortiment der Prüfung dazu, von der Karte des Betriebs.
+
+**Geschafft, wenn …**
+
+- die Suche nach `Schäufele` unter **Regeln → Produkte** genau ein Produkt findet: **Schäufele mit Kloß**, in Stück, mit 450 g Schweinefleisch mit Knochen und 200 g Klöße und Knödel
+- in der Sonderprüfung auf **3. Sortiment** die Suche nach `Schäufele` in **Produkt hinzufügen …** **Schäufele mit Kloß** anbietet
+
+**Zum Nachlesen**
+
+Was in ein Rezept gehört, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#rezepte), wie ein Rezept nur für eine Prüfung angepasst wird unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur).
+
+[Weiter: Ertragsregeln Was auf dem Weg durch die Kette verloren geht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/ertragsregeln/index.md)
+
+# Ertragsregeln
+
+Nicht alles, was unten in die [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md) geht, kommt oben als Verkauf heraus. Eine Ertragsregel ist ein Abzug mit Namen: Wie viel vom Einkauf gilt nicht als verkauft, und warum. In der Prüfung wird nur gewählt, welche Regel gilt. Angelegt, geändert und gelöscht werden die Regeln unter **Regeln → Ertragsregeln**, und was dort als **Standard** angekreuzt ist, gilt in jeder Prüfung, die nichts anderes wählt. Im Beispiel wird der Schankverlust beim Fassbier geregelt.
+
+[Übung 5: Ertragsregeln Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/ertragsregeln/)
+
+## Die Abzüge
+
+Eine Ertragsregel gilt für eine Kategorie oder ein Produkt, meist unten in der Kette, bei dem, was eingekauft wird: Von 100 l Fassbier kommen bei 3 % Schankverlust 97 l in die Gläser, und erst diese rechnet die Kalkulation die Kette hinauf bis zum Bier 0,5 l.
+
+## Das Bier im Sortiment
+
+Im Sortiment der Sonderprüfung steht schon **Bier 0,5 l vom Fass** mit `4,60`. Erst ein Produkt mit Fassbier im Rezept bringt die Kategorie **Bier vom Fass** in die Kalkulation dieser Prüfung: Die Kette vom Fassbier unten zum Bier 0,5 l oben ist dann geschlossen.
+
+## Was gerade gilt
+
+Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Mit dem Bier steht **Bier vom Fass** in der Liste, mit **Kein Abzug**. Zur Wahl stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 %, keine davon ist Standard. Solange niemand eine wählt, wird nichts abgezogen, in dieser Prüfung wie in jeder anderen.
+
+## Die Regeln für das Fassbier
+
+Über das Reglersymbol rechts oben (**Regeln**) die Regeln öffnen, dort den Reiter **Ertragsregeln**. Links stehen alle Kategorien und dann alle Produkte, daneben die Zahl ihrer Regeln. `Fass` ins Suchfeld tippen und die Kategorie **Bier vom Fass** anklicken. Rechts stehen ihre Regeln, eine je Zeile, mit **Name**, **Abzug** und **Standard**:
+
+## Ein Standard für das Amt
+
+**Standard** in der Zeile mit 3 % ankreuzen. Das ist sofort gespeichert. Ab jetzt zieht jede Prüfung beim Fassbier 3 % Schankverlust ab, solange sie unter **4. Kalkulation → Ertragsregeln** nichts anderes wählt, auch die schon angelegten wie die Bp 2025. Ein schon gespeichertes PDF ändert sich nicht mit. Standard kann je Kategorie nur eine Regel sein; ein neues Häkchen nimmt das alte weg.
+
+## Eine eigene Regel
+
+Eine neue Regel kommt in die leere letzte Zeile (**Neue Regel …**): `Schankverlust, alte Schankanlage` als Name, `6` als Abzug. Sie ist gespeichert, sobald Name und Abzug stehen; darunter erscheint wieder eine leere Zeile. Wählbar ist sie ab jetzt in jeder Prüfung, für einen Betrieb, der den höheren Verlust belegt. Im Bericht steht dann ihr Name, nicht nur der Satz.
+
+## Eine Regel löschen
+
+Gelöscht wird mit dem Mistkübel am Ende der Zeile, hier bei 8 %, und einem **Ja** auf die Nachfrage. Schon erstellte Berichte bleiben unverändert. Hatte eine Prüfung genau diese Regel gewählt, rechnet sie wieder mit der Standardregel, und die Vorschau des Berichts nennt vorneweg einen Hinweis, dass die gewählte Ertragsregel nicht mehr existiert.
+
+## Was in der Prüfung ankommt
+
+Nach dem Schließen der Regeln steht beim **Bier vom Fass** jetzt **Schankverlust (Standard)** mit 3 %, ohne dass in der Prüfung etwas gewählt wurde. Die Auswahl bietet auch die neue Regel an, die 8 % ohne Namen sind verschwunden. Wählt eine Prüfung hier eine andere Regel, geht diese Wahl dem Standard vor.
+
+**Geschafft, wenn …**
+
+- unter **Regeln → Ertragsregeln** beim **Bier vom Fass** drei Regeln stehen: **Schankverlust** mit 3 % als Standard und mit 5 %, dazu **Schankverlust, alte Schankanlage** mit 6 %
+- die Sonderprüfung auf **4. Kalkulation → Ertragsregeln** beim **Bier vom Fass** **Schankverlust (Standard)** zeigt, ohne dass dort etwas gewählt wurde
+
+**Zum Nachlesen**
+
+Wie Ertragsregeln angelegt werden und was **Standard** heißt, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln), wie die Prüfung eine Regel wählt unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#ertragsregeln). Wo die Regeln liegen und wer sie teilt, beschreibt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank).
+
+Damit ist das Kapitel **Regeln pflegen** vollständig.
+
+[Weiter: Danach Die Prüfung weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md)
 # Übungen
 
 # Übungen
@@ -2133,7 +2441,15 @@ In den Übungen läuft das Programm im Browser, und Didi erklärt jeden Schritt.
 1. [0**Die Grundlagen**Was das Programm rechnet, die fünf Schritte einer Prüfung und die Wörter, die dabei immer wieder vorkommen. Dazu das Beispiel, das durch alle Übungen führt: das Gasthaus Zur Linde.](https://app.umsatzschaetzung.amtstools.de/lektionen/ueberblick/)
 1. [1**Prüfung anlegen**Jede Arbeit im Programm beginnt mit einer Prüfung: ein Betrieb, ein Zeitraum und alles, was dazugehört. Angelegt wird das Beispiel, das Gasthaus Zur Linde, mit dem Umsatz, den es erklärt hat.](https://app.umsatzschaetzung.amtstools.de/lektionen/pruefung/)
 1. [2**Eine Rechnung korrigieren**Beim Einlesen eines Scans geht manchmal etwas verloren. Das Programm merkt es und legt die Rechnung zur Durchsicht vor. Hier die Rechnung des Tiefkühllieferanten, bei der ein Stempel eine ganze Zeile verdeckt hat.](https://app.umsatzschaetzung.amtstools.de/lektionen/korrektur/)
-1. [3**Offene Positionen zuordnen**Das Programm ordnet fast alle Rechnungspositionen selbst einer Zutat zu. Wo es sich nicht sicher ist, fragt es nach. Drei Beispiele aus dem Gasthaus Zur Linde.](https://app.umsatzschaetzung.amtstools.de/lektionen/zuordnung/)
+1. [3**Offene Positionen zuordnen**Das Programm ordnet fast alle Rechnungspositionen selbst einem Produkt zu. Wo es sich nicht sicher ist, fragt es nach. Vier Beispiele aus dem Gasthaus Zur Linde.](https://app.umsatzschaetzung.amtstools.de/lektionen/zuordnung/)
 1. [4**Sortiment anlegen**Was das Gasthaus verkauft und zu welchem Preis: ein Produkt aus dem Katalog von Hand ins Sortiment, mit Preis, und wie es beim nächsten Mal übernommen wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/sortiment/)
 1. [5**Die Kalkulation**Bevor das Ergebnis zählt, wird aufgeräumt: Einkäufe, die in kein Rezept eingehen, und solche, die gar keinen Umsatz bringen. Danach, am Schnitzel, wie aus Einkauf, Rezept und Preis der Umsatz wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/einkaeufe/)
 1. [6**Ergebnis und Bericht**Zum Schluss das Ergebnis: wie viel vom Einkauf als verkauft gilt, was das Gasthaus Zur Linde danach hätte umsetzen müssen, und wie daraus der Bericht für die Akte wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/bericht/)
+
+## Die Regeln
+
+1. [1**Was das Programm sich merkt**Eine zweite Prüfung des Gasthauses Zur Linde, und vieles ist schon erledigt: Was die erste Prüfung bestätigt hat, steht in den Regeln. Ein erster Blick in die Regeln, und auf die Produkte darin als Produktionskette.](https://app.umsatzschaetzung.amtstools.de/lektionen/regeln/)
+1. [2**Die Produktionskette**Die Produkte beschreiben eine Produktionskette, vom Einkauf bis auf den Teller. Das Schnitzel mit Pommes bis zum Einkauf zurückverfolgen und die Kette um ein Glied verlängern: Pommes frites aus Kartoffeln.](https://app.umsatzschaetzung.amtstools.de/lektionen/kette/)
+1. [3**Warenarten**Unten in der Kette stehen die Produkte, die eingekauft werden, und ihre Warenarten bringen die Rechnungen dorthin. Der Rotwein bekommt eine neue dazu: Domina.](https://app.umsatzschaetzung.amtstools.de/lektionen/warenarten/)
+1. [4**Ein neues Produkt**Oben in der Kette steht, was verkauft wird. Dem Gasthaus fehlt dort ein Gericht: das Schäufele, gemacht aus Schweinefleisch mit Knochen und Klößen. Es kommt in die Regeln, und jede Prüfung kann es ins Sortiment nehmen.](https://app.umsatzschaetzung.amtstools.de/lektionen/produkte/)
+1. [5**Ertragsregeln**Was auf dem Weg durch die Kette verloren geht: eine mitgelieferte Regel zum Standard machen, eine eigene anlegen, eine überflüssige löschen, und sehen, wie das in der Prüfung ankommt, ohne dass dort etwas eingetragen wird.](https://app.umsatzschaetzung.amtstools.de/lektionen/ertragsregeln/)

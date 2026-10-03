@@ -16,14 +16,14 @@ Jede Prüfung ist eine einzelne Datei im Ordner **Dokumente** unter `Umsatzschä
 
 **Zum Nachlesen**
 
-Die Regeln, also Zutaten, Produkte und bestätigte Zuordnungen, stehen nicht in der Datei. Was das für die Weitergabe bedeutet, steht unter [Prüfung weitergeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
+Die Regeln, also Produkte, Rezepte und bestätigte Zuordnungen, stehen nicht in der Datei. Was das für die Weitergabe bedeutet, steht unter [Prüfung weitergeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
 
 ## Die eigene Prüfung
 
 Sie läuft genauso wie das Beispiel. Drei Dinge sind anders:
 
 - **Die Scans sind eigene.** Wie gut das Programm sie liest, hängt an der Scanqualität, siehe [Scanqualität](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/#scanqualitat).
-- **Die Zuordnung hat gelernt.** Jede bestätigte Zuordnung gilt auch in späteren Prüfungen. Wer denselben Getränkehändler noch einmal prüft, hat weniger offene Positionen.
+- **Die Zuordnung hat gelernt.** Jede bestätigte Zuordnung gilt auch in späteren Prüfungen. Wer denselben Getränkehändler noch einmal prüft, hat weniger offene Positionen. Wie man die Regeln selbst pflegt, zeigt [Regeln pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/regeln/index.md).
 - **Das Sortiment kommt aus der Speisekarte.** Produkt für Produkt über **Produkt hinzufügen …**, oder als Tabelle wie hier per CSV.
 
 ## Hilfe im Programm

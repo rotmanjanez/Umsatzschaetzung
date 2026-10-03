@@ -18,7 +18,7 @@ Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt un
 
 ## Die gemeinsame Regel-Datenbank
 
-Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den Lieferanten, die Artikelnummer, die GTIN, den Wortlaut der Rechnungszeile und die Zutat. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank teilen. Zuordnungen, die das Programm selbst trifft, bleiben in der Prüfung.
+Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den Lieferanten, die Artikelnummer, die GTIN, den Wortlaut der Rechnungszeile und das Produkt. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank teilen. Zuordnungen, die das Programm selbst trifft, bleiben in der Prüfung.
 
 Nicht gespeichert werden Daten der geprüften Person, Mengen, Preise und Daten der Rechnungen und aus welcher Prüfung eine Zuordnung stammt. Die Regel-Datenbank beschreibt, was Lieferanten verkaufen, nicht was ein Betrieb eingekauft hat. Grenzfälle sind ein Lieferant, der eine natürliche Person ist, und ein so seltener Artikel, dass er auf einen Betrieb hindeutet. Teilen sollen sie deshalb nur Personen derselben Stelle, die dem Steuergeheimnis unterliegen.
 
@@ -57,10 +57,10 @@ Das Programm ist [quelloffen](https://github.com/rotmanjanez/Umsatzschaetzung). 
 
 Die Modelle laufen nur auf dem Rechner und lernen im Betrieb nicht dazu.
 
-| Modell              | Aufgabe                      | Trainiert auf                                                                                          |
-| ------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
-| PP-OCR (Apache-2.0) | Text auf dem Scan lesen      | unverändert übernommen                                                                                 |
-| Belegtagger (MIT)   | Kopf und Positionen erkennen | erzeugten Rechnungen mit erfundenen Daten                                                              |
-| Zuordnung (MIT)     | Positionen Zutaten zuordnen  | Artikeldaten von Lieferanten, von Sprachmodellen von OpenAI zugeordnet; keine Rechnungen aus Prüfungen |
+| Modell              | Aufgabe                       | Trainiert auf                                                                                          |
+| ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| PP-OCR (Apache-2.0) | Text auf dem Scan lesen       | unverändert übernommen                                                                                 |
+| Belegtagger (MIT)   | Kopf und Positionen erkennen  | erzeugten Rechnungen mit erfundenen Daten                                                              |
+| Zuordnung (MIT)     | Positionen Produkten zuordnen | Artikeldaten von Lieferanten, von Sprachmodellen von OpenAI zugeordnet; keine Rechnungen aus Prüfungen |
 
 Die Testrechnungen im Quellcode sind erfunden.

@@ -8,7 +8,7 @@ Das Programm rechnet aus den Eingangsrechnungen eines Betriebs nach, welchen Ums
 
 1. **[Prüfung anlegen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/index.md)** Betrieb, Zeitraum, erklärter Umsatz, auf Wunsch Bestand und Gewerbekennzahl.
 1. **[Rechnungen](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/index.md)** E-Rechnungen und Scans einlesen, falsch gelesene Scans korrigieren.
-1. **[Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md)** Jede Rechnungsposition einer Zutat zuordnen. Das meiste schlägt das Programm vor.
+1. **[Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md)** Jede Rechnungsposition einem Produkt zuordnen. Das meiste schlägt das Programm vor.
 1. **[Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#sortiment)** Was der Betrieb verkauft und zu welchem Preis.
 1. **[Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md)** Vom Einkauf über Rezepte und Preise zum Umsatz, den der Einkauf ergibt.
 1. **[Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md)** Erklärter neben kalkuliertem Umsatz, jede Zahl bis zur Rechnungszeile belegt, als PDF.
@@ -23,7 +23,7 @@ Die Browserversion ist noch in Erprobung. Sie kann langsamer sein als das Progra
 
 ## Grundlagen
 
-- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Zutaten, Produkte, Rezepte und Ertragsregeln. Sie gehören zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.
+- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Produkte, Rezepte und Ertragsregeln. Sie gehören zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.
 - [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md): Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV.
 
 ## Hilfe im Programm

@@ -888,6 +888,8 @@
       
         
       
+        
+      
     
     
     
@@ -1277,6 +1279,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1324,14 +1528,14 @@
 <h1 id="kalkulation">Kalkulation</h1>
 <p>Die Kalkulation beantwortet eine Frage: Welchen Umsatz hätte der Betrieb mit
 dem, was er eingekauft hat, machen müssen? Sie rechnet dafür vom Einkauf zum
-Verkauf, Zutat für Zutat.</p>
+Verkauf, Ware für Ware.</p>
 <h2 id="der-rechenweg">Der Rechenweg</h2>
 <ol class="us-flow">
-<li><b>Einkauf</b> Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit der Rezepte: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit <a href="../pruefung/#bestand">Bestand</a> zählt nur, was verbraucht wurde.</li>
+<li><b>Einkauf</b> Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit des Produkts: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit <a href="../pruefung/#bestand">Bestand</a> zählt nur, was verbraucht wurde.</li>
 <li><b>Verkaufsfähige Menge</b> Davon ab geht der Abzug der gewählten Ertragsregel, etwa für Schankverlust oder Bruch.</li>
-<li><b>Portionen</b> Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt, nach deren Rezepten.</li>
+<li><b>Portionen</b> Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt: was so verkauft wird, wie es eingekauft ist, direkt, alles andere nach seinem Rezept.</li>
 <li><b>Umsatz</b> Portionen mal Preis, netto gerechnet. Aus diesen Portionen folgt der Rohgewinnaufschlagsatz.</li>
-<li><b>Geschätzter Umsatz</b> Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Zutaten ohne Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.</li>
+<li><b>Geschätzter Umsatz</b> Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Ware in keiner Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.</li>
 </ol>
 
 <p>Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
@@ -1341,7 +1545,9 @@ Einkäufe</strong> und zuletzt das <strong>Ergebnis</strong>.</p>
 <h2 id="sortiment">Sortiment</h2>
 <p>Das Sortiment sind die Produkte, die der Betrieb führt, mit Bruttopreis und
 Steuersatz, wie sie auf der Karte stehen. Die Produkte und ihre Rezepte kommen
-aus den <a href="../regeln/#produkte">Regeln</a>, nur der Preis gehört zur Prüfung. Ein
+aus den <a href="../regeln/#produkte">Regeln</a>, nur der Preis gehört zur Prüfung. Auch ein
+Produkt ohne Rezept kann im Sortiment stehen, etwa eine Flasche Limonade, die so
+verkauft wird, wie sie eingekauft ist. Ein
 Rezept lässt sich zusätzlich für die Prüfung anpassen, siehe
 <a href="#rezeptur">Rezeptur anpassen</a>; das Produkt steht dann mit
 <strong>Rezept angepasst</strong> in der Liste.</p>
@@ -1352,7 +1558,7 @@ der Preis nachgetragen ist.</p>
 <p>Die Speisekarte lässt sich auch als Tabelle übernehmen, siehe
 <a href="../import-export/#sortiment">Sortiment importieren und exportieren</a>.</p>
 <h2 id="portionen">Portionen</h2>
-<p>Dieselbe Zutat steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l,
+<p>Dieselbe Ware steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l,
 Schweinefleisch in Schnitzel und Cordon Bleu. Wie der Betrieb sie tatsächlich
 aufgeteilt hat, weiß niemand. Das Programm setzt dafür keine Quote, sondern
 rechnet die Aufteilung aus, die den Einkauf am vollständigsten aufbraucht, also
@@ -1361,6 +1567,18 @@ am wenigsten Ware übrig lässt. Die Verkaufspreise spielen dabei keine Rolle.</
 welcher Umsatz daraus folgt. Ein Klick auf ein Produkt zeigt rechts, was eine
 Portion im Einkauf kostet, und seine Rezeptur; für die Prüfung angepasste Produkte
 tragen <strong>angepasst</strong>.</p>
+<p>Kann ein Teil eingekauft oder selbst gemacht sein, rechnet die Kalkulation mit
+beidem. Pommes etwa können tiefgekühlt eingekauft oder aus Kartoffeln
+geschnitten sein, sobald Pommes frites ein Rezept aus Kartoffeln haben, siehe
+<a href="../regeln/#produkte">Produkte</a>. Auch dann verteilt die Kalkulation so, dass vom
+ganzen Einkauf möglichst wenig übrig bleibt. Kommen
+die Portionen eines Produkts so aus mehr als einer Herkunft, steht rechts je
+<strong>Herkunft</strong>, wie viele Portionen woraus entstanden sind; der Bericht zeigt
+dasselbe unter <strong>Portionen je Herkunft</strong>.</p>
+<p>Teilen sich mehrere Produkte dieselben Waren, auch über Beilagen und andere
+Teilrezepte, ist die genaue Aufteilung oft zu aufwendig; dann rechnet das
+Programm sie näherungsweise. Das kommt schon bei einer kleinen Speisekarte vor. Rechts steht dann <strong>Näherungsweise
+verteilt</strong>, im Bericht ein Hinweis.</p>
 <p>Die Aufteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
 Einkauf hergibt, nicht, was tatsächlich über die Theke ging.</p>
 <h2 id="ergebnis">Ergebnis</h2>
@@ -1377,11 +1595,11 @@ Einkauf hergibt, nicht, was tatsächlich über die Theke ging.</p>
   der Richtsatzsammlung.</li>
 </ul>
 <h2 id="ertragsregeln">Ertragsregeln</h2>
-<p>Auf der Seite <strong>Ertragsregeln</strong> stehen die Zutaten und Kategorien der Prüfung, für
+<p>Auf der Seite <strong>Ertragsregeln</strong> stehen die Produkte und Kategorien der Prüfung, für
 die es eine <a href="../regeln/#ertragsregeln">Ertragsregel</a> gibt. Voreingestellt ist
 die Standardregel, gibt es keine, <strong>Kein Abzug</strong>. Hat der Betrieb etwa eine alte
 Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt;
-die Wahl einer Zutat geht der ihrer Kategorie vor.</p>
+die Wahl für ein Produkt geht der für seine Kategorie vor.</p>
 <p>Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug hat
 einen Namen, und der Bericht nennt ihn. Fehlt eine passende Regel, wird sie
 unter <a href="../regeln/#ertragsregeln">Regeln</a> angelegt.</p>
@@ -1395,13 +1613,13 @@ gewählten Produkts, gekennzeichnet mit <strong>Katalog</strong> oder <strong>Nu
   Prüfung an. Der Katalog bleibt unverändert.</li>
 </ul>
 <p>Die Abschrift ist das ganze Rezept, nicht nur die Abweichung. Ihre Zeilen
-lassen sich bearbeiten (Zutat, Menge, Einheit, das Plus für <strong>Zutat hinzufügen</strong>);
-abweichende Zeilen zeigen grau den Katalogwert, etwa <strong>Katalog: 200 g</strong>. Jede
-Zutat bleibt in der Einheit, in der sie in allen Rezepten gemessen wird. Wird
+lassen sich bearbeiten (Produkt, Menge, Einheit, das Plus für <strong>Produkt hinzufügen</strong>);
+abweichende Zeilen zeigen grau den Katalogwert, etwa <strong>Katalog: 200 g</strong>. Jedes
+Produkt bleibt in seiner Einheit. Wird
 das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.</p>
 <p><strong>Auf Katalog zurücksetzen</strong> verwirft die Anpassung. <strong>In den Katalog
-übernehmen</strong> öffnet die Regeln mit dem angepassten Rezept; ist es dort
-gespeichert, entfällt die Anpassung, und das Produkt steht wieder auf
+übernehmen</strong> öffnet die Regeln mit dem angepassten Rezept; ist es dort mit
+<strong>Übernehmen</strong> bestätigt, entfällt die Anpassung, und das Produkt steht wieder auf
 <strong>Katalog</strong>.</p>
 <p>Die Prüfung merkt sich, von welchem Stand des Katalogrezepts sie abgeschrieben
 hat. Ändert sich das Katalogrezept danach, wird nichts übernommen; beim
@@ -1417,18 +1635,18 @@ Salat, in die Prüfung.</p>
 den Umsatz eingeht, in zwei Listen mit Betrag und Grund.</p>
 <p><strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong>: Der Umsatz dieser Positionen wird über den
 Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang E), sie verändern den
-Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des
-Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
-in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine
-Zutat ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu
-Recht: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die
-ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient
+Satz selbst aber nicht. Entweder braucht kein Produkt des Sortiments diese
+Ware, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
+in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf ein
+Produkt ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu
+Recht: Kleinigkeiten, für die sich kein eigenes Produkt im Sortiment lohnt, oder
+Waren, die ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient
 einen zweiten Blick; dann ist oft die Zuordnung falsch, oder im Sortiment fehlt
-ein Produkt. Welche Produkte die Zutat verwenden, steht unter
+ein Produkt. Welche Produkte die Ware verwenden, steht unter
 <a href="../regeln/#produkte">Regeln → Produkte</a>.</p>
 <p><strong>Nicht in der Umsatzschätzung</strong>: Diese Positionen fehlen im Umsatz nach BP
 ganz: Positionen, die unter <a href="../zuordnung/">Zuordnung</a> noch offen sind, und
-Zutaten, die ohne Umsatz festgelegt sind.</p>
+Produkte, die ohne Umsatz festgelegt sind.</p>
 <p>Pfand und Leergut stehen nicht in der Liste. Über die Zeit gleichen sie sich
 aus, darum zählen sie auch nicht zu den erfassten Einkäufen. Unter der Liste
 steht grau, was an Pfand berechnet und an Leergut gutgeschrieben wurde.</p>
@@ -1437,9 +1655,9 @@ steht grau, was an Pfand berechnet und an Leergut gutgeschrieben wurde.</p>
 Vorschlägen und die Belege. Eine falsche Zuordnung lässt sich dort direkt
 korrigieren; die Kalkulation und die Vorschau rechnen danach neu.</p>
 <p>Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht am Katalog. Das × am Ende
-einer Zeile unter <strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong> nimmt ihre
-Zutat aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt
-für alle Positionen dieser Zutat in dieser Prüfung, auch für später eingelesene
+einer Zeile unter <strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong> nimmt ihr
+Produkt aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt
+für alle Positionen dieses Produkts in dieser Prüfung, auch für später eingelesene
 Rechnungen; sie stehen dann unter <strong>Nicht in der Umsatzschätzung</strong>. Das ↺ am
 Ende der Zeile nimmt die Festlegung zurück.</p>
 <p>Neben <strong>Nicht in der Umsatzschätzung</strong> steht ihr Anteil an allen Einkäufen. So viel vom Umsatz

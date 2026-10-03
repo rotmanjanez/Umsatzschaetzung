@@ -6,7 +6,7 @@ Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht,
 
 ## Aufbau
 
-**Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne Preis, eine Zutat, die nur über ein geschätztes Stückgewicht umgerechnet wurde, eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit.
+**Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne Preis, eine Ware, die nur über ein geschätztes Stückgewicht umgerechnet wurde, eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit.
 
 1. **Umsätze vor und nach Betriebsprüfung**: erklärter und kalkulierter Umsatz netto je Steuersatz, mit Differenz. Das ist das Ergebnis. Der Umsatz nach BP umfasst den ganzen verkaufsfähigen Wareneinsatz: die Portionen mit Preis und dazu, was über den Aufschlagsatz geschätzt ist.
 1. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, ermittelt nur an Portionen mit Preis. Ist eine Gewerbekennzahl eingetragen, steht darunter der Rahmen der Richtsatzsammlung und ob der kalkulierte Satz darin liegt. Darunter die Kalkulation je Produkt, alles je Portion: Portionen, Einsatz je Portion, Nettopreis und Aufschlagsatz. In der Gastronomie eine Tabelle je Sparte, sonst eine für alle Produkte.
@@ -14,9 +14,9 @@ Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht,
 Der Anhang belegt, woher die Zahlen kommen:
 
 - **A: Eingangspositionen**: jede Rechnungszeile, die eingegangen ist.
-- **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet sind.
-- **C: Ausbeute**: je Zutat, wie viel vom Einkauf verkaufsfähig ist, dazu die angewandte Ertragsregel.
-- **D: Portionen je Zutat**: je Zutat die Produkte, in die die verkaufsfähige Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.
+- **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet sind; ein Rezept für mehr als eine Portion nennt, was es ergibt, etwa „ergibt 20 Stück“, ein Produkt ohne Rezept steht „wie eingekauft“. Kommen Portionen aus mehr als einer Herkunft, etwa aus gekauften und selbst gemachten Pommes, zeigt **Portionen je Herkunft** jede mit ihren Portionen und ihrem Einsatz.
+- **C: Ausbeute**: je Ware, wie viel vom Einkauf verkaufsfähig ist, dazu die angewandte Ertragsregel.
+- **D: Portionen je Ware**: je Ware die Produkte, in die die verkaufsfähige Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.
 - **E: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen ohne Portion und Preis, jede mit dem Satz, der für sie gilt. Es gilt der Satz der Sparte; hat die Sparte keinen, der Gesamtsatz. Auf die Steuersätze verteilt sich der geschätzte Umsatz wie der kalkulierte Umsatz derselben Sparte.
 - **F: Kennzahlen**: die Brücke vom Einkauf bis zum Umsatz nach BP in einer Aufstellung.
 

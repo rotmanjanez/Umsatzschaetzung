@@ -12,7 +12,7 @@ Diese Seite richtet sich an die IT: wo das Programm seine Daten ablegt, wie sich
 
 Eine **Prüfung** ist eine einzelne Datei mit allen Rechnungen und Scans. Sie gehört einer Person und wird nicht geteilt, sondern bei Bedarf [weitergegeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
 
-Die **Regel-Datenbank** `rules.db` enthält Zutaten, Produkte, Rezepte, Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit aller Prüfungen und wächst mit jeder, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md).
+Die **Regel-Datenbank** `rules.db` enthält Produkte, Rezepte, Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit aller Prüfungen und wächst mit jeder, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md).
 
 ## Regel-Datenbank
 
@@ -26,7 +26,7 @@ Auf einem Terminalserver und in einer nicht dauerhaften VDI übersteht ein Ordne
 
 ### Gleichzeitige Nutzung
 
-Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten. Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine Zuordnung bestätigt oder eine Zutat, ein Produkt oder eine Ertragsregel ändert, und jede Änderung betrifft nur diesen einen Eintrag.
+Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten. Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine Zuordnung bestätigt oder ein Produkt oder eine Ertragsregel ändert, und jede Änderung betrifft nur diesen einen Eintrag.
 
 Das Programm verlässt sich dabei nicht auf die Sperren von SQLite, die nicht jede Freigabe zuverlässig durchsetzt. Es liest `rules.db` immer ganz und ersetzt sie ganz durch Umbenennen. Neu gelesen wird die Datei, sobald sich ihre Größe oder ihr Änderungszeitpunkt geändert hat. Ein Start ohne Änderung schreibt nichts.
 

@@ -13,23 +13,22 @@ Ein Gasthaus erklärt für ein Jahr einen Umsatz. Ob der plausibel ist, lässt s
 Dafür braucht es fünf Dinge, und genau das sind die fünf Reiter einer Prüfung:
 
 1. **1. Rechnungen** Die Eingangsrechnungen des Betriebs: was er eingekauft hat.
-1. **2. Zuordnung** Jede Rechnungsposition wird einer Zutat zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.
+1. **2. Zuordnung** Jede Rechnungsposition wird einem Produkt zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.
 1. **3. Sortiment** Was der Betrieb verkauft und zu welchem Preis: Schnitzel mit Pommes für 15,90 €, Bier 0,5 l für 4,60 €.
-1. **4. Kalkulation** Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
+1. **4. Kalkulation** Aus Einkäufen, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.
 1. **5. Bericht** Der kalkulierte Umsatz neben dem erklärten, als PDF.
 
 ## Die wichtigsten Begriffe
 
 Ein paar Wörter kommen dabei immer wieder vor:
 
-| Begriff       | Bedeutung                                                                                                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zutat**     | Eine Ware, wie sie eingekauft wird: Schweinefleisch, Fassbier, Rotwein.                                                                                                      |
-| **Produkt**   | Etwas, das verkauft wird: Schnitzel mit Pommes, Bier 0,5 l vom Fass.                                                                                                         |
-| **Rezept**    | Wie viel von welcher Zutat in ein Produkt geht: In ein Schnitzel gehen 180 g Schweinefleisch.                                                                                |
-| **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen.                                                                                                                  |
-| **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat.                                                                                                             |
-| **Regeln**    | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
+| Begriff       | Bedeutung                                                                                                                                                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Produkt**   | Alles, womit gerechnet wird: was eingekauft wird, wie Schweinefleisch, Fassbier, Rotwein, und was verkauft wird, wie Schnitzel mit Pommes oder Bier 0,5 l vom Fass. Pommes können eingekauft oder, mit einem Rezept, aus Kartoffeln gemacht sein. |
+| **Rezept**    | Aus welchen Produkten ein anderes gemacht wird, und wie viel davon: In ein Schnitzel gehen 180 g Schweinefleisch.                                                                                                                                 |
+| **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen.                                                                                                                                                                                       |
+| **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einem Produkt.                                                                                                                                                                                |
+| **Regeln**    | Das Wissen des Programms: Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung.                                                                               |
 
 ## Das Gasthaus Zur Linde
 

@@ -10,7 +10,7 @@ Name, Steuernummer und PAB-Nr. des Steuerpflichtigen stehen nur im Kopf des Beri
 
 Die **Gewerbekennzahl** der Richtsatzsammlung, etwa `56101.0` für eine Gaststätte, wirkt an zwei Stellen:
 
-- Die Zuordnung schlägt nur Zutaten vor, die zu dieser Gewerbeklasse passen. Einer Gaststätte wird kein Friseurbedarf angeboten.
+- Die Zuordnung schlägt nur Produkte vor, die zu dieser Gewerbeklasse passen. Einer Gaststätte wird kein Friseurbedarf angeboten.
 - Der Bericht stellt den kalkulierten Rohgewinnaufschlag dem Rahmen der Richtsatzsammlung gegenüber.
 
 Ohne Kennzahl bleibt der Vergleich aus, und die Kalkulation trennt nach Getränken und Speisen wie bei einer Gaststätte.
@@ -23,7 +23,7 @@ Der Umsatz, den der Betrieb erklärt hat, netto und getrennt nach Steuersatz. Er
 
 Ohne Angaben gilt alles, was im Zeitraum eingekauft wurde, als verbraucht. Das ist richtig, solange das Lager zu Beginn und Ende etwa gleich voll war.
 
-Liegt eine Inventur vor, trägt das Plus unter der Tabelle (**Zutat hinzufügen**) Anfangs- und Endbestand je Zutat ein. Verbraucht ist dann
+Liegt eine Inventur vor, trägt das Plus unter der Tabelle (**Produkt hinzufügen**) Anfangs- und Endbestand je Produkt ein. Verbraucht ist dann
 
 ```
 Anfangsbestand + Einkauf − Endbestand

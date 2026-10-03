@@ -8,7 +8,7 @@ Das Pfeilsymbol in der Zeile der Liste legt eine Kopie dieser Datei ab, wo Sie w
 
 ## Regeln gehen nicht mit
 
-Zutaten, Produkte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung, sondern in der Regel-Datenbank des Rechners, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md). Die Prüfung verweist nur darauf.
+Produkte, Rezepte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung, sondern in der Regel-Datenbank des Rechners, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md). Die Prüfung verweist nur darauf.
 
 Auf einem Rechner mit anderen Regeln sucht das Programm deshalb für jede Rechnungszeile wieder selbst eine Zuordnung. Findet es keine, bleibt die Zeile ungeklärt und fällt aus der Kalkulation. Die Zahlen können also von denen des Absenders abweichen.
 
@@ -16,7 +16,7 @@ Auf einem Rechner mit anderen Regeln sucht das Programm deshalb für jede Rechnu
 
 Der Bericht der Prüfung geht über das Pfeilsymbol (**Als PDF speichern**) heraus, so wie er angezeigt wird.
 
-In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts (**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant, Nummer, Datum und Summen, darunter jede Position mit Menge, Preisen, Steuersatz und der Zutat, der sie zugeordnet ist. Das Symbol ist gesperrt, bis die letzte Änderung gespeichert ist — exportiert wird, was in der Prüfung steht.
+In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts (**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant, Nummer, Datum und Summen, darunter jede Position mit Menge, Preisen, Steuersatz und dem Produkt, dem sie zugeordnet ist. Das Symbol ist gesperrt, bis die letzte Änderung gespeichert ist — exportiert wird, was in der Prüfung steht.
 
 Trennzeichen ist das Semikolon, die Zahlen stehen so darin, wie sie am Bildschirm stehen, mit Komma und Einheit (`1.110,00 €`, `12 Keg`). Excel öffnet die Datei ohne Nachfrage.
 

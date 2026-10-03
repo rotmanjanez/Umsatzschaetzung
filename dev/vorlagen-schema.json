@@ -55,7 +55,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "ingredientId": {
+              "productId": {
                 "type": "string"
               },
               "opening": {
@@ -213,14 +213,8 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "ingredientId": {
+                    "partId": {
                       "type": "string"
-                    },
-                    "productId": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
                     },
                     "amount": {
                       "type": "integer"
@@ -242,7 +236,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "ingredientId": {
+              "productId": {
                 "type": [
                   "string",
                   "null"
@@ -330,7 +324,7 @@
                   "null"
                 ]
               },
-              "ingredientId": {
+              "productId": {
                 "type": "string"
               },
               "factor": {
@@ -481,7 +475,13 @@
             }
           }
         },
-        "ingredients": {
+        "mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/properties/case/properties/mappings/additionalProperties"
+          }
+        },
+        "products": {
           "type": "object",
           "additionalProperties": {
             "type": "object",
@@ -492,8 +492,17 @@
               "name": {
                 "type": "string"
               },
-              "categoryId": {
+              "unit": {
                 "type": "string"
+              },
+              "batch": {
+                "type": "integer"
+              },
+              "categoryId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "aliases": {
                 "type": "array",
@@ -522,58 +531,6 @@
                   "amount",
                   "unit"
                 ]
-              },
-              "meta": {
-                "type": "object",
-                "properties": {
-                  "validFrom": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "format": "date"
-                  },
-                  "validTo": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "format": "date"
-                  },
-                  "changedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "changedBy": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "rev": {
-                    "type": "integer"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "mappings": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/properties/case/properties/mappings/additionalProperties"
-          }
-        },
-        "products": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
               },
               "recipe": {
                 "type": "array",
@@ -633,7 +590,7 @@
                   "null"
                 ]
               },
-              "ingredientId": {
+              "productId": {
                 "type": [
                   "string",
                   "null"
@@ -865,12 +822,12 @@
             }
           }
         },
-        "ingredients": {
+        "supply": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "ingredientId": {
+              "productId": {
                 "type": "string"
               },
               "name": {
@@ -972,7 +929,7 @@
                       "null"
                     ]
                   },
-                  "ingredientId": {
+                  "productId": {
                     "type": [
                       "string",
                       "null"
@@ -995,7 +952,7 @@
               "sellable": {
                 "type": "integer"
               },
-              "products": {
+              "usedBy": {
                 "type": "array",
                 "items": {
                   "type": "object",
@@ -1084,6 +1041,44 @@
               },
               "priceMissing": {
                 "type": "boolean"
+              },
+              "routes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "portions": {
+                      "type": "integer"
+                    },
+                    "costPerPortion": {
+                      "type": "integer"
+                    },
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "productId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "unit": {
+                            "enum": [
+                              "ml",
+                              "g",
+                              "piece"
+                            ]
+                          },
+                          "perPortion": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -1156,7 +1151,7 @@
               "lineNet": {
                 "type": "integer"
               },
-              "ingredientId": {
+              "productId": {
                 "type": "string"
               }
             }
@@ -1265,7 +1260,7 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "ingredientId": {
+                    "productId": {
                       "type": "string"
                     },
                     "qty": {
@@ -1512,6 +1507,13 @@
         ]
       }
     },
+    "routed": {
+      "description": "Produkte, deren Portionen auf mehr als einem Weg entstanden, etwa teils aus gekauften, teils aus selbst gemachten Pommes.",
+      "type": "array",
+      "items": {
+        "$ref": "#/properties/report/properties/products/items"
+      }
+    },
     "rahmen": {
       "description": "Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.",
       "type": [
@@ -1580,7 +1582,7 @@
       ]
     },
     "anyYields": {
-      "description": "Ob irgendeine Zutat eine Ertragsregel trägt.",
+      "description": "Ob irgendein Bestand eine Ertragsregel trägt.",
       "type": "boolean"
     },
     "gewerbe": {
@@ -1978,6 +1980,7 @@
     "revenue",
     "estimated",
     "calculation",
+    "routed",
     "suppliers",
     "marks",
     "template"

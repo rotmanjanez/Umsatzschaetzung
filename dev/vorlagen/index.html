@@ -770,6 +770,8 @@
       
         
       
+        
+      
     
     
     
@@ -1159,6 +1161,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1221,8 +1425,8 @@ Gepflegt werden sie unter <strong>Regeln → Vorlagen</strong>.</p>
   ist. Wer anpassen will, legt am besten mit <strong>Neu</strong> eine Kopie an und macht
   diese zum Standard. Dann bleibt das Original als Vergleich erhalten.</li>
 </ul>
-<p>Die Vorlage wird beim Speichern geprüft. Ein Fehler im Aufbau, etwa ein
-fehlendes <code>{% endif %}</code>, verhindert das Speichern. Ein Feld, das es nicht gibt,
+<p>Die Vorlage wird gespeichert und dabei geprüft, sobald das Feld verlassen wird.
+Ein Fehler im Aufbau, etwa ein fehlendes <code>{% endif %}</code>, verhindert das Speichern. Ein Feld, das es nicht gibt,
 fällt erst beim Erzeugen des Berichts auf.</p>
 <h2 id="was-eine-vorlage-darf">Was eine Vorlage darf</h2>
 <p>Die Seite läuft in einer abgeschotteten Ansicht. Erlaubt sind HTML, Stile im
@@ -1244,7 +1448,7 @@ das Programm selbst. Sie stehen nicht in der Vorlage.</p>
 </code></pre></div>
 <ul>
 <li>Ein Pfad geht mit <code>.</code> in ein Objekt und mit <code>[…]</code> über einen anderen Wert:
-  <code>rules.ingredients[l.ingredientId].name</code>. Eine Zahl in <code>[…]</code> wählt einen
+  <code>rules.products[l.partId].name</code>. Eine Zahl in <code>[…]</code> wählt einen
   Eintrag einer Liste, gezählt ab 0: <code>revenue[0].vat</code>.</li>
 <li>Eingesetzte Werte werden für HTML maskiert. HTML aus den Daten ist deshalb
   nicht möglich.</li>
@@ -1386,6 +1590,11 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte.</td>
 </tr>
 <tr>
+<td><code>routed</code></td>
+<td>Liste von <a href="#m-productrow">ProductRow</a></td>
+<td>Produkte, deren Portionen auf mehr als einem Weg entstanden, etwa teils aus gekauften, teils aus selbst gemachten Pommes.</td>
+</tr>
+<tr>
 <td><code>rahmen</code></td>
 <td><a href="#m-rahmen">Rahmen</a>?</td>
 <td>Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.</td>
@@ -1398,7 +1607,7 @@ mit der installierten Version überein. Als JSON Schema:
 <tr>
 <td><code>anyYields</code></td>
 <td>ja/nein</td>
-<td>Ob irgendeine Zutat eine Ertragsregel trägt.</td>
+<td>Ob irgendein Bestand eine Ertragsregel trägt.</td>
 </tr>
 <tr>
 <td><code>gewerbe</code></td>
@@ -1547,10 +1756,6 @@ mit der installierten Version überein. Als JSON Schema:
 <td>ID → <a href="#m-category">Category</a></td>
 </tr>
 <tr>
-<td><code>ingredients</code></td>
-<td>ID → <a href="#m-ingredient">Ingredient</a></td>
-</tr>
-<tr>
 <td><code>mappings</code></td>
 <td>ID → <a href="#m-articlemapping">ArticleMapping</a></td>
 </tr>
@@ -1594,8 +1799,8 @@ mit der installierten Version überein. Als JSON Schema:
 <td><a href="#m-totals">Totals</a></td>
 </tr>
 <tr>
-<td><code>ingredients</code></td>
-<td>Liste von <a href="#m-ingredientrow">IngredientRow</a></td>
+<td><code>supply</code></td>
+<td>Liste von <a href="#m-supplyrow">SupplyRow</a></td>
 </tr>
 <tr>
 <td><code>products</code></td>
@@ -1740,6 +1945,81 @@ mit der installierten Version überein. Als JSON Schema:
 <tr>
 <td><code>markup</code></td>
 <td>Zahl</td>
+</tr>
+</tbody>
+</table>
+<h3 id="m-productrow">ProductRow</h3>
+<table>
+<thead>
+<tr>
+<th>Feld</th>
+<th>Typ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>productId</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>binding</code></td>
+<td>Liste von Text</td>
+</tr>
+<tr>
+<td><code>pinReason</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>sparte</code></td>
+<td><code>"unbestimmt"</code> | <code>"getraenke"</code> | <code>"speisen"</code> | <code>"handelsware"</code></td>
+</tr>
+<tr>
+<td><code>portions</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>costPerPortion</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>costOfGoods</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>pinned</code></td>
+<td>ja/nein</td>
+</tr>
+<tr>
+<td><code>grossPrice</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>vat</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>unitNet</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>revenueNet</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>markup</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>priceMissing</code></td>
+<td>ja/nein</td>
+</tr>
+<tr>
+<td><code>routes</code></td>
+<td>Liste von <a href="#m-routerow">RouteRow</a></td>
 </tr>
 </tbody>
 </table>
@@ -1961,7 +2241,7 @@ mit der installierten Version überein. Als JSON Schema:
 </thead>
 <tbody>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text</td>
 </tr>
 <tr>
@@ -2064,7 +2344,7 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 <tr>
 <td><code>recipe</code></td>
-<td>Liste von <a href="#m-recipeline">RecipeLine</a>?</td>
+<td>Liste von <a href="#m-partline">PartLine</a>?</td>
 </tr>
 <tr>
 <td><code>recipeBasis</code></td>
@@ -2082,7 +2362,7 @@ mit der installierten Version überein. Als JSON Schema:
 </thead>
 <tbody>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text?</td>
 </tr>
 <tr>
@@ -2156,7 +2436,7 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Text?</td>
 </tr>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text</td>
 </tr>
 <tr>
@@ -2208,41 +2488,6 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 </tbody>
 </table>
-<h3 id="m-ingredient">Ingredient</h3>
-<table>
-<thead>
-<tr>
-<th>Feld</th>
-<th>Typ</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>id</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>categoryId</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>aliases</code></td>
-<td>Liste von Text</td>
-</tr>
-<tr>
-<td><code>piece</code></td>
-<td><a href="#m-piece">Piece</a>?</td>
-</tr>
-<tr>
-<td><code>meta</code></td>
-<td><a href="#m-meta">Meta</a></td>
-</tr>
-</tbody>
-</table>
 <h3 id="m-product">Product</h3>
 <table>
 <thead>
@@ -2261,8 +2506,28 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Text</td>
 </tr>
 <tr>
+<td><code>unit</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>batch</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>categoryId</code></td>
+<td>Text?</td>
+</tr>
+<tr>
+<td><code>aliases</code></td>
+<td>Liste von Text</td>
+</tr>
+<tr>
+<td><code>piece</code></td>
+<td><a href="#m-piece">Piece</a>?</td>
+</tr>
+<tr>
 <td><code>recipe</code></td>
-<td>Liste von <a href="#m-recipeline">RecipeLine</a></td>
+<td>Liste von <a href="#m-partline">PartLine</a></td>
 </tr>
 <tr>
 <td><code>meta</code></td>
@@ -2292,7 +2557,7 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Text?</td>
 </tr>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text?</td>
 </tr>
 <tr>
@@ -2439,7 +2704,7 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 </tbody>
 </table>
-<h3 id="m-ingredientrow">IngredientRow</h3>
+<h3 id="m-supplyrow">SupplyRow</h3>
 <table>
 <thead>
 <tr>
@@ -2449,7 +2714,7 @@ mit der installierten Version überein. Als JSON Schema:
 </thead>
 <tbody>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text</td>
 </tr>
 <tr>
@@ -2501,8 +2766,8 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Zahl</td>
 </tr>
 <tr>
-<td><code>products</code></td>
-<td>Liste von <a href="#m-ingredientproduct">IngredientProduct</a></td>
+<td><code>usedBy</code></td>
+<td>Liste von <a href="#m-supplyuse">SupplyUse</a></td>
 </tr>
 <tr>
 <td><code>leftover</code></td>
@@ -2510,77 +2775,6 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 <tr>
 <td><code>binding</code></td>
-<td>ja/nein</td>
-</tr>
-</tbody>
-</table>
-<h3 id="m-productrow">ProductRow</h3>
-<table>
-<thead>
-<tr>
-<th>Feld</th>
-<th>Typ</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>productId</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>binding</code></td>
-<td>Liste von Text</td>
-</tr>
-<tr>
-<td><code>pinReason</code></td>
-<td>Text</td>
-</tr>
-<tr>
-<td><code>sparte</code></td>
-<td><code>"unbestimmt"</code> | <code>"getraenke"</code> | <code>"speisen"</code> | <code>"handelsware"</code></td>
-</tr>
-<tr>
-<td><code>portions</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>costPerPortion</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>costOfGoods</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>pinned</code></td>
-<td>ja/nein</td>
-</tr>
-<tr>
-<td><code>grossPrice</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>vat</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>unitNet</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>revenueNet</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>markup</code></td>
-<td>Zahl</td>
-</tr>
-<tr>
-<td><code>priceMissing</code></td>
 <td>ja/nein</td>
 </tr>
 </tbody>
@@ -2673,7 +2867,7 @@ mit der installierten Version überein. Als JSON Schema:
 <td>Zahl</td>
 </tr>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text</td>
 </tr>
 </tbody>
@@ -2873,6 +3067,29 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 </tbody>
 </table>
+<h3 id="m-routerow">RouteRow</h3>
+<table>
+<thead>
+<tr>
+<th>Feld</th>
+<th>Typ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>portions</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>costPerPortion</code></td>
+<td>Zahl</td>
+</tr>
+<tr>
+<td><code>parts</code></td>
+<td>Liste von <a href="#m-routepart">RoutePart</a></td>
+</tr>
+</tbody>
+</table>
 <h3 id="m-satz">Satz</h3>
 <table>
 <thead>
@@ -3016,7 +3233,7 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 </tbody>
 </table>
-<h3 id="m-recipeline">RecipeLine</h3>
+<h3 id="m-partline">PartLine</h3>
 <table>
 <thead>
 <tr>
@@ -3026,12 +3243,8 @@ mit der installierten Version überein. Als JSON Schema:
 </thead>
 <tbody>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>partId</code></td>
 <td>Text</td>
-</tr>
-<tr>
-<td><code>productId</code></td>
-<td>Text?</td>
 </tr>
 <tr>
 <td><code>amount</code></td>
@@ -3121,7 +3334,7 @@ mit der installierten Version überein. Als JSON Schema:
 </tr>
 </tbody>
 </table>
-<h3 id="m-ingredientproduct">IngredientProduct</h3>
+<h3 id="m-supplyuse">SupplyUse</h3>
 <table>
 <thead>
 <tr>
@@ -3185,11 +3398,38 @@ mit der installierten Version überein. Als JSON Schema:
 </thead>
 <tbody>
 <tr>
-<td><code>ingredientId</code></td>
+<td><code>productId</code></td>
 <td>Text</td>
 </tr>
 <tr>
 <td><code>qty</code></td>
+<td>Zahl</td>
+</tr>
+</tbody>
+</table>
+<h3 id="m-routepart">RoutePart</h3>
+<table>
+<thead>
+<tr>
+<th>Feld</th>
+<th>Typ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>productId</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td><code>unit</code></td>
+<td><code>"ml"</code> | <code>"g"</code> | <code>"piece"</code></td>
+</tr>
+<tr>
+<td><code>perPortion</code></td>
 <td>Zahl</td>
 </tr>
 </tbody>

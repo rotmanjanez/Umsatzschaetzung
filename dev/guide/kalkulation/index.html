@@ -776,6 +776,8 @@
       
         
       
+        
+      
     
     
     
@@ -1268,6 +1270,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1327,11 +1531,11 @@ aufgeräumt.</p>
 Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz
 eingehen, in zwei Listen mit dem Grund je Position:</p>
 <ul>
-<li><strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong>: Die Zutat kommt in
-  keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor.
+<li><strong>Nicht Teil der Ermittlung des Aufschlagsatzes</strong>: Kein Produkt des
+  Sortiments braucht die Ware, oder der Zuordnung fehlt der Faktor.
   Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das
   in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder
-  Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.</li>
+  Waren, die ein Rezept nicht aufs Gramm genau abbildet.</li>
 <li><strong>Nicht in der Umsatzschätzung</strong>: Einkäufe, die keinen Umsatz bringen,
   etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.</li>
 </ul>
@@ -1349,7 +1553,7 @@ fertig paniertes Schnitzel. Das Gasthaus kauft das Fleisch aber roh,
 Pommes</strong>, und dessen Rezept rechnet mit Schweinefleisch.</p>
 <p>Rechts steht die Zuordnung, darunter die Vorschläge. <strong>Schweinefleisch</strong>
 trägt das Zeichen <strong>In Rezeptur</strong>: Ein Produkt des Sortiments braucht die
-Zutat, hier <strong>Schnitzel mit Pommes</strong>. Den Vorschlag wählen und
+Ware, hier <strong>Schnitzel mit Pommes</strong>. Den Vorschlag wählen und
 <strong>Zuordnen</strong>.</p>
 </div>
 <p><img alt="Das Schnitzel wird Schweinefleisch zugeordnet" src="../img/kalkulation-schnitzel.png" /></p>
@@ -1370,8 +1574,8 @@ Zeilenende klicken (<strong>… bringt in diesem Betrieb keinen Umsatz</strong>)
 <li><strong>Handspülmittel Konzentrat 5 l</strong></li>
 <li><strong>Versandkostenpauschale</strong></li>
 </ol>
-<p>Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position.
-Alle Positionen derselben Zutat wandern mit: mit den Servietten
+<p>Die Festlegung gilt für das Produkt, nicht nur für die angeklickte Position.
+Alle Positionen desselben Produkts wandern mit: mit den Servietten
 (<strong>Verpackung und Einweg</strong>) auch Müllbeutel und Filterpapier, mit dem
 Handspülmittel (<strong>Reinigung und Hygiene</strong>) Spülmaschinen-Reiniger,
 Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale
@@ -1399,14 +1603,19 @@ steht <strong>Schnitzel mit Pommes</strong> mit dem Preis von der Karte, 15,90 �
 <p>Auf <strong>4. Kalkulation</strong> die Seite <strong>Portionen</strong> öffnen und <strong>Schnitzel mit
 Pommes</strong> anklicken. Rechts steht, wie es gerechnet ist:</p>
 <ul>
-<li><strong>Rezeptur je Portion</strong>: 180 g Schweinefleisch, dazu Pommes frites und
-  Pflanzenöl. Beim Schweinefleisch steht <strong>begrenzt die Portionen</strong>: Es
-  ist die Zutat, von der am wenigsten da ist.</li>
+<li><strong>Rezeptur je Portion</strong>: ein <strong>Schnitzel, ohne Beilage</strong> und eine
+  Portion <strong>Pommes, Beilage</strong>, jedes ein eigenes Produkt mit eigenem Rezept.
+  Im Schnitzel stecken 180 g Schweinefleisch, in der Beilage Pommes frites
+  und Pflanzenöl. Beim Schnitzel steht <strong>begrenzt die Portionen</strong>: Sein
+  Schweinefleisch ist die Ware, von der am wenigsten da ist.</li>
 <li><strong>Portionen</strong>: Das Schweinefleisch könnte auch in den Braten des
-  Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich
+  Mittagstischs gehen. Die Kalkulation verteilt eine Ware, die sich
   mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht;
   das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle
-  rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.</li>
+  rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+  Weil sich viele Gerichte dieselben Waren teilen, steht darunter
+  <strong>Näherungsweise verteilt</strong>: Das Programm hat die Aufteilung nicht bis
+  aufs letzte Stück durchgerechnet.</li>
 <li><strong>Umsatz (netto)</strong>: 3.039 Portionen zu 15,90 € brutto, ohne 19 %
   Umsatzsteuer, ergeben 40.601,04 €.</li>
 </ul>
@@ -1415,9 +1624,9 @@ Pommes</strong> anklicken. Rechts steht, wie es gerechnet ist:</p>
 <p><img alt="Die Seite „Portionen“ mit dem Schnitzel und seinem Rezept" src="../img/kalkulation-portionen.png" /></p>
 </div>
 <h2 id="ertragsregeln">Ertragsregeln</h2>
-<p>Auf der Seite <strong>Ertragsregeln</strong> stehen die Kategorien und Zutaten der
+<p>Auf der Seite <strong>Ertragsregeln</strong> stehen die Kategorien und Produkte der
 Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch.
-Je Zutat oder Warengruppe lässt sich wählen, welche Regel gilt; die
+Je Produkt oder Warengruppe lässt sich wählen, welche Regel gilt; die
 Kalkulation rechnet sofort neu. Für das Beispiel bleiben die
 Voreinstellungen.</p>
 <h2 id="rezeptur-anpassen">Rezeptur anpassen</h2>
@@ -1431,10 +1640,10 @@ woher das Rezept kommt: <strong>Katalog</strong> oder <strong>Nur diese Prüfung
 <li><strong>Für diese Prüfung anpassen</strong> kopiert das Rezept in die Prüfung. Der
   Katalog bleibt, wie er ist.</li>
 </ul>
-<p>Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit,
-dazu fügt das Plus (<strong>Zutat hinzufügen</strong>) eine Zeile an. Weicht eine Zeile
+<p>Angepasst lassen sich die Zeilen bearbeiten: Produkt, Menge und Einheit,
+dazu fügt das Plus (<strong>Produkt hinzufügen</strong>) eine Zeile an. Weicht eine Zeile
 vom Katalog ab, steht grau daneben, was er vorsieht, etwa <strong>Katalog:
-200 g</strong>. Eine Zutat wird in jedem Rezept in derselben Einheit gemessen,
+200 g</strong>. Ein Produkt wird in jedem Rezept in seiner Einheit gemessen,
 auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort
 neu; unter <strong>Portionen</strong> steht beim Produkt <strong>angepasst</strong>, auf
 <strong>3. Sortiment</strong> <strong>Rezept angepasst</strong>, und ein Klick darauf führt hierher.</p>

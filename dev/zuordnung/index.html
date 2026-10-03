@@ -879,6 +879,8 @@
       
         
       
+        
+      
     
     
     
@@ -1268,6 +1270,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1314,7 +1518,7 @@
 
 <h1 id="zuordnung">Zuordnung</h1>
 <p>Eine Rechnung nennt Waren so, wie der Lieferant sie nennt: „GOUDA JUNG 48% BLOCK
-ca 3kg“. Die Kalkulation rechnet mit Zutaten: Schnittkäse. Die Zuordnung ist die
+ca 3kg“. Die Kalkulation rechnet mit Produkten: Schnittkäse. Die Zuordnung ist die
 Verbindung dazwischen. Sie gilt ab dann für jede weitere Rechnung desselben
 Artikels, auch in späteren Prüfungen.</p>
 <p>Zugeordnet wird je Artikel, nicht je Rechnungszeile. Steht derselbe Gouda auf
@@ -1324,7 +1528,7 @@ zwölf Lieferscheinen, ist er einmal zuzuordnen.</p>
 was das Programm nicht sicher genug einschätzt. Unter <strong>Zuordnung</strong> stehen alle
 Artikel der Prüfung in der Liste links, mit ihrem Stand in der ersten Spalte:</p>
 <ul>
-<li><strong>Offen</strong> — noch keine Zutat, die Position wartet auf eine Entscheidung.</li>
+<li><strong>Offen</strong> — noch kein Produkt, die Position wartet auf eine Entscheidung.</li>
 <li><strong>Automatisch</strong> — das Programm hat zugeordnet, niemand hat es bestätigt.</li>
 <li><strong>Manuell</strong> — ein Mensch hat die Zuordnung gewählt oder bestätigt.</li>
 </ul>
@@ -1342,12 +1546,16 @@ Kalkulation weist die offenen Positionen aus, damit kein Einkauf unbemerkt
 unter den Tisch fällt.</p>
 <h2 id="woher-die-vorschlage-kommen">Woher die Vorschläge kommen</h2>
 <p>Das Programm vergleicht den Text der Rechnungsposition mit dem, was über die
-Zutaten bekannt ist:</p>
+Produkte bekannt ist:</p>
 <ul>
-<li>dem <strong>Namen</strong> der Zutat,</li>
-<li>ihren <strong>Warenarten</strong>, also dem, was unter ihr gebucht wird,</li>
+<li>dem <strong>Namen</strong> des Produkts,</li>
+<li>seinen <strong>Warenarten</strong>, also dem, was unter ihm gebucht wird,</li>
 <li>und <strong>jeder Zuordnung, die schon bestätigt wurde</strong>.</li>
 </ul>
+<p>Vorgeschlagen werden nur Produkte, die als Ware eingekauft werden: solche mit
+Kategorie, mit Warenarten oder mit einer bestätigten Zuordnung. Ein Gericht wie
+Schnitzel mit Pommes kommt nicht auf eine Rechnung und wird darum nicht
+vorgeschlagen; von Hand lässt sich aber jedes Produkt wählen.</p>
 <p>Der dritte Punkt ist der wichtigste. Jede bestätigte Zuordnung ist ein Beispiel,
 an dem das Programm die Sprache der Lieferanten lernt — Abkürzungen,
 Gebindeangaben, Schreibweisen. Wer die ersten zwanzig Positionen eines neuen
@@ -1365,19 +1573,19 @@ Schätzung.</p>
 <p>Position links auswählen. Rechts stehen der Rechnungstext, Artikelnummer,
 Einheit und Menge, darunter die Vorschläge. Den richtigen wählen und
 <strong>Zuordnen</strong>.</p>
-<p>Passt keiner, <strong>Manuell zuordnen</strong> und die Zutat selbst wählen. Bei Gebinden ist
+<p>Passt keiner, <strong>Manuell zuordnen</strong> und das Produkt selbst wählen. Bei Gebinden ist
 zusätzlich der <strong>Faktor</strong> anzugeben: der Inhalt eines Gebindes in der Einheit des
-Rezepts, etwa 3000 bei einem 3-kg-Block zu einem Rezept in Gramm. Bei kg, l und
+Produkts, etwa 3000 bei einem 3-kg-Block Schnittkäse, der in Gramm gezählt wird. Bei kg, l und
 Stück rechnet das Programm selbst um.</p>
-<p>Steht die Packungsgröße im Artikeltext („12 × 400 g“) oder hat die Zutat ein
+<p>Steht die Packungsgröße im Artikeltext („12 × 400 g“) oder hat das Produkt ein
 <strong>Stückgewicht</strong>, ist der Faktor schon ausgefüllt; darunter steht, woher er
 kommt, und der Preis je kg oder l, der sich daraus ergibt. Das Stückgewicht ist
 ein Richtwert — rechnet ein Großmarkt einen 10-kg-Sack als „1 Stk“ ab, verrät
 ihn der viel zu hohe Kilopreis. Dann den Faktor überschreiben.</p>
-<p>Wird eine Position einzeln in Stück berechnet und das Rezept in g oder ml, ist
-der eingetragene Faktor das Gewicht eines Stücks. Er wird bei der Zutat
-gespeichert (<strong>Regeln → Zutaten → Stückgewicht</strong>) und gilt dann für jede Position
-dieser Zutat in Stück. Bei Gebinden wie Kiste oder Karton bleibt er bei der
+<p>Wird eine Position einzeln in Stück berechnet und das Produkt in g oder ml
+gezählt, ist der eingetragene Faktor das Gewicht eines Stücks. Er wird beim
+Produkt gespeichert (<strong>Regeln → Produkte → Stückgewicht</strong>) und gilt dann für jede
+Position dieses Produkts in Stück. Bei Gebinden wie Kiste oder Karton bleibt er bei der
 Zuordnung.</p>
 <h2 id="eine-zuordnung-korrigieren">Eine Zuordnung korrigieren</h2>
 <p>Auch eine automatisch zugeordnete Position lässt sich auswählen. Rechts steht
@@ -1387,29 +1595,32 @@ Vorschlag oder <strong>Manuell zuordnen</strong> ersetzt sie. Die Regel für den
 dabei korrigiert, nicht verdoppelt: Jede weitere Rechnung mit diesem Artikel
 folgt der Korrektur.</p>
 <p>Wer stichprobenartig prüfen will, beginnt bei den größten Beträgen — die
-Kalkulation zeigt, welche Beträge auf welche Zutat entfallen, und dort fällt ein
+Kalkulation zeigt, welche Beträge auf welches Produkt entfallen, und dort fällt ein
 Fehler am meisten ins Gewicht.</p>
 <h2 id="warenarten">Warenarten pflegen</h2>
-<p>Warenarten stehen bei der Zutat unter <strong>Regeln → Zutaten</strong>, eine je Zeile.
+<p>Warenarten stehen beim Produkt unter <strong>Regeln → Produkte</strong>, eine je Zeile.
 Bei Schnittkäse etwa Gouda, Emmentaler, Edamer, Tilsiter.</p>
 <p>Eine gute Warenart ist die Ware, nicht der Artikeltext des Lieferanten. „Gouda“
 gehört dazu, „GOUDA JUNG 48% BLOCK ca 3kg“ nicht — diesen Fall deckt die
 Zuordnung selbst ab, sobald sie einmal bestätigt ist. Es lohnt sich, Warenarten
 dann zu ergänzen, wenn eine Warenart immer wieder zur Durchsicht vorgelegt wird,
-obwohl sie eindeutig zu einer Zutat gehört.</p>
+obwohl sie eindeutig zu einem Produkt gehört.</p>
 <p>Warenarten gelten betriebsübergreifend, weil sie zu den Regeln gehören und nicht zu
 einer einzelnen Prüfung.</p>
 <h2 id="kein-wareneinsatz">Kein Wareneinsatz</h2>
 <p>Nicht alles auf einer Eingangsrechnung ist Wareneinsatz. Pfand, Fracht,
-Verpackung, Reinigungsmittel, Büromaterial: Diese Positionen sind Zutaten in der
+Verpackung, Reinigungsmittel, Büromaterial: Diese Positionen sind Produkten in der
 Kategorie <strong>Kein Wareneinsatz</strong> zuzuordnen.</p>
-<p>Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen,
-gehen aber in keine Kalkulation ein. Im Bericht erscheinen sie als
-<strong>unberücksichtigt</strong> — mit Betrag, damit erkennbar bleibt, was bewusst außen vor
-geblieben ist, und nicht bloß vergessen wurde.</p>
+<p>Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen.
+Weil sie in keinem Rezept vorkommen, stehen sie in der Kalkulation unter
+<a href="../kalkulation/#nicht-berucksichtigt">Übrige Einkäufe</a>, und ihr Umsatz wird wie
+bei jeder solchen Ware über den Rohgewinnaufschlagsatz geschätzt. Bringen sie in
+diesem Betrieb keinen Umsatz, nimmt das × am Ende der Zeile sie aus der
+Schätzung; sie stehen dann mit Betrag unter <strong>Nicht in der Umsatzschätzung</strong>,
+damit erkennbar bleibt, was bewusst außen vor geblieben ist.</p>
 <p>Pfand ist der häufigste Fall. Es steht als eigene Position auf fast jeder
 Getränkerechnung, wird zurückgezahlt und hat mit dem Einkauf von Ware nichts zu
-tun. Der Zutat <strong>Pfand und Leergut</strong> zugeordnet, zählt es auch nicht zu den
+tun. Dem Produkt <strong>Pfand und Leergut</strong> zugeordnet, zählt es auch nicht zu den
 erfassten Einkäufen und nicht zu den unberücksichtigten; der Bericht nennt nur
 die Summen von berechnetem Pfand und gutgeschriebenem Leergut.</p>
 

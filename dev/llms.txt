@@ -1,6 +1,6 @@
 # Umsatzschätzung
 
-Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Zutaten zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
+Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Produkten zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
 
 ## Start
 
@@ -11,13 +11,13 @@ Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Ei
 - [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md): Liste der Prüfungen, anlegen, öffnen, löschen, wo eine Prüfung liegt
 - [Prüfung](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/index.md): Eckdaten, Zeitraum, erklärter Umsatz, Bestand und Gewerbekennzahl
 - [Rechnungen importieren](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/index.md): E-Rechnungen und Scans einlesen, Formate, Durchsicht und Korrektur
-- [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md): Rechnungspositionen Zutaten zuordnen, Vorschläge, Sicherheit und Faktor
+- [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md): Rechnungspositionen Produkten zuordnen, Vorschläge, Sicherheit und Faktor
 - [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md): Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz
 - [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md): Aufbau des Berichts, Hinweise, Richtsatzvergleich und PDF
 
 ## Grundlagen
 
-- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Zutaten, Produkte, Rezepte und Ertragsregeln, die für alle Prüfungen gelten
+- [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md): Produkte, Rezepte und Ertragsregeln, die für alle Prüfungen gelten
 - [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md): Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV
 - [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md): Für die IT, Datenablage, gemeinsame Regel-Datenbank, unbeaufsichtigte Installation und Gruppenrichtlinien
 - [Sicherheit und Datenschutz](https://docs.umsatzschaetzung.amtstools.de/dev/datenschutz/index.md): Für IT und Datenschutz, wo Daten liegen, Löschung, Netzwerk, Signatur und Modelle
@@ -42,6 +42,15 @@ Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den Ei
 - [4. Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kalkulation/index.md): Übrige Einkäufe aufräumen und das Ergebnis prüfen
 - [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md): Vorschau prüfen und den Bericht als PDF speichern
 - [Danach](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md): Was für die nächste eigene Prüfung gut zu wissen ist
+
+## Regeln pflegen
+
+- [Eine zweite Prüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sonderpruefung/index.md): Eine zweite Prüfung desselben Gasthauses anlegen
+- [Was das Programm sich merkt](https://docs.umsatzschaetzung.amtstools.de/dev/guide/regeln/index.md): Was das Programm aus der ersten Prüfung behalten hat, und die Regeln im Überblick
+- [Die Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md): Ein Gericht bis zum Einkauf zurückverfolgen und die Kette verlängern
+- [Warenarten](https://docs.umsatzschaetzung.amtstools.de/dev/guide/warenarten/index.md): Einem eingekauften Produkt eine Warenart hinzufügen
+- [Ein neues Produkt](https://docs.umsatzschaetzung.amtstools.de/dev/guide/produkte/index.md): Ein neues Gericht mit Rezept anlegen
+- [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/guide/ertragsregeln/index.md): Eine Standardregel setzen, eine Ertragsregel anlegen und eine löschen
 
 ## Übungen
 

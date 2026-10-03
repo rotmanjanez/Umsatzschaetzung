@@ -861,6 +861,8 @@
       
         
       
+        
+      
     
     
     
@@ -1250,6 +1252,208 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1373,21 +1577,23 @@ etwa neunzig zu. Sie misst nicht, wie ähnlich zwei Texte aussehen.
 </details>
 <details class="frage">
 <summary>Was ist der Faktor, und warum fehlt er?</summary>
-<p>Der Inhalt eines Gebindes in der Einheit des Rezepts, etwa 3000 für einen
-3-kg-Block zu einem Rezept in Gramm. Steht die Packungsgröße nicht im
-Artikeltext und hat die Zutat kein Stückgewicht, kann das Programm ihn nicht
+<p>Der Inhalt eines Gebindes in der Einheit des Produkts, etwa 3000 für einen
+3-kg-Block Käse, der in Gramm gezählt wird. Steht die Packungsgröße nicht im
+Artikeltext und hat das Produkt kein Stückgewicht, kann das Programm ihn nicht
 ermitteln. Ohne Faktor lässt sich die Menge nicht in Portionen umrechnen.
 → <a href="../zuordnung/#eine-position-zuordnen">Eine Position zuordnen</a></p>
 </details>
 <details class="frage">
 <summary>Wohin mit Pfand, Fracht, Reinigungsmitteln?</summary>
-<p>Auf eine Zutat der Kategorie <strong>Kein Wareneinsatz</strong>, Pfand auf <strong>Pfand und
-Leergut</strong>. Sie sind damit erledigt und gehen in keine Kalkulation ein.
+<p>Auf ein Produkt der Kategorie <strong>Kein Wareneinsatz</strong>, Pfand auf <strong>Pfand und
+Leergut</strong>. Pfand zählt dann nicht mit. Das Übrige wird über den
+Aufschlagsatz geschätzt, bis es unter <strong>Übrige Einkäufe</strong> mit dem × aus der
+Schätzung genommen wird.
 → <a href="../zuordnung/#kein-wareneinsatz">Kein Wareneinsatz</a></p>
 </details>
 <details class="frage">
 <summary>Dieselbe Ware wird immer wieder zur Durchsicht vorgelegt.</summary>
-<p>Bei der Zutat unter <strong>Regeln → Zutaten</strong> die Warenart ergänzen, etwa „Gouda“
+<p>Beim Produkt unter <strong>Regeln → Produkte</strong> die Warenart ergänzen, etwa „Gouda“
 bei Schnittkäse.
 → <a href="../zuordnung/#warenarten">Warenarten pflegen</a></p>
 </details>
@@ -1395,10 +1601,10 @@ bei Schnittkäse.
 <details class="frage">
 <summary>Ein Produkt hat 0 Portionen.</summary>
 <p>Die Kalkulation verteilt den Einkauf so auf die Produkte, dass möglichst
-wenig übrig bleibt. Ein Produkt geht leer aus, wenn eine seiner Zutaten gar
-nicht eingekauft wurde oder schon in anderen Produkten aufgeht. Rechts steht
-seine Rezeptur; ob jede Zutat darin im Einkauf vorkommt, zeigt die
-Zuordnung.
+wenig übrig bleibt. Ein Produkt geht leer aus, wenn etwas aus seinem Rezept
+weder eingekauft noch aus Eingekauftem gemacht werden kann oder schon in
+anderen Produkten aufgeht. Rechts steht seine Rezeptur; ob jede Zeile darin
+im Einkauf vorkommt, zeigt die Zuordnung.
 → <a href="../kalkulation/#portionen">Portionen</a></p>
 </details>
 <details class="frage">
@@ -1409,7 +1615,7 @@ nachgetragen ist.
 </details>
 <details class="frage">
 <summary>Bei den Ertragsregeln steht „Kein Abzug“.</summary>
-<p>Für diese Zutat oder Kategorie ist keine Ertragsregel gewählt und keine
+<p>Für dieses Produkt oder diese Kategorie ist keine Ertragsregel gewählt und keine
 Standardregel hinterlegt, es wird also nichts abgezogen, auch kein
 Schankverlust. Eine Regel wird unter <strong>Regeln → Ertragsregeln</strong> angelegt und
 steht dann in jeder Prüfung zur Wahl.
@@ -1431,14 +1637,14 @@ Bericht führt das Rezept so, wie es gerechnet ist.
 <details class="frage">
 <summary>Eine Ware bringt keinen Umsatz, wird aber geschätzt.</summary>
 <p>Unter <strong>Übrige Einkäufe</strong> mit dem × am Ende der Zeile aus der Schätzung
-nehmen. Das gilt für die ganze Zutat, bei Sammelzutaten wie „Reinigung und
-Hygiene“ also für alles, was ihr zugeordnet ist. Das ↺ nimmt es zurück.
+nehmen. Das gilt für das ganze Produkt, bei Sammelprodukten wie „Reinigung und
+Hygiene“ also für alles, was ihm zugeordnet ist. Das ↺ nimmt es zurück.
 → <a href="../kalkulation/#nicht-berucksichtigt">Übrige Einkäufe</a></p>
 </details>
 <details class="frage">
 <summary>Eine Ware fehlt unter „Übrige Einkäufe“.</summary>
-<p>Dann steht ihre Zutat in einem Rezept des Sortiments und geht über Portionen
-in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie
+<p>Dann steht sie selbst im Sortiment oder in einem Rezept des Sortiments und
+geht über Portionen in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie
 verwenden, steht unter <strong>Regeln → Produkte</strong>.
 → <a href="../regeln/#produkte">Produkte</a></p>
 </details>
@@ -1450,7 +1656,7 @@ Information unter der Liste.</p>
 </details>
 <details class="frage">
 <summary>Die Lagerbestände zu Beginn und Ende waren sehr verschieden.</summary>
-<p>Unter <strong>Prüfung → Bestand</strong> Anfangs- und Endbestand je Zutat eintragen. Das
+<p>Unter <strong>Prüfung → Bestand</strong> Anfangs- und Endbestand je Produkt eintragen. Das
 lohnt sich bei Getränken, Tiefkühlware und Wein, nicht bei Frischware.
 → <a href="../pruefung/#bestand">Bestand</a></p>
 </details>
@@ -1475,7 +1681,7 @@ Ein Bericht ohne Hinweise hat keine offenen Punkte mehr.
 <details class="frage">
 <summary>Ein Kollege sieht in meiner Prüfung andere Zahlen.</summary>
 <p>Die Prüfung nimmt Rechnungen, Preise und Entscheidungen mit, aber nicht die
-Regeln: Zutaten, Produkte, bestätigte Zuordnungen und Ertragsregeln liegen auf
+Regeln: Produkte, Rezepte, bestätigte Zuordnungen und Ertragsregeln liegen auf
 dem eigenen Rechner. Auf einem anderen Rechner ordnet das Programm neu zu,
 was es dort nicht kennt, und was offen bleibt, fehlt in der Kalkulation.</p>
 <p>In verwalteten Installationen liegen die Regeln oft für alle gemeinsam auf

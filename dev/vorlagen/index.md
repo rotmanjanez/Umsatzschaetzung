@@ -8,7 +8,7 @@ Der [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md) i
 - Den Standard selbst kann man nicht löschen, erst muss eine andere Vorlage Standard werden.
 - Das Programm bringt die Vorlage **Bericht** mit. Solange sie niemand ändert, folgt sie jedem Update. Eine geänderte Vorlage bleibt dagegen, wie sie ist. Wer anpassen will, legt am besten mit **Neu** eine Kopie an und macht diese zum Standard. Dann bleibt das Original als Vergleich erhalten.
 
-Die Vorlage wird beim Speichern geprüft. Ein Fehler im Aufbau, etwa ein fehlendes `{% endif %}`, verhindert das Speichern. Ein Feld, das es nicht gibt, fällt erst beim Erzeugen des Berichts auf.
+Die Vorlage wird gespeichert und dabei geprüft, sobald das Feld verlassen wird. Ein Fehler im Aufbau, etwa ein fehlendes `{% endif %}`, verhindert das Speichern. Ein Feld, das es nicht gibt, fällt erst beim Erzeugen des Berichts auf.
 
 ## Was eine Vorlage darf
 
@@ -31,7 +31,7 @@ Eine Vorlage ist HTML mit drei Arten von Platzhaltern:
 {% if e.basis == "unbestimmt" %} … {% endif %}     Vergleich mit Text
 ```
 
-- Ein Pfad geht mit `.` in ein Objekt und mit `[…]` über einen anderen Wert: `rules.ingredients[l.ingredientId].name`. Eine Zahl in `[…]` wählt einen Eintrag einer Liste, gezählt ab 0: `revenue[0].vat`.
+- Ein Pfad geht mit `.` in ein Objekt und mit `[…]` über einen anderen Wert: `rules.products[l.partId].name`. Eine Zahl in `[…]` wählt einen Eintrag einer Liste, gezählt ab 0: `revenue[0].vat`.
 - Eingesetzte Werte werden für HTML maskiert. HTML aus den Daten ist deshalb nicht möglich.
 - Steht ein `{% … %}` allein auf seiner Zeile, verschwindet die Zeile im Ergebnis.
 - Leer, `0`, `false`, eine leere Liste und ein fehlender Wert gelten in `if` als nicht vorhanden.
@@ -62,29 +62,30 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Wurzel
 
-| Feld           | Typ                                               |                                                                                                   |
-| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `case`         | [Case](#m-case)                                   | Die Prüfung, wie sie gespeichert ist, mit allen Rechnungen und Zeilen.                            |
-| `rules`        | [RuleSet](#m-ruleset)                             | Die Regeln, mit denen gerechnet wurde; Rezepturen so, wie diese Prüfung sie anpasst.              |
-| `report`       | [Report](#m-report)                               | Das Ergebnis der Kalkulation.                                                                     |
-| `included`     | Liste von [Included](#m-included)                 | Rechnungen mit den Zeilen, die in den Wareneinsatz eingehen, nach Datum und Nummer.               |
-| `revenue`      | Liste von [VatRow](#m-vatrow)                     | Umsatz vor und nach Prüfung je Steuersatz; die letzte Zeile (total) ist die Summe.                |
-| `invoiceCount` | Zahl                                              | Anzahl der Rechnungen in included.                                                                |
-| `includedNet`  | Zahl                                              | Wareneinsatz samt Bestandsveränderung, in Cent.                                                   |
-| `excluded`     | Zahl                                              | Einkauf ohne Zuordnung oder ohne Umsatz, in Cent.                                                 |
-| `estimated`    | [EstimateGroups](#m-estimategroups)               | Über den Aufschlagsatz geschätzter Umsatz, getrennt nach Herkunft.                                |
-| `calculation`  | Liste von [CalculationGroup](#m-calculationgroup) | Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte. |
-| `rahmen`       | [Rahmen](#m-rahmen)?                              | Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.                        |
-| `lage`         | `"unter"` \| `"im"` \| `"über"`?                  | Lage des kalkulierten Aufschlagsatzes zum Rahmen.                                                 |
-| `anyYields`    | ja/nein                                           | Ob irgendeine Zutat eine Ertragsregel trägt.                                                      |
-| `gewerbe`      | [Gewerbezweig](#m-gewerbezweig)?                  | Die Gewerbekennzahl der Prüfung aus den Regeln.                                                   |
-| `richtsatz`    | [Richtsatzbasis](#m-richtsatzbasis)?              | Die verwendete Richtsatzsammlung mit der ganzen Gewerbeklasse der Prüfung und den Pauschbeträgen. |
-| `suppliers`    | Liste von [SupplierSum](#m-suppliersum)           | Je Lieferant Anzahl und Summe aller Rechnungen der Prüfung, in Cent.                              |
-| `marks`        | [PageMarks](#m-pagemarks)                         | Kopf- und Fußzeilen, die ins PDF gestempelt werden.                                               |
-| `template`     | [TemplateInfo](#m-templateinfo)                   | Die Vorlage, aus der dieser Bericht entsteht.                                                     |
-| `periodDays`   | Zahl                                              | Tage im Prüfungszeitraum, beide Enden eingeschlossen.                                             |
-| `generatedAt`  | Zeitpunkt                                         | Zeitpunkt, zu dem der Bericht erzeugt wurde.                                                      |
-| `appVersion`   | Text                                              | Version des Programms.                                                                            |
+| Feld           | Typ                                               |                                                                                                                           |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `case`         | [Case](#m-case)                                   | Die Prüfung, wie sie gespeichert ist, mit allen Rechnungen und Zeilen.                                                    |
+| `rules`        | [RuleSet](#m-ruleset)                             | Die Regeln, mit denen gerechnet wurde; Rezepturen so, wie diese Prüfung sie anpasst.                                      |
+| `report`       | [Report](#m-report)                               | Das Ergebnis der Kalkulation.                                                                                             |
+| `included`     | Liste von [Included](#m-included)                 | Rechnungen mit den Zeilen, die in den Wareneinsatz eingehen, nach Datum und Nummer.                                       |
+| `revenue`      | Liste von [VatRow](#m-vatrow)                     | Umsatz vor und nach Prüfung je Steuersatz; die letzte Zeile (total) ist die Summe.                                        |
+| `invoiceCount` | Zahl                                              | Anzahl der Rechnungen in included.                                                                                        |
+| `includedNet`  | Zahl                                              | Wareneinsatz samt Bestandsveränderung, in Cent.                                                                           |
+| `excluded`     | Zahl                                              | Einkauf ohne Zuordnung oder ohne Umsatz, in Cent.                                                                         |
+| `estimated`    | [EstimateGroups](#m-estimategroups)               | Über den Aufschlagsatz geschätzter Umsatz, getrennt nach Herkunft.                                                        |
+| `calculation`  | Liste von [CalculationGroup](#m-calculationgroup) | Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte.                         |
+| `routed`       | Liste von [ProductRow](#m-productrow)             | Produkte, deren Portionen auf mehr als einem Weg entstanden, etwa teils aus gekauften, teils aus selbst gemachten Pommes. |
+| `rahmen`       | [Rahmen](#m-rahmen)?                              | Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.                                                |
+| `lage`         | `"unter"` \| `"im"` \| `"über"`?                  | Lage des kalkulierten Aufschlagsatzes zum Rahmen.                                                                         |
+| `anyYields`    | ja/nein                                           | Ob irgendein Bestand eine Ertragsregel trägt.                                                                             |
+| `gewerbe`      | [Gewerbezweig](#m-gewerbezweig)?                  | Die Gewerbekennzahl der Prüfung aus den Regeln.                                                                           |
+| `richtsatz`    | [Richtsatzbasis](#m-richtsatzbasis)?              | Die verwendete Richtsatzsammlung mit der ganzen Gewerbeklasse der Prüfung und den Pauschbeträgen.                         |
+| `suppliers`    | Liste von [SupplierSum](#m-suppliersum)           | Je Lieferant Anzahl und Summe aller Rechnungen der Prüfung, in Cent.                                                      |
+| `marks`        | [PageMarks](#m-pagemarks)                         | Kopf- und Fußzeilen, die ins PDF gestempelt werden.                                                                       |
+| `template`     | [TemplateInfo](#m-templateinfo)                   | Die Vorlage, aus der dieser Bericht entsteht.                                                                             |
+| `periodDays`   | Zahl                                              | Tage im Prüfungszeitraum, beide Enden eingeschlossen.                                                                     |
+| `generatedAt`  | Zeitpunkt                                         | Zeitpunkt, zu dem der Bericht erzeugt wurde.                                                                              |
+| `appVersion`   | Text                                              | Version des Programms.                                                                                                    |
 
 ### Case
 
@@ -116,7 +117,6 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `store`         | Text?                                    |
 | `version`       | Zahl                                     |
 | `categories`    | ID → [Category](#m-category)             |
-| `ingredients`   | ID → [Ingredient](#m-ingredient)         |
 | `mappings`      | ID → [ArticleMapping](#m-articlemapping) |
 | `products`      | ID → [Product](#m-product)               |
 | `yieldRules`    | ID → [YieldRule](#m-yieldrule)           |
@@ -125,21 +125,21 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Report
 
-| Feld          | Typ                                         |
-| ------------- | ------------------------------------------- |
-| `caseId`      | Text                                        |
-| `computedAt`  | Zeitpunkt                                   |
-| `totals`      | [Totals](#m-totals)                         |
-| `ingredients` | Liste von [IngredientRow](#m-ingredientrow) |
-| `products`    | Liste von [ProductRow](#m-productrow)       |
-| `markups`     | Liste von [MarkupRow](#m-markuprow)         |
-| `unmapped`    | Liste von [UnmappedLine](#m-unmappedline)   |
-| `unused`      | Liste von [UnusedLine](#m-unusedline)       |
-| `deposits`    | Liste von [UnusedLine](#m-unusedline)       |
-| `noRevenue`   | Liste von [UnusedLine](#m-unusedline)       |
-| `estimated`   | Liste von [EstimateRow](#m-estimaterow)     |
-| `allocations` | Liste von [Allocation](#m-allocation)       |
-| `warnings`    | Liste von [Flag](#m-flag)                   |
+| Feld          | Typ                                       |
+| ------------- | ----------------------------------------- |
+| `caseId`      | Text                                      |
+| `computedAt`  | Zeitpunkt                                 |
+| `totals`      | [Totals](#m-totals)                       |
+| `supply`      | Liste von [SupplyRow](#m-supplyrow)       |
+| `products`    | Liste von [ProductRow](#m-productrow)     |
+| `markups`     | Liste von [MarkupRow](#m-markuprow)       |
+| `unmapped`    | Liste von [UnmappedLine](#m-unmappedline) |
+| `unused`      | Liste von [UnusedLine](#m-unusedline)     |
+| `deposits`    | Liste von [UnusedLine](#m-unusedline)     |
+| `noRevenue`   | Liste von [UnusedLine](#m-unusedline)     |
+| `estimated`   | Liste von [EstimateRow](#m-estimaterow)   |
+| `allocations` | Liste von [Allocation](#m-allocation)     |
+| `warnings`    | Liste von [Flag](#m-flag)                 |
 
 ### Included
 
@@ -176,6 +176,27 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `rows`   | Liste von [ProductRow](#m-productrow)                              |
 | `cost`   | Zahl                                                               |
 | `markup` | Zahl                                                               |
+
+### ProductRow
+
+| Feld             | Typ                                                               |
+| ---------------- | ----------------------------------------------------------------- |
+| `productId`      | Text                                                              |
+| `name`           | Text                                                              |
+| `binding`        | Liste von Text                                                    |
+| `pinReason`      | Text                                                              |
+| `sparte`         | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
+| `portions`       | Zahl                                                              |
+| `costPerPortion` | Zahl                                                              |
+| `costOfGoods`    | Zahl                                                              |
+| `pinned`         | ja/nein                                                           |
+| `grossPrice`     | Zahl                                                              |
+| `vat`            | Zahl                                                              |
+| `unitNet`        | Zahl                                                              |
+| `revenueNet`     | Zahl                                                              |
+| `markup`         | Zahl                                                              |
+| `priceMissing`   | ja/nein                                                           |
+| `routes`         | Liste von [RouteRow](#m-routerow)                                 |
 
 ### Rahmen
 
@@ -249,12 +270,12 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### InventoryEntry
 
-| Feld           | Typ  |
-| -------------- | ---- |
-| `ingredientId` | Text |
-| `opening`      | Zahl |
-| `closing`      | Zahl |
-| `unit`         | Text |
+| Feld        | Typ  |
+| ----------- | ---- |
+| `productId` | Text |
+| `opening`   | Zahl |
+| `closing`   | Zahl |
+| `unit`      | Text |
 
 ### Invoice
 
@@ -276,21 +297,21 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### CaseProduct
 
-| Feld          | Typ                                    |
-| ------------- | -------------------------------------- |
-| `productId`   | Text                                   |
-| `grossPrice`  | Zahl                                   |
-| `vat`         | Zahl                                   |
-| `recipe`      | Liste von [RecipeLine](#m-recipeline)? |
-| `recipeBasis` | Zahl                                   |
+| Feld          | Typ                                |
+| ------------- | ---------------------------------- |
+| `productId`   | Text                               |
+| `grossPrice`  | Zahl                               |
+| `vat`         | Zahl                               |
+| `recipe`      | Liste von [PartLine](#m-partline)? |
+| `recipeBasis` | Zahl                               |
 
 ### YieldChoice
 
-| Feld           | Typ   |
-| -------------- | ----- |
-| `ingredientId` | Text? |
-| `categoryId`   | Text? |
-| `yieldRuleId`  | Text? |
+| Feld          | Typ   |
+| ------------- | ----- |
+| `productId`   | Text? |
+| `categoryId`  | Text? |
+| `yieldRuleId` | Text? |
 
 ### PinnedPortions
 
@@ -311,7 +332,7 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `name`              | Text?           |
 | `observed`          | Text?           |
 | `unitCode`          | Text?           |
-| `ingredientId`      | Text            |
+| `productId`         | Text            |
 | `factor`            | Zahl?           |
 | `confirmed`         | ja/nein         |
 | `meta`              | [Meta](#m-meta) |
@@ -327,37 +348,31 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `sparte`  | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
 | `meta`    | [Meta](#m-meta)                                                   |
 
-### Ingredient
-
-| Feld         | Typ                |
-| ------------ | ------------------ |
-| `id`         | Text               |
-| `name`       | Text               |
-| `categoryId` | Text               |
-| `aliases`    | Liste von Text     |
-| `piece`      | [Piece](#m-piece)? |
-| `meta`       | [Meta](#m-meta)    |
-
 ### Product
 
-| Feld     | Typ                                   |
-| -------- | ------------------------------------- |
-| `id`     | Text                                  |
-| `name`   | Text                                  |
-| `recipe` | Liste von [RecipeLine](#m-recipeline) |
-| `meta`   | [Meta](#m-meta)                       |
+| Feld         | Typ                               |
+| ------------ | --------------------------------- |
+| `id`         | Text                              |
+| `name`       | Text                              |
+| `unit`       | Text                              |
+| `batch`      | Zahl                              |
+| `categoryId` | Text?                             |
+| `aliases`    | Liste von Text                    |
+| `piece`      | [Piece](#m-piece)?                |
+| `recipe`     | Liste von [PartLine](#m-partline) |
+| `meta`       | [Meta](#m-meta)                   |
 
 ### YieldRule
 
-| Feld           | Typ             |
-| -------------- | --------------- |
-| `id`           | Text            |
-| `name`         | Text            |
-| `categoryId`   | Text?           |
-| `ingredientId` | Text?           |
-| `deduction`    | Zahl            |
-| `default`      | ja/nein         |
-| `meta`         | [Meta](#m-meta) |
+| Feld         | Typ             |
+| ------------ | --------------- |
+| `id`         | Text            |
+| `name`       | Text            |
+| `categoryId` | Text?           |
+| `productId`  | Text?           |
+| `deduction`  | Zahl            |
+| `default`    | ja/nein         |
+| `meta`       | [Meta](#m-meta) |
 
 ### ReportTemplate
 
@@ -396,46 +411,26 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `depositRefunded`      | Zahl |
 | `excludedShare`        | Zahl |
 
-### IngredientRow
+### SupplyRow
 
-| Feld           | Typ                                                 |
-| -------------- | --------------------------------------------------- |
-| `ingredientId` | Text                                                |
-| `name`         | Text                                                |
-| `unit`         | `"ml"` \| `"g"` \| `"piece"`                        |
-| `purchases`    | Liste von [Purchase](#m-purchase)                   |
-| `opening`      | Zahl                                                |
-| `closing`      | Zahl                                                |
-| `bought`       | Zahl                                                |
-| `cost`         | Zahl                                                |
-| `used`         | Zahl                                                |
-| `usedCost`     | Zahl                                                |
-| `yield`        | [YieldRule](#m-yieldrule)?                          |
-| `yieldRate`    | Zahl                                                |
-| `sellable`     | Zahl                                                |
-| `products`     | Liste von [IngredientProduct](#m-ingredientproduct) |
-| `leftover`     | Zahl                                                |
-| `binding`      | ja/nein                                             |
-
-### ProductRow
-
-| Feld             | Typ                                                               |
-| ---------------- | ----------------------------------------------------------------- |
-| `productId`      | Text                                                              |
-| `name`           | Text                                                              |
-| `binding`        | Liste von Text                                                    |
-| `pinReason`      | Text                                                              |
-| `sparte`         | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
-| `portions`       | Zahl                                                              |
-| `costPerPortion` | Zahl                                                              |
-| `costOfGoods`    | Zahl                                                              |
-| `pinned`         | ja/nein                                                           |
-| `grossPrice`     | Zahl                                                              |
-| `vat`            | Zahl                                                              |
-| `unitNet`        | Zahl                                                              |
-| `revenueNet`     | Zahl                                                              |
-| `markup`         | Zahl                                                              |
-| `priceMissing`   | ja/nein                                                           |
+| Feld        | Typ                                 |
+| ----------- | ----------------------------------- |
+| `productId` | Text                                |
+| `name`      | Text                                |
+| `unit`      | `"ml"` \| `"g"` \| `"piece"`        |
+| `purchases` | Liste von [Purchase](#m-purchase)   |
+| `opening`   | Zahl                                |
+| `closing`   | Zahl                                |
+| `bought`    | Zahl                                |
+| `cost`      | Zahl                                |
+| `used`      | Zahl                                |
+| `usedCost`  | Zahl                                |
+| `yield`     | [YieldRule](#m-yieldrule)?          |
+| `yieldRate` | Zahl                                |
+| `sellable`  | Zahl                                |
+| `usedBy`    | Liste von [SupplyUse](#m-supplyuse) |
+| `leftover`  | Zahl                                |
+| `binding`   | ja/nein                             |
 
 ### MarkupRow
 
@@ -459,13 +454,13 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### UnusedLine
 
-| Feld           | Typ  |
-| -------------- | ---- |
-| `invoiceId`    | Text |
-| `lineNo`       | Zahl |
-| `name`         | Text |
-| `lineNet`      | Zahl |
-| `ingredientId` | Text |
+| Feld        | Typ  |
+| ----------- | ---- |
+| `invoiceId` | Text |
+| `lineNo`    | Zahl |
+| `name`      | Text |
+| `lineNet`   | Zahl |
+| `productId` | Text |
 
 ### EstimateRow
 
@@ -527,6 +522,14 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `cost`       | Zahl                                    |
 | `revenueNet` | Zahl                                    |
 
+### RouteRow
+
+| Feld             | Typ                                 |
+| ---------------- | ----------------------------------- |
+| `portions`       | Zahl                                |
+| `costPerPortion` | Zahl                                |
+| `parts`          | Liste von [RoutePart](#m-routepart) |
+
 ### Satz
 
 | Feld     | Typ   |
@@ -574,14 +577,13 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `at`   | Zeitpunkt |
 | `auto` | ja/nein   |
 
-### RecipeLine
+### PartLine
 
-| Feld           | Typ   |
-| -------------- | ----- |
-| `ingredientId` | Text  |
-| `productId`    | Text? |
-| `amount`       | Zahl  |
-| `unit`         | Text  |
+| Feld     | Typ  |
+| -------- | ---- |
+| `partId` | Text |
+| `amount` | Zahl |
+| `unit`   | Text |
 
 ### Piece
 
@@ -607,7 +609,7 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 | `qty`       | Zahl                                             |
 | `net`       | Zahl                                             |
 
-### IngredientProduct
+### SupplyUse
 
 | Feld         | Typ  |
 | ------------ | ---- |
@@ -627,10 +629,19 @@ Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher m
 
 ### Leftover
 
-| Feld           | Typ  |
-| -------------- | ---- |
-| `ingredientId` | Text |
-| `qty`          | Zahl |
+| Feld        | Typ  |
+| ----------- | ---- |
+| `productId` | Text |
+| `qty`       | Zahl |
+
+### RoutePart
+
+| Feld         | Typ                          |
+| ------------ | ---------------------------- |
+| `productId`  | Text                         |
+| `name`       | Text                         |
+| `unit`       | `"ml"` \| `"g"` \| `"piece"` |
+| `perPortion` | Zahl                         |
 
 ### Staffel
 

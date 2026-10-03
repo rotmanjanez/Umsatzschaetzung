@@ -8,13 +8,13 @@ Der Bericht ist das, was am Ende in die Akte kommt: der erklärte Umsatz neben d
 
 Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Sie legt fest, wie viel vom Einkauf als verkauft gilt: Nicht alles, was eingekauft wird, wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das Personal isst mit.
 
-Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es eine Ertragsregel gibt, **Nach Kategorie** und **Nach Zutat**. Je Zeile wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer Kategorie vor. Die Kalkulation rechnet sofort neu.
+Die Seite führt nur die Kategorien und Produkte dieser Prüfung, für die es eine Ertragsregel gibt, **Nach Kategorie** und **Nach Produkt**. Je Zeile wird gewählt, welche Regel gilt; die Wahl für ein Produkt geht der für seine Kategorie vor. Die Kalkulation rechnet sofort neu.
 
-Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt.
+Voreingestellt ist die Standardregel des Produkts oder der Kategorie, gibt es keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt.
 
 Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz, sondern auch, warum er gilt.
 
-Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), neben Zutaten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
+Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), neben Produkten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
 
 Für das Beispiel bleibt es bei **Kein Abzug**.
 
@@ -32,7 +32,7 @@ Auf **5. Bericht** wechseln. Der Reiter zeigt den fertigen Bericht so, wie er al
 
 1. **Umsätze vor und nach Betriebsprüfung**: der erklärte Umsatz von 196.418 € neben dem kalkulierten, mit der Differenz je Steuersatz.
 1. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
-1. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat, damit jede Zahl des Berichts nachvollziehbar bleibt.
+1. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die Ausbeute mit der angewandten Ertragsregel und die Portionen je Ware, damit jede Zahl des Berichts nachvollziehbar bleibt.
 
 Stimmt noch etwas nicht, etwa ein Produkt ohne Preis, stehen vorneweg **Hinweise**. Ein Bericht ohne Hinweise hat keine offenen Punkte. Ins PDF gehen die Hinweise nicht mit. Gibt es mehrere Berichtsvorlagen, wählt die Auswahl über der Vorschau eine andere für diese Prüfung.
 
