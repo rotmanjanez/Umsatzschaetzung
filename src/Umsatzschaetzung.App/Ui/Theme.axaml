@@ -159,7 +159,8 @@
 
     <ControlTheme x:Key="NumberBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
         <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
-        <Setter Property="TextAlignment" Value="Right"/>
+        <!-- TextAlignment="Right" leaves the caret where the text would end if it were left-aligned. -->
+        <Setter Property="HorizontalContentAlignment" Value="Right"/>
     </ControlTheme>
 
     <ControlTheme x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
