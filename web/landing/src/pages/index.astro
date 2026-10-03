@@ -42,6 +42,13 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
           </svg>
         </div>
       </div>
+      <section class="courses">
+        <h2>Interaktive Übungen</h2>
+        <div>
+          <a href={app + 'lektionen/ueberblick/'}>Die erste Prüfung</a>
+          <a href={app + 'lektionen/regeln/'}>Die Regeldatenbank</a>
+        </div>
+      </section>
       <footer><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a></footer>
     </main>
     <script>
@@ -108,7 +115,14 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
   .guide a { display: inline-block; text-decoration: none; font-weight: 600; background: var(--blue); color: var(--bg); padding: 14px 24px; transition: background-color 0.15s; }
   .guide a:hover { background: var(--fg); }
   a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
-  footer { margin-top: 72px; font-size: 15px; display: flex; gap: 24px; }
+  .courses { margin-top: 72px; }
+  .courses h2 { margin: 0 0 16px; font-size: 22px; font-weight: 600; }
+  .courses div { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .courses a { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: var(--raised); border-left: 4px solid var(--blue); color: var(--fg); font-weight: 600; text-decoration: none; transition: background-color 0.15s, color 0.15s; }
+  .courses a::after { content: "Starten →"; color: var(--blue); transition: color 0.15s, transform 0.15s; }
+  .courses a:hover { background: var(--blue); color: var(--bg); }
+  .courses a:hover::after { color: var(--bg); transform: translateX(4px); }
+  footer { margin-top: 48px; font-size: 15px; display: flex; gap: 24px; }
   footer a { color: var(--muted); transition: color 0.15s; }
   footer a:hover { color: var(--blue); }
 
@@ -128,7 +142,7 @@ const release = 'https://github.com/rotmanjanez/Umsatzschaetzung/releases/latest
     .guide { animation: none; }
   }
   @media (max-width: 860px) {
-    .hero { grid-template-columns: 1fr; }
+    .hero, .courses div { grid-template-columns: 1fr; }
     .mark svg { width: min(72%, 300px); }
   }
 </style>
