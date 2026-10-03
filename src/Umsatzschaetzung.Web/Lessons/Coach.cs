@@ -135,6 +135,12 @@ public static partial class Coach
     static void Press(PointerPressedEventArgs e)
     {
         var left = e.GetCurrentPoint(top).Properties.IsLeftButtonPressed;
+        // A press beside an open drop-down lands on the layer that closes it, not on what lies beneath.
+        if (left && e.Source?.GetType().Name == "LightDismissOverlayLayer")
+        {
+            swallowed = false;
+            return;
+        }
         swallowed = !left || !Allowed(e.Source as Visual);
         acted |= !swallowed;
         if (!swallowed) return;
