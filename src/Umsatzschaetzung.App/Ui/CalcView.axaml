@@ -204,10 +204,10 @@
                                                     <DataTemplate x:DataType="ui:CaseRecipeRow">
                                                         <StackPanel Margin="0,0,0,10">
                                                             <Grid ColumnDefinitions="*,Auto">
-                                                                <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"
-                                                                                  AutomationProperties.Name="Zutat" AutomationProperties.AutomationId="RecipeIngredient"/>
-                                                                <Button Grid.Column="1" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Zutat entfernen" Click="RemoveRecipeLine"
-                                                                        AutomationProperties.Name="{Binding RemoveName}" AutomationProperties.AutomationId="RecipeRemoveIngredient">
+                                                                <ui:ProductBox Choices="{Binding Options}" SelectedItem="{Binding Part, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                                                               AutomationProperties.AutomationId="RecipePart"/>
+                                                                <Button Grid.Column="1" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Produkt entfernen" Click="RemoveRecipeLine"
+                                                                        AutomationProperties.Name="{Binding RemoveName}" AutomationProperties.AutomationId="RecipeRemovePart">
                                                                     <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14"/>
                                                                 </Button>
                                                             </Grid>
@@ -215,7 +215,7 @@
                                                                 <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}" Classes.invalid="{Binding AmountInvalid}"
                                                                          AutomationProperties.Name="Menge" AutomationProperties.HelpText="{Binding AmountHint}"
                                                                          AutomationProperties.AutomationId="RecipeAmount"/>
-                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
+                                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Classes.invalid="{Binding UnitMismatch}" ToolTip.Tip="{Binding UnitHint}" AutomationProperties.HelpText="{Binding UnitHint}"
                                                                           Width="120" Margin="6,0,0,0" AutomationProperties.Name="Einheit" AutomationProperties.AutomationId="RecipeUnit"/>
                                                                 <TextBlock Grid.Column="2" Text="{Binding CatalogValue}" Theme="{StaticResource Muted}" FontSize="12"
                                                                            Margin="10,0,0,0" IsVisible="{Binding Differs}"/>
@@ -225,11 +225,11 @@
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
-                                            <TextBlock Text="Ohne gültige Zutat bleibt die zuletzt gespeicherte Rezeptur in Kraft." Theme="{StaticResource Muted}"
+                                            <TextBlock Text="Ohne gültige Zeile bleibt die zuletzt gespeicherte Rezeptur in Kraft." Theme="{StaticResource Muted}"
                                                        FontSize="12" Margin="0,0,0,8" IsVisible="{Binding Emptied}"/>
                                             <Grid ColumnDefinitions="*,Auto,Auto">
-                                                <Button Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine" ToolTip.Tip="Zutat hinzufügen"
-                                                        AutomationProperties.Name="Zutat hinzufügen" AutomationProperties.AutomationId="RecipeAddIngredient">
+                                                <Button Theme="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Click="AddRecipeLine" ToolTip.Tip="Produkt hinzufügen"
+                                                        AutomationProperties.Name="Produkt hinzufügen" AutomationProperties.AutomationId="RecipeAddPart">
                                                     <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
                                                 </Button>
                                                 <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Click="PromoteRecipe" AutomationProperties.AutomationId="RecipePromote"

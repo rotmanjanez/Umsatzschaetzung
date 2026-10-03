@@ -57,7 +57,7 @@ AppBuilder.Configure<App>()
     .SetupWithoutStarting();
 
 var weights = new OrtWeights(AppFiles.Beside("models"));
-var encoder = new Encoder(weights);
+var encoder = new Encoder(weights, runs: Math.Max(Environment.ProcessorCount / 2, 1));
 var lesson = new Lesson(store, Path.Combine(work.FullName, "cases"), Path.Combine(work.FullName, "embedded"));
 using var perfOut = options.TryGetValue("perf", out var perfPath) ? File.CreateText(perfPath) : null;
 var perf = perfOut is null ? null : new Perf(perfOut);
@@ -67,7 +67,10 @@ var driver = new Driver(Launch, lesson, (int)(Number("scale") ?? 2), Number("pad
 try
 {
     foreach (var step in steps) driver.Run(step);
-    await lesson.Finish(encoder);
+    // Awaited as Restart awaits the case: what resumes on the dispatcher needs it pumped.
+    var finish = lesson.Finish(encoder);
+    while (!finish.IsCompleted) Driver.Settle();
+    finish.GetAwaiter().GetResult();
 }
 finally
 {
@@ -87,7 +90,7 @@ Shell Launch(bool forget)
         Release.Version,
         documents: documents,
         tagger: new Tagger(weights),
-        ranking: new EncoderRanking(new Kept(encoder, lesson.Embedded), new EmbeddingStore(store, AppFiles.Beside(EmbeddingStore.Shipped))),
+        ranking: new EncoderRanking(new Kept(encoder, lesson.Embedded), new EmbeddingStore(store, AppFiles.Beside(EmbeddingStore.Shipped), encoder.Model)),
         readings: options.TryGetValue("readings", out var readings) ? new Readings(readings, $"{documents.Reader}|{Tagger.Name}") : null);
     var shell = new Shell(service);
     // Photographed as on macOS, whose menu sits at the top of the screen: the same on every platform.

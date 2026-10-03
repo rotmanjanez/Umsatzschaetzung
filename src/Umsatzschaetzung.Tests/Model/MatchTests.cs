@@ -26,9 +26,9 @@ public class MatchTests
     public void TheArticleNumberOfTheSupplierComesFirst()
     {
         var rs = Rules(
-            new ArticleMapping { Id = "a.name", Name = "Pils 0,5 l", IngredientId = "ing.name" },
-            new ArticleMapping { Id = "b.gtin", Gtin = "4006381333931", IngredientId = "ing.gtin" },
-            new ArticleMapping { Id = "c.article", SupplierName = Supplier, SupplierArticleId = "31090", IngredientId = "ing.article" });
+            new ArticleMapping { Id = "a.name", Name = "Pils 0,5 l", ProductId = "prod.name" },
+            new ArticleMapping { Id = "b.gtin", Gtin = "4006381333931", ProductId = "prod.gtin" },
+            new ArticleMapping { Id = "c.article", SupplierName = Supplier, SupplierArticleId = "31090", ProductId = "prod.article" });
         Assert.Equal("c.article", Match.Mapping(rs, Supplier, Day, Line())?.Id);
         Assert.Equal("b.gtin", Match.Mapping(rs, "Anderer", Day, Line())?.Id);
         Assert.Equal("b.gtin", Match.Mapping(rs, null, Day, Line())?.Id);
@@ -38,7 +38,7 @@ public class MatchTests
     [Fact]
     public void ANameMatchIgnoresCaseAndPunctuation()
     {
-        var rs = Rules(new ArticleMapping { Id = "m", Name = "PILS 0,5L", IngredientId = "i" });
+        var rs = Rules(new ArticleMapping { Id = "m", Name = "PILS 0,5L", ProductId = "i" });
         Assert.Null(Match.Mapping(rs, Supplier, Day, Line("pils 0,5 l", null, null)));
         Assert.Equal("m", Match.Mapping(rs, Supplier, Day, Line("pils  0,5l!", null, null))?.Id);
     }
@@ -46,7 +46,7 @@ public class MatchTests
     [Fact]
     public void AnEmptyNameMatchesNothing()
     {
-        var rs = Rules(new ArticleMapping { Id = "m", Name = "--", IngredientId = "i" });
+        var rs = Rules(new ArticleMapping { Id = "m", Name = "--", ProductId = "i" });
         Assert.Null(Match.Mapping(rs, Supplier, Day, Line("", null, null)));
     }
 
@@ -54,8 +54,8 @@ public class MatchTests
     public void TheMappingALineCarriesWinsEvenWhenNothingElseFits()
     {
         var rs = Rules(
-            new ArticleMapping { Id = "a", Gtin = "4006381333931", IngredientId = "i" },
-            new ArticleMapping { Id = "b", Name = "Weizen", IngredientId = "j", Meta = new() { ValidTo = new DateOnly(2000, 1, 1) } });
+            new ArticleMapping { Id = "a", Gtin = "4006381333931", ProductId = "i" },
+            new ArticleMapping { Id = "b", Name = "Weizen", ProductId = "j", Meta = new() { ValidTo = new DateOnly(2000, 1, 1) } });
         var line = Line();
         line.MappingId = "b";
         Assert.Equal("b", Match.Mapping(rs, Supplier, Day, line)?.Id);
@@ -67,8 +67,8 @@ public class MatchTests
     public void AnotherUnitOrAnExpiredRuleDoesNotApply()
     {
         var rs = Rules(
-            new ArticleMapping { Id = "a", Gtin = "4006381333931", UnitCode = "XBO", IngredientId = "i" },
-            new ArticleMapping { Id = "b", Gtin = "4006381333931", IngredientId = "i", Meta = new() { ValidFrom = new DateOnly(2025, 4, 1) } });
+            new ArticleMapping { Id = "a", Gtin = "4006381333931", UnitCode = "XBO", ProductId = "i" },
+            new ArticleMapping { Id = "b", Gtin = "4006381333931", ProductId = "i", Meta = new() { ValidFrom = new DateOnly(2025, 4, 1) } });
         Assert.Null(Match.Mapping(rs, Supplier, Day, Line()));
         Assert.Equal("a", Match.Mapping(rs, Supplier, Day, Line(unit: "xbo"))?.Id);
         Assert.Equal("a", Match.Mapping(rs, Supplier, Day, Line(unit: ""))?.Id);
@@ -79,7 +79,7 @@ public class MatchTests
     [Fact]
     public void AnUnconfirmedGuessFitsItsKeyWhateverTheWording()
     {
-        var rs = Rules(new ArticleMapping { Id = "m", Gtin = "4006381333931", Observed = "Pils 0,5 l", IngredientId = "i" });
+        var rs = Rules(new ArticleMapping { Id = "m", Gtin = "4006381333931", Observed = "Pils 0,5 l", ProductId = "i" });
         Assert.Equal("m", Match.Mapping(rs, Supplier, Day, Line("Pils O,5 1"))?.Id);
         Assert.True(Match.Fits(rs.Mappings["m"], Supplier, Day, Line("Pils O,5 1")));
     }
@@ -88,8 +88,8 @@ public class MatchTests
     public void AmongEqualRulesTheSmallestIdWins()
     {
         var rs = Rules(
-            new ArticleMapping { Id = "m.b", Gtin = "4006381333931", IngredientId = "i.b" },
-            new ArticleMapping { Id = "m.a", Gtin = "4006381333931", IngredientId = "i.a" });
+            new ArticleMapping { Id = "m.b", Gtin = "4006381333931", ProductId = "i.b" },
+            new ArticleMapping { Id = "m.a", Gtin = "4006381333931", ProductId = "i.a" });
         Assert.Equal("m.a", Match.Mapping(rs, Supplier, Day, Line())?.Id);
     }
 
@@ -105,51 +105,65 @@ public class MatchTests
 
     static Case Kase(params YieldChoice[] yields) => new() { PeriodTo = new DateOnly(2025, 12, 31), Yields = [.. yields] };
 
-    static (RuleSet Rules, Ingredient Ingredient) Yields()
+    static (RuleSet Rules, Product Ware) Yields()
     {
         var rs = new RuleSet();
-        var ing = new Ingredient { Id = "ing.bier", CategoryId = "cat.bier" };
-        rs.Put(ing);
+        var bier = new Product { Id = "prod.bier", Unit = "H87", CategoryId = "cat.bier" };
+        rs.Put(bier);
         rs.Put(new YieldRule { Id = "y.cat", CategoryId = "cat.bier" });
         rs.Put(new YieldRule { Id = "y.cat.default", CategoryId = "cat.bier", Default = true });
-        rs.Put(new YieldRule { Id = "y.ing", IngredientId = "ing.bier" });
-        rs.Put(new YieldRule { Id = "y.ing.default", IngredientId = "ing.bier", Default = true });
+        rs.Put(new YieldRule { Id = "y.product", ProductId = "prod.bier" });
+        rs.Put(new YieldRule { Id = "y.product.default", ProductId = "prod.bier", Default = true });
         rs.Put(new YieldRule { Id = "y.other", CategoryId = "cat.wein", Default = true });
-        return (rs, ing);
+        return (rs, bier);
     }
 
     [Fact]
-    public void TheCaseChoiceForTheIngredientComesFirst()
+    public void TheCaseChoiceForTheProductComesFirst()
     {
-        var (rs, ing) = Yields();
-        var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { IngredientId = "ing.bier", YieldRuleId = "y.ing" });
-        Assert.Equal("y.ing", Match.YieldRule(c, rs, ing)?.Id);
+        var (rs, bier) = Yields();
+        var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { ProductId = "prod.bier", YieldRuleId = "y.product" });
+        Assert.Equal("y.product", Match.YieldRule(c, rs, bier)?.Id);
     }
 
     [Fact]
     public void ACaseChoiceForTheCategoryComesNext()
     {
-        var (rs, ing) = Yields();
-        var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { IngredientId = "ing.bier", YieldRuleId = "weg" });
-        Assert.Equal("y.cat", Match.YieldRule(c, rs, ing)?.Id);
+        var (rs, bier) = Yields();
+        var c = Kase(new() { CategoryId = "cat.bier", YieldRuleId = "y.cat" }, new() { ProductId = "prod.bier", YieldRuleId = "weg" });
+        Assert.Equal("y.cat", Match.YieldRule(c, rs, bier)?.Id);
     }
 
     [Fact]
     public void AChoiceWithoutARuleMeansNoDeductionDespiteADefault()
     {
-        var (rs, ing) = Yields();
-        Assert.Null(Match.YieldRule(Kase(new YieldChoice { IngredientId = "ing.bier" }), rs, ing));
-        Assert.Null(Match.YieldRule(Kase(new YieldChoice { CategoryId = "cat.bier" }), rs, ing));
+        var (rs, bier) = Yields();
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { ProductId = "prod.bier" }), rs, bier));
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { CategoryId = "cat.bier" }), rs, bier));
     }
 
     [Fact]
-    public void WithoutAChoiceTheIngredientsDefaultAppliesThenTheCategorys()
+    public void WithoutAChoiceTheProductsDefaultAppliesThenTheCategorys()
     {
-        var (rs, ing) = Yields();
-        Assert.Equal("y.ing.default", Match.YieldRule(Kase(), rs, ing)?.Id);
-        rs.YieldRules.Remove("y.ing.default");
-        Assert.Equal("y.cat.default", Match.YieldRule(Kase(), rs, ing)?.Id);
+        var (rs, bier) = Yields();
+        Assert.Equal("y.product.default", Match.YieldRule(Kase(), rs, bier)?.Id);
+        rs.YieldRules.Remove("y.product.default");
+        Assert.Equal("y.cat.default", Match.YieldRule(Kase(), rs, bier)?.Id);
         rs.YieldRules.Remove("y.cat.default");
-        Assert.Null(Match.YieldRule(Kase(), rs, ing));
+        Assert.Null(Match.YieldRule(Kase(), rs, bier));
+    }
+
+    [Fact]
+    public void AProductWithoutACategoryTakesOnlyItsOwnRule()
+    {
+        var rs = new RuleSet();
+        var krug = new Product { Id = "prod.krug", Name = "Krug", Unit = "H87" };
+        rs.Put(krug);
+        rs.Put(new YieldRule { Id = "y.leer", CategoryId = "", Default = true });
+        Assert.Null(Match.YieldRule(Kase(new YieldChoice { CategoryId = "", YieldRuleId = "y.leer" }), rs, krug));
+        Assert.Null(Match.YieldRule(Kase(), rs, krug));
+        rs.Put(new YieldRule { Id = "y.krug", ProductId = "prod.krug", Default = true });
+        Assert.Equal("y.krug", Match.YieldRule(Kase(), rs, krug)?.Id);
     }
 }
+

@@ -13,17 +13,17 @@ public class EstimateTests
         rs.Put(new Category { Id = "cat.sonst", Name = "Sonstiges" });
         foreach (var (id, name, cat) in new[]
                  {
-                     ("ing.cola", "Cola", "cat.getraenke"), ("ing.bier", "Bier", "cat.getraenke"), ("ing.wein", "Wein", "cat.getraenke"),
-                     ("ing.sirup", "Sirup", "cat.getraenke"), ("ing.zigaretten", "Zigaretten", "cat.tabak"), ("ing.fracht", "Fracht", "cat.sonst"),
+                     ("prod.cola.ware", "Cola", "cat.getraenke"), ("prod.bier.ware", "Bier", "cat.getraenke"), ("prod.wein.ware", "Wein", "cat.getraenke"),
+                     ("prod.sirup", "Sirup", "cat.getraenke"), ("prod.zigaretten.ware", "Zigaretten", "cat.tabak"), ("prod.fracht", "Fracht", "cat.sonst"),
                  })
         {
-            rs.Put(new Ingredient { Id = id, Name = name, CategoryId = cat });
-            rs.Put(new ArticleMapping { Id = "map" + id[3..], Name = name, IngredientId = id, Confirmed = true });
+            rs.Put(new Product { Id = id, Name = name, Unit = "H87", CategoryId = cat });
+            rs.Put(new ArticleMapping { Id = "map" + id[4..], Name = name, ProductId = id, Confirmed = true });
         }
-        rs.Put(new Product { Id = "prod.cola", Name = "Cola", Recipe = [new() { IngredientId = "ing.cola", Amount = 1, Unit = "H87" }] });
-        rs.Put(new Product { Id = "prod.zigaretten", Name = "Zigaretten", Recipe = [new() { IngredientId = "ing.zigaretten", Amount = 1, Unit = "H87" }] });
-        rs.Put(new Product { Id = "prod.bier", Name = "Bier", Recipe = [new() { IngredientId = "ing.bier", Amount = 1, Unit = "H87" }] });
-        rs.Put(new Product { Id = "prod.wein", Name = "Wein", Recipe = [new() { IngredientId = "ing.wein", Amount = 3, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.cola", Name = "Cola", Unit = "H87", Recipe = [new() { PartId = "prod.cola.ware", Amount = 1, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.zigaretten", Name = "Zigaretten", Unit = "H87", Recipe = [new() { PartId = "prod.zigaretten.ware", Amount = 1, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.bier", Name = "Bier", Unit = "H87", Recipe = [new() { PartId = "prod.bier.ware", Amount = 1, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.wein", Name = "Wein", Unit = "H87", Recipe = [new() { PartId = "prod.wein.ware", Amount = 3, Unit = "H87" }] });
         return rs;
     }
 
@@ -79,7 +79,7 @@ public class EstimateTests
     }
 
     [Fact]
-    public void UnallocatedWareIsEstimatedPerIngredient()
+    public void UnallocatedWareIsEstimatedPerProduct()
     {
         var c = Kase(new InvoiceLine { No = 3, Name = "Wein", Quantity = 100_000, UnitCode = "H87", LineNet = 10_000 });
         c.Products.Add(new() { ProductId = "prod.wein", GrossPrice = 1_190, Vat = 1900 });
@@ -105,13 +105,13 @@ public class EstimateTests
     }
 
     [Fact]
-    public void IngredientsWithoutRevenueLeaveTheEstimateAndTheWareneinsatz()
+    public void WaresWithoutRevenueLeaveTheEstimateAndTheWareneinsatz()
     {
         var c = Kase(
             new InvoiceLine { No = 3, Name = "Sirup", Quantity = 1_000, UnitCode = "H87", LineNet = 1_000 },
             new InvoiceLine { No = 4, Name = "Sirup", Quantity = 2_000, UnitCode = "XBO", LineNet = 1_500 });
         var before = Calculation.Run(c, Rules());
-        c.NoRevenue = ["ing.sirup", "ing.cola"];
+        c.NoRevenue = ["prod.sirup", "prod.cola.ware"];
         var r = Calculation.Run(c, Rules());
         Assert.Empty(r.Estimated);
         Assert.Equal(["Cola", "Sirup", "Sirup"], r.NoRevenue.Select(l => l.Name).Order());

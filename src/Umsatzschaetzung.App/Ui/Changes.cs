@@ -104,31 +104,10 @@ public sealed class RuleChange(Session session, Entity kind, string id, IRuleEnt
 
     public object Target => (kind, id);
 
-    public static Entity KindOf(IRuleEntity e) => e switch
-    {
-        Category => Entity.Category,
-        Ingredient => Entity.Ingredient,
-        ArticleMapping => Entity.Mapping,
-        Product => Entity.Product,
-        YieldRule => Entity.YieldRule,
-        Gewerbezweig => Entity.Gewerbezweig,
-        ReportTemplate => Entity.Template,
-        _ => throw new ArgumentException("unbekannte Regel " + e.GetType().Name),
-    };
-
     public IChange Then(IChange later) => new RuleChange(session, kind, id, before, ((RuleChange)later).After);
 
     public string? Stale(bool back) =>
-        Content(session.Rules?.Find(kind, id)) == Content(back ? After : before) ? null : History.Overtaken(back);
+        RuleSet.Content(session.Rules?.Find(kind, id)) == RuleSet.Content(back ? After : before) ? null : History.Overtaken(back);
 
     public Task<bool> Apply(bool back) => session.Restore(kind, id, back ? before : After);
-
-    // What a rule says, apart from when and in which revision it was written.
-    static string? Content(IRuleEntity? e)
-    {
-        if (e is null) return null;
-        var bare = Json.Copy(e);
-        bare.Meta = new Meta();
-        return JsonSerializer.Serialize(bare, bare.GetType(), ModelJsonContext.Default);
-    }
 }

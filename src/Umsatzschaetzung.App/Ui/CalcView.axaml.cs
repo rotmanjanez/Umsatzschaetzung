@@ -109,8 +109,8 @@ public partial class CalcView : Screen
     {
         if (Session.Case is not { } kase || Drawn()) return;
         var stamp = Session.Stamp;
-        IngredientBox.SetCategoryNames(this, Session.CategoryNames);
-        IngredientBox.SetSimilar(this, Session.SimilarIngredients);
+        ProductBox.SetCategoryNames(this, Session.CategoryNames);
+        ProductBox.SetSimilar(this, Session.SimilarProducts);
         Mapping.Refresh();
         model.NoInvoices = kase.Invoices.Count == 0;
         if (model.NoInvoices)
@@ -143,7 +143,7 @@ public partial class CalcView : Screen
         }
         var ex = model.Exclusions;
         var excluded = ex.Unused.Concat(ex.Omitted).FirstOrDefault(r =>
-            item == RevenueItem + r.IngredientId || item == GroupItem + r.Group.Key);
+            item == RevenueItem + r.ProductId || item == GroupItem + r.Group.Key);
         if (excluded is null) return;
         Pages.SelectedItem = ExcludedPage;
         Reveal.Row(excluded.Why == Exclusion.Unused ? UnusedGrid : OmittedGrid, excluded);
@@ -159,7 +159,7 @@ public partial class CalcView : Screen
     bool Promote(Case kase, RuleSet rs)
     {
         var promoted = kase.Products.Where(cp => promoting.Contains(cp.ProductId) && cp.Recipe is { } own
-            && rs.Products.TryGetValue(cp.ProductId, out var p) && Recipes.Same(own, Recipes.Flat(rs, p))).ToList();
+            && rs.Products.TryGetValue(cp.ProductId, out var p) && Recipes.Same(own, p.Recipe)).ToList();
         foreach (var cp in promoted)
         {
             promoting.Remove(cp.ProductId);
@@ -210,7 +210,7 @@ public partial class CalcView : Screen
     void ShowYields(Case kase, RuleSet rs)
     {
         model.Yields.Clear();
-        foreach (var group in Yields.Groups(kase, rs, Session.Ingredients(), Session.CategoryName))
+        foreach (var group in Yields.Groups(kase, rs, Session.CategoryName))
         {
             foreach (var row in group.Rows) row.Changed += () => YieldChosen(row);
             model.Yields.Add(group);
@@ -246,7 +246,7 @@ public partial class CalcView : Screen
             return new ResultRow(p.ProductId, Names.Product(rs, p.ProductId), Format.Group(p.Portions), p.Portions,
                 Format.Cents(p.CostPerPortion), p.PriceMissing ? "" : Format.Cents(p.RevenueNet), p.RevenueNet,
                 p.CostOfGoods > 0 && !p.PriceMissing ? Format.Bp(p.Markup) : "", p.PriceMissing,
-                own?.Recipe is not null, own is null ? "" : RecipeTip(rs, own));
+                own?.Recipe is { Count: > 0 }, own is null ? "" : RecipeTip(rs, own));
         }));
         ProductGrid.SelectedItem = model.Products.FirstOrDefault(p => p.ProductId == selected);
         filling = false;
@@ -305,7 +305,7 @@ public partial class CalcView : Screen
 
     async void Toggle(ExcludedRow? row)
     {
-        if (row is not { IngredientId: { } id } || Session.Case is not { } kase) return;
+        if (row is not { ProductId: { } id } || Session.Case is not { } kase) return;
         if (!kase.NoRevenue.Remove(id))
         {
             kase.NoRevenue.Add(id);
@@ -322,7 +322,7 @@ public partial class CalcView : Screen
     static string RecipeTip(RuleSet rs, CaseProduct cp)
     {
         if (cp.Recipe is null) return "";
-        var lines = cp.Recipe.Select(l => RecipeEditor.Amount(l) + " " + Names.Ingredient(rs, l.IngredientId));
+        var lines = cp.Recipe.Select(l => RecipeEditor.Amount(l) + " " + Names.Product(rs, l.PartId));
         return "Rezeptur nur dieser Prüfung:\n" + string.Join("\n", lines);
     }
 
@@ -343,44 +343,50 @@ public partial class CalcView : Screen
             facts.Add(new("Umsatz (netto)", row.Revenue));
         }
         if (row.Markup != "") facts.Add(new("Aufschlagsatz", row.Markup));
-        var ingredients = r.Ingredients.ToDictionary(i => i.IngredientId);
-        var recipe = product.Recipe.Select(l =>
+        for (var i = 0; i < p.Routes.Count; i++)
+            facts.Add(new($"Herkunft {i + 1}", Format.Portions(p.Routes[i].Portions) + ": "
+                + string.Join(", ", p.Routes[i].Parts.Select(x => Format.Qty(x.PerPortion, x.Unit) + " " + x.Name))));
+        var supply = r.Supply.ToDictionary(i => i.ProductId);
+        // A product bought as it is sold shows where it comes from: its own supply.
+        var lines = product.Recipe.Count > 0 ? product.Recipe : [new PartLine { PartId = product.Id, Amount = product.Batch, Unit = product.Unit }];
+        var recipe = lines.Select(l =>
         {
-            var name = Names.Ingredient(rs, l.IngredientId);
-            var amount = RecipeEditor.Amount(l);
-            var note = Issue(c, rs, ingredients, sold, p, l) ?? (p.Binding.Contains(name) ? "begrenzt die Portionen" : "");
-            return new RecipeUse(name, amount, note);
+            var limits = Recipes.Reachable(rs, [l.PartId]).Any(id => p.Binding.Contains(Names.Product(rs, id)));
+            var note = Issue(c, rs, supply, p, l) ?? (limits ? "begrenzt die Portionen" : "");
+            return new RecipeUse(Names.Product(rs, l.PartId), RecipeEditor.Amount(l), note);
         }).ToList();
         var stuck = p.Portions == 0 && recipe.TrueForAll(x => x.Note == "");
-        model.Detail = new ProductDetail(row.Name, facts, stuck ? "Keine ganze Portion möglich" : "");
-        ShowRecipe(catalog, product, recipe);
+        var approximate = r.Allocations.Exists(a => a.Approximate && a.Products.Exists(x => x.ProductId == p.ProductId));
+        model.Detail = new ProductDetail(row.Name, facts, stuck ? "Keine ganze Portion möglich"
+            : approximate ? "Näherungsweise verteilt: zu viele gemeinsame Bestände oder Wege für die genaue Rechnung" : "");
+        ShowRecipe(catalog, product.Id, lines, recipe);
     }
 
     // The editor outlives a recalculation, so a line being typed keeps its focus; only the notes move.
-    void ShowRecipe(RuleSet catalog, Product product, List<RecipeUse> uses)
+    void ShowRecipe(RuleSet catalog, string productId, List<PartLine> lines, List<RecipeUse> uses)
     {
-        var cp = Listed(product.Id);
+        var cp = Listed(productId);
         var own = cp?.Recipe;
         var editor = model.Editor;
-        if (editor is null || editor.ProductId != product.Id || editor.Adjusted != (own is not null))
+        if (editor is null || editor.ProductId != productId || editor.Adjusted != (own is not null))
         {
-            editor = new RecipeEditor(product.Id) { Adjusted = own is not null };
-            var options = Session.Ingredients();
-            foreach (var l in own ?? []) editor.Add(new CaseRecipeRow(options, catalog, l));
+            editor = new RecipeEditor(productId) { Adjusted = own is not null };
+            var options = Choices(productId);
+            foreach (var l in own ?? []) editor.Add(new CaseRecipeRow(options, l));
             var edited = editor;
             edited.Edited += () => RecipeEdited(edited);
             model.Editor = editor;
         }
         editor.Uses = uses;
         editor.Stale = cp is not null && Recipes.Stale(cp, catalog);
-        editor.Compare(catalog, CatalogRecipe(catalog, product.Id));
+        editor.Compare(catalog, CatalogRecipe(catalog, productId));
         var notes = new Dictionary<string, string>();
-        for (var i = 0; i < product.Recipe.Count && i < uses.Count; i++) notes.TryAdd(product.Recipe[i].IngredientId, uses[i].Note);
-        foreach (var row in editor.Rows) row.Note = row.Ingredient is { } ing ? notes.GetValueOrDefault(ing.Id, "") : "";
+        for (var i = 0; i < lines.Count && i < uses.Count; i++) notes.TryAdd(lines[i].PartId, uses[i].Note);
+        foreach (var row in editor.Rows) row.Note = row.Part is { } part ? notes.GetValueOrDefault(part.Id, "") : "";
     }
 
-    static List<RecipeLine> CatalogRecipe(RuleSet catalog, string productId) =>
-        catalog.Products.TryGetValue(productId, out var p) ? Recipes.Flat(catalog, p) : [];
+    static List<PartLine> CatalogRecipe(RuleSet catalog, string productId) =>
+        catalog.Products.TryGetValue(productId, out var p) ? p.Recipe : [];
 
     CaseProduct? Listed(string productId) => Session.Case?.Products.Find(p => p.ProductId == productId);
 
@@ -388,9 +394,10 @@ public partial class CalcView : Screen
     {
         if (Listed(editor.ProductId) is not { Recipe: { } own } cp || shown is not { } s) return;
         var lines = editor.Lines();
-        editor.Emptied = lines.Count == 0;
+        // No line at all is no recipe of the case's own: the catalog's counts again.
+        editor.Emptied = lines.Count == 0 && editor.Rows.Count > 0;
         editor.Compare(s.Catalog, CatalogRecipe(s.Catalog, editor.ProductId));
-        if (lines.Count == 0 || Recipes.Same(lines, own)) return;
+        if (editor.Emptied || Recipes.Same(lines, own)) return;
         cp.Recipe = lines;
         edited = ProductItem + cp.ProductId;
         Schedule(600);
@@ -400,8 +407,8 @@ public partial class CalcView : Screen
     {
         if (model.Editor is not { } editor || Listed(editor.ProductId) is not { } cp || shown is not { } s
             || !s.Catalog.Products.TryGetValue(editor.ProductId, out var p)) return;
-        cp.Recipe = [.. Recipes.Flat(s.Catalog, p).Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })];
-        cp.RecipeBasis = Recipes.Basis(s.Catalog, p);
+        cp.Recipe = [.. p.Recipe.Select(l => new PartLine { PartId = l.PartId, Amount = l.Amount, Unit = l.Unit })];
+        cp.RecipeBasis = Recipes.Basis(p);
         edited = ProductItem + cp.ProductId;
         ProductSelected(null, null);
         Schedule(0);
@@ -425,7 +432,7 @@ public partial class CalcView : Screen
     {
         if (model.Editor is not { } editor || Listed(editor.ProductId)?.Recipe is not { } own) return;
         promoting.Add(editor.ProductId);
-        Session.EditProduct(editor.ProductId, [.. own.Select(l => new RecipeLine { IngredientId = l.IngredientId, Amount = l.Amount, Unit = l.Unit })]);
+        Session.EditProduct(editor.ProductId, [.. own.Select(l => new PartLine { PartId = l.PartId, Amount = l.Amount, Unit = l.Unit })]);
     }
 
     void EditCatalog(object? sender, RoutedEventArgs e)
@@ -435,7 +442,14 @@ public partial class CalcView : Screen
 
     void AddRecipeLine(object? sender, RoutedEventArgs e)
     {
-        if (model.Editor is { } editor && shown is { } s) editor.Add(new CaseRecipeRow(Session.Ingredients(), s.Catalog, null));
+        if (model.Editor is { } editor) editor.Add(new CaseRecipeRow(Choices(editor.ProductId), null));
+    }
+
+    // Its own stock the calculation takes by itself; a part is something else, and none it is made into.
+    List<Product> Choices(string productId)
+    {
+        var loop = shown is { } s ? PartRow.Containing(s.Rules, productId) : [];
+        return [.. Session.Products().Where(p => p.Id != productId && !loop.Contains(p.Id))];
     }
 
     void RemoveRecipeLine(object? sender, RoutedEventArgs e)
@@ -445,26 +459,23 @@ public partial class CalcView : Screen
         RecipeEdited(editor);
     }
 
-    static string? Issue(Case c, RuleSet rs, Dictionary<string, IngredientRow> ingredients, List<ProductRow> sold, ProductRow product, RecipeLine line)
+    static string? Issue(Case c, RuleSet rs, Dictionary<string, SupplyRow> supply, ProductRow product, PartLine line)
     {
-        if (!ingredients.TryGetValue(line.IngredientId, out var ing))
-            return Mapped(c, rs, line.IngredientId) ? "Gebindeinhalt fehlt in der Zuordnung" : "kein Einkauf zugeordnet";
-        if (ing.Sellable <= 0) return "nach Bestand und Abzügen nichts verkaufsfähig";
-        if (product.Portions == 0 && ing.Leftover < Scale.ToBase(line.Amount, line.Unit))
-            return "aufgebraucht von " + Consumers(rs, sold, line.IngredientId);
+        if (!supply.TryGetValue(line.PartId, out var supplied))
+            return rs.Products.TryGetValue(line.PartId, out var part) && part.Recipe.Count > 0 ? null
+                : Mapped(c, rs, line.PartId) ? "Gebindeinhalt fehlt in der Zuordnung" : "kein Einkauf zugeordnet";
+        if (supplied.Sellable <= 0) return "nach Bestand und Abzügen nichts verkaufsfähig";
+        if (product.Portions == 0 && supplied.Leftover < Scale.ToBase(line.Amount, line.Unit))
+            return "aufgebraucht von " + Consumers(supplied);
         return null;
     }
 
-    static bool Mapped(Case c, RuleSet rs, string ingredientId) =>
-        c.Invoices.Any(inv => inv.Lines.Any(l => Match.Mapping(rs, inv.SupplierName, inv.Date, l)?.IngredientId == ingredientId));
+    static bool Mapped(Case c, RuleSet rs, string productId) =>
+        c.Invoices.Any(inv => inv.Lines.Any(l => Match.Mapping(rs, inv.SupplierName, inv.Date, l)?.ProductId == productId));
 
-    static string Consumers(RuleSet rs, List<ProductRow> sold, string ingredientId)
+    static string Consumers(SupplyRow supply)
     {
-        var users = sold
-            .Where(p => p.Portions > 0 && rs.Products.TryGetValue(p.ProductId, out var x) && x.Recipe.Exists(l => l.IngredientId == ingredientId))
-            .OrderByDescending(p => p.Portions * rs.Products[p.ProductId].Recipe.Where(l => l.IngredientId == ingredientId).Sum(l => Scale.ToBase(l.Amount, l.Unit)))
-            .Select(p => p.Name)
-            .ToList();
+        var users = supply.UsedBy.Select(u => u.Name).Distinct().ToList();
         return users.Count switch
         {
             0 => "andere Produkte",

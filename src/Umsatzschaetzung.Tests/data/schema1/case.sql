@@ -1,8 +1,8 @@
 CREATE TABLE case_mapping(id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT,
-    name TEXT, observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER) WITHOUT ROWID;
+    name TEXT, observed TEXT, unit_code TEXT, product_id TEXT NOT NULL, factor INTEGER) WITHOUT ROWID;
 CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL,
     recipe_basis INTEGER) WITHOUT ROWID;
-CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
+CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, part_id TEXT NOT NULL,
     amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
 CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
 CREATE TABLE document(invoice_id TEXT PRIMARY KEY, name TEXT NOT NULL, data BLOB NOT NULL) WITHOUT ROWID;
@@ -17,7 +17,7 @@ CREATE TABLE fall(
     template_id TEXT,
     -- Die Programmversion, die den Fall zuletzt geschrieben hat.
     app_version TEXT NOT NULL) WITHOUT ROWID;
-CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
+CREATE TABLE inventory(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
 CREATE TABLE invoice(
     id TEXT PRIMARY KEY, ord INTEGER NOT NULL,
     source TEXT NOT NULL, file_name TEXT NOT NULL, supplier_name TEXT NOT NULL, number TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE invoice_line(
     unit_price INTEGER NOT NULL, price_base_qty INTEGER NOT NULL, line_net INTEGER NOT NULL,
     vat INTEGER NOT NULL, mapping_id TEXT,
     PRIMARY KEY(invoice_id, ord)) WITHOUT ROWID;
-CREATE TABLE no_revenue(ingredient_id TEXT PRIMARY KEY) WITHOUT ROWID;
+CREATE TABLE no_revenue(product_id TEXT PRIMARY KEY) WITHOUT ROWID;
 CREATE TABLE pinned(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, portions INTEGER NOT NULL, reason TEXT NOT NULL);
 CREATE TABLE reading_cell(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, line INTEGER NOT NULL,
     field TEXT NOT NULL, text TEXT NOT NULL, x INTEGER NOT NULL, y INTEGER NOT NULL, w INTEGER NOT NULL,
@@ -59,4 +59,4 @@ CREATE TABLE reading_page_flag(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, 
 CREATE TABLE reading_word(invoice_id TEXT NOT NULL, page INTEGER NOT NULL, ord INTEGER NOT NULL,
     text TEXT NOT NULL, x INTEGER NOT NULL, y INTEGER NOT NULL, w INTEGER NOT NULL, h INTEGER NOT NULL,
     confidence REAL NOT NULL, PRIMARY KEY(invoice_id, page, ord)) WITHOUT ROWID;
-CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, ingredient_id TEXT, category_id TEXT, yield_rule_id TEXT);
+CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, product_id TEXT, category_id TEXT, yield_rule_id TEXT);

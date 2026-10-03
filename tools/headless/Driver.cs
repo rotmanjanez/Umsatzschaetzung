@@ -83,6 +83,9 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
             case PickStep s:
                 Pick(s.Files);
                 break;
+            case ChooseStep s when at is ComboBox box:
+                Choose(box, s.Item);
+                break;
             case ChooseStep s:
                 Choose((AutoCompleteBox)at!, s.Text, s.Item);
                 break;
@@ -276,6 +279,18 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         Settle();
         if (box.IsDropDownOpen || box.SelectedItem is { } taken && taken != entry.DataContext)
             throw new InvalidOperationException("the search box did not take " + item);
+    }
+
+    static void Choose(ComboBox box, string item)
+    {
+        box.IsDropDownOpen = true;
+        Settle();
+        var entry = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child?
+            .GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item)
+            ?? throw new InvalidOperationException("not offered: " + item);
+        Press(entry);
+        Settle();
+        if (box.IsDropDownOpen) throw new InvalidOperationException("the list did not take " + item);
     }
 
     static void Press(Visual visual)

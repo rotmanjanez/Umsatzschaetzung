@@ -1,61 +1,39 @@
 namespace Umsatzschaetzung.Model;
 
-// Die Rezeptur legt fest, worin eine Zutat gemessen wird. Die Zutat selbst trägt
-// keine Einheit: "Pommes in Stück" und "Pommes in Gramm" sind nicht dieselbe Zutat.
 public static class Scale
 {
-    public static Unit? Of(RuleSet rs, string ingredientId) => Bases(rs).GetValueOrDefault(ingredientId);
+    public static Unit? Of(RuleSet rs, string productId) =>
+        rs.Products.TryGetValue(productId, out var p) ? Of(p) : null;
 
-    public static Dictionary<string, Unit?> Bases(RuleSet rs) => rs.Bases ??= Compute(rs);
+    public static Unit? Of(Product p) => Units.Lookup(p.Unit) is { Container: false } u ? u.Base : null;
 
-    // Eine unbekannte Einheit oder zwei verschiedene Basen lassen die Zutat ohne Basis.
-    static Dictionary<string, Unit?> Compute(RuleSet rs)
+    public static bool NeedsFactor(RuleSet rs, string productId, InvoiceLine line, IReadOnlySet<string> reached) =>
+        Counted(rs, productId, reached) is not null && Factors.Of(rs, productId, line, null) is null;
+
+    // What a category in no Sparte holds, as cleaning, packaging or freight, is no Wareneinsatz and
+    // counted in nothing, unless something sold reaches it: the cup of a "Kaffee to go" is counted.
+    public static Unit? Counted(RuleSet rs, string productId, IReadOnlySet<string> reached) =>
+        rs.Products.TryGetValue(productId, out var p) && (Goods(rs, p) || reached.Contains(p.Id)) ? Of(p) : null;
+
+    public static bool Goods(RuleSet rs, Product p) =>
+        string.IsNullOrEmpty(p.CategoryId) || rs.Categories.GetValueOrDefault(p.CategoryId)?.Sparte != Sparte.Unbestimmt;
+
+    // What the case sells and everything its recipes are made of, in the rules Recipes.Effective gives.
+    public static HashSet<string> Reached(Case c, RuleSet effective) =>
+        Recipes.Reachable(effective, c.Products
+            .Where(cp => effective.Products.TryGetValue(cp.ProductId, out var p) && p.Meta.ValidOn(c.PeriodTo))
+            .Select(cp => cp.ProductId));
+
+    // Without a case: everything a product of the rules is made of.
+    public static HashSet<string> Parts(RuleSet rs) =>
+        rs.Products.Values.SelectMany(p => p.Recipe).Select(l => l.PartId).ToHashSet(StringComparer.Ordinal);
+
+    public static string Code(Unit u) => u switch
     {
-        var output = new Dictionary<string, Unit?>(StringComparer.Ordinal);
-        foreach (var p in rs.Products.Values)
-            foreach (var line in p.Recipe)
-            {
-                if (line.ProductId is not null) continue;
-                var u = Units.Lookup(line.Unit)?.Base;
-                if (!output.TryGetValue(line.IngredientId, out var seen)) output[line.IngredientId] = u;
-                else if (seen != u) output[line.IngredientId] = null;
-            }
-        return output;
-    }
-
-    public static List<Flag> Conflicts(RuleSet rs, IEnumerable<string> ingredientIds)
-    {
-        var wanted = ingredientIds.ToHashSet(StringComparer.Ordinal);
-        var seen = new Dictionary<string, (Unit Base, string Product)>(StringComparer.Ordinal);
-        List<Flag> flags = [];
-        foreach (var id in rs.Products.Keys.Order(StringComparer.Ordinal))
-            foreach (var line in rs.Products[id].Recipe)
-            {
-                if (line.ProductId is not null || !wanted.Contains(line.IngredientId)) continue;
-                var name = rs.Ingredients.TryGetValue(line.IngredientId, out var ing) ? ing.Name : line.IngredientId;
-                if (Units.Lookup(line.Unit) is not { } u)
-                {
-                    flags.Add(new Flag
-                    {
-                        Code = "unknown_recipe_unit",
-                        Message = $"Rezeptur „{rs.Products[id].Name}“: „{name}“ hat die unbekannte Einheit „{line.Unit}“",
-                    });
-                    continue;
-                }
-                if (!seen.TryGetValue(line.IngredientId, out var first)) seen[line.IngredientId] = (u.Base, rs.Products[id].Name);
-                else if (first.Base != u.Base)
-                    flags.Add(new Flag
-                    {
-                        Code = "recipe_unit_conflict",
-                        Message = $"„{name}“ wird in „{first.Product}“ in {Format.UnitName(first.Base)} und in "
-                            + $"„{rs.Products[id].Name}“ in {Format.UnitName(u.Base)} gerechnet",
-                    });
-            }
-        return flags;
-    }
-
-    public static bool NeedsFactor(RuleSet rs, string ingredientId, InvoiceLine line) =>
-        Of(rs, ingredientId) is not null && Factors.Of(rs, ingredientId, line, null) is null;
+        Unit.G => "GRM",
+        Unit.Ml => "MLT",
+        _ => "H87",
+    };
 
     public static long ToBase(long amount, string unit) =>
         Units.Lookup(unit) is { } u ? amount * u.Factor : amount;

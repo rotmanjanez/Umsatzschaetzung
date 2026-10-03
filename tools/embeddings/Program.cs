@@ -11,7 +11,7 @@ var target = Path.GetFullPath(args[0]);
 var warm = Directory.CreateDirectory(Path.TrimEndingDirectorySeparator(target) + ".part" + Environment.ProcessId).FullName;
 var db = Path.Combine(warm, "embeddings.db");
 var rs = RuleStore.Seed();
-using (var encoder = new Encoder(new OrtWeights(Path.Combine(AppContext.BaseDirectory, "models"))))
+using (var encoder = new Encoder(new OrtWeights(Path.Combine(AppContext.BaseDirectory, "models")), runs: Math.Max(Environment.ProcessorCount / 2, 1)))
     await new Wares(encoder, new EmbeddingStore(warm)).Index(rs, "", CancellationToken.None);
 
 using (var from = File.OpenRead(db))

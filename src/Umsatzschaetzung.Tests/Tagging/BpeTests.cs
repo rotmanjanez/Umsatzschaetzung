@@ -40,7 +40,7 @@ public sealed class BpeTests : IDisposable
     public async Task TheSpecialsComeFromTheSpec()
     {
         var bpe = await Real.Value;
-        Assert.Equal((0, 2, 1, 3), (bpe.Bos, bpe.Eos, bpe.Pad, bpe.Unk));
+        Assert.Equal((0, 2, 3), (bpe.Bos, bpe.Eos, bpe.Unk));
     }
 
     [Theory]

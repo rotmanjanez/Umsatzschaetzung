@@ -5,9 +5,8 @@ using Umsatzschaetzung.Suggest;
 namespace Umsatzschaetzung.Tests.Suggest;
 
 // The shipped embeddings are warmed again only when a file Embeddings.targets hashes changes. They
-// hold every wording of the seed's wares in the order the index embeds them, which decides how they
-// are batched: a change outside those files that alters either fails here, and needs one of them
-// touched so the embeddings are warmed again.
+// hold every wording of the seed's wares: a change outside those files that alters the wordings
+// fails here, and needs one of them touched so the embeddings are warmed again.
 public class ShippedEmbeddingsTests
 {
     sealed class Asked : IEncoder
@@ -26,7 +25,7 @@ public class ShippedEmbeddingsTests
     }
 
     [Fact]
-    public async Task HoldEveryWordingOfTheSeedInTheOrderItIsEmbedded()
+    public async Task HoldEveryWordingOfTheSeed()
     {
         var asked = new Asked();
         await new Wares(asked).Index(RuleStore.Seed(), "", TestContext.Current.CancellationToken);
@@ -39,12 +38,12 @@ public class ShippedEmbeddingsTests
         }.ToString());
         db.Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT text FROM embedding WHERE model = @model ORDER BY rowid";
+        cmd.CommandText = "SELECT text FROM embedding WHERE model = @model";
         cmd.Parameters.AddWithValue("@model", Encoder.Name);
         var shipped = new List<string>();
         using (var rows = cmd.ExecuteReader())
             while (rows.Read()) shipped.Add(rows.GetString(0));
 
-        Assert.Equal(asked.Texts, shipped);
+        Assert.Equal(asked.Texts.Order(StringComparer.Ordinal), shipped.Order(StringComparer.Ordinal));
     }
 }

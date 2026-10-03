@@ -38,15 +38,21 @@ public sealed record RenderArg(string CaseId, bool Pdf);
 public sealed record DeleteRuleArg(Entity Kind, string Id);
 public sealed record RulesSeen(string? Store, long Version);
 
+// Written together, checked as one: what is put and what is deleted.
+public sealed record RulesChange(List<RuleArg> Put, List<DeleteRuleArg> Delete)
+{
+    public static RulesChange Of(IEnumerable<IRuleEntity> put, IEnumerable<(Entity Kind, string Id)> delete) =>
+        new([.. put.Select(RuleArg.Of)], [.. delete.Select(d => new DeleteRuleArg(d.Kind, d.Id))]);
+}
+
 // One of them is set.
-public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezweig = null, Ingredient? Ingredient = null,
+public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezweig = null,
     ArticleMapping? Mapping = null, Product? Product = null, YieldRule? Yield = null, ReportTemplate? Template = null)
 {
     public static RuleArg Of(IRuleEntity rule) => rule switch
     {
         Category c => new(Category: c),
         Gewerbezweig g => new(Gewerbezweig: g),
-        Ingredient i => new(Ingredient: i),
         ArticleMapping m => new(Mapping: m),
         Product p => new(Product: p),
         YieldRule y => new(Yield: y),
@@ -55,7 +61,7 @@ public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezwe
     };
 
     public IRuleEntity Rule =>
-        (IRuleEntity?)Category ?? (IRuleEntity?)Gewerbezweig ?? (IRuleEntity?)Ingredient ?? (IRuleEntity?)Mapping
+        (IRuleEntity?)Category ?? (IRuleEntity?)Gewerbezweig ?? (IRuleEntity?)Mapping
         ?? (IRuleEntity?)Product ?? (IRuleEntity?)Yield ?? (IRuleEntity?)Template
         ?? throw new ServiceError(ErrorCode.Invalid, "Keine Regel übergeben");
 }
@@ -80,6 +86,7 @@ public sealed record RuleArg(Category? Category = null, Gewerbezweig? Gewerbezwe
 [JsonSerializable(typeof(DeleteRuleArg))]
 [JsonSerializable(typeof(RulesSeen))]
 [JsonSerializable(typeof(RuleArg))]
+[JsonSerializable(typeof(RulesChange))]
 [JsonSerializable(typeof(Case))]
 [JsonSerializable(typeof(RuleSet))]
 [JsonSerializable(typeof(VerifyReq))]

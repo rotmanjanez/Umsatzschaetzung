@@ -39,5 +39,5 @@ public partial class RulesPane : UserControl
 
     public void NewProduct(string name, Action<string> created) => view.NewProduct(name, created);
 
-    public void EditProduct(string id, List<RecipeLine>? recipe) => view.EditProduct(id, recipe);
+    public void EditProduct(string id, List<PartLine>? recipe) => view.EditProduct(id, recipe);
 }

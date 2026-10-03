@@ -33,7 +33,7 @@
       "lineNet": 8376,
       "vat": 700,
       "gtin": "4056489011231",
-      "expectedIngredientId": "ing.pommes.frites",
+      "expectedProductId": "prod.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -48,7 +48,7 @@
       "lineNet": 4740,
       "vat": 700,
       "gtin": "4056489011248",
-      "expectedIngredientId": "ing.pommes.frites",
+      "expectedProductId": "prod.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -63,7 +63,7 @@
       "lineNet": 1323,
       "vat": 700,
       "gtin": "4062300031005",
-      "expectedIngredientId": "ing.paniermehl",
+      "expectedProductId": "prod.paniermehl",
       "expectedFactor": 1000
     },
     {
@@ -78,7 +78,7 @@
       "lineNet": 6870,
       "vat": 700,
       "gtin": "4062300040991",
-      "expectedIngredientId": "ing.pflanzenoel",
+      "expectedProductId": "prod.pflanzenoel",
       "expectedFactor": 10000
     },
     {
@@ -93,7 +93,7 @@
       "lineNet": 1090,
       "vat": 700,
       "gtin": "4062300030503",
-      "expectedIngredientId": "ing.mehl",
+      "expectedProductId": "prod.mehl",
       "expectedFactor": 10000
     },
     {
@@ -108,7 +108,7 @@
       "lineNet": 1806,
       "vat": 700,
       "gtin": "4062300030510",
-      "expectedIngredientId": "ing.zucker",
+      "expectedProductId": "prod.zucker",
       "expectedFactor": 1000
     },
     {
@@ -123,7 +123,7 @@
       "lineNet": 2880,
       "vat": 700,
       "gtin": "4062300052029",
-      "expectedIngredientId": "ing.mozzarella",
+      "expectedProductId": "prod.mozzarella",
       "expectedFactor": 1000
     },
     {
@@ -138,7 +138,7 @@
       "lineNet": 660,
       "vat": 700,
       "gtin": "4062300061034",
-      "expectedIngredientId": "ing.toastbrot",
+      "expectedProductId": "prod.toastbrot",
       "expectedFactor": 1000
     },
     {
@@ -153,7 +153,7 @@
       "lineNet": 1990,
       "vat": 1900,
       "gtin": "4062300081001",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

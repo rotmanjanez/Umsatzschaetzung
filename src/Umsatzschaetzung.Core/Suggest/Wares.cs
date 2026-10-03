@@ -40,45 +40,50 @@ public sealed class Wares(IEncoder encoder, IEmbeddingCache? cache = null)
     public static string? Wording(ArticleMapping m) =>
         !string.IsNullOrEmpty(m.Observed) ? m.Observed : !string.IsNullOrEmpty(m.Name) ? m.Name : null;
 
-    // Only the ingredients of the case's Gewerbe are candidates: a Gaststätte is never
-    // offered Blondierpulver. Every name a ware is known under is its own entry — the
-    // ingredient is whichever of its wordings comes closest, not their average.
+    // Only the wares of the case's Gewerbe are candidates: a Gaststätte is never offered
+    // Blondierpulver. A ware is a product something says is bought: a category, an alias
+    // or a confirmed mapping; one with none of them is only known as a dish or a cut, and
+    // its name reads like the goods it is made of. Every name a ware is known under is its
+    // own entry — the product is whichever of its wordings comes closest, not their average.
     public async Task Index(RuleSet rs, string gewerbe, CancellationToken ct)
     {
         if (indexed == rs.Version && indexedGewerbe == gewerbe) return;
-        var covered = rs.Ingredients.Values
-            .Where(i => !rs.Categories.TryGetValue(i.CategoryId, out var c) || c.Covers(gewerbe))
-            .OrderBy(i => i.Id, StringComparer.Ordinal)
-            .ToDictionary(i => i.Id, StringComparer.Ordinal);
+        var mapped = rs.Mappings.Values.Where(m => m.Confirmed).Select(m => m.ProductId).ToHashSet(StringComparer.Ordinal);
+        var covered = rs.Products.Values
+            .Where(p => !string.IsNullOrEmpty(p.CategoryId)
+                ? !rs.Categories.TryGetValue(p.CategoryId, out var c) || c.Covers(gewerbe)
+                : p.Aliases.Count > 0 || mapped.Contains(p.Id))
+            .OrderBy(p => p.Id, StringComparer.Ordinal)
+            .ToDictionary(p => p.Id, StringComparer.Ordinal);
 
         var texts = new List<string>();
         var owners = new List<string>();
         var wares = new List<Meta>();
         var rules = new List<Meta?>();
         var seen = new HashSet<(string, string, Meta?)>();
-        void Add(Ingredient ing, Meta? by, string? text)
+        void Add(Product ware, Meta? by, string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
             text = Normal(text);
-            if (by is not null && seen.Contains((ing.Id, text, null))) return;
-            if (!seen.Add((ing.Id, text, by))) return;
-            owners.Add(ing.Id);
-            wares.Add(ing.Meta);
+            if (by is not null && seen.Contains((ware.Id, text, null))) return;
+            if (!seen.Add((ware.Id, text, by))) return;
+            owners.Add(ware.Id);
+            wares.Add(ware.Meta);
             rules.Add(by);
             texts.Add(text);
         }
 
-        foreach (var ing in covered.Values)
+        foreach (var ware in covered.Values)
         {
-            Add(ing, null, ing.Name);
-            foreach (var alias in ing.Aliases) Add(ing, null, alias);
+            Add(ware, null, ware.Name);
+            foreach (var alias in ware.Aliases) Add(ware, null, alias);
         }
         // A confirmed mapping is a wording a human tied to a ware; the next line that
         // reads like it lands on the same ware without asking again.
         foreach (var id in rs.Mappings.Keys.Order(StringComparer.Ordinal))
         {
             var m = rs.Mappings[id];
-            if (m.Confirmed && covered.TryGetValue(m.IngredientId, out var ing)) Add(ing, m.Meta, Wording(m));
+            if (m.Confirmed && covered.TryGetValue(m.ProductId, out var ware)) Add(ware, m.Meta, Wording(m));
         }
 
         // A save bumps the version for every mapping the import proposes, and almost none

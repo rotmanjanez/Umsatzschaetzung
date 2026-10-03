@@ -16,6 +16,23 @@ public sealed class WireTests : IDisposable
     public void Dispose() => host.Dispose();
 
     [Fact]
+    public async Task AChangeOfSeveralEntriesCrossesAsOneAndAnEmptyOneWritesNothing()
+    {
+        var before = await svc.Rules.Load(ct);
+        var mapping = before.Mappings.Values.First();
+        var rs = await svc.Rules.Change(RulesChange.Of(
+            [new Category { Id = "cat.draht", Name = "Draht" }, new Product { Id = "prod.draht", Name = "Draht", Unit = "H87", CategoryId = "cat.draht" }],
+            [(Entity.Mapping, mapping.Id)]), ct);
+
+        Assert.Equal("cat.draht", rs.Products["prod.draht"].CategoryId);
+        Assert.DoesNotContain(mapping.Id, rs.Mappings.Keys);
+        Assert.Equal(Json.Serialize(await host.Service.Rules.Load(ct)), Json.Serialize(rs));
+        Assert.Equal(rs.Version, (await svc.Rules.Change(new RulesChange([], []), ct)).Version);
+        var both = await Assert.ThrowsAsync<ServiceError>(() => svc.Rules.Change(RulesChange.Of([new Category { Id = "cat.zz", Name = "ZZ" }], [(Entity.Category, "cat.zz")]), ct));
+        Assert.Equal(ErrorCode.Invalid, both.Code);
+    }
+
+    [Fact]
     public async Task ACaseComesBackAsTheLocalServicesKeepIt()
     {
         var put = await svc.Cases.Put(Vorlage.Load(), ct);
@@ -53,7 +70,7 @@ public sealed class WireTests : IDisposable
         var rs = await svc.Rules.Load(ct);
         IRuleEntity[] rules =
         [
-            rs.Categories.Values.First(), rs.Ingredients.Values.First(), rs.Mappings.Values.First(), rs.Products.Values.First(),
+            rs.Categories.Values.First(), rs.Products.Values.First(), rs.Mappings.Values.First(),
             rs.YieldRules.Values.First(), rs.Gewerbezweige.Values.First(), new ReportTemplate { Id = "tpl.draht", Name = "Draht", Source = "<p></p>" },
         ];
         foreach (var rule in rules) rs = await svc.Rules.Save(rule, ct);

@@ -36,12 +36,12 @@ public class RulesTests
         var rs = new RuleSet();
         IRuleEntity[] all =
         [
-            new Category { Id = "c" }, new Ingredient { Id = "i" }, new ArticleMapping { Id = "m" },
+            new Category { Id = "c" }, new Product { Id = "i" }, new ArticleMapping { Id = "m" },
             new Product { Id = "p" }, new YieldRule { Id = "y" },
         ];
         foreach (var e in all) rs.Put(e);
         Assert.Same(all[0], rs.Find(Entity.Category, "c"));
-        Assert.Same(all[1], rs.Find(Entity.Ingredient, "i"));
+        Assert.Same(all[1], rs.Find(Entity.Product, "i"));
         Assert.Same(all[2], rs.Find(Entity.Mapping, "m"));
         Assert.Same(all[3], rs.Find(Entity.Product, "p"));
         Assert.Same(all[4], rs.Find(Entity.YieldRule, "y"));
@@ -66,14 +66,14 @@ public class RulesTests
         var rs = TestData.Seed();
         var own = new Dictionary<string, ArticleMapping>
         {
-            ["map.fass50"] = new() { Id = "map.fass50", IngredientId = "ing.korn" },
-            ["map-auto"] = new() { Id = "map-auto", Observed = "Pils Fass 50 l", IngredientId = "ing.bier.fass" },
-            ["map-fremd"] = new() { Id = "map-fremd", IngredientId = "ing.gibt.es.nicht" },
+            ["map.fass50"] = new() { Id = "map.fass50", ProductId = "prod.korn" },
+            ["map-auto"] = new() { Id = "map-auto", Observed = "Pils Fass 50 l", ProductId = "prod.bier.fass" },
+            ["map-fremd"] = new() { Id = "map-fremd", ProductId = "prod.gibt.es.nicht" },
         };
 
         var merged = rs.With(own);
 
-        Assert.Equal(rs.Mappings["map.fass50"].IngredientId, merged.Mappings["map.fass50"].IngredientId);
+        Assert.Equal(rs.Mappings["map.fass50"].ProductId, merged.Mappings["map.fass50"].ProductId);
         Assert.Same(own["map-auto"], merged.Mappings["map-auto"]);
         Assert.False(merged.Mappings.ContainsKey("map-fremd"));
         Assert.False(rs.Mappings.ContainsKey("map-auto"));

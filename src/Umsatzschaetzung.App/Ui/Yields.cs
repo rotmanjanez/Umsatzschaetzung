@@ -41,28 +41,28 @@ public sealed class YieldGroupRow : Observable
 public static class Yields
 {
     // Only what this Prüfung actually touches: an empty café has no business being offered fuel or funerals.
-    public static List<YieldKindGroup> Groups(Case k, RuleSet rs, List<Ingredient> ingredients, Func<string, string> categoryName)
+    public static List<YieldKindGroup> Groups(Case k, RuleSet rs, Func<string, string> categoryName)
     {
         var used = InCase(k, rs);
         var rules = rs.YieldRules.Values.OrderBy(r => r.Name, StringComparer.Ordinal).ToList();
-        List<YieldGroupRow> byCategory = [], byIngredient = [];
+        List<YieldGroupRow> byCategory = [], byProduct = [];
         var seen = new HashSet<string>();
-        foreach (var ing in ingredients)
+        foreach (var p in rs.Products.Values)
         {
-            if (!used.Contains(ing.Id)) continue;
-            if (ing.CategoryId != "" && seen.Add(ing.CategoryId))
+            if (!used.Contains(p.Id)) continue;
+            if (p.CategoryId is { Length: > 0 } category && seen.Add(category))
             {
-                var forCategory = rules.Where(r => string.IsNullOrEmpty(r.IngredientId) && r.CategoryId == ing.CategoryId).ToList();
+                var forCategory = rules.Where(r => string.IsNullOrEmpty(r.ProductId) && r.CategoryId == category).ToList();
                 if (forCategory.Count > 0)
-                    byCategory.Add(new YieldGroupRow(new YieldChoice { CategoryId = ing.CategoryId }, categoryName(ing.CategoryId), forCategory));
+                    byCategory.Add(new YieldGroupRow(new YieldChoice { CategoryId = category }, categoryName(category), forCategory));
             }
-            var forIngredient = rules.Where(r => r.IngredientId == ing.Id).ToList();
-            if (forIngredient.Count > 0)
-                byIngredient.Add(new YieldGroupRow(new YieldChoice { IngredientId = ing.Id }, ing.Name, forIngredient));
+            var forProduct = rules.Where(r => r.ProductId == p.Id).ToList();
+            if (forProduct.Count > 0)
+                byProduct.Add(new YieldGroupRow(new YieldChoice { ProductId = p.Id }, p.Name, forProduct));
         }
         List<YieldKindGroup> groups = [];
         if (byCategory.Count > 0) groups.Add(new YieldKindGroup("Nach Kategorie", Sorted(byCategory)));
-        if (byIngredient.Count > 0) groups.Add(new YieldKindGroup("Nach Zutat", Sorted(byIngredient)));
+        if (byProduct.Count > 0) groups.Add(new YieldKindGroup("Nach Produkt", Sorted(byProduct)));
         foreach (var row in groups.SelectMany(g => g.Rows)) row.Selected = Chosen(k, row);
         return groups;
     }
@@ -70,7 +70,7 @@ public static class Yields
     public static List<YieldChoice> Choices(IEnumerable<YieldKindGroup> groups) => groups
         .SelectMany(g => g.Rows)
         .Where(r => r.Selected is not null)
-        .Select(r => new YieldChoice { IngredientId = r.Choice.IngredientId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule?.Id })
+        .Select(r => new YieldChoice { ProductId = r.Choice.ProductId, CategoryId = r.Choice.CategoryId, YieldRuleId = r.Selected!.Rule?.Id })
         .ToList();
 
     static List<YieldGroupRow> Sorted(List<YieldGroupRow> rows) =>
@@ -79,14 +79,11 @@ public static class Yields
     static HashSet<string> InCase(Case k, RuleSet rs)
     {
         var ids = new HashSet<string>();
-        foreach (var e in k.Inventory) ids.Add(e.IngredientId);
-        var recipes = Recipes.Effective(k, rs);
-        foreach (var p in k.Products)
-            if (recipes.Products.TryGetValue(p.ProductId, out var product))
-                foreach (var line in product.Recipe) ids.Add(line.IngredientId);
+        foreach (var e in k.Inventory) ids.Add(e.ProductId);
+        ids.UnionWith(Recipes.Reachable(Recipes.Effective(k, rs), k.Products.Select(p => p.ProductId)));
         foreach (var invoice in k.Invoices)
             foreach (var line in invoice.Lines)
-                if (Match.Mapping(rs, invoice.SupplierName, invoice.Date, line) is { } m) ids.Add(m.IngredientId);
+                if (Match.Mapping(rs, invoice.SupplierName, invoice.Date, line) is { } m) ids.Add(m.ProductId);
         return ids;
     }
 
@@ -94,7 +91,7 @@ public static class Yields
     {
         foreach (var y in k.Yields)
         {
-            if (y.IngredientId != row.Choice.IngredientId || y.CategoryId != row.Choice.CategoryId) continue;
+            if (y.ProductId != row.Choice.ProductId || y.CategoryId != row.Choice.CategoryId) continue;
             if (y.YieldRuleId is null) return RuleOption.None;
             var option = row.Options.Find(o => o.Rule?.Id == y.YieldRuleId);
             if (option is not null) return option;

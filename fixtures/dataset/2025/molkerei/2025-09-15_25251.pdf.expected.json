@@ -28,7 +28,7 @@
       "lineNet": 12537,
       "vat": 700,
       "gtin": "4006040032137",
-      "expectedIngredientId": "ing.butter",
+      "expectedProductId": "prod.butter",
       "expectedFactor": 250
     },
     {
@@ -43,7 +43,7 @@
       "lineNet": 9010,
       "vat": 700,
       "gtin": "4006040031109",
-      "expectedIngredientId": "ing.sahne",
+      "expectedProductId": "prod.sahne",
       "expectedFactor": 1000
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 258,
       "vat": 700,
       "gtin": "4006040034001",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

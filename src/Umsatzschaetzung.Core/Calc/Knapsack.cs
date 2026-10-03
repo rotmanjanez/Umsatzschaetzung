@@ -2,19 +2,23 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Calc;
 
-internal sealed record Component(List<string> Products, List<string> Ingredients);
+internal sealed record Component(List<string> Products, List<string> Supply);
+
+// Eine Spalte ist ein Weg eines verkauften Produkts; seine Portionen sind die Summe über seine Spalten.
+internal sealed record Column(string ProductId, Dictionary<string, long> Amount);
 
 internal sealed class KnapsackInput
 {
     public Dictionary<string, long> Capacity { get; } = [];
-    public Dictionary<string, List<RecipeLine>> Recipe { get; } = [];
+    // Die Spalten eines Produkts stehen beieinander, die vom eigenen Bestand vorn.
+    public List<Column> Columns { get; } = [];
     public Dictionary<string, long> UnitCost { get; } = [];
     public Dictionary<string, long> Pinned { get; } = [];
 }
 
 internal sealed class KnapsackResult
 {
-    public Dictionary<string, long> Portions { get; set; } = [];
+    public long[] Portions { get; set; } = [];
     public Dictionary<string, long> Leftover { get; set; } = [];
     public List<string> Binding { get; } = [];
     public long Grid { get; set; }
@@ -27,18 +31,18 @@ internal static class Knapsack
     public const long StateBudget = 1_000_000;
     public const int MaxDpDimensions = 4;
 
-    public static List<Component> Components(RuleSet rs, List<string> products, IEnumerable<string> ingredients)
+    public static List<Component> Components(List<string> products, Dictionary<string, List<Dictionary<string, long>>> routes, IEnumerable<string> supply)
     {
-        var ings = new List<string>(ingredients);
-        ings.Sort(StringComparer.Ordinal);
+        var nodes = new List<string>(supply);
+        nodes.Sort(StringComparer.Ordinal);
 
-        var ingredientIndex = new Dictionary<string, int>(ings.Count);
-        for (var i = 0; i < ings.Count; i++) ingredientIndex[ings[i]] = products.Count + i;
-        var uf = new UnionFind(products.Count + ings.Count);
+        var supplyIndex = new Dictionary<string, int>(nodes.Count);
+        for (var i = 0; i < nodes.Count; i++) supplyIndex[nodes[i]] = products.Count + i;
+        var uf = new UnionFind(products.Count + nodes.Count);
         for (var pi = 0; pi < products.Count; pi++)
-            if (rs.Products.TryGetValue(products[pi], out var p))
-                foreach (var line in p.Recipe)
-                    if (ingredientIndex.TryGetValue(line.IngredientId, out var ii)) uf.Union(pi, ii);
+            foreach (var route in routes[products[pi]])
+                foreach (var id in route.Keys)
+                    if (supplyIndex.TryGetValue(id, out var si)) uf.Union(pi, si);
 
         var groups = new Dictionary<int, Component>();
         List<int> roots = [];
@@ -54,31 +58,20 @@ internal static class Knapsack
             return c;
         }
         for (var pi = 0; pi < products.Count; pi++) Group(pi).Products.Add(products[pi]);
-        for (var ii = 0; ii < ings.Count; ii++) Group(products.Count + ii).Ingredients.Add(ings[ii]);
+        for (var si = 0; si < nodes.Count; si++) Group(products.Count + si).Supply.Add(nodes[si]);
         return [.. roots.Select(r => groups[r])];
     }
 
     public static KnapsackResult Solve(KnapsackInput input)
     {
         var pr = new Problem(input);
-        pr.Products.AddRange(input.Recipe.Keys);
-        pr.Products.Sort(StringComparer.Ordinal);
         foreach (var (id, q) in input.Capacity)
         {
-            pr.Ingredients.Add(id);
+            pr.Supply.Add(id);
             pr.Remaining[id] = Math.Max(q, 0);
         }
-        pr.Ingredients.Sort(StringComparer.Ordinal);
-        foreach (var p in pr.Products)
-        {
-            var lines = new Dictionary<string, long>();
-            foreach (var l in input.Recipe[p])
-            {
-                var amount = Scale.ToBase(l.Amount, l.Unit);
-                if (amount > 0) lines[l.IngredientId] = lines.GetValueOrDefault(l.IngredientId) + amount;
-            }
-            pr.Amount[p] = lines;
-        }
+        pr.Supply.Sort(StringComparer.Ordinal);
+        foreach (var col in input.Columns) pr.Amount.Add(col.Amount);
 
         pr.ApplyPinned();
         pr.ComputeValues();
@@ -86,8 +79,8 @@ internal static class Knapsack
 
         var res = new KnapsackResult { Grid = 1 };
         if (pr.Shared.Count > 0) pr.SolveShared(res);
-        foreach (var p in pr.Free)
-            if (!pr.Portions.ContainsKey(p)) pr.Portions[p] = Math.Max(pr.Bound[p], 0);
+        foreach (var k in pr.Free)
+            if (!pr.Portions.ContainsKey(k)) pr.Portions[k] = Math.Max(pr.Bound[k], 0);
         return pr.Finish(res);
     }
 
@@ -137,98 +130,108 @@ sealed class UnionFind(int n)
 sealed partial class Problem(KnapsackInput input)
 {
     public KnapsackInput In { get; } = input;
-    public List<string> Products { get; } = [];
-    public List<string> Ingredients { get; } = [];
-    public Dictionary<string, Dictionary<string, long>> Amount { get; } = [];
+    public List<string> Supply { get; } = [];
+    public List<Dictionary<string, long>> Amount { get; } = [];
     public Dictionary<string, long> Remaining { get; } = [];
-    public Dictionary<string, long> Portions { get; } = [];
-    public List<string> Free { get; } = [];
-    public Dictionary<string, long> Bound { get; } = [];
-    public Dictionary<string, long> Value { get; } = [];
+    public Dictionary<int, long> Portions { get; } = [];
+    public List<int> Free { get; } = [];
+    public Dictionary<int, long> Bound { get; } = [];
+    public Dictionary<int, long> Value { get; } = [];
     public List<string> Shared { get; } = [];
 
-    long AmountOf(string p, string i) => Amount[p].GetValueOrDefault(i);
+    long AmountOf(int k, string i) => Amount[k].GetValueOrDefault(i);
 
+    // Eine Vorgabe gilt für das Produkt; sie füllt seine Wege der Reihe nach, der letzte nimmt den Rest.
     public void ApplyPinned()
     {
-        foreach (var p in Products)
+        var open = new Dictionary<string, long>(In.Pinned);
+        for (var k = 0; k < Amount.Count; k++)
         {
-            if (!In.Pinned.TryGetValue(p, out var n))
+            var product = In.Columns[k].ProductId;
+            if (!open.TryGetValue(product, out var n))
             {
-                Free.Add(p);
+                Free.Add(k);
                 continue;
             }
-            if (n < 0) throw new InvalidOperationException($"knapsack: negative Pin für Produkt {p}");
-            Portions[p] = n;
-            foreach (var i in Amount[p].Keys)
+            if (n < 0) throw new InvalidOperationException($"knapsack: negative Pin für Produkt {product}");
+            var last = k + 1 == Amount.Count || In.Columns[k + 1].ProductId != product;
+            var x = last ? n : Math.Min(n, Fits(k));
+            open[product] = n - x;
+            Portions[k] = x;
+            foreach (var (i, a) in Amount[k])
             {
-                var use = checked(Amount[p][i] * n);
+                var use = checked(a * x);
                 if (Remaining.TryGetValue(i, out var have)) Remaining[i] = Math.Max(have - use, 0);
             }
         }
     }
 
+    long Fits(int k)
+    {
+        var x = long.MaxValue;
+        foreach (var (i, a) in Amount[k]) x = Math.Min(x, Remaining.GetValueOrDefault(i) / a);
+        return x;
+    }
+
     public void ComputeValues()
     {
-        foreach (var p in Free)
+        foreach (var k in Free)
         {
             long v = 0;
-            foreach (var i in Amount[p].Keys)
-                v = checked(v + Amount[p][i] * Math.Max(In.UnitCost.GetValueOrDefault(i), 1));
-            Value[p] = v;
+            foreach (var (i, a) in Amount[k])
+                v = checked(v + a * Math.Max(In.UnitCost.GetValueOrDefault(i), 1));
+            Value[k] = v;
         }
     }
 
     public void ReduceDimensions()
     {
-        var users = new Dictionary<string, List<string>>();
-        foreach (var p in Free)
+        var users = new Dictionary<string, List<int>>();
+        foreach (var k in Free)
         {
-            Bound[p] = -1;
-            foreach (var i in Amount[p].Keys)
+            Bound[k] = -1;
+            foreach (var i in Amount[k].Keys)
             {
                 if (!users.TryGetValue(i, out var list)) users[i] = list = [];
-                list.Add(p);
+                list.Add(k);
             }
         }
-        foreach (var p in Free)
-            foreach (var (i, a) in Amount[p])
+        foreach (var k in Free)
+            foreach (var (i, a) in Amount[k])
             {
-                if (!Remaining.TryGetValue(i, out var have)) Tighten(p, 0);
-                else if (users[i].Count == 1) Tighten(p, have / a);
+                if (!Remaining.TryGetValue(i, out var have) || have < a) Tighten(k, 0);
+                else if (users[i].Count == 1) Tighten(k, have / a);
             }
-        foreach (var i in Ingredients)
+        foreach (var i in Supply)
             if (users.TryGetValue(i, out var list) && list.Count >= 2) Shared.Add(i);
     }
 
-    void Tighten(string p, long b)
+    void Tighten(int k, long b)
     {
-        if (Bound[p] < 0 || b < Bound[p]) Bound[p] = b;
+        if (Bound[k] < 0 || b < Bound[k]) Bound[k] = b;
     }
 
     public KnapsackResult Finish(KnapsackResult res)
     {
-        res.Portions = Portions;
-        res.Leftover = new Dictionary<string, long>(Ingredients.Count);
+        res.Portions = new long[Amount.Count];
+        res.Leftover = new Dictionary<string, long>(Supply.Count);
         var used = new Dictionary<string, long>();
         var minAmount = new Dictionary<string, long>();
-        foreach (var p in Products)
+        for (var k = 0; k < Amount.Count; k++)
         {
-            var x = Portions[p];
-            foreach (var (i, a) in Amount[p])
+            var x = res.Portions[k] = Portions[k];
+            foreach (var (i, a) in Amount[k])
             {
                 used[i] = checked(used.GetValueOrDefault(i) + a * x);
                 if (!minAmount.TryGetValue(i, out var m) || a < m) minAmount[i] = a;
             }
         }
-        foreach (var i in Ingredients)
+        foreach (var i in Supply)
         {
             var left = Math.Max(In.Capacity.GetValueOrDefault(i) - used.GetValueOrDefault(i), 0);
             res.Leftover[i] = left;
             if (minAmount.TryGetValue(i, out var m) && left < m) res.Binding.Add(i);
         }
-        foreach (var p in Products)
-            if (Portions[p] == 0 && !In.Pinned.ContainsKey(p)) Portions.Remove(p);
         return res;
     }
 }

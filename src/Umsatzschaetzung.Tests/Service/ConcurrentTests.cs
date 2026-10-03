@@ -31,7 +31,7 @@ public sealed class ConcurrentTests : IDisposable
         host.Store.Save(new ArticleMapping
         {
             Id = "map.zwickl", SupplierName = MatcherHost.Rheinland, SupplierArticleId = "Z-1", Observed = "Zwickl naturtrueb, Keg 30 l",
-            IngredientId = "ing.bier.fass", Factor = 30000, Confirmed = true,
+            ProductId = "prod.bier.fass", Factor = 30000, Confirmed = true,
         });
     }
 

@@ -163,7 +163,7 @@ public partial class App : Application
         _ = ocr.Warm();
         var tagger = new Tagger(weights);
         owned.Add(tagger);
-        var encoder = new Encoder(weights);
+        var encoder = new Encoder(weights, runs: Math.Max(Environment.ProcessorCount / 2, 1));
         owned.Add(encoder);
         var printer = Printer?.Invoke();
         if (printer is IDisposable disposable) owned.Add(disposable);
@@ -175,6 +175,6 @@ public partial class App : Application
             CrashLog.Clear();
         }
         return Services.Local(rules, cases, Release.Version,
-            documents: new Documents(ocr, new PdfiumPages()), tagger: tagger, ranking: new EncoderRanking(encoder, new EmbeddingStore(AppData.Dir, AppFiles.Beside(EmbeddingStore.Shipped))), printer: printer);
+            documents: new Documents(ocr, new PdfiumPages()), tagger: tagger, ranking: new EncoderRanking(encoder, new EmbeddingStore(AppData.Dir, AppFiles.Beside(EmbeddingStore.Shipped), encoder.Model)), printer: printer);
     }
 }

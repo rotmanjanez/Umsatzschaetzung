@@ -38,6 +38,7 @@ public static class Remote
             held = await at.Call<RulesSeen?, RuleSet?>("rules.load", held is null ? null : new(held.Store, held.Version), ct) ?? held!;
         public async Task<RuleSet> Save(IRuleEntity rule, CancellationToken ct) => held = await at.Call<RuleArg, RuleSet>("rules.save", RuleArg.Of(rule), ct);
         public async Task<RuleSet> Delete(Entity kind, string id, CancellationToken ct) => held = await at.Call<DeleteRuleArg, RuleSet>("rules.delete", new(kind, id), ct);
+        public async Task<RuleSet> Change(RulesChange change, CancellationToken ct) => held = await at.Call<RulesChange, RuleSet>("rules.change", change, ct);
     }
 
     sealed class Sammlungen(Caller at) : ISammlungen
@@ -117,6 +118,7 @@ public sealed class Dispatch(Services s)
         "rules.load" => In<RulesSeen?, RuleSet?>(m, async seen => await s.Rules.Load(ct) is var rs && seen == new RulesSeen(rs.Store, rs.Version) ? null : rs),
         "rules.save" => Out(s.Rules.Save(Wire.Read<RuleArg>(m).Rule, ct)),
         "rules.delete" => In<DeleteRuleArg, RuleSet>(m, a => s.Rules.Delete(a.Kind, a.Id, ct)),
+        "rules.change" => In<RulesChange, RuleSet>(m, a => s.Rules.Change(a, ct)),
 
         "sammlungen.list" => Out(s.Sammlungen.List(ct)),
         "sammlungen.import" => In<FileArg, List<SammlungInfo>>(m, a => s.Sammlungen.Import(a.FileName, a.Data, ct)),

@@ -28,7 +28,7 @@
       "lineNet": 10512,
       "vat": 700,
       "gtin": "4006040032137",
-      "expectedIngredientId": "ing.butter",
+      "expectedProductId": "prod.butter",
       "expectedFactor": 250
     },
     {
@@ -43,7 +43,7 @@
       "lineNet": 3710,
       "vat": 700,
       "gtin": "4006040031109",
-      "expectedIngredientId": "ing.sahne",
+      "expectedProductId": "prod.sahne",
       "expectedFactor": 1000
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 6960,
       "vat": 700,
       "gtin": "4006040032106",
-      "expectedIngredientId": "ing.schnittkaese",
+      "expectedProductId": "prod.schnittkaese",
       "expectedFactor": 1000
     }
   ]

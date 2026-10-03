@@ -32,7 +32,7 @@
       "priceBaseQty": 1000,
       "lineNet": 35530,
       "vat": 700,
-      "expectedIngredientId": "ing.kaffee",
+      "expectedProductId": "prod.kaffee",
       "expectedFactor": 1000
     },
     {
@@ -46,7 +46,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4950,
       "vat": 700,
-      "expectedIngredientId": "ing.kaffee",
+      "expectedProductId": "prod.kaffee",
       "expectedFactor": 500
     },
     {
@@ -60,7 +60,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1590,
       "vat": 700,
-      "expectedIngredientId": "ing.zucker",
+      "expectedProductId": "prod.zucker",
       "expectedFactor": 4000
     },
     {
@@ -74,7 +74,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2190,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

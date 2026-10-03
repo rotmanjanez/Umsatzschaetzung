@@ -44,12 +44,12 @@ public sealed partial class CaseStore(string dir)
             -- Die Programmversion, die den Fall zuletzt geschrieben hat.
             app_version TEXT NOT NULL) WITHOUT ROWID;
         CREATE TABLE declared(vat INTEGER PRIMARY KEY, ord INTEGER NOT NULL, net INTEGER NOT NULL) WITHOUT ROWID;
-        CREATE TABLE inventory(ord INTEGER PRIMARY KEY, ingredient_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
+        CREATE TABLE inventory(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, opening INTEGER NOT NULL, closing INTEGER NOT NULL, unit TEXT NOT NULL);
         -- recipe_basis ist die Prüfsumme der Katalogrezeptur, von der case_recipe kopiert wurde.
         CREATE TABLE case_product(product_id TEXT PRIMARY KEY, ord INTEGER NOT NULL, gross_price INTEGER NOT NULL, vat INTEGER NOT NULL,
             recipe_basis INTEGER) WITHOUT ROWID;
         -- Ohne yield_rule_id wird nichts abgezogen.
-        CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, ingredient_id TEXT, category_id TEXT, yield_rule_id TEXT);
+        CREATE TABLE yield_choice(ord INTEGER PRIMARY KEY, product_id TEXT, category_id TEXT, yield_rule_id TEXT);
         CREATE TABLE pinned(ord INTEGER PRIMARY KEY, product_id TEXT NOT NULL, portions INTEGER NOT NULL, reason TEXT NOT NULL);
         CREATE TABLE invoice(
             id TEXT PRIMARY KEY, ord INTEGER NOT NULL,
@@ -100,13 +100,13 @@ public sealed partial class CaseStore(string dir)
             PRIMARY KEY(invoice_id, page));
 
         -- Rezeptur nur dieser Prüfung. Ein Produkt ohne Zeilen rechnet mit der des Katalogs.
-        CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
+        CREATE TABLE case_recipe(product_id TEXT NOT NULL, ord INTEGER NOT NULL, part_id TEXT NOT NULL,
             amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
-        -- Ob eine Ware Umsatz bringt, entscheidet der Betrieb je Zutat.
-        CREATE TABLE no_revenue(ingredient_id TEXT PRIMARY KEY) WITHOUT ROWID;
+        -- Ob eine Ware Umsatz bringt, entscheidet der Betrieb je Produkt.
+        CREATE TABLE no_revenue(product_id TEXT PRIMARY KEY) WITHOUT ROWID;
         -- Was das Programm selbst zugeordnet hat. Was eine Person bestätigt, steht in den Regeln.
         CREATE TABLE case_mapping(id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT,
-            name TEXT, observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER) WITHOUT ROWID;
+            name TEXT, observed TEXT, unit_code TEXT, product_id TEXT NOT NULL, factor INTEGER) WITHOUT ROWID;
         """,
     ];
 
@@ -549,8 +549,8 @@ public sealed partial class CaseStore(string dir)
         for (var i = 0; i < c.Inventory.Count; i++)
         {
             var e = c.Inventory[i];
-            Exec(db, tx, "INSERT INTO inventory(ord, ingredient_id, opening, closing, unit) VALUES(@ord, @ing, @opening, @closing, @unit)",
-                ("@ord", i), ("@ing", e.IngredientId), ("@opening", e.Opening), ("@closing", e.Closing), ("@unit", e.Unit));
+            Exec(db, tx, "INSERT INTO inventory(ord, product_id, opening, closing, unit) VALUES(@ord, @product, @opening, @closing, @unit)",
+                ("@ord", i), ("@product", e.ProductId), ("@opening", e.Opening), ("@closing", e.Closing), ("@unit", e.Unit));
         }
 
         for (var i = 0; i < c.Products.Count; i++)
@@ -560,15 +560,15 @@ public sealed partial class CaseStore(string dir)
                 ("@id", p.ProductId), ("@ord", i), ("@price", p.GrossPrice), ("@vat", p.Vat), ("@basis", p.Recipe is null ? null : p.RecipeBasis));
             if (p.Recipe is not { } recipe) continue;
             for (var j = 0; j < recipe.Count; j++)
-                Exec(db, tx, "INSERT INTO case_recipe(product_id, ord, ingredient_id, amount, unit) VALUES(@id, @ord, @ing, @amount, @unit)",
-                    ("@id", p.ProductId), ("@ord", j), ("@ing", recipe[j].IngredientId), ("@amount", recipe[j].Amount), ("@unit", recipe[j].Unit));
+                Exec(db, tx, "INSERT INTO case_recipe(product_id, ord, part_id, amount, unit) VALUES(@id, @ord, @part, @amount, @unit)",
+                    ("@id", p.ProductId), ("@ord", j), ("@part", recipe[j].PartId), ("@amount", recipe[j].Amount), ("@unit", recipe[j].Unit));
         }
 
         for (var i = 0; i < c.Yields.Count; i++)
         {
             var y = c.Yields[i];
-            Exec(db, tx, "INSERT INTO yield_choice(ord, ingredient_id, category_id, yield_rule_id) VALUES(@ord, @ing, @cat, @rule)",
-                ("@ord", i), ("@ing", y.IngredientId), ("@cat", y.CategoryId), ("@rule", y.YieldRuleId));
+            Exec(db, tx, "INSERT INTO yield_choice(ord, product_id, category_id, yield_rule_id) VALUES(@ord, @product, @cat, @rule)",
+                ("@ord", i), ("@product", y.ProductId), ("@cat", y.CategoryId), ("@rule", y.YieldRuleId));
         }
 
         for (var i = 0; i < c.Pinned.Count; i++)
@@ -579,7 +579,7 @@ public sealed partial class CaseStore(string dir)
         }
 
         foreach (var id in c.NoRevenue)
-            Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(ingredient_id) VALUES(@id)", ("@id", id));
+            Exec(db, tx, "INSERT OR IGNORE INTO no_revenue(product_id) VALUES(@id)", ("@id", id));
 
         foreach (var (id, m) in c.Mappings) WriteMapping(db, tx, id, m);
 
@@ -587,10 +587,10 @@ public sealed partial class CaseStore(string dir)
     }
 
     static void WriteMapping(SqliteConnection db, SqliteTransaction tx, string id, ArticleMapping m) =>
-        Exec(db, tx, "INSERT OR REPLACE INTO case_mapping(id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, factor) "
-            + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor)",
+        Exec(db, tx, "INSERT OR REPLACE INTO case_mapping(id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, product_id, factor) "
+            + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @product, @factor)",
             ("@id", id), ("@supplier", m.SupplierName), ("@article", m.SupplierArticleId), ("@gtin", m.Gtin), ("@name", m.Name),
-            ("@observed", m.Observed), ("@unit", m.UnitCode), ("@ingredient", m.IngredientId), ("@factor", m.Factor));
+            ("@observed", m.Observed), ("@unit", m.UnitCode), ("@product", m.ProductId), ("@factor", m.Factor));
 
     static void WriteInvoice(SqliteConnection db, SqliteTransaction tx, Invoice inv, long ord)
     {
@@ -615,35 +615,35 @@ public sealed partial class CaseStore(string dir)
             var c = ReadCase(db);
             ReadRows(db, "SELECT vat, net FROM declared ORDER BY ord",
                 r => c.Declared.Add(new DeclaredRevenue { Vat = r.GetInt64(0), Net = r.GetInt64(1) }));
-            ReadRows(db, "SELECT ingredient_id, opening, closing, unit FROM inventory ORDER BY ord",
+            ReadRows(db, "SELECT product_id, opening, closing, unit FROM inventory ORDER BY ord",
                 r => c.Inventory.Add(new InventoryEntry
                 {
-                    IngredientId = r.GetString(0), Opening = r.GetInt64(1), Closing = r.GetInt64(2), Unit = r.GetString(3),
+                    ProductId = r.GetString(0), Opening = r.GetInt64(1), Closing = r.GetInt64(2), Unit = r.GetString(3),
                 }));
             var recipes = ReadRecipes(db);
             ReadRows(db, "SELECT product_id, gross_price, vat, recipe_basis FROM case_product ORDER BY ord",
                 r => c.Products.Add(new CaseProduct
                 {
                     ProductId = r.GetString(0), GrossPrice = r.GetInt64(1), Vat = r.GetInt64(2),
-                    Recipe = recipes.GetValueOrDefault(r.GetString(0)), RecipeBasis = Num(r, 3) ?? 0,
+                    Recipe = recipes.GetValueOrDefault(r.GetString(0)) ?? (Num(r, 3) is null ? null : []), RecipeBasis = Num(r, 3) ?? 0,
                 }));
-            ReadRows(db, "SELECT ingredient_id, category_id, yield_rule_id FROM yield_choice ORDER BY ord",
+            ReadRows(db, "SELECT product_id, category_id, yield_rule_id FROM yield_choice ORDER BY ord",
                 r => c.Yields.Add(new YieldChoice
                 {
-                    IngredientId = Str(r, 0), CategoryId = Str(r, 1), YieldRuleId = Str(r, 2),
+                    ProductId = Str(r, 0), CategoryId = Str(r, 1), YieldRuleId = Str(r, 2),
                 }));
             ReadRows(db, "SELECT product_id, portions, reason FROM pinned ORDER BY ord",
                 r => c.Pinned.Add(new PinnedPortions
                 {
                     ProductId = r.GetString(0), Portions = r.GetInt64(1), Reason = r.GetString(2),
                 }));
-            ReadRows(db, "SELECT ingredient_id FROM no_revenue ORDER BY ingredient_id", r => c.NoRevenue.Add(r.GetString(0)));
-            ReadRows(db, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, factor "
+            ReadRows(db, "SELECT product_id FROM no_revenue ORDER BY product_id", r => c.NoRevenue.Add(r.GetString(0)));
+            ReadRows(db, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, product_id, factor "
                 + "FROM case_mapping ORDER BY id",
                 r => c.Mappings[r.GetString(0)] = new ArticleMapping
                 {
                     Id = r.GetString(0), SupplierName = Str(r, 1), SupplierArticleId = Str(r, 2), Gtin = Str(r, 3), Name = Str(r, 4),
-                    Observed = Str(r, 5), UnitCode = Str(r, 6), IngredientId = r.GetString(7), Factor = Num(r, 8),
+                    Observed = Str(r, 5), UnitCode = Str(r, 6), ProductId = r.GetString(7), Factor = Num(r, 8),
                 });
 
             var lines = ReadLines(db);
@@ -712,13 +712,13 @@ public sealed partial class CaseStore(string dir)
         return lines;
     }
 
-    static Dictionary<string, List<RecipeLine>> ReadRecipes(SqliteConnection db)
+    static Dictionary<string, List<PartLine>> ReadRecipes(SqliteConnection db)
     {
-        var recipes = new Dictionary<string, List<RecipeLine>>(StringComparer.Ordinal);
-        ReadRows(db, "SELECT product_id, ingredient_id, amount, unit FROM case_recipe ORDER BY product_id, ord", r =>
+        var recipes = new Dictionary<string, List<PartLine>>(StringComparer.Ordinal);
+        ReadRows(db, "SELECT product_id, part_id, amount, unit FROM case_recipe ORDER BY product_id, ord", r =>
         {
             if (!recipes.TryGetValue(r.GetString(0), out var list)) recipes[r.GetString(0)] = list = [];
-            list.Add(new RecipeLine { IngredientId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3) });
+            list.Add(new PartLine { PartId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3) });
         });
         return recipes;
     }
@@ -983,7 +983,7 @@ public sealed partial class CaseStore(string dir)
         }
         foreach (var e in c.Inventory)
             if (Units.Lookup(e.Unit) is null)
-                throw new CaseInvalidException($"Bestand \"{e.IngredientId}\": unbekannte Einheit \"{e.Unit}\"");
+                throw new CaseInvalidException($"Bestand \"{e.ProductId}\": unbekannte Einheit \"{e.Unit}\"");
         var products = new HashSet<string>();
         foreach (var p in c.Products)
         {
@@ -994,15 +994,16 @@ public sealed partial class CaseStore(string dir)
             if (p.Vat is not (0 or 700 or 1900))
                 throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Umsatzsteuersatz muss 0, 7 oder 19 % sein");
             if (p.Recipe is null) continue;
-            if (p.Recipe.Count == 0) throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Rezeptur darf nicht leer sein");
             foreach (var l in p.Recipe)
             {
-                if (string.IsNullOrEmpty(l.IngredientId))
-                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Rezeptur enthält eine Zeile ohne Zutat");
+                if (string.IsNullOrEmpty(l.PartId))
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Rezeptur enthält eine Zeile ohne Bestandteil");
+                if (l.PartId == p.ProductId)
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Rezeptur nennt das Produkt selbst; seinen Bestand rechnet die Kalkulation von allein ein");
                 if (l.Amount <= 0)
-                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Menge der Zutat \"{l.IngredientId}\" muss größer als 0 sein");
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Menge von \"{l.PartId}\" muss größer als 0 sein");
                 if (Units.Lookup(l.Unit) is null)
-                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": Zutat \"{l.IngredientId}\" hat die unbekannte Einheit \"{l.Unit}\"");
+                    throw new CaseInvalidException($"Produkt \"{p.ProductId}\": \"{l.PartId}\" hat die unbekannte Einheit \"{l.Unit}\"");
             }
         }
         var invoices = new HashSet<string>(StringComparer.Ordinal);
@@ -1013,8 +1014,8 @@ public sealed partial class CaseStore(string dir)
         }
         foreach (var y in c.Yields)
         {
-            if (string.IsNullOrEmpty(y.IngredientId) == string.IsNullOrEmpty(y.CategoryId))
-                throw new CaseInvalidException($"Ertragsregel-Wahl \"{y.YieldRuleId}\": entweder Zutat oder Kategorie angeben");
+            if (string.IsNullOrEmpty(y.ProductId) == string.IsNullOrEmpty(y.CategoryId))
+                throw new CaseInvalidException($"Ertragsregel-Wahl \"{y.YieldRuleId}\": entweder Produkt oder Kategorie angeben");
         }
         if (c.CreatedAt == default) throw new CaseInvalidException("Erstellungszeitpunkt fehlt");
         if (c.UpdatedAt == default) throw new CaseInvalidException("Änderungszeitpunkt fehlt");

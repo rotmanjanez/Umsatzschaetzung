@@ -30,14 +30,14 @@ public class JsonTests
     [Fact]
     public void APieceWeightIsWrittenAsInTheSeedAndLeftOutWhenUnknown()
     {
-        const string json = """{"ingredients":{"ing.gurke":{"name":"Gurken","piece":{"amount":400,"unit":"g"}},"ing.salz":{"name":"Salz"}}}""";
+        const string json = """{"products":{"prod.gurke":{"name":"Gurken","unit":"H87","piece":{"amount":400,"unit":"g"}},"prod.salz":{"name":"Salz","unit":"GRM"}}}""";
         var rs = Json.Deserialize<RuleSet>(json);
-        Assert.Equal(new Piece(400, Unit.G), rs.Ingredients["ing.gurke"].Piece);
-        Assert.Null(rs.Ingredients["ing.salz"].Piece);
-        var back = JsonNode.Parse(Json.Serialize(rs))!["ingredients"]!;
-        Assert.Equal("""{"amount":400,"unit":"g"}""", back["ing.gurke"]!["piece"]!.ToJsonString());
-        Assert.Null(back["ing.salz"]!.AsObject()["piece"]);
-        Assert.False(back["ing.salz"]!.AsObject().ContainsKey("piece"));
+        Assert.Equal(new Piece(400, Unit.G), rs.Products["prod.gurke"].Piece);
+        Assert.Null(rs.Products["prod.salz"].Piece);
+        var back = JsonNode.Parse(Json.Serialize(rs))!["products"]!;
+        Assert.Equal("""{"amount":400,"unit":"g"}""", back["prod.gurke"]!["piece"]!.ToJsonString());
+        Assert.Null(back["prod.salz"]!.AsObject()["piece"]);
+        Assert.False(back["prod.salz"]!.AsObject().ContainsKey("piece"));
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class JsonTests
         Assert.Equal(1041, back.Version);
         Assert.Equal(rs.Mappings.Keys.Order(), back.Mappings.Keys.Order());
         Assert.Equal(50_000, back.Mappings["map.fass50"].Factor);
-        Assert.Equal(new DateOnly(2024, 1, 1), back.Ingredients["ing.korn"].Meta.ValidFrom);
+        Assert.Equal(new DateOnly(2024, 1, 1), back.Products["prod.korn"].Meta.ValidFrom);
     }
 
     [Fact]
@@ -176,10 +176,10 @@ public class JsonTests
     [Fact]
     public void ARuleEntityIsCopiedAsItsOwnKind()
     {
-        IRuleEntity rule = new Ingredient { Id = "ing.gurke", Name = "Gurken", Piece = new Piece(400, Unit.G) };
+        IRuleEntity rule = new Product { Id = "prod.gurke", Unit = "H87", Name = "Gurken", Piece = new Piece(400, Unit.G) };
         var copy = Json.Copy(rule);
-        var ingredient = Assert.IsType<Ingredient>(copy);
+        var ware = Assert.IsType<Product>(copy);
         Assert.NotSame(rule, copy);
-        Assert.Equal(("ing.gurke", "Gurken", new Piece(400, Unit.G)), (ingredient.Id, ingredient.Name, ingredient.Piece));
+        Assert.Equal(("prod.gurke", "Gurken", new Piece(400, Unit.G)), (ware.Id, ware.Name, ware.Piece));
     }
 }

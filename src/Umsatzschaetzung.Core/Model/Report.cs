@@ -112,7 +112,7 @@ public sealed class UnusedLine
     public long LineNo { get; set; }
     public string Name { get; set; } = "";
     public long LineNet { get; set; }
-    public string IngredientId { get; set; } = "";
+    public string ProductId { get; set; } = "";
 }
 
 public enum EstimateSource
@@ -147,7 +147,7 @@ public sealed class ProductPortions
 
 public sealed class Leftover
 {
-    public string IngredientId { get; set; } = "";
+    public string ProductId { get; set; } = "";
     public long Qty { get; set; }
 }
 
@@ -167,7 +167,8 @@ public sealed class Purchase
     public long Net { get; set; }
 }
 
-public sealed class IngredientProduct
+// Was ein verkauftes Produkt von einem Bestand nahm: Portionen, die je PerPortion davon brauchen.
+public sealed class SupplyUse
 {
     public string ProductId { get; set; } = "";
     public string Name { get; set; } = "";
@@ -176,9 +177,10 @@ public sealed class IngredientProduct
     public long Qty => Portions * PerPortion;
 }
 
-public sealed class IngredientRow
+// Was von einem Produkt eingekauft oder am Lager war, gleich ob es verkauft, verarbeitet oder beides wird.
+public sealed class SupplyRow
 {
-    public string IngredientId { get; set; } = "";
+    public string ProductId { get; set; } = "";
     public string Name { get; set; } = "";
     public Unit Unit { get; set; }
     public List<Purchase> Purchases { get; set; } = [];
@@ -191,7 +193,7 @@ public sealed class IngredientRow
     public YieldRule? Yield { get; set; }
     public long YieldRate { get; set; }
     public long Sellable { get; set; }
-    public List<IngredientProduct> Products { get; set; } = [];
+    public List<SupplyUse> UsedBy { get; set; } = [];
     public long Leftover { get; set; }
     public bool Binding { get; set; }
 }
@@ -219,6 +221,22 @@ public sealed class MarkupRow
     public long Markup => Rohaufschlag.Of(RevenueNet, CostOfGoods);
 }
 
+public sealed class RoutePart
+{
+    public string ProductId { get; set; } = "";
+    public string Name { get; set; } = "";
+    public Unit Unit { get; set; }
+    public long PerPortion { get; set; }
+}
+
+// Ein Weg, auf dem Portionen entstanden: je Bestand, wie viel eine Portion davon nimmt.
+public sealed class RouteRow
+{
+    public long Portions { get; set; }
+    public long CostPerPortion { get; set; }
+    public List<RoutePart> Parts { get; set; } = [];
+}
+
 public sealed class ProductRow
 {
     public string ProductId { get; set; } = "";
@@ -236,6 +254,8 @@ public sealed class ProductRow
     public long RevenueNet { get; set; }
     public long Markup => Rohaufschlag.Of(RevenueNet, CostOfGoods);
     public bool PriceMissing { get; set; }
+    // Leer, solange alle Portionen auf demselben Weg entstanden.
+    public List<RouteRow> Routes { get; set; } = [];
 }
 
 public sealed class Report
@@ -243,7 +263,7 @@ public sealed class Report
     public string CaseId { get; set; } = "";
     public DateTimeOffset ComputedAt { get; set; }
     public Totals Totals { get; set; } = new();
-    public List<IngredientRow> Ingredients { get; set; } = [];
+    public List<SupplyRow> Supply { get; set; } = [];
     public List<ProductRow> Products { get; set; } = [];
     public List<MarkupRow> Markups { get; set; } = [];
     public List<UnmappedLine> Unmapped { get; set; } = [];

@@ -7,30 +7,12 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.App.Ui;
 
-public sealed class StockRow : Observable
+public sealed class StockRow(List<Product> options, InventoryEntry? entry) : PartRow(options, entry?.ProductId, entry?.Unit)
 {
-    Ingredient? ingredient;
-    string opening = "0", closing = "0";
-    int unitIndex;
+    string opening = entry?.Opening.ToString() ?? "0", closing = entry?.Closing.ToString() ?? "0";
 
-    List<Ingredient> options;
-
-    public StockRow(List<Ingredient> options) => this.options = options;
-
-    public List<Ingredient> Options { get => options; private set => Set(ref options, value); }
-    public List<string> Units { get; } = [.. RulesView.RecipeUnits.Select(Model.Units.Label)];
-    public Ingredient? Ingredient { get => ingredient; set { if (Set(ref ingredient, value)) Raise(nameof(Title)); } }
-    public string Title => ingredient?.Name ?? "neue Zutat";
-    public int UnitIndex { get => unitIndex; set => Set(ref unitIndex, value); }
     public string Opening { get => opening; set => Set(ref opening, value); }
     public string Closing { get => closing; set => Set(ref closing, value); }
-
-    public void Offer(List<Ingredient> ingredients)
-    {
-        var id = ingredient?.Id;
-        Options = ingredients;
-        Ingredient = ingredients.Find(i => i.Id == id);
-    }
 }
 
 public sealed class CaseModel : Observable
@@ -73,10 +55,10 @@ public sealed class CaseModel : Observable
     public string Declared0 { get => declared[2]; set => Set(ref declared[2], value); }
     public ObservableCollection<StockRow> Stock { get; } = [];
 
-    public void Offer(List<Gewerbezweig> zweige, List<Ingredient> ingredients)
+    public void Offer(List<Gewerbezweig> zweige, List<Product> products)
     {
         Gewerbezweige = zweige;
-        foreach (var row in Stock) row.Offer(ingredients);
+        foreach (var row in Stock) row.Offer(products);
     }
 
     static string Declared(Case k, long vat) =>
@@ -96,16 +78,9 @@ public sealed class CaseModel : Observable
         Declared19 = Input.Edit(Declared(k, 1900));
         Declared7 = Input.Edit(Declared(k, 700));
         Declared0 = Input.Edit(Declared(k, 0));
-        var ingredients = session.Ingredients();
+        var products = session.Products();
         Stock.Clear();
-        foreach (var e in k.Inventory)
-            Stock.Add(new StockRow(ingredients)
-            {
-                Ingredient = ingredients.Find(i => i.Id == e.IngredientId),
-                Opening = e.Opening.ToString(),
-                Closing = e.Closing.ToString(),
-                UnitIndex = Math.Max(Array.IndexOf(RulesView.RecipeUnits, e.Unit), 0),
-            });
+        foreach (var e in k.Inventory) Stock.Add(new StockRow(products, e));
     }
 
     // Eine unbekannte Kennzahl, die schon in der Prüfung stand, hält das Speichern nicht auf.
@@ -129,19 +104,19 @@ public sealed class CaseModel : Observable
         for (var i = 0; i < declared.Length; i++)
         {
             if (declared[i].Trim() == "") continue;
-            if (Input.Cents(declared[i]) is not { } cents) return false;
+            if (Input.Cents(declared[i]) is not { } cents || cents < 0) return false;
             if (cents != 0) revenue.Add(new DeclaredRevenue { Vat = VatValues[i], Net = cents });
         }
         List<InventoryEntry> inventory = [];
         foreach (var row in Stock)
         {
-            if (row.Ingredient is null || Input.Int(row.Opening) is not { } opening || Input.Int(row.Closing) is not { } closing) return false;
+            if (row.Part is null || Input.Int(row.Opening) is not { } opening || Input.Int(row.Closing) is not { } closing || opening < 0 || closing < 0) return false;
             inventory.Add(new InventoryEntry
             {
-                IngredientId = row.Ingredient.Id,
+                ProductId = row.Part.Id,
                 Opening = opening,
                 Closing = closing,
-                Unit = RulesView.RecipeUnits[row.UnitIndex],
+                Unit = row.UnitCode,
             });
         }
         k.Label = label;
@@ -198,7 +173,9 @@ public partial class CaseView : Screen
     protected override void Render(RuleSet rules)
     {
         loading = true;
-        model.Offer(Session.Gewerbezweige(), Session.Ingredients());
+        ProductBox.SetCategoryNames(this, Session.CategoryNames);
+        ProductBox.SetSimilar(this, Session.SimilarProducts);
+        model.Offer(Session.Gewerbezweige(), Session.Products());
         loading = false;
     }
 
@@ -226,7 +203,7 @@ public partial class CaseView : Screen
 
     void AddStock(object? sender, RoutedEventArgs e)
     {
-        var row = new StockRow(Session.Ingredients());
+        var row = new StockRow(Session.Products(), null);
         model.Stock.Add(row);
         Reveal.Row(StockBox, row);
         Dispatcher.UIThread.Post(() => StockBox.Columns[0].GetCellContent(row)?.Focus(), DispatcherPriority.Loaded);

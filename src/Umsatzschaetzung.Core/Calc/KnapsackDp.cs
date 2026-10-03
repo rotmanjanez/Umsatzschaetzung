@@ -1,8 +1,8 @@
 namespace Umsatzschaetzung.Calc;
 
-sealed class DpProduct(string id, int dims)
+sealed class DpItem(int column, int dims)
 {
-    public string Id { get; } = id;
+    public int Column { get; } = column;
     public long[] Weight { get; } = new long[dims];
     public long Bound { get; set; } = -1;
     public long Value { get; set; }
@@ -22,7 +22,7 @@ sealed partial class Problem
 {
     public void SolveShared(KnapsackResult res)
     {
-        List<string> candidates = [], independent = [];
+        List<int> candidates = [], independent = [];
         foreach (var p in Free)
         {
             if (Bound[p] == 0 || !UsesShared(p)) independent.Add(p);
@@ -63,10 +63,10 @@ sealed partial class Problem
             }
         }
 
-        var items = new List<DpProduct>(candidates.Count);
+        var items = new List<DpItem>(candidates.Count);
         foreach (var p in candidates)
         {
-            var it = new DpProduct(p, Shared.Count) { Value = checked(Value[p] * factor) };
+            var it = new DpItem(p, Shared.Count) { Value = checked(Value[p] * factor) };
             if (Bound[p] >= 0) it.Bound = Bound[p] / factor;
             for (var d = 0; d < Shared.Count; d++)
             {
@@ -85,20 +85,20 @@ sealed partial class Problem
         foreach (var p in candidates) Portions[p] = 0;
         for (var k = 0; k < items.Count; k++)
         {
-            Portions[items[k].Id] = batches[k] * factor;
-            Consume(items[k].Id, Portions[items[k].Id]);
+            Portions[items[k].Column] = batches[k] * factor;
+            Consume(items[k].Column, Portions[items[k].Column]);
         }
         if (factor > 1) Fill(candidates);
     }
 
-    void Consume(string p, long x)
+    void Consume(int p, long x)
     {
         foreach (var (i, a) in Amount[p]) Remaining[i] = Remaining.GetValueOrDefault(i) - a * x;
         var b = Bound.GetValueOrDefault(p);
         if (b >= 0) Bound[p] = b - x;
     }
 
-    bool UsesShared(string p)
+    bool UsesShared(int p)
     {
         foreach (var i in Shared)
             if (AmountOf(p, i) > 0) return true;
@@ -137,7 +137,7 @@ sealed partial class Problem
         return true;
     }
 
-    static long[] RunDp(long[] capG, long states, List<DpProduct> items)
+    static long[] RunDp(long[] capG, long states, List<DpItem> items)
     {
         var dims = capG.Length;
         var stride = new long[dims];
@@ -227,7 +227,7 @@ sealed partial class Problem
         }
     }
 
-    void Greedy(List<string> candidates, KnapsackResult res)
+    void Greedy(List<int> candidates, KnapsackResult res)
     {
         res.Approximate = true;
         res.Grid = 1;
@@ -236,7 +236,7 @@ sealed partial class Problem
         Fill(candidates);
     }
 
-    void Fill(List<string> candidates)
+    void Fill(List<int> candidates)
     {
         var scarce = Shared[0];
         var scarceDemand = Demand(scarce, candidates);
@@ -247,7 +247,7 @@ sealed partial class Problem
                 (scarce, scarceDemand) = (i, demand);
         }
 
-        bool Less(string pa, string pb)
+        bool Less(int pa, int pb)
         {
             var (aa, ab) = (AmountOf(pa, scarce), AmountOf(pb, scarce));
             if (aa == 0 && ab == 0) return Value[pa] > Value[pb];
@@ -255,7 +255,7 @@ sealed partial class Problem
             if (ab == 0) return false;
             return Knapsack.RatioLess(Value[pb], ab, Value[pa], aa);
         }
-        var order = candidates.OrderBy(p => p, Comparer<string>.Create((a, b) => Less(a, b) ? -1 : Less(b, a) ? 1 : 0)).ToList();
+        var order = candidates.OrderBy(p => p, Comparer<int>.Create((a, b) => Less(a, b) ? -1 : Less(b, a) ? 1 : 0)).ToList();
 
         foreach (var p in order)
         {
@@ -271,7 +271,7 @@ sealed partial class Problem
         }
     }
 
-    long Demand(string i, List<string> products)
+    long Demand(string i, List<int> products)
     {
         long d = 0;
         foreach (var p in products) d += AmountOf(p, i);

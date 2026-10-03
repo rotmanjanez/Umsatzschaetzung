@@ -53,7 +53,7 @@ second, so what fades or moves has come to rest.
 | `shot`     | `name`, `at?`, `trim?`, `clip?` | writes `<out>/<name>.png`; without `at` the whole window |
 | `click`    | `at` | triggers the button - if `at` is not one itself, the next one above it, else the first one inside it (a row's own button); a radio button is checked instead |
 | `type`     | `at`, `text` | writes `text` into the field - if `at` is none, into the first one inside it (the price in a row) |
-| `choose`   | `at`, `text`, `item` | types `text` into a search box and takes the entry `item` from its drop-down |
+| `choose`   | `at`, `text`, `item` | types `text` into a search box and takes the entry `item` from its drop-down; on a combo box opens it and takes `item` |
 | `pick`     | `files` | the next file dialog answers with these files |
 | `focus`    | `at?` | sets the focus; without `at` it takes it away (otherwise the caret blinks into the image) |
 | `deselect` | `at` | clears the selection of a list |

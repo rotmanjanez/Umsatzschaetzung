@@ -1,3 +1,4 @@
+using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Rules;
 using Umsatzschaetzung.Rulestore;
@@ -13,7 +14,6 @@ public class RuleStoreTests
     {
         Version = rs.Version,
         Categories = Sorted(rs.Categories),
-        Ingredients = Sorted(rs.Ingredients),
         Mappings = Sorted(rs.Mappings),
         Products = Sorted(rs.Products),
         YieldRules = Sorted(rs.YieldRules),
@@ -96,9 +96,9 @@ public class RuleStoreTests
         var korn = Json.Copy(read.Products["prod.korn.4cl"]);
         korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
         store.Save(korn);
-        var ingredient = Json.Copy(read.Ingredients.Values.First());
-        ingredient.Aliases = [.. ingredient.Aliases, "noch ein Name"];
-        store.Save(ingredient);
+        var ware = Json.Copy(read.Products.Values.First());
+        ware.Aliases = [.. ware.Aliases, "noch ein Name"];
+        store.Save(ware);
         var mapping = Json.Copy(read.Mappings.Values.First());
         mapping.Name = "anders";
         store.Save(mapping);
@@ -146,35 +146,35 @@ public class RuleStoreTests
         korn.Meta.ValidTo = new DateOnly(2024, 6, 30);
         var first = store.Save(korn).Version;
         var second = store.Save(new Category { Id = "cat.alkoholfrei", Name = "Alkoholfrei" }).Version;
-        var merged = store.Save(new Ingredient { Id = "ing.wasser", Name = "Mineralwasser", CategoryId = "cat.alkoholfrei" });
+        var merged = store.Save(new Product { Id = "prod.wasser", Unit = "H87", Name = "Mineralwasser", CategoryId = "cat.alkoholfrei" });
 
         Assert.True(first < second && second < merged.Version);
-        Assert.Equal((first, second, merged.Version), (merged.Products["prod.korn.4cl"].Meta.Rev, merged.Categories["cat.alkoholfrei"].Meta.Rev, merged.Ingredients["ing.wasser"].Meta.Rev));
+        Assert.Equal((first, second, merged.Version), (merged.Products["prod.korn.4cl"].Meta.Rev, merged.Categories["cat.alkoholfrei"].Meta.Rev, merged.Products["prod.wasser"].Meta.Rev));
         Assert.NotNull(merged.Products["prod.korn.4cl"].Meta.ValidTo);
         Assert.Equal(0, merged.Products["prod.korn.2cl"].Meta.Rev);
     }
 
-    public static TheoryData<string> Kinds => ["category", "ingredient", "mapping", "product", "yield_rule", "gewerbe", "template"];
+    public static TheoryData<string> Kinds => ["category", "ware", "mapping", "product", "yield_rule", "gewerbe", "template"];
 
     static IRuleEntity Full(string kind) => kind switch
     {
         "category" => new Category { Id = "e", Name = "Café & Bar", Gewerbe = ["561", "56101.0"], Gebinde = ["XKG", "XBA"], Sparte = Sparte.Speisen, Meta = Stamped() },
-        "ingredient" => new Ingredient { Id = "e", Name = "Gouda", CategoryId = "cat.x", Aliases = ["Schnittkäse", "Käse jung"], Piece = new(250, Unit.G), Meta = Stamped() },
+        "ware" => new Product { Id = "e", Name = "Gouda", Unit = "H87", CategoryId = "cat.x", Aliases = ["Schnittkäse", "Käse jung"], Piece = new(250, Unit.G), Meta = Stamped() },
         "mapping" => new ArticleMapping
         {
             Id = "e", SupplierName = "Rheinland", SupplierArticleId = "31090", Gtin = "4001234567890", Name = "Pils Fass",
-            Observed = "Pils Fass 50 l", UnitCode = "XKG", IngredientId = "ing.bier.fass", Factor = 50000, Confirmed = true, Meta = Stamped(),
+            Observed = "Pils Fass 50 l", UnitCode = "XKG", ProductId = "prod.bier.fass", Factor = 50000, Confirmed = true, Meta = Stamped(),
         },
         "product" => new Product
         {
-            Id = "e", Name = "Radler", Meta = Stamped(),
-            Recipe = [new() { IngredientId = "ing.b", Amount = 250, Unit = "MLT" }, new() { IngredientId = "ing.a", Amount = 250, Unit = "MLT" }, new() { ProductId = "prod.x", Amount = 2, Unit = "H87" }],
+            Id = "e", Name = "Radler", Unit = "H87", Meta = Stamped(),
+            Recipe = [new() { PartId = "prod.b", Amount = 250, Unit = "MLT" }, new() { PartId = "prod.a", Amount = 250, Unit = "MLT" }, new() { PartId = "prod.x", Amount = 2, Unit = "H87" }],
         },
         "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "56101.0", Name = "Gast-, Speise- und Schankwirtschaften", Meta = Stamped() },
         "template" => new ReportTemplate { Id = "e", Name = "Kurz & knapp", Source = "<h1>{{ case.label }}</h1>\n", Default = true, Meta = Stamped() },
         _ => new YieldRule
         {
-            Id = "e", Name = "Schwund", CategoryId = "cat.x", IngredientId = "ing.y", Deduction = 1_000, Default = true,
+            Id = "e", Name = "Schwund", CategoryId = "cat.x", ProductId = "prod.y", Deduction = 1_000, Default = true,
             Meta = Stamped(),
         },
     };
@@ -182,9 +182,9 @@ public class RuleStoreTests
     static IRuleEntity Sparse(string kind) => kind switch
     {
         "category" => new Category { Id = "e", Name = "n" },
-        "ingredient" => new Ingredient { Id = "e", Name = "n" },
-        "mapping" => new ArticleMapping { Id = "e", IngredientId = "i", Confirmed = true },
-        "product" => new Product { Id = "e", Name = "n" },
+        "ware" => new Product { Id = "e", Name = "n", Unit = "H87" },
+        "mapping" => new ArticleMapping { Id = "e", ProductId = "i", Confirmed = true },
+        "product" => new Product { Id = "e", Name = "n", Unit = "H87" },
         "gewerbe" => new Gewerbezweig { Id = "e", Kennzahl = "k", Name = "n" },
         "template" => new ReportTemplate { Id = "e", Name = "n" },
         _ => new YieldRule { Id = "e", Name = "n" },
@@ -200,7 +200,6 @@ public class RuleStoreTests
     static Entity Kind(IRuleEntity e) => e switch
     {
         Category => Entity.Category,
-        Ingredient => Entity.Ingredient,
         ArticleMapping => Entity.Mapping,
         Product => Entity.Product,
         Gewerbezweig => Entity.Gewerbezweig,
@@ -281,7 +280,7 @@ public class RuleStoreTests
 
     [Theory]
     [InlineData(Entity.Category, "cat.bier.flasche")]
-    [InlineData(Entity.Ingredient, "ing.korn")]
+    [InlineData(Entity.Product, "prod.korn")]
     [InlineData(Entity.Mapping, "map.korn07")]
     [InlineData(Entity.Product, "prod.pils.03")]
     [InlineData(Entity.YieldRule, "yr.bier.fass")]
@@ -340,20 +339,20 @@ public class RuleStoreTests
     }
 
     [Fact]
-    public void ASeedPieceWeightFillsOnlyAnIngredientWithoutOne()
+    public void ASeedPieceWeightFillsOnlyAProductWithoutOne()
     {
         using var tmp = new TempDir();
         var store = Open(tmp);
-        store.Save(new Ingredient { Id = "ing.gurke", Name = "Gurken" });
-        var saved = store.Save(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(55, Unit.G) }).Version;
+        store.Save(new Product { Id = "prod.gurke", Unit = "H87", Name = "Gurken" });
+        var saved = store.Save(new Product { Id = "prod.ei", Unit = "H87", Name = "Ei", Piece = new(55, Unit.G) }).Version;
         var seed = TestData.Seed();
-        seed.Put(new Ingredient { Id = "ing.gurke", Name = "Gurke", Piece = new(400, Unit.G) });
-        seed.Put(new Ingredient { Id = "ing.ei", Name = "Ei", Piece = new(60, Unit.G) });
+        seed.Put(new Product { Id = "prod.gurke", Unit = "H87", Name = "Gurke", Piece = new(400, Unit.G) });
+        seed.Put(new Product { Id = "prod.ei", Unit = "H87", Name = "Ei", Piece = new(60, Unit.G) });
 
         var rs = new RuleStore(tmp.Path, seed).Load();
 
-        Assert.Equal((new Piece(400, Unit.G), "Gurken"), (rs.Ingredients["ing.gurke"].Piece, rs.Ingredients["ing.gurke"].Name));
-        Assert.Equal(new Piece(55, Unit.G), rs.Ingredients["ing.ei"].Piece);
+        Assert.Equal((new Piece(400, Unit.G), "Gurken"), (rs.Products["prod.gurke"].Piece, rs.Products["prod.gurke"].Name));
+        Assert.Equal(new Piece(55, Unit.G), rs.Products["prod.ei"].Piece);
         Assert.Equal(saved, rs.Version);
     }
 
@@ -365,17 +364,17 @@ public class RuleStoreTests
         {
             var seed = TestData.Seed();
             seed.Put(new Category { Id = "cat.fass", Name = "Bier vom Fass", Gebinde = gebinde });
-            seed.Put(new Ingredient { Id = "ing.fass", Name = "Fassbier", CategoryId = "cat.fass", Aliases = [.. fass] });
-            seed.Put(new Ingredient { Id = "ing.flasche", Name = "Flaschenbier", Aliases = [.. flasche] });
+            seed.Put(new Product { Id = "prod.fass", Unit = "H87", Name = "Fassbier", CategoryId = "cat.fass", Aliases = [.. fass] });
+            seed.Put(new Product { Id = "prod.flasche", Unit = "H87", Name = "Flaschenbier", Aliases = [.. flasche] });
             return seed;
         }
         var store = new RuleStore(tmp.Path, Seed(["Fassbier"], ["Pils"], []));
-        var saved = store.Save(new Ingredient { Id = "ing.flasche", Name = "Flaschenbier", Aliases = ["Pils", "Hausmarke"] }).Version;
+        var saved = store.Save(new Product { Id = "prod.flasche", Unit = "H87", Name = "Flaschenbier", Aliases = ["Pils", "Hausmarke"] }).Version;
 
         var rs = new RuleStore(tmp.Path, Seed(["Fassbier", "Pils Fass"], ["Pils", "Helles"], ["XKG"])).Load();
 
-        Assert.Equal(["Fassbier", "Pils Fass"], rs.Ingredients["ing.fass"].Aliases);
-        Assert.Equal(["Pils", "Hausmarke"], rs.Ingredients["ing.flasche"].Aliases);
+        Assert.Equal(["Fassbier", "Pils Fass"], rs.Products["prod.fass"].Aliases);
+        Assert.Equal(["Pils", "Hausmarke"], rs.Products["prod.flasche"].Aliases);
         Assert.Equal(["XKG"], rs.Categories["cat.fass"].Gebinde);
         Assert.Equal(saved, rs.Version);
     }
@@ -714,7 +713,6 @@ public class RuleStoreTests
         IEnumerable<(string Key, IRuleEntity E)> all =
         [
             .. seed.Categories.Select(e => (e.Key, (IRuleEntity)e.Value)),
-            .. seed.Ingredients.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.Mappings.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.Products.Select(e => (e.Key, (IRuleEntity)e.Value)),
             .. seed.YieldRules.Select(e => (e.Key, (IRuleEntity)e.Value)),
@@ -726,6 +724,37 @@ public class RuleStoreTests
         Assert.All(all, x => Assert.Equal(x.Key, x.E.Id));
         Assert.All(all, x => Assert.NotEqual(default, x.E.Meta.ChangedAt));
         RuleCheck.Validate(seed);
+    }
+
+    // Zutaten und Produkte sind ein Baum: jedes Produkt zählt in seiner eigenen Einheit.
+    [Fact]
+    public void TheShippedSeedIsOneTreeOfProductsEachCountedInItsOwnUnit()
+    {
+        var seed = RuleStore.Seed();
+
+        Assert.All(seed.Products.Keys, id => Assert.StartsWith("prod.", id));
+        Assert.All(seed.Products.Values, p => Assert.NotNull(Scale.Of(p)));
+        Assert.All(seed.Products.Values.SelectMany(p => p.Recipe), l => Assert.Contains(l.PartId, seed.Products.Keys));
+        Assert.All(seed.YieldRules.Values, y => Assert.True(y.ProductId is null || seed.Products.ContainsKey(y.ProductId), y.Id));
+        Assert.All(seed.Mappings.Values, m => Assert.Contains(m.ProductId, seed.Products.Keys));
+        Assert.Contains(seed.Products.Values, p => p.Recipe.Count == 0 && p.CategoryId is not null);
+        Assert.Contains(seed.Products.Values, p => p.Recipe.Exists(l => seed.Products[l.PartId].Recipe.Count > 0));
+    }
+
+    [Fact]
+    public void NoFileNamesAnIdFromBeforeTheTree()
+    {
+        var seed = RuleStore.Seed();
+        var old = new System.Text.RegularExpressions.Regex(@"(?<![\w.])ing\.[a-z0-9]");
+        string[] files =
+        [
+            "src/Umsatzschaetzung.Core/Rulestore/seed.json", "src/Umsatzschaetzung.Core/Calc/Normalize.cs",
+            "tools/pieces/pieces.tsv", "tools/pieces/overrides.tsv", "fixtures/dataset/schedule.json",
+            .. Directory.EnumerateFiles(Path.Combine(TestData.Repo, "fixtures/dataset"), "*.expected.json", SearchOption.AllDirectories),
+        ];
+
+        Assert.All(files, f => Assert.False(old.IsMatch(File.ReadAllText(Path.Combine(TestData.Repo, f))), f));
+        Assert.Contains(Normalize.Deposit, seed.Products.Keys);
     }
 
     [Fact]

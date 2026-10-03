@@ -41,8 +41,8 @@ public class CalculationTests
     {
         var kase = Vorlage.Load();
         var rules = TestData.Seed();
-        rules.Ingredients[Normalize.Deposit] = new Ingredient { Id = Normalize.Deposit, Name = "Pfand und Leergut", CategoryId = "cat.kein.wareneinsatz" };
-        rules.Mappings["map.pfand"] = new ArticleMapping { Id = "map.pfand", IngredientId = Normalize.Deposit, Confirmed = true };
+        rules.Products[Normalize.Deposit] = new Product { Id = Normalize.Deposit, Name = "Pfand und Leergut", Unit = "H87", CategoryId = "cat.kein.wareneinsatz" };
+        rules.Mappings["map.pfand"] = new ArticleMapping { Id = "map.pfand", ProductId = Normalize.Deposit, Confirmed = true };
         var lines = kase.Invoices[0].Lines;
         var no = lines.Max(l => l.No);
         lines.Add(new InvoiceLine { No = no + 1, Name = "Pfand Fass KEG", Quantity = 2000, UnitCode = "H87", UnitPrice = 30_000_000, PriceBaseQty = 1000, LineNet = 6_000, MappingId = "map.pfand" });
@@ -80,9 +80,9 @@ public class CalculationTests
     }
 
     [Fact]
-    public void EachIngredientCarriesItsPurchasesYieldAndStock()
+    public void EachWareCarriesItsPurchasesYieldAndStock()
     {
-        var pils = Report.Ingredients.Single(i => i.Name == "Fassbier Pils");
+        var pils = Report.Supply.Single(i => i.Name == "Fassbier Pils");
         var purchase = Assert.Single(pils.Purchases);
         Assert.Equal(("inv.bar.1", "2024-04711", 1L), (purchase.InvoiceId, purchase.Invoice, purchase.LineNo));
         Assert.Equal(111_000, purchase.Net);
@@ -97,9 +97,9 @@ public class CalculationTests
     [Fact]
     public void TheSellableAmountGoesIntoProductsOrTheRest()
     {
-        Assert.Contains(Report.Ingredients, i => i.Products.Count > 1);
-        foreach (var i in Report.Ingredients.Where(i => i.Products.Count > 0))
-            Assert.Equal(i.Sellable, i.Products.Sum(p => p.Qty) + i.Leftover);
+        Assert.Contains(Report.Supply, i => i.UsedBy.Count > 1);
+        foreach (var i in Report.Supply.Where(i => i.UsedBy.Count > 0))
+            Assert.Equal(i.Sellable, i.UsedBy.Sum(p => p.Qty) + i.Leftover);
     }
 
     [Fact]

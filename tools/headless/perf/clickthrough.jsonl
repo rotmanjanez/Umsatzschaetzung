@@ -71,19 +71,18 @@
 
 // Regeln: its window, every page, a search as one types
 { "do": "click", "at": { "tip": "Regeln" } }
-{ "do": "tab", "window": "dialog", "header": "Zutaten" }
-{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "S" }
-{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "Sc" }
-{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "Sch" }
-{ "do": "type", "window": "dialog", "at": { "name": "IngredientSearch" }, "text": "" }
 { "do": "tab", "window": "dialog", "header": "Produkte" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "S" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "Sc" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "Sch" }
+{ "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "" }
 { "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "B" }
 { "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "Bi" }
 { "do": "type", "window": "dialog", "at": { "name": "ProductSearch" }, "text": "" }
 { "do": "tab", "window": "dialog", "header": "Ertragsregeln" }
 { "do": "tab", "window": "dialog", "header": "Gewerbe" }
 { "do": "tab", "window": "dialog", "header": "Vorlagen" }
-{ "do": "tab", "window": "dialog", "header": "Zutaten" }
+{ "do": "tab", "window": "dialog", "header": "Produkte" }
 { "do": "close", "window": "dialog" }
 
 // Back to the list, a search there

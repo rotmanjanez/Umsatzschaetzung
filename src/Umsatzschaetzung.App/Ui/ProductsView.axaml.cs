@@ -63,6 +63,7 @@ public sealed class ProductsModel : Observable
     public ObservableCollection<AssortmentRow> Rows { get; } = [];
     public ObservableCollection<SuggestionRow> Suggestions { get; } = [];
     public List<Product> Catalog { get; set; } = [];
+    public HashSet<string> Sellable { get; set; } = [];
     public bool EmptyAssortment => Rows.Count == 0;
     public bool Suggesting { get => suggesting; set { if (Set(ref suggesting, value)) Raise(nameof(NoSuggestions)); } }
     public bool NoSuggestions => !suggesting && Suggestions.Count == 0;
@@ -102,7 +103,8 @@ public partial class ProductsView : Screen
     IEnumerable<object> Choices(string? text)
     {
         var name = (text ?? "").Trim();
-        var hits = model.Catalog.Where(p => Matches(name, p.Name)).ToList<object>();
+        var hits = model.Catalog.Where(p => (name != "" || model.Sellable.Contains(p.Id)) && Matches(name, p.Name))
+            .OrderBy(p => !model.Sellable.Contains(p.Id)).ToList<object>();
         if (name != "" && !model.Catalog.Exists(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)))
             hits.Add(new ProductDraft(name));
         return hits;
@@ -122,6 +124,7 @@ public partial class ProductsView : Screen
     {
         if (drawn == Session.Stamp && !timer.IsEnabled) return;
         model.Catalog = Session.Products();
+        model.Sellable = [.. Session.Sellable().Select(p => p.Id)];
         Load();
     }
 
@@ -158,7 +161,7 @@ public partial class ProductsView : Screen
             Price = p.GrossPrice > 0 ? Input.Edit(Format.Cents(p.GrossPrice)) : "",
             VatIndex = Math.Max(0, Array.IndexOf(CaseModel.VatValues, p.Vat)),
             PriceMissing = p.GrossPrice <= 0,
-            Adjusted = p.Recipe is not null,
+            Adjusted = p.Recipe is { Count: > 0 },
         };
         row.PropertyChanged += (_, e) => Edited(row, e.PropertyName);
         return row;
@@ -191,7 +194,7 @@ public partial class ProductsView : Screen
         {
             case nameof(AssortmentRow.Price):
                 var cents = row.Price.Trim() == "" ? 0 : Input.Cents(row.Price);
-                if (cents is null) return;
+                if (cents is not >= 0) return;
                 Settings(row.ProductId).GrossPrice = cents.Value;
                 row.PriceMissing = cents.Value <= 0;
                 Schedule(600);

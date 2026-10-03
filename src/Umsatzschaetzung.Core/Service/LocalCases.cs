@@ -22,17 +22,23 @@ sealed class LocalCases(RuleStore rules, CaseStore cases) : ICases
 
     public Task<Case> Put(Case kase, CancellationToken ct) => Guard(ct, () =>
     {
-        if (kase.Products?.Exists(p => p.Recipe is not null) == true) KnownIngredients(kase, rules.Load());
+        if (kase.Products?.Exists(p => p.Recipe is not null) == true) KnownParts(kase, rules.Load());
         Save(kase);
         return kase;
     });
 
-    static void KnownIngredients(Case c, RuleSet rs)
+    static void KnownParts(Case c, RuleSet rs)
     {
         foreach (var p in c.Products)
             foreach (var l in p.Recipe ?? [])
-                if (!rs.Ingredients.ContainsKey(l.IngredientId))
-                    throw new ServiceError(ErrorCode.Invalid, $"Produkt \"{p.ProductId}\": Zutat \"{l.IngredientId}\" existiert nicht");
+            {
+                if (!rs.Products.TryGetValue(l.PartId, out var part))
+                    throw new ServiceError(ErrorCode.Invalid, $"Produkt \"{p.ProductId}\": Bestandteil \"{l.PartId}\" existiert nicht");
+                if (Units.Lookup(l.Unit) is not { Container: false } u)
+                    throw new ServiceError(ErrorCode.Invalid, $"Produkt \"{p.ProductId}\": \"{part.Name}\" hat die unbekannte Einheit \"{l.Unit}\"");
+                if (Scale.Of(part) is { } partUnit && u.Base != partUnit)
+                    throw new ServiceError(ErrorCode.Invalid, $"Produkt \"{p.ProductId}\": \"{part.Name}\" zählt in {Format.UnitName(partUnit)}, nicht in {u.Name}");
+            }
     }
 
     public Task Delete(string caseId, CancellationToken ct) => Guard(ct, () =>

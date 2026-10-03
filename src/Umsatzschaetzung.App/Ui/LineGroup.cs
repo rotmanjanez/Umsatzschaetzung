@@ -28,7 +28,9 @@ public sealed class LineGroup
     // Open positions first, then the machine's decisions, then what a person already settled.
     public int Rank => State == Checked.Pending ? 0 : State == Checked.Automatic ? 1 : 2;
 
-    public static List<LineGroup> Of(Case? c, RuleSet? rs) => c is null ? [] : Of(c.Invoices, c.Mappings, rs);
+    public static List<LineGroup> Of(Case? c, RuleSet? rs) => c is null ? [] : Of(c.Invoices, c.Mappings, rs, Reached(c, rs));
+
+    static HashSet<string> Reached(Case c, RuleSet? rs) => rs is null ? [] : Scale.Reached(c, Recipes.Effective(c, rs));
 
     // Copies what an import adds to, for groups made on another thread.
     public static Func<List<LineGroup>> Later(Case? c, RuleSet? rs)
@@ -36,10 +38,11 @@ public sealed class LineGroup
         if (c is null) return () => [];
         List<Invoice> invoices = [.. c.Invoices];
         Dictionary<string, ArticleMapping> mappings = new(c.Mappings);
-        return () => Of(invoices, mappings, rs);
+        var reached = Reached(c, rs);
+        return () => Of(invoices, mappings, rs, reached);
     }
 
-    static List<LineGroup> Of(List<Invoice> invoices, Dictionary<string, ArticleMapping> mappings, RuleSet? rs)
+    static List<LineGroup> Of(List<Invoice> invoices, Dictionary<string, ArticleMapping> mappings, RuleSet? rs, HashSet<string> reached)
     {
         var groups = new Dictionary<string, LineGroup>();
         rs = rs?.With(mappings);
@@ -61,7 +64,7 @@ public sealed class LineGroup
         }
         foreach (var g in groups.Values)
         {
-            g.State = g.StateOf(invoices, rs);
+            g.State = g.StateOf(invoices, rs, reached);
             g.Search = g.SearchOf(invoices, rs);
         }
         return [.. groups.Values];
@@ -79,23 +82,23 @@ public sealed class LineGroup
         var mapped = Lines
             .Select(p => invoices[p.Invoice].Lines[p.Line].MappingId)
             .Select(id => string.IsNullOrEmpty(id) ? null : rs?.Mappings.GetValueOrDefault(id))
-            .Select(m => m is null ? null : rs!.Ingredients.GetValueOrDefault(m.IngredientId))
-            .OfType<Ingredient>()
+            .Select(m => m is null ? null : rs!.Products.GetValueOrDefault(m.ProductId))
+            .OfType<Product>()
             .Distinct()
-            .Select(i => i.Name + " " + rs!.Categories.GetValueOrDefault(i.CategoryId)?.Name + " " + string.Join(" ", i.Aliases));
+            .Select(i => i.Name + " " + rs!.Categories.GetValueOrDefault(i.CategoryId ?? "")?.Name + " " + string.Join(" ", i.Aliases));
         return string.Join(" ", [Supplier, Name, Article, StateText, .. mapped]);
     }
 
     // A group is settled by the weakest of its lines: one open line keeps it open, one
     // machine decision keeps it automatic.
-    Checked StateOf(List<Invoice> invoices, RuleSet? rs)
+    Checked StateOf(List<Invoice> invoices, RuleSet? rs, HashSet<string> reached)
     {
         var state = Checked.Manual;
         foreach (var (inv, line) in Lines)
         {
             var l = invoices[inv].Lines[line];
             if (string.IsNullOrEmpty(l.MappingId) || rs?.Mappings.GetValueOrDefault(l.MappingId) is not { } m) return Checked.Pending;
-            if (m.Factor is null && Scale.NeedsFactor(rs, m.IngredientId, l)) return Checked.Pending;
+            if (m.Factor is null && Scale.NeedsFactor(rs, m.ProductId, l, reached)) return Checked.Pending;
             MappingId ??= l.MappingId;
             if (!m.Confirmed) state = Checked.Automatic;
         }

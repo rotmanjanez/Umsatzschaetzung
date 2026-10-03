@@ -121,7 +121,7 @@ public class CaseDocumentTests
         using var tmp = new TempDir();
         var store = Store(tmp);
         var c = Cases.Full("fall-1");
-        c.Mappings["map-alt"] = new() { Id = "map-alt", IngredientId = "ing.korn" };
+        c.Mappings["map-alt"] = new() { Id = "map-alt", ProductId = "prod.korn" };
         store.Save(c);
 
         store.Purge();
@@ -257,8 +257,8 @@ public class CaseDocumentTests
         var at = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.FromHours(1));
         var made = new Dictionary<string, ArticleMapping>
         {
-            ["map-neu"] = new() { Id = "map-neu", SupplierName = "Rheinland", Name = "Weizen", IngredientId = "ing.weizen", Factor = 500 },
-            ["map-pils"] = new() { Id = "map-pils", Name = "Pils neu", IngredientId = "ing.bier.fass" },
+            ["map-neu"] = new() { Id = "map-neu", SupplierName = "Rheinland", Name = "Weizen", ProductId = "prod.weizen", Factor = 500 },
+            ["map-pils"] = new() { Id = "map-pils", Name = "Pils neu", ProductId = "prod.bier.fass" },
         };
         var add = new Attachment(invoiceId, "neu.pdf", [4, 5, 6], [Page(), Page()], [[7], [8, 8]]);
 
@@ -314,7 +314,7 @@ public class CaseDocumentTests
         var mine = now.Invoices.Find(i => i.Id == "re-7")!;
         mine.SupplierName = "Rheinland Getränke";
         mine.Lines[1].MappingId = "map-auto";
-        now.Mappings["map-auto"] = new ArticleMapping { Id = "map-auto", Name = "Pils", IngredientId = "ing.bier.fass" };
+        now.Mappings["map-auto"] = new ArticleMapping { Id = "map-auto", Name = "Pils", ProductId = "prod.bier.fass" };
         (now.MappedStore, now.MappedAt) = ("regeln", 9);
         if (meanwhile)
         {

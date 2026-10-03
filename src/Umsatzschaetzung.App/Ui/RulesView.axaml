@@ -2,7 +2,6 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-           xmlns:m="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:RulesModel"
            Margin="24">
     <DockPanel>
@@ -11,103 +10,12 @@
         <TabControl x:Name="Tabs" Theme="{StaticResource KeptTabs}" Background="Transparent" BorderThickness="0" KeyboardNavigation.TabIndex="0"
                     AutomationProperties.Name="Regelbereiche" AutomationProperties.AutomationId="RulesTabs">
 
-            <TabItem Header="Zutaten" AutomationProperties.AutomationId="RulesIngredientsTab">
+            <TabItem x:Name="ProductsTab" Header="Produkte" AutomationProperties.AutomationId="RulesProductsTab">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="38*" MinWidth="260"/>
+                        <ColumnDefinition Width="34*" MinWidth="240"/>
                         <ColumnDefinition Width="6"/>
-                        <ColumnDefinition Width="62*" MinWidth="260"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Theme="{StaticResource Panel}">
-                        <DockPanel>
-                            <Grid DockPanel.Dock="Top" Margin="8" ColumnDefinitions="*,Auto">
-                                <ui:SearchBox x:Name="IngredientSearch" Width="NaN" AutomationProperties.Name="Zutaten filtern" AutomationProperties.AutomationId="IngredientSearch"/>
-                                <Button x:Name="IngredientNew" Grid.Column="1" Theme="{StaticResource SecondaryButton}" Margin="8,0,0,0" ToolTip.Tip="Neu" Click="NewIngredient"
-                                        AutomationProperties.Name="Neue Zutat" AutomationProperties.AutomationId="IngredientNew">
-                                    <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
-                                </Button>
-                            </Grid>
-                            <Grid>
-                                <ListBox x:Name="IngredientGrid" AutomationProperties.Name="Zutaten" AutomationProperties.AutomationId="IngredientList" SelectionChanged="IngredientSelected" BorderThickness="0" Background="Transparent"
-                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate x:DataType="ui:IngredientItem">
-                                            <Grid ColumnDefinitions="*,Auto" Margin="4,6" ToolTip.Tip="{Binding Tip}" AutomationProperties.Name="{Binding Spoken}">
-                                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding AliasCount}" Theme="{StaticResource Muted}" FontSize="12"
-                                                           VerticalAlignment="Center" Margin="8,0,0,0"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                                <ui:NoResults Search="{Binding #IngredientSearch}"/>
-                            </Grid>
-                        </DockPanel>
-                    </Border>
-                    <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent" AutomationProperties.Name="Spaltenbreite"/>
-                    <Grid Grid.Column="2" DataContext="{Binding Ingredients}" x:DataType="ui:IngredientForm">
-                        <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
-                                   Text="Links eine Zutat auswählen, um sie zu bearbeiten – oder mit „Neu“ eine neue anlegen."/>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
-                            <StackPanel Margin="8,0,16,16">
-                                <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2"/>
-                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="IngredientName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"
-                                         AutomationProperties.Name="Name der Zutat (Pflichtfeld)" AutomationProperties.AutomationId="IngredientName"
-                                         AutomationProperties.HelpText="{Binding NameInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name fehlt.'}"/>
-                                <StackPanel>
-                                    <TextBlock Text="Warenarten" Theme="{StaticResource FieldLabel}"
-                                               ToolTip.Tip="Warenarten, die unter dieser Zutat gebucht werden — eine je Zeile."/>
-                                    <TextBox Text="{Binding Aliases, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap"
-                                             Height="110" PlaceholderText="eine Warenart je Zeile"
-                                             AutomationProperties.Name="Warenarten" AutomationProperties.AutomationId="IngredientAliases"
-                                             AutomationProperties.HelpText="Warenarten, die unter dieser Zutat gebucht werden, eine je Zeile, etwa „Gouda“ oder „Emmentaler“ bei Schnittkäse."/>
-                                    <TextBlock Text="Je Zeile eine Warenart, etwa „Gouda“ oder „Emmentaler“ bei Schnittkäse."
-                                               Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Text="Stückgewicht" Theme="{StaticResource FieldLabel}"
-                                               ToolTip.Tip="Ungefähres Gewicht oder Volumen eines Stücks."/>
-                                    <DockPanel HorizontalAlignment="Left" Width="240">
-                                        <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding PieceUnitNames}" SelectedIndex="{Binding PieceUnitIndex, Mode=TwoWay}"
-                                                  IsEnabled="{Binding PieceUnitFree}" Width="104" Margin="6,0,0,0"
-                                                  AutomationProperties.Name="Einheit des Stückgewichts" AutomationProperties.AutomationId="IngredientPieceUnit"/>
-                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Piece, Mode=TwoWay}" Classes.invalid="{Binding PieceInvalid}"
-                                                 PlaceholderText="kein Richtwert" AutomationProperties.Name="Stückgewicht" AutomationProperties.AutomationId="IngredientPiece"
-                                                 AutomationProperties.HelpText="{Binding PieceInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: eine ganze Zahl größer als 0 eingeben oder leer lassen.'}"/>
-                                    </DockPanel>
-                                    <TextBlock Text="Rechnet Positionen in Stück ohne eigenen Faktor um, etwa 1 Gurke ≈ 400 g. Ein Richtwert — leer lassen, wenn es keinen gibt."
-                                               Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
-                                    <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
-                                              DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"
-                                              AutomationProperties.Name="Kategorie" AutomationProperties.AutomationId="IngredientCategory"/>
-                                    <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
-                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"
-                                             LostFocus="CategoryNamed" KeyDown="CategoryNameKey"
-                                             AutomationProperties.Name="Name der neuen Kategorie" AutomationProperties.AutomationId="IngredientNewCategory"
-                                             AutomationProperties.HelpText="{Binding Category.Invalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name der neuen Kategorie fehlt.'}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteIngredient" IsVisible="{Binding Existing}"
-                                            AutomationProperties.Name="Zutat löschen" AutomationProperties.AutomationId="IngredientDelete">
-                                        <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
-                                    </Button>
-                                </StackPanel>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="Produkte" AutomationProperties.AutomationId="RulesProductsTab">
-                <Grid Margin="0,12,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="38*" MinWidth="260"/>
-                        <ColumnDefinition Width="6"/>
-                        <ColumnDefinition Width="62*" MinWidth="260"/>
+                        <ColumnDefinition Width="66*" MinWidth="420"/>
                     </Grid.ColumnDefinitions>
                     <Border Theme="{StaticResource Panel}">
                         <DockPanel>
@@ -123,7 +31,11 @@
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="ui:ProductItem">
-                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Tip}" Margin="4,6"/>
+                                            <StackPanel Margin="4,4" ToolTip.Tip="{Binding Tip}" AutomationProperties.Name="{Binding Spoken}">
+                                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Category}" Theme="{StaticResource Muted}" FontSize="12"
+                                                           TextTrimming="CharacterEllipsis" IsVisible="{Binding HasCategory}"/>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -138,22 +50,74 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <StackPanel Margin="8,0,16,16">
                                 <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2"/>
-                                <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="ProductName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"
-                                         AutomationProperties.Name="Name des Produkts (Pflichtfeld)" AutomationProperties.AutomationId="ProductName"
-                                         AutomationProperties.HelpText="{Binding NameInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name fehlt.'}"/>
-                                <TextBlock Text="Rezept *" Theme="{StaticResource SectionHeader}" Margin="0,20,0,4" AutomationProperties.Name="Rezept (Pflichtangabe)" AutomationProperties.HeadingLevel="3"/>
+                                <Grid ColumnDefinitions="*,12,160">
+                                    <StackPanel>
+                                        <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="ProductName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"
+                                                 AutomationProperties.Name="Name des Produkts (Pflichtfeld)" AutomationProperties.AutomationId="ProductName"
+                                                 AutomationProperties.HelpText="{Binding NameInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name fehlt.'}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Einheit" Theme="{StaticResource FieldLabel}"
+                                                   ToolTip.Tip="Worin das Produkt gezählt wird: in Einkäufen, im Bestand und in Rezepten."/>
+                                        <ComboBox x:Name="ProductUnit" ItemsSource="{Binding UnitNames}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" IsEnabled="{Binding UnitFree}"
+                                                  HorizontalAlignment="Stretch" AutomationProperties.Name="Einheit" AutomationProperties.AutomationId="ProductUnit" ToolTip.ShowOnDisabled="True"
+                                                  ToolTip.Tip="{Binding UnitLocked, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Fest, solange Rezepte oder Zuordnungen das Produkt verwenden.'}"
+                                                  AutomationProperties.HelpText="{Binding UnitLocked, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Fest, solange Rezepte oder Zuordnungen das Produkt verwenden.'}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Kategorie" Theme="{StaticResource FieldLabel}"/>
+                                    <ComboBox ItemsSource="{Binding Category.Options}" SelectedItem="{Binding Category.Selected, Mode=TwoWay}"
+                                              DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"
+                                              AutomationProperties.Name="Kategorie" AutomationProperties.AutomationId="ProductCategory"/>
+                                    <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
+                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"
+                                             AutomationProperties.Name="Name der neuen Kategorie" AutomationProperties.AutomationId="ProductNewCategory"
+                                             AutomationProperties.HelpText="{Binding Category.Invalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name der neuen Kategorie fehlt.'}"/>
+                                </StackPanel>
+                                <StackPanel ToolTip.Tip="Warenarten, die unter diesem Produkt gebucht werden, eine je Zeile, etwa „Gouda“ oder „Emmentaler“ bei Schnittkäse.">
+                                    <TextBlock Text="Warenarten" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding Aliases, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap"
+                                             Height="80" PlaceholderText="eine Warenart je Zeile"
+                                             AutomationProperties.Name="Warenarten" AutomationProperties.AutomationId="ProductAliases"
+                                             AutomationProperties.HelpText="Warenarten, die unter diesem Produkt gebucht werden, eine je Zeile, etwa „Gouda“ oder „Emmentaler“ bei Schnittkäse."/>
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Left"
+                                            ToolTip.Tip="Rechnet Positionen in Stück ohne eigenen Faktor um, etwa 1 Gurke ≈ 400 g. Ein Richtwert — leer lassen, wenn es keinen gibt.">
+                                    <TextBlock Text="Stückgewicht" Theme="{StaticResource FieldLabel}"/>
+                                    <DockPanel Width="240">
+                                        <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding PieceUnitNames}" SelectedIndex="{Binding PieceUnitIndex, Mode=TwoWay}"
+                                                  IsEnabled="{Binding PieceUnitFree}" Width="104" Margin="6,0,0,0"
+                                                  AutomationProperties.Name="Einheit des Stückgewichts" AutomationProperties.AutomationId="ProductPieceUnit"/>
+                                        <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Piece, Mode=TwoWay}" Classes.invalid="{Binding PieceInvalid}"
+                                                 PlaceholderText="kein Richtwert" AutomationProperties.Name="Stückgewicht" AutomationProperties.AutomationId="ProductPiece"
+                                                 AutomationProperties.HelpText="{Binding PieceInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: eine ganze Zahl größer als 0 eingeben oder leer lassen.'}"/>
+                                    </DockPanel>
+                                </StackPanel>
+                                <TextBlock Text="Rezept" Theme="{StaticResource SectionHeader}" Margin="0,20,0,4" AutomationProperties.HeadingLevel="3"/>
                                 <TextBlock Text="{Binding Origin}" Theme="{StaticResource Muted}" Foreground="{DynamicResource InfoBrush}" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite"
                                            IsVisible="{Binding Origin, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="240"/>
-                                        <ColumnDefinition Width="90"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Zutat oder Produkt" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <TextBlock Grid.Column="1" Text="Menge je Portion" Theme="{StaticResource FieldLabel}" Margin="8,0,48,4"/>
-                                </Grid>
+                                <TextBlock Text="Ohne Rezept wird das Produkt eingekauft, nicht hergestellt." IsVisible="{Binding !HasRecipe}"
+                                           Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                <StackPanel IsVisible="{Binding HasRecipe}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+                                        <TextBlock Text="Das Rezept ergibt" VerticalAlignment="Center"/>
+                                        <TextBox x:Name="ProductBatch" Theme="{StaticResource NumberBox}" Text="{Binding Batch, Mode=TwoWay}" Classes.invalid="{Binding BatchInvalid}" Width="110"
+                                                 AutomationProperties.Name="{Binding BatchUnit, StringFormat='Das Rezept ergibt, in {0}'}" AutomationProperties.AutomationId="ProductBatch"
+                                                 AutomationProperties.HelpText="{Binding BatchInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: eine ganze Zahl größer als 0 eingeben.'}"/>
+                                        <TextBlock Text="{Binding BatchUnit}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="240"/>
+                                            <ColumnDefinition Width="48"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Produkt" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                        <TextBlock Grid.Column="1" Text="Menge" Theme="{StaticResource FieldLabel}" Margin="8,0,0,4"/>
+                                    </Grid>
+                                </StackPanel>
                                 <ItemsControl ItemsSource="{Binding Recipe}" AutomationProperties.Name="Rezeptzeilen" AutomationProperties.AutomationId="ProductRecipe">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="ui:RecipeRow">
@@ -161,43 +125,27 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="240"/>
-                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="48"/>
                                                 </Grid.ColumnDefinitions>
-                                                <DockPanel>
-                                                    <ComboBox DockPanel.Dock="Left" ItemsSource="{x:Static ui:RecipeRow.Kinds}" SelectedIndex="{Binding KindIndex, Mode=TwoWay}"
-                                                              Width="104" Margin="0,0,6,0" AutomationProperties.Name="Zutat oder Produkt" AutomationProperties.AutomationId="RecipeKind"/>
-                                                    <ui:IngredientBox Choices="{Binding Options}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" IsVisible="{Binding IsIngredient}"
-                                                                      Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"
-                                                                      AutomationProperties.Name="Zutat" AutomationProperties.AutomationId="RecipeIngredient"
-                                                                      AutomationProperties.HelpText="{Binding IngredientInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: eine Zutat wählen.'}"/>
-                                                    <AutoCompleteBox ItemsSource="{Binding Products}" SelectedItem="{Binding Part, Mode=TwoWay}" IsVisible="{Binding IsPart}"
-                                                                     FilterMode="ContainsOrdinal" MinimumPrefixLength="0" MaxDropDownHeight="320" PlaceholderText="Produkt suchen …"
-                                                                     ValueMemberBinding="{ReflectionBinding Name}" Classes.invalid="{Binding IngredientInvalid}" HorizontalAlignment="Stretch"
-                                                                     AutomationProperties.Name="Produkt" AutomationProperties.AutomationId="RecipeProduct"
-                                                                     AutomationProperties.HelpText="{Binding IngredientInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: ein Produkt wählen.'}">
-                                                        <AutoCompleteBox.ItemTemplate>
-                                                            <DataTemplate x:DataType="m:Product">
-                                                                <TextBlock Text="{Binding Name}"/>
-                                                            </DataTemplate>
-                                                        </AutoCompleteBox.ItemTemplate>
-                                                    </AutoCompleteBox>
-                                                </DockPanel>
+                                                <ui:ProductBox Choices="{Binding Options}" SelectedItem="{Binding Part, Mode=TwoWay}"
+                                                               Classes.invalid="{Binding PartInvalid}" HorizontalAlignment="Stretch" AutomationProperties.AutomationId="RecipePart"
+                                                               AutomationProperties.HelpText="{Binding PartInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: ein Produkt wählen.'}"/>
                                                 <DockPanel Grid.Column="1" Margin="8,0,0,0">
-                                                    <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}"
-                                                              IsEnabled="{Binding IsIngredient}" Width="104" Margin="6,0,0,0" AutomationProperties.Name="Einheit" AutomationProperties.AutomationId="RecipeUnit"/>
-                                                    <TextBox Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}"
-                                                             Classes.invalid="{Binding AmountInvalid}" AutomationProperties.Name="Menge je Portion" AutomationProperties.AutomationId="RecipeAmount"
+                                                    <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Classes.invalid="{Binding UnitMismatch}" ToolTip.Tip="{Binding UnitHint}" AutomationProperties.HelpText="{Binding UnitHint}"
+                                                              Width="120" Margin="6,0,0,0" AutomationProperties.Name="{Binding Title, StringFormat='Einheit {0}'}" AutomationProperties.AutomationId="RecipeUnit"/>
+                                                    <TextBox x:Name="RecipeAmount" Theme="{StaticResource NumberBox}" Text="{Binding Amount, Mode=TwoWay}"
+                                                             Classes.invalid="{Binding AmountInvalid}" AutomationProperties.Name="{Binding Title, StringFormat='Menge {0}'}" AutomationProperties.AutomationId="RecipeAmount"
                                                              AutomationProperties.HelpText="{Binding AmountInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: eine ganze Zahl größer als 0 eingeben.'}"/>
                                                 </DockPanel>
                                                 <Button Grid.Column="2" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Entfernen" HorizontalAlignment="Right" Click="RemoveRecipeLine"
-                                                        AutomationProperties.Name="Rezeptzeile entfernen" AutomationProperties.AutomationId="RecipeRemove">
+                                                        AutomationProperties.Name="{Binding Title, StringFormat='{}{0} entfernen'}" AutomationProperties.AutomationId="RecipeRemove">
                                                     <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                                                 </Button>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zutat hinzufügen" HorizontalAlignment="Left" Click="AddRecipeLine"
+                                <Button Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Rezeptzeile hinzufügen" HorizontalAlignment="Left" Click="AddRecipeLine"
                                         AutomationProperties.Name="Rezeptzeile hinzufügen" AutomationProperties.AutomationId="RecipeAdd">
                                     <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                                 </Button>
@@ -217,7 +165,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Ertragsregeln" AutomationProperties.AutomationId="RulesYieldsTab">
+            <TabItem x:Name="YieldsTab" Header="Ertragsregeln" AutomationProperties.AutomationId="RulesYieldsTab">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="34*" MinWidth="220"/>
@@ -226,9 +174,9 @@
                     </Grid.ColumnDefinitions>
                     <Border Theme="{StaticResource Panel}">
                         <DockPanel>
-                            <ui:SearchBox x:Name="YieldSearch" DockPanel.Dock="Top" Width="NaN" Margin="8" AutomationProperties.Name="Kategorien und Zutaten filtern" AutomationProperties.AutomationId="YieldSearch"/>
+                            <ui:SearchBox x:Name="YieldSearch" DockPanel.Dock="Top" Width="NaN" Margin="8" AutomationProperties.Name="Kategorien und Produkte filtern" AutomationProperties.AutomationId="YieldSearch"/>
                             <Grid>
-                                <ListBox x:Name="ScopeGrid" AutomationProperties.Name="Kategorien und Zutaten" AutomationProperties.AutomationId="ScopeList" SelectionChanged="ScopeSelected" BorderThickness="0" Background="Transparent"
+                                <ListBox x:Name="ScopeGrid" AutomationProperties.Name="Kategorien und Produkte" AutomationProperties.AutomationId="ScopeList" SelectionChanged="ScopeSelected" BorderThickness="0" Background="Transparent"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="ui:ScopeItem">
@@ -247,14 +195,14 @@
                     <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent" AutomationProperties.Name="Spaltenbreite"/>
                     <Grid Grid.Column="2" DataContext="{Binding Yields}" x:DataType="ui:YieldForm">
                         <TextBlock Theme="{StaticResource EmptyState}" IsVisible="{Binding !Active}" MaxWidth="300" TextAlignment="Center"
-                                   Text="Links eine Kategorie oder Zutat auswählen, um ihre Ertragsregeln zu bearbeiten."/>
+                                   Text="Links eine Kategorie oder ein Produkt auswählen, um die Ertragsregeln zu bearbeiten."/>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <StackPanel Margin="8,0,16,16">
                                 <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2"/>
                                 <Grid ColumnDefinitions="*,12,96,24,80,40" Margin="0,0,0,4">
                                     <TextBlock Text="Name" Theme="{StaticResource FieldLabel}"/>
                                     <TextBlock Grid.Column="2" Text="Abzug" Theme="{StaticResource FieldLabel}"/>
-                                    <TextBlock Grid.Column="4" Text="Standard" Theme="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="4" Text="Standard" Theme="{StaticResource FieldLabel}" HorizontalAlignment="Center" ToolTip.Tip="Die Standardregel gilt, solange die Prüfung unter Kalkulation › Ertragsregeln nichts anderes wählt. Ohne Standardregel wird nichts abgezogen."/>
                                 </Grid>
                                 <ItemsControl x:Name="RuleList" ItemsSource="{Binding Rules}" AutomationProperties.Name="Ertragsregeln" AutomationProperties.AutomationId="YieldRules">
                                     <ItemsControl.ItemTemplate>
@@ -270,7 +218,7 @@
                                                          AutomationProperties.HelpText="{Binding DeductionInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig: einen Abzug von 0 bis 100 % eingeben.'}"/>
                                                 <TextBlock Grid.Column="3" Text="%" Theme="{StaticResource Muted}" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center" AutomationProperties.AccessibilityView="Raw"/>
                                                 <CheckBox Grid.Column="4" IsChecked="{Binding IsDefault}" HorizontalAlignment="Center"
-                                                          ToolTip.Tip="Gilt, solange die Prüfung nichts anderes wählt"
+                                                          ToolTip.Tip="Die Standardregel gilt, solange die Prüfung unter Kalkulation › Ertragsregeln nichts anderes wählt. Ohne Standardregel wird nichts abgezogen."
                                                           AutomationProperties.Name="Standardregel" AutomationProperties.AutomationId="YieldDefault"/>
                                                 <Button Grid.Column="5" Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteYield"
                                                         IsVisible="{Binding Existing}" HorizontalAlignment="Right"
@@ -281,15 +229,13 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <TextBlock Text="Die Standardregel gilt, solange die Prüfung unter Kalkulation › Ertragsregeln nichts anderes wählt. Ohne Standardregel wird nichts abgezogen."
-                                           Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Gewerbe" AutomationProperties.AutomationId="RulesGewerbeTab">
+            <TabItem x:Name="GewerbeTab" Header="Gewerbe" AutomationProperties.AutomationId="RulesGewerbeTab">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="38*" MinWidth="260"/>
@@ -328,17 +274,17 @@
                         <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding Active}">
                             <StackPanel Margin="8,0,16,16">
                                 <TextBlock Text="{Binding Title}" Theme="{StaticResource SectionHeader}" TextWrapping="Wrap" AutomationProperties.HeadingLevel="2"/>
-                                <TextBlock Text="Kennzahl *" Theme="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="GewerbeKennzahl" Text="{Binding Kennzahl, Mode=TwoWay}" Classes.invalid="{Binding KennzahlInvalid}"
-                                         Width="160" HorizontalAlignment="Left" PlaceholderText="z. B. 56101.0"
-                                         AutomationProperties.Name="Kennzahl (Pflichtfeld)" AutomationProperties.AutomationId="GewerbeKennzahl"
-                                         AutomationProperties.HelpText="{Binding KennzahlInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig oder schon vergeben: eine Kennzahl wie 56101.0 eingeben.'}"/>
+                                <StackPanel HorizontalAlignment="Left" ToolTip.Tip="Die Kennzahlen stehen in der Prüfung zur Wahl. Kategorien grenzen ihre Produkte über den Anfang der Kennzahl ein, etwa „561“ für alle Gaststätten.">
+                                    <TextBlock Text="Kennzahl *" Theme="{StaticResource FieldLabel}"/>
+                                    <TextBox x:Name="GewerbeKennzahl" Text="{Binding Kennzahl, Mode=TwoWay}" Classes.invalid="{Binding KennzahlInvalid}"
+                                             Width="160" HorizontalAlignment="Left" PlaceholderText="z. B. 56101.0"
+                                             AutomationProperties.Name="Kennzahl (Pflichtfeld)" AutomationProperties.AutomationId="GewerbeKennzahl"
+                                             AutomationProperties.HelpText="{Binding KennzahlInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Ungültig oder schon vergeben: eine Kennzahl wie 56101.0 eingeben.'}"/>
+                                </StackPanel>
                                 <TextBlock Text="Bezeichnung *" Theme="{StaticResource FieldLabel}"/>
                                 <TextBox x:Name="GewerbeName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"
                                          AutomationProperties.Name="Bezeichnung (Pflichtfeld)" AutomationProperties.AutomationId="GewerbeName"
                                          AutomationProperties.HelpText="{Binding NameInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Die Bezeichnung fehlt.'}"/>
-                                <TextBlock Text="Die Kennzahlen stehen in der Prüfung zur Wahl. Kategorien grenzen ihre Zutaten über den Anfang der Kennzahl ein, etwa „561“ für alle Gaststätten."
-                                           Theme="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                     <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteGewerbe" IsVisible="{Binding Existing}"
                                             AutomationProperties.Name="Gewerbekennzahl löschen" AutomationProperties.AutomationId="GewerbeDelete">
@@ -351,7 +297,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Vorlagen" AutomationProperties.AutomationId="RulesTemplatesTab">
+            <TabItem x:Name="TemplatesTab" Header="Vorlagen" AutomationProperties.AutomationId="RulesTemplatesTab">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="30*" MinWidth="220"/>

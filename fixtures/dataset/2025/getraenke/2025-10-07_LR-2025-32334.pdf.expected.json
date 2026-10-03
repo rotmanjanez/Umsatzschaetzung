@@ -27,7 +27,7 @@
       "priceBaseQty": 1000,
       "lineNet": 68750,
       "vat": 1900,
-      "expectedIngredientId": "ing.fassbier",
+      "expectedProductId": "prod.fassbier",
       "expectedFactor": 50000
     },
     {
@@ -41,7 +41,7 @@
       "priceBaseQty": 1000,
       "lineNet": 16300,
       "vat": 1900,
-      "expectedIngredientId": "ing.fassbier",
+      "expectedProductId": "prod.fassbier",
       "expectedFactor": 30000
     },
     {
@@ -56,7 +56,7 @@
       "lineNet": 4620,
       "vat": 1900,
       "gtin": "4001234000203",
-      "expectedIngredientId": "ing.flaschenbier",
+      "expectedProductId": "prod.flaschenbier",
       "expectedFactor": 10000
     },
     {
@@ -71,7 +71,7 @@
       "lineNet": 13760,
       "vat": 1900,
       "gtin": "5449000000996",
-      "expectedIngredientId": "ing.cola",
+      "expectedProductId": "prod.cola",
       "expectedFactor": 4800
     },
     {
@@ -86,7 +86,7 @@
       "lineNet": 8640,
       "vat": 1900,
       "gtin": "4009337000011",
-      "expectedIngredientId": "ing.mineralwasser",
+      "expectedProductId": "prod.mineralwasser",
       "expectedFactor": 8400
     },
     {
@@ -101,7 +101,7 @@
       "lineNet": 1140,
       "vat": 1900,
       "gtin": "4004910000047",
-      "expectedIngredientId": "ing.fruchtsaft",
+      "expectedProductId": "prod.fruchtsaft",
       "expectedFactor": 6000
     },
     {
@@ -115,7 +115,7 @@
       "priceBaseQty": 1000,
       "lineNet": 21000,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -129,7 +129,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3720,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -143,7 +143,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3960,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

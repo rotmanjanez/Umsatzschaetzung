@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Avalonia.Automation;
 using Avalonia.Styling;
+using Umsatzschaetzung.Calc;
 using Umsatzschaetzung.Model;
 using Umsatzschaetzung.Service;
 using Avalonia.Controls;
@@ -134,10 +135,10 @@ public sealed class Session : Observable
     public event Action<string, Action<string>>? ProductRequested;
 
     public void NewProduct(string name, Action<string> created) => ProductRequested?.Invoke(name, created);
-    public event Action<string, List<RecipeLine>?>? ProductEditRequested;
+    public event Action<string, List<PartLine>?>? ProductEditRequested;
 
     // With a recipe the catalog form opens prefilled with it, ready to be saved.
-    public void EditProduct(string productId, List<RecipeLine>? recipe = null) => ProductEditRequested?.Invoke(productId, recipe);
+    public void EditProduct(string productId, List<PartLine>? recipe = null) => ProductEditRequested?.Invoke(productId, recipe);
 
     // The Kalkulation takes it on its next result and selects that product.
     public string? WantedProduct { get; set; }
@@ -339,14 +340,68 @@ public sealed class Session : Observable
 
     public async Task<bool> Put(IRuleEntity data, Place at, CancellationToken ct)
     {
-        var kind = RuleChange.KindOf(data);
+        var kind = RuleSet.KindOf(data);
         var before = Rules?.Find(kind, data.Id) is { } old ? Json.Copy(old) : null;
-        var after = Json.Copy(data);
-        after.Meta = new Meta { ChangedAt = Clock.Now() };
+        var after = Stamped(data);
         if (!await Store(after, ct)) return false;
         at.History.Record(at, new RuleChange(this, kind, data.Id, before, after));
         return true;
     }
+
+    // Entries that only fit together, as a product with the category it is put in: written in one go.
+    public async Task<bool> Put(IReadOnlyList<IRuleEntity> data, Place at, CancellationToken ct)
+    {
+        if (data.Count == 1) return await Put(data[0], at, ct);
+        List<RuleChange> changes = [];
+        List<IRuleEntity> after = [];
+        foreach (var e in data)
+        {
+            var kind = RuleSet.KindOf(e);
+            var copy = Stamped(e);
+            changes.Add(new RuleChange(this, kind, e.Id, Rules?.Find(kind, e.Id) is { } old ? Json.Copy(old) : null, copy));
+            after.Add(copy);
+        }
+        if (!await Change(RulesChange.Of(after, []), ct)) return false;
+        foreach (var c in changes) at.History.Record(at, c);
+        return true;
+    }
+
+    static IRuleEntity Stamped(IRuleEntity data)
+    {
+        var copy = Json.Copy(data);
+        copy.Meta = new Meta { ValidFrom = data.Meta.ValidFrom, ValidTo = data.Meta.ValidTo, ChangedAt = Clock.Now() };
+        return copy;
+    }
+
+    // Puts a whole earlier state back in one write, as a lesson going back over its steps.
+    public Task<bool> Restore(IReadOnlyList<(Entity Kind, string Id, IRuleEntity? Rule)> rules)
+    {
+        List<IRuleEntity> put = [];
+        foreach (var (_, _, rule) in rules)
+            if (rule is not null)
+            {
+                var data = Json.Copy(rule);
+                data.Meta.ChangedAt = Clock.Now();
+                put.Add(data);
+            }
+        return Change(RulesChange.Of(put, rules.Where(r => r.Rule is null).Select(r => (r.Kind, r.Id))), CancellationToken.None);
+    }
+
+    Task<bool> Change(RulesChange change, CancellationToken ct) =>
+        Enqueue(null, async () =>
+        {
+            try
+            {
+                Rules = await Service.Rules.Change(change, CancellationToken.None);
+            }
+            catch (ServiceError)
+            {
+                await LoadRules(CancellationToken.None);
+                throw;
+            }
+            RulesChanged?.Invoke();
+            await LoadStatus(CancellationToken.None);
+        }, ct);
 
     public async Task<bool> Delete(Entity entity, string id, Place at, CancellationToken ct)
     {
@@ -482,18 +537,16 @@ public sealed class Session : Observable
     public bool KnownGewerbe(string kennzahl) =>
         Rules is not null && Rules.Gewerbezweige.Values.Any(g => g.Kennzahl == kennzahl);
 
-    public List<Ingredient> Ingredients() =>
-        Rules is null ? [] : Rules.Ingredients.Values.OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
-
-    public async Task<IReadOnlyList<string>> SimilarIngredients(string text, CancellationToken ct) =>
-        (await Service.Mapping.Suggest(Case?.Id ?? "", new InvoiceLine { Name = text }, null, ct))
-            .Select(c => c.Mapping.IngredientId).ToList();
-
     public List<Product> Products() =>
-        Rules is null ? [] : Rules.Products.Values.OrderBy(p => p.Name, StringComparer.Ordinal).ToList();
+        Rules is null ? [] : [.. Rules.Products.Values.OrderBy(p => p.Name, StringComparer.Ordinal)];
 
-    public string IngredientName(string id) =>
-        Rules is not null && Rules.Ingredients.TryGetValue(id, out var i) ? i.Name : "";
+    // What the Sortiment offers first, as its suggestions pick.
+    public List<Product> Sellable() =>
+        Rules is not { } rs ? [] : [.. Products().Where(Suggestions.Sellable(rs))];
+
+    public async Task<IReadOnlyList<string>> SimilarProducts(string text, CancellationToken ct) =>
+        (await Service.Mapping.Suggest(Case?.Id ?? "", new InvoiceLine { Name = text }, null, ct))
+            .Select(c => c.Mapping.ProductId).ToList();
 
     public async Task<List<PickedFile>> PickFiles(IReadOnlyList<FilePickerFileType> filter, bool multi) =>
         await ReadFiles(await PickSources(filter, multi));

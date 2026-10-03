@@ -34,6 +34,7 @@ public interface IRules
     Task<RuleSet> Load(CancellationToken ct);                                                                               // GET  /rules
     Task<RuleSet> Save(IRuleEntity rule, CancellationToken ct);                                                             // PUT  /rules/{kind}/{id}   last write wins, resp holds the whole set
     Task<RuleSet> Delete(Entity kind, string id, CancellationToken ct);                                                     // DELETE /rules/{kind}/{id}   refused while other entries reference it, resp holds the whole set
+    Task<RuleSet> Change(RulesChange change, CancellationToken ct);                                                         // POST /rules/change   all or nothing, checked as the set it leaves
 }
 
 public interface ISammlungen

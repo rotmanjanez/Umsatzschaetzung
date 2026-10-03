@@ -44,7 +44,7 @@ public sealed class InvoiceLine
 }
 
 // Die Rechnungszeilen, die in die Kalkulation eingegangen sind: ohne die Zeilen ohne
-// Zuordnung, die, deren Zutat in keiner Rezeptur vorkommt, und Pfand und Leergut.
+// Zuordnung, die, deren Produkt weder verkauft wird noch in einem verkauften steckt, und Pfand und Leergut.
 public sealed record Included(string Number, string FileName, DateOnly? Date, List<InvoiceLine> Lines)
 {
     public static List<Included> Of(Case c, Report r)

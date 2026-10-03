@@ -72,10 +72,10 @@ public sealed class CalculateTests : IDisposable
     }
 
     [Fact]
-    public async Task EachIngredientCarriesItsPurchasesYieldAndStock()
+    public async Task EachWareCarriesItsPurchasesYieldAndStock()
     {
         var kase = await svc.Cases.Get(Vorlage.Id, ct);
-        var pils = (await svc.Reports.Calculate(Vorlage.Id, ct)).Report.Ingredients.Single(i => i.Name == "Fassbier Pils");
+        var pils = (await svc.Reports.Calculate(Vorlage.Id, ct)).Report.Supply.Single(i => i.Name == "Fassbier Pils");
 
         Assert.NotEmpty(pils.Purchases);
         Assert.All(pils.Purchases, p =>

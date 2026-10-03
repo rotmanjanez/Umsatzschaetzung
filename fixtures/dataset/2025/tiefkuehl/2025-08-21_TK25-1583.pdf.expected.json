@@ -32,7 +32,7 @@
       "priceBaseQty": 1000,
       "lineNet": 18900,
       "vat": 700,
-      "expectedIngredientId": "ing.pommes.frites",
+      "expectedProductId": "prod.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -46,7 +46,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4680,
       "vat": 700,
-      "expectedIngredientId": "ing.tiefkuehlgemuese",
+      "expectedProductId": "prod.tiefkuehlgemuese",
       "expectedFactor": 10000
     },
     {
@@ -60,7 +60,7 @@
       "priceBaseQty": 1000,
       "lineNet": 7740,
       "vat": 700,
-      "expectedIngredientId": "ing.tiefkuehlgemuese",
+      "expectedProductId": "prod.tiefkuehlgemuese",
       "expectedFactor": 10000
     },
     {
@@ -74,7 +74,7 @@
       "priceBaseQty": 1000,
       "lineNet": 19840,
       "vat": 700,
-      "expectedIngredientId": "ing.backfischportion",
+      "expectedProductId": "prod.backfischportion",
       "expectedFactor": 1
     },
     {
@@ -88,7 +88,7 @@
       "priceBaseQty": 1000,
       "lineNet": 16600,
       "vat": 700,
-      "expectedIngredientId": "ing.seefischfilet",
+      "expectedProductId": "prod.seefischfilet",
       "expectedFactor": 5000
     },
     {
@@ -102,7 +102,7 @@
       "priceBaseQty": 1000,
       "lineNet": 7920,
       "vat": 700,
-      "expectedIngredientId": "ing.tiefkuehlobst",
+      "expectedProductId": "prod.tiefkuehlobst",
       "expectedFactor": 4000
     },
     {
@@ -116,7 +116,7 @@
       "priceBaseQty": 1000,
       "lineNet": 6500,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -130,7 +130,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2100,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

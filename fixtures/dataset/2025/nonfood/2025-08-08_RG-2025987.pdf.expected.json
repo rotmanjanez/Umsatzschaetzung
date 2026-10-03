@@ -28,7 +28,7 @@
       "lineNet": 3890,
       "vat": 1900,
       "gtin": "4260555201012",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -43,7 +43,7 @@
       "lineNet": 3290,
       "vat": 1900,
       "gtin": "4260555202019",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 4740,
       "vat": 1900,
       "gtin": "4260555310516",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -73,7 +73,7 @@
       "lineNet": 4980,
       "vat": 1900,
       "gtin": "4260555401016",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -88,7 +88,7 @@
       "lineNet": 1770,
       "vat": 1900,
       "gtin": "4260555500015",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

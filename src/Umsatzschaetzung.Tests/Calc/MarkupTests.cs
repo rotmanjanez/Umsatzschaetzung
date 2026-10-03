@@ -10,12 +10,12 @@ public class MarkupTests
         var rs = new RuleSet();
         rs.Put(new Category { Id = "cat.getraenke", Name = "Getränke", Sparte = Sparte.Getränke });
         rs.Put(new Category { Id = "cat.tabak", Name = "Tabak", Sparte = Sparte.Handelsware });
-        rs.Put(new Ingredient { Id = "ing.cola", Name = "Cola", CategoryId = "cat.getraenke" });
-        rs.Put(new Ingredient { Id = "ing.zigaretten", Name = "Zigaretten", CategoryId = "cat.tabak" });
-        rs.Put(new ArticleMapping { Id = "map.cola", Name = "Cola", IngredientId = "ing.cola", Confirmed = true });
-        rs.Put(new ArticleMapping { Id = "map.zigaretten", Name = "Zigaretten", IngredientId = "ing.zigaretten", Confirmed = true });
-        rs.Put(new Product { Id = "prod.cola", Name = "Cola", Recipe = [new() { IngredientId = "ing.cola", Amount = 1, Unit = "H87" }] });
-        rs.Put(new Product { Id = "prod.zigaretten", Name = "Zigaretten", Recipe = [new() { IngredientId = "ing.zigaretten", Amount = 1, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.cola.ware", Unit = "H87", Name = "Cola", CategoryId = "cat.getraenke" });
+        rs.Put(new Product { Id = "prod.zigaretten.ware", Unit = "H87", Name = "Zigaretten", CategoryId = "cat.tabak" });
+        rs.Put(new ArticleMapping { Id = "map.cola", Name = "Cola", ProductId = "prod.cola.ware", Confirmed = true });
+        rs.Put(new ArticleMapping { Id = "map.zigaretten", Name = "Zigaretten", ProductId = "prod.zigaretten.ware", Confirmed = true });
+        rs.Put(new Product { Id = "prod.cola", Name = "Cola", Unit = "H87", Recipe = [new() { PartId = "prod.cola.ware", Amount = 1, Unit = "H87" }] });
+        rs.Put(new Product { Id = "prod.zigaretten", Name = "Zigaretten", Unit = "H87", Recipe = [new() { PartId = "prod.zigaretten.ware", Amount = 1, Unit = "H87" }] });
         return rs;
     }
 

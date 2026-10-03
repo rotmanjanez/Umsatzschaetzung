@@ -2,7 +2,6 @@
            xmlns="https://github.com/avaloniaui"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:ui="clr-namespace:Umsatzschaetzung.App.Ui"
-           xmlns:model="clr-namespace:Umsatzschaetzung.Model;assembly=Umsatzschaetzung.Core"
            x:DataType="ui:CaseModel"
            Margin="0,12,0,0">
     <DockPanel>
@@ -28,12 +27,12 @@
                 <Border Theme="{StaticResource SectionRule}"/>
                 <TextBlock Text="Bestand" Theme="{StaticResource SectionHeader}" AutomationProperties.HeadingLevel="2"/>
                 <StackPanel Margin="0,0,0,24">
-                    <DataGrid x:Name="StockBox" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Stock}" IsReadOnly="True" KeyDown="StockKey" AutomationProperties.Name="Bestand" AutomationProperties.HelpText="Entf entfernt die gewählte Zutat" AutomationProperties.AutomationId="CaseStockGrid">
+                    <DataGrid x:Name="StockBox" ui:Grids.Flex="0" Theme="{StaticResource Grid}" ItemsSource="{Binding Stock}" IsReadOnly="True" KeyDown="StockKey" AutomationProperties.Name="Bestand" AutomationProperties.HelpText="Entf entfernt das gewählte Produkt" AutomationProperties.AutomationId="CaseStockGrid">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Zutat" Width="260" MinWidth="140">
+                            <DataGridTemplateColumn Header="Produkt" Width="260" MinWidth="140">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <ComboBox ItemsSource="{Binding Options}" DisplayMemberBinding="{Binding Name, DataType=model:Ingredient}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch" AutomationProperties.Name="Zutat" AutomationProperties.AutomationId="StockIngredient"/>
+                                        <ui:ProductBox Choices="{Binding Options}" SelectedItem="{Binding Part, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch" AutomationProperties.AutomationId="StockProduct"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -54,7 +53,7 @@
                             <DataGridTemplateColumn Header="Einheit" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="ui:StockRow">
-                                        <ComboBox ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Margin="2" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Title, StringFormat='Einheit {0}'}" AutomationProperties.AutomationId="StockUnit"/>
+                                        <ComboBox ItemsSource="{Binding Units}" SelectedIndex="{Binding UnitIndex, Mode=TwoWay}" Classes.invalid="{Binding UnitMismatch}" ToolTip.Tip="{Binding UnitHint}" AutomationProperties.HelpText="{Binding UnitHint}" Margin="2" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Title, StringFormat='Einheit {0}'}" AutomationProperties.AutomationId="StockUnit"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -72,7 +71,7 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <Button x:Name="AddStockButton" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Zutat hinzufügen" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0" AutomationProperties.Name="Zutat hinzufügen" AutomationProperties.AutomationId="StockAddButton">
+                    <Button x:Name="AddStockButton" Theme="{StaticResource SecondaryButton}" ToolTip.Tip="Produkt hinzufügen" HorizontalAlignment="Left" Click="AddStock" Margin="0,8,0,0" AutomationProperties.Name="Produkt hinzufügen" AutomationProperties.AutomationId="StockAddButton">
                         <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14"/>
                     </Button>
                 </StackPanel>

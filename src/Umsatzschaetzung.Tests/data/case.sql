@@ -6,10 +6,10 @@ VALUES('case.bar.2024', 'Schankwirtschaft Zum Alten Fass, Bp 2024', '2024-01-01'
        'Zum Alten Fass Gastronomie GmbH', '214/5711/0832', 'PAB 2024/0417', '',
        '2024-05-02T08:00:00.0000000+00:00', '2024-05-02T08:00:00.0000000+00:00', 'test');
 
-INSERT INTO inventory(ord, ingredient_id, opening, closing, unit) VALUES
-    (0, 'ing.bier.fass',     50000, 100000, 'MLT'),
-    (1, 'ing.bier.flasche',      0,  39600, 'MLT'),
-    (2, 'ing.korn',           1400,   2800, 'MLT');
+INSERT INTO inventory(ord, product_id, opening, closing, unit) VALUES
+    (0, 'prod.bier.fass',     50000, 100000, 'MLT'),
+    (1, 'prod.bier.flasche',      0,  39600, 'MLT'),
+    (2, 'prod.korn',           1400,   2800, 'MLT');
 
 INSERT INTO invoice(id, ord, source, file_name, supplier_name, number, date, currency,
                     net_total, gross_total, stated_net, stated_gross, verified_at, verified_auto)

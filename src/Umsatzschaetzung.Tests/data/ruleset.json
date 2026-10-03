@@ -28,45 +28,13 @@
     }
   },
   "hash": "sha256:3f1c6a2d9b74e08c5a11d4f2c7e93b6081aa25de4c0f7b83915e6d2af4c81b07",
-  "ingredients": {
-    "ing.bier.fass": {
-      "id": "ing.bier.fass",
-      "name": "Fassbier Pils",
-      "meta": {
-        "validFrom": "2024-01-01",
-        "changeId": 1001,
-        "changedAt": "2024-01-08T09:12:00Z"
-      },
-      "categoryId": "cat.bier.vom.fass"
-    },
-    "ing.bier.flasche": {
-      "id": "ing.bier.flasche",
-      "name": "Flaschenbier Pils 0,33 l",
-      "meta": {
-        "validFrom": "2024-01-01",
-        "changeId": 1002,
-        "changedAt": "2024-01-08T09:12:00Z"
-      },
-      "categoryId": "cat.bier.flasche"
-    },
-    "ing.korn": {
-      "id": "ing.korn",
-      "name": "Doppelkorn 38 % vol",
-      "meta": {
-        "validFrom": "2024-01-01",
-        "changeId": 1003,
-        "changedAt": "2024-01-08T09:12:00Z"
-      },
-      "categoryId": "cat.spirituosen"
-    }
-  },
   "mappings": {
     "map.fass50": {
       "id": "map.fass50",
       "supplierName": "Rheinland Getränke Fachgroßhandel GmbH",
       "supplierArticleId": "31090",
       "unitCode": "XKG",
-      "ingredientId": "ing.bier.fass",
+      "productId": "prod.bier.fass",
       "factor": 50000,
       "meta": {
         "validFrom": "2024-01-01",
@@ -80,7 +48,7 @@
       "supplierName": "Rheinland Getränke Fachgroßhandel GmbH",
       "supplierArticleId": "31210",
       "unitCode": "XCS",
-      "ingredientId": "ing.bier.flasche",
+      "productId": "prod.bier.flasche",
       "factor": 7920,
       "meta": {
         "validFrom": "2024-01-01",
@@ -94,7 +62,7 @@
       "supplierName": "Rheinland Getränke Fachgroßhandel GmbH",
       "supplierArticleId": "55120",
       "unitCode": "XBO",
-      "ingredientId": "ing.korn",
+      "productId": "prod.korn",
       "factor": 700,
       "meta": {
         "validFrom": "2024-01-01",
@@ -105,60 +73,46 @@
     }
   },
   "products": {
-    "prod.pils.03": {
-      "id": "prod.pils.03",
-      "name": "Pils 0,3 l vom Fass",
-      "recipe": [
-        {
-          "ingredientId": "ing.bier.fass",
-          "amount": 300,
-          "unit": "MLT"
-        }
-      ],
+    "prod.bier.fass": {
+      "id": "prod.bier.fass",
+      "name": "Fassbier Pils",
+      "unit": "MLT",
+      "categoryId": "cat.bier.vom.fass",
       "meta": {
         "validFrom": "2024-01-01",
-        "changeId": 1020,
-        "changedAt": "2024-01-08T09:31:00Z"
+        "changeId": 1001,
+        "changedAt": "2024-01-08T09:12:00Z"
       }
     },
-    "prod.pils.05": {
-      "id": "prod.pils.05",
-      "name": "Pils 0,5 l vom Fass",
-      "recipe": [
-        {
-          "ingredientId": "ing.bier.fass",
-          "amount": 500,
-          "unit": "MLT"
-        }
-      ],
+    "prod.bier.flasche": {
+      "id": "prod.bier.flasche",
+      "name": "Flaschenbier Pils 0,33 l",
+      "unit": "MLT",
+      "categoryId": "cat.bier.flasche",
       "meta": {
         "validFrom": "2024-01-01",
-        "changeId": 1021,
-        "changedAt": "2024-01-08T09:31:00Z"
+        "changeId": 1002,
+        "changedAt": "2024-01-08T09:12:00Z"
       }
     },
-    "prod.pils.flasche": {
-      "id": "prod.pils.flasche",
-      "name": "Pils 0,33 l Flasche",
-      "recipe": [
-        {
-          "ingredientId": "ing.bier.flasche",
-          "amount": 330,
-          "unit": "MLT"
-        }
-      ],
+    "prod.korn": {
+      "id": "prod.korn",
+      "name": "Doppelkorn 38 % vol",
+      "unit": "MLT",
+      "categoryId": "cat.spirituosen",
       "meta": {
         "validFrom": "2024-01-01",
-        "changeId": 1022,
-        "changedAt": "2024-01-08T09:31:00Z"
+        "changeId": 1003,
+        "changedAt": "2024-01-08T09:12:00Z"
       }
     },
     "prod.korn.2cl": {
       "id": "prod.korn.2cl",
       "name": "Doppelkorn 2 cl",
+      "unit": "H87",
       "recipe": [
         {
-          "ingredientId": "ing.korn",
+          "partId": "prod.korn",
           "amount": 20,
           "unit": "MLT"
         }
@@ -172,9 +126,10 @@
     "prod.korn.4cl": {
       "id": "prod.korn.4cl",
       "name": "Doppelkorn 4 cl",
+      "unit": "H87",
       "recipe": [
         {
-          "ingredientId": "ing.korn",
+          "partId": "prod.korn",
           "amount": 40,
           "unit": "MLT"
         }
@@ -182,6 +137,57 @@
       "meta": {
         "validFrom": "2024-01-01",
         "changeId": 1024,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.pils.03": {
+      "id": "prod.pils.03",
+      "name": "Pils 0,3 l vom Fass",
+      "unit": "H87",
+      "recipe": [
+        {
+          "partId": "prod.bier.fass",
+          "amount": 300,
+          "unit": "MLT"
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1020,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.pils.05": {
+      "id": "prod.pils.05",
+      "name": "Pils 0,5 l vom Fass",
+      "unit": "H87",
+      "recipe": [
+        {
+          "partId": "prod.bier.fass",
+          "amount": 500,
+          "unit": "MLT"
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1021,
+        "changedAt": "2024-01-08T09:31:00Z"
+      }
+    },
+    "prod.pils.flasche": {
+      "id": "prod.pils.flasche",
+      "name": "Pils 0,33 l Flasche",
+      "unit": "H87",
+      "recipe": [
+        {
+          "partId": "prod.bier.flasche",
+          "amount": 330,
+          "unit": "MLT"
+        }
+      ],
+      "meta": {
+        "validFrom": "2024-01-01",
+        "changeId": 1022,
         "changedAt": "2024-01-08T09:31:00Z"
       }
     }

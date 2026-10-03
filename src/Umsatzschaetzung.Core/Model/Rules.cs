@@ -6,7 +6,6 @@ namespace Umsatzschaetzung.Model;
 public enum Entity
 {
     [JsonStringEnumMemberName("category")] Category,
-    [JsonStringEnumMemberName("ingredient")] Ingredient,
     [JsonStringEnumMemberName("mapping")] Mapping,
     [JsonStringEnumMemberName("product")] Product,
     [JsonStringEnumMemberName("yield_rule")] YieldRule,
@@ -72,26 +71,13 @@ public sealed class Category : IRuleEntity
         Gebinde.Count > 0 && containers.Count > 0 && !Gebinde.Exists(containers.Contains);
 }
 
-// Eine Gewerbekennzahl, die eine Prüfung wählen kann. Kategorien grenzen ihre Zutaten per
+// Eine Gewerbekennzahl, die eine Prüfung wählen kann. Kategorien grenzen ihre Produkte per
 // Präfix auf Kennzahlen ein; eine Kennzahl, die keine kennt, ließe der Zuordnung nichts übrig.
 public sealed class Gewerbezweig : IRuleEntity
 {
     public string Id { get; set; } = "";
     public string Kennzahl { get; set; } = "";
     public string Name { get; set; } = "";
-    public Meta Meta { get; set; } = new();
-}
-
-public sealed class Ingredient : IRuleEntity
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string CategoryId { get; set; } = "";
-    // Warenarten, die unter dieser Zutat gebucht werden: "Gouda" bei Schnittkäse. Der
-    // Zuordner sucht in Name und Aliassen; sie sind, was ein Prüfer statt Namensmustern pflegt.
-    public List<string> Aliases { get; set; } = [];
-    // Richtwert für ein Stück in g oder ml: macht "1 Stk Gurke" ohne Faktor zu 400 g.
-    public Piece? Piece { get; set; }
     public Meta Meta { get; set; } = new();
 }
 
@@ -108,8 +94,8 @@ public sealed class ArticleMapping : IRuleEntity
     // what the suggester learns a supplier's vocabulary from.
     public string? Observed { get; set; }
     public string? UnitCode { get; set; }
-    public string IngredientId { get; set; } = "";
-    // Inhalt eines Gebindes in der Rezepteinheit; null, wo die Einheitentabelle schon umrechnet.
+    public string ProductId { get; set; } = "";
+    // Inhalt eines Gebindes in der Einheit des Produkts; null, wo die Einheitentabelle schon umrechnet.
     public long? Factor { get; set; }
     public bool Confirmed { get; set; }
     public Meta Meta { get; set; } = new();
@@ -182,43 +168,54 @@ public static class Match
         return name != "" && ArticleName.Canonical(m.Name) == name;
     }
 
-    // The Prüfung's choice first, the ingredient's before its category's; a choice without a rule is "no deduction".
-    // Without a choice the default of the ingredient, then of its category.
-    public static YieldRule? YieldRule(Case c, RuleSet rs, Ingredient ing)
+    // The Prüfung's choice first, the product's before its category's; a choice without a rule is "no deduction".
+    // Without a choice the default of the product, then of its category.
+    public static YieldRule? YieldRule(Case c, RuleSet rs, Product p)
     {
-        YieldChoice? byIngredient = null, byCategory = null;
+        var category = string.IsNullOrEmpty(p.CategoryId) ? null : p.CategoryId;
+        YieldChoice? byProduct = null, byCategory = null;
         foreach (var y in c.Yields)
         {
-            if (y.IngredientId == ing.Id) byIngredient = y;
-            else if (string.IsNullOrEmpty(y.IngredientId) && !string.IsNullOrEmpty(y.CategoryId) && y.CategoryId == ing.CategoryId)
+            if (y.ProductId == p.Id) byProduct = y;
+            else if (string.IsNullOrEmpty(y.ProductId) && category is not null && y.CategoryId == category)
                 byCategory = y;
         }
-        foreach (var chosen in new[] { byIngredient, byCategory })
+        foreach (var chosen in new[] { byProduct, byCategory })
         {
             if (chosen is null) continue;
             if (chosen.YieldRuleId is not { } id) return null;
             if (rs.YieldRules.TryGetValue(id, out var r)) return r;
         }
-        return rs.YieldRules.Values.FirstOrDefault(r => r.Default && r.IngredientId == ing.Id)
-            ?? rs.YieldRules.Values.FirstOrDefault(r => r.Default && string.IsNullOrEmpty(r.IngredientId) && r.CategoryId == ing.CategoryId);
+        return rs.YieldRules.Values.FirstOrDefault(r => r.Default && r.ProductId == p.Id)
+            ?? (category is null ? null
+                : rs.YieldRules.Values.FirstOrDefault(r => r.Default && string.IsNullOrEmpty(r.ProductId) && r.CategoryId == category));
     }
 }
 
-// Eine Zeile nennt eine Zutat oder, als Teilrezept, ein anderes Produkt: „Schnitzel mit
-// Pommes“ ist ein Schnitzel und eine Portion Pommes. Teilrezepte zählen in Stück.
-public sealed class RecipeLine
+// Wie viel eines anderen Produkts ein Rezept braucht, in einer Einheit, die sich in dessen umrechnen lässt.
+public sealed class PartLine
 {
-    public string IngredientId { get; set; } = "";
-    public string? ProductId { get; set; }
+    public string PartId { get; set; } = "";
     public long Amount { get; set; }
     public string Unit { get; set; } = "";
 }
 
+// Ein Produkt ist, was gekauft, gelagert, hergestellt oder verkauft wird, und jedes kann alles davon:
+// „Schnitzel mit Pommes“ besteht aus einem Schnitzel und einer Portion Pommes, die Pommes aus
+// Kartoffeln. Gezählt wird es in seiner Einheit; ein Rezept gilt für Batch davon.
 public sealed class Product : IRuleEntity
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public List<RecipeLine> Recipe { get; set; } = [];
+    public string Unit { get; set; } = "";
+    public long Batch { get; set; } = 1;
+    public string? CategoryId { get; set; }
+    // Warenarten, die unter diesem Produkt gebucht werden: "Gouda" bei Schnittkäse. Der
+    // Zuordner sucht in Name und Aliassen; sie sind, was ein Prüfer statt Namensmustern pflegt.
+    public List<string> Aliases { get; set; } = [];
+    // Richtwert für ein Stück in g oder ml: macht "1 Stk Gurke" ohne Faktor zu 400 g.
+    public Piece? Piece { get; set; }
+    public List<PartLine> Recipe { get; set; } = [];
     public Meta Meta { get; set; } = new();
 }
 
@@ -227,7 +224,7 @@ public sealed class YieldRule : IRuleEntity
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public string? CategoryId { get; set; }
-    public string? IngredientId { get; set; }
+    public string? ProductId { get; set; }
     public long Deduction { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Default { get; set; }
@@ -253,36 +250,21 @@ public sealed class RuleSet
     public string? Store { get; set; }
     public long Version { get; set; }
     public Dictionary<string, Category> Categories { get; set; } = [];
-    public Dictionary<string, Ingredient> Ingredients { get; set; } = [];
     public Dictionary<string, ArticleMapping> Mappings { get; set; } = [];
-    public Dictionary<string, Product> Products
-    {
-        get => products;
-        set
-        {
-            products = value;
-            Bases = null;
-        }
-    }
+    public Dictionary<string, Product> Products { get; set; } = [];
     public Dictionary<string, YieldRule> YieldRules { get; set; } = [];
-
-    Dictionary<string, Product> products = [];
-
-    // What each ingredient is measured in follows from every recipe at once, so it is worked out
-    // once for this set and dropped when a product changes, not once per line that asks.
-    internal Dictionary<string, Unit?>? Bases { get; set; }
     public Dictionary<string, Gewerbezweig> Gewerbezweige { get; set; } = [];
     public Dictionary<string, ReportTemplate> Templates { get; set; } = [];
 
     // Die Zuordnungen einer Prüfung ergänzen die der Regeln; unter derselben ID gilt die Regel,
-    // und eine, deren Zutat es hier nicht gibt, fällt weg.
+    // und eine, deren Produkt es hier nicht gibt, fällt weg.
     public RuleSet With(IReadOnlyDictionary<string, ArticleMapping>? own)
     {
         if (own is null) return this;
         Dictionary<string, ArticleMapping>? mappings = null;
         foreach (var (id, m) in own)
         {
-            if (Mappings.ContainsKey(id) || !Ingredients.ContainsKey(m.IngredientId)) continue;
+            if (Mappings.ContainsKey(id) || !Products.ContainsKey(m.ProductId)) continue;
             mappings ??= new Dictionary<string, ArticleMapping>(Mappings);
             mappings[id] = m;
         }
@@ -292,13 +274,11 @@ public sealed class RuleSet
             Store = Store,
             Version = Version,
             Categories = Categories,
-            Ingredients = Ingredients,
             Mappings = mappings,
             Products = Products,
             YieldRules = YieldRules,
             Gewerbezweige = Gewerbezweige,
             Templates = Templates,
-            Bases = Bases,
         };
     }
 
@@ -308,13 +288,58 @@ public sealed class RuleSet
     public IRuleEntity? Find(Entity entity, string id) => entity switch
     {
         Entity.Category => Categories.GetValueOrDefault(id),
-        Entity.Ingredient => Ingredients.GetValueOrDefault(id),
         Entity.Mapping => Mappings.GetValueOrDefault(id),
         Entity.Product => Products.GetValueOrDefault(id),
         Entity.YieldRule => YieldRules.GetValueOrDefault(id),
         Entity.Gewerbezweig => Gewerbezweige.GetValueOrDefault(id),
         Entity.Template => Templates.GetValueOrDefault(id),
-        _ => null,
+        _ => throw new ArgumentException("unbekannte Regelart " + entity),
+    };
+
+    public IEnumerable<IRuleEntity> Entries() =>
+        new IEnumerable<IRuleEntity>[] { Categories.Values, Products.Values, Mappings.Values, YieldRules.Values, Gewerbezweige.Values, Templates.Values }
+            .SelectMany(e => e);
+
+    // What turns this set back into `then`: each entry of it that reads otherwise here, and null for
+    // each one here that it did not have. Apart from when it was written, an entry is what it says.
+    public List<(Entity Kind, string Id, IRuleEntity? Rule)> Back(RuleSet then)
+    {
+        List<(Entity, string, IRuleEntity?)> steps = [];
+        foreach (var e in then.Entries())
+            if (Content(Find(KindOf(e), e.Id)) != Content(e)) steps.Add((KindOf(e), e.Id, e));
+        foreach (var e in Entries())
+            if (then.Find(KindOf(e), e.Id) is null) steps.Add((KindOf(e), e.Id, null));
+        return steps;
+    }
+
+    public static string? Content(IRuleEntity? e)
+    {
+        if (e is null) return null;
+        var bare = Json.Copy(e);
+        bare.Meta = new Meta { ValidFrom = e.Meta.ValidFrom, ValidTo = e.Meta.ValidTo };
+        return System.Text.Json.JsonSerializer.Serialize(bare, bare.GetType(), ModelJsonContext.Default);
+    }
+
+    public static Entity KindOf(IRuleEntity e) => e switch
+    {
+        Category => Entity.Category,
+        ArticleMapping => Entity.Mapping,
+        Product => Entity.Product,
+        YieldRule => Entity.YieldRule,
+        Gewerbezweig => Entity.Gewerbezweig,
+        ReportTemplate => Entity.Template,
+        _ => throw new ArgumentException("unbekannte Regel " + e.GetType().Name),
+    };
+
+    public bool Remove(Entity kind, string id) => kind switch
+    {
+        Entity.Category => Categories.Remove(id),
+        Entity.Mapping => Mappings.Remove(id),
+        Entity.Product => Products.Remove(id),
+        Entity.YieldRule => YieldRules.Remove(id),
+        Entity.Gewerbezweig => Gewerbezweige.Remove(id),
+        Entity.Template => Templates.Remove(id),
+        _ => throw new ArgumentException("unbekannte Regelart " + kind),
     };
 
     public void Put(IRuleEntity e)
@@ -322,12 +347,8 @@ public sealed class RuleSet
         switch (e)
         {
             case Category x: Categories[x.Id] = x; break;
-            case Ingredient x: Ingredients[x.Id] = x; break;
             case ArticleMapping x: Mappings[x.Id] = x; break;
-            case Product x:
-                Products[x.Id] = x;
-                Bases = null;
-                break;
+            case Product x: Products[x.Id] = x; break;
             case YieldRule x: YieldRules[x.Id] = x; break;
             case Gewerbezweig x: Gewerbezweige[x.Id] = x; break;
             case ReportTemplate x: Templates[x.Id] = x; break;

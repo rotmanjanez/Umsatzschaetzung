@@ -2,9 +2,9 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Calc;
 
-internal sealed class IngredientUse
+internal sealed class Stock
 {
-    public required string IngredientId { get; init; }
+    public required string ProductId { get; init; }
     public long Bought { get; set; }
     public long Cost { get; set; }
     public long Used { get; set; }
@@ -17,23 +17,29 @@ internal sealed class IngredientUse
     public long YieldRate { get; set; }
 }
 
+// Die Zuteilung: je Weg die Portionen, die auf ihm entstanden.
+internal sealed class Plan
+{
+    public List<Allocation> Allocations { get; } = [];
+    public List<(Column Column, long Portions)> Taken { get; } = [];
+    public HashSet<string> Overdrawn { get; } = [];
+}
+
 public static class Calculation
 {
     public static Report Run(Case c, RuleSet catalog)
     {
         var rs = Recipes.Effective(c, catalog);
-        var bases = Scale.Bases(rs);
-        var (uses, ex, flags) = Normalize.Run(c, rs, bases);
+        var (uses, ex, flags) = Normalize.Run(c, rs);
         Yield.Run(c, rs, uses);
-        var allocs = Allocate(c, rs, uses);
-        var rep = Revenue.Run(c, rs, bases, allocs, uses, ex.Unused);
+        var plan = Allocate(c, rs, uses);
+        var rep = Revenue.Run(c, rs, plan, uses, ex.Unused);
         rep.Unmapped = ex.Unmapped;
         rep.Unused = ex.Unused;
         rep.Deposits = ex.Deposits;
         rep.NoRevenue = ex.NoRevenue;
         rep.Warnings.AddRange(flags);
-        rep.Warnings.AddRange(Scale.Conflicts(rs, ex.Unused.Select(l => l.IngredientId)));
-        rep.Ingredients = IngredientRows(rs, bases, uses, allocs);
+        rep.Supply = SupplyRows(rs, uses, plan);
         var s = rep.Totals;
         s.DepositCharged = ex.Deposits.Where(l => l.LineNet > 0).Sum(l => l.LineNet);
         s.DepositRefunded = ex.Deposits.Where(l => l.LineNet < 0).Sum(l => l.LineNet);
@@ -45,40 +51,38 @@ public static class Calculation
         return rep;
     }
 
-    static List<IngredientRow> IngredientRows(RuleSet rs, Dictionary<string, Unit?> bases, SortedDictionary<string, IngredientUse> uses, List<Allocation> allocs)
+    static List<SupplyRow> SupplyRows(RuleSet rs, SortedDictionary<string, Stock> uses, Plan plan)
     {
         var leftover = new Dictionary<string, long>();
-        var products = new Dictionary<string, List<IngredientProduct>>();
         HashSet<string> binding = [];
-        foreach (var a in allocs)
+        foreach (var a in plan.Allocations)
         {
             foreach (var l in a.Leftover)
-                leftover[l.IngredientId] = leftover.GetValueOrDefault(l.IngredientId) + l.Qty;
+                leftover[l.ProductId] = leftover.GetValueOrDefault(l.ProductId) + l.Qty;
             binding.UnionWith(a.Binding);
-            foreach (var pp in a.Products)
+        }
+        var usedBy = new Dictionary<string, List<SupplyUse>>();
+        foreach (var (col, portions) in plan.Taken)
+        {
+            if (portions == 0) continue;
+            foreach (var (id, amount) in col.Amount)
             {
-                if (pp.Portions == 0) continue;
-                var p = rs.Products[pp.ProductId];
-                foreach (var r in p.Recipe)
-                {
-                    if (!products.TryGetValue(r.IngredientId, out var list)) products[r.IngredientId] = list = [];
-                    var amount = Scale.ToBase(r.Amount, r.Unit);
-                    if (list.Find(x => x.ProductId == pp.ProductId) is { } same) same.PerPortion += amount;
-                    else list.Add(new IngredientProduct { ProductId = pp.ProductId, Name = p.Name, Portions = pp.Portions, PerPortion = amount });
-                }
+                if (!usedBy.TryGetValue(id, out var list)) usedBy[id] = list = [];
+                if (list.Find(x => x.ProductId == col.ProductId && x.PerPortion == amount) is { } same) same.Portions += portions;
+                else list.Add(new SupplyUse { ProductId = col.ProductId, Name = rs.Products[col.ProductId].Name, Portions = portions, PerPortion = amount });
             }
         }
-        foreach (var list in products.Values)
+        foreach (var list in usedBy.Values)
             list.Sort((x, y) => y.Qty.CompareTo(x.Qty));
-        var rows = new List<IngredientRow>(uses.Count);
+        var rows = new List<SupplyRow>(uses.Count);
         foreach (var id in uses.Keys)
         {
             var u = uses[id];
-            rows.Add(new IngredientRow
+            rows.Add(new SupplyRow
             {
-                IngredientId = id,
-                Name = Names.Ingredient(rs, id),
-                Unit = bases.GetValueOrDefault(id) ?? Unit.Piece,
+                ProductId = id,
+                Name = Names.Product(rs, id),
+                Unit = Names.ProductUnit(rs, id),
                 Purchases = u.Purchases,
                 Opening = u.Opening,
                 Closing = u.Closing,
@@ -89,7 +93,7 @@ public static class Calculation
                 Yield = u.Yield,
                 YieldRate = u.YieldRate,
                 Sellable = u.Sellable,
-                Products = products.GetValueOrDefault(id) ?? [],
+                UsedBy = usedBy.GetValueOrDefault(id) ?? [],
                 Leftover = leftover.GetValueOrDefault(id),
                 Binding = binding.Contains(id),
             });
@@ -114,60 +118,48 @@ public static class Calculation
         return output;
     }
 
-    static long Capacity(SortedDictionary<string, IngredientUse> uses, string id) =>
+    static long Capacity(SortedDictionary<string, Stock> uses, string id) =>
         uses.TryGetValue(id, out var u) && u.Sellable > 0 ? u.Sellable : 0;
 
-    internal static HashSet<string> OverdrawnPins(Case c, RuleSet rs, SortedDictionary<string, IngredientUse> uses)
+    // Ein Produkt ohne Weg behält den, auf dem alles selbst gemacht wird: ohne Bestand bekommt es dort
+    // nur über eine Vorgabe Portionen, und die Kalkulation nennt, was fehlt.
+    static Dictionary<string, List<Dictionary<string, long>>> Ways(RuleSet rs, List<string> products, SortedDictionary<string, Stock> uses, HashSet<string> cut)
     {
-        var demand = new Dictionary<string, long>();
-        foreach (var p in c.Pinned)
-            if (rs.Products.TryGetValue(p.ProductId, out var prod))
-                foreach (var r in prod.Recipe)
-                    demand[r.IngredientId] = demand.GetValueOrDefault(r.IngredientId) + Scale.ToBase(r.Amount, r.Unit) * p.Portions;
-        HashSet<string> output = [];
-        foreach (var p in c.Pinned)
+        HashSet<string> stocked = [.. uses.Where(u => u.Value.Sellable > 0).Select(u => u.Key)];
+        var output = new Dictionary<string, List<Dictionary<string, long>>>(products.Count);
+        foreach (var id in products)
         {
-            if (!rs.Products.TryGetValue(p.ProductId, out var prod))
-            {
-                output.Add(p.ProductId);
-                continue;
-            }
-            foreach (var r in prod.Recipe)
-                if (demand[r.IngredientId] > Capacity(uses, r.IngredientId)) output.Add(p.ProductId);
+            var p = rs.Products[id];
+            var (routes, more) = Routes.Of(rs, p, stocked);
+            output[id] = routes.Count > 0 ? routes : [Recipes.Sold(rs, p).ToDictionary(l => l.PartId, l => l.Amount)];
+            if (more) cut.Add(id);
         }
         return output;
     }
 
-    static List<ProductPortions> PortionsList(Dictionary<string, long> portions, Dictionary<string, long> pinned)
+    static Plan Allocate(Case c, RuleSet rs, SortedDictionary<string, Stock> uses)
     {
-        var output = new List<ProductPortions>(portions.Count);
-        foreach (var id in portions.Keys.Order(StringComparer.Ordinal))
-            output.Add(new ProductPortions { ProductId = id, Portions = portions[id], Pinned = pinned.ContainsKey(id) });
-        return output;
-    }
-
-    static List<Allocation> Allocate(Case c, RuleSet rs, SortedDictionary<string, IngredientUse> uses)
-    {
-        List<Allocation> allocs = [];
-        var comps = Knapsack.Components(rs, EnabledProducts(c, rs), uses.Keys);
+        var plan = new Plan();
+        var products = EnabledProducts(c, rs);
+        HashSet<string> cut = [];
+        var ways = Ways(rs, products, uses, cut);
+        var comps = Knapsack.Components(products, ways, uses.Keys);
         for (var i = 0; i < comps.Count; i++)
         {
             var comp = comps[i];
             var input = new KnapsackInput();
-            foreach (var id in comp.Ingredients) input.Capacity[id] = Capacity(uses, id);
+            foreach (var id in comp.Supply) input.Capacity[id] = Capacity(uses, id);
             foreach (var pid in comp.Products)
-            {
-                var p = rs.Products[pid];
-                input.Recipe[pid] = p.Recipe;
-                foreach (var r in p.Recipe)
-                    if (!input.Capacity.ContainsKey(r.IngredientId))
-                        input.Capacity[r.IngredientId] = Capacity(uses, r.IngredientId);
-            }
+                foreach (var route in ways[pid])
+                {
+                    input.Columns.Add(new Column(pid, route));
+                    foreach (var id in route.Keys) input.Capacity.TryAdd(id, Capacity(uses, id));
+                }
             foreach (var id in input.Capacity.Keys)
                 if (uses.TryGetValue(id, out var u) && u.Bought > 0)
                     input.UnitCost[id] = u.Cost * 10_000 / u.Bought;
             foreach (var p in c.Pinned)
-                if (input.Recipe.ContainsKey(p.ProductId)) input.Pinned[p.ProductId] = p.Portions;
+                if (comp.Products.Contains(p.ProductId)) input.Pinned[p.ProductId] = p.Portions;
             KnapsackResult res;
             try
             {
@@ -177,19 +169,48 @@ public static class Calculation
             {
                 throw new InvalidOperationException($"allocate component {i}: {e.Message}", e);
             }
+            var portions = new SortedDictionary<string, long>(StringComparer.Ordinal);
+            for (var k = 0; k < input.Columns.Count; k++)
+            {
+                var col = input.Columns[k];
+                plan.Taken.Add((col, res.Portions[k]));
+                portions[col.ProductId] = portions.GetValueOrDefault(col.ProductId) + res.Portions[k];
+            }
             var a = new Allocation
             {
                 Component = i,
-                Products = PortionsList(res.Portions, input.Pinned),
+                Products = [.. portions.Where(p => p.Value > 0 || input.Pinned.ContainsKey(p.Key))
+                    .Select(p => new ProductPortions { ProductId = p.Key, Portions = p.Value, Pinned = input.Pinned.ContainsKey(p.Key) })],
                 Binding = [.. res.Binding],
                 Grid = res.Grid,
                 States = res.States,
-                Approximate = res.Approximate,
+                Approximate = res.Approximate || comp.Products.Exists(cut.Contains),
             };
             foreach (var id in res.Leftover.Keys.Order(StringComparer.Ordinal))
-                a.Leftover.Add(new Leftover { IngredientId = id, Qty = res.Leftover[id] });
-            allocs.Add(a);
+                a.Leftover.Add(new Leftover { ProductId = id, Qty = res.Leftover[id] });
+            plan.Allocations.Add(a);
+            plan.Overdrawn.UnionWith(Overdrawn(input, res));
         }
-        return allocs;
+        HashSet<string> sold = [.. products];
+        foreach (var p in c.Pinned)
+            if (!sold.Contains(p.ProductId) && (p.Portions > 0 || !rs.Products.ContainsKey(p.ProductId))) plan.Overdrawn.Add(p.ProductId);
+        return plan;
+    }
+
+    // Vorgaben, deren Wege zusammen mehr brauchen, als ein Bestand hergibt.
+    static IEnumerable<string> Overdrawn(KnapsackInput input, KnapsackResult res)
+    {
+        var demand = new Dictionary<string, long>();
+        for (var k = 0; k < input.Columns.Count; k++)
+            if (input.Pinned.ContainsKey(input.Columns[k].ProductId))
+                foreach (var (id, a) in input.Columns[k].Amount)
+                    demand[id] = demand.GetValueOrDefault(id) + a * res.Portions[k];
+        for (var k = 0; k < input.Columns.Count; k++)
+        {
+            var col = input.Columns[k];
+            if (res.Portions[k] > 0 && input.Pinned.ContainsKey(col.ProductId)
+                && col.Amount.Keys.Any(id => demand[id] > input.Capacity.GetValueOrDefault(id)))
+                yield return col.ProductId;
+        }
     }
 }

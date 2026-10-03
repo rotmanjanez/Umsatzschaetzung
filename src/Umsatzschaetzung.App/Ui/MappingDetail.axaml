@@ -116,9 +116,9 @@
                         <StackPanel x:Name="FactorFields" IsVisible="{Binding ShowFields}" Margin="0,4,0,0">
                             <Grid ColumnDefinitions="*,16,200">
                                 <StackPanel IsVisible="{Binding Manual}">
-                                    <TextBlock Text="Zutat *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
-                                    <ui:IngredientBox x:Name="IngredientField" Choices="{Binding Ingredients}" SelectedItem="{Binding Ingredient, Mode=TwoWay}" HorizontalAlignment="Stretch"
-                                                      AutomationProperties.Name="Zutat" AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="MappingIngredient"/>
+                                    <TextBlock Text="Produkt *" Theme="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                                    <ui:ProductBox x:Name="ProductField" Choices="{Binding Products}" SelectedItem="{Binding Product, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                                   AutomationProperties.IsRequiredForForm="True" AutomationProperties.AutomationId="MappingProduct"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" IsVisible="{Binding ShowFactor}">
                                     <TextBlock Text="{Binding FactorLabel}" ToolTip.Tip="Inhalt eines Gebindes in der Rezepteinheit."

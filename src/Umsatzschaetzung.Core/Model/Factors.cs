@@ -11,17 +11,17 @@ public enum FactorSource
     [JsonStringEnumMemberName("piece")] Piece,
 }
 
-// Wie viel Rezepteinheit in einer verrechneten Einheit steckt: Rezeptmenge = Menge × Faktor / (Per × 1000).
+// Wie viel der Einheit des Produkts in einer verrechneten Einheit steckt: Menge × Faktor / (Per × 1000).
 // Per ist nur beim Stückzählen über ein Gewicht nicht 1 -- 1 kg Gurken sind 1.000 / 400 Stück, gerundet
 // wird erst die ganze Zeile. Die Einheitentabelle rechnet ohne Faktor (0), sonst gilt der Faktor der
-// Zuordnung, dann die Packungsangabe der Bezeichnung, zuletzt der Stück-Richtwert der Zutat -- ein Schätzwert.
+// Zuordnung, dann die Packungsangabe der Bezeichnung, zuletzt der Stück-Richtwert des Produkts -- ein Schätzwert.
 public static class Factors
 {
     public static (long Factor, long Per, FactorSource Source)? Of(RuleSet rs, ArticleMapping m, InvoiceLine line) =>
-        Of(rs, m.IngredientId, line, m.Factor);
+        Of(rs, m.ProductId, line, m.Factor);
 
-    public static (long Factor, long Per, FactorSource Source)? Of(RuleSet rs, string ingredientId, InvoiceLine line, long? mappingFactor) =>
-        Of(Scale.Of(rs, ingredientId), rs.Ingredients.GetValueOrDefault(ingredientId)?.Piece, line.UnitCode, PackSize.Read(line.Name), mappingFactor);
+    public static (long Factor, long Per, FactorSource Source)? Of(RuleSet rs, string productId, InvoiceLine line, long? mappingFactor) =>
+        Of(Scale.Of(rs, productId), rs.Products.GetValueOrDefault(productId)?.Piece, line.UnitCode, PackSize.Read(line.Name), mappingFactor);
 
     public static (long Factor, long Per, FactorSource Source)? Of(Unit? recipeUnit, Piece? piece, string unitCode, Pack? pack, long? mappingFactor)
     {

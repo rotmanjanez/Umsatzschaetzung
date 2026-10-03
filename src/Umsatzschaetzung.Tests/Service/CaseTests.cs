@@ -92,16 +92,28 @@ public sealed class CaseTests : IDisposable
     }
 
     [Fact]
-    public async Task ARecipeOfTheCaseMayOnlyUseKnownIngredients()
+    public async Task ARecipeOfTheCaseMayOnlyUseKnownProducts()
     {
         var kase = Vorlage.Blank();
-        kase.Products = [new() { ProductId = "prod.pils.05", Vat = 1900, Recipe = [new() { IngredientId = "ing.unbekannt", Amount = 500, Unit = "MLT" }] }];
+        kase.Products = [new() { ProductId = "prod.pils.05", Vat = 1900, Recipe = [new() { PartId = "prod.unbekannt", Amount = 500, Unit = "MLT" }] }];
         var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Cases.Put(kase, ct));
         Assert.Equal(ErrorCode.Invalid, e.Code);
 
-        kase.Products[0].Recipe = [new() { IngredientId = "ing.bier.fass", Amount = 500, Unit = "MLT" }];
+        kase.Products[0].Recipe = [new() { PartId = "prod.bier.fass", Amount = 500, Unit = "MLT" }];
         var saved = await svc.Cases.Put(kase, ct);
-        Assert.Equal("ing.bier.fass", Assert.Single((await svc.Cases.Get(saved.Id, ct)).Products[0].Recipe!).IngredientId);
+        Assert.Equal("prod.bier.fass", Assert.Single((await svc.Cases.Get(saved.Id, ct)).Products[0].Recipe!).PartId);
+    }
+
+    [Fact]
+    public async Task ARecipeOfTheCaseCountsEachPartInItsOwnUnit()
+    {
+        var kase = Vorlage.Blank();
+        kase.Products = [new() { ProductId = "prod.pils.05", Vat = 1900, Recipe = [new() { PartId = "prod.bier.fass", Amount = 1, Unit = "H87" }] }];
+
+        var e = await Assert.ThrowsAsync<ServiceError>(() => svc.Cases.Put(kase, ct));
+
+        Assert.Equal(ErrorCode.Invalid, e.Code);
+        Assert.Contains("nicht in Stück", e.Message);
     }
 
     [Theory]

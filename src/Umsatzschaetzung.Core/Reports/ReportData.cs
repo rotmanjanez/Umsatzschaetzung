@@ -39,11 +39,13 @@ public sealed class ReportData
     public required EstimateGroups Estimated { get; init; }
     [Description("Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte.")]
     public required List<CalculationGroup> Calculation { get; init; }
+    [Description("Produkte, deren Portionen auf mehr als einem Weg entstanden, etwa teils aus gekauften, teils aus selbst gemachten Pommes.")]
+    public required List<ProductRow> Routed { get; init; }
     [Description("Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig.")]
     public Rahmen? Rahmen { get; init; }
     [Description("Lage des kalkulierten Aufschlagsatzes zum Rahmen.")]
     public Rahmenlage? Lage { get; init; }
-    [Description("Ob irgendeine Zutat eine Ertragsregel trägt.")]
+    [Description("Ob irgendein Bestand eine Ertragsregel trägt.")]
     public bool AnyYields { get; init; }
     [Description("Die Gewerbekennzahl der Prüfung aus den Regeln.")]
     public Gewerbezweig? Gewerbe { get; init; }

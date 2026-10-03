@@ -55,7 +55,7 @@
                     <DataGrid x:Name="Groups" ui:Blur.Detail="{Binding #Detail}" ui:Grids.Flex="1" Theme="{StaticResource Grid}" IsReadOnly="True"
                               SelectionChanged="GroupSelected" IsVisible="{Binding !NoInvoices}"
                               AutomationProperties.Name="Rechnungspositionen" AutomationProperties.AutomationId="MappingGroups"
-                              AutomationProperties.HelpText="Position wählen, um sie rechts einer Zutat zuzuordnen">
+                              AutomationProperties.HelpText="Position wählen, um sie rechts einem Produkt zuzuordnen">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="Status" Width="120" SortMemberPath="Rank">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -87,7 +87,7 @@
                         <TextBlock Text="Noch keine Rechnungen" Theme="{StaticResource SectionHeader}" TextAlignment="Center" HorizontalAlignment="Center"
                                    AutomationProperties.HeadingLevel="2"/>
                         <TextBlock Theme="{StaticResource Muted}" TextAlignment="Center" TextWrapping="Wrap"
-                                   Text="Zugeordnet werden Rechnungspositionen zu Zutaten. Fügen Sie zuerst Rechnungen hinzu."/>
+                                   Text="Zugeordnet werden Rechnungspositionen zu Produkten. Fügen Sie zuerst Rechnungen hinzu."/>
                         <Button Content="Zu den Rechnungen" Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center" Margin="0,20,0,0" Click="GoInvoices"
                                 AutomationProperties.AutomationId="MappingGoInvoices"/>
                     </StackPanel>

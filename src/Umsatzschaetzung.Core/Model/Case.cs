@@ -4,7 +4,7 @@ namespace Umsatzschaetzung.Model;
 
 public sealed class InventoryEntry
 {
-    public string IngredientId { get; set; } = "";
+    public string ProductId { get; set; } = "";
     public long Opening { get; set; }
     public long Closing { get; set; }
     public string Unit { get; set; } = "";
@@ -12,7 +12,7 @@ public sealed class InventoryEntry
 
 public sealed class YieldChoice
 {
-    public string? IngredientId { get; set; }
+    public string? ProductId { get; set; }
     public string? CategoryId { get; set; }
     // Ohne Regel wird nichts abgezogen.
     public string? YieldRuleId { get; set; }
@@ -44,10 +44,10 @@ public sealed class CaseProduct
     public string ProductId { get; set; } = "";
     public long GrossPrice { get; set; }
     public long Vat { get; set; }
-    // Rezeptur nur dieser Prüfung; null heißt: die des Katalogs. Basis ist die Prüfsumme
+    // Rezeptur nur dieser Prüfung, für eine Einheit; null oder leer heißt: die des Katalogs. Basis ist die Prüfsumme
     // der Katalogrezeptur, von der die Kopie stammt.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<RecipeLine>? Recipe { get; set; }
+    public List<PartLine>? Recipe { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public long RecipeBasis { get; set; }
 }
@@ -65,7 +65,7 @@ public sealed class Case
     public List<CaseProduct> Products { get; set; } = [];
     public List<YieldChoice> Yields { get; set; } = [];
     public List<PinnedPortions> Pinned { get; set; } = [];
-    // Zutaten, die in diesem Betrieb keinen Umsatz bringen, etwa Reinigungsmittel.
+    // Produkte, die in diesem Betrieb keinen Umsatz bringen, etwa Reinigungsmittel.
     public List<string> NoRevenue { get; set; } = [];
     // Was das Programm beim Einlesen selbst zugeordnet hat. Es bleibt bei der Prüfung, bis eine
     // Person es bestätigt und es damit in die gemeinsamen Regeln kommt.

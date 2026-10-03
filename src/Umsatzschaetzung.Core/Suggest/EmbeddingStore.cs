@@ -15,7 +15,8 @@ public sealed class EmbeddingStore : IEmbeddingCache
     readonly string connectionString;
     readonly string? shipped;
 
-    public EmbeddingStore(string dir, string? shipped = null)
+    // Given the model, the vectors of every other one are dropped, as no one reads them again.
+    public EmbeddingStore(string dir, string? shipped = null, string? model = null)
     {
         Directory.CreateDirectory(dir);
         connectionString = new SqliteConnectionStringBuilder
@@ -33,6 +34,10 @@ public sealed class EmbeddingStore : IEmbeddingCache
         using var db = Open(connectionString);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "CREATE TABLE IF NOT EXISTS embedding(text TEXT NOT NULL, model TEXT NOT NULL, vec BLOB NOT NULL, PRIMARY KEY(text, model))";
+        cmd.ExecuteNonQuery();
+        if (model is null) return;
+        cmd.CommandText = "DELETE FROM embedding WHERE model <> @model";
+        cmd.Parameters.AddWithValue("@model", model);
         cmd.ExecuteNonQuery();
     }
 

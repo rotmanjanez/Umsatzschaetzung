@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using Umsatzschaetzung.Nets;
 using Umsatzschaetzung.Tagging;
@@ -8,23 +9,26 @@ namespace Umsatzschaetzung.Suggest;
 // so the similarity of two wordings is the dot product of their vectors. Its text side
 // is the tagger's, down to the vocabulary, so the tokenizer is read from the tagger's
 // model directory.
-public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
+//
+// The graph quantises its activations with one scale per tensor, so a text batched with others
+// and their padding moves with them: each text runs alone, and its vector is the same, bit for
+// bit, whatever it is embedded with. Runs above one run that many texts at once on a thread
+// each, for a runtime whose runs may overlap and return finished: the caller's thread takes
+// part and the call returns finished too, so no continuation waits for a dispatcher that is
+// itself waiting, as the headless driver's is at its end.
+public sealed class Encoder(IWeights weights, int runs = 1) : IEncoder, IDisposable
 {
-    public const string Name = "zuordnung-0.1.2/int8";
+    public const string Name = "zuordnung-0.1.2/int8/alone";
     const int Width = IEncoder.Width;
 
     public string Model => Name;
 
     // An article wording is a handful of words; 48 tokens hold the longest of them whole.
     const int MaxLen = 48;
-    const int Batch = 64;
 
     const string ModelFile = "zuordnung/zuordnung.int8.onnx";
     const string CalibrationFile = "zuordnung/calibration.json";
     const string TokenizerDir = "belegtagger";
-
-    // Eight threads measured slower than four on an M1 Pro, and no spinning, as for the tagger.
-    static readonly NetOptions Options = new(Threads: 4, Spin: false);
 
     readonly SemaphoreSlim gate = new(1, 1);
     INet? net;
@@ -57,26 +61,26 @@ public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
         return Math.Clamp((int)Math.Round(100 / (1 + Math.Exp(-(a * cos + b)))), 1, 99);
     }
 
-    // Die Aktivierungen werden zur Laufzeit je Tensor quantisiert, also verschiebt jede
-    // Auffüllung eines Stapels die Werte aller seiner Texte — gleich lange Texte in einem
-    // Stapel halten die Auffüllung klein und die Einbettung nahe an der des Textes allein.
     public async Task<float[][]> Embed(IReadOnlyList<string> texts, CancellationToken ct = default)
     {
         var vectors = new float[texts.Count][];
         await gate.WaitAsync(ct);
         try
         {
-            bpe ??= await Bpe.Open(weights, TokenizerDir, ct);
-            net ??= await Open(ct);
-            var rows = new int[texts.Count][];
-            for (var i = 0; i < texts.Count; i++)
-            {
-                var body = bpe.Encode(texts[i]);
-                rows[i] = body.Length > MaxLen - 2 ? body[..(MaxLen - 2)] : body;
-            }
-            var order = Enumerable.Range(0, texts.Count).OrderBy(i => rows[i].Length).ToArray();
-            for (var at = 0; at < order.Length; at += Batch)
-                await Run(net, bpe, rows, order[at..Math.Min(at + Batch, order.Length)], vectors, ct);
+            var tokens = bpe ??= await Bpe.Open(weights, TokenizerDir, ct);
+            var model = net ??= await Open(ct);
+            if (runs == 1 || texts.Count == 1)
+                for (var i = 0; i < texts.Count; i++) vectors[i] = await Run(model, tokens, texts[i], ct);
+            else
+                try
+                {
+                    Parallel.For(0, texts.Count, new ParallelOptions { MaxDegreeOfParallelism = runs, CancellationToken = ct },
+                        i => vectors[i] = Run(model, tokens, texts[i], ct).GetAwaiter().GetResult());
+                }
+                catch (AggregateException e)
+                {
+                    ExceptionDispatchInfo.Throw(e.InnerExceptions[0]);
+                }
         }
         finally
         {
@@ -104,7 +108,9 @@ public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
         INet? opened = null;
         try
         {
-            opened = await weights.Open(ModelFile, Options, ct);
+            // Eight threads measured slower than four on an M1 Pro, and no spinning, as for the tagger.
+            // Texts run side by side get two each.
+            opened = await weights.Open(ModelFile, new NetOptions(Threads: runs == 1 ? 4 : 2, Spin: false), ct);
             var port = opened.Outputs.FirstOrDefault(p => p.Name == "embedding")
                 ?? throw new InvalidOperationException("Das Zuordnungsmodell liefert keinen Ausgang \"embedding\".");
             if (port.Shape[^1] != Width)
@@ -119,25 +125,19 @@ public sealed class Encoder(IWeights weights) : IEncoder, IDisposable
         }
     }
 
-    static async Task Run(INet net, Bpe bpe, int[][] rows, int[] batch, float[][] into, CancellationToken ct)
+    static async Task<float[]> Run(INet net, Bpe bpe, string text, CancellationToken ct)
     {
-        var n = batch.Length;
-        var len = 2 + batch.Max(i => rows[i].Length);
-        var ids = new long[n * len];
-        var mask = new long[n * len];
-        for (var r = 0; r < n; r++)
-        {
-            var body = rows[batch[r]];
-            var row = r * len;
-            ids[row] = bpe.Bos;
-            for (var k = 0; k < body.Length; k++) ids[row + k + 1] = body[k];
-            ids[row + body.Length + 1] = bpe.Eos;
-            for (var k = body.Length + 2; k < len; k++) ids[row + k] = bpe.Pad;
-            for (var k = 0; k < body.Length + 2; k++) mask[row + k] = 1;
-        }
+        var body = bpe.Encode(text);
+        if (body.Length > MaxLen - 2) body = body[..(MaxLen - 2)];
+        var len = body.Length + 2;
+        var ids = new long[len];
+        ids[0] = bpe.Bos;
+        for (var k = 0; k < body.Length; k++) ids[k + 1] = body[k];
+        ids[^1] = bpe.Eos;
+        var mask = new long[len];
+        Array.Fill(mask, 1L);
 
-        var results = await net.Run([Tensor.Of("input_ids", ids, n, len), Tensor.Of("attention_mask", mask, n, len)], ct);
-        var flat = results.Named("embedding").F;
-        for (var r = 0; r < n; r++) into[batch[r]] = flat[(r * Width)..((r + 1) * Width)];
+        var results = await net.Run([Tensor.Of("input_ids", ids, 1, len), Tensor.Of("attention_mask", mask, 1, len)], ct);
+        return results.Named("embedding").F;
     }
 }

@@ -28,7 +28,7 @@
       "lineNet": 7990,
       "vat": 1900,
       "gtin": "4009862310035",
-      "expectedIngredientId": "ing.spirituose",
+      "expectedProductId": "prod.spirituose",
       "expectedFactor": 700
     },
     {
@@ -43,7 +43,7 @@
       "lineNet": 7140,
       "vat": 1900,
       "gtin": "4003310011106",
-      "expectedIngredientId": "ing.wodka",
+      "expectedProductId": "prod.wodka",
       "expectedFactor": 1000
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 19840,
       "vat": 1900,
       "gtin": "4067700010208",
-      "expectedIngredientId": "ing.likoer",
+      "expectedProductId": "prod.likoer",
       "expectedFactor": 700
     }
   ]

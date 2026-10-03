@@ -12,7 +12,7 @@ public class MatcherExactTests
 
     static async Task<Suggestion?> Hit(RuleSet rs, string? supplier, InvoiceLine line)
     {
-        var cache = new FixedCache().Apart([.. rs.Ingredients.Values.Select(i => Wares.Normal(i.Name))]).Apart(Wares.Normal(line.Name));
+        var cache = new FixedCache().Apart([.. rs.Products.Values.Select(i => Wares.Normal(i.Name))]).Apart(Wares.Normal(line.Name));
         foreach (var m in rs.Mappings.Values)
             if (Wares.Wording(m) is { } w) cache.Apart(Wares.Normal(w));
         var matcher = new Matcher(Encoders.Shipped, cache);
@@ -54,7 +54,7 @@ public class MatcherExactTests
     [Fact]
     public async Task AGtinHitsWhoeverSellsIt()
     {
-        var rs = Seed(new ArticleMapping { Id = "map.gtin", Gtin = Gtin, IngredientId = "ing.korn", Confirmed = true });
+        var rs = Seed(new ArticleMapping { Id = "map.gtin", Gtin = Gtin, ProductId = "prod.korn", Confirmed = true });
         Assert.Equal("map.gtin", (await Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = Gtin }))?.Mapping.Id);
         Assert.Null(await Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = "4009999999999" }));
     }
@@ -66,7 +66,7 @@ public class MatcherExactTests
     [InlineData("Fassbier-Pils, Keg!")]
     public async Task AWordingHitsWhateverItsCaseAndSpacing(string name)
     {
-        var rs = Seed(new ArticleMapping { Id = "map.name", Name = "Fassbier Pils, Keg", IngredientId = "ing.bier.fass", Confirmed = true });
+        var rs = Seed(new ArticleMapping { Id = "map.name", Name = "Fassbier Pils, Keg", ProductId = "prod.bier.fass", Confirmed = true });
         Assert.Equal("map.name", (await Hit(rs, null, new InvoiceLine { Name = name }))?.Mapping.Id);
     }
 
@@ -76,16 +76,16 @@ public class MatcherExactTests
     [InlineData("")]
     public async Task AnotherWordingDoesNotHit(string name)
     {
-        var rs = Seed(new ArticleMapping { Id = "map.name", Name = "Fassbier Pils, Keg", IngredientId = "ing.bier.fass", Confirmed = true });
+        var rs = Seed(new ArticleMapping { Id = "map.name", Name = "Fassbier Pils, Keg", ProductId = "prod.bier.fass", Confirmed = true });
         Assert.Null(await Hit(rs, null, new InvoiceLine { Name = name }));
     }
 
     [Fact]
     public async Task TheArticleNumberOutranksTheGtinWhichOutranksTheWording()
     {
-        var byName = new ArticleMapping { Id = "map.a", Name = "Klarer", IngredientId = "ing.bier.flasche", Confirmed = true };
-        var byGtin = new ArticleMapping { Id = "map.b", Gtin = Gtin, IngredientId = "ing.bier.fass", Confirmed = true };
-        var byArticle = new ArticleMapping { Id = "map.c", SupplierName = Rheinland, SupplierArticleId = "K-1", IngredientId = "ing.korn", Confirmed = true };
+        var byName = new ArticleMapping { Id = "map.a", Name = "Klarer", ProductId = "prod.bier.flasche", Confirmed = true };
+        var byGtin = new ArticleMapping { Id = "map.b", Gtin = Gtin, ProductId = "prod.bier.fass", Confirmed = true };
+        var byArticle = new ArticleMapping { Id = "map.c", SupplierName = Rheinland, SupplierArticleId = "K-1", ProductId = "prod.korn", Confirmed = true };
         var rs = Seed(byName, byGtin, byArticle);
         Assert.Equal("map.c", (await Hit(rs, Rheinland, new InvoiceLine { Name = "Klarer", Gtin = Gtin, SellerArticleId = "K-1" }))?.Mapping.Id);
         Assert.Equal("map.b", (await Hit(rs, null, new InvoiceLine { Name = "Klarer", Gtin = Gtin, SellerArticleId = "K-1" }))?.Mapping.Id);
@@ -106,7 +106,7 @@ public class MatcherExactTests
         var rs = Seed(new ArticleMapping
         {
             Id = "map.guess", SupplierName = Rheinland, SupplierArticleId = "G-1",
-            Observed = "Pils Kiste 20 x 0,5 l", IngredientId = "ing.bier.fass", Confirmed = false,
+            Observed = "Pils Kiste 20 x 0,5 l", ProductId = "prod.bier.fass", Confirmed = false,
         });
         Assert.Equal("map.guess", (await Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0,5 l", SellerArticleId = "G-1" }))?.Mapping.Id);
         Assert.Equal("map.guess", (await Hit(rs, Rheinland, new InvoiceLine { Name = "Pils Kiste 20 x 0.5 1", SellerArticleId = "G-1" }))?.Mapping.Id);

@@ -9,11 +9,9 @@ public static class RuleCheck
     public static void Validate(RuleSet rs)
     {
         foreach (var (id, e) in rs.Categories) ValidateCategory(Keyed(id, e));
-        foreach (var (id, e) in rs.Ingredients) ValidateIngredient(rs, Keyed(id, e));
         foreach (var (id, e) in rs.Mappings) ValidateMapping(rs, Keyed(id, e));
         foreach (var (id, e) in rs.Products) ValidateProduct(rs, Keyed(id, e));
         ValidateNesting(rs);
-        ValidateScales(rs);
         foreach (var (id, e) in rs.YieldRules) ValidateYieldRule(rs, Keyed(id, e));
         HashSet<string> kennzahlen = [];
         foreach (var (id, e) in rs.Gewerbezweige)
@@ -22,7 +20,7 @@ public static class RuleCheck
         foreach (var (id, e) in rs.Templates) ValidateTemplate(rs, Keyed(id, e));
     }
 
-    // A mapping refers to an ingredient and nothing refers to it, so one added to a valid set
+    // A mapping refers to a product and nothing refers to it, so one added to a valid set
     // needs no more than its own check.
     public static void Validate(RuleSet rs, ArticleMapping mapping) => ValidateMapping(rs, Keyed(mapping.Id, mapping));
 
@@ -31,21 +29,43 @@ public static class RuleCheck
     {
         Entity.Category =>
         [
-            .. Names(rs.Ingredients.Values.Where(i => i.CategoryId == id).Select(i => "Zutat \u201e" + i.Name + "\u201c")),
+            .. Names(rs.Products.Values.Where(p => p.CategoryId == id).Select(p => "Produkt \u201e" + p.Name + "\u201c")),
             .. Names(rs.YieldRules.Values.Where(y => y.CategoryId == id).Select(y => "Ausbeuteregel \u201e" + y.Name + "\u201c")),
-        ],
-        Entity.Ingredient =>
-        [
-            .. Names(rs.Mappings.Values.Where(m => m.IngredientId == id).Select(m => "Zuordnung \u201e" + (m.Name ?? m.SupplierArticleId ?? m.Gtin ?? m.Id) + "\u201c")),
-            .. Names(rs.Products.Values.Where(p => p.Recipe.Exists(l => l.IngredientId == id)).Select(p => "Produkt \u201e" + p.Name + "\u201c")),
-            .. Names(rs.YieldRules.Values.Where(y => y.IngredientId == id).Select(y => "Ausbeuteregel \u201e" + y.Name + "\u201c")),
         ],
         Entity.Product =>
         [
-            .. Names(rs.Products.Values.Where(p => p.Recipe.Exists(l => l.ProductId == id)).Select(p => "Produkt \u201e" + p.Name + "\u201c")),
+            .. CountedIn(rs, id),
+            .. Names(rs.YieldRules.Values.Where(y => y.ProductId == id).Select(y => "Ausbeuteregel \u201e" + y.Name + "\u201c")),
         ],
         _ => [],
     };
+
+    // Names of the mappings and recipes that count in this product's unit.
+    public static List<string> CountedIn(RuleSet rs, string id) =>
+    [
+        .. Names(Counting(rs, id).Where(c => c.Kind == Entity.Mapping).Select(c => c.Name)),
+        .. Names(Counting(rs, id).Where(c => c.Kind == Entity.Product).Select(c => c.Name)),
+    ];
+
+    static IEnumerable<(Entity Kind, string Id, string Name)> Counting(RuleSet rs, string id) =>
+        rs.Mappings.Values.Where(m => m.ProductId == id)
+            .Select(m => (Entity.Mapping, m.Id, "Zuordnung \u201e" + (m.Name ?? m.SupplierArticleId ?? m.Gtin ?? m.Id) + "\u201c"))
+            .Concat(rs.Products.Values.Where(p => p.Id != id && p.Recipe.Exists(l => l.PartId == id))
+                .Select(p => (Entity.Product, p.Id, "Produkt \u201e" + p.Name + "\u201c")));
+
+    // A product's unit is what its mappings' factors and its recipe lines count in: it changes only
+    // together with each of them, else they would read their numbers in another unit.
+    public static void Rescaled(RuleSet before, RuleSet after, IEnumerable<IRuleEntity> written)
+    {
+        var with = written.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);
+        foreach (var p in written.OfType<Product>())
+        {
+            if (!before.Products.TryGetValue(p.Id, out var was) || was.Unit == p.Unit) continue;
+            var left = Counting(after, p.Id).Where(c => !with.Contains(c.Id)).Select(c => c.Name).ToList();
+            if (left.Count > 0)
+                throw new RulesException($"Produkt \"{p.Name}\": die Einheit bleibt, solange es verwendet wird von {string.Join(", ", Names(left))}");
+        }
+    }
 
     static IEnumerable<string> Names(IEnumerable<string> names) => names.OrderBy(n => n, StringComparer.Ordinal);
 
@@ -76,47 +96,35 @@ public static class RuleCheck
         return e;
     }
 
-    static void ValidateIngredient(RuleSet rs, Ingredient e)
-    {
-        if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Zutat: Name darf nicht leer sein");
-        if (e.CategoryId != "" && !rs.Categories.ContainsKey(e.CategoryId))
-            throw new RulesException($"Zutat \"{e.Name}\": Kategorie \"{e.CategoryId}\" existiert nicht");
-        if (e.Piece is { } p && (p.Amount <= 0 || p.Unit == Unit.Piece))
-            throw new RulesException($"Zutat \"{e.Name}\": das Stückgewicht muss größer als 0 sein und in g oder ml gelten");
-    }
-
     static void ValidateMapping(RuleSet rs, ArticleMapping e)
     {
         if (string.IsNullOrWhiteSpace(e.SupplierArticleId) && string.IsNullOrWhiteSpace(e.Gtin) && ArticleName.Canonical(e.Name) == "")
             throw new RulesException("Zuordnung: Artikelnummer, GTIN oder Namensmuster erforderlich");
         if (e.Factor is <= 0) throw new RulesException("Zuordnung: Faktor muss größer als 0 sein");
-        if (!rs.Ingredients.ContainsKey(e.IngredientId))
-            throw new RulesException($"Zuordnung: Zutat \"{e.IngredientId}\" existiert nicht");
+        if (!rs.Products.ContainsKey(e.ProductId))
+            throw new RulesException($"Zuordnung: Produkt \"{e.ProductId}\" existiert nicht");
     }
 
     static void ValidateProduct(RuleSet rs, Product e)
     {
         if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Produkt: Name darf nicht leer sein");
-        if (e.Recipe is not { Count: > 0 })
-            throw new RulesException($"Produkt \"{e.Name}\": Rezept darf nicht leer sein");
+        if (Scale.Of(e) is not { } unit)
+            throw new RulesException($"Produkt \"{e.Name}\": \"{e.Unit}\" ist keine Einheit, in der es sich zählen lässt");
+        if (e.Batch <= 0) throw new RulesException($"Produkt \"{e.Name}\": ein Ansatz muss mehr als 0 {Format.UnitName(unit)} ergeben");
+        if (!string.IsNullOrEmpty(e.CategoryId) && !rs.Categories.ContainsKey(e.CategoryId))
+            throw new RulesException($"Produkt \"{e.Name}\": Kategorie \"{e.CategoryId}\" existiert nicht");
+        if (e.Piece is { } p && (p.Amount <= 0 || p.Unit == Unit.Piece))
+            throw new RulesException($"Produkt \"{e.Name}\": das Stückgewicht muss größer als 0 sein und in g oder ml gelten");
         foreach (var l in e.Recipe)
         {
-            if (l.ProductId is { } part)
-            {
-                if (!rs.Products.ContainsKey(part))
-                    throw new RulesException($"Produkt \"{e.Name}\": Teilrezept \"{part}\" existiert nicht");
-                if (l.Amount <= 0)
-                    throw new RulesException($"Produkt \"{e.Name}\": Portionen des Teilrezepts \"{part}\" müssen größer als 0 sein");
-                if (Units.Lookup(l.Unit) is not { Base: Unit.Piece })
-                    throw new RulesException($"Produkt \"{e.Name}\": Teilrezept \"{part}\" zählt in Portionen, nicht in \"{l.Unit}\"");
-                continue;
-            }
-            if (!rs.Ingredients.ContainsKey(l.IngredientId))
-                throw new RulesException($"Produkt \"{e.Name}\": Zutat \"{l.IngredientId}\" existiert nicht");
+            if (!rs.Products.TryGetValue(l.PartId, out var part))
+                throw new RulesException($"Produkt \"{e.Name}\": Bestandteil \"{l.PartId}\" existiert nicht");
             if (l.Amount <= 0)
-                throw new RulesException($"Produkt \"{e.Name}\": Menge der Zutat \"{l.IngredientId}\" muss größer als 0 sein");
-            if (Units.Lookup(l.Unit) is null)
-                throw new RulesException($"Produkt \"{e.Name}\": Zutat \"{l.IngredientId}\" hat die unbekannte Einheit \"{l.Unit}\"");
+                throw new RulesException($"Produkt \"{e.Name}\": Menge von \"{part.Name}\" muss größer als 0 sein");
+            if (Units.Lookup(l.Unit) is not { Container: false } u)
+                throw new RulesException($"Produkt \"{e.Name}\": \"{part.Name}\" hat die unbekannte Einheit \"{l.Unit}\"");
+            if (Scale.Of(part) is { } partUnit && u.Base != partUnit)
+                throw new RulesException($"Produkt \"{e.Name}\": \"{part.Name}\" zählt in {Format.UnitName(partUnit)}, nicht in {u.Name}");
         }
     }
 
@@ -130,47 +138,23 @@ public static class RuleCheck
     {
         if (done.Contains(id) || !rs.Products.TryGetValue(id, out var p)) return;
         if (!open.Add(id)) throw new RulesException($"Produkt \"{p.Name}\": das Rezept enthält sich selbst");
-        foreach (var l in p.Recipe)
-            if (l.ProductId is { } part) Descend(rs, part, open, done);
+        foreach (var l in p.Recipe) Descend(rs, l.PartId, open, done);
         open.Remove(id);
         done.Add(id);
     }
-
-    // Die Rezeptur ist die einzige Stelle, an der eine Zutat eine Einheit bekommt. Zwei
-    // Rezepte dürfen sie deshalb nicht verschieden messen: Pommes in Stück und Pommes in
-    // Gramm sind zwei Zutaten, keine.
-    static void ValidateScales(RuleSet rs)
-    {
-        var seen = new Dictionary<string, (Unit Base, string Product)>(StringComparer.Ordinal);
-        foreach (var id in rs.Products.Keys.OrderBy(k => k, StringComparer.Ordinal))
-        {
-            var p = rs.Products[id];
-            foreach (var l in p.Recipe)
-            {
-                if (l.ProductId is not null || Units.Lookup(l.Unit) is not { } u) continue;
-                if (!seen.TryGetValue(l.IngredientId, out var first)) seen[l.IngredientId] = (u.Base, p.Name);
-                else if (first.Base != u.Base)
-                    throw new RulesException(
-                        $"Zutat \"{Name(rs, l.IngredientId)}\": \"{first.Product}\" rechnet in {Format.UnitName(first.Base)}, "
-                        + $"\"{p.Name}\" in {Format.UnitName(u.Base)}");
-            }
-        }
-    }
-
-    static string Name(RuleSet rs, string id) => rs.Ingredients.TryGetValue(id, out var i) ? i.Name : id;
 
     static void ValidateYieldRule(RuleSet rs, YieldRule e)
     {
         if (string.IsNullOrWhiteSpace(e.Name)) throw new RulesException("Ausbeuteregel: Name darf nicht leer sein");
         var category = e.CategoryId ?? "";
-        var ingredient = e.IngredientId ?? "";
-        if (category == "" && ingredient == "")
-            throw new RulesException("Ausbeuteregel: Kategorie oder Zutat erforderlich");
+        var product = e.ProductId ?? "";
+        if (category == "" && product == "")
+            throw new RulesException("Ausbeuteregel: Kategorie oder Produkt erforderlich");
         if (e.Default && rs.YieldRules.Values.FirstOrDefault(o => o.Id != e.Id && o.Default
-                && (o.IngredientId ?? "") == ingredient && (ingredient != "" || (o.CategoryId ?? "") == category)) is { } other)
+                && (o.ProductId ?? "") == product && (product != "" || (o.CategoryId ?? "") == category)) is { } other)
             throw new RulesException($"Ausbeuteregel \"{e.Name}\": Standard ist bereits \"{other.Name}\"");
-        if (ingredient != "" && !rs.Ingredients.ContainsKey(ingredient))
-            throw new RulesException($"Ausbeuteregel: Zutat \"{ingredient}\" existiert nicht");
+        if (product != "" && !rs.Products.ContainsKey(product))
+            throw new RulesException($"Ausbeuteregel: Produkt \"{product}\" existiert nicht");
         if (category != "" && !rs.Categories.ContainsKey(category))
             throw new RulesException($"Ausbeuteregel: Kategorie \"{category}\" existiert nicht");
         if (e.Deduction is < 0 or > Bp.Full)

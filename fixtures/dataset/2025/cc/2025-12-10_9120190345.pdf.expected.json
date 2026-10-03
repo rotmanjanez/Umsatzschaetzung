@@ -33,7 +33,7 @@
       "lineNet": 7250,
       "vat": 700,
       "gtin": "4056489011231",
-      "expectedIngredientId": "ing.pommes.frites",
+      "expectedProductId": "prod.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -48,7 +48,7 @@
       "lineNet": 3160,
       "vat": 700,
       "gtin": "4056489011248",
-      "expectedIngredientId": "ing.pommes.frites",
+      "expectedProductId": "prod.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -63,7 +63,7 @@
       "lineNet": 3435,
       "vat": 700,
       "gtin": "4062300020351",
-      "expectedIngredientId": "ing.reis",
+      "expectedProductId": "prod.reis",
       "expectedFactor": 5000
     },
     {
@@ -78,7 +78,7 @@
       "lineNet": 1290,
       "vat": 700,
       "gtin": "4062300020368",
-      "expectedIngredientId": "ing.pasta",
+      "expectedProductId": "prod.pasta",
       "expectedFactor": 5000
     },
     {
@@ -93,7 +93,7 @@
       "lineNet": 7020,
       "vat": 700,
       "gtin": "4062300040991",
-      "expectedIngredientId": "ing.pflanzenoel",
+      "expectedProductId": "prod.pflanzenoel",
       "expectedFactor": 10000
     },
     {
@@ -108,7 +108,7 @@
       "lineNet": 1806,
       "vat": 700,
       "gtin": "4062300030510",
-      "expectedIngredientId": "ing.zucker",
+      "expectedProductId": "prod.zucker",
       "expectedFactor": 1000
     },
     {
@@ -123,7 +123,7 @@
       "lineNet": 1440,
       "vat": 700,
       "gtin": "4062300052029",
-      "expectedIngredientId": "ing.mozzarella",
+      "expectedProductId": "prod.mozzarella",
       "expectedFactor": 1000
     },
     {
@@ -138,7 +138,7 @@
       "lineNet": 3980,
       "vat": 1900,
       "gtin": "4062300081001",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -153,7 +153,7 @@
       "lineNet": 1450,
       "vat": 1900,
       "gtin": "4062300081100",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

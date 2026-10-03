@@ -17,7 +17,6 @@ public static class Format
     public static string EntityName(Entity e) => e switch
     {
         Entity.Category => "Kategorie",
-        Entity.Ingredient => "Zutat",
         Entity.Mapping => "Zuordnung",
         Entity.Product => "Produkt",
         Entity.Gewerbezweig => "Gewerbekennzahl",

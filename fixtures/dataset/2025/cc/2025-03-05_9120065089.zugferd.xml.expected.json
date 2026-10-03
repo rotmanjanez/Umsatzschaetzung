@@ -30,7 +30,7 @@
       "priceBaseQty": 1000,
       "lineNet": 8376,
       "vat": 700,
-      "expectedIngredientId": "ing.pommes.frites",
+      "expectedProductId": "prod.pommes.frites",
       "expectedFactor": 10000
     },
     {
@@ -42,7 +42,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2290,
       "vat": 700,
-      "expectedIngredientId": "ing.reis",
+      "expectedProductId": "prod.reis",
       "expectedFactor": 5000
     },
     {
@@ -54,7 +54,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3870,
       "vat": 700,
-      "expectedIngredientId": "ing.pasta",
+      "expectedProductId": "prod.pasta",
       "expectedFactor": 5000
     },
     {
@@ -66,7 +66,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1701,
       "vat": 700,
-      "expectedIngredientId": "ing.paniermehl",
+      "expectedProductId": "prod.paniermehl",
       "expectedFactor": 1000
     },
     {
@@ -78,7 +78,7 @@
       "priceBaseQty": 1000,
       "lineNet": 8760,
       "vat": 700,
-      "expectedIngredientId": "ing.pflanzenoel",
+      "expectedProductId": "prod.pflanzenoel",
       "expectedFactor": 10000
     },
     {
@@ -90,7 +90,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2180,
       "vat": 700,
-      "expectedIngredientId": "ing.mehl",
+      "expectedProductId": "prod.mehl",
       "expectedFactor": 10000
     },
     {
@@ -102,7 +102,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2193,
       "vat": 700,
-      "expectedIngredientId": "ing.zucker",
+      "expectedProductId": "prod.zucker",
       "expectedFactor": 1000
     },
     {
@@ -114,7 +114,7 @@
       "priceBaseQty": 1000,
       "lineNet": 245,
       "vat": 700,
-      "expectedIngredientId": "ing.gewuerzmischung",
+      "expectedProductId": "prod.gewuerzmischung",
       "expectedFactor": 500
     },
     {
@@ -126,7 +126,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4450,
       "vat": 700,
-      "expectedIngredientId": "ing.schnittkaese",
+      "expectedProductId": "prod.schnittkaese",
       "expectedFactor": 1000
     },
     {
@@ -138,7 +138,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1440,
       "vat": 700,
-      "expectedIngredientId": "ing.mozzarella",
+      "expectedProductId": "prod.mozzarella",
       "expectedFactor": 1000
     },
     {
@@ -150,7 +150,7 @@
       "priceBaseQty": 1000,
       "lineNet": 330,
       "vat": 700,
-      "expectedIngredientId": "ing.toastbrot",
+      "expectedProductId": "prod.toastbrot",
       "expectedFactor": 1000
     },
     {
@@ -162,7 +162,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1990,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -174,7 +174,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1450,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -186,7 +186,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1380,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

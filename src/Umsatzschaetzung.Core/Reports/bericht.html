@@ -181,7 +181,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         </tbody>
       </table>
       {% endfor %}
-      <p class="note">Wareneinsatz je Produkt aus Portionen (Anhang D) und Einsatz je Portion nach Rezeptur (Anhang B) und Wareneinsatz der Zutaten (Anhang C), Nettopreis aus Bruttopreis und USt (Anhang B). * geschätzt: Wareneinsatz nach den angesetzten Portionen und Rezepturen, der Rohgewinnaufschlagsatz daraus, in der Summe nach dem Wareneinsatz gewichtet.</p>
+      <p class="note">Wareneinsatz je Produkt aus Portionen (Anhang D) und Einsatz je Portion nach Rezeptur (Anhang B) und Wareneinsatz je Ware (Anhang C), Nettopreis aus Bruttopreis und USt (Anhang B). * geschätzt: Wareneinsatz nach den angesetzten Portionen und Rezepturen, der Rohgewinnaufschlagsatz daraus, in der Summe nach dem Wareneinsatz gewichtet.</p>
     </section>
 
     <section>
@@ -242,7 +242,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% for p in report.products %}
           <tr>
             <td>{{ p.name }}</td>
-            <td class="list">{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.ingredients[l.ingredientId].name }}</span>{% endfor %}</td>
+            <td class="list">{% if rules.products[p.productId].recipe %}{% for l in rules.products[p.productId].recipe %}<span>{{ l.amount | group }}{% if l.unit %} {{ l.unit | unitname }}{% endif %} {{ rules.products[l.partId].name }}</span>{% endfor %}{% if rules.products[p.productId].batch == "1" %}{% else %}<span>ergibt {{ rules.products[p.productId].batch | group }} {{ rules.products[p.productId].unit | unitname }}</span>{% endif %}{% else %}<span>wie eingekauft</span>{% endif %}</td>
             <td>{{ p.sparte | sparte }}</td>
             <td class="num">{{ p.costPerPortion | cents }}</td>
             <td class="num">{% if not p.priceMissing %}{{ p.grossPrice | cents }}{% endif %}</td>
@@ -252,16 +252,42 @@ ol.warnings li { margin-bottom: 0.3em; }
           {% endfor %}
         </tbody>
       </table>
+      {% if routed %}
+
+      <h2>Portionen je Herkunft</h2>
+      <table class="lines">
+        <thead>
+          <tr>
+            <th scope="col">Produkt</th>
+            <th scope="col" class="wrap">Je Portion</th>
+            <th scope="col" class="num">Portionen</th>
+            <th scope="col" class="num">Einsatz je Portion</th>
+          </tr>
+        </thead>
+        {% for p in routed %}
+        <tbody>
+          {% for w in p.routes %}
+          <tr>
+            <td class="ref">{{ p.name }}</td>
+            <td class="wrap list">{% for l in w.parts %}<span>{{ l.perPortion | qty:l.unit }} {{ l.name }}</span>{% endfor %}</td>
+            <td class="num">{{ w.portions | group }}</td>
+            <td class="num">{{ w.costPerPortion | cents }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        {% endfor %}
+      </table>
+      {% endif %}
     </section>
 
     <section>
       <h1>Anhang C: Ausbeute</h1>
-      {% if report.ingredients %}
+      {% if report.supply %}
       {% if case.inventory %}
       <table>
         <thead>
           <tr>
-            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="wide">Ware</th>
             <th scope="col" class="num">Anfangsbestand</th>
             <th scope="col" class="num">Einkauf</th>
             <th scope="col" class="num">Endbestand</th>
@@ -272,7 +298,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </thead>
         <tbody>
-          {% for i in report.ingredients %}
+          {% for i in report.supply %}
           <tr>
             <td>{{ i.name }}</td>
             <td class="num">{{ i.opening | qty:i.unit }}</td>
@@ -290,7 +316,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="wide">Ware</th>
             <th scope="col" class="num">Einkauf</th>
             <th scope="col" class="num">Wareneinsatz</th>
             <th scope="col" class="num">Ausbeute</th>
@@ -298,7 +324,7 @@ ol.warnings li { margin-bottom: 0.3em; }
           </tr>
         </thead>
         <tbody>
-          {% for i in report.ingredients %}
+          {% for i in report.supply %}
           <tr>
             <td>{{ i.name }}</td>
             <td class="num">{{ i.bought | qty:i.unit }}</td>
@@ -311,7 +337,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       </table>
       {% endif %}
       {% else %}
-      <p class="empty">Keine Zutaten im Regelwerk.</p>
+      <p class="empty">Keine Ware eingekauft.</p>
       {% endif %}
 
       <h2>Ertragssätze</h2>
@@ -319,14 +345,14 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="wide">Ware</th>
             <th scope="col">Ertragsregel</th>
             <th scope="col" class="num">Abzug</th>
             <th scope="col" class="num">Ausbeute</th>
           </tr>
         </thead>
         <tbody>
-          {% for i in report.ingredients %}
+          {% for i in report.supply %}
           {% if i.yield %}
           <tr>
             <td>{{ i.name }}</td>
@@ -344,19 +370,19 @@ ol.warnings li { margin-bottom: 0.3em; }
     </section>
 
     <section>
-      <h1>Anhang D: Portionen je Zutat</h1>
-      {% if report.ingredients %}
+      <h1>Anhang D: Portionen je Ware</h1>
+      {% if report.supply %}
       <table class="lines">
         <thead>
           <tr>
-            <th scope="col">Zutat</th>
+            <th scope="col">Ware</th>
             <th scope="col" class="wrap">Produkt</th>
             <th scope="col" class="num">Portionen</th>
             <th scope="col" class="num">Je Portion</th>
             <th scope="col" class="num">Menge</th>
           </tr>
         </thead>
-        {% for i in report.ingredients %}
+        {% for i in report.supply %}
         <tbody>
           <tr>
             <td class="ref">{{ i.name }}</td>
@@ -365,7 +391,7 @@ ol.warnings li { margin-bottom: 0.3em; }
             <td></td>
             <td class="num">{{ i.sellable | qty:i.unit }}</td>
           </tr>
-          {% for p in i.products %}
+          {% for p in i.usedBy %}
           <tr>
             <td class="ref">{{ i.name }}</td>
             <td class="wrap">{{ p.name }}</td>
@@ -385,7 +411,7 @@ ol.warnings li { margin-bottom: 0.3em; }
         {% endfor %}
       </table>
       {% else %}
-      <p class="empty">Keine Zutaten im Regelwerk.</p>
+      <p class="empty">Keine Ware eingekauft.</p>
       {% endif %}
     </section>
 
@@ -435,7 +461,7 @@ ol.warnings li { margin-bottom: 0.3em; }
       <table>
         <thead>
           <tr>
-            <th scope="col" class="wide">Zutat</th>
+            <th scope="col" class="wide">Ware</th>
             <th scope="col" class="num">Rest</th>
             <th scope="col">Satz</th>
             <th scope="col" class="num">Einsatz</th>

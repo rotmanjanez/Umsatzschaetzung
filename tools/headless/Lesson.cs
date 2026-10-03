@@ -48,15 +48,14 @@ public sealed class Lesson(string store, string cases, string embedded)
     }
 
     // Each lesson finds every wording its steps ask about embedded as the guide embedded it, and
-    // every line of its case, each embedded alone as a line is asked about, so it opens no model in
-    // the browser.
+    // every line of its case, so it opens no model in the browser.
     public async Task Finish(IEncoder encoder)
     {
         var names = kept.SelectMany(to => Directory.EnumerateFiles(Path.Combine(to, "cases"), "*.db")).SelectMany(Names)
             .Select(Wares.Normal).Distinct(StringComparer.Ordinal).ToList();
         var known = Embedded.Read(encoder.Model, names);
-        foreach (var name in names.Where(n => !known.ContainsKey(n)))
-            Embedded.Write(encoder.Model, [(name, (await encoder.Embed([name]))[0])]);
+        var missing = names.Where(n => !known.ContainsKey(n)).ToList();
+        if (missing.Count > 0) Embedded.Write(encoder.Model, [.. missing.Zip(await encoder.Embed(missing))]);
         foreach (var to in kept)
         {
             Directory.CreateDirectory(Path.Combine(to, "embeddings"));

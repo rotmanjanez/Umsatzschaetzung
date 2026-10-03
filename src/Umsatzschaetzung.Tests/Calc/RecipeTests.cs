@@ -12,12 +12,12 @@ public class RecipeTests
     static readonly RuleSet Rules = TestData.Seed();
     static readonly Report Catalog = Calculation.Run(Vorlage.Load(), Rules);
 
-    static Case Adjusted(string ingredientId, long amount)
+    static Case Adjusted(string partId, long amount)
     {
         var c = Vorlage.Load();
         var cp = c.Products.Single(p => p.ProductId == Flasche);
-        cp.Recipe = [new RecipeLine { IngredientId = ingredientId, Amount = amount, Unit = "MLT" }];
-        cp.RecipeBasis = Recipes.Basis(Rules, Rules.Products[Flasche]);
+        cp.Recipe = [new PartLine { PartId = partId, Amount = amount, Unit = "MLT" }];
+        cp.RecipeBasis = Recipes.Basis(Rules.Products[Flasche]);
         return c;
     }
 
@@ -26,20 +26,20 @@ public class RecipeTests
     [Fact]
     public void ALargerAmountYieldsFewerPortions()
     {
-        var r = Calculation.Run(Adjusted("ing.bier.flasche", 500), Rules);
+        var r = Calculation.Run(Adjusted("prod.bier.flasche", 500), Rules);
 
         Assert.True(Row(Catalog).Portions > 0);
         Assert.True(Row(r).Portions < Row(Catalog).Portions);
     }
 
     [Fact]
-    public void ASubstituteIngredientIsConsumedInsteadOfTheCatalogOne()
+    public void ASubstitutePartIsConsumedInsteadOfTheCatalogOne()
     {
-        var r = Calculation.Run(Adjusted("ing.bier.fass", 300), Rules);
+        var r = Calculation.Run(Adjusted("prod.bier.fass", 300), Rules);
 
-        Assert.Contains(Catalog.Ingredients, i => i.IngredientId == "ing.bier.flasche" && i.Used > 0);
-        Assert.DoesNotContain(r.Ingredients, i => i.IngredientId == "ing.bier.flasche");
-        Assert.Contains(r.Unused, l => l.IngredientId == "ing.bier.flasche");
+        Assert.Contains(Catalog.Supply, i => i.ProductId == "prod.bier.flasche" && i.Used > 0);
+        Assert.DoesNotContain(r.Supply, i => i.ProductId == "prod.bier.flasche");
+        Assert.Contains(r.Unused, l => l.ProductId == "prod.bier.flasche");
         Assert.Equal(r.Products.Single(p => p.ProductId == "prod.pils.03").CostPerPortion, Row(r).CostPerPortion);
         Assert.NotEqual(Row(Catalog).CostPerPortion, Row(r).CostPerPortion);
     }
@@ -58,12 +58,12 @@ public class RecipeTests
         var rules = TestData.Seed();
         var before = rules.Products[Flasche].Recipe;
 
-        var effective = Recipes.Effective(Adjusted("ing.bier.fass", 330), rules);
+        var effective = Recipes.Effective(Adjusted("prod.bier.fass", 330), rules);
 
         Assert.NotSame(rules, effective);
         Assert.Same(before, rules.Products[Flasche].Recipe);
-        Assert.Equal("ing.bier.flasche", Assert.Single(rules.Products[Flasche].Recipe).IngredientId);
-        Assert.Equal("ing.bier.fass", Assert.Single(effective.Products[Flasche].Recipe).IngredientId);
+        Assert.Equal("prod.bier.flasche", Assert.Single(rules.Products[Flasche].Recipe).PartId);
+        Assert.Equal("prod.bier.fass", Assert.Single(effective.Products[Flasche].Recipe).PartId);
         Assert.Same(rules.Products["prod.korn.2cl"], effective.Products["prod.korn.2cl"]);
     }
 
@@ -71,7 +71,7 @@ public class RecipeTests
     public void AChangedCatalogProductMakesTheOverrideStale()
     {
         var rules = TestData.Seed();
-        var cp = Adjusted("ing.bier.flasche", 500).Products.Single(p => p.ProductId == Flasche);
+        var cp = Adjusted("prod.bier.flasche", 500).Products.Single(p => p.ProductId == Flasche);
         Assert.False(Recipes.Stale(cp, rules));
 
         rules.Products[Flasche].Recipe[0].Amount += 1;
@@ -82,7 +82,7 @@ public class RecipeTests
     [Fact]
     public void TheReportPrintsTheCasesRecipe()
     {
-        var c = Adjusted("ing.bier.flasche", 500);
+        var c = Adjusted("prod.bier.flasche", 500);
 
         var html = Html.Render(c, Rules, Calculation.Run(c, Rules), null);
 

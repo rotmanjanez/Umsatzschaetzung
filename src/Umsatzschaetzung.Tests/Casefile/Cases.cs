@@ -29,9 +29,9 @@ static class Cases
         c.Declared = [new() { Vat = 1900, Net = 733595 }, new() { Vat = 0, Net = 0 }, new() { Vat = 700, Net = 12 }];
         c.Inventory =
         [
-            new() { IngredientId = "ing.bier.fass", Opening = 50_000, Closing = 100_000, Unit = "LTR" },
-            new() { IngredientId = "ing.korn", Opening = 0, Closing = -1, Unit = "MLT" },
-            new() { IngredientId = "ing.bier.fass", Opening = 1, Closing = 2, Unit = "MLT" },
+            new() { ProductId = "prod.bier.fass", Opening = 50_000, Closing = 100_000, Unit = "LTR" },
+            new() { ProductId = "prod.korn", Opening = 0, Closing = -1, Unit = "MLT" },
+            new() { ProductId = "prod.bier.fass", Opening = 1, Closing = 2, Unit = "MLT" },
         ];
         c.Products =
         [
@@ -40,16 +40,16 @@ static class Cases
             new()
             {
                 ProductId = "prod.radler", GrossPrice = 390, Vat = 1900, RecipeBasis = 17,
-                Recipe = [new() { IngredientId = "ing.bier.fass", Amount = 250, Unit = "MLT" }, new() { IngredientId = "ing.limo", Amount = 1, Unit = "LTR" }],
+                Recipe = [new() { PartId = "prod.bier.fass", Amount = 250, Unit = "MLT" }, new() { PartId = "prod.limo", Amount = 1, Unit = "LTR" }],
             },
         ];
         c.Yields =
         [
-            new() { IngredientId = "ing.bier.fass", YieldRuleId = "yr.b" },
+            new() { ProductId = "prod.bier.fass", YieldRuleId = "yr.b" },
             new() { CategoryId = "cat.bier", YieldRuleId = "yr.a" },
         ];
         c.Pinned = [new() { ProductId = "prod.pils.05", Portions = 1200, Reason = "laut Kassenbuch" }, new() { ProductId = "prod.x", Portions = 0, Reason = "" }];
-        c.NoRevenue = ["ing.spuelmittel", "ing.muellbeutel"];
+        c.NoRevenue = ["prod.spuelmittel", "prod.muellbeutel"];
         c.Invoices =
         [
             new()
@@ -75,7 +75,7 @@ static class Cases
         c.Mappings = new()
         {
             ["map-pils"] = new() { Id = "map-pils", SupplierName = "Rheinland", SupplierArticleId = "31090", Gtin = "4001234567891", Name = "Pils Fass",
-                Observed = "Pils Fass 50 l", UnitCode = "XKG", IngredientId = "ing.bier.fass", Factor = 50000 },
+                Observed = "Pils Fass 50 l", UnitCode = "XKG", ProductId = "prod.bier.fass", Factor = 50000 },
         };
         return c;
     }
@@ -105,14 +105,14 @@ static class Cases
             (expected.Taxpayer.Name, expected.Taxpayer.TaxNumber, expected.Taxpayer.PabNumber, expected.Taxpayer.Gewerbe),
             (actual.Taxpayer.Name, actual.Taxpayer.TaxNumber, actual.Taxpayer.PabNumber, actual.Taxpayer.Gewerbe));
         Assert.Equal(expected.Declared.Select(d => (d.Vat, d.Net)), actual.Declared.Select(d => (d.Vat, d.Net)));
-        Assert.Equal(expected.Inventory.Select(e => (e.IngredientId, e.Opening, e.Closing, e.Unit)),
-            actual.Inventory.Select(e => (e.IngredientId, e.Opening, e.Closing, e.Unit)));
+        Assert.Equal(expected.Inventory.Select(e => (e.ProductId, e.Opening, e.Closing, e.Unit)),
+            actual.Inventory.Select(e => (e.ProductId, e.Opening, e.Closing, e.Unit)));
         Assert.Equal(expected.Products.Select(p => (p.ProductId, p.GrossPrice, p.Vat, p.RecipeBasis)),
             actual.Products.Select(p => (p.ProductId, p.GrossPrice, p.Vat, p.RecipeBasis)));
-        Assert.Equal(expected.Products.Select(p => p.Recipe?.Select(l => (l.IngredientId, l.Amount, l.Unit)).ToList()),
-            actual.Products.Select(p => p.Recipe?.Select(l => (l.IngredientId, l.Amount, l.Unit)).ToList()));
-        Assert.Equal(expected.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)),
-            actual.Yields.Select(y => (y.IngredientId, y.CategoryId, y.YieldRuleId)));
+        Assert.Equal(expected.Products.Select(p => p.Recipe?.Select(l => (l.PartId, l.Amount, l.Unit)).ToList()),
+            actual.Products.Select(p => p.Recipe?.Select(l => (l.PartId, l.Amount, l.Unit)).ToList()));
+        Assert.Equal(expected.Yields.Select(y => (y.ProductId, y.CategoryId, y.YieldRuleId)),
+            actual.Yields.Select(y => (y.ProductId, y.CategoryId, y.YieldRuleId)));
         Assert.Equal(expected.NoRevenue.Order(StringComparer.Ordinal), actual.NoRevenue);
         Assert.Equal(
             expected.Mappings.OrderBy(m => m.Key, StringComparer.Ordinal).Select(m => (m.Key, Json.Serialize(m.Value))),

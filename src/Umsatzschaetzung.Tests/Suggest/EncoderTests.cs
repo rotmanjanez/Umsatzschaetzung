@@ -16,9 +16,7 @@ public class EncoderTests(EncoderFixture f) : IClassFixture<EncoderFixture>
     // int8 kernels are not bit-portable across CPUs and ORT versions.
     const double ParityCosine = 0.98;
 
-    // A drift in the tokenizer or the graph costs accuracy without ever crashing. Each
-    // text is embedded alone, as the fixture was: inside a padded batch the per-tensor
-    // activation scales move it by about 0.988.
+    // A drift in the tokenizer or the graph costs accuracy without ever crashing.
     [Fact]
     public async Task TheVectorsTheWeightsWereExportedWithAreReproduced()
     {
@@ -55,20 +53,80 @@ public class EncoderTests(EncoderFixture f) : IClassFixture<EncoderFixture>
         Assert.Equal(v[0], v[1]);
     }
 
-    // Texts are batched by length and in batches of 64; each vector still comes back at the
-    // position of its text.
+    // The graph's activation scales span its whole input, so a text batched with others moved
+    // by up to 0.013 in cosine, enough to flip a confidence across the threshold.
     [Fact]
-    public async Task VectorsComeBackInTheOrderOfTheirTexts()
+    public async Task AVectorIsTheSameWhateverItIsEmbeddedWith()
     {
+        var ct = TestContext.Current.CancellationToken;
         var texts = Enumerable.Range(0, 70).Select(i => i % 2 == 0 ? $"Pils {i}" : $"Doppelkorn Flasche 0,7 l Nr. {i}").ToList();
-        var all = await f.Encoder.Embed(texts, TestContext.Current.CancellationToken);
-        foreach (var i in new[] { 0, 1, 64, 69 })
+        var all = await f.Encoder.Embed(texts, ct);
+        using var parallel = new Encoder(new OrtWeights(AppFiles.Beside("models")), runs: 4);
+        var reversed = await parallel.Embed(texts.AsEnumerable().Reverse().ToList(), ct);
+        for (var i = 0; i < texts.Count; i++)
         {
-            var alone = (await f.Encoder.Embed([texts[i]], TestContext.Current.CancellationToken))[0];
-            var own = Vec.Dot(alone, all[i]);
-            Assert.True(own >= 0.98, $"{i}: {own:F4}");
-            Assert.True(own > Vec.Dot(alone, all[(i + 1) % texts.Count]), $"{i} closer to its neighbour");
+            var alone = (await f.Encoder.Embed([texts[i]], ct))[0];
+            Assert.Equal(alone, all[i]);
+            Assert.Equal(alone, reversed[texts.Count - 1 - i]);
         }
+    }
+
+    sealed class Unpumped : SynchronizationContext
+    {
+        public override void Post(SendOrPostCallback d, object? state) { }
+    }
+
+    // The headless driver awaits its last embedding on a dispatcher no one pumps any more.
+    [Fact]
+    public async Task ParallelRunsReturnFinishedOnAContextNoOnePumps()
+    {
+        using var parallel = new Encoder(new OrtWeights(AppFiles.Beside("models")), runs: 4);
+        await parallel.Embed([], TestContext.Current.CancellationToken);
+        var before = SynchronizationContext.Current;
+        SynchronizationContext.SetSynchronizationContext(new Unpumped());
+        try
+        {
+            var run = parallel.Embed([.. Enumerable.Range(0, 16).Select(i => $"Pils {i}")], TestContext.Current.CancellationToken);
+            Assert.True(run.IsCompleted);
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(before);
+        }
+    }
+
+    // A net that is cancelled on its third run, as the runtime is when the program shuts down.
+    sealed class Cancelling(CancellationTokenSource cts) : IWeights, INet
+    {
+        readonly OrtWeights real = new(AppFiles.Beside("models"));
+        int ran;
+
+        public bool Accelerated => false;
+        public IReadOnlyList<Port> Inputs => [];
+        public IReadOnlyList<Port> Outputs => [new("embedding", [-1, IEncoder.Width])];
+
+        public Task<INet> Open(string model, NetOptions options, CancellationToken ct = default) => Task.FromResult<INet>(this);
+        public Task<byte[]> Read(string file, CancellationToken ct = default) => real.Read(file, ct);
+
+        public Task<Tensor[]> Run(IReadOnlyList<Tensor> inputs, CancellationToken ct = default)
+        {
+            if (Interlocked.Increment(ref ran) == 3) cts.Cancel();
+            ct.ThrowIfCancellationRequested();
+            return Task.FromResult<Tensor[]>([Tensor.Of("embedding", new float[IEncoder.Width], 1, IEncoder.Width)]);
+        }
+
+        public void Dispose() { }
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(4)]
+    public async Task ACancelledRunIsACancellation(int runs)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        using var encoder = new Encoder(new Cancelling(cts), runs);
+        var texts = Enumerable.Range(0, 64).Select(i => $"Pils {i}").ToList();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => encoder.Embed(texts, cts.Token));
     }
 
     [Fact]

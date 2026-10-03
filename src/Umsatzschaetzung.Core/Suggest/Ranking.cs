@@ -4,7 +4,7 @@ using Umsatzschaetzung.Model;
 
 namespace Umsatzschaetzung.Suggest;
 
-public sealed record Ranked(string IngredientId, int Confidence);
+public sealed record Ranked(string ProductId, int Confidence);
 
 // Which wares a line reads like, best first, and how sure: the part of a suggestion a model
 // answers. The exact hit, the cut and the mapping are the matcher's, whoever ranks.
@@ -55,7 +55,7 @@ public sealed class EncoderRanking(IEncoder encoder, IEmbeddingCache? cache = nu
             // between wares the words cannot tell apart.
             var held = Containers(line);
             foreach (var id in best.Keys)
-                if (rs.Categories.GetValueOrDefault(rs.Ingredients[id].CategoryId)?.Contradicts(held) == true)
+                if (rs.Products[id].CategoryId is { } c && rs.Categories.GetValueOrDefault(c)?.Contradicts(held) == true)
                     best[id] -= Mismatch;
 
             await encoder.Load(ct);

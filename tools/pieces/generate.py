@@ -1,4 +1,4 @@
-"""Ask gpt-6-luna for the weight of one piece of every ingredient.
+"""Ask gpt-6-luna for the weight of one piece of every product made from nothing else.
 
     set -a; . ./.env; python3 tools/pieces/generate.py --cache DIR [--apply]
 
@@ -56,19 +56,19 @@ SCHEMA = {
 def candidates(seed):
     uses = defaultdict(list)
     for p in seed["products"].values():
-        for r in p["recipe"]:
-            if "ingredientId" in r:
-                uses[r["ingredientId"]].append((p["name"], r["amount"], r["unit"]))
+        for r in p.get("recipe", []):
+            uses[r["partId"]].append((p["name"], r["amount"], r["unit"]))
     used, free = [], []
-    for iid, ing in seed["ingredients"].items():
-        units = {DIMENSION[u] for _, _, u in uses[iid]}
-        (used if units else free).append({
-            "id": iid,
-            "name": ing["name"],
-            "aliases": ing["aliases"][:12],
-            "category": seed["categories"][ing["categoryId"]]["name"],
-            "dimension": units.pop() if len(units) == 1 else "mixed" if units else "keine",
-            "recipes": [f"{n}: {a} {DIMENSION[u]}" for n, a, u in uses[iid][:3]],
+    for nid, node in seed["products"].items():
+        if node.get("recipe"):
+            continue
+        (used if uses[nid] else free).append({
+            "id": nid,
+            "name": node["name"],
+            "aliases": node.get("aliases", [])[:12],
+            "category": seed["categories"][node["categoryId"]]["name"] if "categoryId" in node else "",
+            "dimension": DIMENSION[node["unit"]],
+            "recipes": [f"{n}: {a} {DIMENSION[u]}" for n, a, u in uses[nid][:3]],
         })
     return used, free
 
@@ -125,10 +125,10 @@ def problems(c, answer, runs):
 
 def apply(pieces):
     lines = SEED.read_text(encoding="utf-8").split("\n")
-    pattern = re.compile(r'^"(ing\.[^"]+)": \{.*\]\}(,?)$')
+    pattern = re.compile(r'^"(prod\.[^"]+)": \{.*\}(,?)$')
     for i, line in enumerate(lines):
         m = pattern.match(line)
-        if m and m[1] in pieces and '"piece":' not in line:
+        if m and m[1] in pieces and '"piece":' not in line and '"recipe":' not in line:
             p = pieces[m[1]]
             cut = len(line) - 1 - len(m[2])
             lines[i] = line[:cut] + f',"piece":{{"amount":{p["amount"]},"unit":"{p["unit"]}"}}' + line[cut:]

@@ -51,7 +51,7 @@ public class FactorTests
         Assert.Null(Of(0, 0, null, unitCode, recipe));
 
     [Fact]
-    public void AnIngredientInNoRecipeHasNoUnitToConvertTo() =>
+    public void AProductWithoutAUnitHasNothingToConvertTo() =>
         Assert.Null(Of(20, 500, Unit.Ml, "XCS", null, Gurke, 7));
 
     [Fact]
@@ -70,7 +70,7 @@ public class FactorTests
     [InlineData("C62", 400L)]
     [InlineData("PCE", 400L)]
     [InlineData("EA", 400L)]
-    public void APieceIsWeighedByTheIngredient(string unitCode, long factor) =>
+    public void APieceIsWeighedByTheProduct(string unitCode, long factor) =>
         Assert.Equal((factor, 1L, FactorSource.Piece), Of(0, 0, null, unitCode, Unit.G, Gurke));
 
     [Theory]
@@ -125,8 +125,8 @@ public class FactorTests
     static RuleSet Rules(Piece? piece)
     {
         var rs = new RuleSet();
-        rs.Put(new Ingredient { Id = "ing.gurke", Name = "Gurken", Piece = piece });
-        rs.Put(new Product { Id = "p", Name = "Salat", Recipe = [new() { IngredientId = "ing.gurke", Amount = 80, Unit = "GRM" }] });
+        rs.Put(new Product { Id = "prod.gurke", Unit = "GRM", Name = "Gurken", Piece = piece });
+        rs.Put(new Product { Id = "p", Name = "Salat", Unit = "H87", Recipe = [new() { PartId = "prod.gurke", Amount = 80, Unit = "GRM" }] });
         return rs;
     }
 
@@ -134,11 +134,30 @@ public class FactorTests
     public void AKnownPieceWeightLeavesNothingToAsk()
     {
         var line = new InvoiceLine { Name = "Salatgurke Kl. I", UnitCode = "H87", Quantity = 1000 };
-        Assert.True(Scale.NeedsFactor(Rules(null), "ing.gurke", line));
-        Assert.False(Scale.NeedsFactor(Rules(Gurke), "ing.gurke", line));
-        Assert.Equal((400L, 1L, FactorSource.Piece), Factors.Of(Rules(Gurke), new ArticleMapping { IngredientId = "ing.gurke" }, line));
-        Assert.False(Scale.NeedsFactor(Rules(null), "ing.gurke", new InvoiceLine { Name = "Gurken Kiste 12 x 350 g", UnitCode = "XCS" }));
-        Assert.False(Scale.NeedsFactor(Rules(null), "ing.unbekannt", line));
+        Assert.True(Scale.NeedsFactor(Rules(null), "prod.gurke", line, new HashSet<string>()));
+        Assert.False(Scale.NeedsFactor(Rules(Gurke), "prod.gurke", line, new HashSet<string>()));
+        Assert.Equal((400L, 1L, FactorSource.Piece), Factors.Of(Rules(Gurke), new ArticleMapping { ProductId = "prod.gurke" }, line));
+        Assert.False(Scale.NeedsFactor(Rules(null), "prod.gurke", new InvoiceLine { Name = "Gurken Kiste 12 x 350 g", UnitCode = "XCS" }, new HashSet<string>()));
+        Assert.False(Scale.NeedsFactor(Rules(null), "prod.unbekannt", line, new HashSet<string>()));
+    }
+
+    [Fact]
+    public void WhatIsInNoSparteAsksForAFactorOnlyOnceSomethingSoldReachesIt()
+    {
+        var rs = new RuleSet();
+        rs.Put(new Category { Id = "cat.kein", Name = "Kein Wareneinsatz" });
+        rs.Put(new Category { Id = "cat.wurst", Name = "Wurst", Sparte = Sparte.Speisen });
+        rs.Put(new Product { Id = "prod.reinigung", Name = "Reinigung", Unit = "H87", CategoryId = "cat.kein" });
+        rs.Put(new Product { Id = "prod.wurst", Name = "Wurst", Unit = "H87", CategoryId = "cat.wurst" });
+        var line = new InvoiceLine { Name = "Handspülmittel 5 l", UnitCode = "XCI" };
+
+        HashSet<string> none = [], reached = ["prod.reinigung"];
+
+        Assert.False(Scale.NeedsFactor(rs, "prod.reinigung", line, none));
+        Assert.Null(Scale.Counted(rs, "prod.reinigung", none));
+        Assert.True(Scale.NeedsFactor(rs, "prod.reinigung", line, reached));
+        Assert.True(Scale.NeedsFactor(rs, "prod.wurst", line, none));
+        Assert.Equal(Unit.Piece, Scale.Counted(rs, "prod.wurst", none));
     }
 }
 

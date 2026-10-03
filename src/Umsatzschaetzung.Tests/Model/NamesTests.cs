@@ -7,39 +7,39 @@ public class NamesTests
     static RuleSet Rules()
     {
         var rs = new RuleSet();
-        rs.Put(new Ingredient { Id = "ing.bier", Name = "Fassbier Pils" });
-        rs.Put(new Ingredient { Id = "ing.salz", Name = "Salz" });
-        rs.Put(new Ingredient { Id = "ing.ei", Name = "Ei" });
+        rs.Put(new Product { Id = "prod.bier", Unit = "MLT", Name = "Fassbier Pils" });
+        rs.Put(new Product { Id = "prod.salz", Unit = "GRM", Name = "Salz" });
+        rs.Put(new Product { Id = "prod.ei", Unit = "H87", Name = "Ei" });
         rs.Put(new Product
         {
             Id = "p.pils",
             Name = "Pils 0,3 l",
-            Recipe = [new() { IngredientId = "ing.bier", Amount = 300, Unit = "MLT" }, new() { IngredientId = "ing.salz", Amount = 1500, Unit = "GRM" }],
+            Recipe = [new() { PartId = "prod.bier", Amount = 300, Unit = "MLT" }, new() { PartId = "prod.salz", Amount = 1500, Unit = "GRM" }],
         });
-        rs.Put(new Product { Id = "p.ei", Name = "Spiegelei", Recipe = [new() { IngredientId = "ing.ei", Amount = 2, Unit = "?" }] });
-        rs.Put(new ArticleMapping { Id = "map.fass", IngredientId = "ing.bier", Factor = 50_000 });
-        rs.Put(new ArticleMapping { Id = "map.salz", IngredientId = "ing.salz" });
-        rs.Put(new ArticleMapping { Id = "map.ei", IngredientId = "ing.ei", Factor = 10 });
+        rs.Put(new Product { Id = "p.ei", Name = "Spiegelei", Unit = "H87", Recipe = [new() { PartId = "prod.ei", Amount = 2, Unit = "?" }] });
+        rs.Put(new ArticleMapping { Id = "map.fass", ProductId = "prod.bier", Factor = 50_000 });
+        rs.Put(new ArticleMapping { Id = "map.salz", ProductId = "prod.salz" });
+        rs.Put(new ArticleMapping { Id = "map.ei", ProductId = "prod.ei", Factor = 10 });
         return rs;
     }
 
     [Fact]
-    public void IngredientAndProductFallBackToTheirId()
+    public void AProductFallsBackToItsId()
     {
         var rs = Rules();
-        Assert.Equal("Fassbier Pils", Names.Ingredient(rs, "ing.bier"));
-        Assert.Equal("ing.weg", Names.Ingredient(rs, "ing.weg"));
+        Assert.Equal("Fassbier Pils", Names.Product(rs, "prod.bier"));
+        Assert.Equal("prod.weg", Names.Product(rs, "prod.weg"));
         Assert.Equal("Pils 0,3 l", Names.Product(rs, "p.pils"));
         Assert.Equal("p.weg", Names.Product(rs, "p.weg"));
     }
 
     [Fact]
-    public void AnIngredientIsCountedInItsRecipeUnitOrInPieces()
+    public void AProductIsCountedInItsOwnUnitOrInPieces()
     {
         var rs = Rules();
-        Assert.Equal(Unit.Ml, Names.IngredientUnit(rs, "ing.bier"));
-        Assert.Equal(Unit.Piece, Names.IngredientUnit(rs, "ing.ei"));
-        Assert.Equal(Unit.Piece, Names.IngredientUnit(rs, "ing.weg"));
+        Assert.Equal(Unit.Ml, Names.ProductUnit(rs, "prod.bier"));
+        Assert.Equal(Unit.Piece, Names.ProductUnit(rs, "prod.ei"));
+        Assert.Equal(Unit.Piece, Names.ProductUnit(rs, "prod.weg"));
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class NamesTests
     }
 
     [Fact]
-    public void ARecipeListsAmountUnitAndIngredient()
+    public void ARecipeListsAmountUnitAndPart()
     {
         var rs = Rules();
         Assert.Equal("300 Milliliter Fassbier Pils, 1.500 Gramm Salz", Names.Recipe(rs, rs.Products["p.pils"]));
@@ -63,7 +63,7 @@ public class NamesTests
     }
 
     [Fact]
-    public void AMappingNamesItsIngredientAndTheContentOfOnePackage()
+    public void AMappingNamesItsProductAndTheContentOfOnePackage()
     {
         var rs = Rules();
         Assert.Equal("Fassbier Pils × 50 l", Names.Mapping(rs, "map.fass"));

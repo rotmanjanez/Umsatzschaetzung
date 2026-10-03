@@ -38,14 +38,27 @@ public static class Suggestions
     static List<string> Candidates(Case c, RuleSet rs, IReadOnlySet<string> dismissed)
     {
         var known = Listed(c);
+        var sellable = Sellable(rs);
         return [.. rs.Products.Values
-            .Where(p => !known.Contains(p.Id) && !dismissed.Contains(p.Id) && p.Meta.ValidOn(c.PeriodTo) && Fits(rs, p, c.Taxpayer.Gewerbe))
+            .Where(p => !known.Contains(p.Id) && !dismissed.Contains(p.Id) && p.Meta.ValidOn(c.PeriodTo) && sellable(p) && Fits(rs, p, c.Taxpayer.Gewerbe))
             .Select(p => p.Id)];
     }
 
+    // Sold by the piece. A product without a recipe is sold as it is bought only if nothing is made
+    // from it and its category has a Sparte: what goes into another product is an input, and what is
+    // in no Sparte, as cleaning, packaging or freight, is not what the business sells.
+    public static Func<Product, bool> Sellable(RuleSet rs)
+    {
+        var parts = Scale.Parts(rs);
+        return p => Scale.Of(p) == Unit.Piece
+            && (p.Recipe.Count > 0 || !parts.Contains(p.Id) && !string.IsNullOrEmpty(p.CategoryId) && Scale.Goods(rs, p));
+    }
+
     static bool Fits(RuleSet rs, Product p, string gewerbe) =>
-        Recipes.Flat(rs, p).TrueForAll(r => !rs.Ingredients.TryGetValue(r.IngredientId, out var ing)
-            || !rs.Categories.TryGetValue(ing.CategoryId, out var cat) || cat.Covers(gewerbe));
+        Recipes.Sold(rs, p).TrueForAll(r => !rs.Products.TryGetValue(r.PartId, out var part) || Category(rs, part)?.Covers(gewerbe) != false);
+
+    static Category? Category(RuleSet rs, Product p) =>
+        string.IsNullOrEmpty(p.CategoryId) ? null : rs.Categories.GetValueOrDefault(p.CategoryId);
 
     static List<PinnedPortions> Fixed(Case c, Report sold, List<string> candidates)
     {
@@ -62,8 +75,8 @@ public static class Suggestions
 
     static List<string> Ranked(RuleSet rs, Report sold, Report report, List<string> ids)
     {
-        var left = report.Ingredients.ToDictionary(i => i.IngredientId, i => Math.Max(i.Leftover, 0));
-        var cost = report.Ingredients.ToDictionary(i => i.IngredientId, i => i.Used > 0 ? i.UsedCost * Micro / i.Used : 0);
+        var left = report.Supply.ToDictionary(i => i.ProductId, i => Math.Max(i.Leftover, 0));
+        var cost = report.Supply.ToDictionary(i => i.ProductId, i => i.Used > 0 ? i.UsedCost * Micro / i.Used : 0);
         var markups = sold.Markups.Where(m => m.CostOfGoods > 0 && m.RevenueNet > 0).ToDictionary(m => m.Sparte, m => m.Markup);
         var overall = sold.Totals.CalculatedRevenueNet > 0 ? sold.Totals.Markup : 0;
 
@@ -71,9 +84,9 @@ public static class Suggestions
         foreach (var id in ids)
         {
             var amount = new Dictionary<string, long>();
-            foreach (var r in Recipes.Flat(rs, rs.Products[id]))
+            foreach (var r in Recipes.Sold(rs, rs.Products[id]))
                 if (Scale.ToBase(r.Amount, r.Unit) is var a and > 0)
-                    amount[r.IngredientId] = amount.GetValueOrDefault(r.IngredientId) + a;
+                    amount[r.PartId] = amount.GetValueOrDefault(r.PartId) + a;
             if (amount.Count == 0 || !amount.Keys.All(left.ContainsKey)) continue;
             var main = amount.MaxBy(x => x.Value * cost.GetValueOrDefault(x.Key)).Key;
             raw.Add((id, amount, main));
@@ -84,8 +97,7 @@ public static class Suggestions
 
         var pool = raw.Select(r =>
         {
-            var sparte = rs.Ingredients.TryGetValue(r.Main, out var ing) && rs.Categories.TryGetValue(ing.CategoryId, out var cat)
-                ? cat.Sparte : Sparte.Unbestimmt;
+            var sparte = rs.Products.TryGetValue(r.Main, out var main) ? Category(rs, main)?.Sparte ?? Sparte.Unbestimmt : Sparte.Unbestimmt;
             var complexity = 1 + (r.Amount.Count - 1) / 2.0;
             var size = Math.Sqrt((double)smallest[r.Main] / r.Amount[r.Main]);
             var markup = markups.TryGetValue(sparte, out var m) ? m : overall;

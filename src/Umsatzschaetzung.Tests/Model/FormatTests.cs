@@ -109,7 +109,6 @@ public class FormatTests
 
     [Theory]
     [InlineData(Entity.Category, "Kategorie")]
-    [InlineData(Entity.Ingredient, "Zutat")]
     [InlineData(Entity.Mapping, "Zuordnung")]
     [InlineData(Entity.Product, "Produkt")]
     [InlineData(Entity.YieldRule, "Ausbeuteregel")]

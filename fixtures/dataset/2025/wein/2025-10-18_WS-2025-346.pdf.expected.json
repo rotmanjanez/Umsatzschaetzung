@@ -27,7 +27,7 @@
       "priceBaseQty": 1000,
       "lineNet": 48960,
       "vat": 1900,
-      "expectedIngredientId": "ing.weisswein",
+      "expectedProductId": "prod.weisswein",
       "expectedFactor": 750
     },
     {
@@ -41,7 +41,7 @@
       "priceBaseQty": 1000,
       "lineNet": 9900,
       "vat": 1900,
-      "expectedIngredientId": "ing.weisswein",
+      "expectedProductId": "prod.weisswein",
       "expectedFactor": 1000
     },
     {
@@ -55,7 +55,7 @@
       "priceBaseQty": 1000,
       "lineNet": 20540,
       "vat": 1900,
-      "expectedIngredientId": "ing.rotwein",
+      "expectedProductId": "prod.rotwein",
       "expectedFactor": 750
     },
     {
@@ -69,7 +69,7 @@
       "priceBaseQty": 1000,
       "lineNet": 15130,
       "vat": 1900,
-      "expectedIngredientId": "ing.sekt",
+      "expectedProductId": "prod.sekt",
       "expectedFactor": 750
     }
   ]

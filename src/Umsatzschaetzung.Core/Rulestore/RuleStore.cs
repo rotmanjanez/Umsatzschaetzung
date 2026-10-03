@@ -32,29 +32,25 @@ public sealed class RuleStore
         CREATE TABLE category_gebinde(category_id TEXT NOT NULL, ord INTEGER NOT NULL, unit_code TEXT NOT NULL,
             PRIMARY KEY(category_id, ord)) WITHOUT ROWID;
 
-        CREATE TABLE ingredient(
-            id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT NOT NULL,
+        CREATE TABLE product(
+            id TEXT PRIMARY KEY, name TEXT NOT NULL, unit TEXT NOT NULL, batch INTEGER NOT NULL, category_id TEXT,
+            piece_amount INTEGER, piece_unit TEXT,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
-            deleted_at TEXT, piece_amount INTEGER, piece_unit TEXT) WITHOUT ROWID;
-        CREATE TABLE ingredient_alias(ingredient_id TEXT NOT NULL, ord INTEGER NOT NULL, alias TEXT NOT NULL,
-            PRIMARY KEY(ingredient_id, ord)) WITHOUT ROWID;
+            deleted_at TEXT) WITHOUT ROWID;
+        CREATE TABLE product_alias(product_id TEXT NOT NULL, ord INTEGER NOT NULL, alias TEXT NOT NULL,
+            PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
+        CREATE TABLE recipe_line(product_id TEXT NOT NULL, ord INTEGER NOT NULL, part_id TEXT NOT NULL,
+            amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
 
         -- Hierher kommt nur, was eine Person bestätigt hat.
         CREATE TABLE mapping(
             id TEXT PRIMARY KEY, supplier_name TEXT, supplier_article_id TEXT, gtin TEXT, name TEXT,
-            observed TEXT, unit_code TEXT, ingredient_id TEXT NOT NULL, factor INTEGER,
+            observed TEXT, unit_code TEXT, product_id TEXT NOT NULL, factor INTEGER,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
-
-        CREATE TABLE product(
-            id TEXT PRIMARY KEY, name TEXT NOT NULL,
-            valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
-            deleted_at TEXT) WITHOUT ROWID;
-        CREATE TABLE recipe_line(product_id TEXT NOT NULL, ord INTEGER NOT NULL, ingredient_id TEXT NOT NULL,
-            sub_product_id TEXT, amount INTEGER NOT NULL, unit TEXT NOT NULL, PRIMARY KEY(product_id, ord)) WITHOUT ROWID;
 
         CREATE TABLE yield_rule(
-            id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT, ingredient_id TEXT,
+            id TEXT PRIMARY KEY, name TEXT NOT NULL, category_id TEXT, product_id TEXT,
             deduction INTEGER NOT NULL, is_default INTEGER NOT NULL,
             valid_from TEXT, valid_to TEXT, changed_at TEXT NOT NULL, changed_by TEXT, rev INTEGER NOT NULL,
             deleted_at TEXT) WITHOUT ROWID;
@@ -166,7 +162,6 @@ public sealed class RuleStore
         using var doc = JsonDocument.Parse(bytes);
         var stamp = doc.RootElement.TryGetProperty("changedAt", out var c) ? c.GetDateTimeOffset() : default;
         Complete(rs.Categories, stamp);
-        Complete(rs.Ingredients, stamp);
         Complete(rs.Mappings, stamp);
         Complete(rs.Products, stamp);
         Complete(rs.YieldRules, stamp);
@@ -190,23 +185,29 @@ public sealed class RuleStore
 
     // The write holds the store from its first statement: the set kept is brought along only when
     // it was still the store's before the write; if someone else wrote since, all is read again.
-    public RuleSet Save(IRuleEntity e) => Writing((db, tx) =>
-    {
-        var current = Current(db, tx);
-        e.Meta.Rev = Bump(db, tx);
-        e.Meta.ChangedBy = Environment.UserName;
-        Put(db, tx, e);
-        var rs = current is null ? Read(db, tx) : Changed(current, e.Meta.Rev, next => Keep(next, Json.Copy(e)));
-        return loaded = rs;
-    });
+    public RuleSet Save(IRuleEntity e) => Change([e], []);
 
-    public RuleSet Delete(Entity kind, string id) => Writing((db, tx) =>
+    public RuleSet Delete(Entity kind, string id) => Change([], [(kind, id)]);
+
+    // One write: all of it lands, or none.
+    public RuleSet Change(List<IRuleEntity> put, List<(Entity Kind, string Id)> delete) => Writing((db, tx) =>
     {
         var current = Current(db, tx);
         var version = Bump(db, tx);
-        Exec(db, tx, $"UPDATE {Table(kind)} SET deleted_at = @now, changed_by = @by WHERE id = @id",
-            ("@id", id), ("@now", Stamp(Clock.Now())), ("@by", Environment.UserName));
-        var rs = current is null ? Read(db, tx) : Changed(current, version, next => Drop(next, kind, id));
+        foreach (var e in put)
+        {
+            e.Meta.Rev = version;
+            e.Meta.ChangedBy = Environment.UserName;
+            Put(db, tx, e);
+        }
+        foreach (var (kind, id) in delete)
+            Exec(db, tx, $"UPDATE {Table(kind)} SET deleted_at = @now, changed_by = @by WHERE id = @id",
+                ("@id", id), ("@now", Stamp(Clock.Now())), ("@by", Environment.UserName));
+        var rs = current is null ? Read(db, tx) : Changed(current, version, next =>
+        {
+            foreach (var e in put) Keep(next, Json.Copy(e));
+            foreach (var (kind, id) in delete) next.Remove(kind, id);
+        });
         return loaded = rs;
     });
 
@@ -226,13 +227,11 @@ public sealed class RuleStore
             Store = rs.Store,
             Version = version,
             Categories = new(rs.Categories),
-            Ingredients = new(rs.Ingredients),
             Mappings = new(rs.Mappings),
             Products = new(rs.Products),
             YieldRules = new(rs.YieldRules),
             Gewerbezweige = new(rs.Gewerbezweige),
             Templates = new(rs.Templates),
-            Bases = rs.Bases,
         };
         change(next);
         return next;
@@ -250,23 +249,6 @@ public sealed class RuleStore
                 rs.Templates[id] = unseated;
             }
         rs.Put(e);
-    }
-
-    static void Drop(RuleSet rs, Entity kind, string id)
-    {
-        switch (kind)
-        {
-            case Entity.Category: rs.Categories.Remove(id); break;
-            case Entity.Ingredient: rs.Ingredients.Remove(id); break;
-            case Entity.Mapping: rs.Mappings.Remove(id); break;
-            case Entity.Product:
-                rs.Products.Remove(id);
-                rs.Bases = null;
-                break;
-            case Entity.Gewerbezweig: rs.Gewerbezweige.Remove(id); break;
-            case Entity.Template: rs.Templates.Remove(id); break;
-            default: rs.YieldRules.Remove(id); break;
-        }
     }
 
     public List<SammlungInfo> Sammlungen() => Reading(db => Infos(db, null));
@@ -309,12 +291,12 @@ public sealed class RuleStore
     static string Table(Entity kind) => kind switch
     {
         Entity.Category => "category",
-        Entity.Ingredient => "ingredient",
         Entity.Mapping => "mapping",
         Entity.Product => "product",
         Entity.Gewerbezweig => "gewerbe",
         Entity.Template => "template",
-        _ => "yield_rule",
+        Entity.YieldRule => "yield_rule",
+        _ => throw new ArgumentException("unbekannte Regelart " + kind),
     };
 
     static void Put(SqliteConnection db, SqliteTransaction tx, IRuleEntity e)
@@ -335,59 +317,50 @@ public sealed class RuleStore
                 PutGebinde(db, tx, x);
                 break;
 
-            case Ingredient x:
-                Exec(db, tx, "INSERT INTO ingredient(id, name, category_id, piece_amount, piece_unit, "
-                    + "valid_from, valid_to, changed_at, changed_by, rev) "
-                    + "VALUES(@id, @name, @category, @piece, @pieceUnit, @from, @to, @changed, @by, @rev) "
-                    + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
-                    + "piece_amount = excluded.piece_amount, piece_unit = excluded.piece_unit, "
-                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
-                    + "rev = excluded.rev, deleted_at = NULL",
-                    Meta(x, ("@name", x.Name), ("@category", x.CategoryId),
-                        ("@piece", x.Piece?.Amount), ("@pieceUnit", x.Piece is { } p ? Units.Code(p.Unit) : null)));
-                PutAliases(db, tx, x.Id, x.Aliases);
-                break;
-
             case ArticleMapping x:
                 Exec(db, tx, "INSERT INTO mapping(id, supplier_name, supplier_article_id, gtin, name, observed, "
-                    + "unit_code, ingredient_id, factor, valid_from, valid_to, changed_at, changed_by, rev) "
-                    + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @ingredient, @factor, "
+                    + "unit_code, product_id, factor, valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @supplier, @article, @gtin, @name, @observed, @unit, @product, @factor, "
                     + "@from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET supplier_name = excluded.supplier_name, "
                     + "supplier_article_id = excluded.supplier_article_id, gtin = excluded.gtin, name = excluded.name, "
-                    + "observed = excluded.observed, unit_code = excluded.unit_code, ingredient_id = excluded.ingredient_id, "
+                    + "observed = excluded.observed, unit_code = excluded.unit_code, product_id = excluded.product_id, "
                     + "factor = excluded.factor, valid_from = excluded.valid_from, "
                     + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, rev = excluded.rev, deleted_at = NULL",
                     Meta(x, ("@supplier", x.SupplierName), ("@article", x.SupplierArticleId), ("@gtin", x.Gtin),
                         ("@name", x.Name), ("@observed", x.Observed), ("@unit", x.UnitCode),
-                        ("@ingredient", x.IngredientId), ("@factor", x.Factor)));
+                        ("@product", x.ProductId), ("@factor", x.Factor)));
                 break;
 
             case Product x:
-                Exec(db, tx, "INSERT INTO product(id, name, valid_from, valid_to, changed_at, changed_by, rev) "
-                    + "VALUES(@id, @name, @from, @to, @changed, @by, @rev) "
-                    + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, valid_from = excluded.valid_from, "
-                    + "valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, rev = excluded.rev, deleted_at = NULL",
-                    Meta(x, ("@name", x.Name)));
+                Exec(db, tx, "INSERT INTO product(id, name, unit, batch, category_id, piece_amount, piece_unit, "
+                    + "valid_from, valid_to, changed_at, changed_by, rev) "
+                    + "VALUES(@id, @name, @unit, @batch, @category, @piece, @pieceUnit, @from, @to, @changed, @by, @rev) "
+                    + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, unit = excluded.unit, batch = excluded.batch, "
+                    + "category_id = excluded.category_id, piece_amount = excluded.piece_amount, piece_unit = excluded.piece_unit, "
+                    + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
+                    + "rev = excluded.rev, deleted_at = NULL",
+                    Meta(x, ("@name", x.Name), ("@unit", x.Unit), ("@batch", x.Batch), ("@category", string.IsNullOrEmpty(x.CategoryId) ? null : x.CategoryId),
+                        ("@piece", x.Piece?.Amount), ("@pieceUnit", x.Piece is { } p ? Units.Code(p.Unit) : null)));
+                PutAliases(db, tx, x.Id, x.Aliases);
                 Exec(db, tx, "DELETE FROM recipe_line WHERE product_id = @id", ("@id", x.Id));
                 for (var i = 0; i < x.Recipe.Count; i++)
                 {
                     var l = x.Recipe[i];
-                    Exec(db, tx, "INSERT INTO recipe_line(product_id, ord, ingredient_id, sub_product_id, amount, unit) "
-                        + "VALUES(@id, @ord, @ingredient, @part, @amount, @unit)",
-                        ("@id", x.Id), ("@ord", i), ("@ingredient", l.IngredientId), ("@part", l.ProductId), ("@amount", l.Amount), ("@unit", l.Unit));
+                    Exec(db, tx, "INSERT INTO recipe_line(product_id, ord, part_id, amount, unit) VALUES(@id, @ord, @part, @amount, @unit)",
+                        ("@id", x.Id), ("@ord", i), ("@part", l.PartId), ("@amount", l.Amount), ("@unit", l.Unit));
                 }
                 break;
 
             case YieldRule x:
-                Exec(db, tx, "INSERT INTO yield_rule(id, name, category_id, ingredient_id, deduction, is_default, "
+                Exec(db, tx, "INSERT INTO yield_rule(id, name, category_id, product_id, deduction, is_default, "
                     + "valid_from, valid_to, changed_at, changed_by, rev) "
-                    + "VALUES(@id, @name, @category, @ingredient, @deduction, @default, @from, @to, @changed, @by, @rev) "
+                    + "VALUES(@id, @name, @category, @product, @deduction, @default, @from, @to, @changed, @by, @rev) "
                     + "ON CONFLICT(id) DO UPDATE SET name = excluded.name, category_id = excluded.category_id, "
-                    + "ingredient_id = excluded.ingredient_id, deduction = excluded.deduction, is_default = excluded.is_default, "
+                    + "product_id = excluded.product_id, deduction = excluded.deduction, is_default = excluded.is_default, "
                     + "valid_from = excluded.valid_from, valid_to = excluded.valid_to, changed_at = excluded.changed_at, changed_by = excluded.changed_by, "
                     + "rev = excluded.rev, deleted_at = NULL",
-                    Meta(x, ("@name", x.Name), ("@category", x.CategoryId), ("@ingredient", x.IngredientId),
+                    Meta(x, ("@name", x.Name), ("@category", x.CategoryId), ("@product", x.ProductId),
                         ("@deduction", x.Deduction), ("@default", x.Default)));
                 break;
 
@@ -461,43 +434,37 @@ public sealed class RuleStore
                 Sparte = ReadSparte(r, 7),
             }));
 
-        var aliases = Aliases(db, tx);
-        Rows(db, tx, "SELECT id, name, category_id, valid_from, valid_to, changed_at, changed_by, rev, piece_amount, piece_unit "
-            + "FROM ingredient WHERE deleted_at IS NULL",
-            r => rs.Put(new Ingredient
-            {
-                Id = r.GetString(0), Name = r.GetString(1), CategoryId = r.GetString(2), Meta = ReadMeta(r, 3),
-                Aliases = aliases.GetValueOrDefault(r.GetString(0), []),
-                Piece = ReadPiece(r, 8),
-            }));
-
-        Rows(db, tx, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, ingredient_id, "
+        Rows(db, tx, "SELECT id, supplier_name, supplier_article_id, gtin, name, observed, unit_code, product_id, "
             + "factor, valid_from, valid_to, changed_at, changed_by, rev FROM mapping WHERE deleted_at IS NULL",
             r => rs.Put(new ArticleMapping
             {
                 Id = r.GetString(0), SupplierName = Str(r, 1), SupplierArticleId = Str(r, 2), Gtin = Str(r, 3),
-                Name = Str(r, 4), Observed = Str(r, 5), UnitCode = Str(r, 6), IngredientId = r.GetString(7),
+                Name = Str(r, 4), Observed = Str(r, 5), UnitCode = Str(r, 6), ProductId = r.GetString(7),
                 Factor = Num(r, 8), Confirmed = true, Meta = ReadMeta(r, 9),
             }));
 
-        var recipes = new Dictionary<string, List<RecipeLine>>(StringComparer.Ordinal);
-        Rows(db, tx, "SELECT product_id, ingredient_id, amount, unit, sub_product_id FROM recipe_line ORDER BY product_id, ord", r =>
+        var aliases = Aliases(db, tx);
+        var recipes = new Dictionary<string, List<PartLine>>(StringComparer.Ordinal);
+        Rows(db, tx, "SELECT product_id, part_id, amount, unit FROM recipe_line ORDER BY product_id, ord", r =>
         {
             if (!recipes.TryGetValue(r.GetString(0), out var list)) recipes[r.GetString(0)] = list = [];
-            list.Add(new RecipeLine { IngredientId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3), ProductId = Str(r, 4) });
+            list.Add(new PartLine { PartId = r.GetString(1), Amount = r.GetInt64(2), Unit = r.GetString(3) });
         });
-        Rows(db, tx, "SELECT id, name, valid_from, valid_to, changed_at, changed_by, rev FROM product WHERE deleted_at IS NULL",
+        Rows(db, tx, "SELECT id, name, unit, batch, category_id, piece_amount, piece_unit, valid_from, valid_to, changed_at, changed_by, rev "
+            + "FROM product WHERE deleted_at IS NULL",
             r => rs.Put(new Product
             {
-                Id = r.GetString(0), Name = r.GetString(1), Meta = ReadMeta(r, 2),
+                Id = r.GetString(0), Name = r.GetString(1), Unit = r.GetString(2), Batch = r.GetInt64(3), CategoryId = Str(r, 4),
+                Piece = ReadPiece(r, 5), Meta = ReadMeta(r, 7),
+                Aliases = aliases.GetValueOrDefault(r.GetString(0), []),
                 Recipe = recipes.GetValueOrDefault(r.GetString(0), []),
             }));
 
-        Rows(db, tx, "SELECT id, name, category_id, ingredient_id, deduction, is_default, "
+        Rows(db, tx, "SELECT id, name, category_id, product_id, deduction, is_default, "
             + "valid_from, valid_to, changed_at, changed_by, rev FROM yield_rule WHERE deleted_at IS NULL",
             r => rs.Put(new YieldRule
             {
-                Id = r.GetString(0), Name = r.GetString(1), CategoryId = Str(r, 2), IngredientId = Str(r, 3),
+                Id = r.GetString(0), Name = r.GetString(1), CategoryId = Str(r, 2), ProductId = Str(r, 3),
                 Deduction = r.GetInt64(4), Default = r.GetBoolean(5), Meta = ReadMeta(r, 6),
             }));
 
@@ -521,7 +488,7 @@ public sealed class RuleStore
     static Dictionary<string, List<string>> Aliases(SqliteConnection db, SqliteTransaction? tx)
     {
         var aliases = new Dictionary<string, List<string>>(StringComparer.Ordinal);
-        Rows(db, tx, "SELECT ingredient_id, alias FROM ingredient_alias ORDER BY ingredient_id, ord", r =>
+        Rows(db, tx, "SELECT product_id, alias FROM product_alias ORDER BY product_id, ord", r =>
         {
             if (!aliases.TryGetValue(r.GetString(0), out var list)) aliases[r.GetString(0)] = list = [];
             list.Add(r.GetString(1));
@@ -531,9 +498,9 @@ public sealed class RuleStore
 
     static void PutAliases(SqliteConnection db, SqliteTransaction tx, string id, List<string> aliases)
     {
-        Exec(db, tx, "DELETE FROM ingredient_alias WHERE ingredient_id = @id", ("@id", id));
+        Exec(db, tx, "DELETE FROM product_alias WHERE product_id = @id", ("@id", id));
         for (var i = 0; i < aliases.Count; i++)
-            Exec(db, tx, "INSERT INTO ingredient_alias(ingredient_id, ord, alias) VALUES(@id, @ord, @alias)",
+            Exec(db, tx, "INSERT INTO product_alias(product_id, ord, alias) VALUES(@id, @ord, @alias)",
                 ("@id", id), ("@ord", i), ("@alias", aliases[i]));
     }
 
@@ -544,13 +511,13 @@ public sealed class RuleStore
         _ => null,
     };
 
-    // SeedRules lässt vorhandene Zutaten stehen; ein neu mitgelieferter Stück-Richtwert kommt
+    // SeedRules lässt vorhandene Produkte stehen; ein neu mitgelieferter Stück-Richtwert kommt
     // nur dort hinzu, wo noch keiner steht.
     static void SeedPieces(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
-        foreach (var e in seed.Ingredients.Values)
+        foreach (var e in seed.Products.Values)
             if (e.Piece is { } p)
-                Exec(db, tx, "UPDATE ingredient SET piece_amount = @amount, piece_unit = @unit WHERE id = @id AND piece_amount IS NULL",
+                Exec(db, tx, "UPDATE product SET piece_amount = @amount, piece_unit = @unit WHERE id = @id AND piece_amount IS NULL",
                     ("@id", e.Id), ("@amount", p.Amount), ("@unit", Units.Code(p.Unit)));
     }
 
@@ -559,9 +526,9 @@ public sealed class RuleStore
     static void SeedUntouched(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
         HashSet<string> untouched = new(StringComparer.Ordinal);
-        Rows(db, tx, "SELECT id FROM ingredient WHERE rev = 0 AND deleted_at IS NULL", r => untouched.Add(r.GetString(0)));
+        Rows(db, tx, "SELECT id FROM product WHERE rev = 0 AND deleted_at IS NULL", r => untouched.Add(r.GetString(0)));
         var aliases = Aliases(db, tx);
-        foreach (var e in seed.Ingredients.Values)
+        foreach (var e in seed.Products.Values)
             if (untouched.Contains(e.Id) && !e.Aliases.SequenceEqual(aliases.GetValueOrDefault(e.Id, []), StringComparer.Ordinal))
                 PutAliases(db, tx, e.Id, e.Aliases);
         foreach (var c in seed.Categories.Values)
@@ -585,9 +552,9 @@ public sealed class RuleStore
 
     static void SeedRules(SqliteConnection db, SqliteTransaction tx, RuleSet seed)
     {
-        foreach (var e in Entities(seed))
+        foreach (var e in seed.Entries())
         {
-            if (Scalar(db, tx, $"SELECT 1 FROM {Table(Kind(e))} WHERE id = @id", ("@id", e.Id)) is not null) continue;
+            if (Scalar(db, tx, $"SELECT 1 FROM {Table(RuleSet.KindOf(e))} WHERE id = @id", ("@id", e.Id)) is not null) continue;
             Put(db, tx, e);
         }
     }
@@ -935,21 +902,6 @@ public sealed class RuleStore
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
 
-    static IEnumerable<IRuleEntity> Entities(RuleSet rs) =>
-        rs.Categories.Values.Concat<IRuleEntity>(rs.Ingredients.Values).Concat(rs.Mappings.Values).Concat(rs.Products.Values).Concat(rs.YieldRules.Values)
-            .Concat(rs.Gewerbezweige.Values).Concat(rs.Templates.Values);
-
-    static Entity Kind(IRuleEntity e) => e switch
-    {
-        Category => Entity.Category,
-        Ingredient => Entity.Ingredient,
-        ArticleMapping => Entity.Mapping,
-        Product => Entity.Product,
-        YieldRule => Entity.YieldRule,
-        Gewerbezweig => Entity.Gewerbezweig,
-        ReportTemplate => Entity.Template,
-        _ => throw new ArgumentException(e.GetType().Name),
-    };
 
     static string Day(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 

@@ -78,9 +78,10 @@ public static class Html
             Excluded = s.UnmappedCost + s.NoRevenueCost,
             Estimated = Estimated(r.Estimated),
             Calculation = Calculation(r),
+            Routed = r.Products.FindAll(p => p.Routes.Count > 0),
             Rahmen = rahmen,
             Lage = rahmen?.Lage(s.Markup),
-            AnyYields = r.Ingredients.Exists(i => i.Yield is not null),
+            AnyYields = r.Supply.Exists(i => i.Yield is not null),
             Gewerbe = rs.Gewerbezweige.Values.FirstOrDefault(g => g.Kennzahl == c.Taxpayer.Gewerbe),
             Richtsatz = sammlung is null ? null
                 : new Richtsatzbasis(sammlung.Year, quelle?.Quelle ?? "", quelle?.ImportedAt ?? default,

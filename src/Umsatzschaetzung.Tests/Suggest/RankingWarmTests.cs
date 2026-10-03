@@ -38,8 +38,8 @@ public class RankingWarmTests
     static RuleSet Wares()
     {
         var rs = new RuleSet { Version = 1 };
-        rs.Put(new Ingredient { Id = "ing.a", Name = "A" });
-        rs.Put(new Ingredient { Id = "ing.b", Name = "B" });
+        rs.Put(new Product { Id = "prod.a", Unit = "H87", Name = "A", CategoryId = "cat.x" });
+        rs.Put(new Product { Id = "prod.b", Unit = "H87", Name = "B", CategoryId = "cat.x" });
         return rs;
     }
 

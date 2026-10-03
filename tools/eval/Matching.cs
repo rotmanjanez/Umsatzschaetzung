@@ -8,10 +8,10 @@ using Umsatzschaetzung.Suggest;
 
 namespace Umsatzschaetzung.Eval;
 
-// The article matcher over labelled product names. A row's expected ingredient is the
+// The article matcher over labelled product names. A row's expected product is the
 // one carrying its labelled product type as a name or an alias. Rows in a non-goods
-// gruppe that no ingredient claims belong to the kein-Wareneinsatz category; all other
-// rows without a claiming ingredient have no expectation and are only counted.
+// gruppe that no product claims belong to the kein-Wareneinsatz category; all other
+// rows without a claiming product have no expectation and are only counted.
 public static class Matching
 {
     const string Gewerbe = "56101.0";
@@ -34,7 +34,7 @@ public static class Matching
         using var encoder = new Suggest.Encoder(new OrtWeights(AppFiles.Beside("models")));
         var matcher = new Matcher(encoder);
         var expected = Expectations(rs);
-        var nonGoods = rs.Ingredients.Values.Where(i => i.CategoryId == NonGoodsCategory)
+        var nonGoods = rs.Products.Values.Where(i => i.CategoryId == NonGoodsCategory)
             .Select(i => i.Id).ToHashSet(StringComparer.Ordinal);
 
         var rows = Read(labels).ToList();
@@ -47,11 +47,11 @@ public static class Matching
         foreach (var row in rows)
         {
             var sugs = await matcher.Suggest(rs, Gewerbe, null, new InvoiceLine { Name = row.Name, UnitCode = "" });
-            var ings = sugs.ConvertAll(s => s.Mapping.IngredientId);
+            var ings = sugs.ConvertAll(s => s.Mapping.ProductId);
             var want = expected.GetValueOrDefault(Fold(row.Produkt))
                 ?? (NonGoods.Contains(row.Gruppe) && nonGoods.Count > 0 ? nonGoods : null);
             var top = sugs.Count > 0 ? sugs[0] : null;
-            var topName = top is null ? "" : rs.Ingredients[top.Mapping.IngredientId].Name;
+            var topName = top is null ? "" : rs.Products[top.Mapping.ProductId].Name;
             var top1 = want is not null && ings.Count > 0 && want.Contains(ings[0]);
             var top5 = want is not null && ings.Exists(want.Contains);
             if (want is not null) scored.Add(new Scored(row, topName, top?.Confidence ?? 0, top1, top5));
@@ -67,7 +67,7 @@ public static class Matching
                 want is null ? "-" : top1 ? "ok" : "wrong"));
             if (show != "" && row.Name.Contains(show, StringComparison.OrdinalIgnoreCase))
                 Console.WriteLine($"{row.Name}\n  " + string.Join("\n  ",
-                    sugs.Select(s => $"{s.Confidence,3} {rs.Ingredients[s.Mapping.IngredientId].Name}")));
+                    sugs.Select(s => $"{s.Confidence,3} {rs.Products[s.Mapping.ProductId].Name}")));
         }
 
         var seconds = (DateTime.UtcNow - started).TotalSeconds;
@@ -99,19 +99,19 @@ public static class Matching
         return 0;
     }
 
-    // Ein Produkttyp kann in mehreren Zutaten stecken — "Gouda" als Schnittkäse und als
+    // Ein Produkttyp kann in mehreren Produkten stecken — "Gouda" als Schnittkäse und als
     // geriebener Käse —, jede davon ist eine richtige Antwort.
     static Dictionary<string, HashSet<string>> Expectations(RuleSet rs)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         var map = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
-        foreach (var ing in rs.Ingredients.Values.Where(i => i.Meta.ValidOn(today)))
-            foreach (var name in ing.Aliases.Prepend(ing.Name))
+        foreach (var ware in rs.Products.Values.Where(p => p.Meta.ValidOn(today)))
+            foreach (var name in ware.Aliases.Prepend(ware.Name))
             {
                 var key = Fold(name);
                 if (key == "") continue;
                 if (!map.TryGetValue(key, out var set)) map[key] = set = new HashSet<string>(StringComparer.Ordinal);
-                set.Add(ing.Id);
+                set.Add(ware.Id);
             }
         return map;
     }

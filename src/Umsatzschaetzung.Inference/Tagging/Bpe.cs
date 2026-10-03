@@ -24,7 +24,6 @@ public sealed class Bpe
     public int Unk { get; }
     public int Bos { get; }
     public int Eos { get; }
-    public int Pad { get; }
 
     Bpe(byte[] specJson, byte[] vocabJson, byte[] bytesJson, byte[] mergesTxt)
     {
@@ -34,7 +33,6 @@ public sealed class Bpe
         var specials = root.GetProperty("specials");
         Bos = specials.GetProperty("<s>").GetInt32();
         Eos = specials.GetProperty("</s>").GetInt32();
-        Pad = specials.GetProperty("<pad>").GetInt32();
         split = new Regex(root.GetProperty("pretokenizer_regex").GetString()!, RegexOptions.Compiled);
 
         using var v = JsonDocument.Parse(vocabJson);

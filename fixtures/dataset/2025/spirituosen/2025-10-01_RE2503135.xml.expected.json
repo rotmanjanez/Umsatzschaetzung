@@ -28,7 +28,7 @@
       "lineNet": 14382,
       "vat": 1900,
       "gtin": "4009862310035",
-      "expectedIngredientId": "ing.spirituose",
+      "expectedProductId": "prod.spirituose",
       "expectedFactor": 700
     },
     {
@@ -43,7 +43,7 @@
       "lineNet": 11900,
       "vat": 1900,
       "gtin": "4003310011106",
-      "expectedIngredientId": "ing.wodka",
+      "expectedProductId": "prod.wodka",
       "expectedFactor": 1000
     },
     {
@@ -58,7 +58,7 @@
       "lineNet": 3270,
       "vat": 1900,
       "gtin": "4003310000704",
-      "expectedIngredientId": "ing.wodka",
+      "expectedProductId": "prod.wodka",
       "expectedFactor": 700
     },
     {
@@ -73,7 +73,7 @@
       "lineNet": 9030,
       "vat": 1900,
       "gtin": "8501110080231",
-      "expectedIngredientId": "ing.rum",
+      "expectedProductId": "prod.rum",
       "expectedFactor": 700
     },
     {
@@ -88,7 +88,7 @@
       "lineNet": 22320,
       "vat": 1900,
       "gtin": "4067700010208",
-      "expectedIngredientId": "ing.likoer",
+      "expectedProductId": "prod.likoer",
       "expectedFactor": 700
     },
     {
@@ -103,7 +103,7 @@
       "lineNet": 3380,
       "vat": 1900,
       "gtin": "4067700012516",
-      "expectedIngredientId": "ing.likoer",
+      "expectedProductId": "prod.likoer",
       "expectedFactor": 480
     },
     {
@@ -118,7 +118,7 @@
       "lineNet": 690,
       "vat": 1900,
       "gtin": "3052910000615",
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     },
     {
@@ -132,7 +132,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1170,
       "vat": 1900,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

@@ -4,24 +4,24 @@ namespace Umsatzschaetzung.App.Ui;
 
 public enum Exclusion { Unmapped, Unused, NoRevenue }
 
-public sealed class ExcludedRow(LineGroup group, Exclusion why, string? ingredientId, string ingredient)
+public sealed class ExcludedRow(LineGroup group, Exclusion why, string? productId, string product)
 {
     public LineGroup Group { get; } = group;
     public Exclusion Why { get; } = why;
-    public string? IngredientId { get; } = ingredientId;
+    public string? ProductId { get; } = productId;
     public string Name => Group.Name;
-    public string Ingredient { get; } = ingredient;
+    public string Product { get; } = product;
     public long Net { get; set; }
     public string LineNet => Format.Cents(Net);
     public bool CanDropRevenue => Why == Exclusion.Unused;
     public bool CanRestoreRevenue => Why == Exclusion.NoRevenue;
-    public string DropTip => $"„{Ingredient}“ bringt in diesem Betrieb keinen Umsatz";
-    public string RestoreTip => $"„{Ingredient}“ bringt doch Umsatz";
+    public string DropTip => $"„{Product}“ bringt in diesem Betrieb keinen Umsatz";
+    public string RestoreTip => $"„{Product}“ bringt doch Umsatz";
     public string Reason => Why switch
     {
         Exclusion.Unmapped => "nicht zugeordnet",
-        Exclusion.Unused => $"„{Ingredient}“ in keiner Rezeptur",
-        _ => $"„{Ingredient}“ bringt keinen Umsatz",
+        Exclusion.Unused => $"„{Product}“ in keiner Rezeptur",
+        _ => $"„{Product}“ bringt keinen Umsatz",
     };
     public string Spoken => Name + ", " + LineNet + ", " + Reason;
 }
@@ -74,9 +74,9 @@ public sealed class ExclusionModel : Observable
         foreach (var l in r.Unmapped)
             Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.Unmapped, null, ""));
         foreach (var l in r.NoRevenue)
-            Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.NoRevenue, l.IngredientId, Names.Ingredient(rs, l.IngredientId)));
+            Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.NoRevenue, l.ProductId, Names.Product(rs, l.ProductId)));
         foreach (var l in r.Unused)
-            Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.Unused, l.IngredientId, Names.Ingredient(rs, l.IngredientId)));
+            Add(l.InvoiceId, l.LineNo, l.LineNet, g => new ExcludedRow(g, Exclusion.Unused, l.ProductId, Names.Product(rs, l.ProductId)));
         var sorted = rows.Values.OrderByDescending(x => x.Net).ToList();
         Omitted.Replace(sorted.Where(x => x.Why != Exclusion.Unused));
         Unused.Replace(sorted.Where(x => x.Why == Exclusion.Unused));

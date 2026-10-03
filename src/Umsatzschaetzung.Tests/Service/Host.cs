@@ -69,7 +69,7 @@ public sealed class MatcherHost : Host
             SupplierName = Rheinland,
             SupplierArticleId = "Z-1",
             Observed = "Zwickl naturtrueb, Keg 30 l",
-            IngredientId = "ing.bier.fass",
+            ProductId = "prod.bier.fass",
             Factor = 30000,
             Confirmed = true,
         });

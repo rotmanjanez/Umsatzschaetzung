@@ -17,21 +17,21 @@ public class MappingTests(MatcherHost host)
     {
         var friseur = await svc.Cases.Put(Vorlage.Blank("Salon", "96021.0"), ct);
         var sugs = await svc.Mapping.Suggest(friseur.Id, Korn, null, ct);
-        Assert.DoesNotContain(sugs, s => s.Mapping.IngredientId == "ing.korn");
+        Assert.DoesNotContain(sugs, s => s.Mapping.ProductId == "prod.korn");
     }
 
     [Fact]
     public async Task ACaseWithoutGewerbeSeesEverything()
     {
         var neu = await svc.Cases.Put(Vorlage.Blank(), ct);
-        Assert.Equal("ing.korn", (await svc.Mapping.Suggest(neu.Id, Korn, null, ct))[0].Mapping.IngredientId);
+        Assert.Equal("prod.korn", (await svc.Mapping.Suggest(neu.Id, Korn, null, ct))[0].Mapping.ProductId);
     }
 
     [Fact]
     public async Task AnEmptyCaseIdSuggestsWithoutFilter()
     {
         var sugs = await svc.Mapping.Suggest("", Korn, null, ct);
-        Assert.Equal("ing.korn", sugs[0].Mapping.IngredientId);
+        Assert.Equal("prod.korn", sugs[0].Mapping.ProductId);
         Assert.Equal(700, sugs[0].Mapping.Factor);
         Assert.Equal(OriginKind.Encoder, sugs[0].Kind);
         Assert.Equal("", sugs[0].Mapping.Id);
@@ -41,7 +41,7 @@ public class MappingTests(MatcherHost host)
     public async Task AnUnknownCaseSuggestsWithoutFilter()
     {
         var sugs = await svc.Mapping.Suggest("fall-gibt-es-nicht", Korn, null, ct);
-        Assert.Equal("ing.korn", sugs[0].Mapping.IngredientId);
+        Assert.Equal("prod.korn", sugs[0].Mapping.ProductId);
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class MappingTests(MatcherHost host)
         var sugs = await svc.Mapping.Suggest("", line, Rheinland, ct);
         Assert.True(sugs.Count > 1);
         Assert.Equal((OriginKind.Exact, "map.zwickl"), (sugs[0].Kind, sugs[0].Mapping.Id));
-        Assert.Equal((OriginKind.Encoder, "ing.korn"), (sugs[1].Kind, sugs[1].Mapping.IngredientId));
-        Assert.DoesNotContain(sugs.Skip(1), s => s.Mapping.IngredientId == "ing.bier.fass");
+        Assert.Equal((OriginKind.Encoder, "prod.korn"), (sugs[1].Kind, sugs[1].Mapping.ProductId));
+        Assert.DoesNotContain(sugs.Skip(1), s => s.Mapping.ProductId == "prod.bier.fass");
     }
 
     // The rules are shared by whoever asks; an exact hit edited before it is saved must not change them.
@@ -117,7 +117,7 @@ public class MappingTests(MatcherHost host)
         Assert.False((await svc.Rules.Load(ct)).Mappings.ContainsKey(guessed));
         var saved = await svc.Cases.Get(late.Id, ct);
         Assert.Equal(["map.zwickl", guessed], saved.Invoices[0].Lines.Select(l => l.MappingId));
-        Assert.Equal((false, "ing.bier.fass"), saved.Mappings[guessed!] is var m ? (m.Confirmed, m.IngredientId) : default);
+        Assert.Equal((false, "prod.bier.fass"), saved.Mappings[guessed!] is var m ? (m.Confirmed, m.ProductId) : default);
     }
 
     [Fact]

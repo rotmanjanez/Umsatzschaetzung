@@ -40,12 +40,13 @@ public sealed class Matcher(IRanking? ranking)
         var on = date ?? DateOnly.FromDateTime(DateTime.Now);
         var hit = Match.Mapping(rs, supplier, on, line);
         var pack = PackSize.Read(line.Name);
+        var parts = Scale.Parts(rs);
         var sugs = (ranking is null ? [] : await ranking.Rank(rs, gewerbe, line, on, Candidates + 1, ct))
-            .Where(r => r.IngredientId != hit?.IngredientId && rs.Ingredients.ContainsKey(r.IngredientId))
+            .Where(r => r.ProductId != hit?.ProductId && rs.Products.ContainsKey(r.ProductId))
             .Take(Candidates)
             .Where(r => r.Confidence >= Floor)
             .Select(r => new Suggestion(
-                Mapping(supplier, line, r.IngredientId, Packed(rs, rs.Ingredients[r.IngredientId], line.UnitCode, pack)),
+                Mapping(supplier, line, r.ProductId, Packed(rs, parts, r.ProductId, line.UnitCode, pack)),
                 r.Confidence,
                 OriginKind.Encoder))
             .ToList();
@@ -53,7 +54,7 @@ public sealed class Matcher(IRanking? ranking)
         return sugs;
     }
 
-    static ArticleMapping Mapping(string? supplier, InvoiceLine line, string ingredientId, long? factor)
+    static ArticleMapping Mapping(string? supplier, InvoiceLine line, string productId, long? factor)
     {
         var m = new ArticleMapping
         {
@@ -61,7 +62,7 @@ public sealed class Matcher(IRanking? ranking)
             Gtin = line.Gtin,
             Observed = line.Name,
             UnitCode = string.IsNullOrEmpty(line.UnitCode) ? null : line.UnitCode,
-            IngredientId = ingredientId,
+            ProductId = productId,
             Factor = factor,
         };
         if (!string.IsNullOrEmpty(supplier)) m.SupplierArticleId = line.SellerArticleId;
@@ -70,8 +71,8 @@ public sealed class Matcher(IRanking? ranking)
     }
 
     // Only a factor read from the article name is kept with the mapping; one from the
-    // ingredient's piece weight is looked up at calculation time, so correcting the weight
+    // product's piece weight is looked up at calculation time, so correcting the weight
     // corrects every case.
-    static long? Packed(RuleSet rs, Ingredient ing, string unitCode, Pack? pack) =>
-        Factors.Of(Scale.Of(rs, ing.Id), ing.Piece, unitCode, pack, null) is (var f, _, FactorSource.Pack) ? f : null;
+    static long? Packed(RuleSet rs, HashSet<string> parts, string productId, string unitCode, Pack? pack) =>
+        Factors.Of(Scale.Counted(rs, productId, parts), rs.Products[productId].Piece, unitCode, pack, null) is (var f, _, FactorSource.Pack) ? f : null;
 }

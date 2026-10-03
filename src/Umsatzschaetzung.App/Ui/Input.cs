@@ -16,7 +16,15 @@ public static class Input
     public static long? Micro(string s) => Scaled(s, 6);
 
     public static long? Int(string s) =>
-        long.TryParse(s.Replace(".", "").Trim(), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var v) ? v : null;
+        Ungrouped(s.Trim()) is { } digits && long.TryParse(digits, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var v) ? v : null;
+
+    // A dot only groups thousands, as "12.500": "0.5" is no number here, the decimal mark is the comma.
+    static string? Ungrouped(string s)
+    {
+        if (!s.Contains('.')) return s;
+        var groups = s.TrimStart('-').Split('.');
+        return groups[0].Length is >= 1 and <= 3 && groups.Skip(1).All(g => g.Length == 3) ? s.Replace(".", "") : null;
+    }
 
     public static DateOnly? Date(string s) =>
         DateOnly.TryParseExact(s.Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
@@ -32,14 +40,14 @@ public static class Input
 
     static long? Scaled(string s, int decimals)
     {
-        s = Edit(s).Replace(".", "").Replace(" ", "");
+        s = Edit(s).Replace(" ", "");
         if (s == "") return null;
         var neg = s.StartsWith('-');
         if (neg) s = s[1..];
         var comma = s.IndexOf(',');
-        var whole = comma < 0 ? s : s[..comma];
+        if (Ungrouped(comma < 0 ? s : s[..comma]) is not { } whole) return null;
         var frac = comma < 0 ? "" : s[(comma + 1)..];
-        if (frac.Length > decimals) frac = frac[..decimals];
+        if (whole == "" && frac == "" || frac.Length > decimals) return null;
         frac = frac.PadRight(decimals, '0');
         if (!long.TryParse(whole + frac, NumberStyles.None, CultureInfo.InvariantCulture, out var v)) return null;
         return neg ? -v : v;

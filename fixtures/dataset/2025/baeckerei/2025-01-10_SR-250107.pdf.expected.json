@@ -27,7 +27,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4556,
       "vat": 700,
-      "expectedIngredientId": "ing.broetchen",
+      "expectedProductId": "prod.broetchen",
       "expectedFactor": 1
     },
     {
@@ -41,7 +41,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3162,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel",
+      "expectedProductId": "prod.brezel",
       "expectedFactor": 1
     },
     {
@@ -55,7 +55,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1870,
       "vat": 700,
-      "expectedIngredientId": "ing.broetchen",
+      "expectedProductId": "prod.broetchen",
       "expectedFactor": 1
     },
     {
@@ -69,7 +69,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2928,
       "vat": 700,
-      "expectedIngredientId": "ing.burgerbun",
+      "expectedProductId": "prod.burgerbun",
       "expectedFactor": 1
     },
     {
@@ -83,7 +83,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1620,
       "vat": 700,
-      "expectedIngredientId": "ing.baguette",
+      "expectedProductId": "prod.baguette",
       "expectedFactor": 1
     },
     {
@@ -97,7 +97,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3224,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel",
+      "expectedProductId": "prod.brezel",
       "expectedFactor": 1
     },
     {
@@ -111,7 +111,7 @@
       "priceBaseQty": 1000,
       "lineNet": 480,
       "vat": 700,
-      "expectedIngredientId": "ing.toastbrot",
+      "expectedProductId": "prod.toastbrot",
       "expectedFactor": 750
     },
     {
@@ -125,7 +125,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3774,
       "vat": 700,
-      "expectedIngredientId": "ing.broetchen",
+      "expectedProductId": "prod.broetchen",
       "expectedFactor": 1
     },
     {
@@ -139,7 +139,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1620,
       "vat": 700,
-      "expectedIngredientId": "ing.baguette",
+      "expectedProductId": "prod.baguette",
       "expectedFactor": 1
     },
     {
@@ -153,7 +153,7 @@
       "priceBaseQty": 1000,
       "lineNet": 4092,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel",
+      "expectedProductId": "prod.brezel",
       "expectedFactor": 1
     },
     {
@@ -167,7 +167,7 @@
       "priceBaseQty": 1000,
       "lineNet": 720,
       "vat": 700,
-      "expectedIngredientId": "ing.toastbrot",
+      "expectedProductId": "prod.toastbrot",
       "expectedFactor": 750
     },
     {
@@ -181,7 +181,7 @@
       "priceBaseQty": 1000,
       "lineNet": 2380,
       "vat": 700,
-      "expectedIngredientId": "ing.broetchen",
+      "expectedProductId": "prod.broetchen",
       "expectedFactor": 1
     },
     {
@@ -195,7 +195,7 @@
       "priceBaseQty": 1000,
       "lineNet": 1968,
       "vat": 700,
-      "expectedIngredientId": "ing.burgerbun",
+      "expectedProductId": "prod.burgerbun",
       "expectedFactor": 1
     },
     {
@@ -209,7 +209,7 @@
       "priceBaseQty": 1000,
       "lineNet": 3596,
       "vat": 700,
-      "expectedIngredientId": "ing.brezel",
+      "expectedProductId": "prod.brezel",
       "expectedFactor": 1
     },
     {
@@ -223,7 +223,7 @@
       "priceBaseQty": 1000,
       "lineNet": 760,
       "vat": 700,
-      "expectedIngredientId": "none",
+      "expectedProductId": "none",
       "expectedFactor": 0
     }
   ]

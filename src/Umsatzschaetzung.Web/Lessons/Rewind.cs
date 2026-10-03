@@ -113,22 +113,15 @@ public static partial class Coach
         await session.Restore(kase);
     }
 
+    // The rules go back in one write: entries that changed together, as a unit and the recipe counting
+    // in it, fit only together. A store that refuses says so; the lesson does not go on half rewound.
     static async Task Revert(string rules)
     {
         if (rules == "" || session!.Rules is not { } now) return;
-        var then = Json.Deserialize<RuleSet>(rules);
-        foreach (var (kind, id, rule) in Entries(then).Where(e => Text(now.Find(e.Kind, e.Id)) != Text(e.Rule)))
-            await session.Restore(kind, id, rule);
-        foreach (var (kind, id, _) in Entries(now).AsEnumerable().Reverse().Where(e => then.Find(e.Kind, e.Id) is null))
-            await session.Restore(kind, id, null);
+        var back = now.Back(Json.Deserialize<RuleSet>(rules));
+        if (back.Count > 0 && !await session.Restore(back))
+            throw new InvalidOperationException("Die Regeln ließen sich nicht zurücksetzen: " + session.Error);
     }
-
-    static string? Text(IRuleEntity? rule) => rule is null ? null : JsonSerializer.Serialize(rule, rule.GetType(), ModelJsonContext.Default);
-
-    static List<(Entity Kind, string Id, IRuleEntity Rule)> Entries(RuleSet r) =>
-        [.. new IEnumerable<IRuleEntity>[] { r.Categories.Values, r.Ingredients.Values, r.Products.Values, r.Mappings.Values, r.YieldRules.Values, r.Gewerbezweige.Values, r.Templates.Values }
-            .SelectMany(e => e)
-            .Select(e => (RuleChange.KindOf(e), e.Id, e))];
 
     static List<Step> Load(string json) =>
         string.IsNullOrEmpty(json) ? [] : JsonSerializer.Deserialize(json, LessonJson.Default.ListStep) ?? [];
