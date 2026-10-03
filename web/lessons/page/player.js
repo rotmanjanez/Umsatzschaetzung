@@ -28,7 +28,7 @@ export function player(lesson, running) {
   running.then(() => { up = true; });
 
   document.title = `${lesson.title} · ${lesson.course}`;
-  sheet(beats[0].card, true);
+  sheet(beats[0]?.card || {}, true);
   slider.max = starts.at(-1) + length.at(-1);
   $('ticks').replaceChildren(...chapters.slice(1).map(c => {
     const tick = document.createElement('i');
