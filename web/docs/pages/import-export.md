@@ -12,7 +12,7 @@ das Programm, ob sie ersetzt werden soll.
 
 ## Regeln gehen nicht mit
 
-Zutaten, Produkte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung,
+Produkte, Rezepte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung,
 sondern in der Regel-Datenbank des Rechners, siehe [Regeln](regeln.md). Die Prüfung
 verweist nur darauf.
 
@@ -29,7 +29,7 @@ heraus, so wie er angezeigt wird.
 In einer geöffneten Rechnung schreibt das Pfeilsymbol oben rechts
 (**CSV exportieren**) deren gelesene Daten als Tabelle: Kopf mit Lieferant,
 Nummer, Datum und Summen, darunter jede Position mit Menge, Preisen,
-Steuersatz und der Zutat, der sie zugeordnet ist. Das Symbol ist gesperrt,
+Steuersatz und dem Produkt, dem sie zugeordnet ist. Das Symbol ist gesperrt,
 bis die letzte Änderung gespeichert ist — exportiert wird, was in der Prüfung
 steht.
 

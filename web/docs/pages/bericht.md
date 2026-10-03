@@ -10,7 +10,7 @@ steht auf der [Kalkulation](kalkulation.md#nicht-berucksichtigt), nicht hier.
 ## Aufbau
 
 **Hinweise** stehen vorneweg, wenn etwas noch nicht stimmt: ein Produkt ohne
-Preis, eine Zutat, die nur über ein geschätztes Stückgewicht umgerechnet wurde,
+Preis, eine Ware, die nur über ein geschätztes Stückgewicht umgerechnet wurde,
 eine näherungsweise bestimmte Zuteilung. Ein Bericht ohne Hinweise hat keine offenen
 Punkte. Ins PDF gehen die Hinweise nicht mit.
 
@@ -30,10 +30,14 @@ Der Anhang belegt, woher die Zahlen kommen:
 - **A: Eingangspositionen**: jede Rechnungszeile, die eingegangen ist.
 - **B: Rezepturen**: je Produkt Rezept, Sparte, Einsatz je Portion, Preis und
   Steuersatz. Für die Prüfung angepasste Rezepte stehen so, wie sie gerechnet
-  sind.
-- **C: Ausbeute**: je Zutat, wie viel vom Einkauf verkaufsfähig ist, dazu die
+  sind; ein Rezept für mehr als eine Portion nennt, was es ergibt, etwa
+  „ergibt 20 Stück“, ein Produkt ohne Rezept steht „wie eingekauft“. Kommen
+  Portionen aus mehr als einer Herkunft, etwa aus gekauften und selbst
+  gemachten Pommes, zeigt **Portionen je Herkunft** jede mit ihren Portionen und
+  ihrem Einsatz.
+- **C: Ausbeute**: je Ware, wie viel vom Einkauf verkaufsfähig ist, dazu die
   angewandte Ertragsregel.
-- **D: Portionen je Zutat**: je Zutat die Produkte, in die die verkaufsfähige
+- **D: Portionen je Ware**: je Ware die Produkte, in die die verkaufsfähige
   Menge geht, mit Portionen, Menge je Portion und Menge, darunter der Rest.
 - **E: Umsatz über den Rohgewinnaufschlagsatz**: die einzelnen Positionen ohne Portion
   und Preis, jede mit dem Satz, der für sie gilt. Es gilt der Satz der

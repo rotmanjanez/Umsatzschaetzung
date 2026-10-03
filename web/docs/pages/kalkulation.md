@@ -2,16 +2,16 @@
 
 Die Kalkulation beantwortet eine Frage: Welchen Umsatz hätte der Betrieb mit
 dem, was er eingekauft hat, machen müssen? Sie rechnet dafür vom Einkauf zum
-Verkauf, Zutat für Zutat.
+Verkauf, Ware für Ware.
 
 ## Der Rechenweg
 
 <ol class="us-flow">
-<li><b>Einkauf</b> Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit der Rezepte: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit <a href="../pruefung/#bestand">Bestand</a> zählt nur, was verbraucht wurde.</li>
+<li><b>Einkauf</b> Die zugeordneten Rechnungspositionen des Zeitraums, umgerechnet in die Einheit des Produkts: 116 Fässer zu 50 l sind 5.800 l Fassbier. Mit <a href="../pruefung/#bestand">Bestand</a> zählt nur, was verbraucht wurde.</li>
 <li><b>Verkaufsfähige Menge</b> Davon ab geht der Abzug der gewählten Ertragsregel, etwa für Schankverlust oder Bruch.</li>
-<li><b>Portionen</b> Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt, nach deren Rezepten.</li>
+<li><b>Portionen</b> Die verkaufsfähige Menge wird auf die Produkte des Sortiments verteilt: was so verkauft wird, wie es eingekauft ist, direkt, alles andere nach seinem Rezept.</li>
 <li><b>Umsatz</b> Portionen mal Preis, netto gerechnet. Aus diesen Portionen folgt der Rohgewinnaufschlagsatz.</li>
-<li><b>Geschätzter Umsatz</b> Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Zutaten ohne Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.</li>
+<li><b>Geschätzter Umsatz</b> Was keine Portion mit Preis geworden ist (Produkte ohne Preis, nicht zugeteilte Ware, Ware in keiner Rezeptur), geht mit seinem Einsatz zuzüglich dieses Satzes in den Umsatz ein.</li>
 </ol>
 
 Jede Änderung an Rechnungen, Zuordnung, Sortiment, Rezepten oder
@@ -24,7 +24,9 @@ Einkäufe** und zuletzt das **Ergebnis**.
 
 Das Sortiment sind die Produkte, die der Betrieb führt, mit Bruttopreis und
 Steuersatz, wie sie auf der Karte stehen. Die Produkte und ihre Rezepte kommen
-aus den [Regeln](regeln.md#produkte), nur der Preis gehört zur Prüfung. Ein
+aus den [Regeln](regeln.md#produkte), nur der Preis gehört zur Prüfung. Auch ein
+Produkt ohne Rezept kann im Sortiment stehen, etwa eine Flasche Limonade, die so
+verkauft wird, wie sie eingekauft ist. Ein
 Rezept lässt sich zusätzlich für die Prüfung anpassen, siehe
 [Rezeptur anpassen](#rezeptur); das Produkt steht dann mit
 **Rezept angepasst** in der Liste.
@@ -39,7 +41,7 @@ Die Speisekarte lässt sich auch als Tabelle übernehmen, siehe
 
 ## Portionen
 
-Dieselbe Zutat steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l,
+Dieselbe Ware steckt oft in mehreren Produkten: Fassbier in 0,3 l und 0,5 l,
 Schweinefleisch in Schnitzel und Cordon Bleu. Wie der Betrieb sie tatsächlich
 aufgeteilt hat, weiß niemand. Das Programm setzt dafür keine Quote, sondern
 rechnet die Aufteilung aus, die den Einkauf am vollständigsten aufbraucht, also
@@ -49,6 +51,20 @@ Unter **Portionen** steht je Produkt, wie viele Portionen es bekommen hat und
 welcher Umsatz daraus folgt. Ein Klick auf ein Produkt zeigt rechts, was eine
 Portion im Einkauf kostet, und seine Rezeptur; für die Prüfung angepasste Produkte
 tragen **angepasst**.
+
+Kann ein Teil eingekauft oder selbst gemacht sein, rechnet die Kalkulation mit
+beidem. Pommes etwa können tiefgekühlt eingekauft oder aus Kartoffeln
+geschnitten sein, sobald Pommes frites ein Rezept aus Kartoffeln haben, siehe
+[Produkte](regeln.md#produkte). Auch dann verteilt die Kalkulation so, dass vom
+ganzen Einkauf möglichst wenig übrig bleibt. Kommen
+die Portionen eines Produkts so aus mehr als einer Herkunft, steht rechts je
+**Herkunft**, wie viele Portionen woraus entstanden sind; der Bericht zeigt
+dasselbe unter **Portionen je Herkunft**.
+
+Teilen sich mehrere Produkte dieselben Waren, auch über Beilagen und andere
+Teilrezepte, ist die genaue Aufteilung oft zu aufwendig; dann rechnet das
+Programm sie näherungsweise. Das kommt schon bei einer kleinen Speisekarte vor. Rechts steht dann **Näherungsweise
+verteilt**, im Bericht ein Hinweis.
 
 Die Aufteilung ist eine Rechnung, keine Feststellung. Sie zeigt, was der
 Einkauf hergibt, nicht, was tatsächlich über die Theke ging.
@@ -69,11 +85,11 @@ Die Seite zeigt:
 
 ## Ertragsregeln { #ertragsregeln }
 
-Auf der Seite **Ertragsregeln** stehen die Zutaten und Kategorien der Prüfung, für
+Auf der Seite **Ertragsregeln** stehen die Produkte und Kategorien der Prüfung, für
 die es eine [Ertragsregel](regeln.md#ertragsregeln) gibt. Voreingestellt ist
 die Standardregel, gibt es keine, **Kein Abzug**. Hat der Betrieb etwa eine alte
 Schankanlage mit belegbar höherem Verlust, wird hier die passende Regel gewählt;
-die Wahl einer Zutat geht der ihrer Kategorie vor.
+die Wahl für ein Produkt geht der für seine Kategorie vor.
 
 Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug hat
 einen Namen, und der Bericht nennt ihn. Fehlt eine passende Regel, wird sie
@@ -90,9 +106,9 @@ gewählten Produkts, gekennzeichnet mit **Katalog** oder **Nur diese Prüfung**.
   Prüfung an. Der Katalog bleibt unverändert.
 
 Die Abschrift ist das ganze Rezept, nicht nur die Abweichung. Ihre Zeilen
-lassen sich bearbeiten (Zutat, Menge, Einheit, das Plus für **Zutat hinzufügen**);
-abweichende Zeilen zeigen grau den Katalogwert, etwa **Katalog: 200 g**. Jede
-Zutat bleibt in der Einheit, in der sie in allen Rezepten gemessen wird. Wird
+lassen sich bearbeiten (Produkt, Menge, Einheit, das Plus für **Produkt hinzufügen**);
+abweichende Zeilen zeigen grau den Katalogwert, etwa **Katalog: 200 g**. Jedes
+Produkt bleibt in seiner Einheit. Wird
 das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.
 
 **Auf Katalog zurücksetzen** verwirft die Anpassung. **In den Katalog
@@ -118,19 +134,19 @@ den Umsatz eingeht, in zwei Listen mit Betrag und Grund.
 
 **Nicht Teil der Ermittlung des Aufschlagsatzes**: Der Umsatz dieser Positionen wird über den
 Rohgewinnaufschlagsatz ihrer Sparte geschätzt (Bericht, Anhang E), sie verändern den
-Satz selbst aber nicht. Entweder kommt die Zutat in keinem Produkt des
-Sortiments vor, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
-in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf eine
-Zutat ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu
-Recht: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder Zutaten, die
-ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient
+Satz selbst aber nicht. Entweder braucht kein Produkt des Sortiments diese
+Ware, oder der Zuordnung fehlt der Faktor, sodass sich die Menge nicht
+in Portionen umrechnen lässt. Fracht und Verpackung gehören besser auf ein
+Produkt ohne Sparte oder aus der Zuordnung heraus. Echte Ware steht hier meist zu
+Recht: Kleinigkeiten, für die sich kein eigenes Produkt im Sortiment lohnt, oder
+Waren, die ein Rezept nicht aufs Gramm genau abbildet. Erst ein großer Betrag verdient
 einen zweiten Blick; dann ist oft die Zuordnung falsch, oder im Sortiment fehlt
-ein Produkt. Welche Produkte die Zutat verwenden, steht unter
+ein Produkt. Welche Produkte die Ware verwenden, steht unter
 [Regeln → Produkte](regeln.md#produkte).
 
 **Nicht in der Umsatzschätzung**: Diese Positionen fehlen im Umsatz nach BP
 ganz: Positionen, die unter [Zuordnung](zuordnung.md) noch offen sind, und
-Zutaten, die ohne Umsatz festgelegt sind.
+Produkte, die ohne Umsatz festgelegt sind.
 
 Pfand und Leergut stehen nicht in der Liste. Über die Zeit gleichen sie sich
 aus, darum zählen sie auch nicht zu den erfassten Einkäufen. Unter der Liste
@@ -142,9 +158,9 @@ Vorschlägen und die Belege. Eine falsche Zuordnung lässt sich dort direkt
 korrigieren; die Kalkulation und die Vorschau rechnen danach neu.
 
 Ob eine Ware Umsatz bringt, hängt am Betrieb, nicht am Katalog. Das × am Ende
-einer Zeile unter **Nicht Teil der Ermittlung des Aufschlagsatzes** nimmt ihre
-Zutat aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt
-für alle Positionen dieser Zutat in dieser Prüfung, auch für später eingelesene
+einer Zeile unter **Nicht Teil der Ermittlung des Aufschlagsatzes** nimmt ihr
+Produkt aus der Schätzung, etwa bei Reinigungsmitteln oder Müllbeuteln. Das gilt
+für alle Positionen dieses Produkts in dieser Prüfung, auch für später eingelesene
 Rechnungen; sie stehen dann unter **Nicht in der Umsatzschätzung**. Das ↺ am
 Ende der Zeile nimmt die Festlegung zurück.
 

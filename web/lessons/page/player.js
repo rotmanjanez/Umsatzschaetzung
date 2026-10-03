@@ -101,7 +101,14 @@ export function player(lesson, running) {
     line(beat.note, 'note');
     $('card').classList.toggle('act', !!beat.show?.act);
     if (beat.show?.page) track('spot', 'on own', () => union(own(beat.show), own(beat.through)), false);
-    else if (beat.show) track('spot', 'on', () => union(box(beat.show, false), span(beat.through)));
+    else if (beat.show) {
+      let reveal = true;
+      track('spot', 'on', () => {
+        const found = box(beat.show, reveal);
+        if (found) reveal = false;
+        return union(found, span(beat.through));
+      });
+    }
     await speak(beat);
     if (g !== run) return;
     await sleep(PAUSE + (beat.hold || 0) * 1000);
@@ -149,15 +156,11 @@ export function player(lesson, running) {
     stop();
     line();
     sheet({ kicker, title: lesson.done?.title || 'Gut gemacht!', text: lesson.done?.text }, true);
-    $('start').hidden = false;
-    $('start').textContent = 'Noch einmal von vorn';
-    $('start').onclick = () => location.reload();
     $('all').hidden = false;
     if (lesson.next) {
       $('next').href = lesson.next.href;
       $('next').textContent = `Weiter: ${lesson.next.title}  ▶`;
       $('next').hidden = false;
-      $('start').className = 'quiet';
     }
     $('stage').classList.remove('gone');
   }

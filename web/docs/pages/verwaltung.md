@@ -16,7 +16,7 @@ Eine **Prüfung** ist eine einzelne Datei mit allen Rechnungen und Scans. Sie
 gehört einer Person und wird nicht geteilt, sondern bei Bedarf
 [weitergegeben](import-export.md#prufung-weitergeben).
 
-Die **Regel-Datenbank** `rules.db` enthält Zutaten, Produkte, Rezepte,
+Die **Regel-Datenbank** `rules.db` enthält Produkte, Rezepte,
 Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit
 aller Prüfungen und wächst mit jeder, siehe [Regeln](regeln.md).
 
@@ -43,7 +43,7 @@ Freigabe.
 
 Mehrere Personen können gleichzeitig mit derselben Regel-Datenbank arbeiten.
 Die meiste Zeit werden Regeln nur gelesen. Geschrieben wird, wenn jemand eine
-Zuordnung bestätigt oder eine Zutat, ein Produkt oder eine Ertragsregel ändert,
+Zuordnung bestätigt oder ein Produkt oder eine Ertragsregel ändert,
 und jede Änderung betrifft nur diesen einen Eintrag.
 
 Das Programm verlässt sich dabei nicht auf die Sperren von SQLite, die nicht

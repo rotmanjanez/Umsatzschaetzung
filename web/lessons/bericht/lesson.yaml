@@ -81,10 +81,10 @@ chapters:
           wird verkauft. Beim Zapfen geht Bier verloren, Gemüse verdirbt, das
           Personal isst mit.
 
-          Die Seite führt nur die Kategorien und Zutaten dieser Prüfung, für die es
-          eine Ertragsregel gibt, **Nach Kategorie** und **Nach Zutat**. Je Zeile
-          wird gewählt, welche Regel gilt; die Wahl einer Zutat geht der ihrer
-          Kategorie vor. Die Kalkulation rechnet sofort neu.
+          Die Seite führt nur die Kategorien und Produkte dieser Prüfung, für die es
+          eine Ertragsregel gibt, **Nach Kategorie** und **Nach Produkt**. Je Zeile
+          wird gewählt, welche Regel gilt; die Wahl für ein Produkt geht der für
+          seine Kategorie vor. Die Kalkulation rechnet sofort neu.
         shot:
           name: bericht-ertragsregeln
           at: { text: "Nach Kategorie", up: StackPanel }
@@ -102,7 +102,7 @@ chapters:
           Standard hinterlegt oder hier ausgewählt ist.
         show: { text: "Bier vom Fass", up: Grid }
         text: |-
-          Voreingestellt ist die Standardregel der Zutat oder Kategorie, gibt es
+          Voreingestellt ist die Standardregel des Produkts oder der Kategorie, gibt es
           keine, **Kein Abzug**. Beim Gasthaus steht überall **Kein Abzug**. Für
           **Bier vom Fass** stehen drei Regeln **Schankverlust** mit 3 %, 5 % und
           8 % zur Wahl, keine davon ist Standard. Hat ein Betrieb etwa eine alte
@@ -127,7 +127,7 @@ chapters:
         hold: 0.5
         text: |-
           Die Ertragsregeln stehen in der
-          [Regel-Datenbank](../verwaltung.md#regel-datenbank), neben Zutaten,
+          [Regel-Datenbank](../verwaltung.md#regel-datenbank), neben Produkten,
           Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das
           Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und
           Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe
@@ -224,7 +224,7 @@ chapters:
           2. **Rohgewinnaufschlag**: Einsatz, Umsatz, Rohgewinn und Aufschlagsatz je
              Sparte, darunter je Produkt Einsatz und Nettopreis je Portion.
           3. **Anhang**: die Eingangspositionen, die Rezepturen je Produkt, die
-             Ausbeute mit der angewandten Ertragsregel und die Portionen je Zutat,
+             Ausbeute mit der angewandten Ertragsregel und die Portionen je Ware,
              damit jede Zahl des Berichts nachvollziehbar bleibt.
       - say: >-
           Stimmt noch etwas nicht, fehlt zum Beispiel bei einem Produkt der Preis,

@@ -75,9 +75,8 @@ Start wiederkommt.
 | Tabelle | Inhalt | Maßstab und Sonderwerte |
 |---|---|---|
 | `category`, `category_gewerbe`, `category_gebinde` | Kategorien, auf Gewerbekennzahlen und Packmittel begrenzt | keine Zeile in `category_gewerbe` oder `category_gebinde` heißt: alle |
-| `ingredient`, `ingredient_alias` | Zutaten und die Warenarten, unter denen sie gebucht werden | `piece_amount` in g oder ml je Stück, in `piece_unit`; leer: kein Richtwert |
-| `mapping` | bestätigte Zuordnungen von Rechnungszeilen zu Zutaten | `factor` ist der Inhalt eines Gebindes in ml, g oder Stück; leer, wo die Einheit selbst umrechnet |
-| `product`, `recipe_line` | Produkte und ihre Rezepturen | `amount` in `unit`; mit `sub_product_id` ist die Zeile ein Teilrezept in Stück |
+| `product`, `product_alias`, `recipe_line` | Produkte, die Warenarten, unter denen sie gebucht werden, und ihre Rezepturen aus anderen Produkten | gezählt in `unit`; ein Rezept ergibt `batch` davon; `piece_amount` in g oder ml je Stück, in `piece_unit`, leer: kein Richtwert; eine Zeile nennt `amount` von `part_id` in `unit` |
+| `mapping` | bestätigte Zuordnungen von Rechnungszeilen zu Produkten | `factor` ist der Inhalt eines Gebindes in der Einheit des Produkts; leer, wo die Einheit selbst umrechnet |
 | `yield_rule` | Ertragsregeln | `deduction` in Basispunkten |
 | `gewerbe` | wählbare Gewerbekennzahlen | |
 | `template` | Berichtsvorlagen | `is_default` bei genau einer |
@@ -98,9 +97,9 @@ hat dasselbe Format.
 | `declared` | erklärter Umsatz je Steuersatz | `vat` in Basispunkten, `net` in Cent |
 | `inventory` | Anfangs- und Endbestand | `opening`, `closing` in ganzen `unit` |
 | `case_product`, `case_recipe` | Verkaufspreise und eigene Rezepturen | `gross_price` in Cent, `0` oder weniger: Preis fehlt. `recipe_basis` ist die Prüfsumme der Katalogrezeptur, von der kopiert wurde; leer: es gilt die des Katalogs |
-| `yield_choice` | gewählte Ertragsregel je Zutat oder Kategorie | `yield_rule_id` leer: kein Abzug |
+| `yield_choice` | gewählte Ertragsregel je Produkt oder Kategorie | `yield_rule_id` leer: kein Abzug |
 | `pinned` | fest vorgegebene Portionen | ganze Portionen |
-| `no_revenue` | Zutaten ohne Umsatz, etwa Reinigungsmittel | |
+| `no_revenue` | Produkte ohne Umsatz, etwa Reinigungsmittel | |
 | `case_mapping` | Zuordnungen, die das Programm selbst getroffen hat | wie `mapping` in `rules.db` |
 | `invoice` | Rechnungen | Summen in Cent. `stated_net`, `stated_gross` leer: der Beleg druckt keine. `verified_at` leer: nicht durchgesehen |
 | `invoice_line` | Rechnungszeilen | `quantity` in Tausendsteln, `unit_price` in Millionstel Euro je `price_base_qty`, `line_net` in Cent, `vat` in Basispunkten |

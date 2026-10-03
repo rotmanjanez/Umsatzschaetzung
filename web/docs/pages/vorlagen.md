@@ -48,7 +48,7 @@ Eine Vorlage ist HTML mit drei Arten von Platzhaltern:
 ```
 
 - Ein Pfad geht mit `.` in ein Objekt und mit `[…]` über einen anderen Wert:
-  `rules.ingredients[l.ingredientId].name`. Eine Zahl in `[…]` wählt einen
+  `rules.products[l.partId].name`. Eine Zahl in `[…]` wählt einen
   Eintrag einer Liste, gezählt ab 0: `revenue[0].vat`.
 - Eingesetzte Werte werden für HTML maskiert. HTML aus den Daten ist deshalb
   nicht möglich.
@@ -101,9 +101,10 @@ mit der installierten Version überein. Als JSON Schema:
 | `excluded` | Zahl | Einkauf ohne Zuordnung oder ohne Umsatz, in Cent. |
 | `estimated` | [EstimateGroups](#m-estimategroups) | Über den Aufschlagsatz geschätzter Umsatz, getrennt nach Herkunft. |
 | `calculation` | Liste von [CalculationGroup](#m-calculationgroup) | Kalkulation je Produkt: eine Gruppe je Sparte, außerhalb der Gastronomie eine Gruppe ohne Sparte. |
+| `routed` | Liste von [ProductRow](#m-productrow) | Produkte, deren Portionen auf mehr als einem Weg entstanden, etwa teils aus gekauften, teils aus selbst gemachten Pommes. |
 | `rahmen` | [Rahmen](#m-rahmen)? | Rahmensatz der Richtsatzsammlung für die Gewerbekennzahl, falls eindeutig. |
 | `lage` | `"unter"` \| `"im"` \| `"über"`? | Lage des kalkulierten Aufschlagsatzes zum Rahmen. |
-| `anyYields` | ja/nein | Ob irgendeine Zutat eine Ertragsregel trägt. |
+| `anyYields` | ja/nein | Ob irgendein Bestand eine Ertragsregel trägt. |
 | `gewerbe` | [Gewerbezweig](#m-gewerbezweig)? | Die Gewerbekennzahl der Prüfung aus den Regeln. |
 | `richtsatz` | [Richtsatzbasis](#m-richtsatzbasis)? | Die verwendete Richtsatzsammlung mit der ganzen Gewerbeklasse der Prüfung und den Pauschbeträgen. |
 | `suppliers` | Liste von [SupplierSum](#m-suppliersum) | Je Lieferant Anzahl und Summe aller Rechnungen der Prüfung, in Cent. |
@@ -143,7 +144,6 @@ mit der installierten Version überein. Als JSON Schema:
 | `store` | Text? |
 | `version` | Zahl |
 | `categories` | ID → [Category](#m-category) |
-| `ingredients` | ID → [Ingredient](#m-ingredient) |
 | `mappings` | ID → [ArticleMapping](#m-articlemapping) |
 | `products` | ID → [Product](#m-product) |
 | `yieldRules` | ID → [YieldRule](#m-yieldrule) |
@@ -157,7 +157,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `caseId` | Text |
 | `computedAt` | Zeitpunkt |
 | `totals` | [Totals](#m-totals) |
-| `ingredients` | Liste von [IngredientRow](#m-ingredientrow) |
+| `supply` | Liste von [SupplyRow](#m-supplyrow) |
 | `products` | Liste von [ProductRow](#m-productrow) |
 | `markups` | Liste von [MarkupRow](#m-markuprow) |
 | `unmapped` | Liste von [UnmappedLine](#m-unmappedline) |
@@ -203,6 +203,27 @@ mit der installierten Version überein. Als JSON Schema:
 | `rows` | Liste von [ProductRow](#m-productrow) |
 | `cost` | Zahl |
 | `markup` | Zahl |
+
+### ProductRow { #m-productrow }
+
+| Feld | Typ |
+|---|---|
+| `productId` | Text |
+| `name` | Text |
+| `binding` | Liste von Text |
+| `pinReason` | Text |
+| `sparte` | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
+| `portions` | Zahl |
+| `costPerPortion` | Zahl |
+| `costOfGoods` | Zahl |
+| `pinned` | ja/nein |
+| `grossPrice` | Zahl |
+| `vat` | Zahl |
+| `unitNet` | Zahl |
+| `revenueNet` | Zahl |
+| `markup` | Zahl |
+| `priceMissing` | ja/nein |
+| `routes` | Liste von [RouteRow](#m-routerow) |
 
 ### Rahmen { #m-rahmen }
 
@@ -278,7 +299,7 @@ mit der installierten Version überein. Als JSON Schema:
 
 | Feld | Typ |
 |---|---|
-| `ingredientId` | Text |
+| `productId` | Text |
 | `opening` | Zahl |
 | `closing` | Zahl |
 | `unit` | Text |
@@ -308,14 +329,14 @@ mit der installierten Version überein. Als JSON Schema:
 | `productId` | Text |
 | `grossPrice` | Zahl |
 | `vat` | Zahl |
-| `recipe` | Liste von [RecipeLine](#m-recipeline)? |
+| `recipe` | Liste von [PartLine](#m-partline)? |
 | `recipeBasis` | Zahl |
 
 ### YieldChoice { #m-yieldchoice }
 
 | Feld | Typ |
 |---|---|
-| `ingredientId` | Text? |
+| `productId` | Text? |
 | `categoryId` | Text? |
 | `yieldRuleId` | Text? |
 
@@ -338,7 +359,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `name` | Text? |
 | `observed` | Text? |
 | `unitCode` | Text? |
-| `ingredientId` | Text |
+| `productId` | Text |
 | `factor` | Zahl? |
 | `confirmed` | ja/nein |
 | `meta` | [Meta](#m-meta) |
@@ -354,24 +375,18 @@ mit der installierten Version überein. Als JSON Schema:
 | `sparte` | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
 | `meta` | [Meta](#m-meta) |
 
-### Ingredient { #m-ingredient }
-
-| Feld | Typ |
-|---|---|
-| `id` | Text |
-| `name` | Text |
-| `categoryId` | Text |
-| `aliases` | Liste von Text |
-| `piece` | [Piece](#m-piece)? |
-| `meta` | [Meta](#m-meta) |
-
 ### Product { #m-product }
 
 | Feld | Typ |
 |---|---|
 | `id` | Text |
 | `name` | Text |
-| `recipe` | Liste von [RecipeLine](#m-recipeline) |
+| `unit` | Text |
+| `batch` | Zahl |
+| `categoryId` | Text? |
+| `aliases` | Liste von Text |
+| `piece` | [Piece](#m-piece)? |
+| `recipe` | Liste von [PartLine](#m-partline) |
 | `meta` | [Meta](#m-meta) |
 
 ### YieldRule { #m-yieldrule }
@@ -381,7 +396,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `id` | Text |
 | `name` | Text |
 | `categoryId` | Text? |
-| `ingredientId` | Text? |
+| `productId` | Text? |
 | `deduction` | Zahl |
 | `default` | ja/nein |
 | `meta` | [Meta](#m-meta) |
@@ -423,11 +438,11 @@ mit der installierten Version überein. Als JSON Schema:
 | `depositRefunded` | Zahl |
 | `excludedShare` | Zahl |
 
-### IngredientRow { #m-ingredientrow }
+### SupplyRow { #m-supplyrow }
 
 | Feld | Typ |
 |---|---|
-| `ingredientId` | Text |
+| `productId` | Text |
 | `name` | Text |
 | `unit` | `"ml"` \| `"g"` \| `"piece"` |
 | `purchases` | Liste von [Purchase](#m-purchase) |
@@ -440,29 +455,9 @@ mit der installierten Version überein. Als JSON Schema:
 | `yield` | [YieldRule](#m-yieldrule)? |
 | `yieldRate` | Zahl |
 | `sellable` | Zahl |
-| `products` | Liste von [IngredientProduct](#m-ingredientproduct) |
+| `usedBy` | Liste von [SupplyUse](#m-supplyuse) |
 | `leftover` | Zahl |
 | `binding` | ja/nein |
-
-### ProductRow { #m-productrow }
-
-| Feld | Typ |
-|---|---|
-| `productId` | Text |
-| `name` | Text |
-| `binding` | Liste von Text |
-| `pinReason` | Text |
-| `sparte` | `"unbestimmt"` \| `"getraenke"` \| `"speisen"` \| `"handelsware"` |
-| `portions` | Zahl |
-| `costPerPortion` | Zahl |
-| `costOfGoods` | Zahl |
-| `pinned` | ja/nein |
-| `grossPrice` | Zahl |
-| `vat` | Zahl |
-| `unitNet` | Zahl |
-| `revenueNet` | Zahl |
-| `markup` | Zahl |
-| `priceMissing` | ja/nein |
 
 ### MarkupRow { #m-markuprow }
 
@@ -492,7 +487,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `lineNo` | Zahl |
 | `name` | Text |
 | `lineNet` | Zahl |
-| `ingredientId` | Text |
+| `productId` | Text |
 
 ### EstimateRow { #m-estimaterow }
 
@@ -554,6 +549,14 @@ mit der installierten Version überein. Als JSON Schema:
 | `cost` | Zahl |
 | `revenueNet` | Zahl |
 
+### RouteRow { #m-routerow }
+
+| Feld | Typ |
+|---|---|
+| `portions` | Zahl |
+| `costPerPortion` | Zahl |
+| `parts` | Liste von [RoutePart](#m-routepart) |
+
 ### Satz { #m-satz }
 
 | Feld | Typ |
@@ -601,12 +604,11 @@ mit der installierten Version überein. Als JSON Schema:
 | `at` | Zeitpunkt |
 | `auto` | ja/nein |
 
-### RecipeLine { #m-recipeline }
+### PartLine { #m-partline }
 
 | Feld | Typ |
 |---|---|
-| `ingredientId` | Text |
-| `productId` | Text? |
+| `partId` | Text |
 | `amount` | Zahl |
 | `unit` | Text |
 
@@ -634,7 +636,7 @@ mit der installierten Version überein. Als JSON Schema:
 | `qty` | Zahl |
 | `net` | Zahl |
 
-### IngredientProduct { #m-ingredientproduct }
+### SupplyUse { #m-supplyuse }
 
 | Feld | Typ |
 |---|---|
@@ -656,8 +658,17 @@ mit der installierten Version überein. Als JSON Schema:
 
 | Feld | Typ |
 |---|---|
-| `ingredientId` | Text |
+| `productId` | Text |
 | `qty` | Zahl |
+
+### RoutePart { #m-routepart }
+
+| Feld | Typ |
+|---|---|
+| `productId` | Text |
+| `name` | Text |
+| `unit` | `"ml"` \| `"g"` \| `"piece"` |
+| `perPortion` | Zahl |
 
 ### Staffel { #m-staffel }
 

@@ -71,11 +71,11 @@ chapters:
           Sie zeigt die Einkäufe, die nicht über Rezeptur und Preis in den Umsatz
           eingehen, in zwei Listen mit dem Grund je Position:
 
-          - **Nicht Teil der Ermittlung des Aufschlagsatzes**: Die Zutat kommt in
-            keinem Produkt des Sortiments vor, oder der Zuordnung fehlt der Faktor.
+          - **Nicht Teil der Ermittlung des Aufschlagsatzes**: Kein Produkt des
+            Sortiments braucht die Ware, oder der Zuordnung fehlt der Faktor.
             Ihr Umsatz wird über den Rohgewinnaufschlagsatz geschätzt. Meist ist das
             in Ordnung: Kleinigkeiten, für die sich kein eigenes Produkt lohnt, oder
-            Zutaten, die ein Rezept nicht aufs Gramm genau abbildet.
+            Waren, die ein Rezept nicht aufs Gramm genau abbildet.
           - **Nicht in der Umsatzschätzung**: Einkäufe, die keinen Umsatz bringen,
             etwa Putzmittel oder Servietten. Auf sie wird kein Gewinn ermittelt.
 
@@ -123,7 +123,7 @@ chapters:
         text: |-
           Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch**
           trägt das Zeichen **In Rezeptur**: Ein Produkt des Sortiments braucht die
-          Zutat, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und
+          Ware, hier **Schnitzel mit Pommes**. Den Vorschlag wählen und
           **Zuordnen**.
         shot:
           name: kalkulation-schnitzel
@@ -179,8 +179,8 @@ chapters:
       - say: >-
           Die Servietten sind nach unten gewandert, und zwei andere Zeilen gleich
           mit: die Müllbeutel und das Filterpapier für den Kaffee. Die hat das
-          Programm alle derselben Zutat zugeordnet, nämlich Verpackung und Einweg.
-          Und das Kreuz gilt für die ganze Zutat, nicht nur für die eine Zeile.
+          Programm alle demselben Produkt zugeordnet, nämlich Verpackung und Einweg.
+          Und das Kreuz gilt für das ganze Produkt, nicht nur für die eine Zeile.
         show: { name: OmittedGrid }
       - say: >-
           Als Nächstes die Kohlensäure für die Schankanlage, die CO2-Flasche.
@@ -209,8 +209,8 @@ chapters:
         task: Kreuz bei „Versandkostenpauschale“ klicken.
         hint: Das Kreuz steht ganz rechts in der Zeile.
         text: |-
-          Die Festlegung gilt für die Zutat, nicht nur für die angeklickte Position.
-          Alle Positionen derselben Zutat wandern mit: mit den Servietten
+          Die Festlegung gilt für das Produkt, nicht nur für die angeklickte Position.
+          Alle Positionen desselben Produkts wandern mit: mit den Servietten
           (**Verpackung und Einweg**) auch Müllbeutel und Filterpapier, mit dem
           Handspülmittel (**Reinigung und Hygiene**) Spülmaschinen-Reiniger,
           Klarspüler, Handtuchrollen und Handschuhe, mit der Versandkostenpauschale
@@ -225,7 +225,7 @@ chapters:
           alt: Was keinen Umsatz bringt, steht unter „Nicht in der Umsatzschätzung“
       - say: >-
           Unten steht jetzt alles, was keinen Umsatz bringt. Wer sich vertan hat:
-          Das Symbol am Zeilenende holt eine Zutat wieder zurück.
+          Das Symbol am Zeilenende holt ein Produkt wieder zurück.
         show: { name: OmittedGrid }
       - say: >-
           Oben bleiben gut viertausenddreihundert Euro, das sind keine sieben
@@ -292,14 +292,19 @@ chapters:
           Auf **4. Kalkulation** die Seite **Portionen** öffnen und **Schnitzel mit
           Pommes** anklicken. Rechts steht, wie es gerechnet ist:
 
-          - **Rezeptur je Portion**: 180 g Schweinefleisch, dazu Pommes frites und
-            Pflanzenöl. Beim Schweinefleisch steht **begrenzt die Portionen**: Es
-            ist die Zutat, von der am wenigsten da ist.
+          - **Rezeptur je Portion**: ein **Schnitzel, ohne Beilage** und eine
+            Portion **Pommes, Beilage**, jedes ein eigenes Produkt mit eigenem Rezept.
+            Im Schnitzel stecken 180 g Schweinefleisch, in der Beilage Pommes frites
+            und Pflanzenöl. Beim Schnitzel steht **begrenzt die Portionen**: Sein
+            Schweinefleisch ist die Ware, von der am wenigsten da ist.
           - **Portionen**: Das Schweinefleisch könnte auch in den Braten des
-            Mittagstischs gehen. Die Kalkulation verteilt eine Zutat, die sich
+            Mittagstischs gehen. Die Kalkulation verteilt eine Ware, die sich
             mehrere Produkte teilen, so, dass möglichst viel vom Einkauf aufgeht;
             das Schnitzel verbraucht mit Pommes und Öl mehr davon. So entfallen alle
             rund 547 kg auf das Schnitzel, bei 180 g je Stück 3.039 Portionen.
+            Weil sich viele Gerichte dieselben Waren teilen, steht darunter
+            **Näherungsweise verteilt**: Das Programm hat die Aufteilung nicht bis
+            aufs letzte Stück durchgerechnet.
           - **Umsatz (netto)**: 3.039 Portionen zu 15,90 € brutto, ohne 19 %
             Umsatzsteuer, ergeben 40.601,04 €.
 
@@ -309,10 +314,11 @@ chapters:
           at: { name: ProductGrid, up: Grid }
           alt: Die Seite „Portionen“ mit dem Schnitzel und seinem Rezept
       - say: >-
-          Rechts steht das Rezept: hundertachtzig Gramm Schweinefleisch pro
-          Schnitzel, dazu Pommes und Öl. Beim Schweinefleisch steht, begrenzt die
+          Rechts steht das Rezept: ein Schnitzel ohne Beilage und eine Portion
+          Pommes. Beide haben ihr eigenes Rezept, im Schnitzel stecken
+          hundertachtzig Gramm Schweinefleisch. Beim Schnitzel steht, begrenzt die
           Portionen. Das Fleisch bestimmt also, wie viele Schnitzel es werden.
-        show: { text: "Schweinefleisch", up: StackPanel }
+        show: { text: "Schnitzel, ohne Beilage", up: StackPanel }
       - say: >-
           Das Schweinefleisch könnte auch in den Braten vom Mittagstisch gehen.
           Das Programm verteilt es aber so, dass möglichst viel vom Einkauf
@@ -337,9 +343,9 @@ chapters:
   - title: Ertragsregeln
     beats:
       - text: |-
-          Auf der Seite **Ertragsregeln** stehen die Kategorien und Zutaten der
+          Auf der Seite **Ertragsregeln** stehen die Kategorien und Produkte der
           Prüfung, für die es Ertragsregeln gibt, etwa für Schankverlust oder Bruch.
-          Je Zutat oder Warengruppe lässt sich wählen, welche Regel gilt; die
+          Je Produkt oder Warengruppe lässt sich wählen, welche Regel gilt; die
           Kalkulation rechnet sofort neu. Für das Beispiel bleiben die
           Voreinstellungen.
 
@@ -357,10 +363,10 @@ chapters:
           - **Für diese Prüfung anpassen** kopiert das Rezept in die Prüfung. Der
             Katalog bleibt, wie er ist.
 
-          Angepasst lassen sich die Zeilen bearbeiten: Zutat, Menge und Einheit,
-          dazu fügt das Plus (**Zutat hinzufügen**) eine Zeile an. Weicht eine Zeile
+          Angepasst lassen sich die Zeilen bearbeiten: Produkt, Menge und Einheit,
+          dazu fügt das Plus (**Produkt hinzufügen**) eine Zeile an. Weicht eine Zeile
           vom Katalog ab, steht grau daneben, was er vorsieht, etwa **Katalog:
-          200 g**. Eine Zutat wird in jedem Rezept in derselben Einheit gemessen,
+          200 g**. Ein Produkt wird in jedem Rezept in seiner Einheit gemessen,
           auch im angepassten. Die Kalkulation rechnet bei jeder Änderung sofort
           neu; unter **Portionen** steht beim Produkt **angepasst**, auf
           **3. Sortiment** **Rezept angepasst**, und ein Klick darauf führt hierher.

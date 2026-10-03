@@ -30,7 +30,7 @@ Häufige Fragen, nach Arbeitsschritt geordnet.
 <ol class="us-flow">
 <li><b><a href="pruefung/">Prüfung anlegen</a></b> Betrieb, Zeitraum, erklärter Umsatz, auf Wunsch Bestand und Gewerbekennzahl.</li>
 <li><b><a href="rechnungen/">Rechnungen</a></b> E-Rechnungen und Scans einlesen, falsch gelesene Scans korrigieren.</li>
-<li><b><a href="zuordnung/">Zuordnung</a></b> Jede Rechnungsposition einer Zutat zuordnen. Das meiste schlägt das Programm vor.</li>
+<li><b><a href="zuordnung/">Zuordnung</a></b> Jede Rechnungsposition einem Produkt zuordnen. Das meiste schlägt das Programm vor.</li>
 <li><b><a href="kalkulation/#sortiment">Sortiment</a></b> Was der Betrieb verkauft und zu welchem Preis.</li>
 <li><b><a href="kalkulation/">Kalkulation</a></b> Vom Einkauf über Rezepte und Preise zum Umsatz, den der Einkauf ergibt.</li>
 <li><b><a href="bericht/">Bericht</a></b> Erklärter neben kalkuliertem Umsatz, jede Zahl bis zur Rechnungszeile belegt, als PDF.</li>
@@ -49,7 +49,7 @@ dort das Gerät nicht.
 
 ## Grundlagen
 
-- [Regeln](regeln.md): Zutaten, Produkte, Rezepte und Ertragsregeln. Sie gehören
+- [Regeln](regeln.md): Produkte, Rezepte und Ertragsregeln. Sie gehören
   zum Rechner, nicht zur Prüfung, und wachsen mit jeder Prüfung.
 - [Import und Export](import-export.md): Prüfungen weitergeben, Sortiment als
   Tabelle, Rechnung als CSV.

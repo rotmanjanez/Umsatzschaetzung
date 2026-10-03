@@ -81,21 +81,23 @@
 
 ??? frage "Was ist der Faktor, und warum fehlt er?"
 
-    Der Inhalt eines Gebindes in der Einheit des Rezepts, etwa 3000 für einen
-    3-kg-Block zu einem Rezept in Gramm. Steht die Packungsgröße nicht im
-    Artikeltext und hat die Zutat kein Stückgewicht, kann das Programm ihn nicht
+    Der Inhalt eines Gebindes in der Einheit des Produkts, etwa 3000 für einen
+    3-kg-Block Käse, der in Gramm gezählt wird. Steht die Packungsgröße nicht im
+    Artikeltext und hat das Produkt kein Stückgewicht, kann das Programm ihn nicht
     ermitteln. Ohne Faktor lässt sich die Menge nicht in Portionen umrechnen.
     → [Eine Position zuordnen](zuordnung.md#eine-position-zuordnen)
 
 ??? frage "Wohin mit Pfand, Fracht, Reinigungsmitteln?"
 
-    Auf eine Zutat der Kategorie **Kein Wareneinsatz**, Pfand auf **Pfand und
-    Leergut**. Sie sind damit erledigt und gehen in keine Kalkulation ein.
+    Auf ein Produkt der Kategorie **Kein Wareneinsatz**, Pfand auf **Pfand und
+    Leergut**. Pfand zählt dann nicht mit. Das Übrige wird über den
+    Aufschlagsatz geschätzt, bis es unter **Übrige Einkäufe** mit dem × aus der
+    Schätzung genommen wird.
     → [Kein Wareneinsatz](zuordnung.md#kein-wareneinsatz)
 
 ??? frage "Dieselbe Ware wird immer wieder zur Durchsicht vorgelegt."
 
-    Bei der Zutat unter **Regeln → Zutaten** die Warenart ergänzen, etwa „Gouda“
+    Beim Produkt unter **Regeln → Produkte** die Warenart ergänzen, etwa „Gouda“
     bei Schnittkäse.
     → [Warenarten pflegen](zuordnung.md#warenarten)
 
@@ -104,10 +106,10 @@
 ??? frage "Ein Produkt hat 0 Portionen."
 
     Die Kalkulation verteilt den Einkauf so auf die Produkte, dass möglichst
-    wenig übrig bleibt. Ein Produkt geht leer aus, wenn eine seiner Zutaten gar
-    nicht eingekauft wurde oder schon in anderen Produkten aufgeht. Rechts steht
-    seine Rezeptur; ob jede Zutat darin im Einkauf vorkommt, zeigt die
-    Zuordnung.
+    wenig übrig bleibt. Ein Produkt geht leer aus, wenn etwas aus seinem Rezept
+    weder eingekauft noch aus Eingekauftem gemacht werden kann oder schon in
+    anderen Produkten aufgeht. Rechts steht seine Rezeptur; ob jede Zeile darin
+    im Einkauf vorkommt, zeigt die Zuordnung.
     → [Portionen](kalkulation.md#portionen)
 
 ??? frage "Ein Produkt hat Portionen, aber keinen Umsatz."
@@ -118,7 +120,7 @@
 
 ??? frage "Bei den Ertragsregeln steht „Kein Abzug“."
 
-    Für diese Zutat oder Kategorie ist keine Ertragsregel gewählt und keine
+    Für dieses Produkt oder diese Kategorie ist keine Ertragsregel gewählt und keine
     Standardregel hinterlegt, es wird also nichts abgezogen, auch kein
     Schankverlust. Eine Regel wird unter **Regeln → Ertragsregeln** angelegt und
     steht dann in jeder Prüfung zur Wahl.
@@ -140,14 +142,14 @@
 ??? frage "Eine Ware bringt keinen Umsatz, wird aber geschätzt."
 
     Unter **Übrige Einkäufe** mit dem × am Ende der Zeile aus der Schätzung
-    nehmen. Das gilt für die ganze Zutat, bei Sammelzutaten wie „Reinigung und
-    Hygiene“ also für alles, was ihr zugeordnet ist. Das ↺ nimmt es zurück.
+    nehmen. Das gilt für das ganze Produkt, bei Sammelprodukten wie „Reinigung und
+    Hygiene“ also für alles, was ihm zugeordnet ist. Das ↺ nimmt es zurück.
     → [Übrige Einkäufe](kalkulation.md#nicht-berucksichtigt)
 
 ??? frage "Eine Ware fehlt unter „Übrige Einkäufe“."
 
-    Dann steht ihre Zutat in einem Rezept des Sortiments und geht über Portionen
-    in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie
+    Dann steht sie selbst im Sortiment oder in einem Rezept des Sortiments und
+    geht über Portionen in den Umsatz ein, nicht über den Aufschlagsatz. Welche Produkte sie
     verwenden, steht unter **Regeln → Produkte**.
     → [Produkte](regeln.md#produkte)
 
@@ -159,7 +161,7 @@
 
 ??? frage "Die Lagerbestände zu Beginn und Ende waren sehr verschieden."
 
-    Unter **Prüfung → Bestand** Anfangs- und Endbestand je Zutat eintragen. Das
+    Unter **Prüfung → Bestand** Anfangs- und Endbestand je Produkt eintragen. Das
     lohnt sich bei Getränken, Tiefkühlware und Wein, nicht bei Frischware.
     → [Bestand](pruefung.md#bestand)
 
@@ -185,7 +187,7 @@
 ??? frage "Ein Kollege sieht in meiner Prüfung andere Zahlen."
 
     Die Prüfung nimmt Rechnungen, Preise und Entscheidungen mit, aber nicht die
-    Regeln: Zutaten, Produkte, bestätigte Zuordnungen und Ertragsregeln liegen auf
+    Regeln: Produkte, Rezepte, bestätigte Zuordnungen und Ertragsregeln liegen auf
     dem eigenen Rechner. Auf einem anderen Rechner ordnet das Programm neu zu,
     was es dort nicht kennt, und was offen bleibt, fehlt in der Kalkulation.
 

@@ -30,7 +30,7 @@ enthalten; auch es löscht der nächste Start.
 
 Bestätigt eine Person eine Zuordnung, speichert die Regel-Datenbank dazu den
 Lieferanten, die Artikelnummer, die GTIN, den Wortlaut der Rechnungszeile und
-die Zutat. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank
+das Produkt. Das Programm schlägt sie danach allen vor, die die Regel-Datenbank
 teilen. Zuordnungen, die das Programm selbst trifft, bleiben in der Prüfung.
 
 Nicht gespeichert werden Daten der geprüften Person, Mengen, Preise und Daten
@@ -112,6 +112,6 @@ Die Modelle laufen nur auf dem Rechner und lernen im Betrieb nicht dazu.
 |---|---|---|
 | PP-OCR (Apache-2.0) | Text auf dem Scan lesen | unverändert übernommen |
 | Belegtagger (MIT) | Kopf und Positionen erkennen | erzeugten Rechnungen mit erfundenen Daten |
-| Zuordnung (MIT) | Positionen Zutaten zuordnen | Artikeldaten von Lieferanten, von Sprachmodellen von OpenAI zugeordnet; keine Rechnungen aus Prüfungen |
+| Zuordnung (MIT) | Positionen Produkten zuordnen | Artikeldaten von Lieferanten, von Sprachmodellen von OpenAI zugeordnet; keine Rechnungen aus Prüfungen |
 
 Die Testrechnungen im Quellcode sind erfunden.

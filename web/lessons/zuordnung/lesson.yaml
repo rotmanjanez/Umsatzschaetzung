@@ -2,14 +2,14 @@ course: Umsatzschätzung Schritt für Schritt
 number: 3
 title: Offene Positionen zuordnen
 summary: >-
-  Das Programm ordnet fast alle Rechnungspositionen selbst einer Zutat zu. Wo es sich
-  nicht sicher ist, fragt es nach. Drei Beispiele aus dem Gasthaus Zur Linde.
+  Das Programm ordnet fast alle Rechnungspositionen selbst einem Produkt zu. Wo es sich
+  nicht sicher ist, fragt es nach. Vier Beispiele aus dem Gasthaus Zur Linde.
 window: [1440, 810]
 
 done:
   title: Geschafft!
   text: >-
-    Drei Positionen zugeordnet. Mit echten Rechnungen geht es genauso.
+    Vier Positionen zugeordnet. Mit echten Rechnungen geht es genauso.
 
 guide:
   page: web/docs/pages/guide/zuordnung.md
@@ -18,14 +18,14 @@ guide:
     <p class="us-steps"><a href="../start/">Prüfung</a><a href="../rechnungen/">1. Rechnungen</a><span class="here">2. Zuordnung</span><a href="../sortiment/">3. Sortiment</a><a href="../kalkulation/">4. Kalkulation</a><a href="../bericht/">5. Bericht</a></p>
 
     Eine Rechnung nennt die Ware so, wie der Lieferant sie nennt: „Frankenbräu
-    Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Zutaten: Fassbier. Die
+    Pils Fass 50 l KEG“. Die Kalkulation rechnet mit Produkten: Fassbier. Die
     Zuordnung ist die Verbindung dazwischen. Beim Import hat das Programm sie für
     fast alle Positionen schon hergestellt. Auf diesem Reiter wird nachgeholt, was
     es nicht wusste.
   end: |-
     !!! geschafft "Geschafft, wenn …"
-        - über der Liste `2 offen, 117 automatisch, 3 manuell` steht
-        - nur noch Leberkäse und Petersilie **Offen** sind
+        - über der Liste `3 offen, 115 automatisch, 4 manuell` steht
+        - nur noch Petersilie, Leberkäse und Putenbrustfilet **Offen** sind
 
     !!! nachlesen "Zum Nachlesen"
         Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit
@@ -35,7 +35,7 @@ guide:
     [Weiter: 3. Sortiment <span>Was das Gasthaus verkauft, und zu welchem Preis</span>](sortiment.md){ .us-next }
 
 chapters:
-  - title: Von der Rechnung zur Zutat
+  - title: Von der Rechnung zum Produkt
     beats:
       - card:
           kicker: Umsatzschätzung · Übung 3
@@ -55,10 +55,10 @@ chapters:
       - say: >-
           Auf der Karte steht nämlich nur ein Glas Rotwein, null Komma zwei Liter, und
           das Rezept dahinter sagt: zweihundert Milliliter Rotwein. Welcher Jahrgang
-          gerade offen ist, ist ihm egal. Darum rechnet das Programm mit Zutaten, und so
+          gerade offen ist, ist ihm egal. Darum rechnet das Programm mit Rotwein, und so
           passt ein Rezept in jedes Jahr und in jeden Betrieb.
       - say: >-
-          Was es dafür braucht, ist die Brücke von der Rechnung zur Zutat, und das ist
+          Was es dafür braucht, ist die Brücke von der Rechnung zum Produkt, und das ist
           die Zuordnung. Die meisten davon erledigt das Programm selbst, und nur wo es
           sich nicht sicher ist, fragt es nach.
 
@@ -75,12 +75,12 @@ chapters:
         text: |-
           Auf **2. Zuordnung** wechseln. Links stehen alle Artikel der Prüfung, jeder
           einmal, auch wenn er auf 25 Rechnungen vorkommt. Darüber steht die Bilanz:
-          `5 offen, 117 automatisch, 0 manuell`.
+          `7 offen, 115 automatisch, 0 manuell`.
       - say: >-
-          Links oben steht gleich, wie es ausschaut: Fünf Positionen sind noch
-          offen, und hundertsiebzehn hat das Programm schon selbst erledigt. Gar
+          Links oben steht gleich, wie es ausschaut: Sieben Positionen sind noch
+          offen, und hundertfünfzehn hat das Programm schon selbst erledigt. Gar
           nicht schlecht.
-        show: { starts: "5 offen" }
+        show: { starts: "7 offen" }
       - say: >-
           So wie die Liste sortiert ist, stehen die offenen ganz oben. Um genau die
           kümmern wir uns jetzt.
@@ -90,7 +90,7 @@ chapters:
           Die erste Spalte ist der Status. So wie die Liste zu Beginn sortiert ist, stehen
           die offenen oben:
 
-          - **Offen**: Das Programm war sich bei keiner Zutat sicher genug. Hier ist
+          - **Offen**: Das Programm war sich bei keinem Produkt sicher genug, oder es fehlt der Faktor. Hier ist
             eine Entscheidung nötig.
           - **Automatisch**: Das Programm hat zugeordnet, niemand hat es bestätigt.
           - **Manuell**: Ein Mensch hat die Zuordnung gewählt oder bestätigt.
@@ -98,7 +98,7 @@ chapters:
           name: zuordnung-liste
           at: { name: Groups, up: MappingView }
           trim: { bottom: 371 }
-          alt: Der Reiter „2. Zuordnung“ nach dem Import, fünf Positionen offen
+          alt: Der Reiter „2. Zuordnung“ nach dem Import, sieben Positionen offen
 
   - title: Ein Vorschlag, der nicht passt
     beats:
@@ -110,7 +110,7 @@ chapters:
         allow: [{ starts: "2022 Domina", up: DataGridRow }]
         rounds: 20
         task: Auf „2022 Domina trocken 0,75 l“ klicken.
-        hint: Es ist die fünfte Zeile, die letzte mit dem Status „Offen“.
+        hint: Es ist die siebte Zeile, die letzte mit dem Status „Offen“.
         text: |-
           Die Zeile **2022 Domina trocken 0,75 l** anklicken. Rechts erscheint alles,
           was zu diesem Artikel bekannt ist:
@@ -133,13 +133,13 @@ chapters:
           Darunter stehen seine Vorschläge, jeweils mit einer Sicherheit in Prozent.
         show: { text: "Schaumwein × 750 ml", up: ItemsControl }
       - say: >-
-          Es tippt auf Schaumwein, allerdings nur mit fünfundfünfzig Prozent, das
+          Es tippt auf Schaumwein, allerdings nur mit siebenundfünfzig Prozent, das
           ist also eher geraten. Rotwein liegt knapp dahinter, und deshalb hat das
           Programm nachgefragt.
         show: { text: "Schaumwein × 750 ml" }
         text: |-
-          Das Programm hält den Wein für Schaumwein, mit 55 % ist es sich aber nicht
-          sicher, und Rotwein steht mit 52 % gleich dahinter. Genau deshalb ist die
+          Das Programm hält den Wein für Schaumwein, mit 57 % ist es sich aber nicht
+          sicher, und Rotwein steht mit 51 % gleich dahinter. Genau deshalb ist die
           Position offen geblieben.
       - say: >-
           Domina ist aber ein fränkischer Rotwein, also nehmen wir Rotwein.
@@ -156,8 +156,8 @@ chapters:
           hat das Programm aus dem Namen gelesen.
         show: { name: FactorFields }
         text: |-
-          Der **Faktor** passt schon: Das Rezept für ein Glas Rotwein rechnet in
-          Millilitern, die Rechnung in Flaschen, und das Programm hat 750 ml je
+          Der **Faktor** passt schon: Rotwein wird in Millilitern gezählt, die
+          Rechnung in Flaschen, und das Programm hat 750 ml je
           Flasche aus dem Artikeltext gelesen. Darunter rechnet es vor:
           158 Flaschen × 750 ml = 118,5 l.
       - say: >-
@@ -189,14 +189,37 @@ chapters:
           sich auch Rezepte und Ertragsregeln, siehe
           [3. Sortiment](sortiment.md) und [5. Bericht](bericht.md).
 
+  - title: Was kein Wareneinsatz ist
+    beats:
+      - say: >-
+          Als Nächstes hat das Programm die CO2-Flasche aufgemacht, die steht ganz
+          oben in der Liste. Das ist die Kohlensäure für die Schankanlage. Das
+          Programm tippt auf Ausstattung und Bedarf, mit neunundsiebzig Prozent, und
+          das war ihm knapp zu wenig, um es allein zu entscheiden.
+        set: [{ do: select, at: { starts: "CO2-Flasche", up: DataGridRow } }]
+        show: { text: "Ausstattung und Bedarf", up: RadioButton }
+        text: |-
+          Als Nächstes **CO2-Flasche 10 kg Füllung** anklicken. Vorgeschlagen ist
+          **Ausstattung und Bedarf** mit 79 %, knapp unter der Schwelle. Die
+          Kohlensäure braucht die Schankanlage, verkauft wird sie nicht: Sie gehört
+          zu den Waren ohne Wareneinsatz, siehe
+          [Kein Wareneinsatz](../zuordnung.md#kein-wareneinsatz). Der Vorschlag passt,
+          also **Zuordnen**.
+      - say: >-
+          Das passt aber, verkauft wird die Kohlensäure ja nicht. Also auf
+          Zuordnen.
+        click: { text: "Zuordnen" }
+        done: { at: { starts: "„CO2-Flasche" } }
+        rounds: 8
+        task: Auf „Zuordnen“ klicken.
+
   - title: Wenn eine Menge fehlt
     beats:
       - say: >-
-          Als Nächstes hat das Programm die Kaffeesahne aufgemacht, die steht ganz oben
-          in der Liste.
+          Dann ist die Kaffeesahne dran, die steht jetzt ganz oben in der Liste.
         set: [{ do: select, at: { starts: "Kaffeesahne", up: DataGridRow } }]
         text: |-
-          Als Nächstes **Kaffeesahne Portionen 10 × 7,5 g 240er** anklicken. Die Zutat
+          Als Nächstes **Kaffeesahne Portionen 10 × 7,5 g 240er** anklicken. Das Produkt
           ist klar, **Sahne** ist schon gewählt. Aber der Faktor fehlt: Aus „Karton“
           lässt sich nicht lesen, wie viel drin ist. Das Feld **Faktor** ist dann mit
           einem Stern markiert, und darunter steht die Frage, die zu beantworten ist.
@@ -204,9 +227,9 @@ chapters:
           name: zuordnung-faktor-fehlt
           at: { text: "AUS DEN REGELN", up: Border }
           width: 630
-          alt: "Die Kaffeesahne: Zutat klar, Faktor fehlt"
+          alt: "Die Kaffeesahne: Produkt klar, Faktor fehlt"
       - say: >-
-          Die Zutat ist hier klar, das ist Sahne. Beim Faktor ist aber ein
+          Das Produkt ist hier klar, das ist Sahne. Beim Faktor ist aber ein
           Sternchen, und das heißt: Diese Angabe braucht das Programm unbedingt. Darunter
           fragt es, wie viel Sahne in einem Karton steckt. Aus dem Wort Karton allein
           kann es das nämlich nicht wissen.
@@ -221,7 +244,7 @@ chapters:
         accept: ["1800 ml"]
         text: |-
           Die Antwort steht meist im Artikeltext: 240 Portionen zu 7,5 g sind rund
-          1,8 l je Karton, das Rezept rechnet Sahne in Millilitern. `1800`{.copy}
+          1,8 l je Karton, Sahne wird in Millilitern gezählt. `1800`{.copy}
           eintragen, die Zeile darunter rechnet vor. Dann **Zuordnen**.
         shot:
           name: zuordnung-faktor
@@ -241,6 +264,7 @@ chapters:
           Als Nächstes hat das Programm gleich die Frühkartoffeln aufgemacht, und da
           passt schon alles: Kartoffeln, zwölfeinhalb Kilo der Sack. Also gleich auf
           Zuordnen.
+        set: [{ do: select, at: { starts: "Frühkartoffeln", up: DataGridRow } }]
         click: { text: "Zuordnen" }
         done: { at: { starts: "„Frühkartoffeln" } }
         rounds: 8
@@ -254,9 +278,11 @@ chapters:
   - title: Was offen bleiben darf
     beats:
       - text: |-
-          Bleiben **Leberkäse am Stück, ungebacken** und **Petersilie glatt, Bund**.
-          Beim Leberkäse hat der Scan die Einheit als „K8“ gelesen; ohne verlässliche
-          Einheit gibt es keinen verlässlichen Faktor. Bei der Petersilie lässt sich
+          Bleiben **Petersilie glatt, Bund**, **Leberkäse am Stück, ungebacken** und
+          **Putenbrustfilet frisch**. Beim Leberkäse hat der Scan die Einheit als „K8“
+          gelesen, beim Putenbrustfilet auf einer Rechnung „kg“ als „Keg“, also Fass;
+          ohne verlässliche Einheit gibt es keinen verlässlichen Faktor. Die übrigen
+          Rechnungen beider Artikel sind richtig gelesen und zugeordnet. Bei der Petersilie lässt sich
           aus „Bund“ nicht lesen, wie viel drin ist, und der Einkauf fällt kaum ins
           Gewicht.
 
@@ -266,14 +292,14 @@ chapters:
           erst geschätzt werden müsste und der Einkauf kaum ins Gewicht fällt, ist
           offen lassen die ehrlichere Antwort.
 
-          Am Ende steht über der Liste `2 offen`.
+          Am Ende steht über der Liste `3 offen`.
         act: [{ do: top, at: { name: Groups } }, { do: deselect, at: { name: Groups } }]
         shot:
           name: zuordnung-fertig
-          at: { starts: "2 offen", up: DockPanel }
+          at: { starts: "3 offen", up: DockPanel }
           width: 610
           below: true
-          alt: Nur Leberkäse und Petersilie sind noch offen
+          alt: Nur Petersilie, Leberkäse und Putenbrustfilet sind noch offen
 
   - title: Zusammenfassung
     beats:
@@ -283,7 +309,7 @@ chapters:
           list:
             - Reiter „2. Zuordnung“
             - Offene Zeile anklicken
-            - Zutat und Faktor prüfen
+            - Produkt und Faktor prüfen
             - „Zuordnen“ klicken
         say: >-
           Das war's schon. Man geht auf den Reiter Zuordnung, klickt eine offene Zeile

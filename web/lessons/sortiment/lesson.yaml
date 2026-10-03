@@ -21,7 +21,7 @@ guide:
     Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht
     es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist
     das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und
-    Zutaten rechnet die Kalkulation den Umsatz.
+    Einkauf rechnet die Kalkulation den Umsatz.
 
     Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der
     [Regel-Datenbank](../verwaltung.md#regel-datenbank) und gelten für jede Prüfung.
@@ -101,8 +101,8 @@ chapters:
           text: Rezept aus der Regel-Datenbank, Preis vom Betrieb.
         say: >-
           Letztes Mal haben wir gesehen, dass sich das Programm die Zuordnungen in
-          der Regel-Datenbank merkt. Dort stehen auch die Produkte, jedes mit
-          seinem Rezept, also zum Beispiel, wie viel Fleisch in ein Schnitzel kommt. Ein
+          der Regel-Datenbank merkt. Dort stehen auch die Produkte, und bei allem,
+          was die Küche selber macht, das Rezept, also zum Beispiel, wie viel Fleisch in ein Schnitzel kommt. Ein
           paar Grundrezepte bringt das Programm mit, damit man gleich loslegen kann.
           Was fehlt, legt man selbst dazu an, und so wächst der Katalog mit jeder
           Prüfung. Für unser Gasthaus reicht der Grundstock: Wir suchen uns aus, was
@@ -208,9 +208,11 @@ chapters:
       - say: >-
           Kommt der Betrieb später wieder dran, liest man diese Datei mit dem linken
           in der neuen Prüfung ein, und schon steht das Sortiment von damals da.
-          Dann passt man nur noch die Preise an, die sich geändert haben, und löscht,
-          was nicht mehr auf der Karte steht.
         show: { tip: "CSV importieren" }
+      - say: >-
+          Dann passt man nur noch die Preise an, die sich geändert haben, und löscht
+          mit dem Mistkübel, was nicht mehr auf der Karte steht.
+        show: { tip: "Aus dem Sortiment nehmen" }
       - act:
           - { do: pick, files: ["web/docs/pages/guide/sortiment-gasthaus.csv"] }
           - { do: click, at: { tip: "CSV importieren" } }

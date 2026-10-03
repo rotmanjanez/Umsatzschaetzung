@@ -37,7 +37,7 @@ plugins:
         Umsatzschätzung ist ein Desktop-Programm für Windows und macOS, das aus den
         Eingangsrechnungen eines Betriebs, etwa eines Gasthauses, nachrechnet, welchen
         Umsatz er mit seinem Einkauf hätte machen müssen, und diesen dem erklärten Umsatz
-        gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Zutaten
+        gegenüberstellt. Es liest E-Rechnungen und Scans, ordnet Rechnungspositionen Produkten
         zu, rechnet über Rezepte, Ertragsregeln und Verkaufspreise den Umsatz und belegt
         jede Zahl im Bericht bis zur Rechnungszeile. Die Dokumentation ist deutsch.
       full_output: llms-full.txt
@@ -48,11 +48,11 @@ plugins:
           - pruefungen.md: Liste der Prüfungen, anlegen, öffnen, löschen, wo eine Prüfung liegt
           - pruefung.md: Eckdaten, Zeitraum, erklärter Umsatz, Bestand und Gewerbekennzahl
           - rechnungen.md: E-Rechnungen und Scans einlesen, Formate, Durchsicht und Korrektur
-          - zuordnung.md: Rechnungspositionen Zutaten zuordnen, Vorschläge, Sicherheit und Faktor
+          - zuordnung.md: Rechnungspositionen Produkten zuordnen, Vorschläge, Sicherheit und Faktor
           - kalkulation.md: Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz
           - bericht.md: Aufbau des Berichts, Hinweise, Richtsatzvergleich und PDF
         Grundlagen:
-          - regeln.md: Zutaten, Produkte, Rezepte und Ertragsregeln, die für alle Prüfungen gelten
+          - regeln.md: Produkte, Rezepte und Ertragsregeln, die für alle Prüfungen gelten
           - import-export.md: Prüfungen weitergeben, Sortiment als Tabelle, Rechnung als CSV
           - verwaltung.md: Für die IT, Datenablage, gemeinsame Regel-Datenbank, unbeaufsichtigte Installation und Gruppenrichtlinien
           - datenschutz.md: Für IT und Datenschutz, wo Daten liegen, Löschung, Netzwerk, Signatur und Modelle

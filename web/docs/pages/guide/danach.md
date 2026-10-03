@@ -28,7 +28,7 @@ Zeile eine Kopie der Datei ab, wo man will; **Importieren** holt sie auf dem
 anderen Rechner in die Liste.
 
 !!! nachlesen "Zum Nachlesen"
-    Die Regeln, also Zutaten, Produkte und bestätigte Zuordnungen, stehen nicht
+    Die Regeln, also Produkte, Rezepte und bestätigte Zuordnungen, stehen nicht
     in der Datei. Was das für die Weitergabe bedeutet, steht unter
     [Prüfung weitergeben](../import-export.md#prufung-weitergeben).
 

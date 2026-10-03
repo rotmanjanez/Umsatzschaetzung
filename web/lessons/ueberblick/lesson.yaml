@@ -101,9 +101,9 @@ chapters:
 
           <ol class="us-flow">
           <li><b>1. Rechnungen</b> Die Eingangsrechnungen des Betriebs: was er eingekauft hat.</li>
-          <li><b>2. Zuordnung</b> Jede Rechnungsposition wird einer Zutat zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.</li>
+          <li><b>2. Zuordnung</b> Jede Rechnungsposition wird einem Produkt zugeordnet, etwa „Schweineschnitzel natur, ausgelöst“ zu Schweinefleisch. Das Programm schlägt vor, der Prüfer bestätigt oder korrigiert.</li>
           <li><b>3. Sortiment</b> Was der Betrieb verkauft und zu welchem Preis: Schnitzel mit Pommes für 15,90 €, Bier 0,5 l für 4,60 €.</li>
-          <li><b>4. Kalkulation</b> Aus Zutaten, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.</li>
+          <li><b>4. Kalkulation</b> Aus Einkäufen, Rezepten und Preisen rechnet das Programm den Umsatz, den der Einkauf ergeben müsste.</li>
           <li><b>5. Bericht</b> Der kalkulierte Umsatz neben dem erklärten, als PDF.</li>
           </ol>
 
@@ -138,9 +138,9 @@ chapters:
       - card:
           kicker: 4. Kalkulation
           title: Was der Einkauf ergeben müsste
-          text: Aus Zutaten, Rezepten und Preisen.
+          text: Aus Einkäufen, Rezepten und Preisen.
         say: >-
-          In der Kalkulation rechnet das Programm dann aus Zutaten, Rezepten und
+          In der Kalkulation rechnet das Programm dann aus Einkäufen, Rezepten und
           Preisen zusammen, wie viel Umsatz bei dem Einkauf herauskommen müsste.
       - card:
           kicker: 5. Bericht
@@ -154,15 +154,15 @@ chapters:
     beats:
       - card:
           kicker: Ein paar Wörter
-          title: Zutat und Produkt
+          title: Alles ist ein Produkt
           list:
-            - "Zutat: Schweinefleisch"
-            - "Produkt: Schnitzel mit Pommes"
+            - "Eingekauft: Schweinefleisch"
+            - "Verkauft: Schnitzel mit Pommes"
         say: >-
-          Ein paar Wörter kommen dabei immer wieder vor. Eine Zutat ist das, was
-          eingekauft wird, also Schweinefleisch, Fassbier oder Rotwein. Ein Produkt
-          ist das, was verkauft wird, zum Beispiel das Schnitzel mit Pommes oder die
-          Halbe vom Fass.
+          Ein paar Wörter kommen dabei immer wieder vor. Alles, womit das Programm
+          rechnet, ist ein Produkt: das, was eingekauft wird, also Schweinefleisch,
+          Fassbier oder Rotwein, genauso wie das, was verkauft wird, zum Beispiel
+          das Schnitzel mit Pommes oder die Halbe vom Fass.
       - card:
           kicker: Ein paar Wörter
           title: Rezept und Sortiment
@@ -170,20 +170,23 @@ chapters:
             - "Rezept: 180 g Schweinefleisch je Schnitzel"
             - "Sortiment: Produkte mit Preisen"
         say: >-
-          Das Rezept sagt, wie viel von welcher Zutat in ein Produkt geht. In ein
-          Schnitzel gehen rund hundertachtzig Gramm Schweinefleisch. Und das
+          Das Rezept sagt, aus welchen Produkten ein anderes gemacht wird, und wie
+          viel davon. In ein Schnitzel gehen rund hundertachtzig Gramm
+          Schweinefleisch. Pommes kann der Wirt tiefgekühlt einkaufen oder selber
+          aus Kartoffeln machen, und sobald es dafür ein Rezept gibt, rechnet das
+          Programm mit beidem. Und das
           Sortiment sind die Produkte, die genau dieser Betrieb führt, mit seinen
           eigenen Preisen.
       - card:
           kicker: Ein paar Wörter
           title: Zuordnung und Regeln
           list:
-            - "Zuordnung: Position zu Zutat"
+            - "Zuordnung: Position zu Produkt"
             - "Regeln: das Gedächtnis des Programms"
         say: >-
           Die Zuordnung kennen wir schon, das ist die Verbindung zwischen einer
-          Rechnungsposition und einer Zutat. Und die Regeln sind sozusagen das
-          Gedächtnis vom Programm: Zutaten, Produkte, Rezepte und alle bestätigten
+          Rechnungsposition und einem Produkt. Und die Regeln sind sozusagen das
+          Gedächtnis vom Programm: Produkte, Rezepte und alle bestätigten
           Zuordnungen. Die gehören nicht zu einer Prüfung, sondern zum Programm
           selbst, und werden mit jeder Prüfung ein Stückerl mehr.
         text: |-
@@ -191,12 +194,11 @@ chapters:
 
           | Begriff | Bedeutung |
           |---|---|
-          | **Zutat** | Eine Ware, wie sie eingekauft wird: Schweinefleisch, Fassbier, Rotwein. |
-          | **Produkt** | Etwas, das verkauft wird: Schnitzel mit Pommes, Bier 0,5 l vom Fass. |
-          | **Rezept** | Wie viel von welcher Zutat in ein Produkt geht: In ein Schnitzel gehen 180 g Schweinefleisch. |
+          | **Produkt** | Alles, womit gerechnet wird: was eingekauft wird, wie Schweinefleisch, Fassbier, Rotwein, und was verkauft wird, wie Schnitzel mit Pommes oder Bier 0,5 l vom Fass. Pommes können eingekauft oder, mit einem Rezept, aus Kartoffeln gemacht sein. |
+          | **Rezept** | Aus welchen Produkten ein anderes gemacht wird, und wie viel davon: In ein Schnitzel gehen 180 g Schweinefleisch. |
           | **Sortiment** | Die Produkte, die dieser Betrieb führt, mit seinen Preisen. |
-          | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einer Zutat. |
-          | **Regeln** | Das Wissen des Programms: Zutaten, Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
+          | **Zuordnung** | Die Verbindung zwischen einer Rechnungsposition und einem Produkt. |
+          | **Regeln** | Das Wissen des Programms: Produkte, Rezepte und alle bestätigten Zuordnungen. Es gehört nicht zu einer Prüfung, sondern zum Programm, und wächst mit jeder Prüfung. |
 
   - title: Das Gasthaus Zur Linde
     beats:
@@ -248,7 +250,7 @@ chapters:
             - Sortiment anlegen
             - Kalkulation, Bericht
         say: >-
-          Der ganze Weg ist also: Rechnungen einlesen, die Positionen den Zutaten
+          Der ganze Weg ist also: Rechnungen einlesen, die Positionen den Produkten
           zuordnen, das Sortiment mit den Preisen anlegen, die Kalkulation anschauen,
           und am Ende der Bericht.
       - card:
