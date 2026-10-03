@@ -11,6 +11,11 @@ das Reglersymbol (**Regeln**) in der [Liste der Prüfungen](pruefungen.md). Nur 
 Prüfung zusätzlich für sich anpassen, siehe
 [Rezeptur anpassen](kalkulation.md#rezeptur).
 
+Änderungen speichern sich von selbst, sobald eine kurze Pause im Tippen
+eintritt. Ein neues Produkt entsteht, sobald sein Name eingetragen ist und das
+Feld verlassen wird. Fehlt beim Schließen noch eine Angabe oder ist die
+Regel-Datenbank nicht erreichbar, bleibt das Fenster offen und fragt nach.
+
 | Regel | Gepflegt unter |
 |---|---|
 | Produkte und Rezepte | **Regeln → Produkte** |

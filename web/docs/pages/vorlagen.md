@@ -18,8 +18,8 @@ Gepflegt werden sie unter **Regeln → Vorlagen**.
   ist. Wer anpassen will, legt am besten mit **Neu** eine Kopie an und macht
   diese zum Standard. Dann bleibt das Original als Vergleich erhalten.
 
-Die Vorlage wird beim Speichern geprüft. Ein Fehler im Aufbau, etwa ein
-fehlendes `{% endif %}`, verhindert das Speichern. Ein Feld, das es nicht gibt,
+Die Vorlage wird gespeichert und dabei geprüft, sobald das Feld verlassen wird.
+Ein Fehler im Aufbau, etwa ein fehlendes `{% endif %}`, verhindert das Speichern. Ein Feld, das es nicht gibt,
 fällt erst beim Erzeugen des Berichts auf.
 
 ## Was eine Vorlage darf

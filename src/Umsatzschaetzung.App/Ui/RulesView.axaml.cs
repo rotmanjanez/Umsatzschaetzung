@@ -100,7 +100,7 @@ public sealed class YieldRow : Observable
     string name = "", deduction = "";
     bool isDefault, nameInvalid, deductionInvalid;
 
-    public YieldRow(Func<YieldRow, Task> save) => Save = new Autosave(() => save(this));
+    public YieldRow(Func<YieldRow, Task<bool>> save) => Save = new Autosave(_ => save(this));
 
     public Autosave Save { get; }
     public string? Id { get => id; set { if (Set(ref id, value)) { Raise(nameof(Existing)); Raise(nameof(Placeholder)); } } }
@@ -302,8 +302,11 @@ public partial class RulesView : Screen
     public static readonly FuncValueConverter<bool, string, string?> Flag = new((on, text) => on ? text : null);
 
     readonly RulesModel model = new();
-    readonly Autosave gewerbeSave;
-    bool loading, saving, filling, productEdited;
+    readonly Autosave productSave, gewerbeSave, templateSave;
+    bool loading, filling, productEdited;
+    int saving, productEdits;
+    // A new product, or a new category, is made from the name it had when its field was left, not while it is typed.
+    string? nameLeft, categoryLeft;
     Action<string>? productCreated;
     (string Id, List<PartLine>? Recipe)? wanted;
 
@@ -317,8 +320,8 @@ public partial class RulesView : Screen
 
     protected override int Page => Tabs.SelectedIndex;
 
-    // Products and templates wait for their save button, so typing there is undone in the field.
-    public bool TypingFirst => Tabs.SelectedItem == ProductsTab || Tabs.SelectedItem == TemplatesTab;
+    // The template's text is saved once the field is left, so typing there is undone in the field.
+    public bool TypingFirst => TemplateSource.IsFocused;
 
     public RulesView(Session session) : base(session)
     {
@@ -332,7 +335,9 @@ public partial class RulesView : Screen
         TemplateGrid.ItemsSource = model.Templates.Items;
         ProductGrid.ItemsSource = ProductSearch.View;
         ScopeGrid.ItemsSource = YieldSearch.View;
-        gewerbeSave = new Autosave(SaveGewerbe);
+        productSave = new Autosave(done => SaveProduct(done));
+        gewerbeSave = new Autosave(_ => SaveGewerbe());
+        templateSave = new Autosave(SaveTemplate);
         model.Products.Changed += ProductEdited;
         model.Products.Category.Changed += ProductEdited;
         model.Products.Recipe.CollectionChanged += (_, e) =>
@@ -344,15 +349,25 @@ public partial class RulesView : Screen
         {
             if (e.PropertyName is nameof(GewerbeForm.Kennzahl) or nameof(GewerbeForm.Name)) Edited(gewerbeSave);
         };
+        model.Templates.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(TemplateForm.Name) or nameof(TemplateForm.IsDefault)) Edited(templateSave);
+            else if (e.PropertyName is nameof(TemplateForm.Source) && !filling) templateSave.Mark();
+        };
     }
 
     int PageOf(TabItem tab) => Tabs.Items.IndexOf(tab);
 
     Place AtPage(TabItem tab, string id) => new(History, PageOf(tab), id);
 
+    // A recipe taken over from a Prüfung waits for its button.
     void ProductEdited()
     {
-        if (!filling) productEdited = true;
+        if (filling) return;
+        productEdited = true;
+        productEdits++;
+        if (model.Products.Origin == "") productSave.Schedule();
+        else productSave.Mark();
     }
 
     public void FocusPage() => Tabs.ContainerFromIndex(Tabs.SelectedIndex)?.Focus();
@@ -365,7 +380,7 @@ public partial class RulesView : Screen
         TopLevel.GetTopLevel(this)?.FocusManager?.TryMoveFocus(direction);
     }
 
-    Task SaveYieldRows() => Task.WhenAll(model.Yields.Rules.ToList().Select(r => r.Save.Now()));
+    async Task<bool> SaveYieldRows() => (await Task.WhenAll(model.Yields.Rules.ToList().Select(r => r.Save.Now()))).All(s => s);
 
     void Edited(Autosave save)
     {
@@ -378,13 +393,24 @@ public partial class RulesView : Screen
 
     protected override void OnLeave()
     {
+        _ = productSave.Now();
         _ = gewerbeSave.Now();
+        _ = templateSave.Now();
         _ = SaveYieldRows();
+    }
+
+    // The window stays until what was typed is in the store, or the user lets it go.
+    public async Task<bool> Closing()
+    {
+        var saved = await Task.WhenAll(productSave.Now(true), gewerbeSave.Now(true), templateSave.Now(true), SaveYieldRows());
+        await Session.Saved;
+        return saved.All(s => s)
+            || await Dialog.Confirm(this, "Nicht alle Änderungen sind gespeichert. Trotzdem schließen und sie verwerfen?", "Regeln schließen");
     }
 
     void Rebuild()
     {
-        if (saving || !IsActive || Session.Rules is null) return;
+        if (saving > 0 || !IsActive || Session.Rules is null) return;
         var rs = Session.Rules;
         loading = true;
         var products = Session.Products();
@@ -421,8 +447,11 @@ public partial class RulesView : Screen
         }
         else if (model.Products.CurrentId is not null) model.Products.Active = false;
         if (ScopeGrid.SelectedItem is ScopeItem si) ShowScope(si); else model.Yields.Active = false;
-        if (TemplateGrid.SelectedItem is TemplateItem ti) LoadTemplate(ti.Template);
-        else if (model.Templates.CurrentId is not null) model.Templates.Active = false;
+        if (!templateSave.Busy)
+        {
+            if (TemplateGrid.SelectedItem is TemplateItem ti) LoadTemplate(ti.Template);
+            else if (model.Templates.CurrentId is not null) model.Templates.Active = false;
+        }
         if (wanted is { } w) EditProduct(w.Id, w.Recipe);
         wanted = null;
     }
@@ -431,8 +460,7 @@ public partial class RulesView : Screen
     public async Task Move(bool back)
     {
         if (!IsActive) return;
-        await gewerbeSave.Now();
-        await SaveYieldRows();
+        await Task.WhenAll(productSave.Now(), gewerbeSave.Now(), templateSave.Now(), SaveYieldRows());
         if ((back ? await History.Undo() : await History.Redo()) is not { } place) return;
         Tabs.SelectedIndex = place.Page;
         var tab = Tabs.SelectedItem;
@@ -464,7 +492,7 @@ public partial class RulesView : Screen
             return;
         }
         if (!await Confirmed(form.Title, entity)) return;
-        if (form == model.Gewerbe) gewerbeSave.Cancel();
+        (form == model.Products ? productSave : form == model.Gewerbe ? gewerbeSave : templateSave).Cancel();
         if (!await Session.Delete(entity, id, At(id), Ct)) return;
         form.CurrentId = null;
         if (form == model.Products) productEdited = false;
@@ -478,7 +506,9 @@ public partial class RulesView : Screen
 
     void ProductSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (!loading && ProductGrid.SelectedItem is ProductItem item) LoadProduct(item.Product);
+        if (loading || ProductGrid.SelectedItem is not ProductItem item) return;
+        _ = productSave.Now();
+        LoadProduct(item.Product);
     }
 
     void LoadProduct(Product p)
@@ -486,6 +516,7 @@ public partial class RulesView : Screen
         var f = model.Products;
         var rs = Session.Rules;
         productCreated = null;
+        productSave.Cancel();
         filling = true;
         f.CurrentId = p.Id;
         f.Existing = f.Active = true;
@@ -498,20 +529,24 @@ public partial class RulesView : Screen
         productEdited = false;
     }
 
-    // Keeps what the user typed and takes the rest from the store as it is now.
+    // Keeps what the user typed and takes the rest from the store as it is now; rows that still read
+    // as stored are kept too, so a save landing mid-typing leaves the caret where it is.
     void Rebase(Product p)
     {
         var f = model.Products;
         var category = CategoryEdited();
         var recipe = RecipeEdited();
         filling = true;
+        f.Existing = true;
+        f.Title = p.Name;
         f.Rebase(p);
         f.UnitFree = UnitFree(p.Id);
         if (!f.UnitFree && f.UnitCode != p.Unit) Relock(p);
-        if (!category) f.Category.Load(Session.Categories(), p.CategoryId);
+        if (!category || f.Category.Creating && string.Equals(Session.CategoryName(p.CategoryId), f.Category.NewName.Trim(), StringComparison.OrdinalIgnoreCase))
+            f.Category.Load(Session.Categories(), p.CategoryId);
         else if (!f.Category.Creating) f.Category.Load(Session.Categories(), f.Category.Selected?.Id);
         var parts = Parts(p.Id);
-        if (recipe)
+        if (recipe || SameRecipe(p))
             foreach (var row in f.Recipe) row.Offer(parts);
         else
         {
@@ -529,7 +564,7 @@ public partial class RulesView : Screen
         filling = true;
         model.Products.Lock(stored);
         filling = was;
-        Session.Fail($"Die Einheit bleibt {Units.Label(stored.Unit)}, solange es verwendet wird von {string.Join(", ", users)}. Die übrigen Änderungen lassen sich speichern.");
+        Session.Fail($"Die Einheit bleibt {Units.Label(stored.Unit)}, solange es verwendet wird von {string.Join(", ", users)}.");
     }
 
     bool UnitFree(string id) => Session.Rules is not { } rs || RuleCheck.CountedIn(rs, id).Count == 0;
@@ -537,8 +572,9 @@ public partial class RulesView : Screen
     bool CategoryEdited() =>
         model.Products.Category.Creating || (model.Products.Category.Selected?.Id ?? "") != (model.Products.Loaded?.CategoryId ?? "");
 
-    bool RecipeEdited() =>
-        model.Products.Loaded is not { } p || RecipeLines() is not { } lines || !Recipes.Same(lines, p.Recipe);
+    bool RecipeEdited() => model.Products.Loaded is not { } p || !SameRecipe(p);
+
+    bool SameRecipe(Product p) => RecipeLines() is { } lines && Recipes.Same(lines, p.Recipe);
 
     // Null while a line is not complete.
     List<PartLine>? RecipeLines()
@@ -573,12 +609,13 @@ public partial class RulesView : Screen
         ProductGrid.SelectedItem = item;
         loading = false;
         ProductGrid.ScrollIntoView(item);
+        _ = productSave.Now();
         LoadProduct(item.Product);
         if (recipe is null) return;
         var parts = Parts(id);
+        model.Products.Origin = "Rezeptur aus der Prüfung. Erst mit „Übernehmen“ gilt sie im Katalog für alle Prüfungen.";
         model.Products.Recipe.Clear();
         foreach (var l in recipe) model.Products.Recipe.Add(new RecipeRow(parts, l));
-        model.Products.Origin = "Rezeptur aus der Prüfung übernommen. Erst mit Speichern gilt sie im Katalog für alle Prüfungen.";
     }
 
     void NewProduct(object? sender, RoutedEventArgs e)
@@ -591,9 +628,13 @@ public partial class RulesView : Screen
     {
         var f = model.Products;
         Tabs.SelectedItem = ProductsTab;
+        _ = productSave.Now();
+        productSave.Cancel();
         filling = true;
         ProductGrid.SelectedItem = null;
         productCreated = created;
+        nameLeft = name;
+        categoryLeft = null;
         f.CurrentId = null;
         f.Existing = false;
         f.Active = true;
@@ -604,6 +645,7 @@ public partial class RulesView : Screen
         if (created is not null) f.Recipe.Add(new RecipeRow(Parts(null), null));
         filling = false;
         productEdited = name != "";
+        if (productEdited) productSave.Schedule();
     }
 
     void AddRecipeLine(object? sender, RoutedEventArgs e) =>
@@ -615,39 +657,42 @@ public partial class RulesView : Screen
     }
 
     // What the user changed goes onto the product as it is stored now; the rest stays as it is there.
-    async void SaveProduct(object? sender, RoutedEventArgs e)
+    // While the user is still at it, a line or name not filled in yet is waited for rather than pointed out.
+    async Task<bool> SaveProduct(bool done, bool adopt = false)
     {
         var f = model.Products;
+        if (!f.Active) return true;
+        if (f.Origin != "" && !adopt) return false;
         var weight = Input.Int(f.Piece);
         var batch = Input.Int(f.Batch);
-        f.NameInvalid = f.Name.Trim() == "";
+        var named = f.Name.Trim() != "";
+        f.NameInvalid = !named && (done || f.CurrentId is not null);
         f.PieceInvalid = f.Piece.Trim() != "" && weight is not > 0;
         f.BatchInvalid = f.HasRecipe && batch is not > 0;
-        f.Category.Invalid = f.Category.Creating && f.Category.NewName.Trim() == "";
+        var unnamed = f.Category.Creating && f.Category.NewName.Trim() == "";
+        f.Category.Invalid = unnamed && done;
         foreach (var row in f.Recipe)
         {
-            row.PartInvalid = row.Part is null;
-            row.AmountInvalid = Input.Int(row.Amount) is not > 0;
+            var started = done || row.Part is not null || row.Amount.Trim() != "";
+            row.PartInvalid = started && row.Part is null;
+            row.AmountInvalid = started && Input.Int(row.Amount) is not > 0;
         }
         var recipe = RecipeLines();
-        if (f.NameInvalid || f.PieceInvalid || f.BatchInvalid || f.Category.Invalid || recipe is null)
+        if (!named || f.PieceInvalid || f.BatchInvalid || unnamed || recipe is null)
         {
-            Session.Fail(Missing(
-                f.NameInvalid ? "Name" : null,
-                f.Category.Invalid ? "Name der neuen Kategorie" : null,
-                f.PieceInvalid ? "Stückgewicht (eine ganze Zahl größer als 0)" : null,
-                f.BatchInvalid ? "„Das Rezept ergibt“ (eine ganze Zahl größer als 0)" : null,
-                recipe is null ? "Rezept (Produkt und Menge größer als 0 je Zeile)" : null));
-            return;
+            if (done)
+                Session.Fail(Missing(
+                    f.NameInvalid ? "Name" : null,
+                    f.Category.Invalid ? "Name der neuen Kategorie" : null,
+                    f.PieceInvalid ? "Stückgewicht (eine ganze Zahl größer als 0)" : null,
+                    f.BatchInvalid ? "„Das Rezept ergibt“ (eine ganze Zahl größer als 0)" : null,
+                    recipe is null ? "Rezept (Produkt und Menge größer als 0 je Zeile)" : null));
+            return false;
         }
+        if (!done && (f.CurrentId is null && f.Name != nameLeft || f.Category.Creating && f.Category.NewName != categoryLeft)) return false;
         var id = f.CurrentId ?? Ids.New();
-        var rs = Session.Rules;
-        var stored = rs?.Products.GetValueOrDefault(id);
-        if (stored is not null && stored.Unit != f.UnitCode && !UnitFree(id))
-        {
-            Relock(stored);
-            return;
-        }
+        var stored = Session.Rules?.Products.GetValueOrDefault(id);
+        if (stored is not null && stored.Unit != f.UnitCode && !UnitFree(id)) Relock(stored);
         var fresh = stored is null;
         var data = fresh ? new Product { Id = id } : Json.Copy(stored!);
         if (fresh || f.NameEdited) data.Name = f.Name.Trim();
@@ -663,19 +708,46 @@ public partial class RulesView : Screen
             data.CategoryId = categoryId;
             if (made is not null) put.Add(made);
         }
+        if (put.Count == 0 && !fresh && Json.Serialize(data) == Json.Serialize(stored)) return true;
         put.Add(data);
         var isNew = f.CurrentId is null;
+        var created = isNew ? productCreated : null;
+        var edits = productEdits;
         var saved = false;
         await Compose(async () =>
         {
             f.CurrentId = id;
-            saved = await Session.Put(put, AtPage(ProductsTab, id), Ct);
-            if (!saved && isNew) f.CurrentId = null;
-            if (saved) productEdited = false;
+            saved = await Session.Put(put, AtPage(ProductsTab, id), CancellationToken.None);
+            if (!saved && isNew && f.CurrentId == id) f.CurrentId = null;
         });
-        if (!saved || !isNew || productCreated is not { } created) return;
-        productCreated = null;
-        created(id);
+        if (saved && edits == productEdits) productEdited = false;
+        if (saved && created is not null)
+        {
+            if (productCreated == created) productCreated = null;
+            created(id);
+        }
+        return saved;
+    }
+
+    async void AdoptRecipe(object? sender, RoutedEventArgs e)
+    {
+        if (!await SaveProduct(true, adopt: true)) return;
+        filling = true;
+        model.Products.Origin = "";
+        filling = false;
+        productSave.Cancel();
+    }
+
+    void ProductNameLeft(object? sender, RoutedEventArgs e)
+    {
+        nameLeft = model.Products.Name;
+        _ = productSave.Now();
+    }
+
+    void CategoryNameLeft(object? sender, RoutedEventArgs e)
+    {
+        categoryLeft = model.Products.Category.NewName;
+        _ = productSave.Now();
     }
 
     static List<string> AliasLines(string text) =>
@@ -686,14 +758,14 @@ public partial class RulesView : Screen
     // Hold the rebuild until the write is through, so the form is filled once from what was stored.
     async Task Compose(Func<Task> save)
     {
-        saving = true;
+        saving++;
         try
         {
             await save();
         }
         finally
         {
-            saving = false;
+            saving--;
         }
         Rebuild();
     }
@@ -779,16 +851,16 @@ public partial class RulesView : Screen
     }
 
     // A new row waits quietly until it has both a name and a rate; an existing one says what is wrong.
-    async Task SaveYield(YieldRow row)
+    async Task<bool> SaveYield(YieldRow row)
     {
-        if (model.Yields.Scope is not { } scope) return;
+        if (model.Yields.Scope is not { } scope) return true;
         var name = row.Name.Trim();
         var deduction = Input.Bp(row.Deduction);
         var rated = deduction is >= 0 and <= Bp.Full;
-        if (row.Id is null && (name == "" || row.Deduction.Trim() == "")) return;
+        if (row.Id is null && (name == "" || row.Deduction.Trim() == "")) return row.Blank;
         row.NameInvalid = name == "";
         row.DeductionInvalid = !rated;
-        if (row.NameInvalid || row.DeductionInvalid) return;
+        if (row.NameInvalid || row.DeductionInvalid) return false;
         var isNew = row.Id is null;
         var id = row.Id ?? Ids.New();
         var data = new YieldRule
@@ -813,9 +885,11 @@ public partial class RulesView : Screen
                 off.Default = false;
                 cleared &= await Session.Put(off, at, CancellationToken.None);
             }
-        if (cleared && await Session.Put(data, at, CancellationToken.None) || !isNew) return;
+        if (cleared && await Session.Put(data, at, CancellationToken.None)) return true;
+        if (!isNew) return false;
         row.Id = null;
         if (model.Yields.Rules.LastOrDefault() is { Id: null, Blank: true } extra && extra != row) model.Yields.Rules.Remove(extra);
+        return false;
     }
 
     async void DeleteYield(object? sender, RoutedEventArgs e)
@@ -836,6 +910,7 @@ public partial class RulesView : Screen
     void LoadGewerbe(Gewerbezweig g)
     {
         var f = model.Gewerbe;
+        gewerbeSave.Cancel();
         filling = true;
         f.CurrentId = g.Id;
         f.Existing = f.Active = true;
@@ -848,6 +923,7 @@ public partial class RulesView : Screen
     void NewGewerbe(object? sender, RoutedEventArgs e)
     {
         _ = gewerbeSave.Now();
+        gewerbeSave.Cancel();
         var f = model.Gewerbe;
         filling = true;
         GewerbeGrid.SelectedItem = null;
@@ -860,18 +936,20 @@ public partial class RulesView : Screen
         GewerbeKennzahl.Focus();
     }
 
-    async Task SaveGewerbe()
+    async Task<bool> SaveGewerbe()
     {
         var f = model.Gewerbe;
         var data = new Gewerbezweig { Id = f.CurrentId ?? Ids.New(), Kennzahl = f.Kennzahl.Trim(), Name = f.Name.Trim() };
         var taken = Session.Gewerbezweige().Exists(g => g.Kennzahl == data.Kennzahl && g.Id != data.Id);
         f.KennzahlInvalid = !Gewerbe.Kennzahl(data.Kennzahl) || taken;
         f.NameInvalid = data.Name == "";
-        if (f.KennzahlInvalid || f.NameInvalid) return;
+        if (f.KennzahlInvalid || f.NameInvalid) return false;
         f.CurrentId = data.Id;
-        if (!await Session.Put(data, AtPage(GewerbeTab, data.Id), CancellationToken.None) || f.CurrentId != data.Id) return;
+        if (!await Session.Put(data, AtPage(GewerbeTab, data.Id), CancellationToken.None)) return false;
+        if (f.CurrentId != data.Id) return true;
         f.Existing = true;
         f.Title = data.Kennzahl + " " + data.Name;
+        return true;
     }
 
     async void DeleteGewerbe(object? sender, RoutedEventArgs e) => await Delete(model.Gewerbe, Entity.Gewerbezweig, GewerbeNew);
@@ -882,24 +960,32 @@ public partial class RulesView : Screen
     void TemplateSelected(object? sender, SelectionChangedEventArgs e)
     {
         if (loading || TemplateGrid.SelectedItem is not TemplateItem item) return;
+        _ = templateSave.Now();
         LoadTemplate(item.Template);
     }
 
     void LoadTemplate(ReportTemplate t)
     {
         var f = model.Templates;
+        templateSave.Cancel();
+        filling = true;
         f.CurrentId = t.Id;
         f.Existing = f.Active = true;
         f.Title = t.Name;
         f.Name = t.Name;
         f.Source = t.Source;
         f.IsDefault = t.Default;
+        filling = false;
     }
 
+    // A copy of the standard, kept as soon as it is made.
     void NewTemplate(object? sender, RoutedEventArgs e)
     {
         var from = Session.Rules?.Template(null);
         var f = model.Templates;
+        _ = templateSave.Now();
+        templateSave.Cancel();
+        filling = true;
         TemplateGrid.SelectedItem = null;
         f.CurrentId = null;
         f.Existing = false;
@@ -908,28 +994,37 @@ public partial class RulesView : Screen
         f.Name = from is null ? "" : "Kopie von " + from.Name;
         f.Source = from?.Source ?? "";
         f.IsDefault = false;
+        filling = false;
+        templateSave.Schedule();
         TemplateName.Focus();
     }
 
-    async void SaveTemplate(object? sender, RoutedEventArgs e)
+    void TemplateSourceLeft(object? sender, RoutedEventArgs e) => _ = templateSave.Now();
+
+    async Task<bool> SaveTemplate(bool done)
     {
         var f = model.Templates;
+        if (!f.Active) return true;
         var id = f.CurrentId ?? Ids.New();
         var data = new ReportTemplate { Id = id, Name = f.Name.Trim(), Source = f.Source, Default = f.IsDefault };
         f.NameInvalid = data.Name == "";
         if (f.NameInvalid)
         {
-            Session.Fail(Missing("Name"));
-            return;
+            if (done) Session.Fail(Missing("Name"));
+            return false;
         }
+        if (Session.Rules?.Templates.GetValueOrDefault(id) is { } stored
+            && stored.Name == data.Name && stored.Source == data.Source && stored.Default == data.Default) return true;
         f.CurrentId = id;
         if (!await Session.Put(data, AtPage(TemplatesTab, id), CancellationToken.None))
         {
-            if (!f.Existing) f.CurrentId = null;
-            return;
+            if (!f.Existing && f.CurrentId == id) f.CurrentId = null;
+            return false;
         }
+        if (f.CurrentId != id) return true;
         f.Existing = true;
         f.Title = data.Name;
+        return true;
     }
 
     async void DeleteTemplate(object? sender, RoutedEventArgs e) => await Delete(model.Templates, Entity.Template, TemplateNew);

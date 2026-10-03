@@ -21,6 +21,7 @@ public partial class RulesPane : UserControl
         History.Keys(Frame.Input, view.Move, textFirst: () => view.TypingFirst);
         session.Anchor(Frame, ErrorBanner, ErrorText);
         Frame.Closed += session.Indicate(this, SaveBadge, SaveText);
+        Frame.Closing = view.Closing;
         Frame.Closed += view.Leave;
         Frame.Opening += view.FocusPage;
     }

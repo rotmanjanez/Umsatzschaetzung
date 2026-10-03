@@ -118,6 +118,7 @@ public sealed class Sheets : Grid
         readonly Sheets sheets;
         readonly TextBlock title;
         IInputElement? before;
+        bool asking;
 
         public Sheet(Sheets sheets, Control view, string title, double width, double height) : base(view)
         {
@@ -197,9 +198,16 @@ public sealed class Sheets : Grid
 
         public override void Activate() => sheets.Raise(this);
 
-        public override void Close()
+        public override async void Close()
         {
-            if (!sheets.stack.Contains(this)) return;
+            if (!sheets.stack.Contains(this) || asking) return;
+            if (Closing is { } ask)
+            {
+                asking = true;
+                var closes = await ask();
+                asking = false;
+                if (!closes || !sheets.stack.Contains(this)) return;
+            }
             sheets.Remove(this);
             RaiseClosed();
             sheets.Closed(this);

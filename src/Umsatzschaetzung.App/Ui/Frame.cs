@@ -39,6 +39,9 @@ public abstract class Frame
 
     public event Action? Activated, Closed;
 
+    // Asked before the frame closes; false keeps it open.
+    public Func<Task<bool>>? Closing { get; set; }
+
     // Before the frame shows, so that a screen reader finds the focus with the frame and reads it once.
     public event Action? Opening;
 
@@ -59,6 +62,7 @@ public abstract class Frame
 public sealed class WindowFrame : Frame
 {
     IInputElement? before;
+    Task<bool>? asked;
 
     public WindowFrame(Control view, string title, double width = double.NaN, double height = double.NaN,
         double minWidth = 0, double minHeight = 0, bool fit = false) : base(view)
@@ -78,6 +82,13 @@ public sealed class WindowFrame : Frame
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
         };
         Window.Activated += (_, _) => RaiseActivated();
+        Window.Closing += async (_, e) =>
+        {
+            if (Closing is not { } ask || asked is { IsCompletedSuccessfully: true, Result: true }) return;
+            e.Cancel = true;
+            if (asked is { IsCompleted: false }) return;
+            if (await (asked = ask())) Window.Close();
+        };
         Window.Closed += (_, _) =>
         {
             RaiseClosed();

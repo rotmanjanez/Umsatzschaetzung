@@ -112,8 +112,8 @@ Produkt bleibt in seiner Einheit. Wird
 das Produkt aus dem Sortiment genommen, entfällt die Anpassung mit.
 
 **Auf Katalog zurücksetzen** verwirft die Anpassung. **In den Katalog
-übernehmen** öffnet die Regeln mit dem angepassten Rezept; ist es dort
-gespeichert, entfällt die Anpassung, und das Produkt steht wieder auf
+übernehmen** öffnet die Regeln mit dem angepassten Rezept; ist es dort mit
+**Übernehmen** bestätigt, entfällt die Anpassung, und das Produkt steht wieder auf
 **Katalog**.
 
 Die Prüfung merkt sich, von welchem Stand des Katalogrezepts sie abgeschrieben

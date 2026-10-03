@@ -53,7 +53,7 @@
                                 <Grid ColumnDefinitions="*,12,160">
                                     <StackPanel>
                                         <TextBlock Text="Name *" Theme="{StaticResource FieldLabel}"/>
-                                        <TextBox x:Name="ProductName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}"
+                                        <TextBox x:Name="ProductName" Text="{Binding Name, Mode=TwoWay}" Classes.invalid="{Binding NameInvalid}" LostFocus="ProductNameLeft"
                                                  AutomationProperties.Name="Name des Produkts (Pflichtfeld)" AutomationProperties.AutomationId="ProductName"
                                                  AutomationProperties.HelpText="{Binding NameInvalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name fehlt.'}"/>
                                     </StackPanel>
@@ -72,7 +72,7 @@
                                               DisplayMemberBinding="{Binding Name, DataType=ui:CategoryOption}" HorizontalAlignment="Stretch"
                                               AutomationProperties.Name="Kategorie" AutomationProperties.AutomationId="ProductCategory"/>
                                     <TextBox Text="{Binding Category.NewName, Mode=TwoWay}" PlaceholderText="Name der neuen Kategorie"
-                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0"
+                                             IsVisible="{Binding Category.Creating}" Classes.invalid="{Binding Category.Invalid}" Margin="0,6,0,0" LostFocus="CategoryNameLeft"
                                              AutomationProperties.Name="Name der neuen Kategorie" AutomationProperties.AutomationId="ProductNewCategory"
                                              AutomationProperties.HelpText="{Binding Category.Invalid, Converter={x:Static ui:RulesView.Flag}, ConverterParameter='Der Name der neuen Kategorie fehlt.'}"/>
                                 </StackPanel>
@@ -150,10 +150,9 @@
                                     <PathIcon Data="{StaticResource NewIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                                 </Button>
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveProduct"
-                                            AutomationProperties.Name="Produkt speichern" AutomationProperties.AutomationId="ProductSave">
-                                        <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
-                                    </Button>
+                                    <Button Theme="{StaticResource PrimaryButton}" Margin="0,0,8,0" Content="Übernehmen" Click="AdoptRecipe"
+                                            IsVisible="{Binding Origin, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                            AutomationProperties.Name="Rezeptur in den Katalog übernehmen" AutomationProperties.AutomationId="ProductAdopt"/>
                                     <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteProduct" IsVisible="{Binding Existing}"
                                             AutomationProperties.Name="Produkt löschen" AutomationProperties.AutomationId="ProductDelete">
                                         <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
@@ -338,17 +337,13 @@
                                           AutomationProperties.Name="Standardvorlage" AutomationProperties.AutomationId="TemplateDefault"/>
                             </StackPanel>
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
-                                <Button Theme="{StaticResource PrimaryButton}" MinWidth="0" Margin="0,0,8,0" ToolTip.Tip="Speichern" Click="SaveTemplate"
-                                        AutomationProperties.Name="Vorlage speichern" AutomationProperties.AutomationId="TemplateSave">
-                                    <PathIcon Data="{StaticResource SaveIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
-                                </Button>
                                 <Button Theme="{StaticResource DangerIcon}" ToolTip.Tip="Löschen" Click="DeleteTemplate" IsVisible="{Binding Existing}"
                                         AutomationProperties.Name="Vorlage löschen" AutomationProperties.AutomationId="TemplateDelete">
                                     <PathIcon Data="{StaticResource DeleteIcon}" Width="14" Height="14" AutomationProperties.AccessibilityView="Raw"/>
                                 </Button>
                             </StackPanel>
                             <TextBlock DockPanel.Dock="Top" Text="Vorlage" Theme="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TemplateSource" Text="{Binding Source, Mode=TwoWay}" AcceptsReturn="True" AcceptsTab="True"
+                            <TextBox x:Name="TemplateSource" Text="{Binding Source, Mode=TwoWay}" AcceptsReturn="True" AcceptsTab="True" LostFocus="TemplateSourceLeft"
                                      AutomationProperties.Name="Vorlage" AutomationProperties.AutomationId="TemplateSource"
                                      AutomationProperties.HelpText="Die Tabulatortaste rückt ein, Strg+Tabulator verlässt das Feld."
                                      TextWrapping="NoWrap" FontFamily="{StaticResource MonoFont}" FontSize="12"
