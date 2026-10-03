@@ -84,7 +84,15 @@ in `lesson.py`. A changed voice is spoken anew in every lesson on its next
 The guide's example case is played by the lessons in `GUIDE` in `lesson.py`, in turn: a
 lesson starts where the one before it stops, so it shows the same case as the guide, and
 one not in `GUIDE` starts on an empty program. A lesson with nothing played, like
-`rechnungen`, is the guide's alone and has only the `guide` stage. It is split into chapters, each chapter into beats. A beat is
+`rechnungen`, is the guide's alone and has only the `guide` stage.
+
+The second course, „Die Regeln“, follows `bericht` in `GUIDE`. `sonderpruefung`, the guide's
+alone like `rechnungen` and never published, prepares a second Prüfung of the same Gasthaus,
+and the five lessons `regeln`, `kette`, `warenarten`, `produkte` and `ertragsregeln` work on
+the Regeln sheet with what the first course left there, along the production chain its
+products describe.
+
+A lesson is split into chapters, each chapter into beats. A beat is
 one sentence or a few, together with what happens on screen:
 
 ```yaml
@@ -104,7 +112,7 @@ one sentence or a few, together with what happens on screen:
 | `click` | the learner clicks there |
 | `act` | headless steps that perform the click, where a plain click does not fit (a tab) |
 | `set` | steps the page and the headless run take before the beat, where the lesson needs the program somewhere it may not have gone by itself; the slider may take them again, so they choose (a row, a tab) rather than toggle |
-| `type` | `{ at, text }`: the learner clicks into a field and types |
+| `type` | `{ at, text }`: the learner clicks into a field and types; with `append: true` the text becomes the field's new last line instead of replacing it, the caret waits there when the learner clicks in, and the default `done` is that the last line reads `text` |
 | `show` | spotlights a control without touching it; `through` stretches the spotlight over every shown control that matches a second target |
 | `note` | a line on the card for the beat |
 | `hold` | seconds to wait after the sentence |

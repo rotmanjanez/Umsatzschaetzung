@@ -1,0 +1,325 @@
+course: Die Regeln
+number: 2
+title: Die Produktionskette
+summary: >-
+  Die Produkte beschreiben eine Produktionskette, vom Einkauf bis auf den Teller. Das
+  Schnitzel mit Pommes bis zum Einkauf zurückverfolgen und die Kette um ein Glied
+  verlängern: Pommes frites aus Kartoffeln.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+
+guide:
+  page: web/docs/pages/guide/kette.md
+  title: Die Produktionskette
+  intro: |-
+    <p class="us-steps"><a href="../sonderpruefung/">Zweite Prüfung</a><a href="../regeln/">Regeln</a><span class="here">Kette</span><a href="../warenarten/">Warenarten</a><a href="../produkte/">Produkte</a><a href="../ertragsregeln/">Ertragsregeln</a></p>
+
+    Unter **Regeln → Produkte** steht alles, womit gerechnet wird: was eingekauft wird,
+    was daraus gemacht wird und was verkauft wird. Das **Rezept** eines Produkts nennt
+    andere Produkte, und deren Rezepte wieder andere, bis zu Produkten ohne Rezept, die
+    eingekauft werden. Zusammen beschreiben die Produkte so eine Produktionskette.
+    Im Beispiel wird das Schnitzel mit Pommes bis zum Einkauf zurückverfolgt, und die
+    Pommes frites bekommen ein Rezept aus Kartoffeln.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - unter **Regeln → Produkte** die **Pommes frites** ein Rezept haben:
+          `1200` Gramm **Kartoffeln**, **Das Rezept ergibt** `1000` Gramm
+
+    !!! nachlesen "Zum Nachlesen"
+        Was Produkte und Rezepte bedeuten, steht unter [Regeln](../regeln.md#produkte)
+        und [Rezepte](../regeln.md#rezepte), wie die Kalkulation einen Einkauf auf die
+        Produkte verteilt unter [Kalkulation](../kalkulation.md).
+
+    [Weiter: Warenarten <span>Wo die Rechnungen in die Kette kommen</span>](warenarten.md){ .us-next }
+
+chapters:
+  - title: Vom Teller zum Einkauf
+    beats:
+      - card:
+          kicker: Die Regeln · Übung 2
+          title: Die Produktionskette
+        say: >-
+          In dieser Übung gehen wir einem Gericht nach, vom Teller zurück bis zum
+          Einkauf. Die Produkte in den Regeln hängen nämlich zusammen wie in einer
+          Küche: Aus dem, was eingekauft wird, wird etwas gemacht, und daraus wieder
+          etwas, bis es auf der Karte steht.
+
+  - title: Oben in der Kette
+    beats:
+      - say: >-
+          Die Produkte stehen in den Regeln. Rechts oben ist der Knopf mit den Reglern.
+        set: [{ do: tab, header: "2. Zuordnung" }]
+        click: { tip: "Regeln" }
+        done: { at: { id: RulesProductsTab }, selected: true }
+        undo: [{ do: close }]
+        rounds: 4
+        task: Rechts oben auf „Regeln“ klicken.
+        hint: Der Knopf mit den drei Reglern, links neben dem Fragezeichen.
+      - say: >-
+          Wir fangen oben an, bei dem, was verkauft wird. Ins Feld Filtern klicken und
+          Schnitzel mit Pommes eintippen.
+        type: { at: { name: ProductSearch }, text: "Schnitzel mit Pommes" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductSearch }, text: "Schnitzel mit Pommes" }
+          - { do: focus, window: dialog }
+        rounds: 2
+        task: "Filtern: Schnitzel mit Pommes"
+        hint: Das Feld „Filtern“ steht links oben, über der Liste.
+      - say: >-
+          Da ist unser Schnitzel mit Pommes aus der ersten Prüfung. Einmal draufklicken.
+        click: { text: "Schnitzel mit Pommes", up: ListBoxItem }
+        act: [{ do: select, window: dialog, at: { text: "Schnitzel mit Pommes", up: ListBoxItem } }]
+        rounds: 2
+        task: Auf „Schnitzel mit Pommes“ klicken.
+        hint: Es steht in der Liste unter dem Suchfeld.
+        text: |-
+          Rechts oben **Regeln** öffnen; der erste Reiter ist **Produkte**. In
+          **Filtern** `Schnitzel mit Pommes`{.copy} eintippen und **Schnitzel mit
+          Pommes** anklicken. Sein **Rezept** hat zwei Zeilen, und beide nennen keinen
+          Einkauf, sondern andere Produkte: **Schnitzel, ohne Beilage** und **Pommes,
+          Beilage**, je 1 Stück. **Das Rezept ergibt** 1 Stück, eine Portion.
+        shot:
+          name: kette-schnitzel
+          window: dialog
+          alt: Das Produkt „Schnitzel mit Pommes“ mit seinem Rezept aus zwei anderen Produkten
+      - say: >-
+          Rechts steht sein Rezept. Zwei Zeilen: ein Schnitzel, ohne Beilage, und eine
+          Pommes, Beilage. Das sind keine Einkäufe, das sind selbst Produkte, jedes mit
+          einem eigenen Rezept.
+        show: { id: ProductRecipe }
+      - say: >-
+          Und darüber: Das Rezept ergibt ein Stück. Das ist eine Portion.
+        show: { id: ProductBatch }
+
+  - title: Eine Stufe tiefer
+    beats:
+      - say: >-
+          Gehen wir der Beilage nach. Oben im Feld Filtern statt Schnitzel mit Pommes
+          einmal Pommes Beilage eintippen.
+        type: { at: { name: ProductSearch }, text: "Pommes Beilage" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductSearch }, text: "Pommes Beilage" }
+          - { do: focus, window: dialog }
+        accept: ["Pommes, Beilage"]
+        rounds: 2
+        task: "Filtern: Pommes Beilage"
+        hint: Das Feld „Filtern“ steht links oben, über der Liste.
+      - say: >-
+          Und auf Pommes, Beilage klicken.
+        click: { text: "Pommes, Beilage", up: ListBoxItem }
+        act: [{ do: select, window: dialog, at: { text: "Pommes, Beilage", up: ListBoxItem } }]
+        rounds: 2
+        task: Auf „Pommes, Beilage“ klicken.
+        hint: Es steht in der Liste unter dem Suchfeld.
+        text: |-
+          Eine Stufe tiefer: `Pommes Beilage`{.copy} filtern und **Pommes, Beilage**
+          anklicken. Eine Portion sind 180 g **Pommes frites** und 100 ml
+          **Pflanzenöl**, das Altöl aus der Fritteuse eingerechnet. Weil die Beilage ein
+          eigenes Produkt ist, steht sie nur einmal in den Regeln, und jedes Gericht mit
+          Pommes rechnet mit derselben Portion.
+      - say: >-
+          Eine Portion Pommes sind hundertachtzig Gramm Pommes frites und hundert
+          Milliliter Öl, das Altöl aus der Fritteuse mitgerechnet. Und weil die Beilage
+          ein eigenes Produkt ist, rechnet jedes Gericht mit Pommes mit derselben
+          Portion, vom Schnitzel bis zum Rindersteak.
+        show: { id: ProductRecipe }
+
+  - title: Unten in der Kette
+    beats:
+      - say: >-
+          Noch eine Stufe tiefer, zu den Pommes frites. Im Feld Filtern Pommes frites
+          eintippen.
+        type: { at: { name: ProductSearch }, text: "Pommes frites" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductSearch }, text: "Pommes frites" }
+          - { do: focus, window: dialog }
+        rounds: 2
+        task: "Filtern: Pommes frites"
+        hint: Das Feld „Filtern“ steht links oben, über der Liste.
+      - say: >-
+          Und auf Pommes frites klicken.
+        click: { text: "Pommes frites", up: ListBoxItem }
+        act: [{ do: select, window: dialog, at: { text: "Pommes frites", up: ListBoxItem } }]
+        rounds: 2
+        task: Auf „Pommes frites“ klicken.
+        hint: Es steht in der Liste unter dem Suchfeld.
+        text: |-
+          Die **Pommes frites** haben kein Rezept: **Ohne Rezept wird das Produkt
+          eingekauft, nicht hergestellt.** Dafür haben sie **Warenarten**, die Namen,
+          unter denen sie auf Rechnungen stehen. Hier beginnt die Kette: Was die
+          Zuordnung den Pommes frites zuordnet, geht von hier nach oben in jedes Gericht,
+          das sie braucht.
+        shot:
+          name: kette-pommes
+          window: dialog
+          alt: Die Pommes frites, ohne Rezept, mit ihren Warenarten
+      - say: >-
+          Hier ist Schluss. Unter Rezept steht: Ohne Rezept wird das Produkt
+          eingekauft, nicht hergestellt.
+        show: { text: "Ohne Rezept wird das Produkt eingekauft, nicht hergestellt." }
+      - say: >-
+          Dafür hat es Warenarten, also die Namen, unter denen es auf Rechnungen steht.
+          Hier kommt der Einkauf in die Kette.
+        show: { id: ProductAliases, up: StackPanel }
+      - card:
+          kicker: Die Produktionskette
+          title: Vom Einkauf auf den Teller
+          list:
+            - "Eingekauft: Pommes frites, Pflanzenöl"
+            - "Gemacht: Pommes, Beilage"
+            - "Verkauft: Schnitzel mit Pommes"
+        say: >-
+          Das ist die ganze Kette. Unten das, was eingekauft wird, die Pommes frites und
+          das Öl. Daraus wird die Beilage gemacht, und die geht ins Schnitzel mit
+          Pommes, das verkauft wird. Die Kalkulation geht diese Kette in jeder Prüfung
+          durch: wie viel eingekauft ist, und wie viele Portionen das oben ergibt.
+        text: |-
+          Die Kalkulation geht diese Kette in jeder Prüfung durch, vom Einkauf unten bis
+          zum verkauften Produkt oben. Ein Rezept darf sich dabei nicht selbst
+          enthalten, auch nicht über andere Produkte.
+
+  - title: Ein Glied mehr
+    beats:
+      - say: >-
+          Viele Wirt*innen kaufen die Pommes tiefgekühlt. Manche schneiden sie aber selber,
+          aus Kartoffeln. Das Gasthaus Zur Linde kauft beides: die Pommes beim
+          Großmarkt, und Frühkartoffeln bei der Gärtnerei. Damit das Programm auch mit
+          den Kartoffeln rechnet, geben wir den Pommes frites ein Rezept. Unter Rezept
+          auf das Plus klicken.
+        click: { id: RecipeAdd }
+        act: [{ do: click, window: dialog, at: { id: RecipeAdd } }]
+        done: { at: { id: RecipePart } }
+        undo: [{ do: click, at: { id: RecipeRemove } }]
+        rounds: 2
+        task: Unter „Rezept“ auf das Plus klicken.
+        hint: Das Plus steht unter „Ohne Rezept wird das Produkt eingekauft“.
+        text: |-
+          Das Gasthaus kauft Pommes frites beim Großmarkt und Frühkartoffeln bei der
+          Gärtnerei. Damit die Kalkulation auch Pommes aus Kartoffeln kennt, bekommen
+          die Pommes frites ein Rezept: unter **Rezept** das Plus
+          (**Rezeptzeile hinzufügen**) anklicken.
+      - say: >-
+          In der neuen Zeile ins Feld klicken und Kartoffeln eintippen.
+        type: { at: { id: RecipePart }, text: "Kartoffeln" }
+        act: []
+        rounds: 2
+        task: "Produkt: Kartoffeln"
+        hint: Das Feld steht in der neuen Zeile, unter „Produkt“.
+      - say: >-
+          Darunter klappt eine Liste auf. Wir nehmen Kartoffeln, ganz ohne Zusatz.
+        click: { text: "Kartoffeln" }
+        act:
+          - { do: choose, window: dialog, at: { id: RecipePart }, text: "Kartoffeln", item: "Kartoffeln" }
+          - { do: focus, window: dialog, at: { id: RecipeAmount } }
+        allow: [{ text: "Kartoffeln" }, { text: "Kartoffeln", up: ListBoxItem }]
+        done: { at: { id: RecipePart }, text: ["Kartoffeln"] }
+        rounds: 2
+        task: Auf „Kartoffeln“ klicken.
+        hint: Es steht in der Liste unter dem Feld.
+      - say: >-
+          Aus einem Kilo Kartoffeln bleiben nach dem Schälen und Schneiden gut
+          achthundert Gramm Pommes. Rechnen wir also: zwölfhundert Gramm Kartoffeln
+          ergeben tausend Gramm Pommes. Bei Menge zwölfhundert eintippen.
+        type: { at: { id: RecipeAmount }, text: "1200" }
+        act:
+          - { do: type, window: dialog, at: { id: RecipeAmount }, text: "1200" }
+          - { do: focus, window: dialog }
+        undo:
+          - { do: click, at: { id: RecipeAdd } }
+          - { do: choose, at: { id: RecipePart }, text: "Kartoffeln", item: "Kartoffeln" }
+        rounds: 2
+        task: "Menge: 1200"
+        hint: Das Feld steht in der Zeile, unter „Menge“.
+        text: |-
+          `Kartoffeln`{.copy} tippen und aus der Liste **Kartoffeln** wählen, als
+          **Menge** `1200`{.copy}. Die Einheit steht schon auf Gramm, weil Kartoffeln in
+          Gramm gezählt werden.
+      - say: >-
+          Und oben, bei Das Rezept ergibt, steht noch eins. Da kommen die tausend Gramm
+          hinein. Ins Feld klicken und tausend eintippen.
+        type: { at: { id: ProductBatch }, text: "1000" }
+        act:
+          - { do: type, window: dialog, at: { id: ProductBatch }, text: "1000" }
+          - { do: focus, window: dialog }
+        accept: ["1.000"]
+        rounds: 2
+        task: "Das Rezept ergibt: 1000"
+        hint: Das Feld steht über der Rezeptzeile, neben „Das Rezept ergibt“.
+        text: |-
+          **Das Rezept ergibt** sagt, wie viel das Rezept hervorbringt, in der Einheit
+          des Produkts: hier `1000`{.copy} Gramm Pommes frites aus 1.200 g Kartoffeln.
+          Bei einer Portion ist es 1 Stück, bei einem Kuchen 12 Stück.
+        shot:
+          name: kette-rezept
+          window: dialog
+          alt: Die Pommes frites mit einem Rezept aus 1.200 g Kartoffeln, das 1.000 g ergibt
+      - say: >-
+          Ein Rezept muss also nicht eine Portion ergeben. Ein Kuchen ergibt zwölf
+          Stück, und unsere Kartoffeln tausend Gramm Pommes.
+        show: { id: ProductBatch }
+      - say: >-
+          Speichern müssen wir nicht. Sobald eine Zeile vollständig ist und man
+          mit dem Tippen aufhört, steht das Rezept in den Regeln.
+        show: { id: ProductRecipe }
+        text: |-
+          Gespeichert wird von selbst, sobald jede Rezeptzeile Produkt und Menge hat und
+          eine kurze Pause im Tippen eintritt.
+
+  - title: Was das bringt
+    beats:
+      - card:
+          kicker: Was das bringt
+          title: Eingekauft oder selbst gemacht
+          list:
+            - "Pommes frites: eingekauft"
+            - "Pommes frites: aus Kartoffeln"
+        say: >-
+          Und was bringt das? Die Pommes frites werden jetzt eingekauft oder aus
+          Kartoffeln gemacht. Die Kalkulation rechnet mit beidem, und verteilt den
+          Einkauf so, dass möglichst wenig übrig bleibt. Kauft ein Betrieb nur Kartoffeln
+          und gar keine Pommes, zählt jede Portion Pommes trotzdem.
+        text: |-
+          Die Pommes frites werden jetzt eingekauft oder aus Kartoffeln gemacht. Die
+          Kalkulation rechnet mit beidem und verteilt den Einkauf so, dass möglichst
+          wenig übrig bleibt. Kauft ein Betrieb nur Kartoffeln und keine Pommes, zählt
+          jede Portion Pommes trotzdem. Das gilt in jeder Prüfung danach, für jedes
+          Gericht mit Pommes.
+      - say: >-
+          Eine Ausnahme im Programm braucht es dafür nicht. Ein einziges Rezept, und
+          jedes Gericht mit Pommes kennt den Weg bis zur Kartoffel, in jeder Prüfung
+          danach.
+        show: { id: ProductRecipe }
+        hold: 0.5
+
+  - title: Die Regeln schließen
+    beats:
+      - say: >-
+          Das war's schon. Wir machen die Regeln zu, mit dem Kreuz rechts oben.
+        click: { tip: "Schließen (Esc)" }
+        act: [{ do: close, window: dialog }]
+        done: { at: { text: "2. Zuordnung", type: TabItem }, selected: true }
+        undo:
+          - { do: click, at: { tip: "Regeln" } }
+          - { do: type, at: { name: ProductSearch }, text: "Pommes frites" }
+          - { do: select, at: { text: "Pommes frites", up: ListBoxItem } }
+        rounds: 2
+        task: Die Regeln schließen.
+        hint: Das Kreuz steht rechts oben, in der Leiste über den Regeln.
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: Die Produkte sind eine Kette
+          list:
+            - "Oben: was verkauft wird"
+            - "Dazwischen: Produkte aus Produkten"
+            - "Unten: was eingekauft wird"
+            - Ein Rezept hängt ein Glied an
+        say: >-
+          Noch einmal zusammen: Oben steht, was verkauft wird, unten, was eingekauft
+          wird, und dazwischen Produkte, die aus anderen Produkten gemacht werden. Mit
+          einem Rezept hängt man ein Glied an. In der nächsten Übung schauen wir uns
+          den Anfang der Kette an, die Warenarten.

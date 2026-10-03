@@ -73,6 +73,13 @@ plugins:
           - guide/kalkulation.md: Übrige Einkäufe aufräumen und das Ergebnis prüfen
           - guide/bericht.md: Vorschau prüfen und den Bericht als PDF speichern
           - guide/danach.md: Was für die nächste eigene Prüfung gut zu wissen ist
+        Regeln pflegen:
+          - guide/sonderpruefung.md: Eine zweite Prüfung desselben Gasthauses anlegen
+          - guide/regeln.md: Was das Programm aus der ersten Prüfung behalten hat, und die Regeln im Überblick
+          - guide/kette.md: Ein Gericht bis zum Einkauf zurückverfolgen und die Kette verlängern
+          - guide/warenarten.md: Einem eingekauften Produkt eine Warenart hinzufügen
+          - guide/produkte.md: Ein neues Gericht mit Rezept anlegen
+          - guide/ertragsregeln.md: Eine Standardregel setzen, eine Ertragsregel anlegen und eine löschen
         Übungen:
           - uebungen.md: Interaktive Übungen, in denen das Programm im Browser läuft und jeder Schritt selbst geklickt wird
 
@@ -127,4 +134,11 @@ nav:
       - 4. Kalkulation: guide/kalkulation.md
       - 5. Bericht: guide/bericht.md
       - Danach: guide/danach.md
+      - Regeln pflegen:
+          - Eine zweite Prüfung: guide/sonderpruefung.md
+          - Was das Programm sich merkt: guide/regeln.md
+          - Die Produktionskette: guide/kette.md
+          - Warenarten: guide/warenarten.md
+          - Ein neues Produkt: guide/produkte.md
+          - Ertragsregeln: guide/ertragsregeln.md
   - Übungen: uebungen.md

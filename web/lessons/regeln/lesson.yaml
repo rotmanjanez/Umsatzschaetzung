@@ -1,0 +1,349 @@
+course: Die Regeln
+number: 1
+title: Was das Programm sich merkt
+summary: >-
+  Eine zweite Prüfung des Gasthauses Zur Linde, und vieles ist schon erledigt: Was die
+  erste Prüfung bestätigt hat, steht in den Regeln. Ein erster Blick in die Regeln, und
+  auf die Produkte darin als Produktionskette.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+
+guide:
+  page: web/docs/pages/guide/regeln.md
+  title: Regeln pflegen
+  intro: |-
+    <p class="us-steps"><a href="../sonderpruefung/">Zweite Prüfung</a><span class="here">Regeln</span><a href="../kette/">Kette</a><a href="../warenarten/">Warenarten</a><a href="../produkte/">Produkte</a><a href="../ertragsregeln/">Ertragsregeln</a></p>
+
+    Eine Prüfung endet mit ihrem Bericht, die Arbeit daran nicht: Jede bestätigte
+    Zuordnung, jedes Produkt mit seinem Rezept und jede Ertragsregel steht in den
+    [Regeln](../regeln.md) und gilt für jede Prüfung danach. Dieses Kapitel zeigt an
+    der zweiten Prüfung des Gasthauses, was die erste dort hinterlassen hat, und wie
+    die Regeln selbst gepflegt werden. Im Mittelpunkt stehen die Produkte: Zusammen
+    beschreiben sie eine Produktionskette, vom Einkauf bis zu dem, was verkauft wird.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - auf **2. Zuordnung** der Sonderprüfung `3 offen, 74 automatisch, 2 manuell` steht
+        - der Domina dort **Manuell** trägt, ohne dass er in dieser Prüfung zugeordnet wurde
+        - die Regeln mit ihren vier Reitern einmal offen waren und wieder geschlossen sind
+
+    !!! nachlesen "Zum Nachlesen"
+        Was in den Regeln steht, beschreibt [Regeln](../regeln.md), wo die
+        Regel-Datenbank liegt und wer sie teilt
+        [Verwaltete Installation](../verwaltung.md#regel-datenbank), was mit einer
+        weitergegebenen Prüfung geschieht
+        [Regeln gehen nicht mit](../import-export.md#regeln-gehen-nicht-mit).
+
+    [Weiter: Die Produktionskette <span>Ein Gericht bis zum Einkauf zurückverfolgen</span>](kette.md){ .us-next }
+
+chapters:
+  - title: Was bleibt
+    beats:
+      - card:
+          kicker: Die Regeln · Übung 1
+          title: Was das Programm sich merkt
+        say: >-
+          Servus und willkommen zum zweiten Teil! In den ersten Übungen haben wir eine
+          ganze Prüfung gemacht. Jetzt schauen wir, was davon bleibt. Das Programm hat
+          sich nämlich einiges gemerkt.
+
+  - title: Die zweite Prüfung
+    beats:
+      - say: >-
+          In der Liste steht jetzt eine zweite Prüfung vom Gasthaus Zur Linde: eine
+          Umsatzsteuer-Sonderprüfung, von Mai bis Juli. Die sechsundzwanzig Rechnungen
+          aus diesen drei Monaten sind schon eingelesen.
+        show: { text: "Gasthaus Zur Linde, USt-Sonderprüfung 2025", up: DataGridRow }
+        text: |-
+          In der Liste der Prüfungen steht neben der **Bp 2025** eine zweite Prüfung
+          des Gasthauses, die **USt-Sonderprüfung 2025** für Mai bis Juli, mit den 26
+          Rechnungen dieser drei Monate, wie unter [Eine zweite Prüfung](sonderpruefung.md)
+          angelegt. Das Reglersymbol rechts oben öffnet die **Regeln**, hier und in
+          jeder geöffneten Prüfung.
+        shot:
+          name: regeln-liste
+          at: { type: CasesView }
+          clip: DataGridRow
+          alt: Die Liste der Prüfungen mit beiden Prüfungen des Gasthauses
+      - say: >-
+          Machen wir sie auf, mit einem Klick auf die Zeile.
+        click: { text: "Gasthaus Zur Linde, USt-Sonderprüfung 2025", up: DataGridRow }
+        act: [{ do: press, at: { text: "Gasthaus Zur Linde, USt-Sonderprüfung 2025" } }]
+        done: { at: { text: "2. Zuordnung", type: TabItem } }
+        rounds: 4
+        task: Auf „Gasthaus Zur Linde, USt-Sonderprüfung 2025“ klicken.
+        hint: Es ist die Zeile mit „USt-Sonderprüfung“ im Namen.
+
+  - title: Was die Zuordnung schon weiß
+    beats:
+      - say: >-
+          Und gleich weiter auf den Reiter Zuordnung.
+        click: { text: "2. Zuordnung", type: TabItem }
+        act: [{ do: tab, header: "2. Zuordnung" }]
+        rounds: 8
+        task: Auf „2. Zuordnung“ klicken.
+        hint: Die Reiter stehen oben, unter dem Namen der Prüfung.
+        text: |-
+          Auf **2. Zuordnung** der Sonderprüfung steht über der Liste
+          `3 offen, 74 automatisch, 2 manuell`. Bei der ersten Prüfung waren es vor der
+          ersten Entscheidung `5 offen, 117 automatisch, 0 manuell`. Diesmal sind zwei
+          Positionen **Manuell**, obwohl in dieser Prüfung noch niemand etwas
+          zugeordnet hat.
+        shot:
+          name: regeln-zuordnung
+          at: { name: Groups, up: Border }
+          trim: { bottom: 371 }
+          alt: Die Zuordnung der Sonderprüfung, drei Positionen offen, zwei manuell
+      - say: >-
+          Oben steht wieder die Bilanz: drei offen, vierundsiebzig automatisch, und
+          zwei manuell. Manuell heißt: Ein Mensch hat das entschieden. Dabei haben wir in
+          dieser Prüfung noch gar nichts angeklickt.
+        show: { starts: "3 offen" }
+      - say: >-
+          Beim letzten Mal waren am Anfang fünf von hundertzweiundzwanzig offen, und
+          manuell war keine einzige.
+        show: { starts: "3 offen" }
+
+  - title: Was offen blieb, kommt wieder
+    beats:
+      - say: >-
+          Offen sind diesmal drei. Die Petersilie und der Leberkäse, das sind genau die
+          zwei, die wir beim letzten Mal offen gelassen haben.
+        show: { text: "Status", type: TextBlock }
+        through: { text: "Offen" }
+        text: |-
+          Offen sind **Petersilie glatt, Bund** und **Leberkäse am Stück, ungebacken**,
+          genau die zwei, die in der ersten Prüfung offen geblieben sind: Bei der
+          Petersilie fehlt, wie viel ein Bund wiegt, beim Leberkäse hat der Scan vom
+          5. Juni die Einheit wieder als „K8“ gelesen. Was nicht beantwortet wurde,
+          kann das Programm sich nicht merken.
+
+          Bei der **Kaffeesahne** ist **Sahne** schon gewählt; gefragt wird nur, wie
+          viel Sahne ein Karton enthält. Der Scan hat den Namen des Großmarkts diesmal
+          als „GastroMarkt C+C Großhandei“ gelesen, darum greift die Regel nicht ganz.
+      - say: >-
+          Was wir dem Programm nicht sagen, kann es sich halt nicht merken.
+        show: { text: "Status", type: TextBlock }
+        through: { text: "Offen" }
+      - say: >-
+          Bei der Kaffeesahne ganz oben weiß es schon, dass das Sahne ist. Es fragt
+          nur wieder, wie viel Sahne in einem Karton steckt. Der Scan hat diesmal den
+          Namen vom Großmarkt anders gelesen, darum greift unsere Regel hier nicht ganz.
+        show: { starts: "Kaffeesahne", up: DataGridRow }
+
+  - title: Was gelernt ist
+    beats:
+      - say: >-
+          Und die zwei manuellen? Die stehen ganz unten in der Liste. Klicken wir auf
+          den Domina.
+        click: { starts: "2022 Domina" }
+        via: select
+        allow: [{ starts: "2022 Domina", up: DataGridRow }]
+        rounds: 20
+        task: Auf „2022 Domina trocken 0,75 l“ klicken.
+        hint: Es ist die letzte Zeile der Liste, mit dem Status „Manuell“.
+        text: |-
+          Die zwei manuellen stehen am Ende der Liste: **Schweineschnitzel natur,
+          ausgelöst** und **2022 Domina trocken 0,75 l**, die zwei Zuordnungen, die in
+          der ersten Prüfung entschieden wurden, der Domina auf **2. Zuordnung**, das
+          Schnitzel auf **4. Kalkulation**. Den Domina anklicken: Unter **Aus den
+          Regeln** steht `Zugeordnet Rotwein × 750 ml · manuell`, der Vorschlag
+          **Rotwein × 750 ml** trägt **Aktuelle Zuordnung**. Das ist keine Vermutung mit
+          einer Sicherheit, sondern die Regel, die das **Zuordnen** damals angelegt hat.
+          Sie gilt für die 62 Flaschen der zwei Rechnungen dieser Prüfung genauso.
+        shot:
+          name: regeln-domina
+          at: { name: Groups, up: MappingView }
+          alt: Der Domina in der Sonderprüfung, schon manuell Rotwein zugeordnet
+      - say: >-
+          Da unten stehen sie: das Schweineschnitzel und der Domina. Genau die zwei
+          haben wir in der ersten Prüfung selbst entschieden, den Domina beim Zuordnen,
+          das Schnitzel in der Kalkulation.
+        show: { starts: "2022 Domina", up: DataGridRow }
+        through: { text: "Manuell", up: DataGridRow }
+      - say: >-
+          Rechts steht es: zugeordnet, Rotwein, siebenhundertfünfzig Milliliter,
+          manuell. Das ist keine Vermutung mehr, sondern eine Regel. Wir haben sie im
+          ersten Teil angelegt, in der dritten Übung, mit einem Klick auf Zuordnen.
+        show: { text: "AUS DEN REGELN", up: Border }
+      - say: >-
+          Und sie gilt gleich für beide Rechnungen dieser Prüfung, zusammen
+          zweiundsechzig Flaschen. Gefragt hat das Programm diesmal nicht.
+        show: { text: "Aktuelle Zuordnung" }
+        hold: 0.5
+
+  - title: Die Regel-Datenbank
+    beats:
+      - card:
+          kicker: Wo das steht
+          title: Eine Prüfung ist eine Datei, die Regeln sind eine Datenbank
+          text: Die Prüfung verweist nur auf die Regeln.
+        say: >-
+          Wo merkt sich das Programm so etwas? Eine Prüfung ist eine Datei. Darin
+          stehen die Rechnungen mit ihren Scans, das Sortiment mit den Preisen und der
+          erklärte Umsatz. Die Regeln sind etwas anderes, nämlich eine Datenbank. Darin
+          stehen die Produkte mit ihren Rezepten, die Ertragsregeln, die
+          Gewerbekennzahlen, und jede Zuordnung, die jemand bestätigt hat. Die Prüfung
+          verweist nur darauf.
+        text: |-
+          Eine Prüfung ist eine Datei: Rechnungen, Scans, Sortiment mit Preisen, der
+          erklärte Umsatz. Die Regeln sind eine Datenbank daneben, die
+          [Regel-Datenbank](../verwaltung.md#regel-datenbank): Produkte mit ihren
+          Rezepten, Ertragsregeln, Gewerbekennzahlen und jede bestätigte
+          Zuordnung. Die Prüfung verweist nur darauf.
+      - card:
+          kicker: Wer sie teilt
+          title: Eine Datenbank für alle
+          text: Was heute jemand bestätigt, gilt morgen für alle.
+        say: >-
+          Und diese Datenbank teilen sich alle. Auf einem Rechner alle, die sich dort
+          anmelden. Und legt die IT sie auf ein Laufwerk im Netz, dann das ganze Amt.
+          Was eine Kolleg*in heute bestätigt, ist morgen für alle da.
+        text: |-
+          Alle, die sich am selben Rechner anmelden, arbeiten mit denselben Regeln.
+          Liegt die Regel-Datenbank auf einer Freigabe im Netz, gilt das für alle, die
+          darauf zeigen: Was jemand heute zuordnet oder anlegt, haben die anderen beim
+          nächsten Start.
+      - card:
+          kicker: Weitergeben
+          title: Regeln reisen nicht mit
+          text: Eine weitergegebene Prüfung rechnet mit den Regeln des anderen Rechners.
+        say: >-
+          Eins noch: Gibt man eine Prüfung an einen anderen Rechner weiter, gehen die
+          Regeln nicht mit. Dort ordnet das Programm dann mit den Regeln von diesem
+          Rechner neu zu. Mit einer gemeinsamen Datenbank stellt sich die Frage gar
+          nicht.
+        text: |-
+          Eine Prüfung, die an einen anderen Rechner geht, nimmt die Regeln nicht mit.
+          Dort wird mit den Regeln dieses Rechners neu zugeordnet, siehe
+          [Regeln gehen nicht mit](../import-export.md#regeln-gehen-nicht-mit). Mit
+          einer gemeinsamen Regel-Datenbank stellt sich die Frage nicht.
+      - card:
+          kicker: Der Grundstock
+          title: Ein Anfang, kein Urteil
+          list:
+            - 1.067 Produkte
+            - 696 davon mit Rezept
+            - 26 Ertragsregeln
+        say: >-
+          Mitgeliefert wird ein Grundstock: gut tausend Produkte, knapp siebenhundert
+          davon mit Rezept, und sechsundzwanzig Ertragsregeln, für jedes Gewerbe vom
+          Gasthaus bis zur Fahrradwerkstatt. Das ist ein Anfang, kein Urteil.
+          Was im Amt anders gilt, wird geändert, und gilt dann für jede Prüfung danach.
+        text: |-
+          Mitgeliefert wird ein Grundstock von 1.067 Produkten, 696 davon mit Rezept, und
+          26 Ertragsregeln für jedes Gewerbe, vom Gasthaus bis zur Fahrradwerkstatt, auf
+          kein Amt im Besonderen abgestimmt. Was im Amt anders gilt, wird dort geändert
+          und gilt für jede Prüfung danach.
+
+  - title: Die Reiter
+    beats:
+      - say: >-
+          Schauen wir hinein. Die Regeln öffnet der Knopf mit den Reglern, rechts oben.
+        click: { tip: "Regeln" }
+        done: { at: { id: RulesProductsTab }, selected: true }
+        undo: [{ do: close }]
+        rounds: 4
+        task: Rechts oben auf „Regeln“ klicken.
+        hint: Es ist der graue Knopf mit den drei Reglern, links neben dem Fragezeichen.
+        text: |-
+          Das Reglersymbol rechts oben (**Regeln**) öffnet die Regeln, in der Liste der
+          Prüfungen wie in jeder Prüfung. Sie haben vier Reiter:
+
+          | Reiter | Was dort steht |
+          |---|---|
+          | **Produkte** | alles, womit gerechnet wird, was eingekauft und was verkauft wird, jedes Produkt mit seinen Warenarten und seinem Rezept |
+          | **Ertragsregeln** | benannte Abzüge, etwa der Schankverlust beim Fassbier |
+          | **Gewerbe** | die Gewerbekennzahlen, die eine Prüfung wählen kann |
+          | **Vorlagen** | das Aussehen des Berichts, meist Sache der IT |
+
+          Was hier geändert wird, gilt sofort, für jede Prüfung.
+        shot:
+          name: regeln-produkte
+          window: dialog
+          below: true
+          alt: Die Regeln, Reiter „Produkte“
+      - say: >-
+          Offen ist der erste Reiter, die Produkte. Das ist alles, womit das Programm
+          rechnet: was eingekauft wird, wie Fassbier oder Kartoffeln, und was verkauft
+          wird, wie das Schnitzel mit Pommes.
+        show: { id: ProductList }
+      - card:
+          kicker: Die Produkte
+          title: Eine Produktionskette
+          list:
+            - "Eingekauft: Schweinefleisch, Pommes frites"
+            - "Gemacht: Schnitzel, Beilage"
+            - "Verkauft: Schnitzel mit Pommes"
+        say: >-
+          Und die Produkte hängen zusammen. Das Rezept vom Schnitzel mit Pommes nennt
+          ein Schnitzel und eine Beilage, und deren Rezepte nennen, was eingekauft
+          wird: Schweinefleisch, Pommes frites, Öl. Zusammen beschreiben die Produkte
+          also eine Produktionskette, vom Einkauf bis auf den Teller. Der gehen wir in
+          der nächsten Übung nach.
+        text: |-
+          Die Produkte hängen über ihre Rezepte zusammen: **Schnitzel mit Pommes** ist
+          ein **Schnitzel, ohne Beilage** und eine **Pommes, Beilage**; das Schnitzel
+          sind 180 g **Schweinefleisch**, die Beilage **Pommes frites** und
+          **Pflanzenöl**, und die werden eingekauft. Zusammen beschreiben die Produkte so
+          eine Produktionskette, vom Einkauf bis zu dem, was verkauft wird.
+      - say: >-
+          Der zweite Reiter sind die Ertragsregeln. Klicken wir ihn an.
+        click: { id: RulesYieldsTab }
+        act: [{ do: tab, header: "Ertragsregeln", window: dialog }]
+        rounds: 2
+        task: Auf „Ertragsregeln“ klicken.
+        hint: Der zweite Reiter, gleich neben „Produkte“.
+      - say: >-
+          Hier stehen die Abzüge, je Kategorie oder Produkt, und jeder hat einen Namen,
+          etwa der Schankverlust beim Fassbier. Weiter zu Gewerbe.
+        click: { id: RulesGewerbeTab }
+        act: [{ do: tab, header: "Gewerbe", window: dialog }]
+        rounds: 2
+        task: Auf „Gewerbe“ klicken.
+        hint: Der dritte Reiter, neben „Ertragsregeln“.
+      - say: >-
+          Das sind die Gewerbekennzahlen, aus denen eine Prüfung eine wählt. Die lässt
+          man meistens, wie sie sind. Und zuletzt die Vorlagen.
+        click: { id: RulesTemplatesTab }
+        act: [{ do: tab, header: "Vorlagen", window: dialog }]
+        rounds: 2
+        task: Auf „Vorlagen“ klicken.
+        hint: Der letzte Reiter, ganz rechts.
+      - say: >-
+          Die bestimmen, wie der Bericht ausschaut. Das richtet meistens die IT ein.
+          Um die Produkte und die Ertragsregeln geht es in den nächsten Übungen.
+        show: { id: RulesTemplatesTab }
+        hold: 0.5
+      - say: >-
+          Für heute machen wir die Regeln wieder zu, mit dem Kreuz rechts oben.
+        click: { tip: "Schließen (Esc)" }
+        act: [{ do: close, window: dialog }]
+        done: { at: { tip: "Regeln" } }
+        undo: [{ do: click, at: { tip: "Regeln" } }, { do: tab, header: "Vorlagen" }]
+        rounds: 2
+        task: Die Regeln schließen.
+        hint: Das Kreuz steht rechts oben über den Regeln.
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: Was das Programm sich merkt
+          list:
+            - Regeln-Knopf rechts oben
+            - Produkte, eine Kette vom Einkauf zum Verkauf
+            - Gilt für jede Prüfung
+            - Gemeinsam für alle
+        say: >-
+          Das war's schon. Die Regeln öffnet der Knopf rechts oben. Die Produkte darin
+          sind eine Kette vom Einkauf bis zum Verkauf, und was in den Regeln steht,
+          gilt für jede Prüfung, und für alle, die sich die Datenbank teilen.
+      - card:
+          kicker: Gut zu wissen
+          title: Jede Zuordnung ist eine Regel
+          text: Man legt sie an, ohne die Regeln je zu öffnen.
+        say: >-
+          Und jede bestätigte Zuordnung ist auch eine Regel. Die legt man an, ohne die
+          Regeln überhaupt zu öffnen, einfach mit einem Klick auf Zuordnen.

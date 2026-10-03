@@ -17,7 +17,7 @@ concurrency:
 # of all it is built from, and takes it from there instead of building it again when none of that
 # changed.
 env:
-  LESSONS: ueberblick pruefung korrektur zuordnung sortiment einkaeufe bericht
+  LESSONS: ueberblick pruefung korrektur zuordnung sortiment einkaeufe bericht regeln kette warenarten produkte ertragsregeln
   PROGRAM: data src tools/embeddings Directory.Build.props Models.targets Embeddings.targets global.json :!src/Umsatzschaetzung.Tests :!src/Umsatzschaetzung.Desktop .github/workflows/deploy-web.yml
 
 jobs:

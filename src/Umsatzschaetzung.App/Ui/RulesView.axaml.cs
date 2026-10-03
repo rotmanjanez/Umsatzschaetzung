@@ -391,13 +391,7 @@ public partial class RulesView : Screen
 
     protected override void Render(RuleSet rules) => Rebuild();
 
-    protected override void OnLeave()
-    {
-        _ = productSave.Now();
-        _ = gewerbeSave.Now();
-        _ = templateSave.Now();
-        _ = SaveYieldRows();
-    }
+    protected override void OnLeave() => _ = Store();
 
     // The window stays until what was typed is in the store, or the user lets it go.
     public async Task<bool> Closing()
@@ -456,11 +450,14 @@ public partial class RulesView : Screen
         wanted = null;
     }
 
+    // What is typed and complete goes to the store now, rather than after the pause.
+    public Task Store() => Task.WhenAll(productSave.Now(), gewerbeSave.Now(), templateSave.Now(), SaveYieldRows());
+
     // The rules are rebuilt from the store once the step is written; the tab it was made on shows its entry.
     public async Task Move(bool back)
     {
         if (!IsActive) return;
-        await Task.WhenAll(productSave.Now(), gewerbeSave.Now(), templateSave.Now(), SaveYieldRows());
+        await Store();
         if ((back ? await History.Undo() : await History.Redo()) is not { } place) return;
         Tabs.SelectedIndex = place.Page;
         var tab = Tabs.SelectedItem;

@@ -1,5 +1,7 @@
 # Regeln
 
+Schritt für Schritt am Beispiel: [Regeln pflegen](guide/regeln.md).
+
 Regeln sind das Wissen, das nicht zu einem Betrieb gehört, sondern zum Handwerk:
 dass ein Bier 0,5 l aus 500 ml Fassbier besteht, dass beim Fassbier ein Teil
 als Schankverlust verloren geht, dass „Frankenbräu Pils Fass 50 l KEG“ Fassbier

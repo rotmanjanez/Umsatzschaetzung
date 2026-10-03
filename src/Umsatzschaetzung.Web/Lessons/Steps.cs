@@ -61,6 +61,11 @@ public sealed record TypeStep : Step, IAimed
 {
     public required Target At { get; init; }
     public required string Text { get; init; }
+    // Adds the text as a line of its own after what the field holds.
+    public bool Append { get; init; }
+
+    public string Into(string? held) =>
+        Append && !string.IsNullOrWhiteSpace(held) ? held.TrimEnd() + "\n" + Text : Text;
 }
 
 public sealed record FocusStep : Step, IAimed

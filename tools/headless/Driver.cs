@@ -53,7 +53,8 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
                 Click(at!);
                 break;
             case TypeStep s:
-                Set(Editor(at!), "Text", s.Text);
+                var field = Editor(at!);
+                Set(field, "Text", s.Into(Get(field, "Text") as string));
                 break;
             case FocusStep s:
                 if (s.At is null) window.FocusManager?.Focus(null);
@@ -125,7 +126,7 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         _ => "",
     };
 
-    static string Say(Target t) => t.Name ?? t.Text ?? t.Starts ?? t.Tip ?? t.Type ?? "";
+    static string Say(Target t) => t.Name ?? t.Id ?? t.Text ?? t.Starts ?? t.Tip ?? t.Type ?? "";
 
     Window Window(string? which) => which switch
     {
@@ -150,7 +151,11 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
             ?? visual.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.IsEffectivelyVisible)
             ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
         if (button is RadioButton radio) radio.IsChecked = true;
-        else button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        else
+        {
+            if (button is ToggleButton toggle) toggle.IsChecked = toggle.IsChecked != true;
+            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        }
     }
 
     // A field, or the first text box inside what `at` found (the price in a row).
@@ -159,13 +164,13 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         : visual.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsEffectivelyVisible)
           ?? throw new InvalidOperationException("no text field in " + visual.GetType().Name);
 
-    static void Set(Visual visual, string name, object? value)
-    {
-        var target = (AvaloniaObject)visual;
-        var property = AvaloniaPropertyRegistry.Instance.GetRegistered(target).FirstOrDefault(p => p.Name == name)
-            ?? throw new InvalidOperationException(visual.GetType().Name + " has no " + name);
-        target.SetValue(property, value);
-    }
+    static void Set(Visual visual, string name, object? value) => visual.SetValue(Property(visual, name), value);
+
+    static object? Get(Visual visual, string name) => visual.GetValue(Property(visual, name));
+
+    static AvaloniaProperty Property(Visual visual, string name) =>
+        AvaloniaPropertyRegistry.Instance.GetRegistered(visual).FirstOrDefault(p => p.Name == name)
+        ?? throw new InvalidOperationException(visual.GetType().Name + " has no " + name);
 
     static void Select(Visual row)
     {
@@ -233,6 +238,11 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
         var id = shell.Session.Case?.Id;
         Close();
         shell = launch(true);
+        Resume(id);
+    }
+
+    public void Resume(string? id)
+    {
         if (id is null) return;
         var kase = shell.Session.Service.Cases.Get(id, CancellationToken.None);
         while (!kase.IsCompleted) Settle();
@@ -265,15 +275,15 @@ public sealed class Driver(Func<bool, Shell> launch, Lesson lesson, int scale, d
 
     // Clicks into a search box, types and clicks the entry of its drop-down that reads `item`,
     // with the pointer as a person would; the box has to have taken it, or taken and cleared it.
+    // A box that asks the model fills its drop-down once the model has answered.
     static void Choose(AutoCompleteBox box, string text, string item)
     {
         Press(box);
         Settle();
         if (text != "") box.GetVisualDescendants().OfType<TextBox>().First().Text = text;
-        Settle();
-        var popup = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child
-            ?? throw new InvalidOperationException("no drop-down below the search box");
-        var entry = popup.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item)
+        for (var i = 0; i < 60 && !Settle(full: false); i++) { }
+        var entry = box.GetVisualDescendants().OfType<Popup>().FirstOrDefault()?.Child?
+            .GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Text == item)
             ?? throw new InvalidOperationException("not offered: " + item);
         Press(entry);
         Settle();

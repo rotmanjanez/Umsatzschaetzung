@@ -1,0 +1,323 @@
+course: Die Regeln
+number: 4
+title: Ein neues Produkt
+summary: >-
+  Oben in der Kette steht, was verkauft wird. Dem Gasthaus fehlt dort ein Gericht: das
+  Schäufele, gemacht aus Schweinefleisch mit Knochen und Klößen. Es kommt in die Regeln,
+  und jede Prüfung kann es ins Sortiment nehmen.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+
+guide:
+  page: web/docs/pages/guide/produkte.md
+  title: Ein neues Produkt
+  intro: |-
+    <p class="us-steps"><a href="../sonderpruefung/">Zweite Prüfung</a><a href="../regeln/">Regeln</a><a href="../kette/">Kette</a><a href="../warenarten/">Warenarten</a><span class="here">Produkte</span><a href="../ertragsregeln/">Ertragsregeln</a></p>
+
+    Oben in der [Produktionskette](kette.md) stehen die Produkte, die verkauft werden:
+    Ihr **Rezept** sagt, aus welchen anderen Produkten sie gemacht werden und wie viel
+    davon. Aus diesen Produkten stellt jede Prüfung ihr Sortiment zusammen. Im Beispiel
+    fehlt ein Gericht des Gasthauses: das Schäufele.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - die Suche nach `Schäufele` unter **Regeln → Produkte** genau ein Produkt
+          findet: **Schäufele mit Kloß**, in Stück, mit 450 g Schweinefleisch mit
+          Knochen und 200 g Klöße und Knödel
+        - in der Sonderprüfung auf **3. Sortiment** die Suche nach `Schäufele` in
+          **Produkt hinzufügen …** **Schäufele mit Kloß** anbietet
+
+    !!! nachlesen "Zum Nachlesen"
+        Was in ein Rezept gehört, steht unter [Regeln](../regeln.md#rezepte), wie ein
+        Rezept nur für eine Prüfung angepasst wird unter
+        [Kalkulation](../kalkulation.md#rezeptur).
+
+    [Weiter: Ertragsregeln <span>Was auf dem Weg durch die Kette verloren geht</span>](ertragsregeln.md){ .us-next }
+
+chapters:
+  - title: Was verkauft wird
+    beats:
+      - card:
+          kicker: Die Regeln · Übung 4
+          title: Ein neues Produkt
+        say: >-
+          In dieser Übung hängen wir oben an die Kette ein neues Glied, ein Gericht,
+          das dem Gasthaus Zur Linde in den Regeln noch fehlt: das Schäufele, mit Kloß.
+
+  - title: Ein Produkt anlegen
+    beats:
+      - say: >-
+          Die Produkte stehen wieder in den Regeln. Rechts oben ist der Knopf dafür.
+        set: [{ do: tab, header: "2. Zuordnung" }]
+        click: { tip: "Regeln" }
+        done: { at: { id: RulesProductsTab }, selected: true }
+        undo: [{ do: close }]
+        rounds: 4
+        task: Rechts oben auf „Regeln“ klicken.
+        hint: Der Knopf mit den drei Reglern, links neben dem Fragezeichen.
+      - say: >-
+          Ob die Regeln das Schäufele schon kennen? Oben ins Feld Filtern klicken und
+          Schäufele eintippen.
+        type: { at: { name: ProductSearch }, text: "Schäufele" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductSearch }, text: "Schäufele" }
+          - { do: focus, window: dialog }
+        rounds: 2
+        task: "Filtern: Schäufele"
+        hint: Das Feld „Filtern“ steht links oben, über der Liste.
+      - say: >-
+          Keine Treffer. Das Schäufele fehlt also, und wir legen es an.
+        show: { text: "Keine Treffer" }
+        text: |-
+          Auf der Karte des Gasthauses steht ein **Schäufele mit Kloß**. Unter
+          **Regeln → Produkte** zeigt die Suche nach `Schäufele`{.copy} **Keine
+          Treffer**: Die Regeln kennen es nicht.
+      - say: >-
+          Ein neues Produkt legt man mit dem Plus neben dem Suchfeld an.
+        click: { name: ProductNew }
+        act: [{ do: click, window: dialog, at: { name: ProductNew } }]
+        done: { at: { text: "Neues Produkt" } }
+        rounds: 2
+        task: Auf das Plus neben „Filtern“ klicken.
+        hint: Das Plus steht links oben, gleich rechts neben dem Suchfeld.
+      - say: >-
+          Zuerst der Name, so wie das Gericht auf der Karte heißt: Schäufele mit Kloß.
+        type: { at: { name: ProductName }, text: "Schäufele mit Kloß" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductName }, text: "Schäufele mit Kloß" }
+          - { do: focus, window: dialog }
+        undo: [{ do: click, at: { name: ProductNew } }]
+        rounds: 2
+        task: "Name: Schäufele mit Kloß"
+        hint: Mit „ß“ am Ende.
+        text: |-
+          Das Plus neben **Filtern** legt ein neues Produkt an. In **Name**
+          `Schäufele mit Kloß`{.copy} eintragen, so wie es auf der Karte heißt.
+      - say: >-
+          Links in der Liste steht es schon. Speichern müssen wir in den Regeln nie:
+          Sobald der Name steht, ist das Produkt angelegt, und alles Weitere wird von
+          selbst gespeichert.
+        set: [{ do: focus, window: dialog }]
+        show: { text: "Schäufele mit Kloß", up: ListBoxItem }
+        text: |-
+          Sobald der Name steht und das Feld verlassen wird, ist das Produkt angelegt und
+          steht links in der Liste. Alles Weitere wird von selbst gespeichert, nach
+          einer kurzen Pause im Tippen.
+      - say: >-
+          Neben dem Namen steht die Einheit. Die steht schon auf Stück, und das passt:
+          Verkauft wird das Schäufele portionsweise, Stück für Stück.
+        show: { id: ProductUnit }
+        text: |-
+          Die **Einheit** steht auf **Stück**, und das passt: Verkauft wird das Schäufele
+          portionsweise. Kartoffeln oder Rotwein werden in Gramm oder Millilitern
+          gezählt, ein Gericht in Stück.
+
+  - title: Das Rezept
+    beats:
+      - say: >-
+          Jetzt das Rezept, also: woraus wird das Schäufele gemacht? Die erste Zeile
+          kommt mit dem Plus unter Rezept dazu.
+        click: { id: RecipeAdd }
+        act: [{ do: click, window: dialog, at: { id: RecipeAdd } }]
+        done: { at: { id: RecipePart } }
+        undo: [{ do: click, at: { id: RecipeRemove } }]
+        rounds: 2
+        task: Unter „Rezept“ auf das Plus klicken.
+        hint: Das Plus steht unter „Rezept“, nicht das links oben.
+      - say: >-
+          Ein Schäufele ist die Schweineschulter, mit Knochen. Ins Feld klicken und
+          Knochen eintippen, das reicht der Suche schon.
+        type: { at: { id: RecipePart }, text: "Knochen" }
+        act: []
+        rounds: 2
+        accept: ["Schweinefleisch mit Knochen"]
+        task: "Produkt: Knochen"
+        hint: Das Feld steht in der neuen Zeile, unter „Produkt“.
+      - say: >-
+          Darunter klappt eine Liste auf, mit Schweinefleisch mit Knochen. Das nehmen
+          wir.
+        click: { text: "Schweinefleisch mit Knochen" }
+        act:
+          - { do: choose, window: dialog, at: { id: RecipePart }, text: "Knochen", item: "Schweinefleisch mit Knochen" }
+          - { do: focus, window: dialog, at: { id: RecipeAmount } }
+        allow: [{ text: "Schweinefleisch mit Knochen" }, { text: "Schweinefleisch mit Knochen", up: ListBoxItem }]
+        done: { at: { id: RecipePart }, text: ["Schweinefleisch mit Knochen"] }
+        rounds: 2
+        task: Auf „Schweinefleisch mit Knochen“ klicken.
+        hint: Es steht in der Liste unter dem Feld.
+        text: |-
+          Das Plus unter **Rezept** fügt eine Zeile an; ein neues Produkt beginnt ohne.
+          Ins Feld `Knochen`{.copy} tippen und aus der Liste **Schweinefleisch mit
+          Knochen** wählen. Gesucht wird in Name und Kategorie, dahinter folgen
+          ähnliche Produkte.
+      - say: >-
+          Und die Menge. Ein Schäufele wiegt roh, mit dem Knochen, etwa
+          vierhundertfünfzig Gramm. Wir tippen vierhundertfünfzig ein.
+        type: { at: { id: RecipeAmount }, text: "450" }
+        act:
+          - { do: type, window: dialog, at: { id: RecipeAmount }, text: "450" }
+          - { do: focus, window: dialog }
+        undo:
+          - { do: click, at: { id: RecipeAdd } }
+          - { do: choose, at: { id: RecipePart }, text: "Knochen", item: "Schweinefleisch mit Knochen" }
+        rounds: 2
+        task: "Menge: 450"
+        hint: Das Feld steht in der Zeile, unter „Menge“.
+        text: |-
+          In **Menge** `450`{.copy} eintragen: Ein Schäufele wiegt roh, mit Knochen,
+          etwa 450 g.
+      - say: >-
+          Daneben steht schon Gramm. Das Schweinefleisch wird ja in Gramm eingekauft,
+          und so zählt es auch in jedem Rezept.
+        show: { id: RecipeUnit }
+        text: |-
+          Die Einheit steht auf **Gramm**, denn Schweinefleisch mit Knochen wird in
+          Gramm gezählt, im Einkauf wie in jedem Rezept.
+      - say: >-
+          Jetzt fehlt noch der Kloß. Der bekommt eine eigene Zeile, also noch einmal
+          das Plus.
+        click: { id: RecipeAdd }
+        act: [{ do: click, window: dialog, at: { id: RecipeAdd } }]
+        done: { at: { id: RecipePart, nth: 2 } }
+        undo: [{ do: click, at: { id: RecipeRemove, nth: 2 } }]
+        rounds: 2
+        task: Noch einmal auf das Plus unter dem Rezept klicken.
+        hint: Das Plus steht gleich unter der ersten Zeile.
+      - say: >-
+          In der neuen Zeile ins Feld klicken und Klöße eintippen.
+        type: { at: { id: RecipePart, nth: 2 }, text: "Klöße" }
+        act: []
+        rounds: 2
+        accept: ["Klöße und Knödel"]
+        task: "Produkt: Klöße"
+        hint: Das Feld steht in der zweiten Zeile, unter „Produkt“.
+      - say: >-
+          Da steht Klöße und Knödel. Das nehmen wir.
+        click: { text: "Klöße und Knödel" }
+        act:
+          - { do: choose, window: dialog, at: { id: RecipePart, nth: 2 }, text: "Klöße", item: "Klöße und Knödel" }
+          - { do: focus, window: dialog, at: { id: RecipeAmount, nth: 2 } }
+        allow: [{ text: "Klöße und Knödel" }, { text: "Klöße und Knödel", up: ListBoxItem }]
+        done: { at: { id: RecipePart, nth: 2 }, text: ["Klöße und Knödel"] }
+        rounds: 2
+        task: Auf „Klöße und Knödel“ klicken.
+        hint: Es steht in der Liste unter dem Feld.
+      - say: >-
+          Für den Kloß rechnen wir zweihundert Gramm.
+        type: { at: { id: RecipeAmount, nth: 2 }, text: "200" }
+        act:
+          - { do: type, window: dialog, at: { id: RecipeAmount, nth: 2 }, text: "200" }
+          - { do: focus, window: dialog }
+        undo:
+          - { do: click, at: { id: RecipeAdd } }
+          - { do: choose, at: { id: RecipePart, nth: 2 }, text: "Klöße", item: "Klöße und Knödel" }
+        rounds: 2
+        task: "Menge: 200"
+        hint: Das Feld steht in der zweiten Zeile, unter „Menge“.
+        text: |-
+          Jeder weitere Bestandteil bekommt mit dem Plus eine eigene Zeile. Für den Kloß:
+          noch einmal das Plus, `Klöße`{.copy} tippen, **Klöße und Knödel** wählen und
+          `200`{.copy} Gramm eintragen. **Das Rezept ergibt** bleibt bei 1 Stück: Das
+          Rezept ist eine Portion.
+        shot:
+          name: produkte-neu
+          window: dialog
+          alt: Das neue Produkt „Schäufele mit Kloß“ mit seinem Rezept
+      - say: >-
+          Und oben steht: Das Rezept ergibt ein Stück. Das Rezept ist also genau eine
+          Portion, so lassen wir es.
+        show: { id: ProductBatch }
+      - say: >-
+          Fertig, und gespeichert ist es auch schon. Die Kette ist um ein Glied
+          länger: Das eingekaufte Schweinefleisch und die Klöße gehen jetzt auch ins
+          Schäufele.
+        show: { text: "Schäufele mit Kloß", up: ListBoxItem }
+
+  - title: Löschen
+    beats:
+      - say: >-
+          Unter dem Rezept ist jetzt auch der Mistkübel da. Damit wird ein Produkt
+          gelöscht, nach einer Rückfrage. Steckt es im Rezept eines anderen Produkts,
+          lehnt das Programm ab und sagt, wo.
+        show: { id: ProductDelete }
+        text: |-
+          Der Mistkübel unter dem Rezept löscht das Produkt, nach einer Rückfrage.
+          Steckt es im Rezept eines anderen Produkts, lehnt das Programm ab und nennt
+          dieses.
+      - say: >-
+          Löschen sollte man aber nur, was im Amt nie vorkommt. Eine Prüfung, die das
+          Produkt im Sortiment hat, rechnet danach ohne es. Ein gespeichertes PDF
+          bleibt, wie er ist, aber eine Prüfungskalkulation kann sich dadurch ändern.
+        show: { id: ProductDelete }
+        hold: 0.5
+        text: |-
+          Gelöscht wird nur, was im Amt nie vorkommt: Eine Prüfung, die das Produkt im
+          Sortiment führt, rechnet danach ohne es. Schon gespeicherte Berichte bleiben
+          unverändert.
+
+  - title: Im Sortiment
+    beats:
+      - say: >-
+          Probieren wir es gleich in unserer Prüfung aus. Die Regeln machen wir mit dem
+          Kreuz rechts oben wieder zu.
+        click: { tip: "Schließen (Esc)" }
+        act: [{ do: close, window: dialog }]
+        done: { at: { text: "2. Zuordnung", type: TabItem }, selected: true }
+        undo:
+          - { do: click, at: { tip: "Regeln" } }
+          - { do: type, at: { name: ProductSearch }, text: "Schäufele" }
+          - { do: select, at: { text: "Schäufele mit Kloß", up: ListBoxItem } }
+        rounds: 2
+        task: Die Regeln schließen.
+        hint: Das Kreuz steht rechts oben, in der Leiste über den Regeln.
+      - say: >-
+          Dann oben auf den Reiter Sortiment.
+        click: { text: "3. Sortiment", type: TabItem }
+        act: [{ do: tab, header: "3. Sortiment" }]
+        rounds: 8
+        task: Auf „3. Sortiment“ klicken.
+        hint: Die Reiter stehen oben, gleich rechts neben „2. Zuordnung“.
+      - say: >-
+          Rechts oben ins Feld Produkt hinzufügen klicken und Schäufele eintippen.
+        type: { at: { name: CatalogBox }, text: "Schäufele" }
+        act: []
+        rounds: 2
+        accept: ["Schäufele mit", "Schäufele mit Kloß"]
+        task: "Produkt hinzufügen: Schäufele"
+        hint: Das Feld steht ganz rechts oben, über der Liste.
+      - say: >-
+          Da ist es schon, in der Liste darunter. Ab jetzt kann jede Prüfung das
+          Schäufele so ins Sortiment nehmen, auch wenn das Sortiment als CSV-Datei
+          eingelesen wird.
+        show: { text: "Schäufele mit Kloß", up: ListBoxItem }
+        text: |-
+          Die Regeln schließen und in der Prüfung auf **3. Sortiment** wechseln. In
+          **Produkt hinzufügen …** `Schäufele`{.copy} tippen: Das neue Produkt steht
+          schon in der Liste darunter. Jede Prüfung kann es ab jetzt ins Sortiment
+          nehmen, auch beim [Import des Sortiments](../import-export.md#sortiment) aus
+          einer CSV-Datei.
+      - say: >-
+          Einen Preis haben wir in den Regeln übrigens nicht eingetragen. Der ist
+          betriebsspezifisch: Jedes Gasthaus verlangt fürs Schäufele etwas anderes.
+          Darum kommt er erst ins Sortiment der Prüfung, von der Karte des Betriebs.
+        show: { text: "Schäufele mit Kloß", up: ListBoxItem }
+        hold: 0.5
+        text: |-
+          Einen Preis hat das Produkt in den Regeln nicht: Der ist betriebsspezifisch und
+          kommt erst mit dem Sortiment der Prüfung dazu, von der Karte des Betriebs.
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So kommt ein Produkt in die Regeln
+          list:
+            - Regeln → Produkte
+            - Neu mit dem Plus
+            - Name, Einheit und Rezept
+            - Der Preis erst im Sortiment
+        say: >-
+          Noch einmal zusammen: die Regeln aufmachen, mit dem Plus ein neues Produkt
+          anlegen, Name, Einheit und Rezept eintragen. Gespeichert wird von selbst. Den
+          Preis bekommt es erst im Sortiment einer Prüfung, von der Karte des Betriebs.

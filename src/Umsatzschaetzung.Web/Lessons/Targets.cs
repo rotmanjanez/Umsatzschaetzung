@@ -1,21 +1,25 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.VisualTree;
 
 namespace Umsatzschaetzung.Headless;
 
-// What a step reaches for: a name from the XAML, a visible text, a control
-// type - and optionally the ancestor it actually means, or the cell of its row in a column.
+// What a step reaches for: a name from the XAML, an automation id, a visible text, a control
+// type - and optionally the ancestor it actually means, or the cell of its row in a column; with
+// `nth`, the nth of the controls that match.
 public sealed record Target
 {
     public string? Name { get; init; }
+    public string? Id { get; init; }
     public string? Text { get; init; }
     public string? Starts { get; init; }
     public string? Type { get; init; }
     public string? Tip { get; init; }
     public string? Up { get; init; }
     public string? Column { get; init; }
+    public int Nth { get; init; } = 1;
 }
 
 // Shared by the headless driver and the exercise in the browser, so a script and an
@@ -39,7 +43,7 @@ public static class Targets
     // Also hands back the control that matched, before `up` led to its ancestor.
     public static Visual? Seek(Visual root, Target target, out Visual? hit)
     {
-        foreach (var v in root.GetVisualDescendants().Where(v => Is(v, target)))
+        foreach (var v in root.GetVisualDescendants().Where(v => Is(v, target)).Skip(target.Nth - 1))
         {
             if ((target.Up is { } up ? Above(v, up) : v) is not { } found) continue;
             hit = v;
@@ -59,6 +63,7 @@ public static class Targets
     public static bool Is(Visual v, Target target) =>
         v.IsEffectivelyVisible
         && (target.Name is null || (v as StyledElement)?.Name == target.Name)
+        && (target.Id is null || AutomationProperties.GetAutomationId(v) == target.Id)
         && (target.Text is null || Label(v) == target.Text)
         && (target.Starts is null || Label(v)?.StartsWith(target.Starts, StringComparison.Ordinal) == true)
         && (target.Type is null || v.GetType().Name == target.Type)

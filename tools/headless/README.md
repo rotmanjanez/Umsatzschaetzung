@@ -15,6 +15,7 @@ the switches. Same run, same bytes: if an image changes, the interface changed.
     --readings folder of recorded readings (default: none, every scan is read)
     --perf    writes what every step costs to this TSV file; shots are skipped
     --trace   folder for the CPU samples of every step that names a `trace`
+    --from    starts on the stores a `keep` step kept in this folder, with their case open
 
 With `--readings` a scan is read once and its reading, the words, the correction and the
 tagged draft, is kept under the hash of its bytes and the readers. Later runs replay it
@@ -71,10 +72,12 @@ second, so what fades or moves has come to rest.
 | `press`    | `at` | presses and releases the pointer on `at`, as a click on a row that opens it |
 | `close`    | | closes the window, with `"window": "dialog"` the one on top |
 
-`at` looks for a control: `name` is the `x:Name` from the XAML, `text` the visible
-caption, `starts` the beginning of one (for a long row that the scan may have read
-with a twist at the end), `tip` the tooltip (for buttons that only show an icon),
-`type` the type (`"DataGrid"`). Several fields narrow it down further, and
+`at` looks for a control: `name` is the `x:Name` from the XAML, `id` its
+`AutomationProperties.AutomationId`, `text` the visible caption, `starts` the beginning
+of one (for a long row that the scan may have read with a twist at the end), `tip` the
+tooltip (for buttons that only show an icon), `type` the type (`"DataGrid"`), `nth` the
+nth of several that match (rows of a list that read alike). Several fields narrow it
+down further, and
 `up` then climbs to the nearest ancestor of that type:
 
     { "text": "Lieferant", "up": "DataGrid" }

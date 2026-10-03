@@ -81,11 +81,13 @@ public static partial class Coach
         await Settle();
     }
 
-    // An invoice stores its edits a moment after they are made, and only then are they in the case.
+    // An invoice stores its edits a moment after they are made, and only then are they in the case; the
+    // rules store theirs after a pause in typing, so they are told to at once.
     static async Task Stored()
     {
         for (var i = 0; i < 100 && top!.GetVisualDescendants().OfType<InvoiceView>().Any(v => v.DataContext is InvoiceModel { Dirty: true }); i++)
             await Settle();
+        foreach (var rules in top!.GetVisualDescendants().OfType<RulesView>().ToList()) await rules.Store();
         await Settle();
     }
 
@@ -136,7 +138,7 @@ public static partial class Coach
                 Click(at!);
                 break;
             case TypeStep s:
-                Type(at!, s.Text);
+                Type(at!, s);
                 break;
             case FocusStep:
                 if (at is InputElement input) input.Focus();
@@ -159,7 +161,8 @@ public static partial class Coach
                 if (session!.Case?.Invoices.Find(i => i.Number == s.Number) is { } invoice) session.OpenInvoice(invoice.Id);
                 break;
             case TabStep s:
-                var item = await Reach(new Target { Text = s.Header, Type = "TabItem" });
+                var header = new Target { Text = s.Header, Type = "TabItem" };
+                var item = Topmost() is { } open && Targets.Seek(open, header) is { } inside ? inside : await Reach(header);
                 ((TabControl)Targets.Up(item, "TabControl")).SelectedItem = item;
                 break;
             case ChooseStep s:
@@ -168,11 +171,22 @@ public static partial class Coach
             case WaitStep s:
                 await Settle(s.Rounds);
                 break;
+            case PressStep:
+                var row = (at as StyledElement)?.DataContext as CaseRow ?? throw new NotSupportedException("not a case: " + at!.GetType().Name);
+                session!.Open(await session.Service.Cases.Get(row.Case.Id, CancellationToken.None));
+                break;
+            case CloseStep:
+                Click(Targets.Seek(Topmost() ?? throw new InvalidOperationException("no sheet to close"), new Target { Tip = "Schließen (Esc)" })!);
+                break;
             default:
                 throw new NotSupportedException("not in the browser: " + step.GetType().Name);
         }
         await Settle();
     }
+
+    // The sheet on top, where one is open: what the program in a window would call the dialog.
+    static Border? Topmost() =>
+        top!.GetVisualDescendants().OfType<Sheets>().FirstOrDefault()?.Children.OfType<Border>().MaxBy(c => c.ZIndex);
 
     static async Task<Visual> Reach(Target target)
     {
@@ -204,17 +218,22 @@ public static partial class Coach
             ?? visual.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.IsEffectivelyVisible)
             ?? throw new InvalidOperationException("not a button: " + visual.GetType().Name);
         if (button is RadioButton radio) radio.IsChecked = true;
-        else button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        else
+        {
+            if (button is ToggleButton toggle) toggle.IsChecked = toggle.IsChecked != true;
+            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        }
     }
 
     // A field, or the first text box inside what `at` found (the price in a row).
-    static void Type(Visual visual, string text)
+    static void Type(Visual visual, TypeStep step)
     {
         if (AvaloniaPropertyRegistry.Instance.GetRegistered(visual).FirstOrDefault(p => p.Name == "Text") is { } property)
-            visual.SetValue(property, text);
+            visual.SetValue(property, step.Into(visual.GetValue(property) as string));
+        else if (visual.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsEffectivelyVisible) is { } box)
+            box.Text = step.Into(box.Text);
         else
-            (visual.GetVisualDescendants().OfType<TextBox>().FirstOrDefault(b => b.IsEffectivelyVisible)
-             ?? throw new InvalidOperationException("no text field in " + visual.GetType().Name)).Text = text;
+            throw new InvalidOperationException("no text field in " + visual.GetType().Name);
     }
 
     static void Select(Visual row, object? item)

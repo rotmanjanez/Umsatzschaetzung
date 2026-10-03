@@ -4,7 +4,7 @@
 //
 //   dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]
 //                                          [--width PT] [--height PT] [--scale N] [--pad PT]
-//                                          [--readings DIR]
+//                                          [--readings DIR] [--from DIR]
 //
 //   --out     target folder for the images (default: next to the script)
 //   --rules   rule set as JSON (default: the app's own seeded rule set)
@@ -13,6 +13,7 @@
 //   --readings folder of recorded readings: a scan read once is replayed on every later run
 //   --perf    writes what every step costs as TSV to this file; shots are skipped
 //   --trace   folder for the CPU samples of every step that names a "trace"
+//   --from    starts on the stores a `keep` step kept in this folder, with their case open
 using System.Globalization;
 using Avalonia;
 using Avalonia.Headless;
@@ -59,6 +60,7 @@ AppBuilder.Configure<App>()
 var weights = new OrtWeights(AppFiles.Beside("models"));
 var encoder = new Encoder(weights, runs: Math.Max(Environment.ProcessorCount / 2, 1));
 var lesson = new Lesson(store, Path.Combine(work.FullName, "cases"), Path.Combine(work.FullName, "embedded"));
+var open = options.TryGetValue("from", out var from) ? lesson.Restore(from) : null;
 using var perfOut = options.TryGetValue("perf", out var perfPath) ? File.CreateText(perfPath) : null;
 var perf = perfOut is null ? null : new Perf(perfOut);
 perf?.Header();
@@ -66,6 +68,7 @@ var tracing = options.TryGetValue("trace", out var traceDir) ? new Tracing(trace
 var driver = new Driver(Launch, lesson, (int)(Number("scale") ?? 2), Number("pad") ?? 16, outDir, perf, tracing);
 try
 {
+    driver.Resume(open);
     foreach (var step in steps) driver.Run(step);
     // Awaited as Restart awaits the case: what resumes on the dispatcher needs it pumped.
     var finish = lesson.Finish(encoder);
@@ -109,6 +112,6 @@ static int Usage(string problem)
 {
     Console.Error.WriteLine(problem);
     Console.Error.WriteLine("dotnet run --project tools/headless -- <script.jsonl> [--out DIR] [--rules FILE]"
-        + " [--width PT] [--height PT] [--scale N] [--pad PT] [--readings DIR] [--perf FILE] [--trace DIR]");
+        + " [--width PT] [--height PT] [--scale N] [--pad PT] [--readings DIR] [--perf FILE] [--trace DIR] [--from DIR]");
     return 2;
 }

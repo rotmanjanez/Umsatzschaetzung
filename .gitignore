@@ -20,6 +20,12 @@ web/docs/pages/guide/sortiment.md
 web/docs/pages/guide/kalkulation.md
 web/docs/pages/guide/bericht.md
 web/docs/pages/guide/rechnungen.md
+web/docs/pages/guide/sonderpruefung.md
+web/docs/pages/guide/regeln.md
+web/docs/pages/guide/kette.md
+web/docs/pages/guide/warenarten.md
+web/docs/pages/guide/produkte.md
+web/docs/pages/guide/ertragsregeln.md
 web/docs/pages/uebungen.md
 web/docs/shots/guide.jsonl
 .env

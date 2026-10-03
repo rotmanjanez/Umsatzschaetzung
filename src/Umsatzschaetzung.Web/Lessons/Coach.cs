@@ -20,12 +20,14 @@ public sealed record Goal
     public required Done Done { get; init; }
 }
 
-// `at` is there; with `selected` its row, tab or option is chosen; with `text` its field reads one of them.
+// `at` is there; with `selected` its row, tab or option is chosen; with `text` its field reads one of them,
+// with `last` too its last line does.
 public sealed record Done
 {
     public required Target At { get; init; }
     public bool Selected { get; init; }
     public List<string>? Text { get; init; }
+    public bool Last { get; init; }
 }
 
 // Runs the real program under an exercise: a press or a key only reaches the controls the
@@ -47,6 +49,7 @@ public static partial class Coach
         Gate(InputElement.KeyDownEvent, Key);
         Gate(InputElement.KeyUpEvent, Key);
         Gate(InputElement.TextInputEvent, Key);
+        InputElement.GotFocusEvent.AddClassHandler<TopLevel>((_, e) => Append(e.Source), RoutingStrategies.Bubble, handledEventsToo: true);
         new DispatcherTimer(TimeSpan.FromMilliseconds(150), DispatcherPriority.Background, (_, _) => Check()).Start();
     }
 
@@ -108,7 +111,7 @@ public static partial class Coach
     static Visual? Find(Target target)
     {
         if (top is null) return null;
-        if (found.TryGetValue(target, out var known) && known.Hit.IsAttachedToVisualTree() && Targets.Is(known.Hit, target))
+        if (target.Nth <= 1 && found.TryGetValue(target, out var known) && known.Hit.IsAttachedToVisualTree() && Targets.Is(known.Hit, target))
             return known.Found;
         if (Targets.Seek(top, target, out var hit) is not { } result)
         {
@@ -152,6 +155,7 @@ public static partial class Coach
     static void Release(PointerReleasedEventArgs e)
     {
         if (swallowed) e.Handled = true;
+        else Append(e.Source);
     }
 
     static void Key(RoutedEventArgs e)
@@ -190,7 +194,22 @@ public static partial class Coach
     static bool Met(Visual hit, Done done)
     {
         if (done.Selected && !Chosen(hit)) return false;
-        return done.Text is null || Field(hit) is { } text && done.Text.Any(t => Same(t, text));
+        return done.Text is null || Field(hit) is { } text && done.Text.Any(t => Same(t, done.Last ? Last(text) : text));
+    }
+
+    static string Last(string text) => text.Split('\n').Select(l => l.Trim()).LastOrDefault(l => l != "") ?? "";
+
+    // A field the learner adds a line to takes their typing after everything it holds, on a line of
+    // its own, wherever they clicked into it: after the press or release has placed the caret.
+    static void Append(object? source)
+    {
+        if (task?.Done is not { Last: true } done || Find(done.At) is not { } hit || Editor(hit) is not { } box
+            || source is not Visual at || at != box && !box.IsVisualAncestorOf(at)) return;
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!string.IsNullOrWhiteSpace(box.Text) && !box.Text.EndsWith('\n')) box.Text = box.Text.TrimEnd() + "\n";
+            box.CaretIndex = box.Text?.Length ?? 0;
+        });
     }
 
     // The nearest row, tab or option around what was found decides, not the tab around all of them.
@@ -200,8 +219,9 @@ public static partial class Coach
 
     // A cell shows its editor only while it is edited; once taken, it shows the text.
     static string? Field(Visual hit) =>
-        (hit as TextBox ?? hit.GetVisualDescendants().OfType<TextBox>().FirstOrDefault())?.Text
-        ?? (hit is DataGridCell ? hit.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault()?.Text : null);
+        Editor(hit)?.Text ?? (hit is DataGridCell ? hit.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault()?.Text : null);
+
+    static TextBox? Editor(Visual hit) => hit as TextBox ?? hit.GetVisualDescendants().OfType<TextBox>().FirstOrDefault();
 
     // An amount reads right at the value the program keeps from it, as 4,6 does for 4,60.
     static bool Same(string a, string b) =>

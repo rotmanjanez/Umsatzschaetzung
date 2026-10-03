@@ -40,7 +40,8 @@ Sie läuft genauso wie das Beispiel. Drei Dinge sind anders:
   Scanqualität, siehe [Scanqualität](../rechnungen.md#scanqualitat).
 - **Die Zuordnung hat gelernt.** Jede bestätigte Zuordnung gilt auch in
   späteren Prüfungen. Wer denselben Getränkehändler noch einmal prüft, hat
-  weniger offene Positionen.
+  weniger offene Positionen. Wie man die Regeln selbst pflegt, zeigt
+  [Regeln pflegen](regeln.md).
 - **Das Sortiment kommt aus der Speisekarte.** Produkt für Produkt über
   **Produkt hinzufügen …**, oder als Tabelle wie hier per CSV.
 

@@ -1,0 +1,102 @@
+title: Eine zweite Prüfung
+
+guide:
+  page: web/docs/pages/guide/sonderpruefung.md
+  title: Eine zweite Prüfung
+  intro: |-
+    <p class="us-steps"><span class="here">Zweite Prüfung</span><a href="../regeln/">Regeln</a><a href="../kette/">Kette</a><a href="../warenarten/">Warenarten</a><a href="../produkte/">Produkte</a><a href="../ertragsregeln/">Ertragsregeln</a></p>
+
+    Was die Regeln können, zeigt sich erst an der nächsten Prüfung. Für dieses Kapitel
+    bekommt das Gasthaus Zur Linde deshalb eine zweite: eine Umsatzsteuer-Sonderprüfung
+    für Mai bis Juli 2025, mit den 26 Rechnungen aus diesen drei Monaten.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - die Liste zwei Prüfungen des Gasthauses zeigt
+        - die Sonderprüfung auf **1. Rechnungen** 26 Rechnungen hält und auf
+          **3. Sortiment** **Bier 0,5 l vom Fass** mit `4,60`
+
+    !!! nachlesen "Zum Nachlesen"
+        Die Liste der Prüfungen beschreibt [Prüfungen](../pruefungen.md), wo die Regeln
+        liegen und wer sie teilt [Verwaltete Installation](../verwaltung.md#regel-datenbank).
+
+    [Weiter: Regeln pflegen <span>Was das Programm aus der ersten Prüfung behalten hat</span>](regeln.md){ .us-next }
+
+chapters:
+  - title: Anlegen
+    beats:
+      - act:
+          - { do: click, at: { name: NewCase } }
+          - { do: focus }
+          - { do: type, at: { name: NewLabel }, text: "Gasthaus Zur Linde, USt-Sonderprüfung 2025" }
+          - { do: type, at: { name: NewFrom }, text: "01.05.2025" }
+          - { do: type, at: { name: NewTo }, text: "31.07.2025" }
+          - { do: type, at: { name: NewName }, text: "Renate Vogel" }
+          - { do: type, at: { name: NewTaxNumber }, text: "123/456/789" }
+          - { do: type, at: { name: NewPab }, text: "PAB 2025/0611" }
+          - { do: focus }
+          - { do: click, at: { text: "Anlegen" } }
+
+  - title: Rechnungen
+    beats:
+      - act:
+          - { do: tab, header: "1. Rechnungen" }
+          - do: import
+            files:
+              - beispiel-rechnungen/2025-05-06_LR-2025-31092.png
+              - beispiel-rechnungen/2025-05-08_2025-0313.png
+              - beispiel-rechnungen/2025-05-12_R-25-029.jpeg
+              - beispiel-rechnungen/2025-05-15_WS-2025-181.png
+              - beispiel-rechnungen/2025-05-20_LR-2025-31163.png
+              - beispiel-rechnungen/2025-05-22_2025-0339.png
+              - beispiel-rechnungen/2025-05-28_9120105649.jpeg
+              - beispiel-rechnungen/2025-05-30_SR-251058.pdf
+              - beispiel-rechnungen/2025-06-03_LR-2025-31290.pdf
+              - beispiel-rechnungen/2025-06-05_2025-0370.png
+              - beispiel-rechnungen/2025-06-09_R-25-035.jpeg
+              - beispiel-rechnungen/2025-06-10_FA2500302.png
+              - beispiel-rechnungen/2025-06-17_LR-2025-31397.png
+              - beispiel-rechnungen/2025-06-19_2025-0406.png
+              - beispiel-rechnungen/2025-06-25_9120110229.jpeg
+              - beispiel-rechnungen/2025-06-25_RE2501944.pdf
+              - beispiel-rechnungen/2025-07-01_LR-2025-31553.png
+              - beispiel-rechnungen/2025-07-03_2025-0438.png
+              - beispiel-rechnungen/2025-07-07_R-25-041.jpeg
+              - beispiel-rechnungen/2025-07-11_WS-2025-268.png
+              - beispiel-rechnungen/2025-07-15_LR-2025-31618.png
+              - beispiel-rechnungen/2025-07-17_2025-0450.png
+              - beispiel-rechnungen/2025-07-23_9120127235.jpeg
+              - beispiel-rechnungen/2025-07-25_SR-251386.pdf
+              - beispiel-rechnungen/2025-07-29_LR-2025-31767.pdf
+              - beispiel-rechnungen/2025-07-31_2025-0463.png
+          - { do: click, window: dialog, at: { text: "Schließen" } }
+          - { do: deselect, at: { text: "Lieferant", up: DataGrid } }
+
+  - title: Sortiment
+    beats:
+      - act:
+          - { do: tab, header: "3. Sortiment" }
+          - { do: choose, at: { name: CatalogBox }, text: "Bier 0,5", item: "Bier 0,5 l vom Fass" }
+          - { do: edit, at: { text: "Bier 0,5 l vom Fass" }, column: Bruttopreis, text: "4,60" }
+          - { do: focus }
+
+  - title: Zwei Prüfungen
+    beats:
+      - act:
+          - { do: click, at: { name: BackButton } }
+          - { do: deselect, at: { text: "Bezeichnung", up: DataGrid } }
+        rounds: 2
+        text: |-
+          Angelegt wird sie wie die erste unter [Prüfung anlegen](start.md): Bezeichnung
+          `Gasthaus Zur Linde, USt-Sonderprüfung 2025`, Zeitraum `01.05.2025` bis
+          `31.07.2025`, Name `Renate Vogel` und Steuernummer `123/456/789` wie gehabt,
+          PAB-Nr. `PAB 2025/0611`. Auf **1. Rechnungen** kommen aus dem Ordner
+          `beispiel-rechnungen-2025` die 26 Dateien, deren Name mit `2025-05`, `2025-06`
+          oder `2025-07` beginnt. Auf **3. Sortiment** kommt **Bier 0,5 l vom Fass** mit
+          `4,60` wie in der ersten. Einen erklärten Umsatz braucht es nicht. Zurück in
+          der Liste stehen beide Prüfungen:
+        shot:
+          name: sonderpruefung-liste
+          at: { text: "Bezeichnung", up: DataGrid }
+          trim: { top: 16 }
+          clip: DataGridRow
+          alt: Die Liste der Prüfungen mit beiden Prüfungen des Gasthauses

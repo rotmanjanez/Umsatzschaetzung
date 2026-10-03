@@ -104,6 +104,20 @@ public sealed class Lesson(string store, string cases, string embedded)
         tx.Commit();
     }
 
+    // The other way round, for a run that starts where a lesson starts: the kept stores are copied
+    // back, and the case they had open is handed back to be opened.
+    public string? Restore(string from)
+    {
+        foreach (var (into, dir) in new[] { ("rules", store), ("cases", cases) })
+        {
+            Directory.CreateDirectory(dir);
+            foreach (var db in Directory.EnumerateFiles(Path.Combine(from, into), "*.db"))
+                File.Copy(db, Path.Combine(dir, Path.GetFileName(db)));
+        }
+        using var kept = JsonDocument.Parse(File.ReadAllText(Path.Combine(from, "zustand.json")));
+        return kept.RootElement.GetProperty("case").GetString();
+    }
+
     static void Run(string db, string sql, string? copy = null)
     {
         using var connection = Open(db);

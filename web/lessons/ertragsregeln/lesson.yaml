@@ -1,0 +1,369 @@
+course: Die Regeln
+number: 5
+title: Ertragsregeln
+summary: >-
+  Was auf dem Weg durch die Kette verloren geht: eine mitgelieferte Regel zum Standard
+  machen, eine eigene anlegen, eine überflüssige löschen, und sehen, wie das in der
+  Prüfung ankommt, ohne dass dort etwas eingetragen wird.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+  text: Die Kette ist gepflegt, und jede Änderung gilt ab jetzt in jeder Prüfung.
+
+guide:
+  page: web/docs/pages/guide/ertragsregeln.md
+  title: Ertragsregeln
+  intro: |-
+    <p class="us-steps"><a href="../sonderpruefung/">Zweite Prüfung</a><a href="../regeln/">Regeln</a><a href="../kette/">Kette</a><a href="../warenarten/">Warenarten</a><a href="../produkte/">Produkte</a><span class="here">Ertragsregeln</span></p>
+
+    Nicht alles, was unten in die [Produktionskette](kette.md) geht, kommt oben als
+    Verkauf heraus. Eine Ertragsregel ist ein Abzug mit Namen: Wie viel vom Einkauf gilt
+    nicht als verkauft, und warum. In der Prüfung wird nur gewählt, welche Regel gilt. Angelegt,
+    geändert und gelöscht werden die Regeln unter **Regeln → Ertragsregeln**, und was
+    dort als **Standard** angekreuzt ist, gilt in jeder Prüfung, die nichts anderes
+    wählt. Im Beispiel wird der Schankverlust beim Fassbier geregelt.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - unter **Regeln → Ertragsregeln** beim **Bier vom Fass** drei Regeln stehen:
+          **Schankverlust** mit 3 % als Standard und mit 5 %, dazu
+          **Schankverlust, alte Schankanlage** mit 6 %
+        - die Sonderprüfung auf **4. Kalkulation → Ertragsregeln** beim **Bier vom
+          Fass** **Schankverlust (Standard)** zeigt, ohne dass dort etwas gewählt wurde
+
+    !!! nachlesen "Zum Nachlesen"
+        Wie Ertragsregeln angelegt werden und was **Standard** heißt, steht unter
+        [Regeln](../regeln.md#ertragsregeln), wie die Prüfung eine Regel wählt unter
+        [Kalkulation](../kalkulation.md#ertragsregeln). Wo die Regeln liegen und wer
+        sie teilt, beschreibt [Verwaltete Installation](../verwaltung.md#regel-datenbank).
+
+    Damit ist das Kapitel **Regeln pflegen** vollständig.
+
+    [Weiter: Danach <span>Die Prüfung weitergeben und die eigene beginnen</span>](danach.md){ .us-next }
+
+chapters:
+  - title: Die Abzüge
+    beats:
+      - card:
+          kicker: Die Regeln · Übung 5
+          title: Ertragsregeln
+        say: >-
+          In der letzten Übung geht es um das, was auf dem Weg durch die Kette verloren
+          geht. Beim Zapfen geht ein bisserl Bier daneben, Gemüse verdirbt. Diese
+          Abzüge regeln die Ertragsregeln, und eine Änderung daran kommt in jeder
+          Prüfung auf einmal an.
+      - card:
+          kicker: Wo in der Kette
+          title: Der Abzug sitzt beim Einkauf
+          list:
+            - 100 l Fassbier eingekauft
+            - 3 % Schankverlust
+            - 97 l in den Gläsern
+        say: >-
+          Eine Ertragsregel sitzt meist ganz unten in der Kette, bei dem, was eingekauft
+          wird. Von hundert Litern Fassbier kommen bei drei Prozent Schankverlust
+          siebenundneunzig in die Gläser. Erst die rechnet die Kalkulation die Kette
+          hinauf, bis zum Bier auf der Karte.
+        text: |-
+          Eine Ertragsregel gilt für eine Kategorie oder ein Produkt, meist unten in der
+          Kette, bei dem, was eingekauft wird: Von 100 l Fassbier kommen bei 3 %
+          Schankverlust 97 l in die Gläser, und erst diese rechnet die Kalkulation die
+          Kette hinauf bis zum Bier 0,5 l.
+
+  - title: Das Bier im Sortiment
+    beats:
+      - say: >-
+          Im Sortiment der Sonderprüfung steht schon das Bier vom Fass, mit dem Preis
+          von der Karte. Mit ihm kommt das Fassbier in die Kalkulation dieser Prüfung.
+        set: [{ do: tab, header: "3. Sortiment" }]
+        show: { text: "Bier 0,5 l vom Fass", up: DataGridRow }
+        hold: 0.5
+        text: |-
+          Im Sortiment der Sonderprüfung steht schon **Bier 0,5 l vom Fass** mit
+          `4,60`. Erst ein Produkt mit Fassbier im Rezept bringt die Kategorie
+          **Bier vom Fass** in die Kalkulation dieser Prüfung: Die Kette vom Fassbier
+          unten zum Bier 0,5 l oben ist dann geschlossen.
+
+  - title: Was gerade gilt
+    beats:
+      - say: >-
+          Die Abzüge stehen auf dem Reiter Kalkulation, klicken wir ihn an.
+        click: { text: "4. Kalkulation", type: TabItem }
+        act: [{ do: tab, header: "4. Kalkulation" }]
+        rounds: 8
+        task: Auf „4. Kalkulation“ klicken.
+        hint: Die Reiter stehen oben, unter dem Namen des Gasthauses.
+      - say: >-
+          Und in der zweiten Reihe auf die Seite Ertragsregeln.
+        click: { text: "Ertragsregeln", type: TabItem }
+        act: [{ do: tab, header: "Ertragsregeln" }]
+        rounds: 4
+        task: Auf „Ertragsregeln“ klicken.
+        hint: Sie steht in der zweiten Reihe, gleich neben „Portionen“.
+        text: |-
+          Auf **4. Kalkulation** die Seite **Ertragsregeln** öffnen. Mit dem Bier steht
+          **Bier vom Fass** in der Liste, mit **Kein Abzug**. Zur Wahl
+          stehen drei Regeln **Schankverlust** mit 3 %, 5 % und 8 %, keine davon ist
+          Standard. Solange niemand eine wählt, wird nichts abgezogen, in dieser
+          Prüfung wie in jeder anderen.
+        shot:
+          name: ertragsregeln-vorher
+          at: { text: "Nach Kategorie", up: StackPanel }
+          width: 330
+          alt: Die Seite „Ertragsregeln“ der Sonderprüfung, beim Bier vom Fass „Kein Abzug“
+      - say: >-
+          Da ist unser Bier vom Fass, und daneben steht Kein Abzug.
+        show: { text: "Bier vom Fass", up: Grid }
+      - say: >-
+          Aus der letzten Übung im ersten Kurs wissen wir noch, warum: Zur Auswahl
+          stehen drei Regeln, alle heißen Schankverlust, mit drei, fünf und acht
+          Prozent. Keine davon ist Standard, und so wird nichts abgezogen, solange
+          niemand eine auswählt. In jeder Prüfung, jedes Mal. Das ändern wir jetzt
+          an der Stelle, wo es für alle gilt.
+        show: { text: "Bier vom Fass", up: Grid }
+
+  - title: Die Regeln für das Fassbier
+    beats:
+      - say: >-
+          Dafür öffnen wir die Regeln, mit dem Reglersymbol rechts oben.
+        click: { tip: "Regeln" }
+        rounds: 4
+        done: { at: { id: RulesYieldsTab } }
+        undo: [{ do: close }]
+        task: Auf das Reglersymbol rechts oben klicken.
+        hint: Es steht ganz rechts oben, links neben dem Fragezeichen.
+      - say: >-
+          Oben stehen die Reiter. Wir klicken auf Ertragsregeln.
+        click: { id: RulesYieldsTab }
+        act: [{ do: tab, header: "Ertragsregeln", window: dialog }]
+        rounds: 2
+        task: Auf den Reiter „Ertragsregeln“ klicken.
+        hint: Der dritte Reiter oben im Fenster der Regeln, rechts neben „Produkte“.
+      - say: >-
+          Links stehen alle Kategorien und Produkte. Damit wir nicht lange suchen,
+          tippen wir oben ins Suchfeld Fass.
+        type: { at: { name: YieldSearch }, text: "Fass" }
+        act: [{ do: type, window: dialog, at: { name: YieldSearch }, text: "Fass" }]
+        rounds: 2
+        task: "Suchen: Fass"
+        hint: Das Suchfeld steht links oben, über der Liste.
+      - say: >-
+          Ganz oben steht die Kategorie Bier vom Fass, mit einem Dreier daneben: So
+          viele Regeln hat sie. Einmal draufklicken.
+        click: { text: "Bier vom Fass", up: ListBoxItem }
+        act: [{ do: select, window: dialog, at: { text: "Bier vom Fass", up: ListBoxItem } }]
+        rounds: 2
+        task: Auf „Bier vom Fass“ klicken.
+        hint: Die erste Zeile links, mit der 3 daneben.
+        text: |-
+          Über das Reglersymbol rechts oben (**Regeln**) die Regeln öffnen, dort den
+          Reiter **Ertragsregeln**. Links stehen alle Kategorien und dann alle Produkte,
+          daneben die Zahl ihrer Regeln. `Fass`{.copy} ins Suchfeld tippen und die
+          Kategorie **Bier vom Fass** anklicken. Rechts stehen ihre Regeln, eine je
+          Zeile, mit **Name**, **Abzug** und **Standard**:
+        shot:
+          name: ertragsregeln-drei
+          window: dialog
+          at: { name: RuleList, up: StackPanel }
+          clip: TextBlock
+          trim: { left: 4 }
+          width: 560
+          alt: Die drei Regeln „Schankverlust“ für Bier vom Fass, keine davon Standard
+      - say: >-
+          Rechts stehen jetzt die drei Regeln. Alle heißen Schankverlust, mit drei,
+          fünf und acht Prozent. Und in der Spalte Standard ist bei keiner ein
+          Häkchen.
+        show: { name: RuleList }
+
+  - title: Ein Standard für das Amt
+    beats:
+      - say: >-
+          Sagen wir, im Amt gilt: drei Prozent Schankverlust, wenn nichts anderes
+          belegt ist. Das machen wir zum Standard. Wir klicken also in der ersten
+          Zeile, bei den drei Prozent, auf das Kästchen unter Standard.
+        click: { id: YieldDefault, nth: 1 }
+        act: [{ do: click, window: dialog, at: { id: YieldDefault, nth: 1 } }]
+        rounds: 2
+        task: Bei „Schankverlust, 3 %“ das Kästchen „Standard“ anklicken.
+        hint: Das Kästchen steht in der ersten Zeile, rechts neben der 3.
+        text: |-
+          **Standard** in der Zeile mit 3 % ankreuzen. Das ist sofort gespeichert. Ab
+          jetzt zieht jede Prüfung beim Fassbier 3 % Schankverlust ab, solange sie
+          unter **4. Kalkulation → Ertragsregeln** nichts anderes wählt, auch die
+          schon angelegten wie die Bp 2025. Ein schon gespeichertes PDF ändert sich
+          nicht mit. Standard kann je Kategorie nur eine
+          Regel sein; ein neues Häkchen nimmt das alte weg.
+      - say: >-
+          Gespeichert ist das schon. Ab jetzt zieht jede Prüfung beim Fassbier drei
+          Prozent ab, solange sie nichts anderes wählt. Auch die Bp
+          zweitausendfünfundzwanzig, deren Ergebnis ändert sich mit. Nur ein PDF,
+          das schon gespeichert ist, bleibt, wie es war.
+        show: { id: YieldDefault, nth: 1 }
+
+  - title: Eine eigene Regel
+    beats:
+      - say: >-
+          Jetzt ein Betrieb mit einer alten Schankanlage, bei dem nachweislich mehr
+          danebengeht. Der bekommt keine freie Prozentzahl, sondern eine Regel mit
+          Namen, damit im Bericht steht, warum. Die legen wir gleich an: In der
+          leeren Zeile ganz unten, wo Neue Regel steht, klicken wir hinein und
+          schreiben Schankverlust, alte Schankanlage.
+        type: { at: { id: YieldName, nth: 4 }, text: "Schankverlust, alte Schankanlage" }
+        act: [{ do: type, window: dialog, at: { id: YieldName, nth: 4 }, text: "Schankverlust, alte Schankanlage" }]
+        accept: ["Schankverlust alte Schankanlage"]
+        task: "Name: Schankverlust, alte Schankanlage"
+        hint: Die leere Zeile ganz unten, in der „Neue Regel …“ steht.
+      - say: >-
+          Und daneben, unter Abzug, sechs Prozent. Also einfach sechs eintippen.
+        type: { at: { id: YieldDeduction, nth: 4 }, text: "6" }
+        act:
+          - { do: type, window: dialog, at: { id: YieldDeduction, nth: 4 }, text: "6" }
+          - { do: focus, window: dialog }
+        rounds: 4
+        done: { at: { text: "4", up: ListBoxItem } }
+        task: "Abzug: 6"
+        hint: Das Feld rechts neben dem Namen, in derselben Zeile.
+      - say: >-
+          Gespeichert wird von selbst, sobald Name und Zahl stehen. Links beim Bier
+          vom Fass steht jetzt ein Vierer, und unten wartet schon wieder eine leere
+          Zeile für die nächste Regel.
+        show: { text: "4", up: ListBoxItem }
+      - text: |-
+          Eine neue Regel kommt in die leere letzte Zeile (**Neue Regel …**):
+          `Schankverlust, alte Schankanlage`{.copy} als Name, `6`{.copy} als Abzug. Sie
+          ist gespeichert, sobald Name und Abzug stehen; darunter erscheint wieder eine
+          leere Zeile. Wählbar ist sie ab jetzt in jeder Prüfung, für einen Betrieb, der
+          den höheren Verlust belegt. Im Bericht steht dann ihr Name, nicht nur der
+          Satz.
+        shot:
+          name: ertragsregeln-neu
+          window: dialog
+          at: { name: RuleList, up: StackPanel }
+          clip: TextBlock
+          trim: { left: 4 }
+          width: 560
+          alt: Die neue Regel „Schankverlust, alte Schankanlage“ mit 6 %
+
+  - title: Eine Regel löschen
+    beats:
+      - say: >-
+          Bleibt die Stufe mit acht Prozent. Die hat keinen Namen, der sagt, wofür sie
+          gedacht ist, und für die alte Schankanlage haben wir jetzt die eigene Regel.
+          Sagen wir, im Amt hat sie nie jemand gewählt. Eine Regel, die keiner braucht,
+          macht nur in jeder Prüfung die Auswahl länger. Also weg damit: In der Zeile
+          mit acht Prozent ganz rechts auf den Mistkübel klicken.
+        click: { id: YieldDelete, nth: 3 }
+        act: [{ do: click, window: dialog, at: { id: YieldDelete, nth: 3 } }]
+        rounds: 2
+        done: { at: { text: "Ja" } }
+        undo: [{ do: click, at: { text: "Nein" } }]
+        task: Bei „Schankverlust, 8 %“ auf den Mistkübel klicken.
+        hint: Die dritte Zeile, ganz rechts, neben der 8.
+      - say: >-
+          Das Programm fragt lieber noch einmal nach. Wir sind sicher, also Ja.
+        click: { text: "Ja" }
+        act: [{ do: click, window: dialog, at: { text: "Ja" } }]
+        rounds: 4
+        done: { at: { text: "3", up: ListBoxItem } }
+        undo:
+          - { do: select, at: { text: "Fassbier", up: ListBoxItem } }
+          - { do: select, at: { text: "Bier vom Fass", up: ListBoxItem } }
+          - { do: click, at: { id: YieldDelete, nth: 3 } }
+        task: Auf „Ja“ klicken.
+        hint: Unten rechts, die linke der beiden Schaltflächen.
+        text: |-
+          Gelöscht wird mit dem Mistkübel am Ende der Zeile, hier bei 8 %, und einem
+          **Ja** auf die Nachfrage. Schon erstellte Berichte bleiben unverändert. Hatte
+          eine Prüfung genau diese Regel gewählt, rechnet sie wieder mit der
+          Standardregel, und die Vorschau des Berichts nennt vorneweg einen Hinweis,
+          dass die gewählte Ertragsregel nicht mehr existiert.
+      - say: >-
+          Weg ist sie. Und hätte eine Prüfung genau diese Regel gewählt gehabt? Dann
+          gilt dort wieder der Standard, und in der Vorschau des Berichts steht vorne
+          ein Hinweis, dass es die gewählte Regel nicht mehr gibt. Ein gespeichertes
+          PDF bleibt natürlich, wie es war.
+        show: { name: RuleList }
+
+  - title: Was in der Prüfung ankommt
+    beats:
+      - say: >-
+          Das war's in den Regeln. Wir schließen das Fenster, mit dem Kreuz rechts
+          oben.
+        click: { tip: "Schließen (Esc)" }
+        act: [{ do: close, window: dialog }]
+        rounds: 8
+        done: { at: { text: "Schankverlust (Standard)" } }
+        undo:
+          - { do: click, at: { tip: "Regeln" } }
+          - { do: tab, header: "Ertragsregeln" }
+          - { do: type, at: { name: YieldSearch }, text: "Fass" }
+          - { do: select, at: { text: "Bier vom Fass", up: ListBoxItem } }
+        task: Auf das Kreuz rechts oben klicken.
+        hint: Es steht ganz rechts oben im Fenster der Regeln.
+      - say: >-
+          Und da ist es: Beim Bier vom Fass steht jetzt Schankverlust Standard, mit
+          drei Prozent.
+        show: { text: "Bier vom Fass", up: Grid }
+      - say: >-
+          In der Auswahl daneben steht jetzt auch unsere neue Regel, Schankverlust,
+          alte Schankanlage. Und die acht Prozent ohne Namen sind weg.
+        show: { id: YieldRule }
+      - say: >-
+          In der Prüfung haben wir nichts eingetragen, und trotzdem gilt es. Das ist
+          der Unterschied zwischen einer Regel und einer Einstellung.
+        show: { text: "Bier vom Fass", up: Grid }
+        hold: 0.5
+      - text: |-
+          Nach dem Schließen der Regeln steht beim **Bier vom Fass** jetzt
+          **Schankverlust (Standard)** mit 3 %, ohne dass in der Prüfung etwas gewählt
+          wurde. Die Auswahl bietet auch die neue Regel an, die 8 % ohne Namen sind
+          verschwunden. Wählt eine Prüfung hier eine andere Regel, geht diese Wahl dem
+          Standard vor.
+        act:
+          - { do: press, at: { id: YieldRule } }
+          - { do: wait, rounds: 2 }
+        shot:
+          name: ertragsregeln-nachher
+          at: { text: "Nach Kategorie", up: StackPanel }
+          trim: { bottom: -24 }
+          width: 390
+          alt: Beim Bier vom Fass gilt „Schankverlust (Standard)“, die Auswahl bietet die neue Regel an
+      - act:
+          - { do: press, at: { id: YieldRule } }
+          - { do: wait, rounds: 2 }
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So pflegt man Ertragsregeln
+          list:
+            - Regeln → Ertragsregeln
+            - Kategorie wählen
+            - Standard ankreuzen
+            - Neue Regel in die letzte Zeile
+            - Löschen mit Bestätigung
+        say: >-
+          Noch einmal zusammen: Regeln öffnen, Reiter Ertragsregeln, links die
+          Kategorie wählen. Den Standard ankreuzen, eine neue Regel in die leere letzte
+          Zeile schreiben, und gelöscht wird mit dem Mistkübel und einem Ja.
+      - card:
+          kicker: Gut zu wissen
+          title: Die Wahl der Prüfung geht vor
+          text: Der Standard gilt, wenn in der Prüfung nichts gewählt ist.
+        say: >-
+          Und wenn ein Betrieb anders ist, wählt man in seiner Prüfung einfach eine
+          andere Regel. Die Wahl der Prüfung geht dem Standard immer vor.
+      - card:
+          kicker: Die Regeln
+          title: Die Regeln wachsen mit
+          list:
+            - Jede bestätigte Zuordnung
+            - Jede Warenart
+            - Jedes Rezept
+            - Jede Ertragsregel
+        say: >-
+          Damit ist auch der zweite Kurs geschafft. Jede bestätigte Zuordnung, jede
+          Warenart, jedes Rezept und jede Ertragsregel macht die Kette ein Stück
+          vollständiger, und die nächste Prüfung kürzer, für alle, die dieselben Regeln
+          verwenden.

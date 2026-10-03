@@ -1,0 +1,284 @@
+course: Die Regeln
+number: 3
+title: Warenarten
+summary: >-
+  Unten in der Kette stehen die Produkte, die eingekauft werden, und ihre Warenarten
+  bringen die Rechnungen dorthin. Der Rotwein bekommt eine neue dazu: Domina.
+window: [1440, 810]
+
+done:
+  title: Geschafft!
+
+guide:
+  page: web/docs/pages/guide/warenarten.md
+  title: Warenarten
+  intro: |-
+    <p class="us-steps"><a href="../sonderpruefung/">Zweite Prüfung</a><a href="../regeln/">Regeln</a><a href="../kette/">Kette</a><span class="here">Warenarten</span><a href="../produkte/">Produkte</a><a href="../ertragsregeln/">Ertragsregeln</a></p>
+
+    Unten in der [Produktionskette](kette.md) stehen die Produkte, die eingekauft werden:
+    Fassbier, Schweinefleisch, Rotwein. Jedes nennt unter **Warenarten** die Namen, unter
+    denen es auf Rechnungen steht. Die helfen der Zuordnung bei Artikeln, die sie noch
+    nicht kennt, und bringen so den Einkauf in die Kette. Im Beispiel bekommt der Rotwein
+    eine dazu: Domina.
+  end: |-
+    !!! geschafft "Geschafft, wenn …"
+        - unter **Regeln → Produkte** beim Rotwein die letzte Warenart `Domina` ist
+        - die Suche nach `Domina` genau ein Produkt findet: Rotwein
+
+    !!! nachlesen "Zum Nachlesen"
+        Was eine gute Warenart ist, steht unter
+        [Warenarten pflegen](../zuordnung.md#warenarten), was Einheit, Kategorie und
+        Stückgewicht bedeuten unter [Regeln](../regeln.md#produkte).
+
+    [Weiter: Produkte <span>Ein neues Gericht oben an die Kette</span>](produkte.md){ .us-next }
+
+chapters:
+  - title: Der Domina, noch einmal
+    beats:
+      - card:
+          kicker: Die Regeln · Übung 3
+          title: Warenarten
+        say: >-
+          Unten in der Kette stehen die Produkte, die eingekauft werden. Heute schauen
+          wir, wie die Rechnungen dorthin kommen, und bringen dem Programm dabei ein
+          neues Wort bei.
+      - say: >-
+          Schauen wir uns noch einmal den Domina vom Weingut Sommer an. Er ist
+          Rotwein, weil wir ihn in der ersten Prüfung selbst zugeordnet haben.
+        set:
+          - { do: tab, header: "2. Zuordnung" }
+          - { do: select, at: { starts: "2022 Domina", up: DataGridRow } }
+        show: { text: "Rotwein × 750 ml", up: RadioButton }
+        text: |-
+          Die Zuordnung, die in der ersten Prüfung bestätigt wurde, gilt für genau
+          diesen Artikel: **2022 Domina trocken 0,75 l** von Weingut Sommer. Was ein
+          Domina ist, weiß das Programm damit noch nicht. Unter den Warenarten des
+          Rotweins steht er nicht, und als nächsten Vorschlag nennt es Schaumwein.
+      - say: >-
+          Diese Zuordnung gilt aber nur für diesen einen Artikel. Was ein Domina ist,
+          weiß das Programm damit noch nicht. Gleich darunter tippt es nämlich immer
+          noch auf Schaumwein.
+        show: { text: "Schaumwein × 750 ml", up: RadioButton }
+      - say: >-
+          Kommt ein Domina von einem anderen Weingut, hat das Programm zum Vergleich
+          also nur den Artikel vom Weingut Sommer. Besser ist, es kennt die Ware
+          selbst. Das sagen wir ihm heute, und zwar nicht in der Prüfung, sondern beim
+          Produkt Rotwein.
+
+  - title: Das Produkt finden
+    beats:
+      - say: >-
+          Die Produkte stehen in den Regeln. Rechts oben ist der Knopf dafür.
+        click: { tip: "Regeln" }
+        done: { at: { id: RulesProductsTab }, selected: true }
+        undo: [{ do: close }]
+        rounds: 4
+        task: Rechts oben auf „Regeln“ klicken.
+        hint: Der Knopf mit den drei Reglern, links neben dem Fragezeichen.
+      - say: >-
+          Wir suchen den Rotwein. Oben ins Feld Filtern klicken und Rotwein eintippen.
+        type: { at: { name: ProductSearch }, text: "Rotwein" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductSearch }, text: "Rotwein" }
+          - { do: focus, window: dialog }
+        rounds: 2
+        task: "Filtern: Rotwein"
+        hint: Das Feld „Filtern“ steht links oben, über der Liste.
+        text: |-
+          Rechts oben **Regeln** öffnen und in **Filtern** `Rotwein`{.copy} eintippen.
+          Gesucht wird auch in Kategorie und Warenarten, darum steht nicht nur der
+          Rotwein da: auch der Essig, mit „Rotweinessig“ unter seinen Warenarten, und
+          **Rotwein 0,2 l**, das Glas Rotwein, ein Glied weiter oben in der Kette.
+      - say: >-
+          Gesucht wird nicht nur im Namen, sondern auch in den Warenarten. Darum steht
+          zum Beispiel der Essig da, wegen Rotweinessig. Und Rotwein null Komma zwei
+          Liter, das Glas, das verkauft wird: ein Glied weiter oben in der Kette, mit
+          zweihundert Millilitern Rotwein im Rezept.
+        show: { id: ProductList }
+      - say: >-
+          Wir wollen ganz nach unten, zum Rotwein, wie er eingekauft wird. Einmal
+          draufklicken.
+        click: { text: "Rotwein", up: ListBoxItem }
+        act: [{ do: select, window: dialog, at: { text: "Rotwein", up: ListBoxItem } }]
+        rounds: 2
+        task: Auf „Rotwein“ klicken.
+        hint: Es ist der Rotwein ohne Zusatz, mit der Kategorie „Wein“ darunter.
+        text: |-
+          Auf **Rotwein** klicken. Rechts steht, was zu ihm gehört:
+        shot:
+          name: warenarten-rotwein
+          window: dialog
+          alt: Das Produkt Rotwein unter „Regeln → Produkte“
+
+  - title: Was zu einem Produkt gehört
+    beats:
+      - say: >-
+          Oben stehen der Name und die Einheit, hier Milliliter. Darin wird der Rotwein
+          gezählt, im Einkauf genauso wie in jedem Rezept. Ändern lässt sie sich nicht
+          mehr, weil Rezepte und Zuordnungen damit rechnen.
+        show: { id: ProductUnit }
+        text: |-
+          - **Name** und **Einheit**: Der Rotwein wird in Millilitern gezählt, im
+            Einkauf, im Bestand und in jedem Rezept. Solange Rezepte oder Zuordnungen ihn
+            verwenden, bleibt die Einheit fest.
+      - say: >-
+          Darunter die Kategorie, hier Wein. Sie bestimmt, welche Ertragsregeln gelten,
+          und zu welcher Sparte der Rotwein im Bericht zählt.
+        show: { id: ProductCategory, up: StackPanel }
+        text: |-
+          - **Kategorie**: hier Wein. Sie bestimmt, welche Ertragsregeln gelten, und die
+            Sparte im Rohgewinnaufschlag.
+      - say: >-
+          Dann die Warenarten. Das sind die Namen, unter denen Rotwein eingekauft wird,
+          einer pro Zeile: Merlot, Spätburgunder, Dornfelder und so weiter. Die helfen
+          der Zuordnung bei Artikeln, die sie noch nicht kennt.
+        show: { id: ProductAliases, up: StackPanel }
+        text: |-
+          - **Warenarten**: unter welchen Namen das Produkt eingekauft wird, einer je
+            Zeile, von Merlot bis Dornfelder. Sie helfen der Zuordnung bei Artikeln, die
+            sie noch nicht kennt.
+      - say: >-
+          Und ganz unten: kein Rezept. Der Rotwein wird eingekauft, nicht gemacht.
+          Hier fängt seine Kette an.
+        show: { text: "Ohne Rezept wird das Produkt eingekauft, nicht hergestellt." }
+        text: |-
+          - **Rezept**: keines. Der Rotwein wird eingekauft, nicht hergestellt; hier
+            beginnt seine Kette.
+
+  - title: Eine Warenart anfügen
+    beats:
+      - say: >-
+          Domina fehlt in der Liste, das holen wir jetzt nach. Ins Feld Warenarten
+          klicken und Domina eintippen. Keine Sorge, der Cursor springt von selbst
+          ans Ende, in eine neue Zeile.
+        type: { at: { id: ProductAliases }, text: "Domina", append: true }
+        act:
+          - { do: type, window: dialog, at: { id: ProductAliases }, text: "Domina", append: true }
+          - { do: focus, window: dialog }
+        rounds: 2
+        task: „Domina“ ans Ende der Liste
+        hint: Einfach ins Feld „Warenarten“ klicken, der Cursor steht dann schon am Ende.
+      - say: >-
+          Speichern müssen wir nicht. Sobald man mit dem Tippen aufhört, steht
+          Domina in den Regeln.
+        show: { id: ProductAliases, up: StackPanel }
+        text: |-
+          Ins Feld **Warenarten** klicken, ans Ende der Liste gehen und in einer neuen
+          Zeile `Domina`{.copy} eintragen. Gespeichert wird von selbst, sobald eine
+          kurze Pause im Tippen eintritt.
+      - say: >-
+          Probieren wir es gleich aus. Oben im Feld Filtern statt Rotwein einmal Domina
+          eintippen.
+        type: { at: { name: ProductSearch }, text: "Domina" }
+        act:
+          - { do: type, window: dialog, at: { name: ProductSearch }, text: "Domina" }
+          - { do: focus, window: dialog }
+        rounds: 2
+        task: "Filtern: Domina"
+        hint: Das Feld „Filtern“ steht links oben, über der Liste.
+        text: |-
+          Zur Probe in **Filtern** `Domina`{.copy} eintippen. Vorher stand dort
+          „Keine Treffer“, jetzt findet die Suche genau ein Produkt: Rotwein.
+        shot:
+          name: warenarten-domina
+          window: dialog
+          alt: Die Suche nach „Domina“ findet den Rotwein
+      - say: >-
+          Übrig bleibt ein einziges Produkt, der Rotwein. Vorher hätte die Suche gar
+          nichts gefunden.
+        show: { text: "Rotwein", up: ListBoxItem }
+
+  - title: Was das bringt
+    beats:
+      - card:
+          kicker: Was das bringt
+          title: Ein Wort für jede Prüfung
+          text: Jeder Domina, jeder Jahrgang, jedes Weingut.
+        say: >-
+          Und was bringt uns das? Taucht ab jetzt irgendwo ein Domina auf, egal von
+          welchem Weingut und aus welchem Jahrgang, findet die Zuordnung das Wort
+          beim Rotwein. Und von dort geht er die Kette hinauf, ins Glas Rotwein auf der
+          Karte. In jeder Prüfung, und für alle, die mit denselben Regeln arbeiten.
+        text: |-
+          Kommt ab jetzt ein Domina vor, von welchem Weingut und aus welchem Jahrgang
+          auch immer, findet die Zuordnung das Wort beim Rotwein, und von dort geht der
+          Einkauf die Kette hinauf, etwa ins Glas **Rotwein 0,2 l**. Das gilt für jede
+          Prüfung danach und für alle, die dieselbe
+          [Regel-Datenbank](../verwaltung.md#regel-datenbank) nutzen.
+      - card:
+          kicker: Faustregel
+          title: Die Ware, nicht der Artikeltext
+          text: „Domina“ ja, „2022 Domina trocken 0,75 l“ nein.
+        say: >-
+          Eine Faustregel noch: Eine gute Warenart ist die Ware, nicht der
+          Artikeltext. Domina gehört hinein. Zweitausendzweiundzwanzig Domina trocken,
+          null Komma fünfundsiebzig Liter, gehört nicht hinein. Den Artikel kennt das
+          Programm schon, aus unserer Zuordnung.
+        text: |-
+          Eine gute Warenart ist die Ware, nicht der Artikeltext: „Domina“ ja,
+          „2022 Domina trocken 0,75 l“ nein. Den Artikel deckt die bestätigte
+          Zuordnung schon ab.
+
+  - title: Neu und Löschen
+    beats:
+      - say: >-
+          Mit dem Plus oben legt man ein neues Produkt an. Unten in der Kette braucht
+          es das selten: nur wenn eine Ware ganz fehlt, oder wenn sie anders gezählt
+          wird. Pommes in Stück und Pommes in Gramm wären zum Beispiel zwei Produkte.
+        show: { name: ProductNew }
+        text: |-
+          Das Plus neben **Filtern** legt ein neues Produkt an. Für den Einkauf braucht
+          es das selten: wenn eine Ware ganz fehlt, oder wenn sie anders gezählt wird.
+          Pommes in Stück und Pommes in Gramm wären zwei Produkte.
+      - say: >-
+          Und mit dem Mistkübel ganz unten wird ein Produkt gelöscht. Das
+          Programm fragt vorher nach. Braucht es noch ein Rezept, eine Zuordnung oder
+          eine Ertragsregel, löscht es gar nicht, sondern sagt, wer es noch braucht.
+          Beim Rotwein wären das unser Domina und das Glas Rotwein. Den lassen wir also
+          schön stehen.
+        show: { id: ProductDelete }
+        text: |-
+          Der Mistkübel ganz unten löscht das Produkt, nach einer Rückfrage.
+          Solange ein Rezept, eine Zuordnung oder eine Ertragsregel es noch braucht,
+          lehnt das Programm ab und nennt, wer es verwendet. Beim Rotwein wären das
+          unter anderem die Zuordnung des Domina und das Produkt „Rotwein 0,2 l“: Ein
+          Glied mitten aus der Kette lässt sich nicht herausnehmen.
+
+  - title: Die Regeln schließen
+    beats:
+      - say: >-
+          Das war's schon. Wir machen die Regeln wieder zu, mit dem Kreuz rechts oben.
+        click: { tip: "Schließen (Esc)" }
+        act: [{ do: close, window: dialog }]
+        done: { at: { text: "2. Zuordnung", type: TabItem }, selected: true }
+        undo:
+          - { do: click, at: { tip: "Regeln" } }
+          - { do: type, at: { name: ProductSearch }, text: "Domina" }
+          - { do: select, at: { text: "Rotwein", up: ListBoxItem } }
+        rounds: 2
+        task: Die Regeln schließen.
+        hint: Das Kreuz steht rechts oben, in der Leiste über den Regeln.
+        text: |-
+          Das Kreuz rechts oben (oder Esc) schließt die Regeln.
+
+  - title: Zusammenfassung
+    beats:
+      - card:
+          kicker: Zusammenfassung
+          title: So bekommt ein Produkt eine Warenart
+          list:
+            - Regeln → Produkte
+            - Produkt suchen und anklicken
+            - Warenart ans Ende anfügen
+        say: >-
+          Noch einmal zusammen: die Regeln aufmachen, das Produkt suchen und anklicken,
+          und die Warenart ans Ende der Liste schreiben. Gespeichert wird von selbst.
+          Warenarten gehören an den Anfang der Kette, zu dem, was eingekauft wird.
+      - card:
+          kicker: Gut zu wissen
+          title: Produkte sind grob
+          text: Den Unterschied trägt das Rezept.
+        say: >-
+          Und gut zu wissen: Was eingekauft wird, ist absichtlich grob gefasst.
+          Hähnchenschenkel und ein ganzes Hähnchen sind beide Hähnchenfleisch. Den
+          Unterschied trägt das Rezept weiter oben, mit seiner Menge.

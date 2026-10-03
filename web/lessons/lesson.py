@@ -39,7 +39,8 @@ EXAMPLES = "https://github.com/rotmanjanez/Umsatzschaetzung/releases/download/be
 
 # The guide's example case is played by these lessons in turn, each starting where the one
 # before stops; a lesson not among them starts on an empty program.
-GUIDE = ["pruefung", "rechnungen", "korrektur", "zuordnung", "sortiment", "einkaeufe", "bericht"]
+GUIDE = ["pruefung", "rechnungen", "korrektur", "zuordnung", "sortiment", "einkaeufe", "bericht",
+         "sonderpruefung", "regeln", "kette", "warenarten", "produkte", "ertragsregeln"]
 SCRIPT = ROOT / "web" / "docs" / "shots" / "guide.jsonl"
 EXERCISES = ROOT / "web" / "docs" / "pages" / "uebungen.md"
 APP = "https://app.umsatzschaetzung.amtstools.de/lektionen/"
@@ -65,13 +66,19 @@ def written(chapter: str, spec: dict) -> dict:
     target = spec["type"]["at"] if "type" in spec else spec.get("click")
     done = spec.get("done")
     if done is None and target:
-        done = ({"at": target, "text": [str(spec["type"]["text"]), *map(str, spec.get("accept", []))]}
+        done = ({"at": target, "text": [str(spec["type"]["text"]), *map(str, spec.get("accept", []))], **appended(spec)}
                 if "type" in spec else {"at": target, "selected": True})
     return {"allow": spec.get("allow", [target] if target else []), "done": done,
             "chapter": chapter, "say": spec.get("say", "").strip(), "card": spec.get("card"),
             "note": spec.get("note", ""), "task": spec.get("task", ""), "hint": spec.get("hint", ""),
             "show": spec.get("show"), "through": spec.get("through"), "hold": spec.get("hold", 0.0),
             "set": spec.get("set", []), "do": instead(spec), "undo": spec.get("undo", [])}
+
+
+# Typed with `append`, the text goes onto a line of its own after what the field holds, and only
+# that last line has to read right.
+def appended(spec: dict, key: str = "last") -> dict:
+    return {key: True} if spec["type"].get("append") else {}
 
 
 # What the page does in the learner's place when the slider passes a beat they act in: what the
@@ -135,7 +142,8 @@ def acted(spec: dict) -> list[dict]:
     elif "click" in spec:
         acts = [{"do": spec.get("via", "click"), "at": spec["click"]}]
     elif "type" in spec:
-        acts = [{"do": "type", "at": spec["type"]["at"], "text": str(spec["type"]["text"])}, {"do": "focus"}]
+        acts = [{"do": "type", "at": spec["type"]["at"], "text": str(spec["type"]["text"]), **appended(spec, "append")},
+                {"do": "focus"}]
     else:
         return []
     return acts + spec.get("then", []) + ([{"do": "wait", "rounds": spec["rounds"]}] if "rounds" in spec else [])
