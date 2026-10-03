@@ -33,17 +33,14 @@ window: [1440, 810]
 
 done:
   title: Geschafft!
-  text: >-
-    Die Beispielprüfung ist fertig, vom ersten Scan bis zum Bericht. Die eigene
-    läuft genauso.
+  text: Die Beispielprüfung ist fertig.
 
 chapters:
   - title: Vom Einkauf zum Bericht
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 6
+          kicker: Übung 6
           title: Ergebnis und Bericht
-          text: Die letzte Übung, ein paar Minuten zum Mitklicken.
         say: >-
           Willkommen zur letzten Übung! Die Arbeit am Gasthaus ist so gut wie
           erledigt. In dieser Übung schauen wir uns an, was dabei herausgekommen

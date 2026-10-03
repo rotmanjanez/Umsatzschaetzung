@@ -9,7 +9,6 @@ window: [1440, 810]
 
 done:
   title: Bereit!
-  text: Als Nächstes wird die Prüfung angelegt.
 
 guide:
   page: web/docs/pages/guide/index.md
@@ -35,9 +34,8 @@ chapters:
   - title: Was das Programm rechnet
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 0
+          kicker: Übung 0
           title: Die Grundlagen
-          text: Ein paar Minuten zum Zuhören.
         say: >-
           Willkommen! Bevor wir irgendwo draufklicken, schauen wir uns an,
           worum es bei dem Programm überhaupt geht. Das dauert nur ein paar

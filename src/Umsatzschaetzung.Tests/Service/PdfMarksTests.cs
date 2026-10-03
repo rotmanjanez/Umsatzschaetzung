@@ -16,7 +16,7 @@ public class PdfMarksTests
         trailer <</Root 1 0 R>>
         %%EOF
         """);
-    static readonly PageMarks Marks = new("Umsatzschätzung · Bäckerei", "01.01.2025 bis 31.12.2025", ["Steuernummer 12/345", "Datum 24.09.2026"]);
+    static readonly PageMarks Marks = new("Bäckerei", "01.01.2025 bis 31.12.2025", ["Steuernummer 12/345", "Datum 24.09.2026"]);
 
     static List<string> Texts(byte[] pdf)
     {
@@ -67,7 +67,7 @@ public class PdfMarksTests
         var pages = Texts(PdfMarks.Stamp(TwoPages, Marks));
 
         Assert.DoesNotContain("Bäckerei", pages[0]);
-        Assert.Contains("Umsatzschätzung · Bäckerei", pages[1]);
+        Assert.Contains("Bäckerei", pages[1]);
         Assert.Contains("01.01.2025 bis 31.12.2025", pages[1]);
     }
 }

@@ -8,8 +8,6 @@ window: [1440, 810]
 
 done:
   title: Geschafft!
-  text: >-
-    Vier Positionen zugeordnet. Mit echten Rechnungen geht es genauso.
 
 guide:
   page: web/docs/pages/guide/zuordnung.md
@@ -38,9 +36,8 @@ chapters:
   - title: Von der Rechnung zum Produkt
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 3
+          kicker: Übung 3
           title: Offene Positionen zuordnen
-          text: Ein paar Minuten zum Mitklicken.
         say: >-
           Willkommen! In dieser Übung geht es um einen Handgriff, der in fast jeder
           Prüfung gebraucht wird, nämlich das Zuordnen der offenen Positionen. Lange

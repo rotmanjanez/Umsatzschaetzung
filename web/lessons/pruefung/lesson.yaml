@@ -9,7 +9,6 @@ window: [1440, 810]
 
 done:
   title: Geschafft!
-  text: Als Nächstes kommen die Rechnungen.
 
 guide:
   page: web/docs/pages/guide/start.md
@@ -34,9 +33,8 @@ chapters:
   - title: So funktionieren die Übungen
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 1
+          kicker: Übung 1
           title: Prüfung anlegen
-          text: Ein paar Minuten zum Mitklicken.
         say: >-
           Willkommen! Schön, dass du da bist. Bevor wir loslegen, erkläre ich kurz,
           wie diese Übungen funktionieren.

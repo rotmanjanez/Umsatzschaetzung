@@ -51,7 +51,7 @@ public static class Html
             .Select(g => new SupplierSum(g.Key, g.Count(), g.Sum(i => i.NetTotal), g.Sum(i => i.GrossTotal)))];
 
     public static PageMarks Marks(Case c, Model.Report r) => new(
-        "Umsatzschätzung · " + c.Label,
+        c.Label,
         Format.Period(c.PeriodFrom, c.PeriodTo),
         [
             "Steuernummer " + c.Taxpayer.TaxNumber,

@@ -9,9 +9,6 @@ window: [1440, 810]
 
 done:
   title: Geschafft!
-  text: >-
-    Das Schnitzelfleisch zählt jetzt zum Schnitzel, was keinen Umsatz bringt, ist
-    aussortiert, und du weißt, wie aus dem Einkauf der Umsatz wird.
 
 guide:
   page: web/docs/pages/guide/kalkulation.md
@@ -35,9 +32,8 @@ chapters:
   - title: Übrige Einkäufe
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 5
+          kicker: Übung 5
           title: Die Kalkulation
-          text: Ein paar Minuten zum Mitklicken.
         say: >-
           Servus! In dieser Übung räumen wir zuerst auf, die Einkäufe, die in kein
           Rezept hineinpassen. Und dann schauen wir am Schnitzel, wie das Programm den

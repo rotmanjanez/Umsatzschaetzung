@@ -8,9 +8,6 @@ window: [1440, 810]
 
 done:
   title: Geschafft!
-  text: >-
-    Das erste Produkt steht mit Preis im Sortiment. Mit einer echten Speisekarte
-    geht es genauso.
 
 guide:
   page: web/docs/pages/guide/sortiment.md
@@ -80,9 +77,8 @@ chapters:
   - title: Die Speisekarte mit Preisen
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 4
+          kicker: Übung 4
           title: Sortiment anlegen
-          text: Ein paar Minuten zum Mitklicken.
         say: >-
           Willkommen! Bis jetzt weiß das Programm, was das Gasthaus
           eingekauft hat. In dieser Übung kommt die andere Seite dazu, nämlich was das

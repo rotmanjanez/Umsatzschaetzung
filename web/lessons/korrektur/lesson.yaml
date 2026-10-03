@@ -9,9 +9,6 @@ window: [1440, 810]
 
 done:
   title: Geschafft!
-  text: >-
-    Die Rechnung ist korrigiert: die fehlende Zeile abgeschrieben, den Lieferanten
-    ergänzt, die Steuersätze eingetragen. Keine Rechnung ist mehr offen.
 
 guide:
   page: web/docs/pages/guide/korrektur.md
@@ -53,9 +50,8 @@ chapters:
   - title: Die Rechnungsliste
     beats:
       - card:
-          kicker: Umsatzschätzung · Übung 2
+          kicker: Übung 2
           title: Eine Rechnung korrigieren
-          text: Ein paar Minuten zum Mitklicken.
         say: >-
           Servus und willkommen! In dieser Übung geht es darum, wie man eine Rechnung
           korrigiert, die das Programm nicht ganz richtig lesen konnte. Jeden Klick
