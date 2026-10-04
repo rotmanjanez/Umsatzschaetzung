@@ -13,6 +13,10 @@ updates:
         patterns: ["bblanchon.PDFium*"]
       onnxruntime:
         patterns: ["Microsoft.ML.OnnxRuntime*"]
+    ignore:
+      # Avalonia 12 is built against SkiaSharp 3; lift once Avalonia moves to 4.
+      - dependency-name: "SkiaSharp*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directories: ["/", "/.github/actions/*"]
