@@ -1,0 +1,1786 @@
+
+<!doctype html>
+<html lang="de" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.umsatzschaetzung.amtstools.de/latest/dateiformate/">
+      
+      
+        <link rel="prev" href="../datenschutz/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+      <link rel="icon" href="../assets/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>Dateiformate - Umsatzschätzung</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/umsatzschaetzung.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dateiformate" class="md-skip">
+          Zum Inhalt
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  Diese Fassung ist nicht die aktuelle Version der Dokumentation.
+  <a href="../..">
+    <strong>Zur aktuellen Fassung wechseln</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href=".." title="Umsatzschätzung" class="md-header__button md-logo" aria-label="Umsatzschätzung" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Umsatzschätzung
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dateiformate
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Dunkles Design"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dunkles Design" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Helles Design"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Helles Design" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Suche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Suche wird initialisiert
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+  
+    <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+      <div class="md-sidebar__scrollwrap">
+        <div class="md-sidebar__inner">
+          
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Umsatzschätzung" class="md-nav__button md-logo" aria-label="Umsatzschätzung" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Umsatzschätzung
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Programm
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Programm
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pruefungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prüfungen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rechnungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rechnungen importieren
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zuordnung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Zuordnung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kalkulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Kalkulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bericht/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bericht
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Grundlagen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Grundlagen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Regeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../import-export/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Import und Export
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verwaltung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Verwaltete Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datenschutz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sicherheit und Datenschutz
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Dateiformate
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Dateiformate
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#schema-und-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema und Version
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#werte" class="md-nav__link">
+    <span class="md-ellipsis">
+      Werte
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rulesdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      rules.db
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datei-einer-prufung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Datei einer Prüfung
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Hilfe
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Hilfe
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Häufige Fragen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hilfe/csv/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CSV-Dateien
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../guide/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Beispielprüfung
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Beispielprüfung
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Installation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/install-macos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    macOS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/install-windows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Windows
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Prüfung anlegen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    1. Rechnungen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            1. Rechnungen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/rechnungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Importieren
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/korrektur/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Korrigieren
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/zuordnung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    2. Zuordnung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sortiment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    3. Sortiment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kalkulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    4. Kalkulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/bericht/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    5. Bericht
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/danach/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Danach
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_10" id="__nav_5_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Regeln pflegen
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_10">
+            <span class="md-nav__icon md-icon"></span>
+            Regeln pflegen
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sonderpruefung/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Eine zweite Prüfung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/regeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Was das Programm sich merkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/kette/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Die Produktionskette
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/warenarten/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Warenarten
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/produkte/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ein neues Produkt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ertragsregeln/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ertragsregeln
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uebungen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Übungen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+        </div>
+      </div>
+    </div>
+  
+
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="dateiformate">Dateiformate</h1>
+<p>Für die IT. Beschreibt, wie <code>rules.db</code> und die Datei einer Prüfung aufgebaut
+sind, damit man sie mit einem SQLite-Werkzeug lesen und prüfen kann. Ändern
+sollte man sie nur über das Programm.</p>
+<h2 id="schema-und-version">Schema und Version</h2>
+<p>Beide Dateien sind SQLite-Datenbanken. <code>PRAGMA user_version</code> im Dateikopf
+nennt die Fassung des Schemas; diese Seite beschreibt <strong>Schema 1</strong>. Eine neue
+Fassung entsteht nur, indem ein Schritt angehängt wird, der von der vorigen
+auf die neue hebt. Ein veröffentlichter Schritt wird nie mehr geändert.</p>
+<ul>
+<li>Eine ältere Datei hebt das Programm beim Öffnen in einer einzigen
+  Transaktion auf die aktuelle Fassung. Eine Prüfung wird davor als
+  <code>&lt;Name&gt;.db.v&lt;n&gt;.bak</code> kopiert; die Kopie wird gelöscht, sobald die neue Datei
+  die Integritätsprüfung besteht und sich vollständig lesen lässt, sonst ersetzt
+  sie die neue Datei wieder.</li>
+<li>Eine neuere Datei, als das Programm kennt, wird nicht geöffnet und nicht
+  verändert.</li>
+<li><code>rules.db</code> wird nie an Ort und Stelle beschrieben, denn die Sperren von
+  SQLite halten nicht auf jeder Netzwerkfreigabe. Das Programm liest die Datei
+  ganz in den Speicher, ändert sie dort und schreibt sie als <code>rules.db.neu</code>
+  daneben, die dann <code>rules.db</code> durch Umbenennen ersetzt. Ein Leser bekommt so
+  die alte oder die neue Datei, nie ein Gemisch. Wer schreibt, hält dabei
+  <code>rules.lock</code> exklusiv geöffnet, siehe
+  <a href="../verwaltung/#gleichzeitige-nutzung">Gleichzeitige Nutzung</a>. Neben
+  <code>rules.db</code> entsteht deshalb weder <code>-journal</code> noch <code>-wal</code>; ein
+  <code>rules.db-journal</code>, das eine ältere Programmversion bei einem Absturz
+  hinterlassen hat, spielt SQLite beim nächsten Start einmal zurück.</li>
+<li>Bei jedem Start legt das Programm eine Kopie von <code>rules.db</code> in <code>snapshots</code>
+  ab, siehe <a href="../verwaltung/#sicherungen">Sicherungen</a>.</li>
+</ul>
+<h2 id="werte">Werte</h2>
+<p>Beträge und Mengen sind ganze Zahlen mit festem Maßstab, nie Gleitkomma:</p>
+<table>
+<thead>
+<tr>
+<th>Größe</th>
+<th>gespeichert als</th>
+<th>Beispiel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Geldbetrag</td>
+<td>Cent</td>
+<td>12,50 € = <code>1250</code></td>
+</tr>
+<tr>
+<td>Menge auf der Rechnung</td>
+<td>Tausendstel der Einheit</td>
+<td>2,5 kg = <code>2500</code></td>
+</tr>
+<tr>
+<td>Einzelpreis auf der Rechnung</td>
+<td>Millionstel Euro je <code>price_base_qty</code></td>
+<td>0,925 € = <code>925000</code></td>
+</tr>
+<tr>
+<td>Preisbasis <code>price_base_qty</code></td>
+<td>Tausendstel der Einheit; <code>0</code> gilt als 1</td>
+<td>Preis je Stück = <code>1000</code></td>
+</tr>
+<tr>
+<td>Steuersatz, Abzug</td>
+<td>Basispunkte, 1 % = 100</td>
+<td>19 % = <code>1900</code></td>
+</tr>
+<tr>
+<td>Richtsatz (<code>satz</code>)</td>
+<td>ganze Prozent</td>
+<td>250 % = <code>250</code></td>
+</tr>
+<tr>
+<td>Umsatzgrenzen der Richtsätze (<code>staffel</code>)</td>
+<td>Cent</td>
+<td></td>
+</tr>
+<tr>
+<td>Rezeptmenge, Bestand</td>
+<td>ganze Einheiten der eigenen Einheit</td>
+<td>250 ml = <code>250</code> mit <code>MLT</code></td>
+</tr>
+<tr>
+<td>Faktor, Stückgewicht</td>
+<td>ganze ml, g oder Stück</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Weitere Regeln:</p>
+<ul>
+<li>Einheiten sind Codes nach UN/ECE Rec 20 (<code>LTR</code>, <code>KGM</code>, <code>H87</code>), Packmittel
+  nach Rec 21 mit <code>X</code> davor (<code>XBO</code>, <code>XCS</code>).</li>
+<li>Ein Tag ist Text <code>JJJJ-MM-TT</code>, ein Zeitpunkt Text nach ISO 8601 mit Offset.
+  <code>valid_from</code> gilt ab dem Tag, <code>valid_to</code> bis vor dem Tag; leer heißt offen.</li>
+<li>Aufzählungen stehen unter ihrem JSON-Namen (<code>zugferd</code>, <code>scan</code>, <code>lineNet</code>).</li>
+<li>Wahrheitswerte sind <code>0</code> und <code>1</code>.</li>
+<li>IDs sind Text; neue IDs sind UUID v7.</li>
+<li><code>ord</code> hält die Reihenfolge einer Liste und beginnt bei 0.</li>
+</ul>
+<h2 id="rulesdb">rules.db</h2>
+<p><code>meta</code> hat genau eine Zeile: <code>store</code> ist die Kennung dieser Datenbank und
+ändert sich, wenn sie aus einer Sicherung wiederhergestellt wird. <code>version</code>
+steigt mit jeder Änderung an den Regeln, mindestens auf die Unix-Zeit in
+Millisekunden, damit eine von Hand zurückkopierte Datei keinen Stand ein
+zweites Mal vergibt. Es gilt nur zusammen mit <code>store</code>. <code>app</code>
+ist die Programmversion, die sie zuletzt geöffnet hat.</p>
+<p>Jede Regel trägt <code>valid_from</code>, <code>valid_to</code>, <code>changed_at</code>, <code>changed_by</code> und
+<code>rev</code>, den Stand von <code>version</code> bei ihrer letzten Änderung. Gelöschtes bleibt
+mit <code>deleted_at</code> stehen, damit eine mitgelieferte Regel nicht beim nächsten
+Start wiederkommt.</p>
+<table>
+<thead>
+<tr>
+<th>Tabelle</th>
+<th>Inhalt</th>
+<th>Maßstab und Sonderwerte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>category</code>, <code>category_gewerbe</code>, <code>category_gebinde</code></td>
+<td>Kategorien, auf Gewerbekennzahlen und Packmittel begrenzt</td>
+<td>keine Zeile in <code>category_gewerbe</code> oder <code>category_gebinde</code> heißt: alle</td>
+</tr>
+<tr>
+<td><code>product</code>, <code>product_alias</code>, <code>recipe_line</code></td>
+<td>Produkte, die Warenarten, unter denen sie gebucht werden, und ihre Rezepturen aus anderen Produkten</td>
+<td>gezählt in <code>unit</code>; ein Rezept ergibt <code>batch</code> davon; <code>piece_amount</code> in g oder ml je Stück, in <code>piece_unit</code>, leer: kein Richtwert; eine Zeile nennt <code>amount</code> von <code>part_id</code> in <code>unit</code></td>
+</tr>
+<tr>
+<td><code>mapping</code></td>
+<td>bestätigte Zuordnungen von Rechnungszeilen zu Produkten</td>
+<td><code>factor</code> ist der Inhalt eines Gebindes in der Einheit des Produkts; leer, wo die Einheit selbst umrechnet</td>
+</tr>
+<tr>
+<td><code>yield_rule</code></td>
+<td>Ertragsregeln</td>
+<td><code>deduction</code> in Basispunkten</td>
+</tr>
+<tr>
+<td><code>gewerbe</code></td>
+<td>wählbare Gewerbekennzahlen</td>
+<td></td>
+</tr>
+<tr>
+<td><code>template</code></td>
+<td>Berichtsvorlagen</td>
+<td><code>is_default</code> bei genau einer</td>
+</tr>
+<tr>
+<td><code>sammlung</code>, <code>klasse</code>, <code>klasse_kennzahl</code>, <code>staffel</code>, <code>satz</code>, <code>synonym</code>, <code>pauschbetrag</code></td>
+<td>Richtsatzsammlungen je Jahr</td>
+<td><code>staffel.von</code> ausschließlich, <code>bis</code> einschließlich, in Cent, leer: offen; <code>satz</code> in ganzen Prozent, <code>von</code> und <code>bis</code> leer, wo nur ein Mittelsatz gedruckt ist; <code>pauschbetrag</code> in Cent</td>
+</tr>
+</tbody>
+</table>
+<p><code>embeddings.db</code> enthält nur Rechenwerte für Vorschläge und liegt nicht in diesem
+Ordner, sondern bei jeder Person selbst; sie wird bei Bedarf neu erzeugt und ist
+kein Austauschformat.</p>
+<h2 id="datei-einer-prufung">Datei einer Prüfung</h2>
+<p>Die Datei heißt wie die Bezeichnung der Prüfung. Eine weitergegebene Prüfung
+hat dasselbe Format.</p>
+<table>
+<thead>
+<tr>
+<th>Tabelle</th>
+<th>Inhalt</th>
+<th>Maßstab und Sonderwerte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fall</code></td>
+<td>eine Zeile: Eckdaten, Steuerpflichtiger, Zeitraum</td>
+<td><code>mapped_store</code> und <code>mapped_at</code> nennen den Stand der Regeln, gegen den zuletzt zugeordnet wurde; <code>mapped_at = 0</code>: noch nie. <code>template_id</code> leer: Standardvorlage. <code>app_version</code>: Programmversion, die zuletzt geschrieben hat</td>
+</tr>
+<tr>
+<td><code>declared</code></td>
+<td>erklärter Umsatz je Steuersatz</td>
+<td><code>vat</code> in Basispunkten, <code>net</code> in Cent</td>
+</tr>
+<tr>
+<td><code>inventory</code></td>
+<td>Anfangs- und Endbestand</td>
+<td><code>opening</code>, <code>closing</code> in ganzen <code>unit</code></td>
+</tr>
+<tr>
+<td><code>case_product</code>, <code>case_recipe</code></td>
+<td>Verkaufspreise und eigene Rezepturen</td>
+<td><code>gross_price</code> in Cent, <code>0</code> oder weniger: Preis fehlt. <code>recipe_basis</code> ist die Prüfsumme der Katalogrezeptur, von der kopiert wurde; leer: es gilt die des Katalogs</td>
+</tr>
+<tr>
+<td><code>yield_choice</code></td>
+<td>gewählte Ertragsregel je Produkt oder Kategorie</td>
+<td><code>yield_rule_id</code> leer: kein Abzug</td>
+</tr>
+<tr>
+<td><code>pinned</code></td>
+<td>fest vorgegebene Portionen</td>
+<td>ganze Portionen</td>
+</tr>
+<tr>
+<td><code>no_revenue</code></td>
+<td>Produkte ohne Umsatz, etwa Reinigungsmittel</td>
+<td></td>
+</tr>
+<tr>
+<td><code>case_mapping</code></td>
+<td>Zuordnungen, die das Programm selbst getroffen hat</td>
+<td>wie <code>mapping</code> in <code>rules.db</code></td>
+</tr>
+<tr>
+<td><code>invoice</code></td>
+<td>Rechnungen</td>
+<td>Summen in Cent. <code>stated_net</code>, <code>stated_gross</code> leer: der Beleg druckt keine. <code>verified_at</code> leer: nicht durchgesehen</td>
+</tr>
+<tr>
+<td><code>invoice_line</code></td>
+<td>Rechnungszeilen</td>
+<td><code>quantity</code> in Tausendsteln, <code>unit_price</code> in Millionstel Euro je <code>price_base_qty</code>, <code>line_net</code> in Cent, <code>vat</code> in Basispunkten</td>
+</tr>
+<tr>
+<td><code>document</code></td>
+<td>die eingelesene Datei, PDF oder XML</td>
+<td></td>
+</tr>
+<tr>
+<td><code>reading_*</code></td>
+<td>was der Scan gelesen hat</td>
+<td>Kästen in Pixeln der gelesenen Seite; <code>confidence</code> von 0 bis 1; <code>turn</code> in Grad; <code>scale</code> als Verhältnis, <code>skew</code> und <code>settle</code> in Grad</td>
+</tr>
+</tbody>
+</table>
+<p>Löscht man eine Rechnung, bleiben <code>document</code> und <code>reading_*</code> bis zum nächsten
+Start stehen, damit sich das Löschen zurücknehmen lässt; eine weitergegebene
+Prüfung enthält sie nicht. <code>secure_delete</code> überschreibt den frei gewordenen
+Platz.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.indexes", "navigation.expand", "content.code.copy"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../javascripts/umsatzschaetzung.js"></script>
+      
+    
+  </body>
+</html>
