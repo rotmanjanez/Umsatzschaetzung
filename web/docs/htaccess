@@ -20,6 +20,9 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.+)$ /dev/$1 [R=302,L]
 
 <IfModule mod_headers.c>
+  <If "%{REQUEST_URI} =~ m#^/dev/#">
+    Header set X-Robots-Tag "noindex"
+  </If>
   <FilesMatch "\.(js|css|woff2|svg|png|jpg|webp|avif)$">
     Header set Cache-Control "public, max-age=31536000"
   </FilesMatch>

@@ -29,6 +29,8 @@ theme:
         name: Helles Design
 
 plugins:
+  - mike:
+      canonical_version: latest
   - search:
       lang: de
   - llmstxt:
