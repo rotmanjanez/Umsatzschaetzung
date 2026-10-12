@@ -431,6 +431,7 @@ jobs:
           git fetch origin gh-pages:gh-pages
           git worktree add web/docs/publish gh-pages
           cp web/docs/htaccess web/docs/publish/.htaccess
+          cp web/docs/robots.txt web/docs/publish/robots.txt
 
       - uses: ./.github/actions/netcup-deploy
         with:
