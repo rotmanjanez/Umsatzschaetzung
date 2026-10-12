@@ -1,6 +1,6 @@
 # Ein neues Produkt
 
-Oben in der [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md) stehen die Produkte, die verkauft werden: Ihr **Rezept** sagt, aus welchen anderen Produkten sie gemacht werden und wie viel davon. Aus diesen Produkten stellt jede Prüfung ihr Sortiment zusammen. Im Beispiel fehlt ein Gericht des Gasthauses: das Schäufele.
+Oben in der [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/latest/guide/kette/index.md) stehen die Produkte, die verkauft werden: Ihr **Rezept** sagt, aus welchen anderen Produkten sie gemacht werden und wie viel davon. Aus diesen Produkten stellt jede Prüfung ihr Sortiment zusammen. Im Beispiel fehlt ein Gericht des Gasthauses: das Schäufele.
 
 [Übung 4: Ein neues Produkt Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/produkte/)
 
@@ -32,7 +32,7 @@ Gelöscht wird nur, was im Amt nie vorkommt: Eine Prüfung, die das Produkt im S
 
 ## Im Sortiment
 
-Die Regeln schließen und in der Prüfung auf **3. Sortiment** wechseln. In **Produkt hinzufügen …** `Schäufele` tippen: Das neue Produkt steht schon in der Liste darunter. Jede Prüfung kann es ab jetzt ins Sortiment nehmen, auch beim [Import des Sortiments](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#sortiment) aus einer CSV-Datei.
+Die Regeln schließen und in der Prüfung auf **3. Sortiment** wechseln. In **Produkt hinzufügen …** `Schäufele` tippen: Das neue Produkt steht schon in der Liste darunter. Jede Prüfung kann es ab jetzt ins Sortiment nehmen, auch beim [Import des Sortiments](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/#sortiment) aus einer CSV-Datei.
 
 Einen Preis hat das Produkt in den Regeln nicht: Der ist betriebsspezifisch und kommt erst mit dem Sortiment der Prüfung dazu, von der Karte des Betriebs.
 
@@ -43,6 +43,6 @@ Einen Preis hat das Produkt in den Regeln nicht: Der ist betriebsspezifisch und 
 
 **Zum Nachlesen**
 
-Was in ein Rezept gehört, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#rezepte), wie ein Rezept nur für eine Prüfung angepasst wird unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#rezeptur).
+Was in ein Rezept gehört, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#rezepte), wie ein Rezept nur für eine Prüfung angepasst wird unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/#rezeptur).
 
-[Weiter: Ertragsregeln Was auf dem Weg durch die Kette verloren geht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/ertragsregeln/index.md)
+[Weiter: Ertragsregeln Was auf dem Weg durch die Kette verloren geht](https://docs.umsatzschaetzung.amtstools.de/latest/guide/ertragsregeln/index.md)

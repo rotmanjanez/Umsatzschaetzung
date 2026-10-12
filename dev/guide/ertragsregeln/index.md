@@ -1,6 +1,6 @@
 # Ertragsregeln
 
-Nicht alles, was unten in die [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md) geht, kommt oben als Verkauf heraus. Eine Ertragsregel ist ein Abzug mit Namen: Wie viel vom Einkauf gilt nicht als verkauft, und warum. In der Prüfung wird nur gewählt, welche Regel gilt. Angelegt, geändert und gelöscht werden die Regeln unter **Regeln → Ertragsregeln**, und was dort als **Standard** angekreuzt ist, gilt in jeder Prüfung, die nichts anderes wählt. Im Beispiel wird der Schankverlust beim Fassbier geregelt.
+Nicht alles, was unten in die [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/latest/guide/kette/index.md) geht, kommt oben als Verkauf heraus. Eine Ertragsregel ist ein Abzug mit Namen: Wie viel vom Einkauf gilt nicht als verkauft, und warum. In der Prüfung wird nur gewählt, welche Regel gilt. Angelegt, geändert und gelöscht werden die Regeln unter **Regeln → Ertragsregeln**, und was dort als **Standard** angekreuzt ist, gilt in jeder Prüfung, die nichts anderes wählt. Im Beispiel wird der Schankverlust beim Fassbier geregelt.
 
 [Übung 5: Ertragsregeln Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/ertragsregeln/)
 
@@ -43,8 +43,8 @@ Nach dem Schließen der Regeln steht beim **Bier vom Fass** jetzt **Schankverlus
 
 **Zum Nachlesen**
 
-Wie Ertragsregeln angelegt werden und was **Standard** heißt, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln), wie die Prüfung eine Regel wählt unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#ertragsregeln). Wo die Regeln liegen und wer sie teilt, beschreibt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank).
+Wie Ertragsregeln angelegt werden und was **Standard** heißt, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#ertragsregeln), wie die Prüfung eine Regel wählt unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/#ertragsregeln). Wo die Regeln liegen und wer sie teilt, beschreibt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank).
 
 Damit ist das Kapitel **Regeln pflegen** vollständig.
 
-[Weiter: Danach Die Prüfung weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md)
+[Weiter: Danach Die Prüfung weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/danach/index.md)

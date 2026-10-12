@@ -2,7 +2,7 @@
 
 Der Bericht ist das Ergebnis der Prüfung, so wie es in die Akte kommt: der erklärte Umsatz neben dem kalkulierten, und dahinter alles, was nötig ist, um jede Zahl bis zur einzelnen Rechnungszeile zurückzuverfolgen.
 
-Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht, steht auf der [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt), nicht hier.
+Was eingekauft wurde, aber nicht über Rezeptur und Preis in den Umsatz eingeht, steht auf der [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/#nicht-berucksichtigt), nicht hier.
 
 ## Aufbau
 
@@ -22,7 +22,7 @@ Der Anhang belegt, woher die Zahlen kommen:
 
 ## Vorlage
 
-Der Bericht entsteht aus der Standardvorlage der [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md). Gibt es mehrere Vorlagen, wählt die Auswahl über der Vorschau eine andere für diese Prüfung.
+Der Bericht entsteht aus der Standardvorlage der [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md). Gibt es mehrere Vorlagen, wählt die Auswahl über der Vorschau eine andere für diese Prüfung.
 
 ## Als PDF speichern
 

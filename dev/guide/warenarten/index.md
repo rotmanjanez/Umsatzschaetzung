@@ -1,6 +1,6 @@
 # Warenarten
 
-Unten in der [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md) stehen die Produkte, die eingekauft werden: Fassbier, Schweinefleisch, Rotwein. Jedes nennt unter **Warenarten** die Namen, unter denen es auf Rechnungen steht. Die helfen der Zuordnung bei Artikeln, die sie noch nicht kennt, und bringen so den Einkauf in die Kette. Im Beispiel bekommt der Rotwein eine dazu: Domina.
+Unten in der [Produktionskette](https://docs.umsatzschaetzung.amtstools.de/latest/guide/kette/index.md) stehen die Produkte, die eingekauft werden: Fassbier, Schweinefleisch, Rotwein. Jedes nennt unter **Warenarten** die Namen, unter denen es auf Rechnungen steht. Die helfen der Zuordnung bei Artikeln, die sie noch nicht kennt, und bringen so den Einkauf in die Kette. Im Beispiel bekommt der Rotwein eine dazu: Domina.
 
 [Übung 3: Warenarten Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/warenarten/)
 
@@ -29,7 +29,7 @@ Zur Probe in **Filtern** `Domina` eintippen. Vorher stand dort „Keine Treffer�
 
 ## Was das bringt
 
-Kommt ab jetzt ein Domina vor, von welchem Weingut und aus welchem Jahrgang auch immer, findet die Zuordnung das Wort beim Rotwein, und von dort geht der Einkauf die Kette hinauf, etwa ins Glas **Rotwein 0,2 l**. Das gilt für jede Prüfung danach und für alle, die dieselbe [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank) nutzen.
+Kommt ab jetzt ein Domina vor, von welchem Weingut und aus welchem Jahrgang auch immer, findet die Zuordnung das Wort beim Rotwein, und von dort geht der Einkauf die Kette hinauf, etwa ins Glas **Rotwein 0,2 l**. Das gilt für jede Prüfung danach und für alle, die dieselbe [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank) nutzen.
 
 Eine gute Warenart ist die Ware, nicht der Artikeltext: „Domina“ ja, „2022 Domina trocken 0,75 l“ nein. Den Artikel deckt die bestätigte Zuordnung schon ab.
 
@@ -50,6 +50,6 @@ Das Kreuz rechts oben (oder Esc) schließt die Regeln.
 
 **Zum Nachlesen**
 
-Was eine gute Warenart ist, steht unter [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#warenarten), was Einheit, Kategorie und Stückgewicht bedeuten unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte).
+Was eine gute Warenart ist, steht unter [Warenarten pflegen](https://docs.umsatzschaetzung.amtstools.de/latest/zuordnung/#warenarten), was Einheit, Kategorie und Stückgewicht bedeuten unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#produkte).
 
-[Weiter: Produkte Ein neues Gericht oben an die Kette](https://docs.umsatzschaetzung.amtstools.de/dev/guide/produkte/index.md)
+[Weiter: Produkte Ein neues Gericht oben an die Kette](https://docs.umsatzschaetzung.amtstools.de/latest/guide/produkte/index.md)

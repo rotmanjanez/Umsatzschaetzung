@@ -54,6 +54,6 @@ Das Gasthaus hat alles zu 19 % erklärt. Die übrigen Abschnitte des Reiters ble
 
 **Zum Nachlesen**
 
-Alle Felder des Reiters im Einzelnen beschreibt [Prüfung](https://docs.umsatzschaetzung.amtstools.de/dev/pruefung/index.md), die Liste der Prüfungen beschreibt [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md).
+Alle Felder des Reiters im Einzelnen beschreibt [Prüfung](https://docs.umsatzschaetzung.amtstools.de/latest/pruefung/index.md), die Liste der Prüfungen beschreibt [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/latest/pruefungen/index.md).
 
-[Weiter: 1. Rechnungen importieren Die 106 Rechnungen des Gasthauses einlesen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/rechnungen/index.md)
+[Weiter: 1. Rechnungen importieren Die 106 Rechnungen des Gasthauses einlesen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/rechnungen/index.md)

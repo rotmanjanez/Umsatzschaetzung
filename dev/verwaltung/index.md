@@ -10,9 +10,9 @@ Diese Seite richtet sich an die IT: wo das Programm seine Daten ablegt, wie sich
 | Regel-Datenbank            | siehe [unten](#regel-datenbank)                        |
 | Prüfungen                  | `Dokumente\Umsatzschätzung`, folgt der Ordnerumleitung |
 
-Eine **Prüfung** ist eine einzelne Datei mit allen Rechnungen und Scans. Sie gehört einer Person und wird nicht geteilt, sondern bei Bedarf [weitergegeben](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben).
+Eine **Prüfung** ist eine einzelne Datei mit allen Rechnungen und Scans. Sie gehört einer Person und wird nicht geteilt, sondern bei Bedarf [weitergegeben](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/#prufung-weitergeben).
 
-Die **Regel-Datenbank** `rules.db` enthält Produkte, Rezepte, Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit aller Prüfungen und wächst mit jeder, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md).
+Die **Regel-Datenbank** `rules.db` enthält Produkte, Rezepte, Ertragsregeln und alle bestätigten Zuordnungen. Sie ist die gesammelte Arbeit aller Prüfungen und wächst mit jeder, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md).
 
 ## Regel-Datenbank
 
@@ -96,8 +96,8 @@ Die Werte heißen `Store` und `CaseDir`. Sie werden beim Start gelesen, eine Än
 
 ## Berichtsvorlagen
 
-Der Bericht entsteht aus einer HTML-Vorlage, die mit den Regeln in der Regel-Datenbank liegt. Wer den Bericht an eine eigene Form anpassen will, findet Aufbau und Datenmodell unter [Berichtsvorlagen](https://docs.umsatzschaetzung.amtstools.de/dev/vorlagen/index.md).
+Der Bericht entsteht aus einer HTML-Vorlage, die mit den Regeln in der Regel-Datenbank liegt. Wer den Bericht an eine eigene Form anpassen will, findet Aufbau und Datenmodell unter [Berichtsvorlagen](https://docs.umsatzschaetzung.amtstools.de/latest/vorlagen/index.md).
 
 ## Sicherheit und Datenschutz
 
-Siehe [Sicherheit und Datenschutz](https://docs.umsatzschaetzung.amtstools.de/dev/datenschutz/index.md).
+Siehe [Sicherheit und Datenschutz](https://docs.umsatzschaetzung.amtstools.de/latest/datenschutz/index.md).

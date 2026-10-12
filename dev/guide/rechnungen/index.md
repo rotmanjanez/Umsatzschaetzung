@@ -50,6 +50,6 @@ Den Dialog mit **Schließen** beenden. Jede Rechnung steht dann mit Lieferant, N
 
 **Zum Nachlesen**
 
-Welche Dateiformate das Programm liest, was es aus einem Scan holt und woran ein guter Scan zu erkennen ist, steht unter [Rechnungen importieren](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/index.md).
+Welche Dateiformate das Programm liest, was es aus einem Scan holt und woran ein guter Scan zu erkennen ist, steht unter [Rechnungen importieren](https://docs.umsatzschaetzung.amtstools.de/latest/rechnungen/index.md).
 
-[Weiter: 1. Rechnungen korrigieren Die offene Rechnung durchsehen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/korrektur/index.md)
+[Weiter: 1. Rechnungen korrigieren Die offene Rechnung durchsehen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/korrektur/index.md)

@@ -20,7 +20,7 @@ Unter Windows kann der Ordner per Gruppenrichtlinie umgelegt sein, etwa auf ein 
 
 **Importieren** übernimmt eine Falldatei in das Programm und öffnet sie. Sie liegt danach im selben Ordner wie die übrigen Prüfungen.
 
-Das Pfeilsymbol in der Zeile legt umgekehrt eine Kopie der Prüfung ab, wo Sie wollen. Genaueres unter [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md).
+Das Pfeilsymbol in der Zeile legt umgekehrt eine Kopie der Prüfung ab, wo Sie wollen. Genaueres unter [Import und Export](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/index.md).
 
 ## Löschen
 

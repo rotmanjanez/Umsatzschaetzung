@@ -2,7 +2,7 @@
 
 Didi hat [Maxie Bichmann](https://bichmann.net) gezeichnet.
 
-In den Übungen läuft das Programm im Browser, und Didi erklärt jeden Schritt. Geklickt und getippt wird selbst, am Beispiel der [Beispielprüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/index.md). Installiert werden muss nichts, und eigene Daten braucht es keine.
+In den Übungen läuft das Programm im Browser, und Didi erklärt jeden Schritt. Geklickt und getippt wird selbst, am Beispiel der [Beispielprüfung](https://docs.umsatzschaetzung.amtstools.de/latest/guide/index.md). Installiert werden muss nichts, und eigene Daten braucht es keine.
 
 ## Umsatzschätzung Schritt für Schritt
 

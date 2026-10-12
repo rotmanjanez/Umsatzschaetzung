@@ -21,7 +21,7 @@ Rechts steht die Zuordnung, darunter die Vorschläge. **Schweinefleisch** trägt
 
 Die Position verschwindet aus der Liste und zählt ab jetzt zum Schnitzel.
 
-Die automatische Zuordnung liegt meistens richtig. Wo nicht, fällt es hier als großer Betrag auf. Wie auf [2. Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md) merkt sich das Programm die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank).
+Die automatische Zuordnung liegt meistens richtig. Wo nicht, fällt es hier als großer Betrag auf. Wie auf [2. Zuordnung](https://docs.umsatzschaetzung.amtstools.de/latest/guide/zuordnung/index.md) merkt sich das Programm die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank).
 
 ## Was keinen Umsatz bringt
 
@@ -90,6 +90,6 @@ Zum Schluss die letzte Seite, **Ergebnis**, öffnen: Umsätze vor und nach Betri
 
 **Zum Nachlesen**
 
-Den Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz und die Seite **Übrige Einkäufe** im Einzelnen beschreibt [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt).
+Den Rechenweg vom Einkauf über Ertragsregeln, Rezepte und Preise zum Umsatz und die Seite **Übrige Einkäufe** im Einzelnen beschreibt [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/#nicht-berucksichtigt).
 
-[Weiter: 5. Bericht Das Ergebnis als PDF](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md)
+[Weiter: 5. Bericht Das Ergebnis als PDF](https://docs.umsatzschaetzung.amtstools.de/latest/guide/bericht/index.md)

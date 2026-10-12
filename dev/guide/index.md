@@ -46,8 +46,8 @@ Am meisten bringt die Anleitung, wenn jeder Schritt gleich im Programm mitgemach
 
 Vorab muss das Programm auf dem Rechner installiert sein:
 
-[Windows](https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-windows/index.md) [macOS](https://docs.umsatzschaetzung.amtstools.de/dev/guide/install-macos/index.md)
+[Windows](https://docs.umsatzschaetzung.amtstools.de/latest/guide/install-windows/index.md) [macOS](https://docs.umsatzschaetzung.amtstools.de/latest/guide/install-macos/index.md)
 
 Wer es schon installiert hat, geht direkt weiter.
 
-[Weiter: Prüfung anlegen Den Fall im Programm eröffnen und den erklärten Umsatz eintragen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/start/index.md)
+[Weiter: Prüfung anlegen Den Fall im Programm eröffnen und den erklärten Umsatz eintragen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/start/index.md)

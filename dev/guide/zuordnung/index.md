@@ -31,11 +31,11 @@ Der **Faktor** passt schon: Rotwein wird in Millilitern gezählt, die Rechnung i
 
 Dann **Zuordnen**. Rechts oben bestätigt ein grüner Hinweis die Zuordnung, die Zeile wandert in der Liste nach unten zu den manuellen Zuordnungen.
 
-Das Programm merkt sich die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank): Kommt der Domina in einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln sich auch Rezepte und Ertragsregeln, siehe [3. Sortiment](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/index.md) und [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/guide/bericht/index.md).
+Das Programm merkt sich die Zuordnung in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank): Kommt der Domina in einer späteren Prüfung wieder vor, ist er gleich Rotwein. Dort sammeln sich auch Rezepte und Ertragsregeln, siehe [3. Sortiment](https://docs.umsatzschaetzung.amtstools.de/latest/guide/sortiment/index.md) und [5. Bericht](https://docs.umsatzschaetzung.amtstools.de/latest/guide/bericht/index.md).
 
 ## Was kein Wareneinsatz ist
 
-Als Nächstes **CO2-Flasche 10 kg Füllung** anklicken. Vorgeschlagen ist **Ausstattung und Bedarf** mit 79 %, knapp unter der Schwelle. Die Kohlensäure braucht die Schankanlage, verkauft wird sie nicht: Sie gehört zu den Waren ohne Wareneinsatz, siehe [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/#kein-wareneinsatz). Der Vorschlag passt, also **Zuordnen**.
+Als Nächstes **CO2-Flasche 10 kg Füllung** anklicken. Vorgeschlagen ist **Ausstattung und Bedarf** mit 79 %, knapp unter der Schwelle. Die Kohlensäure braucht die Schankanlage, verkauft wird sie nicht: Sie gehört zu den Waren ohne Wareneinsatz, siehe [Kein Wareneinsatz](https://docs.umsatzschaetzung.amtstools.de/latest/zuordnung/#kein-wareneinsatz). Der Vorschlag passt, also **Zuordnen**.
 
 ## Wenn eine Menge fehlt
 
@@ -62,6 +62,6 @@ Am Ende steht über der Liste `3 offen`.
 
 **Zum Nachlesen**
 
-Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit Pfand, Fracht und anderem umgegangen wird, das kein Wareneinsatz ist, steht unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/dev/zuordnung/index.md).
+Woher die Vorschläge kommen, was die Sicherheit bedeutet und wie mit Pfand, Fracht und anderem umgegangen wird, das kein Wareneinsatz ist, steht unter [Zuordnung](https://docs.umsatzschaetzung.amtstools.de/latest/zuordnung/index.md).
 
-[Weiter: 3. Sortiment Was das Gasthaus verkauft, und zu welchem Preis](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment/index.md)
+[Weiter: 3. Sortiment Was das Gasthaus verkauft, und zu welchem Preis](https://docs.umsatzschaetzung.amtstools.de/latest/guide/sortiment/index.md)

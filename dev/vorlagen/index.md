@@ -2,7 +2,7 @@
 
 Diese Seite richtet sich an die IT und an alle, die den Bericht an eine eigene Form anpassen. Für die Prüfung selbst ist sie nicht nötig.
 
-Der [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md) ist eine HTML-Seite, die aus einer Vorlage entsteht. Vorlagen gehören zu den [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md) und liegen mit ihnen in der Regel-Datenbank, eine gemeinsame Regel-Datenbank teilt also auch die Vorlagen. Gepflegt werden sie unter **Regeln → Vorlagen**.
+Der [Bericht](https://docs.umsatzschaetzung.amtstools.de/latest/bericht/index.md) ist eine HTML-Seite, die aus einer Vorlage entsteht. Vorlagen gehören zu den [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md) und liegen mit ihnen in der Regel-Datenbank, eine gemeinsame Regel-Datenbank teilt also auch die Vorlagen. Gepflegt werden sie unter **Regeln → Vorlagen**.
 
 - Genau eine Vorlage ist der **Standard**. Eine Prüfung nimmt ihn, solange sie im Bericht keine andere wählt. Ist die gewählte Vorlage gelöscht, gilt wieder der Standard.
 - Den Standard selbst kann man nicht löschen, erst muss eine andere Vorlage Standard werden.
@@ -40,7 +40,7 @@ Beträge sind ganze **Cent**, Sätze **Basispunkte** (1900 = 19 %), Rezeptmengen
 
 ## Daten
 
-Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher mit der installierten Version überein. Als JSON Schema: [vorlagen-schema.json](https://docs.umsatzschaetzung.amtstools.de/dev/vorlagen-schema.json).
+Die folgenden Abschnitte werden aus dem Programmcode erzeugt und stimmen daher mit der installierten Version überein. Als JSON Schema: [vorlagen-schema.json](https://docs.umsatzschaetzung.amtstools.de/latest/vorlagen-schema.json).
 
 ## Filter
 

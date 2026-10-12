@@ -35,4 +35,4 @@ CSV steht für *comma-separated values*, durch Komma getrennte Werte. Im Deutsch
 
 Excel fragt beim Speichern, ob Funktionen verloren gehen dürfen: Ja, eine CSV-Datei hat keine. Wer die Tabelle mit Formeln weiter pflegen will, speichert zusätzlich eine Excel-Datei.
 
-Was im Programm als CSV hinein- und herausgeht, steht unter [Import und Export](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/index.md).
+Was im Programm als CSV hinein- und herausgeht, steht unter [Import und Export](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/index.md).

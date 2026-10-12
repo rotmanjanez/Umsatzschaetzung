@@ -2,13 +2,13 @@
 
 ## Prüfung weitergeben
 
-Eine Prüfung ist eine einzelne Datei, siehe [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/dev/pruefungen/index.md). Rechnungen, Belege und Scans liegen darin, es geht nichts verloren.
+Eine Prüfung ist eine einzelne Datei, siehe [Prüfungen](https://docs.umsatzschaetzung.amtstools.de/latest/pruefungen/index.md). Rechnungen, Belege und Scans liegen darin, es geht nichts verloren.
 
 Das Pfeilsymbol in der Zeile der Liste legt eine Kopie dieser Datei ab, wo Sie wollen. **Importieren** ist der Weg zurück: die Datei wandert in den Prüfungsordner und wird geöffnet. Ist die Prüfung dort schon vorhanden, fragt das Programm, ob sie ersetzt werden soll.
 
 ## Regeln gehen nicht mit
 
-Produkte, Rezepte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung, sondern in der Regel-Datenbank des Rechners, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md). Die Prüfung verweist nur darauf.
+Produkte, Rezepte, Zuordnungen und Ertragsregeln stehen nicht in der Prüfung, sondern in der Regel-Datenbank des Rechners, siehe [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md). Die Prüfung verweist nur darauf.
 
 Auf einem Rechner mit anderen Regeln sucht das Programm deshalb für jede Rechnungszeile wieder selbst eine Zuordnung. Findet es keine, bleibt die Zeile ungeklärt und fällt aus der Kalkulation. Die Zahlen können also von denen des Absenders abweichen.
 
@@ -22,7 +22,7 @@ Trennzeichen ist das Semikolon, die Zahlen stehen so darin, wie sie am Bildschir
 
 ## Sortiment
 
-Das Sortiment einer Prüfung lässt sich als [CSV](https://docs.umsatzschaetzung.amtstools.de/dev/hilfe/csv/index.md) exportieren und in dieselbe oder eine andere Prüfung importieren. Beide Knöpfe stehen in der Kopfzeile von **3. Sortiment**, neben **Produkt hinzufügen …**.
+Das Sortiment einer Prüfung lässt sich als [CSV](https://docs.umsatzschaetzung.amtstools.de/latest/hilfe/csv/index.md) exportieren und in dieselbe oder eine andere Prüfung importieren. Beide Knöpfe stehen in der Kopfzeile von **3. Sortiment**, neben **Produkt hinzufügen …**.
 
 ### Export
 
@@ -59,4 +59,4 @@ Namen, die der Katalog nicht kennt, werden übersprungen und danach gemeldet. Se
 
 ## Rechnungen
 
-Rechnungen kommen nicht über diesen Weg in die Prüfung, sondern über den Import in der Prüfung selbst, siehe [Rechnungen importieren](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/index.md).
+Rechnungen kommen nicht über diesen Weg in die Prüfung, sondern über den Import in der Prüfung selbst, siehe [Rechnungen importieren](https://docs.umsatzschaetzung.amtstools.de/latest/rechnungen/index.md).

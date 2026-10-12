@@ -26,4 +26,4 @@ Das Installationspaket ist digital signiert. Meldet Microsoft Defender SmartScre
 
 ______________________________________________________________________
 
-[Weiter: Prüfung anlegen Den Fall im Programm eröffnen und den erklärten Umsatz eintragen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/start/index.md)
+[Weiter: Prüfung anlegen Den Fall im Programm eröffnen und den erklärten Umsatz eintragen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/start/index.md)

@@ -61,6 +61,6 @@ Nur ein Zeilenbetrag, der nicht zu Menge und Einzelpreis passt, sperrt das Best�
 
 **Zum Nachlesen**
 
-Wann ein Scan ohne Durchsicht übernommen wird und was das Fenster im Einzelnen prüft, steht unter [Durchsicht](https://docs.umsatzschaetzung.amtstools.de/dev/rechnungen/#durchsicht).
+Wann ein Scan ohne Durchsicht übernommen wird und was das Fenster im Einzelnen prüft, steht unter [Durchsicht](https://docs.umsatzschaetzung.amtstools.de/latest/rechnungen/#durchsicht).
 
-[Weiter: 2. Zuordnung Eingekaufte Waren den Produkten zuordnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/zuordnung/index.md)
+[Weiter: 2. Zuordnung Eingekaufte Waren den Produkten zuordnen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/zuordnung/index.md)

@@ -1,12 +1,12 @@
 # Regeln pflegen
 
-Eine Prüfung endet mit ihrem Bericht, die Arbeit daran nicht: Jede bestätigte Zuordnung, jedes Produkt mit seinem Rezept und jede Ertragsregel steht in den [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md) und gilt für jede Prüfung danach. Dieses Kapitel zeigt an der zweiten Prüfung des Gasthauses, was die erste dort hinterlassen hat, und wie die Regeln selbst gepflegt werden. Im Mittelpunkt stehen die Produkte: Zusammen beschreiben sie eine Produktionskette, vom Einkauf bis zu dem, was verkauft wird.
+Eine Prüfung endet mit ihrem Bericht, die Arbeit daran nicht: Jede bestätigte Zuordnung, jedes Produkt mit seinem Rezept und jede Ertragsregel steht in den [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md) und gilt für jede Prüfung danach. Dieses Kapitel zeigt an der zweiten Prüfung des Gasthauses, was die erste dort hinterlassen hat, und wie die Regeln selbst gepflegt werden. Im Mittelpunkt stehen die Produkte: Zusammen beschreiben sie eine Produktionskette, vom Einkauf bis zu dem, was verkauft wird.
 
 [Übung 1: Was das Programm sich merkt Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/regeln/)
 
 ## Die zweite Prüfung
 
-In der Liste der Prüfungen steht neben der **Bp 2025** eine zweite Prüfung des Gasthauses, die **USt-Sonderprüfung 2025** für Mai bis Juli, mit den 26 Rechnungen dieser drei Monate, wie unter [Eine zweite Prüfung](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sonderpruefung/index.md) angelegt. Das Reglersymbol rechts oben öffnet die **Regeln**, hier und in jeder geöffneten Prüfung.
+In der Liste der Prüfungen steht neben der **Bp 2025** eine zweite Prüfung des Gasthauses, die **USt-Sonderprüfung 2025** für Mai bis Juli, mit den 26 Rechnungen dieser drei Monate, wie unter [Eine zweite Prüfung](https://docs.umsatzschaetzung.amtstools.de/latest/guide/sonderpruefung/index.md) angelegt. Das Reglersymbol rechts oben öffnet die **Regeln**, hier und in jeder geöffneten Prüfung.
 
 ## Was die Zuordnung schon weiß
 
@@ -24,11 +24,11 @@ Die zwei manuellen stehen am Ende der Liste: **Schweineschnitzel natur, ausgelö
 
 ## Die Regel-Datenbank
 
-Eine Prüfung ist eine Datei: Rechnungen, Scans, Sortiment mit Preisen, der erklärte Umsatz. Die Regeln sind eine Datenbank daneben, die [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank): Produkte mit ihren Rezepten, Ertragsregeln, Gewerbekennzahlen und jede bestätigte Zuordnung. Die Prüfung verweist nur darauf.
+Eine Prüfung ist eine Datei: Rechnungen, Scans, Sortiment mit Preisen, der erklärte Umsatz. Die Regeln sind eine Datenbank daneben, die [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank): Produkte mit ihren Rezepten, Ertragsregeln, Gewerbekennzahlen und jede bestätigte Zuordnung. Die Prüfung verweist nur darauf.
 
 Alle, die sich am selben Rechner anmelden, arbeiten mit denselben Regeln. Liegt die Regel-Datenbank auf einer Freigabe im Netz, gilt das für alle, die darauf zeigen: Was jemand heute zuordnet oder anlegt, haben die anderen beim nächsten Start.
 
-Eine Prüfung, die an einen anderen Rechner geht, nimmt die Regeln nicht mit. Dort wird mit den Regeln dieses Rechners neu zugeordnet, siehe [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#regeln-gehen-nicht-mit). Mit einer gemeinsamen Regel-Datenbank stellt sich die Frage nicht.
+Eine Prüfung, die an einen anderen Rechner geht, nimmt die Regeln nicht mit. Dort wird mit den Regeln dieses Rechners neu zugeordnet, siehe [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/#regeln-gehen-nicht-mit). Mit einer gemeinsamen Regel-Datenbank stellt sich die Frage nicht.
 
 Mitgeliefert wird ein Grundstock von 1.067 Produkten, 696 davon mit Rezept, und 26 Ertragsregeln für jedes Gewerbe, vom Gasthaus bis zur Fahrradwerkstatt, auf kein Amt im Besonderen abgestimmt. Was im Amt anders gilt, wird dort geändert und gilt für jede Prüfung danach.
 
@@ -55,6 +55,6 @@ Die Produkte hängen über ihre Rezepte zusammen: **Schnitzel mit Pommes** ist e
 
 **Zum Nachlesen**
 
-Was in den Regeln steht, beschreibt [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md), wo die Regel-Datenbank liegt und wer sie teilt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), was mit einer weitergegebenen Prüfung geschieht [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#regeln-gehen-nicht-mit).
+Was in den Regeln steht, beschreibt [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md), wo die Regel-Datenbank liegt und wer sie teilt [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank), was mit einer weitergegebenen Prüfung geschieht [Regeln gehen nicht mit](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/#regeln-gehen-nicht-mit).
 
-[Weiter: Die Produktionskette Ein Gericht bis zum Einkauf zurückverfolgen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kette/index.md)
+[Weiter: Die Produktionskette Ein Gericht bis zum Einkauf zurückverfolgen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/kette/index.md)

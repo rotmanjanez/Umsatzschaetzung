@@ -14,7 +14,7 @@ Nach dem Import sind die meisten Positionen bereits zugeordnet. Offen bleibt, wa
 
 Die offenen Positionen stehen oben, die automatischen darunter.
 
-Eine automatische Zuordnung bleibt bei der Prüfung. Erst wenn ein Mensch sie bestätigt oder wählt, kommt sie in die [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/index.md) und gilt auch in anderen Prüfungen.
+Eine automatische Zuordnung bleibt bei der Prüfung. Erst wenn ein Mensch sie bestätigt oder wählt, kommt sie in die [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/index.md) und gilt auch in anderen Prüfungen.
 
 Wird eine Rechnung nachträglich geändert, prüft das Programm die Zuordnung ihrer Positionen neu: Eine Position, deren Artikelnummer oder Einheit nicht mehr zur Regel passt, wird erneut zugeordnet; eine automatische Zuordnung gilt nur für den Wortlaut, aus dem sie entstanden ist, und fällt bei geändertem Text ebenfalls zurück in die Durchsicht.
 
@@ -66,6 +66,6 @@ Warenarten gelten betriebsübergreifend, weil sie zu den Regeln gehören und nic
 
 Nicht alles auf einer Eingangsrechnung ist Wareneinsatz. Pfand, Fracht, Verpackung, Reinigungsmittel, Büromaterial: Diese Positionen sind Produkten in der Kategorie **Kein Wareneinsatz** zuzuordnen.
 
-Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen. Weil sie in keinem Rezept vorkommen, stehen sie in der Kalkulation unter [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#nicht-berucksichtigt), und ihr Umsatz wird wie bei jeder solchen Ware über den Rohgewinnaufschlagsatz geschätzt. Bringen sie in diesem Betrieb keinen Umsatz, nimmt das × am Ende der Zeile sie aus der Schätzung; sie stehen dann mit Betrag unter **Nicht in der Umsatzschätzung**, damit erkennbar bleibt, was bewusst außen vor geblieben ist.
+Sie sind damit erledigt und verschwinden aus der Liste der offenen Positionen. Weil sie in keinem Rezept vorkommen, stehen sie in der Kalkulation unter [Übrige Einkäufe](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/#nicht-berucksichtigt), und ihr Umsatz wird wie bei jeder solchen Ware über den Rohgewinnaufschlagsatz geschätzt. Bringen sie in diesem Betrieb keinen Umsatz, nimmt das × am Ende der Zeile sie aus der Schätzung; sie stehen dann mit Betrag unter **Nicht in der Umsatzschätzung**, damit erkennbar bleibt, was bewusst außen vor geblieben ist.
 
 Pfand ist der häufigste Fall. Es steht als eigene Position auf fast jeder Getränkerechnung, wird zurückgezahlt und hat mit dem Einkauf von Ware nichts zu tun. Dem Produkt **Pfand und Leergut** zugeordnet, zählt es auch nicht zu den erfassten Einkäufen und nicht zu den unberücksichtigten; der Bericht nennt nur die Summen von berechnetem Pfand und gutgeschriebenem Leergut.

@@ -10,9 +10,9 @@ Für IT und Datenschutzbeauftragte. Sicherheitslücken meldet man wie in [SECURI
 | Ordner der Regel-Datenbank       | `rules.db`, `snapshots\`                                                                     | alle, die ihn teilen |
 | `%LOCALAPPDATA%\Umsatzschätzung` | Einstellungen, Fehlerprotokoll, `embeddings.db`, `pages\` mit dem gerade angezeigten Bericht | die Person           |
 
-Eine Prüfung unterliegt dem Steuergeheimnis. Sie verlässt den Rechner nur, wenn jemand sie [weitergibt](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#prufung-weitergeben), dann als vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/index.md).
+Eine Prüfung unterliegt dem Steuergeheimnis. Sie verlässt den Rechner nur, wenn jemand sie [weitergibt](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/#prufung-weitergeben), dann als vollständige Kopie. Die Ordner lassen sich zentral setzen, siehe [Verwaltete Installation](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/index.md).
 
-Die Datei einer Prüfung heißt wie ihre Bezeichnung. Nennt diese den Betrieb, steht der Name auch in Ordneransichten, Sicherungskatalogen und Suchindizes. Den Aufbau der Dateien beschreibt [Dateiformate](https://docs.umsatzschaetzung.amtstools.de/dev/dateiformate/index.md).
+Die Datei einer Prüfung heißt wie ihre Bezeichnung. Nennt diese den Betrieb, steht der Name auch in Ordneransichten, Sicherungskatalogen und Suchindizes. Den Aufbau der Dateien beschreibt [Dateiformate](https://docs.umsatzschaetzung.amtstools.de/latest/dateiformate/index.md).
 
 Ein Bericht wird zum Anzeigen und Drucken kurz als Datei in `pages\` abgelegt und danach gelöscht; was ein Absturz dort zurücklässt, löscht der nächste Start. Das Fehlerprotokoll `crash.log` kann Dateinamen und Text aus Rechnungen enthalten; auch es löscht der nächste Start.
 
@@ -39,7 +39,7 @@ Das Programm verschlüsselt nicht selbst. Vorausgesetzt werden BitLocker oder ei
 
 Das Programm baut keine eigenen Verbindungen auf: keine Updates, keine Nutzungsdaten. Die Hilfe (F1) öffnet die Dokumentation im Browser.
 
-Berichte zeigt die **Microsoft Edge WebView2 Runtime** von Windows an, im privaten Modus, ohne JavaScript und ohne Zugriff auf andere Adressen als die eigenen Berichtsdateien. Auch eine eigene [Berichtsvorlage](https://docs.umsatzschaetzung.amtstools.de/dev/vorlagen/index.md) kann nichts nach außen senden. Updates und Diagnosedaten der Runtime selbst regeln die Richtlinien für Microsoft Edge.
+Berichte zeigt die **Microsoft Edge WebView2 Runtime** von Windows an, im privaten Modus, ohne JavaScript und ohne Zugriff auf andere Adressen als die eigenen Berichtsdateien. Auch eine eigene [Berichtsvorlage](https://docs.umsatzschaetzung.amtstools.de/latest/vorlagen/index.md) kann nichts nach außen senden. Updates und Diagnosedaten der Runtime selbst regeln die Richtlinien für Microsoft Edge.
 
 ## Zugriff und Nachvollziehbarkeit
 

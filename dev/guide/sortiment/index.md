@@ -2,7 +2,7 @@
 
 Bis hierher weiß das Programm, was das Gasthaus eingekauft hat. Jetzt braucht es die andere Seite: was das Gasthaus verkauft und zu welchem Preis. Das ist das Sortiment, im Grunde die Speisekarte mit Preisen. Aus Sortiment und Einkauf rechnet die Kalkulation den Umsatz.
 
-Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank) und gelten für jede Prüfung. Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was fehlt, legt man unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte) an, und so wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser Prüfung.
+Die Produkte selbst, samt Rezept, stehen wie die Zuordnungen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank) und gelten für jede Prüfung. Das Programm bringt einen Grundstock mit, damit man gleich loslegen kann; was fehlt, legt man unter [Regeln → Produkte](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#produkte) an, und so wächst der Katalog mit jeder Prüfung. Aus ihm wird das Sortiment zusammengestellt; nur der Preis kommt vom Betrieb und gehört allein zu dieser Prüfung.
 
 [Übung 4: Sortiment anlegen Im Programm mitmachen, direkt im Browser](https://app.umsatzschaetzung.amtstools.de/lektionen/sortiment/)
 
@@ -16,7 +16,7 @@ In das Feld **Bruttopreis** `15,90` eintragen, also den Preis auf der Karte, mit
 
 ## Die übrigen Produkte
 
-Die übrigen 27 Produkte werden hier nicht einzeln abgetippt. Für die folgenden Schritte liegen sie mit den Preisen des Beispiels in einer vorbereiteten Datei: [sortiment-gasthaus.csv](https://docs.umsatzschaetzung.amtstools.de/dev/guide/sortiment-gasthaus.csv) . Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das rechte, **CSV exportieren**, schreibt das Sortiment in eine solche Datei.
+Die übrigen 27 Produkte werden hier nicht einzeln abgetippt. Für die folgenden Schritte liegen sie mit den Preisen des Beispiels in einer vorbereiteten Datei: [sortiment-gasthaus.csv](https://docs.umsatzschaetzung.amtstools.de/latest/guide/sortiment-gasthaus.csv) . Herunterladen, dann links neben **Produkt hinzufügen …** auf das linke der beiden Symbole (**CSV importieren**) klicken und die Datei auswählen. Das rechte, **CSV exportieren**, schreibt das Sortiment in eine solche Datei.
 
 Die Produkte werden über ihren Namen im Katalog gefunden und mit Preis und Steuersatz ins Sortiment übernommen. Danach stehen 28 Produkte in der Liste:
 
@@ -45,6 +45,6 @@ Nur mit öffentlichen Angaben wie der Karte aus dem Internet: Was aus der Akte s
 
 **Zum Nachlesen**
 
-Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen Produkten geschieht, steht unter [Sortiment importieren und exportieren](https://docs.umsatzschaetzung.amtstools.de/dev/import-export/#sortiment). Was ein Produkt mit seinem Rezept ist, steht unter [Produkte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte).
+Wie die CSV-Datei aufgebaut ist und was beim Import mit vorhandenen Produkten geschieht, steht unter [Sortiment importieren und exportieren](https://docs.umsatzschaetzung.amtstools.de/latest/import-export/#sortiment). Was ein Produkt mit seinem Rezept ist, steht unter [Produkte](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#produkte).
 
-[Weiter: 4. Kalkulation Den Umsatz aus dem Einkauf berechnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/kalkulation/index.md)
+[Weiter: 4. Kalkulation Den Umsatz aus dem Einkauf berechnen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/kalkulation/index.md)

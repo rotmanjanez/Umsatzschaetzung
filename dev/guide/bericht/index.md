@@ -14,7 +14,7 @@ Voreingestellt ist die Standardregel des Produkts oder der Kategorie, gibt es ke
 
 Freie Prozentsätze lassen sich in der Prüfung nicht eintragen. Jeder Abzug ist eine Regel mit Namen, und der Bericht nennt ihn: nicht nur den Satz, sondern auch, warum er gilt.
 
-Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/dev/verwaltung/#regel-datenbank), neben Produkten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
+Die Ertragsregeln stehen in der [Regel-Datenbank](https://docs.umsatzschaetzung.amtstools.de/latest/verwaltung/#regel-datenbank), neben Produkten, Rezepten und Zuordnungen. Fehlt eine passende Regel, wird sie über das Reglersymbol (**Regeln**) unter **Ertragsregeln** angelegt, mit Namen und Abzug in Prozent, und steht dann in jeder Prüfung zur Wahl, siehe [Ertragsregeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#ertragsregeln). Die Sätze sind Erfahrungswerte, als Anhalt dient die Richtsatzsammlung des Prüfungsjahres.
 
 Für das Beispiel bleibt es bei **Kein Abzug**.
 
@@ -53,8 +53,8 @@ Der Pfeil links oben führt zurück zur Liste der Prüfungen. Dort steht das Gas
 
 **Zum Nachlesen**
 
-Die Abschnitte des Berichts im Einzelnen beschreibt [Bericht](https://docs.umsatzschaetzung.amtstools.de/dev/bericht/index.md), die Ertragsregeln [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#ertragsregeln) und [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/#ertragsregeln).
+Die Abschnitte des Berichts im Einzelnen beschreibt [Bericht](https://docs.umsatzschaetzung.amtstools.de/latest/bericht/index.md), die Ertragsregeln [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#ertragsregeln) und [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/#ertragsregeln).
 
 Damit ist die Beispielprüfung vollständig.
 
-[Weiter: Danach Die Prüfung weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/danach/index.md)
+[Weiter: Danach Die Prüfung weitergeben und die eigene beginnen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/danach/index.md)

@@ -38,6 +38,6 @@ Die Pommes frites werden jetzt eingekauft oder aus Kartoffeln gemacht. Die Kalku
 
 **Zum Nachlesen**
 
-Was Produkte und Rezepte bedeuten, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#produkte) und [Rezepte](https://docs.umsatzschaetzung.amtstools.de/dev/regeln/#rezepte), wie die Kalkulation einen Einkauf auf die Produkte verteilt unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/dev/kalkulation/index.md).
+Was Produkte und Rezepte bedeuten, steht unter [Regeln](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#produkte) und [Rezepte](https://docs.umsatzschaetzung.amtstools.de/latest/regeln/#rezepte), wie die Kalkulation einen Einkauf auf die Produkte verteilt unter [Kalkulation](https://docs.umsatzschaetzung.amtstools.de/latest/kalkulation/index.md).
 
-[Weiter: Warenarten Wo die Rechnungen in die Kette kommen](https://docs.umsatzschaetzung.amtstools.de/dev/guide/warenarten/index.md)
+[Weiter: Warenarten Wo die Rechnungen in die Kette kommen](https://docs.umsatzschaetzung.amtstools.de/latest/guide/warenarten/index.md)
