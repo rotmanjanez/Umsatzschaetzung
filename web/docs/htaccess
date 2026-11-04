@@ -7,12 +7,14 @@ RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} !^docs\.umsatzschaetzung\.amtstools\.de$ [NC]
 RewriteRule ^(.*)$ https://docs.umsatzschaetzung.amtstools.de/$1 [R=301,L]
 
+RewriteRule ^$ /latest/ [R=301,L]
+
 RewriteCond %{REQUEST_URI} !^/(dev|latest|[0-9][^/]*)/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/latest/$1 -f [OR]
 RewriteCond %{DOCUMENT_ROOT}/latest/$1 -d
-RewriteRule ^(.+)$ /latest/$1 [R=302,L]
+RewriteRule ^(.+)$ /latest/$1 [R=301,L]
 
 RewriteCond %{REQUEST_URI} !^/(dev|latest|[0-9][^/]*)/
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -20,7 +22,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.+)$ /dev/$1 [R=302,L]
 
 <IfModule mod_headers.c>
-  <If "%{REQUEST_URI} =~ m#^/dev/#">
+  <If "%{REQUEST_URI} =~ m#^/(dev|[0-9][^/]*)/#">
     Header set X-Robots-Tag "noindex"
   </If>
   <FilesMatch "\.(js|css|woff2|svg|png|jpg|webp|avif)$">
